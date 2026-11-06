@@ -1,0 +1,15 @@
+{
+  "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+  "label_accesses": [
+    {
+      "nodes": 32,
+      "role": "test",
+      "stage": "evaluate"
+    }
+  ],
+  "manifest_sha256": "4277bdda299213897f4724f249fc9348ef6a6ae80ddfb8471fa6a0bd684dc0b7",
+  "seconds_this_attempt": 0.4179837360024976,
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "stage": "evaluate",
+  "status": "COMPLETE"
+}

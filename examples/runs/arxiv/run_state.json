@@ -1,0 +1,19 @@
+{
+  "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+  "dataset": "synthetic",
+  "implementation": "CROSS-MORSE",
+  "last_complete_stage": "evaluate",
+  "profile": "smoke",
+  "scientific_run": false,
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "status": "COMPLETE",
+  "task": {
+    "dataset": "ogbn-arxiv",
+    "metric": "accuracy",
+    "num_outputs": 4,
+    "prediction_level": "node",
+    "task_type": "multiclass"
+  },
+  "test_labels_accessed": true,
+  "version": "1.0.0"
+}

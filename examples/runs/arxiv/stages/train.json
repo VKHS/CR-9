@@ -1,0 +1,55 @@
+{
+  "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+  "label_accesses": [
+    {
+      "nodes": 52,
+      "role": "fit_train",
+      "stage": "train"
+    },
+    {
+      "nodes": 5,
+      "role": "fit_val",
+      "stage": "train"
+    },
+    {
+      "nodes": 52,
+      "role": "fit_train",
+      "stage": "train"
+    },
+    {
+      "nodes": 5,
+      "role": "fit_val",
+      "stage": "train"
+    },
+    {
+      "nodes": 52,
+      "role": "fit_train",
+      "stage": "train"
+    },
+    {
+      "nodes": 5,
+      "role": "fit_val",
+      "stage": "train"
+    },
+    {
+      "nodes": 52,
+      "role": "fit_train",
+      "stage": "train"
+    },
+    {
+      "nodes": 5,
+      "role": "fit_val",
+      "stage": "train"
+    },
+    {
+      "nodes": 5,
+      "role": "fit_val",
+      "stage": "train"
+    }
+  ],
+  "manifest_sha256": "83d74a330ec28a1256ec62d310dbedbc430c46834567894e4452c242a3f2b93a",
+  "seconds_this_attempt": 0.9333219079999253,
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "stage": "train",
+  "status": "COMPLETE"
+}

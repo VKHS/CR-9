@@ -1,0 +1,300 @@
+{
+  "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+  "label_accesses": [
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    },
+    {
+      "nodes": 10,
+      "role": "select",
+      "stage": "select"
+    }
+  ],
+  "manifest_sha256": "23ffd9501a1f0922ea4f22d29cc486060d6f0021e3f50505b4cef3a4b91289ac",
+  "seconds_this_attempt": 1.511097886999778,
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "stage": "select",
+  "status": "COMPLETE"
+}

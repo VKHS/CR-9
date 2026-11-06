@@ -1,0 +1,5 @@
+# Policy and deployment ledger (main Table 1) -- SYNTHETIC SOFTWARE EXAMPLES: these values are not benchmark results
+"# generated from 2 run(s) [examples]; runtime source b5005fc53d31; runs: ogbn-arxiv:arxiv, Peptides-func:peptides_func"
+Dataset,exact q_C identity; provisional,confirmation output,global admission (criterion),input fallback,final effect over q_C; scope
+ogbn-arxiv,"learned stop, E = 2, full; learned stop, E = 2, full",no feedback candidate in Q_s; q_C retained,G_admit = 0; comparator returned (no feedback candidate survived selection and confirmation),,"+0.00 [+0.00, +0.00] accuracy pp; +0.00000 [+0.00000, +0.00000] CE; descriptive dependent-core inference"
+Peptides-func,"phase schedule, E = 2; phase schedule, E = 2",no feedback candidate in Q_s; q_C retained,G_admit = 0; comparator returned (no feedback candidate survived selection and confirmation),,"+0.00 [+0.00, +0.00] AP pp; +0.00000 [+0.00000, +0.00000] BCE; paired graph bootstrap conditional on the fixed trained ensemble"

@@ -1,0 +1,18 @@
+% Compute accounting (Supplementary Table S23)
+% generated from 2 run(s) [examples]; runtime source b5005fc53d31; runs: ogbn-arxiv:arxiv, Peptides-func:peptides_func
+% Do not edit: regenerate with `make tables`.
+% SYNTHETIC SOFTWARE EXAMPLES: these values are not benchmark results.
+\begin{table}[t]
+\centering
+\small
+\caption{Compute accounting (Supplementary Table S23) (synthetic example runs). Serial costs in nominal E = 1 executions from the candidate records; wall times are the measured serial execution of the candidate on the run's device after warm-up. The fallback probability column is not measured by the released runner (no serving-time input gate), so expected cost equals C_qD.}
+\label{tab:S23}
+\begin{tabular}{lllllllllll}
+\hline
+Dataset & route/E & controller cost C\_qD & comparator cost C\_qC & fallback probability & assurance cost & expected cost & wall time q\_D (s) & wall time q\_C (s) & qualification (h) & device \\
+\hline
+ogbn-arxiv & learned stop, E = 2, full & 3.382 & 3.382 & -- & 3.382 & 3.382 & 0.0222 & 0.0222 & 0.0010 & cpu \\
+Peptides-func & phase schedule, E = 2 & 3.540 & 3.540 & -- & 3.540 & 3.540 & 3.2138 & 3.2138 & 0.0190 & cpu \\
+\hline
+\end{tabular}
+\end{table}

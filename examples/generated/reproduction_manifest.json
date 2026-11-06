@@ -1,0 +1,32 @@
+{
+  "files": [
+    {
+      "bytes": 108872,
+      "path": "example_scores.png",
+      "sha256": "3739edcf599fd57b7b9f8eee3608e9d5d7ee58531626bd36e86b9ee25bac953d"
+    },
+    {
+      "bytes": 77050,
+      "path": "example_scores.svg",
+      "sha256": "ec8f7a8f5d7033c6fbf87da1340c4cfdace290db86f9c3a9d10caf912247e161"
+    },
+    {
+      "bytes": 2860,
+      "path": "metrics.csv",
+      "sha256": "74f9a430d1e0d13c9a11f85371f12f3a737c61a01e889ad9db6bf0ad9ce6a26f"
+    },
+    {
+      "bytes": 1511,
+      "path": "metrics.md",
+      "sha256": "77a221a91f862f22c87fe521144fdb82981750126772d761ae89345cb1d70f88"
+    },
+    {
+      "bytes": 12680,
+      "path": "replay.json",
+      "sha256": "a4e83aac70d24766a5276623bffb7fdccae119b6594a5937aa23b181460c5a00"
+    }
+  ],
+  "runtime_source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "schema_version": "cross-morse-example-reproduction-1",
+  "scope": "Synthetic software examples; not official benchmark scores or manuscript reproduction."
+}

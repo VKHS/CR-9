@@ -1,0 +1,355 @@
+{
+  "schema_version": "paper-sources-1",
+  "page_numbering": "one-based PDF page; printed page numbers agree for these files",
+  "documents": {
+    "main": {
+      "bundled_path": null,
+      "sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+      "byte_size": 5498468,
+      "pages": 16,
+      "role": "main",
+      "content_status": "external_reference",
+      "document": "main manuscript",
+      "original_attachment_name": "SCIENTIFIC_REPORT_CROSS_MORSE_after_14 (4)(2).pdf",
+      "identity_provenance": "Source identity registered on 2026-11-06T10:32:13+00:00 with a byte-bound contextual source review in paper/transcription_check.json. Numeric token searches are advisory; PDF bytes are verified only when a matching local copy is supplied."
+    },
+    "supplementary": {
+      "bundled_path": null,
+      "sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
+      "byte_size": 12252216,
+      "pages": 38,
+      "role": "supplementary",
+      "content_status": "external_reference",
+      "document": "supplementary information",
+      "original_attachment_name": "SCIENTIFIC_REPORT_CROSS_MORSE_after_14 (5)(2).pdf",
+      "identity_provenance": "Source identity registered on 2026-11-06T10:32:13+00:00 with a byte-bound contextual source review in paper/transcription_check.json. Numeric token searches are advisory; PDF bytes are verified only when a matching local copy is supplied."
+    }
+  },
+  "interpretation_precedence": "The identified main manuscript and supplement define the numerical comparison targets. Table groups retain their source pages and evidence classification.",
+  "table_groups": {
+    "abstract_and_section_claims": {
+      "source": "main",
+      "pages": [
+        1,
+        2,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "label": "Abstract and results",
+      "evidence_kind": "mixed",
+      "note": "Loss, metric and cost summaries; exchange rates and amortization are derived. Paired loss includes CE and mean BCE."
+    },
+    "main_table_1_policy_and_deployment_ledger": {
+      "source": "main",
+      "pages": [
+        9,
+        10
+      ],
+      "label": "Table 1",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Printed policy ledger with ancillary admission statistics from S13/S43/S48. Single-graph admission is descriptive. Confirmation and evaluated-arm status are recorded in reported_results.json."
+    },
+    "main_table_2_gain_and_cost_ledger": {
+      "source": "main",
+      "pages": [
+        10,
+        11
+      ],
+      "label": "Table 2",
+      "evidence_kind": "mixed",
+      "note": "Expected branch cost and assurance configuration; exchange rates and amortization are derived. C_0.99 is a modelled cost quantile."
+    },
+    "supplementary_table_S4_target_qualification": {
+      "source": "supplementary",
+      "pages": [
+        2
+      ],
+      "label": "Table S4",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Training-only target-regime summaries; S4 and S7 use separately reported qualification fractions."
+    },
+    "supplementary_table_S6c_sensing_cost_identity": {
+      "source": "supplementary",
+      "pages": [
+        5
+      ],
+      "label": "Table S6c",
+      "evidence_kind": "mixed",
+      "note": "Sensor settings and arithmetic work identities; resolvent fractions are reported observations."
+    },
+    "supplementary_table_S12_selection_ledger": {
+      "source": "supplementary",
+      "pages": [
+        8,
+        9
+      ],
+      "label": "Table S12",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Representative retained configurations from outer folds. The complete candidate ledger is a separate run artifact."
+    },
+    "supplementary_table_S12c_selection_rule_audit": {
+      "source": "supplementary",
+      "pages": [
+        9
+      ],
+      "label": "Table S12c",
+      "evidence_kind": "derived_arithmetic",
+      "note": "Registered upper-limit selection applied to representative rows; full-ledger selections are separately recorded."
+    },
+    "supplementary_table_S13_independent_graph_admission": {
+      "source": "supplementary",
+      "pages": [
+        10
+      ],
+      "label": "Table S13",
+      "evidence_kind": "mixed",
+      "note": "Fixed-ensemble clipped paired-loss moments and unit counts; empirical-Bernstein penalties and upper bounds are derived."
+    },
+    "supplementary_table_S14_mechanism_contrasts_submitted_protocol": {
+      "source": "supplementary",
+      "pages": [
+        10
+      ],
+      "label": "Table S14",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Nine-test Holm confirmation family. Multigraph units belong to D_confirm; confirmation uses the registered 0.05 threshold."
+    },
+    "supplementary_table_S14b_separated_data_sensitivity": {
+      "source": "supplementary",
+      "pages": [
+        10,
+        11
+      ],
+      "label": "Table S14b",
+      "evidence_kind": "analytical_sensitivity",
+      "note": "Fixed-effect sensitivity under the two-way variance model: only the graph variance component scales with sample size."
+    },
+    "supplementary_table_S14b_unchanged_contrasts": {
+      "source": "supplementary",
+      "pages": [
+        10,
+        11
+      ],
+      "label": "Table S14b",
+      "evidence_kind": "analytical_sensitivity",
+      "note": "Six source contrasts retained in the analytical Holm family."
+    },
+    "supplementary_table_S15_method_comparison": {
+      "source": "supplementary",
+      "pages": [
+        11,
+        12
+      ],
+      "label": "Table S15",
+      "evidence_kind": "mixed",
+      "note": "Official scores and resource ranges under a shared 48-trial HPO ceiling. The full-depth plant is qN."
+    },
+    "supplementary_table_S15b_per_rerun_resource_ledger": {
+      "source": "supplementary",
+      "pages": [
+        12
+      ],
+      "label": "Table S15b",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Per-rerun timing, score dispersion and GPU-hour values as labelled in the source."
+    },
+    "supplementary_table_S16_arxiv_factorial": {
+      "source": "supplementary",
+      "pages": [
+        12,
+        13,
+        36
+      ],
+      "label": "Table S16 and Figure S17d",
+      "evidence_kind": "mixed",
+      "note": "Factorial cell outcomes and derived contrasts; factor and stopping definitions are retained in the result registry."
+    },
+    "supplementary_table_S16b_pascal_factorial": {
+      "source": "supplementary",
+      "pages": [
+        12,
+        13
+      ],
+      "label": "Table S16b",
+      "evidence_kind": "mixed",
+      "note": "Decision-capable factorial cells and derived effect-coded contrasts."
+    },
+    "supplementary_table_S20_selection_theorem_instantiation": {
+      "source": "supplementary",
+      "pages": [
+        15
+      ],
+      "label": "Table S20",
+      "evidence_kind": "mixed",
+      "note": "Empirical radii and family sizes; near-best slack is derived under conditional coverage assumptions."
+    },
+    "supplementary_table_S21_action_gap_audit": {
+      "source": "supplementary",
+      "pages": [
+        15,
+        16
+      ],
+      "label": "Table S21",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Action-gap audit values at source precision."
+    },
+    "supplementary_table_S22_trajectory_tube_audit": {
+      "source": "supplementary",
+      "pages": [
+        16
+      ],
+      "label": "Table S22",
+      "evidence_kind": "mixed",
+      "note": "Empirical plug-in tube using sampled Lipschitz quantiles; violation complements mode-stable coverage."
+    },
+    "supplementary_table_S23_assurance_and_expected_compute": {
+      "source": "supplementary",
+      "pages": [
+        16
+      ],
+      "label": "Table S23",
+      "evidence_kind": "mixed",
+      "note": "Controller/comparator work, fallback frequency, wall time, memory and qualification; branch accounting defines expected and assurance cost."
+    },
+    "supplementary_table_S23b_nominal_execution_time_and_amortization": {
+      "source": "supplementary",
+      "pages": [
+        16
+      ],
+      "label": "Table S23b",
+      "evidence_kind": "mixed",
+      "note": "Nominal-time anchors and derived amortization. The COCO anchor uses Pascal timing; t_nom_measured is a retained compatibility key."
+    },
+    "supplementary_table_S26b_ensemble_law_and_break_even": {
+      "source": "supplementary",
+      "pages": [
+        18
+      ],
+      "label": "Table S26b",
+      "evidence_kind": "mixed",
+      "note": "Least-squares ensemble-law fit and model-based bands, break-even and spend scenarios."
+    },
+    "supplementary_table_S30_oracle_dispersion": {
+      "source": "supplementary",
+      "pages": [
+        19
+      ],
+      "label": "Table S30",
+      "evidence_kind": "mixed",
+      "note": "Oracle-depth summaries; clipped-effect dispersion and retained-share scenarios are derived."
+    },
+    "supplementary_table_S34_budget_aware_rule": {
+      "source": "supplementary",
+      "pages": [
+        21
+      ],
+      "label": "Table S34",
+      "evidence_kind": "analytical_sensitivity",
+      "note": "Analytical skip/switch and retained-fraction scenarios based on action gaps. The executable scheduled-acquisition variant is documented separately."
+    },
+    "supplementary_table_S37_input_fallback_counts": {
+      "source": "supplementary",
+      "pages": [
+        23
+      ],
+      "label": "Table S37",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Input-gate counts and rounded fallback fractions."
+    },
+    "supplementary_table_S41_qualification_cost_components": {
+      "source": "supplementary",
+      "pages": [
+        24,
+        25
+      ],
+      "label": "Table S41",
+      "evidence_kind": "mixed",
+      "note": "Qualification totals and fixed allocation shares; E3-E6 comparison costs are separate. Products uses the derived S15 increment."
+    },
+    "supplementary_table_S42_power_of_budget_matched_test": {
+      "source": "supplementary",
+      "pages": [
+        25
+      ],
+      "label": "Table S42",
+      "evidence_kind": "analytical_sensitivity",
+      "note": "Analytical power and standard-error calculation for D_compare under the stated variance model."
+    },
+    "supplementary_table_S44_per_input_cost_model": {
+      "source": "supplementary",
+      "pages": [
+        26
+      ],
+      "label": "Table S44",
+      "evidence_kind": "analytical_sensitivity",
+      "note": "Modelled 99th-percentile cost across resolvent-frequency scenarios."
+    },
+    "supplementary_table_S45_inserted_site_attribution": {
+      "source": "supplementary",
+      "pages": [
+        26
+      ],
+      "label": "Table S45",
+      "evidence_kind": "mixed",
+      "note": "Arm outcomes and configuration ranges; arm 2 is the qC identity, with paired standard error drawn from S42."
+    },
+    "supplementary_table_S46_budget_matched_frontier": {
+      "source": "supplementary",
+      "pages": [
+        26,
+        27
+      ],
+      "label": "Tables S46 and S46b",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Budget-matched arm outcomes and retained-share configuration ranges; S46b reports paired intervals, Holm tests and work ratios."
+    },
+    "supplementary_table_S47_decision_boundary_and_power": {
+      "source": "supplementary",
+      "pages": [
+        27
+      ],
+      "label": "Table S47",
+      "evidence_kind": "analytical_sensitivity",
+      "note": "Analytical retained-share grid, crossover and power scenarios; the ensemble-spend scenario has its own assumptions."
+    },
+    "supplementary_table_S12b_nested_open_loop_comparison": {
+      "source": "supplementary",
+      "pages": [
+        9
+      ],
+      "label": "Table S12b",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Nested open-loop comparison at source precision."
+    },
+    "supplementary_table_S7_support_audit": {
+      "source": "supplementary",
+      "pages": [
+        5
+      ],
+      "label": "Table S7",
+      "evidence_kind": "author_reported_measurements",
+      "note": "Minimum ESS and maximum normalized weights refer to failed cells removed from Q_feas."
+    },
+    "supplementary_table_S46b_arm_level_outcomes": {
+      "source": "supplementary",
+      "pages": [
+        27
+      ],
+      "label": "Table S46b",
+      "evidence_kind": "author_reported_measurements",
+      "note": "D_compare arm effects, intervals, Holm tests and work ratios. Grid ranges describe configurations; teacher confirmation status is recorded separately."
+    },
+    "supplementary_table_S5d_model_inventory": {
+      "source": "supplementary",
+      "pages": [
+        3
+      ],
+      "label": "Table S5d",
+      "evidence_kind": "mixed",
+      "note": "Released-default and benchmark model identities; checkpoint inventories, sensor configuration and nominal-identity records identify each execution."
+    }
+  }
+}

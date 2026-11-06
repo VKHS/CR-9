@@ -1,0 +1,4 @@
+# Held-out mechanism contrasts (Supplementary Table S14) -- SYNTHETIC SOFTWARE EXAMPLES: these values are not benchmark results
+"# generated from 2 run(s) [examples]; runtime source b5005fc53d31; runs: ogbn-arxiv:arxiv, Peptides-func:peptides_func"
+Dataset,contrast,candidate -> predecessor,effect,95% interval,units,raw P (zero),Holm P,margin,P vs margin,passes
+(no confirmation contrasts were executed: no feedback candidate entered Q_s in these runs),,,,,,,,,,

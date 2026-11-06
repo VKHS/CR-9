@@ -1,0 +1,9 @@
+dataset,quantity,value,unit,source_file,locator
+ogbn-arxiv (synthetic),sketch_dim,0,columns (0 = full state),raw/arxiv/config.json,json:/sensor/sketch_dim
+ogbn-arxiv (synthetic),observer_period,2,control depths,raw/arxiv/config.json,json:/controller/observer_period
+ogbn-arxiv (synthetic),sensing_period,1,control depths,raw/arxiv/config.json,json:/sensor/sensing_period
+ogbn-arxiv (synthetic),residual_fraction,0,fraction,raw/arxiv/sensor_parameters.json,json:/residual_fraction
+Peptides-func (synthetic),sketch_dim,0,columns (0 = full state),raw/peptides_func/config.json,json:/sensor/sketch_dim
+Peptides-func (synthetic),observer_period,2,control depths,raw/peptides_func/config.json,json:/controller/observer_period
+Peptides-func (synthetic),sensing_period,1,control depths,raw/peptides_func/config.json,json:/sensor/sensing_period
+Peptides-func (synthetic),residual_fraction,0.5,fraction,raw/peptides_func/sensor_parameters.json,json:/residual_fraction

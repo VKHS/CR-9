@@ -1,0 +1,4 @@
+# SYNTHETIC EXAMPLE - Executed sensor parameters (Supplementary Table S6c)
+dataset,sketch_dim,observer_period,residual_fraction,sensing_period
+ogbn-arxiv (synthetic),0,2,0,1
+Peptides-func (synthetic),0,2,0.5,1

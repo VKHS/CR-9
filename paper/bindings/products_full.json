@@ -1,0 +1,57 @@
+{
+  "schema_version": "result-binding-1",
+  "status": "pending_run",
+  "_how_to_complete": "Fill reported_value from the sealed run-derived tables of the run named in run_identities, declare the relationship to the manuscript and set status to author_completed after checking the mapping; manuscript_value is the printed value against which make compare-runs checks the run. compare_with_manuscript.py --emit-binding writes a completed declaration from a run directory.",
+  "manuscript_identifier": "CROSS-MORSE manuscript, separated-data protocol",
+  "relationship_to_manuscript": null,
+  "run_identities": {
+    "source_sha256": null,
+    "config_sha256": null,
+    "unit_sha256": null,
+    "dataset": "ogbn-products"
+  },
+  "expected_profile": "full",
+  "expected_config": "configs/products_full.json",
+  "results": [
+    {
+      "manuscript_location": "Main Table 1, ogbn-products, final effect over qC: paired CE (nats)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/mean",
+      "reported_value": null,
+      "absolute_tolerance": 0.0,
+      "manuscript_value": 0.0
+    },
+    {
+      "manuscript_location": "Main Table 1, ogbn-products, official accuracy gain over qC (percentage points)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/mean",
+      "reported_value": null,
+      "absolute_tolerance": 0.0,
+      "manuscript_value": 0.0
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, ogbn-products, 'optimized phase (qC, returned)' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qD/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 87.74
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, ogbn-products, 'optimized phase (qC, returned)' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qC/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 87.74
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, ogbn-products, 'full-depth plant' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qN/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 87.59
+    }
+  ]
+}

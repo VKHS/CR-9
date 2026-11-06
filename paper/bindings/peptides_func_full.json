@@ -1,0 +1,178 @@
+{
+  "schema_version": "result-binding-1",
+  "status": "pending_run",
+  "_how_to_complete": "Identify a sealed official run and declare its relationship to the manuscript. The reference_value is the declared target, not a replacement measured result. compare_with_manuscript.py --emit-binding creates the final-policy declaration; separately sealed evaluated-radius evidence is required for the source-arm targets. A pending template is not evidence.",
+  "manuscript_identifier": "CROSS-MORSE manuscript, separated-data protocol",
+  "relationship_to_manuscript": null,
+  "run_identities": {
+    "source_sha256": null,
+    "config_sha256": null,
+    "unit_sha256": null,
+    "dataset": "Peptides-func"
+  },
+  "expected_profile": "full",
+  "expected_config": "configs/peptides_func_full.json",
+  "results": [
+    {
+      "manuscript_location": "Frozen-rule comparator identity (main p9; SI S11/S12/S14, Note S26), Peptides-func, paired_qD_minus_qC_loss/mean",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/mean",
+      "reported_value": null,
+      "reference_value": 0.0,
+      "absolute_tolerance": 0.0,
+      "target_role": "served_policy",
+      "target_kind": "derived_comparator_identity",
+      "derivation": "qD equals qC; every paired difference and paired resample is identically zero"
+    },
+    {
+      "manuscript_location": "Frozen-rule comparator identity (main p9; SI S11/S12/S14, Note S26), Peptides-func, paired_qD_minus_qC_loss/lower",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/lower",
+      "reported_value": null,
+      "reference_value": 0.0,
+      "absolute_tolerance": 0.0,
+      "target_role": "served_policy",
+      "target_kind": "derived_comparator_identity",
+      "derivation": "qD equals qC; every paired difference and paired resample is identically zero"
+    },
+    {
+      "manuscript_location": "Frozen-rule comparator identity (main p9; SI S11/S12/S14, Note S26), Peptides-func, paired_qD_minus_qC_loss/upper",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/upper",
+      "reported_value": null,
+      "reference_value": 0.0,
+      "absolute_tolerance": 0.0,
+      "target_role": "served_policy",
+      "target_kind": "derived_comparator_identity",
+      "derivation": "qD equals qC; every paired difference and paired resample is identically zero"
+    },
+    {
+      "manuscript_location": "Frozen-rule comparator identity (main p9; SI S11/S12/S14, Note S26), Peptides-func, paired_qD_minus_qC_metric_pp/mean",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/mean",
+      "reported_value": null,
+      "reference_value": 0.0,
+      "absolute_tolerance": 0.0,
+      "target_role": "served_policy",
+      "target_kind": "derived_comparator_identity",
+      "derivation": "qD equals qC; every paired difference and paired resample is identically zero"
+    },
+    {
+      "manuscript_location": "Frozen-rule comparator identity (main p9; SI S11/S12/S14, Note S26), Peptides-func, paired_qD_minus_qC_metric_pp/lower",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/lower",
+      "reported_value": null,
+      "reference_value": 0.0,
+      "absolute_tolerance": 0.0,
+      "target_role": "served_policy",
+      "target_kind": "derived_comparator_identity",
+      "derivation": "qD equals qC; every paired difference and paired resample is identically zero"
+    },
+    {
+      "manuscript_location": "Frozen-rule comparator identity (main p9; SI S11/S12/S14, Note S26), Peptides-func, paired_qD_minus_qC_metric_pp/upper",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/upper",
+      "reported_value": null,
+      "reference_value": 0.0,
+      "absolute_tolerance": 0.0,
+      "target_role": "served_policy",
+      "target_kind": "derived_comparator_identity",
+      "derivation": "qD equals qC; every paired difference and paired resample is identically zero"
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, Peptides-func, full-depth plant official score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qN/metric_percent",
+      "reported_value": null,
+      "reference_value": 70.4,
+      "absolute_tolerance": 0.05,
+      "target_role": "served_policy",
+      "target_kind": "author_reported_score",
+      "reference_pointer": "/supplementary_table_S15_method_comparison/Peptides-func/rows/0/official_score",
+      "reference_scale": 100.0
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, Peptides-func, best fixed sequence (qC) official score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qC/metric_percent",
+      "reported_value": null,
+      "reference_value": 71.4,
+      "absolute_tolerance": 0.05,
+      "target_role": "served_policy",
+      "target_kind": "author_reported_score",
+      "reference_pointer": "/supplementary_table_S15_method_comparison/Peptides-func/rows/3/official_score",
+      "reference_scale": 100.0
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, Peptides-func, best fixed sequence (qC) official score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qD/metric_percent",
+      "reported_value": null,
+      "reference_value": 71.4,
+      "absolute_tolerance": 0.05,
+      "target_role": "served_policy",
+      "target_kind": "derived_comparator_identity",
+      "reference_pointer": "/supplementary_table_S15_method_comparison/Peptides-func/rows/3/official_score",
+      "reference_scale": 100.0
+    }
+  ],
+  "reference_view": "Frozen confirmation rule with comparator identity; printed radius observations remain separate source-arm targets.",
+  "unavailable_evaluated_arm_targets": [
+    {
+      "reference_pointer": "/main_table_1_policy_and_deployment_ledger/Peptides-func/loss_effect_nats",
+      "reported_value": -0.00303,
+      "absolute_tolerance": 5e-06,
+      "manuscript_location": "Main Table 1, Peptides-func, evaluated radius arm: loss_effect_nats",
+      "target_role": "evaluated_arm",
+      "target_kind": "author_reported_arm"
+    },
+    {
+      "reference_pointer": "/main_table_1_policy_and_deployment_ledger/Peptides-func/loss_effect_interval_nats/0",
+      "reported_value": -0.0047,
+      "absolute_tolerance": 5e-06,
+      "manuscript_location": "Main Table 1, Peptides-func, evaluated radius arm: loss_effect_interval_nats/0",
+      "target_role": "evaluated_arm",
+      "target_kind": "author_reported_arm"
+    },
+    {
+      "reference_pointer": "/main_table_1_policy_and_deployment_ledger/Peptides-func/loss_effect_interval_nats/1",
+      "reported_value": -0.0013,
+      "absolute_tolerance": 5e-06,
+      "manuscript_location": "Main Table 1, Peptides-func, evaluated radius arm: loss_effect_interval_nats/1",
+      "target_role": "evaluated_arm",
+      "target_kind": "author_reported_arm"
+    },
+    {
+      "reference_pointer": "/main_table_1_policy_and_deployment_ledger/Peptides-func/official_gain_pp",
+      "reported_value": 0.58,
+      "absolute_tolerance": 0.005,
+      "manuscript_location": "Main Table 1, Peptides-func, evaluated radius arm: official_gain_pp",
+      "target_role": "evaluated_arm",
+      "target_kind": "author_reported_arm"
+    },
+    {
+      "reference_pointer": "/main_table_1_policy_and_deployment_ledger/Peptides-func/official_gain_interval_pp/0",
+      "reported_value": 0.09,
+      "absolute_tolerance": 0.005,
+      "manuscript_location": "Main Table 1, Peptides-func, evaluated radius arm: official_gain_interval_pp/0",
+      "target_role": "evaluated_arm",
+      "target_kind": "author_reported_arm"
+    },
+    {
+      "reference_pointer": "/main_table_1_policy_and_deployment_ledger/Peptides-func/official_gain_interval_pp/1",
+      "reported_value": 1.07,
+      "absolute_tolerance": 0.005,
+      "manuscript_location": "Main Table 1, Peptides-func, evaluated radius arm: official_gain_interval_pp/1",
+      "target_role": "evaluated_arm",
+      "target_kind": "author_reported_arm"
+    },
+    {
+      "reference_pointer": "/supplementary_table_S15_method_comparison/Peptides-func/rows/5/official_score",
+      "reported_value": 0.72,
+      "absolute_tolerance": 0.0005,
+      "manuscript_location": "Supplementary Table S15, Peptides-func, evaluated radius official score",
+      "target_role": "evaluated_arm",
+      "target_kind": "author_reported_arm"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+ "action_counts_A0_A9": [
+  5,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "definition": "share of resolvent actions (A3-A7) among all actions executed at native and inserted sites by the deployed rule's members, from the run's own execution record",
+ "deployed_route": "learned_stop",
+ "executed_actions": 5,
+ "residual_fraction": 0.0,
+ "resolvent_actions": 0
+}

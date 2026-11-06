@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Preallocated independent comparison holdout",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "evaluation_role", "label_role", "data_role_protocol", "reserved_at", "observation_count", "observation_ids_sha256", "parent_data_fingerprint", "base_prepare_manifest_sha256"],
+  "properties": {
+    "schema": {"const": "cm-arm-comparison-holdout-1"},
+    "evaluation_role": {"const": "compare"},
+    "label_role": {"const": "D_compare"},
+    "data_role_protocol": {"const": "fit60-explore20-select10-confirm5-compare5-v1"},
+    "reserved_at": {"const": "prepare"},
+    "observation_count": {"type": "integer", "minimum": 1},
+    "observation_ids_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "parent_data_fingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "base_prepare_manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

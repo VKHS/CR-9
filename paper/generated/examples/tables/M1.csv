@@ -1,0 +1,5 @@
+"# Split, seed and environment manifest -- SYNTHETIC SOFTWARE EXAMPLES: these values are not benchmark results"
+"# generated from 2 run(s) [examples]; runtime source b5005fc53d31; runs: ogbn-arxiv:arxiv, Peptides-func:peptides_func"
+Dataset,profile,data source,split unit,split sizes (fit/explore/select/confirm/admit/test),partition seed,training seeds,ensemble seeds q_C / q_D,bootstrap seeds (select/admit/final),Python / Torch / CUDA,device,source identity,config identity
+ogbn-arxiv,smoke,synthetic_fixture,node,57/19/10/5/32/32,314159,"[1, 2]","[1, 2] / [1, 2]",314163 / 314165 / 314166,3.12.14 / 2.10.0+cpu / None,cpu,b5005fc53d31dfcb,ffdcdec3ad654402
+Peptides-func,smoke,synthetic_fixture,graph,28/10/5/2/16/16,314159,"[1, 2]","[1, 2] / [1, 2]",314163 / 314165 / 314166,3.12.14 / 2.10.0+cpu / None,cpu,b5005fc53d31dfcb,0c0875b4f7e8cd92

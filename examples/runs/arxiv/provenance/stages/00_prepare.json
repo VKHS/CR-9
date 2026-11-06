@@ -1,0 +1,69 @@
+{
+  "claim_scope": "registered dataset execution or synthetic validation; manuscript agreement requires result artifact bindings",
+  "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+  "created_utc": "2026-10-29T14:51:43.433890+00:00",
+  "dataset": "synthetic",
+  "evaluator": null,
+  "inputs": [],
+  "model_audit": null,
+  "outputs": [
+    {
+      "bytes": 1815,
+      "path": "action_registry.json",
+      "sha256": "6dda7a004f82a77c140474da0a3a2bb58e533149e3c5806bf2eaad131b104cad"
+    },
+    {
+      "bytes": 2986,
+      "path": "config.json",
+      "sha256": "a1fd493604e19f78b6fbb1b0a7f09d287f14354ada4054e777b677b6ac7d08cc"
+    },
+    {
+      "bytes": 4578,
+      "path": "environment.json",
+      "sha256": "9da181c594d89b682adeec336c27423e425c68622512b89428c93003bf72d51e"
+    },
+    {
+      "bytes": 0,
+      "path": "prepared/.prepare.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1556,
+      "path": "prepared/clusters.npz",
+      "sha256": "763b7e089d4ee6676c253ab96833619193be1dc9f4f2c743752f86de0324eef3"
+    },
+    {
+      "bytes": 28966,
+      "path": "prepared/graph.npz",
+      "sha256": "22f3ff1849e795d65b78c5499ec2110ca33e5f77cffe688aee334bfc67ea30b6"
+    },
+    {
+      "bytes": 5994,
+      "path": "prepared/metadata.json",
+      "sha256": "847736a6c7375b08bbce1173c0033e3f1ca30a1cd28d1abd5c6c13185569f609"
+    },
+    {
+      "bytes": 2026,
+      "path": "prepared/official_splits.npz",
+      "sha256": "ac5f5014c191ca39be874bc8161ac89cc27923f7cebea39177456bb29c84d72f"
+    },
+    {
+      "bytes": 3956,
+      "path": "prepared/splits.npz",
+      "sha256": "102f5f005748224879d337ba8c8fb33cdbf830615e628f06578fecb639262641"
+    },
+    {
+      "bytes": 55443,
+      "path": "provenance/evaluator.py",
+      "sha256": "1adaf12cfd31c68c4207f7796063eb5856353bfe63be43b91ee6fdff8e452050"
+    }
+  ],
+  "parent_manifest": null,
+  "schema_version": "1.1",
+  "scientific_role": "auxiliary",
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "stage": "prepare",
+  "stage_index": 0,
+  "unit_manifest_path": "prepared/splits.npz",
+  "unit_sha256": "102f5f005748224879d337ba8c8fb33cdbf830615e628f06578fecb639262641"
+}

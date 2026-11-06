@@ -1,0 +1,89 @@
+{
+  "schema_version": "result-binding-1",
+  "status": "pending_run",
+  "_how_to_complete": "Fill reported_value from the sealed run-derived tables of the run named in run_identities, declare the relationship to the manuscript and set status to author_completed after checking the mapping; manuscript_value is the printed value against which make compare-runs checks the run. compare_with_manuscript.py --emit-binding writes a completed declaration from a run directory.",
+  "manuscript_identifier": "CROSS-MORSE manuscript, separated-data protocol",
+  "relationship_to_manuscript": null,
+  "run_identities": {
+    "source_sha256": null,
+    "config_sha256": null,
+    "unit_sha256": null,
+    "dataset": "PascalVOC-SP"
+  },
+  "expected_profile": "full",
+  "expected_config": "configs/pascalvoc_sp_full.json",
+  "results": [
+    {
+      "manuscript_location": "Main Table 1, PascalVOC-SP, final effect over qC: paired CE (nats)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/mean",
+      "reported_value": null,
+      "absolute_tolerance": 5e-06,
+      "manuscript_value": -0.00842
+    },
+    {
+      "manuscript_location": "Main Table 1, PascalVOC-SP, lower end of the 95% paired-loss interval",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/lower",
+      "reported_value": null,
+      "absolute_tolerance": 5e-06,
+      "manuscript_value": -0.01278
+    },
+    {
+      "manuscript_location": "Main Table 1, PascalVOC-SP, upper end of the 95% paired-loss interval",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/upper",
+      "reported_value": null,
+      "absolute_tolerance": 5e-06,
+      "manuscript_value": -0.00406
+    },
+    {
+      "manuscript_location": "Main Table 1, PascalVOC-SP, official macro F1 gain over qC (percentage points)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/mean",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 0.6
+    },
+    {
+      "manuscript_location": "Main Table 1, PascalVOC-SP, lower end of the 95% official-gain interval (pp)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/lower",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 0.38
+    },
+    {
+      "manuscript_location": "Main Table 1, PascalVOC-SP, upper end of the 95% official-gain interval (pp)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/upper",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 0.82
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, PascalVOC-SP, 'MPC-RH (deployed)' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qD/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 48.21
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, PascalVOC-SP, 'MPC-OL (qC)' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qC/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 47.61
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, PascalVOC-SP, 'full-depth plant' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qN/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 46.89
+    }
+  ]
+}

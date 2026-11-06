@@ -1,0 +1,20 @@
+{
+ "definition": "wall seconds of one nominal member execution divided by its inputs (graphs; one for a single-graph benchmark), mean over the nominal candidate's members, from the run's own record",
+ "members": [
+  {
+   "inputs": 1,
+   "member": 0,
+   "seconds_per_input": 0.0023722250007267576,
+   "seed": 1,
+   "wall_seconds": 0.0023722250007267576
+  },
+  {
+   "inputs": 1,
+   "member": 1,
+   "seconds_per_input": 0.00134151700331131,
+   "seed": 2,
+   "wall_seconds": 0.00134151700331131
+  }
+ ],
+ "t_nom_seconds": 0.0018568710020190338
+}

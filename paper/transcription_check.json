@@ -1,0 +1,733 @@
+{
+ "author_review": {
+  "groups": {
+   "abstract_and_section_claims": {
+    "note": "Read the entire 16-page main manuscript and compared the abstract/results statements with Tables 1-2; visually inspected pages 9-13. The effect range is 0 to -0.00905 nats (the legacy paired_CE key also includes mean BCE), maximum official-metric change is 0.65 percentage points, expected serial overhead is 15-33%, and assurance overhead is 118-135%. Exploration is 9,600-32,000 trajectories and qualification is 1.4-2.3 GPU-hours. Positive feedback-vs-plan-once improvements 0.0065 and 0.0096 store rounded magnitudes of the signed -0.00649 and -0.00962 contrasts on page 9, rather than distinct experiments. Exchange-rate range 3.5-7.3 millinats rounds Table 2 values; qualification share 0.18 is an aggregate derived from S41/S15. The manuscript reports six evaluated controlled arms but expressly discloses Peptides confirmation failure and three representative-selection discrepancies on page 9; those qualifications are retained. Matching source statements does not verify observation-level evidence.",
+    "review_status": "reviewed"
+   },
+   "main_table_1_policy_and_deployment_ledger": {
+    "note": "Checked every Table 1 row and 95% test interval on rendered page 10 against the registry: arxiv +0.07 pp/-0.00450 CE, proteins +0.11 AUC pp/-0.00380 BCE, products exact comparator identity, Roman +0.26 pp/-0.00572 CE, Pascal +0.60 F1 pp/-0.00842 CE, COCO +0.65 F1 pp/-0.00905 CE, and the evaluated Peptides radius arm +0.0058 native AP/-0.00303 BCE. Peptides native AP and interval [0.0009,0.0107] convert to 0.58 pp/[0.09,1.07] in the registry. The ancillary admission moments, graph counts and fallback fractions in this group come from S13/S23/S37/S43/S48, not exclusively from the main table pages. Page 9 and S12c require the full candidate ledger to establish the Roman/Pascal/COCO MPC-RH selections; Peptides Holm P=0.070 exceeds 0.05 and its registered lifecycle returns qC. The record preserves both evaluated-arm observations and lifecycle_resolution, without treating the radius arm as a confirmed final policy. Main and supplementary contextual reviews corroborate these source descriptions; archived runs remain separate evidence.",
+    "review_status": "reviewed"
+   },
+   "main_table_2_gain_and_cost_ledger": {
+    "note": "Checked all seven Table 2 rows on rendered page 11, including comparator identity, ensemble size, expected cost and overhead, modeled C_0.99 with its scenario range, assurance cost, exchange rate/range and amortization. C_qC is 4/4/2.1/4/8/8/4 and C_expected is 4.62/4.68/2.1/5.22/10.30/10.60/4.73 in dataset order. Costs use nominal full-depth execution units; overhead percentages, exchange rates and amortization are derived from their underlying quantities and printed rounding, so ratios of already rounded table cells need not exactly reproduce the displayed derived values. C_0.99 is explicitly a modeled quantile in the caption, not an observed empirical percentile; M_star*t_nom is in thousands of input-seconds and lambda is millinats per added nominal execution. The Peptides cost/effect row describes its evaluated radius arm, subject to the confirmation discrepancy on page 9. Numerical targets remain unchanged.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S12_selection_ledger": {
+    "note": "All 63 representative rows checked across pages 8-9, with signs, E, profile, intervals, ranks and selected flags. These are representative rows, not the complete candidate ledger. Printed full-ledger choices on Roman/Pascal/COCO cannot be inferred by replaying only these representatives.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S12b_nested_open_loop_comparison": {
+    "note": "All 30 nested-family rows checked. Zero entries are qC-family identities. These nested effects are not the same estimator as representative outer-fold values in S12 and must not be substituted in selector replay.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S12c_selection_rule_audit": {
+    "note": "Upper-bound and point-estimate sensitivity readings checked. At eps_eq=0.002 on U_s, representative Roman/Pascal/COCO rows select radius; full-ledger MPC-RH choices are separately reported and still require original complete selector evidence. Do not adjust the threshold to force those choices.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S13_independent_graph_admission": {
+    "note": "All primary and B=0.05/0.20 sensitivity rows checked, including J=1428/5000/2331, fixed-ensemble moments, B=0.1, delta_a=0.025, eps_a and computed bounds. Peptides B=0.2 has G_admit=0. Radius-arm admission arithmetic does not resolve its preceding S14 confirmation failure.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S14_mechanism_contrasts_submitted_protocol": {
+    "note": "All nine effects, intervals, units, raw/adjusted p values and margins checked; rendered page 10 inspected. Peptides raw p=.035, Holm p=.070 fails alpha=.05 and its eligible predecessor is qC. Pascal raw p=.0002 and adjusted p=.0013 are printed at finite precision; exact joint Holm replay requires original unrounded raw test outputs. COCO values are inequalities, not exact p values. No equivalence was established for products.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S14b_separated_data_sensitivity": {
+    "note": "Three rescaled multigraph contrasts checked at J_new=425/5664/544, old intervals and graph variance shares .030/.015/.071. Fixed-effect rescaling under the variance model is analytical sensitivity, not a new observed replication. Peptides Holm .070 remains above .05.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S14b_unchanged_contrasts": {
+    "note": "Six unchanged single-graph contrasts checked. Their role in the analytical family is distinct from reconstructing the original joint nine-test confirmation campaign; products is not tested against its equivalence margin.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S15_method_comparison": {
+    "note": "All 63 method scores and declared resource ranges checked over seven datasets. Scores use percent units except native Peptides AP; seed SD uses percentage points including Peptides. Resource intervals are declared ranges, not paired confidence intervals. Shared 48-trial HPO ceiling is retained. qC nominal execution rules have separate cost identities in S23.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S15b_per_rerun_resource_ledger": {
+    "note": "All 27 per-rerun rows checked, including controller-branch wall times, serial cost, GPU-hours and SD over 12 seeds. Peptides SD is AP percentage points. Expected wall-time overhead uses branch probabilities from S23, not the branch wall time alone.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S16_arxiv_factorial": {
+    "note": "All eight A/O/X cells, intervals, activity and relative time checked against p12 and rendered Figure S17d on p36. Reported effects and interactions are derived contrasts; the figure uses independence-based intervals whereas paired causal uncertainty requires original joint resampling covariance. Cell010 has zero action activity but a changed stopping depth/outcome; original execution record must resolve the factor-domain convention.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S16b_pascal_factorial": {
+    "note": "All eight S/O/X cells and main effects -.0062/-.0059/-.0049 with .0044 half-width checked across pp12-13. Derived interactions are within 1e-4 at printed precision. The supplement specifies joint resampling covariance for contrast intervals.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S20_selection_theorem_instantiation": {
+    "note": "All candidate counts, eligible-family counts, radii, near-best slack, screened-finalist slack and 10,000 resamples checked. Products eligible set is empty. Peptides source wording is boundary graph-level selection (existing fragile wording should be aligned). Conditional slack does not establish measured optimality.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S21_action_gap_audit": {
+    "note": "All seven rows checked; gaps are in nats and the switching/stability values are fractions. These are empirical perturbation statistics, not proof of regional invariance for a selective-sensing certificate.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S22_trajectory_tube_audit": {
+    "note": "All five rows checked, including beta quantiles, reference/perturbation terms, tube coverage, mode-stable coverage and observed errors. Violation rate is 1-mode_stable_coverage; empirical plug-in tube coverage is not a uniform deterministic guarantee.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S23_assurance_and_expected_compute": {
+    "note": "All seven branch-cost, fallback, memory, qualification and Lean-effect rows checked. Products globally returns qC, so controller cost is zero and fallback probability is inapplicable. Expected serial work is a branch-weighted mean; assurance is the two-branch sum, not an observed maximum.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S23b_nominal_execution_time_and_amortization": {
+    "note": "All six timing/amortization rows checked with seconds versus milliseconds and scientific notation. t_nom entries are anchored by geometric means/training quotients; COCO explicitly shares Pascal timing and its own quotient is unused. The retained key t_nom_measured is a compatibility field, not evidence of a direct measurement. M_star is derived and depends inversely on measured latency.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S26b_ensemble_law_and_break_even": {
+    "note": "All six fitted D_inf, bands, kappa=.035, expected/assurance break-even ranges and eight additional checkpoint costs checked. Ensemble grid E=1,2,4,8,12,16,20 requires 20 distinct checkpoint identities. Bands and crossovers remain model-based sensitivities.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S30_oracle_dispersion": {
+    "note": "All seven oracle-depth medians, IQRs and disagreement fractions checked. Multigraph clipped-effect SD derives from S13 moments. Retained-share grids are model scenarios; this admission-stage oracle is diagnostic only after policies are frozen.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S34_budget_aware_rule": {
+    "note": "All six gap, switch, skip, retained-share and overhead scenarios checked. Gap-only skip rates are upper bounds on certifiable acquisition skips; r_B=1-skip*switch is a model and is not an observed execution identity. Late-abort p1=.01 is the scenario parameter.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S37_input_fallback_counts": {
+    "note": "All three counts checked: Pascal 116/1429, COCO 355/5000, Peptides 438/2331. Denominators are test-input graphs; they differ from admission graph counts. Unprinted action-level harm denominators must come from original decision logs.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S41_qualification_cost_components": {
+    "note": "All printed component GPU-hours and E3-E6 campaign costs checked; rounded components may differ from total by .01. Products has no S41 row: 2.28 is the S15 difference 15.20-12.92 and must remain explicitly derived. Backbone per-seed hours are from S5, separate from campaign/HPO accounting.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S42_power_of_budget_matched_test": {
+    "note": "All six SE, MDE, margin and power rows checked. MDE and margins are in millinats; SE in nats. The values follow the stated variance/power model, with conservative and optimistic paired-seed readings. Multigraph D_compare counts follow S39 and are not admission counts.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S44_per_input_cost_model": {
+    "note": "All six cost-model rows checked. f_bar and f_99 are scenario inputs distinct from actual f_res in S6c. C_0.99 is modelled and is distinct from an observed maximum or guaranteed hard work cap.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S45_inserted_site_attribution": {
+    "note": "All three native/inserted arm rows checked. The native-site fractions .047/.047/.125 match the 6/128,6/128,8/64 site counts at source precision. Arm2=qC is the identity. Bracketed native-feedback values are ranges, and paired SE is linked to the graph-unit model in S42.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S46_budget_matched_frontier": {
+    "note": "All six frontier rows and E3-E6 effects checked; effects are millinats. Bracketed ranges are retained-share configurations, not confidence intervals. Rounded work ceilings must not replace measured exact per-input work. Peptides refers to an evaluated radius teacher whose confirmation status remains disputed in S14.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S46b_arm_level_outcomes": {
+    "note": "All 24 arm rows, signed effects, intervals, p values and work ratios checked against rendered p27. Effects vs qC are negative improvements; effects vs qM are positive deficits. Intervals are crossed seed-by-unit bootstrap intervals, whereas bracketed vs-qC ranges are configurations. Four-contrast Holm family is per dataset, separate from S14 joint nine-contrast family. Peptides teacher confirmation is not established by the displayed S14 test.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S47_decision_boundary_and_power": {
+    "note": "All six retained-share grids, exact contract thresholds 1 and r_B, ensemble-spend scenario thresholds, margin/MDE and power columns checked. These are analytical sensitivities; spend assumptions are explicitly not measured for the competing predictor/budget arms in Note S16.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S4_target_qualification": {
+    "note": "All seven dataset rows checked. Effects and bounds are in nats, PDD in percentage points; selected strata are 1.00. Target-qualification fractions differ intentionally from the support-cell pass fractions in S7.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S5d_model_inventory": {
+    "note": "Default arxiv count 1,138,216 and benchmark 3.1M plus model inventory/sensor/identity requirements checked. Exact full-profile count 3,116,632 is repository-instantiated evidence, not a printed PDF number, but rounds to source 3.1M. Model dimensions and source provenance must remain explicit.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S6c_sensing_cost_identity": {
+    "note": "All six controlled rows checked, including proteins (k, P_s, f_res)=(32,4,0.061) and Pascal (64,2,0.24). Work ratios are arithmetic identities at rounded source precision; actual sensor settings and resolvent fractions are reported observations. k=0 denotes full state.",
+    "review_status": "reviewed"
+   },
+   "supplementary_table_S7_support_audit": {
+    "note": "All seven support rows checked. Minimum ESS and maximum weight describe failing cells pruned from the candidate family; passing cells require same-vector propensity/ESS/weight checks. The source-qualified fraction and S4 registry qualification use different denominators.",
+    "review_status": "reviewed"
+   }
+  },
+  "page_map_sha256": "fb94f7da0f6f12fa8259998aa0d13b4d70545e3561bb77cebfbeb2bec1373c1b",
+  "pdf_sha256": {
+   "main": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+   "supplementary": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"
+  },
+  "registry_sha256": {
+   "registered_constants": "d783497b4d129a3268fe223e07459fb001d31f2b3e9ce78c61db8d8499427dbe",
+   "reported_results": "042c01a5c8b514ef49de983869b7fae986d60e82fb0c76c86aa3d8f79e678cf5"
+  },
+  "reviewed_by": "ChatGPT: AI-assisted contextual review requested by author on 2026-11-06; main and supplementary review agents",
+  "schema": "cross-morse-manuscript-review-1",
+  "scope": "Contextual source review of registry interpretation and page provenance by the named reviewer; not verification of measurements or an attestation of personal review by an author."
+ },
+ "extractor": "poppler",
+ "page_map_sha256": "fb94f7da0f6f12fa8259998aa0d13b4d70545e3561bb77cebfbeb2bec1373c1b",
+ "pdf_sha256": {
+  "main": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+  "supplementary": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"
+ },
+ "registered_utc": "2026-11-06T10:32:13+00:00",
+ "registry_sha256": {
+  "registered_constants": "d783497b4d129a3268fe223e07459fb001d31f2b3e9ce78c61db8d8499427dbe",
+  "reported_results": "042c01a5c8b514ef49de983869b7fae986d60e82fb0c76c86aa3d8f79e678cf5"
+ },
+ "schema": "cross-morse-transcription-check-2",
+ "scope": "Page-wide numeric token occurrence only. A match can belong to another table cell or quantity; a miss can reflect a unit conversion, rounding, scientific notation or a documented derivation. Neither the occurrence rate nor the contextual source review verifies experimental measurements.",
+ "spot_check": {
+  "coverage": 0.965,
+  "found": 2260,
+  "groups": {
+   "abstract_and_section_claims": {
+    "coverage": 0.875,
+    "found": 14,
+    "label": "Abstract and results",
+    "label_found": null,
+    "missing_examples": [
+     {
+      "pointer": "/feedback_vs_plan_once_improvement_nats/0",
+      "value": 0.0065
+     },
+     {
+      "pointer": "/feedback_vs_plan_once_improvement_nats/1",
+      "value": 0.0096
+     }
+    ],
+    "pages": [
+     1,
+     2,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "values": 16
+   },
+   "main_table_1_policy_and_deployment_ledger": {
+    "coverage": 0.7229,
+    "found": 60,
+    "label": "Table 1",
+    "label_found": true,
+    "missing_examples": [
+     {
+      "pointer": "/ogbn-arxiv/admission_D_bar",
+      "value": -0.0046
+     },
+     {
+      "pointer": "/ogbn-arxiv/input_fallback_fraction",
+      "value": 0.12
+     },
+     {
+      "pointer": "/ogbn-proteins/admission_D_bar",
+      "value": -0.0039
+     },
+     {
+      "pointer": "/ogbn-proteins/admission_U_desc",
+      "value": -0.0007
+     },
+     {
+      "pointer": "/ogbn-proteins/input_fallback_fraction",
+      "value": 0.15
+     },
+     {
+      "pointer": "/Roman-empire/admission_D_bar",
+      "value": -0.0064
+     },
+     {
+      "pointer": "/Roman-empire/admission_U_desc",
+      "value": -0.0033
+     },
+     {
+      "pointer": "/Roman-empire/input_fallback_fraction",
+      "value": 0.129
+     }
+    ],
+    "pages": [
+     9,
+     10
+    ],
+    "values": 83
+   },
+   "main_table_2_gain_and_cost_ledger": {
+    "coverage": 1.0,
+    "found": 89,
+    "label": "Table 2",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     10,
+     11
+    ],
+    "values": 89
+   },
+   "supplementary_table_S12_selection_ledger": {
+    "coverage": 1.0,
+    "found": 315,
+    "label": "Table S12",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     8,
+     9
+    ],
+    "values": 315
+   },
+   "supplementary_table_S12b_nested_open_loop_comparison": {
+    "coverage": 1.0,
+    "found": 30,
+    "label": "Table S12b",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     9
+    ],
+    "values": 30
+   },
+   "supplementary_table_S12c_selection_rule_audit": {
+    "coverage": 1.0,
+    "found": 6,
+    "label": "Table S12c",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     9
+    ],
+    "values": 6
+   },
+   "supplementary_table_S13_independent_graph_admission": {
+    "coverage": 1.0,
+    "found": 45,
+    "label": "Table S13",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     10
+    ],
+    "values": 45
+   },
+   "supplementary_table_S14_mechanism_contrasts_submitted_protocol": {
+    "coverage": 1.0,
+    "found": 68,
+    "label": "Table S14",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     10
+    ],
+    "values": 68
+   },
+   "supplementary_table_S14b_separated_data_sensitivity": {
+    "coverage": 0.9333,
+    "found": 28,
+    "label": "Table S14b",
+    "label_found": true,
+    "missing_examples": [
+     {
+      "pointer": "/0/graph_variance_share",
+      "value": 0.03
+     },
+     {
+      "pointer": "/2/graph_variance_share",
+      "value": 0.071
+     }
+    ],
+    "pages": [
+     10,
+     11
+    ],
+    "values": 30
+   },
+   "supplementary_table_S14b_unchanged_contrasts": {
+    "coverage": 1.0,
+    "found": 47,
+    "label": "Table S14b",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     10,
+     11
+    ],
+    "values": 47
+   },
+   "supplementary_table_S15_method_comparison": {
+    "coverage": 1.0,
+    "found": 158,
+    "label": "Table S15",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     11,
+     12
+    ],
+    "values": 158
+   },
+   "supplementary_table_S15b_per_rerun_resource_ledger": {
+    "coverage": 1.0,
+    "found": 108,
+    "label": "Table S15b",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     12
+    ],
+    "values": 108
+   },
+   "supplementary_table_S16_arxiv_factorial": {
+    "coverage": 0.7213,
+    "found": 44,
+    "label": "Table S16 and Figure S17d",
+    "label_found": true,
+    "missing_examples": [
+     {
+      "pointer": "/cells/000/interval/0",
+      "value": 0.866
+     },
+     {
+      "pointer": "/cells/000/interval/1",
+      "value": 0.8746
+     },
+     {
+      "pointer": "/cells/100/interval/0",
+      "value": 0.8622
+     },
+     {
+      "pointer": "/cells/100/interval/1",
+      "value": 0.871
+     },
+     {
+      "pointer": "/cells/010/interval/0",
+      "value": 0.864
+     },
+     {
+      "pointer": "/cells/010/interval/1",
+      "value": 0.873
+     },
+     {
+      "pointer": "/cells/001/interval/0",
+      "value": 0.8614
+     },
+     {
+      "pointer": "/cells/110/interval/0",
+      "value": 0.8533
+     }
+    ],
+    "pages": [
+     12,
+     13,
+     36
+    ],
+    "values": 61
+   },
+   "supplementary_table_S16b_pascal_factorial": {
+    "coverage": 0.7308,
+    "found": 38,
+    "label": "Table S16b",
+    "label_found": true,
+    "missing_examples": [
+     {
+      "pointer": "/cells/000/interval/0",
+      "value": 1.3168
+     },
+     {
+      "pointer": "/cells/000/interval/1",
+      "value": 1.3292
+     },
+     {
+      "pointer": "/cells/001/interval/1",
+      "value": 1.3245
+     },
+     {
+      "pointer": "/cells/010/interval/0",
+      "value": 1.3112
+     },
+     {
+      "pointer": "/cells/010/interval/1",
+      "value": 1.3236
+     },
+     {
+      "pointer": "/cells/011/interval/0",
+      "value": 1.3062
+     },
+     {
+      "pointer": "/cells/011/interval/1",
+      "value": 1.3186
+     },
+     {
+      "pointer": "/cells/100/interval/0",
+      "value": 1.3108
+     }
+    ],
+    "pages": [
+     12,
+     13
+    ],
+    "values": 52
+   },
+   "supplementary_table_S20_selection_theorem_instantiation": {
+    "coverage": 1.0,
+    "found": 42,
+    "label": "Table S20",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     15
+    ],
+    "values": 42
+   },
+   "supplementary_table_S21_action_gap_audit": {
+    "coverage": 1.0,
+    "found": 42,
+    "label": "Table S21",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     15,
+     16
+    ],
+    "values": 42
+   },
+   "supplementary_table_S22_trajectory_tube_audit": {
+    "coverage": 1.0,
+    "found": 50,
+    "label": "Table S22",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     16
+    ],
+    "values": 50
+   },
+   "supplementary_table_S23_assurance_and_expected_compute": {
+    "coverage": 1.0,
+    "found": 76,
+    "label": "Table S23",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     16
+    ],
+    "values": 76
+   },
+   "supplementary_table_S23b_nominal_execution_time_and_amortization": {
+    "coverage": 0.65,
+    "found": 39,
+    "label": "Table S23b",
+    "label_found": true,
+    "missing_examples": [
+     {
+      "pointer": "/ogbn-arxiv/W_nom_MAC",
+      "value": 11500000000000.0
+     },
+     {
+      "pointer": "/ogbn-arxiv/M_star_inputs",
+      "value": 12000.0
+     },
+     {
+      "pointer": "/ogbn-arxiv/M_star_range/0",
+      "value": 7500.0
+     },
+     {
+      "pointer": "/ogbn-arxiv/M_star_range/1",
+      "value": 26000.0
+     },
+     {
+      "pointer": "/ogbn-proteins/W_nom_MAC",
+      "value": 7040000000000.0
+     },
+     {
+      "pointer": "/ogbn-proteins/M_star_inputs",
+      "value": 11000.0
+     },
+     {
+      "pointer": "/ogbn-proteins/M_star_range/0",
+      "value": 7400.0
+     },
+     {
+      "pointer": "/ogbn-proteins/M_star_range/1",
+      "value": 15000.0
+     }
+    ],
+    "pages": [
+     16
+    ],
+    "values": 60
+   },
+   "supplementary_table_S26b_ensemble_law_and_break_even": {
+    "coverage": 1.0,
+    "found": 72,
+    "label": "Table S26b",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     18
+    ],
+    "values": 72
+   },
+   "supplementary_table_S30_oracle_dispersion": {
+    "coverage": 1.0,
+    "found": 49,
+    "label": "Table S30",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     19
+    ],
+    "values": 49
+   },
+   "supplementary_table_S34_budget_aware_rule": {
+    "coverage": 1.0,
+    "found": 54,
+    "label": "Table S34",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     21
+    ],
+    "values": 54
+   },
+   "supplementary_table_S37_input_fallback_counts": {
+    "coverage": 1.0,
+    "found": 9,
+    "label": "Table S37",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     23
+    ],
+    "values": 9
+   },
+   "supplementary_table_S41_qualification_cost_components": {
+    "coverage": 0.96,
+    "found": 48,
+    "label": "Table S41",
+    "label_found": true,
+    "missing_examples": [
+     {
+      "pointer": "/ogbn-products/backbone_training_GPU_h_per_seed",
+      "value": 4.8
+     },
+     {
+      "pointer": "/ogbn-products/qualification_increment_derived_from_table_S15_GPU_h",
+      "value": 2.28
+     }
+    ],
+    "pages": [
+     24,
+     25
+    ],
+    "values": 50
+   },
+   "supplementary_table_S42_power_of_budget_matched_test": {
+    "coverage": 1.0,
+    "found": 78,
+    "label": "Table S42",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     25
+    ],
+    "values": 78
+   },
+   "supplementary_table_S44_per_input_cost_model": {
+    "coverage": 1.0,
+    "found": 84,
+    "label": "Table S44",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     26
+    ],
+    "values": 84
+   },
+   "supplementary_table_S45_inserted_site_attribution": {
+    "coverage": 1.0,
+    "found": 27,
+    "label": "Table S45",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     26
+    ],
+    "values": 27
+   },
+   "supplementary_table_S46_budget_matched_frontier": {
+    "coverage": 1.0,
+    "found": 96,
+    "label": "Tables S46 and S46b",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     26,
+     27
+    ],
+    "values": 96
+   },
+   "supplementary_table_S46b_arm_level_outcomes": {
+    "coverage": 1.0,
+    "found": 177,
+    "label": "Table S46b",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     27
+    ],
+    "values": 177
+   },
+   "supplementary_table_S47_decision_boundary_and_power": {
+    "coverage": 1.0,
+    "found": 120,
+    "label": "Table S47",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     27
+    ],
+    "values": 120
+   },
+   "supplementary_table_S4_target_qualification": {
+    "coverage": 1.0,
+    "found": 49,
+    "label": "Table S4",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     2
+    ],
+    "values": 49
+   },
+   "supplementary_table_S5d_model_inventory": {
+    "coverage": 0.6667,
+    "found": 2,
+    "label": "Table S5d",
+    "label_found": true,
+    "missing_examples": [
+     {
+      "pointer": "/ogbn-arxiv/full_profile_parameters",
+      "value": 3116632.0
+     }
+    ],
+    "pages": [
+     3
+    ],
+    "values": 3
+   },
+   "supplementary_table_S6c_sensing_cost_identity": {
+    "coverage": 1.0,
+    "found": 54,
+    "label": "Table S6c",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     5
+    ],
+    "values": 54
+   },
+   "supplementary_table_S7_support_audit": {
+    "coverage": 1.0,
+    "found": 42,
+    "label": "Table S7",
+    "label_found": true,
+    "missing_examples": [],
+    "pages": [
+     5
+    ],
+    "values": 42
+   }
+  },
+  "method": "signed_page_token_occurrence",
+  "scope": "Page-wide numeric token occurrence only. A match can belong to another table cell or quantity; a miss can reflect a unit conversion, rounding, scientific notation or a documented derivation. Neither the occurrence rate nor the contextual source review verifies experimental measurements.",
+  "values": 2342,
+  "verifies_transcription": false
+ }
+}

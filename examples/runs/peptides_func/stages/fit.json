@@ -1,0 +1,9 @@
+{
+  "config_sha256": "0c0875b4f7e8cd925798cea3096169894bc619e8af63dff40217e1076210784e",
+  "label_accesses": [],
+  "manifest_sha256": "2236af25ed43cb9ea2674fd1505a08f50e3e5807320e74600910aea072166309",
+  "seconds_this_attempt": 0.8072753689993988,
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "stage": "fit",
+  "status": "COMPLETE"
+}

@@ -1,0 +1,4 @@
+# SYNTHETIC EXAMPLE - Per-input nominal execution time (Supplementary Table S23b)
+dataset,t_nom_seconds
+ogbn-arxiv (synthetic),0.001856871002
+Peptides-func (synthetic),0.001495748688

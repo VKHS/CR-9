@@ -1,0 +1,211 @@
+{
+  "arrhenius_gpu_execution_verified": false,
+  "artifact_policy": "The source package includes two complete synthetic runs, arxiv and Peptides-func, with checkpoints, predictions, prepared fixtures, stage seals and checksums. They demonstrate software workflows; they are not official benchmark observations. All seven dataset adapters and 21 profiles remain available. Official datasets and ordinary user runs stay outside the source tree.",
+  "bundled_example_inventories": "examples/inventory/",
+  "bundled_example_run_roots": [
+    "examples/runs/arxiv",
+    "examples/runs/peptides_func"
+  ],
+  "bundled_examples_are_benchmark_results": false,
+  "bundled_synthetic_examples_included": true,
+  "complete_bundled_resume_artifacts": true,
+  "entrypoints": {
+    "COCO-SP": "run_cross_morse_coco_sp.py",
+    "PascalVOC-SP": "run_cross_morse_pascalvoc_sp.py",
+    "Peptides-func": "run_cross_morse_peptides_func.py",
+    "Roman-empire": "run_cross_morse_roman_empire.py",
+    "ogbn-arxiv": "run_cross_morse_arxiv.py",
+    "ogbn-products": "run_cross_morse_products.py",
+    "ogbn-proteins": "run_cross_morse_proteins.py",
+    "synthetic": "run_cross_morse.py"
+  },
+  "full_official_dataset_runs_verified": [],
+  "implemented_datasets": [
+    "ogbn-arxiv",
+    "ogbn-products",
+    "ogbn-proteins",
+    "Roman-empire",
+    "PascalVOC-SP",
+    "COCO-SP",
+    "Peptides-func"
+  ],
+  "manuscript_registry": "paper/README.md",
+  "not_implemented_datasets": [],
+  "official_data_preparation_verified": [
+    "Roman-empire"
+  ],
+  "profiles": {
+    "COCO-SP": {
+      "full": {
+        "benchmark_dataset": "COCO-SP",
+        "config": "configs/coco_sp_full.json",
+        "dataset": "COCO-SP",
+        "purpose": "registered paper-scale configuration; execution produces the results"
+      },
+      "pilot": {
+        "benchmark_dataset": "COCO-SP",
+        "config": "configs/coco_sp_pilot.json",
+        "dataset": "COCO-SP",
+        "purpose": "official data with reduced model and development computation"
+      },
+      "smoke": {
+        "benchmark_dataset": "COCO-SP",
+        "config": "configs/coco_sp_smoke.json",
+        "dataset": "synthetic",
+        "purpose": "small task-specific software fixture"
+      }
+    },
+    "PascalVOC-SP": {
+      "full": {
+        "benchmark_dataset": "PascalVOC-SP",
+        "config": "configs/pascalvoc_sp_full.json",
+        "dataset": "PascalVOC-SP",
+        "purpose": "registered paper-scale configuration; execution produces the results"
+      },
+      "pilot": {
+        "benchmark_dataset": "PascalVOC-SP",
+        "config": "configs/pascalvoc_sp_pilot.json",
+        "dataset": "PascalVOC-SP",
+        "purpose": "official data with reduced model and development computation"
+      },
+      "smoke": {
+        "benchmark_dataset": "PascalVOC-SP",
+        "config": "configs/pascalvoc_sp_smoke.json",
+        "dataset": "synthetic",
+        "purpose": "small task-specific software fixture"
+      }
+    },
+    "Peptides-func": {
+      "full": {
+        "benchmark_dataset": "Peptides-func",
+        "config": "configs/peptides_func_full.json",
+        "dataset": "Peptides-func",
+        "purpose": "registered paper-scale configuration; execution produces the results"
+      },
+      "pilot": {
+        "benchmark_dataset": "Peptides-func",
+        "config": "configs/peptides_func_pilot.json",
+        "dataset": "Peptides-func",
+        "purpose": "official data with reduced model and development computation"
+      },
+      "smoke": {
+        "benchmark_dataset": "Peptides-func",
+        "config": "configs/peptides_func_smoke.json",
+        "dataset": "synthetic",
+        "purpose": "small task-specific software fixture"
+      }
+    },
+    "Roman-empire": {
+      "full": {
+        "benchmark_dataset": "Roman-empire",
+        "config": "configs/roman_empire_full.json",
+        "dataset": "Roman-empire",
+        "purpose": "registered paper-scale configuration; execution produces the results"
+      },
+      "pilot": {
+        "benchmark_dataset": "Roman-empire",
+        "config": "configs/roman_empire_pilot.json",
+        "dataset": "Roman-empire",
+        "purpose": "official data with reduced model and development computation"
+      },
+      "smoke": {
+        "benchmark_dataset": "Roman-empire",
+        "config": "configs/roman_empire_smoke.json",
+        "dataset": "synthetic",
+        "purpose": "small task-specific software fixture"
+      }
+    },
+    "ogbn-arxiv": {
+      "full": {
+        "benchmark_dataset": "ogbn-arxiv",
+        "config": "configs/arxiv_full.json",
+        "dataset": "ogbn-arxiv",
+        "purpose": "registered paper-scale configuration; execution produces the results"
+      },
+      "pilot": {
+        "benchmark_dataset": "ogbn-arxiv",
+        "config": "configs/arxiv_pilot.json",
+        "dataset": "ogbn-arxiv",
+        "purpose": "official data with reduced model and development computation"
+      },
+      "smoke": {
+        "benchmark_dataset": "ogbn-arxiv",
+        "config": "configs/arxiv_smoke.json",
+        "dataset": "synthetic",
+        "purpose": "small task-specific software fixture"
+      }
+    },
+    "ogbn-products": {
+      "full": {
+        "benchmark_dataset": "ogbn-products",
+        "config": "configs/products_full.json",
+        "dataset": "ogbn-products",
+        "purpose": "registered paper-scale configuration; execution produces the results"
+      },
+      "pilot": {
+        "benchmark_dataset": "ogbn-products",
+        "config": "configs/products_pilot.json",
+        "dataset": "ogbn-products",
+        "purpose": "official data with reduced model and development computation"
+      },
+      "smoke": {
+        "benchmark_dataset": "ogbn-products",
+        "config": "configs/products_smoke.json",
+        "dataset": "synthetic",
+        "purpose": "small task-specific software fixture"
+      }
+    },
+    "ogbn-proteins": {
+      "full": {
+        "benchmark_dataset": "ogbn-proteins",
+        "config": "configs/proteins_full.json",
+        "dataset": "ogbn-proteins",
+        "purpose": "registered paper-scale configuration; execution produces the results"
+      },
+      "pilot": {
+        "benchmark_dataset": "ogbn-proteins",
+        "config": "configs/proteins_pilot.json",
+        "dataset": "ogbn-proteins",
+        "purpose": "official data with reduced model and development computation"
+      },
+      "smoke": {
+        "benchmark_dataset": "ogbn-proteins",
+        "config": "configs/proteins_smoke.json",
+        "dataset": "synthetic",
+        "purpose": "small task-specific software fixture"
+      }
+    }
+  },
+  "published_numerical_results_reproduced": false,
+  "release_kind": "research_implementation",
+  "schema_version": "2.0",
+  "scope_notes": [
+    "Nine core policy families and the eight-stage lifecycle are available on all seven datasets.",
+    "Each task uses its declared loss, prediction axis and official metric.",
+    "Independent graph episodes reset predictor/controller/anchor state; graph-level predictions pool within one graph.",
+    "Roman-empire supports all ten official masks and a separate split-summary campaign.",
+    "Synthetic checks establish software behavior, not benchmark performance.",
+    "The budget-matched arms E3-E6 (including the budget-aware rule q_B) and the pinned-upstream driver of the retrained external baselines are implemented in cm_experiments/ and run outside the eight-stage lifecycle; their outputs enter as record sets through scripts/export_records.py. The upstream baseline code and its task adapters are pinned by commit in each study plan, not bundled.",
+    "Manuscript agreement requires explicit bindings to the corresponding result-producing artifacts.",
+    "The manuscript's registered constants and reported results are kept as transcriptions in paper/ and verified against the executable registry and the full profiles by scripts/check_paper_constants.py.",
+    "The implementation choices the manuscript leaves open are recorded in paper/IMPLEMENTATION_NOTES.md."
+  ],
+  "shell_entrypoints": {
+    "COCO-SP": "run_cross_morse_coco_sp.sh",
+    "PascalVOC-SP": "run_cross_morse_pascalvoc_sp.sh",
+    "Peptides-func": "run_cross_morse_peptides_func.sh",
+    "Roman-empire": "run_cross_morse_roman_empire.sh",
+    "ogbn-arxiv": "run_cross_morse_arxiv.sh",
+    "ogbn-products": "run_cross_morse_products.sh",
+    "ogbn-proteins": "run_cross_morse_proteins.sh"
+  },
+  "task_specific_cpu_smoke_verified": [
+    "Peptides-func"
+  ],
+  "test_only_datasets": [
+    "synthetic"
+  ],
+  "validated_runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+  "validation_date_utc": "2026-11-02",
+  "validation_record": "docs/VALIDATION.json"
+}

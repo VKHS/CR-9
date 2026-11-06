@@ -1,0 +1,8 @@
+{
+  "fit/full/controller.pt": "9bbf435dde4482a82489aa4cee9ea6ef1b323fe7434527dd90ffab0abca6d2e2",
+  "fit/lean/controller.pt": "f5c46e63adf799477a2a2f04aa26eace181c4d2c913e4ff00c5d9c5fe8133fee",
+  "train/plant_seed1_best.pt": "d4a17ff736ec730e250835756a3434530543613e8c4da003150734f5095b0476",
+  "train/plant_seed2_best.pt": "621c2f0cb2eb79962166598b12d7fe6a603b27a1c40fb76a619aaca450a535c7",
+  "train/q0_seed1_best.pt": "3e8c5eec06e6197abf9835e3ae03f0f6b17a0e3f7d77fc2aa64cc6eed56ba9a4",
+  "train/q0_seed2_best.pt": "d9b41cc94550e0f4649bfb93d2542bf5b7d4c1dd0bb2bb846827f1ec91f062af"
+}

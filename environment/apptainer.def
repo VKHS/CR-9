@@ -1,0 +1,35 @@
+# Apptainer/Singularity CPU recipe using the recorded Python package versions.
+# The base image and operating-system packages are not byte-pinned.
+#
+#   apptainer build cross-morse-verify.sif environment/apptainer.def
+#   apptainer exec --bind "$PWD":/opt/cross-morse --pwd /opt/cross-morse cross-morse-verify.sif make verify PYTHON=python
+#
+# The definition installs the recorded CPU environment on the Python 3.12 image the lock file was
+# observed with. Bind the checkout at run time; the image carries no source, data or run archive,
+# so one image serves every commit. GPU execution on the cluster follows docs/HPC.md instead.
+Bootstrap: docker
+From: python:3.12-slim
+
+%files
+    environment/requirements-cpu.lock /opt/env/requirements-cpu.lock
+    environment/observed_environment.json /opt/env/observed_environment.json
+    environment/check_environment.py /opt/env/check_environment.py
+
+%post
+    apt-get update && apt-get install -y --no-install-recommends make git ca-certificates libcairo2 && rm -rf /var/lib/apt/lists/*
+    python -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu \
+        "$(python -B /opt/env/check_environment.py --spec-dir /opt/env --bootstrap)"
+    python -m pip install --no-cache-dir -r /opt/env/requirements-cpu.lock
+    python -m pip check
+
+%environment
+    export PYTHONDONTWRITEBYTECODE=1
+    export OMP_NUM_THREADS=2
+    export OPENBLAS_NUM_THREADS=2
+    export MKL_NUM_THREADS=2
+
+%test
+    python -B /opt/env/check_environment.py --spec-dir /opt/env
+
+%runscript
+    exec make verify PYTHON=python "$@"

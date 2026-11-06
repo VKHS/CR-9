@@ -1,0 +1,17 @@
+{
+ "files": {
+  "code/SOURCE.json": "6ab7f3d1576d542a1eec4c2c153bfc929e1e33f6e09743c4238060f62a68144b",
+  "provenance.json": "a57aecd8b7772f79f7876d3f2a182a0e637d08827adf6973881787129ec8d887",
+  "raw/arxiv/config.json": "a1fd493604e19f78b6fbb1b0a7f09d287f14354ada4054e777b677b6ac7d08cc",
+  "raw/arxiv/deployed_candidate.json": "76adac34ed358cdfb11afa5518c96c84988f426154a7b0447e4f63ce5c9260b6",
+  "raw/arxiv/results_summary.json": "50c86db4512943aa786beb2922c1204543bec119423bea468cc2f7c0a871750e",
+  "raw/arxiv/sensor_parameters.json": "19aed1f891bef37873d6904d9a4ecbceaf8ba5f3afa80caea18263d5f5e4beb9",
+  "raw/peptides_func/config.json": "bed1ae3f8e9467c5d32e5a0ede9e3577eb412dab4ccd3ffd300f3262602970ca",
+  "raw/peptides_func/deployed_candidate.json": "e96435c2d845c5b96b4b3714c2a5d28cd690a4f9873f1f567b26b1bd0880ffa3",
+  "raw/peptides_func/results_summary.json": "e972cd01748bc08b278903abec0024f8284d76ecd9f04a801b5ee90f90ea4d43",
+  "raw/peptides_func/sensor_parameters.json": "4531a345b65741733c47439043c45c4c0191497c1523b85ff21b2c40175f3e0f",
+  "summary.csv": "0cd9f1cc023302794e9b247bba2566d31465170c39e032178919f331dddd07c7"
+ },
+ "schema": "cross-morse-records-manifest-1",
+ "set": "sensor_parameters"
+}

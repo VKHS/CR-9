@@ -1,0 +1,89 @@
+{
+  "schema_version": "result-binding-1",
+  "status": "pending_run",
+  "_how_to_complete": "Fill reported_value from the sealed run-derived tables of the run named in run_identities, declare the relationship to the manuscript and set status to author_completed after checking the mapping; manuscript_value is the printed value against which make compare-runs checks the run. compare_with_manuscript.py --emit-binding writes a completed declaration from a run directory.",
+  "manuscript_identifier": "CROSS-MORSE manuscript, separated-data protocol",
+  "relationship_to_manuscript": null,
+  "run_identities": {
+    "source_sha256": null,
+    "config_sha256": null,
+    "unit_sha256": null,
+    "dataset": "ogbn-arxiv"
+  },
+  "expected_profile": "full",
+  "expected_config": "configs/arxiv_full.json",
+  "results": [
+    {
+      "manuscript_location": "Main Table 1, ogbn-arxiv, final effect over qC: paired CE (nats)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/mean",
+      "reported_value": null,
+      "absolute_tolerance": 5e-05,
+      "manuscript_value": -0.0045
+    },
+    {
+      "manuscript_location": "Main Table 1, ogbn-arxiv, lower end of the 95% paired-loss interval",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/lower",
+      "reported_value": null,
+      "absolute_tolerance": 5e-05,
+      "manuscript_value": -0.0075
+    },
+    {
+      "manuscript_location": "Main Table 1, ogbn-arxiv, upper end of the 95% paired-loss interval",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_loss/upper",
+      "reported_value": null,
+      "absolute_tolerance": 5e-05,
+      "manuscript_value": -0.0015
+    },
+    {
+      "manuscript_location": "Main Table 1, ogbn-arxiv, official accuracy gain over qC (percentage points)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/mean",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 0.07
+    },
+    {
+      "manuscript_location": "Main Table 1, ogbn-arxiv, lower end of the 95% official-gain interval (pp)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/lower",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 0.01
+    },
+    {
+      "manuscript_location": "Main Table 1, ogbn-arxiv, upper end of the 95% official-gain interval (pp)",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/paired_qD_minus_qC_metric_pp/upper",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 0.13
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, ogbn-arxiv, 'radius (deployed)' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qD/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 73.22
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, ogbn-arxiv, 'best fixed sequence (qC)' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qC/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 73.15
+    },
+    {
+      "manuscript_location": "Supplementary Table S15, ogbn-arxiv, 'full-depth plant' official test score",
+      "artifact": "final/results_summary.json",
+      "json_pointer": "/models/qN/metric_percent",
+      "reported_value": null,
+      "absolute_tolerance": 0.005,
+      "manuscript_value": 72.93
+    }
+  ]
+}

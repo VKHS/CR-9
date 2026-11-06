@@ -1,0 +1,18 @@
+% Split, seed and environment manifest
+% generated from 2 run(s) [examples]; runtime source b5005fc53d31; runs: ogbn-arxiv:arxiv, Peptides-func:peptides_func
+% Do not edit: regenerate with `make tables`.
+% SYNTHETIC SOFTWARE EXAMPLES: these values are not benchmark results.
+\begin{table}[t]
+\centering
+\small
+\caption{Split, seed and environment manifest (synthetic example runs). Every value is read from the sealed run: prepared/metadata.json (split rule, sizes and role hashes), config.json (seeds), final/results_summary.json (ensemble members), the decision records (bootstrap seeds), environment.json and run_state.json. The full role membership arrays are prepared/splits.npz; manifests/ holds the extracted per-run manifests.}
+\label{tab:M1}
+\begin{tabular}{lllllllllllll}
+\hline
+Dataset & profile & data source & split unit & split sizes (fit/explore/select/confirm/admit/test) & partition seed & training seeds & ensemble seeds q\_C / q\_D & bootstrap seeds (select/admit/final) & Python / Torch / CUDA & device & source identity & config identity \\
+\hline
+ogbn-arxiv & smoke & synthetic\_fixture & node & 57/19/10/5/32/32 & 314159 & [1, 2] & [1, 2] / [1, 2] & 314163 / 314165 / 314166 & 3.12.14 / 2.10.0+cpu / None & cpu & b5005fc53d31dfcb & ffdcdec3ad654402 \\
+Peptides-func & smoke & synthetic\_fixture & graph & 28/10/5/2/16/16 & 314159 & [1, 2] & [1, 2] / [1, 2] & 314163 / 314165 / 314166 & 3.12.14 / 2.10.0+cpu / None & cpu & b5005fc53d31dfcb & 0c0875b4f7e8cd92 \\
+\hline
+\end{tabular}
+\end{table}

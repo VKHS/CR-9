@@ -1,0 +1,43 @@
+{
+ "schema": "cross-morse-records-index-1",
+ "sets": [
+  {
+   "experiment": "per-input nominal execution time (Supplementary Table S23b)",
+   "files": 11,
+   "manifest_sha256": "12a088226adaa656e3ff089a51a49f65bdae68db24e5627bccddfbac8b5d7ea6",
+   "manuscript_tables": [
+    "Supplementary Table S23b"
+   ],
+   "produced_by": "scripts/export_records.py from-runs --set nominal_time on 2 sealed run(s): arxiv, peptides_func",
+   "rows": 2,
+   "set": "nominal_time",
+   "synthetic": true,
+   "verified": true
+  },
+  {
+   "experiment": "executed sensor parameters (Supplementary Table S6c)",
+   "files": 11,
+   "manifest_sha256": "1d2f9b61173dfcafefe194de4a1c0ba137598bad48fde86d784a6eeff68d4931",
+   "manuscript_tables": [
+    "Supplementary Table S6c"
+   ],
+   "produced_by": "scripts/export_records.py from-runs --set sensor_parameters on 2 sealed run(s): arxiv, peptides_func",
+   "rows": 8,
+   "set": "sensor_parameters",
+   "synthetic": true,
+   "verified": true
+  }
+ ],
+ "sets_defined": [
+  "baselines",
+  "factorials",
+  "negative_controls",
+  "input_gate",
+  "nominal_time",
+  "sensor_parameters",
+  "cross_backbone",
+  "ensemble_grid",
+  "inserted_site",
+  "budget_matched"
+ ]
+}

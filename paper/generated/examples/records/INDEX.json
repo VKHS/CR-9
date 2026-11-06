@@ -1,0 +1,6 @@
+{
+ "record_tables": [
+  "nominal_time",
+  "sensor_parameters"
+ ]
+}

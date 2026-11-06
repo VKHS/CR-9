@@ -1,0 +1,19 @@
+{
+  "config_sha256": "0c0875b4f7e8cd925798cea3096169894bc619e8af63dff40217e1076210784e",
+  "dataset": "synthetic",
+  "implementation": "CROSS-MORSE",
+  "last_complete_stage": "evaluate",
+  "profile": "smoke",
+  "scientific_run": false,
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "status": "COMPLETE",
+  "task": {
+    "dataset": "Peptides-func",
+    "metric": "ap",
+    "num_outputs": 4,
+    "prediction_level": "graph",
+    "task_type": "multilabel"
+  },
+  "test_labels_accessed": true,
+  "version": "1.0.0"
+}

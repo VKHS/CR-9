@@ -1,0 +1,2495 @@
+{
+  "schema": "cross-morse-display-manifest-1",
+  "review_date": "2026-11-06",
+  "review_scope": "AI-assisted contextual inventory of every numbered table and figure in both supplied PDFs. Presence in this inventory records a support path, not deposited experimental evidence or an exact-artwork reproduction.",
+  "documents": {
+    "main": {
+      "sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+      "byte_size": 5498468,
+      "pages": 16
+    },
+    "supplementary": {
+      "sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
+      "byte_size": 12252216,
+      "pages": 38
+    }
+  },
+  "registry_sha256": {
+    "registered_constants.json": "d783497b4d129a3268fe223e07459fb001d31f2b3e9ce78c61db8d8499427dbe",
+    "reported_results.json": "042c01a5c8b514ef49de983869b7fae986d60e82fb0c76c86aa3d8f79e678cf5"
+  },
+  "displays": [
+    {
+      "kind": "figure",
+      "label": "Figure 1",
+      "pages": [
+        2
+      ],
+      "id": "main:Figure 1",
+      "source": "main",
+      "title": "Frozen predictor and policy lifecycle",
+      "registry_groups": [],
+      "implementation": [
+        "scripts/draw_diagrams.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make diagrams-check",
+        "make theory"
+      ],
+      "coverage": "method_illustration",
+      "required_evidence": "Method definitions and supported-interface documentation; repository diagrams illustrate the method and are not asserted to be the paper artwork.",
+      "notes": [],
+      "related_tables": [],
+      "evidence_kind": "explanatory"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure 2",
+      "pages": [
+        9
+      ],
+      "id": "main:Figure 2",
+      "source": "main",
+      "title": "Measured evidence and analytical statements",
+      "registry_groups": [
+        "supplementary_table_S20_selection_theorem_instantiation",
+        "supplementary_table_S21_action_gap_audit",
+        "supplementary_table_S22_trajectory_tube_audit",
+        "supplementary_table_S12_selection_ledger",
+        "supplementary_table_S12c_selection_rule_audit"
+      ],
+      "implementation": [
+        "cm_theory/control.py",
+        "cm_theory/selection.py",
+        "cm_theory/stability.py",
+        "cross_morse/policies.py",
+        "paper/build/figures.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper"
+      ],
+      "coverage": "partial_panels",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [
+        "F3 draws related selection geometry using the full eligible candidate ledger for panel 2c; the complete printed figure requires its original panel data and design."
+      ],
+      "related_tables": [
+        "supplementary:Table S20",
+        "supplementary:Table S21",
+        "supplementary:Table S22",
+        "supplementary:Table S28",
+        "supplementary:Table S28b",
+        "supplementary:Table S12",
+        "supplementary:Table S12c"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure 3",
+      "pages": [
+        10
+      ],
+      "id": "main:Figure 3",
+      "source": "main",
+      "title": "Feedback and replanning identification",
+      "registry_groups": [
+        "supplementary_table_S14_mechanism_contrasts_submitted_protocol",
+        "supplementary_table_S14b_separated_data_sensitivity",
+        "supplementary_table_S14b_unchanged_contrasts"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py",
+        "scripts/check_si_identities.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S14",
+        "supplementary:Table S14b"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure 4",
+      "pages": [
+        11
+      ],
+      "id": "main:Figure 4",
+      "source": "main",
+      "title": "Ablations, ensemble response and resource accounting",
+      "registry_groups": [
+        "supplementary_table_S16_arxiv_factorial",
+        "supplementary_table_S16b_pascal_factorial",
+        "supplementary_table_S26b_ensemble_law_and_break_even",
+        "supplementary_table_S41_qualification_cost_components"
+      ],
+      "implementation": [
+        "cm_campaigns/accounting.py",
+        "cm_theory/economics.py",
+        "cm_theory/factorial.py",
+        "records/specs.json",
+        "paper/build/figures.py"
+      ],
+      "record_sets": [
+        "ensemble_grid",
+        "factorials"
+      ],
+      "commands": [
+        "make paper"
+      ],
+      "coverage": "partial_panels",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [
+        "F1 reconstructs effect versus overhead for panel 4d; other factorial and ensemble panels require their original analyses."
+      ],
+      "related_tables": [
+        "supplementary:Table S16",
+        "supplementary:Table S16b",
+        "supplementary:Table S26",
+        "supplementary:Table S26b",
+        "supplementary:Table S41"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure 5",
+      "pages": [
+        12
+      ],
+      "id": "main:Figure 5",
+      "source": "main",
+      "title": "Deployment effect and cost",
+      "registry_groups": [
+        "supplementary_table_S15_method_comparison",
+        "supplementary_table_S23_assurance_and_expected_compute",
+        "supplementary_table_S23b_nominal_execution_time_and_amortization",
+        "supplementary_table_S44_per_input_cost_model"
+      ],
+      "implementation": [
+        "cm_campaigns/timing.py",
+        "cm_experiments/upstream.py",
+        "cm_theory/economics.py",
+        "scripts/check_paper_constants.py",
+        "paper/build/figures.py"
+      ],
+      "record_sets": [
+        "baselines",
+        "input_gate",
+        "nominal_time"
+      ],
+      "commands": [
+        "make paper"
+      ],
+      "coverage": "partial_panels",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [
+        "F2 is a partial internal-method map using absolute official scores and serial costs. Panel 5a additionally uses external baselines and gain/cost normalization; the complete panel and other cost-model panels require their original data, assumptions and generator."
+      ],
+      "related_tables": [
+        "supplementary:Table S15",
+        "supplementary:Table S23",
+        "supplementary:Table S23b",
+        "supplementary:Table S44"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure 6",
+      "pages": [
+        13
+      ],
+      "id": "main:Figure 6",
+      "source": "main",
+      "title": "Budget-matched comparison",
+      "registry_groups": [
+        "supplementary_table_S46_budget_matched_frontier",
+        "supplementary_table_S46b_arm_level_outcomes",
+        "supplementary_table_S47_decision_boundary_and_power"
+      ],
+      "implementation": [
+        "cm_campaigns/arm_campaign.py",
+        "cm_experiments/execution.py",
+        "cm_theory/economics.py",
+        "cm_theory/inference.py"
+      ],
+      "record_sets": [
+        "budget_matched"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S46",
+        "supplementary:Table S46b",
+        "supplementary:Table S47"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table 1",
+      "pages": [
+        10
+      ],
+      "id": "main:Table 1",
+      "source": "main",
+      "title": "Policy and paired test outcomes",
+      "registry_groups": [
+        "main_table_1_policy_and_deployment_ledger"
+      ],
+      "implementation": [
+        "paper/build/tables.py",
+        "scripts/check_decision_consistency.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [
+        "Peptides radius measurements are an evaluated arm; the printed Holm value 0.070 does not pass 0.05, so the registered lifecycle returns qC on those inputs."
+      ],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table 2",
+      "pages": [
+        11
+      ],
+      "id": "main:Table 2",
+      "source": "main",
+      "title": "Predictive gains and serial-work accounting",
+      "registry_groups": [
+        "main_table_2_gain_and_cost_ledger"
+      ],
+      "implementation": [
+        "paper/build/tables.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S1",
+      "pages": [
+        31
+      ],
+      "id": "supplementary:Figure S1",
+      "source": "supplementary",
+      "title": "Integrated decision surface",
+      "registry_groups": [
+        "supplementary_table_S23_assurance_and_expected_compute"
+      ],
+      "implementation": [
+        "cm_theory/economics.py",
+        "paper/build/tables.py"
+      ],
+      "record_sets": [
+        "input_gate"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S48",
+        "supplementary:Table S23"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S2",
+      "pages": [
+        31
+      ],
+      "id": "supplementary:Figure S2",
+      "source": "supplementary",
+      "title": "Runtime and memory scaling",
+      "registry_groups": [
+        "supplementary_table_S15b_per_rerun_resource_ledger",
+        "supplementary_table_S23b_nominal_execution_time_and_amortization"
+      ],
+      "implementation": [
+        "cm_campaigns/accounting.py",
+        "cm_campaigns/timing.py",
+        "scripts/check_paper_constants.py"
+      ],
+      "record_sets": [
+        "baselines",
+        "nominal_time"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S15b",
+        "supplementary:Table S23b"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S3",
+      "pages": [
+        31,
+        32
+      ],
+      "id": "supplementary:Figure S3",
+      "source": "supplementary",
+      "title": "Budget-matched per-dataset frontiers",
+      "registry_groups": [
+        "supplementary_table_S46_budget_matched_frontier",
+        "supplementary_table_S46b_arm_level_outcomes"
+      ],
+      "implementation": [
+        "cm_campaigns/arm_campaign.py",
+        "cm_experiments/execution.py"
+      ],
+      "record_sets": [
+        "budget_matched"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S46",
+        "supplementary:Table S46b"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S4",
+      "pages": [
+        32
+      ],
+      "id": "supplementary:Figure S4",
+      "source": "supplementary",
+      "title": "Method score and cost maps",
+      "registry_groups": [
+        "supplementary_table_S15_method_comparison",
+        "supplementary_table_S15b_per_rerun_resource_ledger"
+      ],
+      "implementation": [
+        "cm_campaigns/accounting.py",
+        "cm_campaigns/timing.py",
+        "cm_experiments/upstream.py"
+      ],
+      "record_sets": [
+        "baselines"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S15",
+        "supplementary:Table S15b"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S5",
+      "pages": [
+        32
+      ],
+      "id": "supplementary:Figure S5",
+      "source": "supplementary",
+      "title": "Horizon and beam sensitivity",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/policies.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S29"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S6",
+      "pages": [
+        32
+      ],
+      "id": "supplementary:Figure S6",
+      "source": "supplementary",
+      "title": "Action-cost and sensing-work model",
+      "registry_groups": [
+        "supplementary_table_S6c_sensing_cost_identity"
+      ],
+      "implementation": [
+        "cm_theory/operators.py",
+        "cross_morse/core.py",
+        "scripts/check_paper_constants.py"
+      ],
+      "record_sets": [
+        "sensor_parameters"
+      ],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S6",
+        "supplementary:Table S6b",
+        "supplementary:Table S6c"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S7",
+      "pages": [
+        32
+      ],
+      "id": "supplementary:Figure S7",
+      "source": "supplementary",
+      "title": "Acquisition gate",
+      "registry_groups": [
+        "supplementary_table_S21_action_gap_audit",
+        "supplementary_table_S34_budget_aware_rule"
+      ],
+      "implementation": [
+        "cm_experiments/budget.py",
+        "cross_morse/policies.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S21",
+        "supplementary:Table S34"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S8",
+      "pages": [
+        32
+      ],
+      "id": "supplementary:Figure S8",
+      "source": "supplementary",
+      "title": "Clipping moments and uncertainty units",
+      "registry_groups": [
+        "supplementary_table_S13_independent_graph_admission"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S13"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S9",
+      "pages": [
+        33
+      ],
+      "id": "supplementary:Figure S9",
+      "source": "supplementary",
+      "title": "Mechanism contrasts and size sensitivity",
+      "registry_groups": [
+        "supplementary_table_S14_mechanism_contrasts_submitted_protocol",
+        "supplementary_table_S14b_separated_data_sensitivity",
+        "supplementary_table_S14b_unchanged_contrasts"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py",
+        "scripts/check_si_identities.py",
+        "paper/build/figures.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper"
+      ],
+      "coverage": "partial_panels",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [
+        "F6 reconstructs available local mechanism contrasts; joint-family and sensitivity panels require the complete S14 sources."
+      ],
+      "related_tables": [
+        "supplementary:Table S14",
+        "supplementary:Table S14b"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S10",
+      "pages": [
+        33
+      ],
+      "id": "supplementary:Figure S10",
+      "source": "supplementary",
+      "title": "Sensing-cost identities",
+      "registry_groups": [
+        "supplementary_table_S23_assurance_and_expected_compute",
+        "supplementary_table_S6c_sensing_cost_identity"
+      ],
+      "implementation": [
+        "cm_theory/economics.py",
+        "cross_morse/core.py",
+        "scripts/check_paper_constants.py"
+      ],
+      "record_sets": [
+        "input_gate",
+        "sensor_parameters"
+      ],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S6c",
+        "supplementary:Table S23"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S11",
+      "pages": [
+        33
+      ],
+      "id": "supplementary:Figure S11",
+      "source": "supplementary",
+      "title": "Terminal-site budget ledger",
+      "registry_groups": [],
+      "implementation": [
+        "cm_experiments/budget.py",
+        "cm_theory/budget.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
+      "notes": [],
+      "related_tables": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S12",
+      "pages": [
+        34
+      ],
+      "id": "supplementary:Figure S12",
+      "source": "supplementary",
+      "title": "Comparison-test power",
+      "registry_groups": [
+        "supplementary_table_S42_power_of_budget_matched_test"
+      ],
+      "implementation": [
+        "cm_theory/inference.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S42"
+      ],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S13",
+      "pages": [
+        34
+      ],
+      "id": "supplementary:Figure S13",
+      "source": "supplementary",
+      "title": "Application settings and schedule adequacy",
+      "registry_groups": [
+        "supplementary_table_S30_oracle_dispersion"
+      ],
+      "implementation": [
+        "cm_theory/economics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S30",
+        "supplementary:Table S33"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S14",
+      "pages": [
+        34
+      ],
+      "id": "supplementary:Figure S14",
+      "source": "supplementary",
+      "title": "Depth diagnostics",
+      "registry_groups": [
+        "supplementary_table_S4_target_qualification"
+      ],
+      "implementation": [
+        "cross_morse/pipeline.py",
+        "paper/build/figures.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original paired loss and source-alignment effects, selected-policy effects across depth, supported intervention depths and transport-phase data, with their generating script. The entry-stage loss diagnostic in F4 does not reconstruct these printed panels.",
+      "notes": [
+        "F4 plots recorded nominal validation loss against depth at entry. It is a related diagnostic, not the selected-policy paired loss effect in panel S14b or an exact builder for any printed S14 panel."
+      ],
+      "related_tables": [
+        "supplementary:Table S4"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S15",
+      "pages": [
+        35
+      ],
+      "id": "supplementary:Figure S15",
+      "source": "supplementary",
+      "title": "Spectral fingerprint, action range and headroom",
+      "registry_groups": [
+        "supplementary_table_S4_target_qualification",
+        "main_table_1_policy_and_deployment_ledger"
+      ],
+      "implementation": [
+        "cm_theory/operators.py",
+        "cross_morse/core.py",
+        "paper/build/tables.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check",
+        "make scientific-audit"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Registered action constants for panels a-c, plus original per-input oracle search and complete-policy effects for the headroom quantities in panel d. Theory checks verify operator identities; original plotted data and the generator remain required for the complete figure.",
+      "notes": [
+        "Panels a-c are exact registered action calculations. Panel d uses the measured oracle upper confidence bound and deployed policy effect; its headroom denominator is a confidence bound, not the oracle point estimate."
+      ],
+      "related_tables": [
+        "supplementary:Table S6",
+        "supplementary:Table S6b",
+        "supplementary:Table S4",
+        "main:Table 1"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S16",
+      "pages": [
+        35
+      ],
+      "id": "supplementary:Figure S16",
+      "source": "supplementary",
+      "title": "Reliability, harm and fallback",
+      "registry_groups": [
+        "supplementary_table_S37_input_fallback_counts"
+      ],
+      "implementation": [
+        "cross_morse/core.py",
+        "cross_morse/learning.py",
+        "cross_morse/statistics.py",
+        "records/specs.json"
+      ],
+      "record_sets": [
+        "input_gate",
+        "negative_controls"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S8",
+        "supplementary:Table S19",
+        "supplementary:Table S37"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S17",
+      "pages": [
+        36
+      ],
+      "id": "supplementary:Figure S17",
+      "source": "supplementary",
+      "title": "Analytical and statistical audits",
+      "registry_groups": [
+        "supplementary_table_S13_independent_graph_admission",
+        "supplementary_table_S16_arxiv_factorial",
+        "supplementary_table_S20_selection_theorem_instantiation"
+      ],
+      "implementation": [
+        "cm_theory/control.py",
+        "cm_theory/factorial.py",
+        "cm_theory/selection.py",
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [
+        "factorials"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S13",
+        "supplementary:Table S16",
+        "supplementary:Table S20",
+        "supplementary:Table S28"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S18",
+      "pages": [
+        37
+      ],
+      "id": "supplementary:Figure S18",
+      "source": "supplementary",
+      "title": "Inserted-site attribution and separated protocols",
+      "registry_groups": [
+        "supplementary_table_S14_mechanism_contrasts_submitted_protocol",
+        "supplementary_table_S14b_separated_data_sensitivity",
+        "supplementary_table_S14b_unchanged_contrasts",
+        "supplementary_table_S45_inserted_site_attribution"
+      ],
+      "implementation": [
+        "cross_morse/core.py",
+        "cross_morse/statistics.py",
+        "scripts/check_si_identities.py"
+      ],
+      "record_sets": [
+        "inserted_site"
+      ],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S14",
+        "supplementary:Table S14b",
+        "supplementary:Table S45"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S19",
+      "pages": [
+        37
+      ],
+      "id": "supplementary:Figure S19",
+      "source": "supplementary",
+      "title": "Guarantee scope and supported models",
+      "registry_groups": [
+        "main_table_1_policy_and_deployment_ledger",
+        "supplementary_table_S13_independent_graph_admission"
+      ],
+      "implementation": [
+        "cross_morse/core.py",
+        "cross_morse/split_contract.py",
+        "cross_morse/statistics.py",
+        "paper/build/tables.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make diagrams-check",
+        "make theory",
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Method and guarantee definitions for panels a/c, plus original per-dataset admission statistics and frozen policy outcomes for panel b. Protocol and theory checks do not reconstruct those measured outcomes; the complete figure needs its original data and artwork generator.",
+      "notes": [
+        "Panel b reports dataset-specific admission outcomes, including the distinction between descriptive single-graph criteria and independent-graph admission. The figure is not solely a method illustration."
+      ],
+      "related_tables": [
+        "supplementary:Table S1",
+        "supplementary:Table S5b",
+        "supplementary:Table S13",
+        "supplementary:Table S48"
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "figure",
+      "label": "Figure S20",
+      "pages": [
+        38
+      ],
+      "id": "supplementary:Figure S20",
+      "source": "supplementary",
+      "title": "Break-even, resampling and seed-design power",
+      "registry_groups": [
+        "supplementary_table_S26b_ensemble_law_and_break_even",
+        "supplementary_table_S42_power_of_budget_matched_test",
+        "supplementary_table_S47_decision_boundary_and_power"
+      ],
+      "implementation": [
+        "cm_theory/economics.py",
+        "cm_theory/inference.py"
+      ],
+      "record_sets": [
+        "ensemble_grid"
+      ],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
+      "notes": [],
+      "related_tables": [
+        "supplementary:Table S26b",
+        "supplementary:Table S42",
+        "supplementary:Table S47"
+      ],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S1",
+      "pages": [
+        1,
+        2
+      ],
+      "id": "supplementary:Table S1",
+      "source": "supplementary",
+      "title": "Dataset statistical units and admission criteria",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/statistics.py",
+        "cross_morse/split_contract.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S2",
+      "pages": [
+        2
+      ],
+      "id": "supplementary:Table S2",
+      "source": "supplementary",
+      "title": "Data roles, folds, seeds and decisions",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/split_contract.py",
+        "manifests/registered/INDEX.json"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S3",
+      "pages": [
+        2
+      ],
+      "id": "supplementary:Table S3",
+      "source": "supplementary",
+      "title": "Target-regime qualification contract",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/pipeline.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S4",
+      "pages": [
+        2
+      ],
+      "id": "supplementary:Table S4",
+      "source": "supplementary",
+      "title": "Target-qualification observations",
+      "registry_groups": [
+        "supplementary_table_S4_target_qualification"
+      ],
+      "implementation": [
+        "cross_morse/pipeline.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S5",
+      "pages": [
+        3
+      ],
+      "id": "supplementary:Table S5",
+      "source": "supplementary",
+      "title": "Frozen-model inventory and training cost",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/core.py",
+        "scripts/model_inventory.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make model-inventory",
+        "make compare-runs"
+      ],
+      "coverage": "inventory_check",
+      "required_evidence": "Archived model inventories, named checkpoint tensors, effective widths, precision and original training/accounting logs; current parameter counts identify the released configuration.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S5b",
+      "pages": [
+        3,
+        4
+      ],
+      "id": "supplementary:Table S5b",
+      "source": "supplementary",
+      "title": "Native and inserted transport sites",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/core.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S5c",
+      "pages": [
+        4
+      ],
+      "id": "supplementary:Table S5c",
+      "source": "supplementary",
+      "title": "Nominal identity and site accounting",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/core.py",
+        "tests/test_theory_runtime_parity.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S5d",
+      "pages": [
+        3
+      ],
+      "id": "supplementary:Table S5d",
+      "source": "supplementary",
+      "title": "Executable model inventory and reconciliation",
+      "registry_groups": [
+        "supplementary_table_S5d_model_inventory"
+      ],
+      "implementation": [
+        "scripts/model_inventory.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make model-inventory",
+        "make compare-runs"
+      ],
+      "coverage": "inventory_check",
+      "required_evidence": "Archived model inventories, named checkpoint tensors, effective widths, precision and original training/accounting logs; current parameter counts identify the released configuration.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S6",
+      "pages": [
+        4
+      ],
+      "id": "supplementary:Table S6",
+      "source": "supplementary",
+      "title": "Ten-action registry and per-step cost",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/core.py",
+        "cm_theory/operators.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S6b",
+      "pages": [
+        5
+      ],
+      "id": "supplementary:Table S6b",
+      "source": "supplementary",
+      "title": "Action range, reach and product identities",
+      "registry_groups": [],
+      "implementation": [
+        "cm_theory/operators.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S6c",
+      "pages": [
+        5
+      ],
+      "id": "supplementary:Table S6c",
+      "source": "supplementary",
+      "title": "Sensing-work identity and executed settings",
+      "registry_groups": [
+        "supplementary_table_S6c_sensing_cost_identity"
+      ],
+      "implementation": [
+        "cross_morse/core.py",
+        "scripts/check_paper_constants.py"
+      ],
+      "record_sets": [
+        "sensor_parameters"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in sensor_parameters; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S7",
+      "pages": [
+        5
+      ],
+      "id": "supplementary:Table S7",
+      "source": "supplementary",
+      "title": "Per-cell support audit",
+      "registry_groups": [
+        "supplementary_table_S7_support_audit"
+      ],
+      "implementation": [
+        "scripts/scientific_evidence_audit.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S8",
+      "pages": [
+        5,
+        6
+      ],
+      "id": "supplementary:Table S8",
+      "source": "supplementary",
+      "title": "Online features and observer diagnostics",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/core.py",
+        "cross_morse/learning.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check",
+        "make scientific-audit"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Registered sensor schema, feature formulas, normalization, acquisition periods and observer-diagnostic definitions; execution manifests establish which profile was used. This table specifies coordinates and checks, rather than reporting measured diagnostic outcomes.",
+      "notes": [
+        "S8 defines 25/26 sensor coordinates and separate observer diagnostics; it does not tabulate measured innovation, NIS or calibration results."
+      ],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S9",
+      "pages": [
+        6
+      ],
+      "id": "supplementary:Table S9",
+      "source": "supplementary",
+      "title": "Observer, consequence-model and search configuration",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/learning.py",
+        "cross_morse/policies.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S10",
+      "pages": [
+        6
+      ],
+      "id": "supplementary:Table S10",
+      "source": "supplementary",
+      "title": "Executable policy definitions",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/policies.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S11",
+      "pages": [
+        8
+      ],
+      "id": "supplementary:Table S11",
+      "source": "supplementary",
+      "title": "Frozen confirmation map",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S12",
+      "pages": [
+        8,
+        9
+      ],
+      "id": "supplementary:Table S12",
+      "source": "supplementary",
+      "title": "Representative candidate ledger",
+      "registry_groups": [
+        "supplementary_table_S12_selection_ledger"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [
+        "Representative printed rows do not reconstruct the full-ledger Roman/Pascal/COCO choices; retain the eligible family, nested comparator and every feasibility mask."
+      ],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S12b",
+      "pages": [
+        9
+      ],
+      "id": "supplementary:Table S12b",
+      "source": "supplementary",
+      "title": "Nested open-loop family comparison",
+      "registry_groups": [
+        "supplementary_table_S12b_nested_open_loop_comparison"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S12c",
+      "pages": [
+        9
+      ],
+      "id": "supplementary:Table S12c",
+      "source": "supplementary",
+      "title": "Representative and complete-ledger selector audit",
+      "registry_groups": [
+        "supplementary_table_S12c_selection_rule_audit"
+      ],
+      "implementation": [
+        "paper/build/selection.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [
+        "Representative printed rows do not reconstruct the full-ledger Roman/Pascal/COCO choices; retain the eligible family, nested comparator and every feasibility mask.",
+        "Representative-row rule readings are derived from displayed bounds; the executed and separated-protocol choice columns report historical complete-ledger selections."
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S13",
+      "pages": [
+        10
+      ],
+      "id": "supplementary:Table S13",
+      "source": "supplementary",
+      "title": "Independent-graph admission and clipping",
+      "registry_groups": [
+        "supplementary_table_S13_independent_graph_admission"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S14",
+      "pages": [
+        10
+      ],
+      "id": "supplementary:Table S14",
+      "source": "supplementary",
+      "title": "Nine-test mechanism confirmation family",
+      "registry_groups": [
+        "supplementary_table_S14_mechanism_contrasts_submitted_protocol"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py",
+        "cm_campaigns/confirmation.py",
+        "scripts/audit_s14_confirmation.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs",
+        "make confirmation-audit"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [
+        "The run builder emits local-family contrasts. The separate joint S14 campaign must preserve all nine original unrounded tests and decisions fixed before admission."
+      ],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S14b",
+      "pages": [
+        10,
+        11
+      ],
+      "id": "supplementary:Table S14b",
+      "source": "supplementary",
+      "title": "Confirmation-size sensitivity",
+      "registry_groups": [
+        "supplementary_table_S14b_separated_data_sensitivity",
+        "supplementary_table_S14b_unchanged_contrasts"
+      ],
+      "implementation": [
+        "scripts/check_si_identities.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [
+        "Sample-size sensitivity rescales uncertainty under the declared variance model; it is separate from original confirmation observations."
+      ],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S15",
+      "pages": [
+        11,
+        12
+      ],
+      "id": "supplementary:Table S15",
+      "source": "supplementary",
+      "title": "Method scores and resource ranges",
+      "registry_groups": [
+        "supplementary_table_S15_method_comparison"
+      ],
+      "implementation": [
+        "cm_experiments/upstream.py"
+      ],
+      "record_sets": [
+        "baselines"
+      ],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [
+        "The run builder covers internal methods; the fourteen external dataset/method pairs require the baselines record set."
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S15b",
+      "pages": [
+        12
+      ],
+      "id": "supplementary:Table S15b",
+      "source": "supplementary",
+      "title": "Per-rerun resource accounting",
+      "registry_groups": [
+        "supplementary_table_S15b_per_rerun_resource_ledger"
+      ],
+      "implementation": [
+        "cm_campaigns/accounting.py",
+        "cm_campaigns/timing.py"
+      ],
+      "record_sets": [
+        "baselines"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in baselines; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S16",
+      "pages": [
+        12
+      ],
+      "id": "supplementary:Table S16",
+      "source": "supplementary",
+      "title": "arxiv component factorial",
+      "registry_groups": [
+        "supplementary_table_S16_arxiv_factorial"
+      ],
+      "implementation": [
+        "cm_theory/factorial.py"
+      ],
+      "record_sets": [
+        "factorials"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in factorials; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S16b",
+      "pages": [
+        12,
+        13
+      ],
+      "id": "supplementary:Table S16b",
+      "source": "supplementary",
+      "title": "Pascal component factorial",
+      "registry_groups": [
+        "supplementary_table_S16b_pascal_factorial"
+      ],
+      "implementation": [
+        "cm_theory/factorial.py"
+      ],
+      "record_sets": [
+        "factorials"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in factorials; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S17",
+      "pages": [
+        13
+      ],
+      "id": "supplementary:Table S17",
+      "source": "supplementary",
+      "title": "Module ablations and observed signatures",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/core.py",
+        "cross_morse/learning.py",
+        "cross_morse/policies.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S18",
+      "pages": [
+        13
+      ],
+      "id": "supplementary:Table S18",
+      "source": "supplementary",
+      "title": "Registered sensitivity grids and observations",
+      "registry_groups": [],
+      "implementation": [
+        "paper/registered_constants.json"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S19",
+      "pages": [
+        13
+      ],
+      "id": "supplementary:Table S19",
+      "source": "supplementary",
+      "title": "Negative controls",
+      "registry_groups": [],
+      "implementation": [
+        "records/specs.json"
+      ],
+      "record_sets": [
+        "negative_controls"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in negative_controls; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S20",
+      "pages": [
+        15
+      ],
+      "id": "supplementary:Table S20",
+      "source": "supplementary",
+      "title": "Selection radii and theorem instantiation",
+      "registry_groups": [
+        "supplementary_table_S20_selection_theorem_instantiation"
+      ],
+      "implementation": [
+        "cm_theory/selection.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S21",
+      "pages": [
+        15,
+        16
+      ],
+      "id": "supplementary:Table S21",
+      "source": "supplementary",
+      "title": "Action gaps and switching",
+      "registry_groups": [
+        "supplementary_table_S21_action_gap_audit"
+      ],
+      "implementation": [
+        "cross_morse/policies.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S22",
+      "pages": [
+        16
+      ],
+      "id": "supplementary:Table S22",
+      "source": "supplementary",
+      "title": "Trajectory tube audit",
+      "registry_groups": [
+        "supplementary_table_S22_trajectory_tube_audit"
+      ],
+      "implementation": [
+        "cm_theory/stability.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S23",
+      "pages": [
+        16
+      ],
+      "id": "supplementary:Table S23",
+      "source": "supplementary",
+      "title": "Expected and assurance cost",
+      "registry_groups": [
+        "supplementary_table_S23_assurance_and_expected_compute"
+      ],
+      "implementation": [
+        "cm_theory/economics.py"
+      ],
+      "record_sets": [
+        "input_gate"
+      ],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S23b",
+      "pages": [
+        16
+      ],
+      "id": "supplementary:Table S23b",
+      "source": "supplementary",
+      "title": "Nominal execution work, timing and amortization",
+      "registry_groups": [
+        "supplementary_table_S23b_nominal_execution_time_and_amortization"
+      ],
+      "implementation": [
+        "cm_campaigns/timing.py",
+        "scripts/check_paper_constants.py"
+      ],
+      "record_sets": [
+        "nominal_time"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in nominal_time; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [
+        "Keep observed timing, arithmetic nominal-work approximations, adopted timing anchors and modelled tails separately identified."
+      ],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S24",
+      "pages": [
+        16,
+        17
+      ],
+      "id": "supplementary:Table S24",
+      "source": "supplementary",
+      "title": "Claim-to-artifact registry",
+      "registry_groups": [],
+      "implementation": [
+        "paper/bindings/arxiv_full.json",
+        "records/specs.json"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S25",
+      "pages": [
+        17
+      ],
+      "id": "supplementary:Table S25",
+      "source": "supplementary",
+      "title": "Cross-backbone substitutions",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/core.py"
+      ],
+      "record_sets": [
+        "cross_backbone"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in cross_backbone; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S26",
+      "pages": [
+        17,
+        18
+      ],
+      "id": "supplementary:Table S26",
+      "source": "supplementary",
+      "title": "Integer ensemble grid and equal-cost interpolation",
+      "registry_groups": [],
+      "implementation": [
+        "records/specs.json"
+      ],
+      "record_sets": [
+        "ensemble_grid"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in ensemble_grid; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S26b",
+      "pages": [
+        18
+      ],
+      "id": "supplementary:Table S26b",
+      "source": "supplementary",
+      "title": "Fitted ensemble law and break-even",
+      "registry_groups": [
+        "supplementary_table_S26b_ensemble_law_and_break_even"
+      ],
+      "implementation": [
+        "cm_theory/economics.py"
+      ],
+      "record_sets": [
+        "ensemble_grid"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in ensemble_grid; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S27",
+      "pages": [
+        18
+      ],
+      "id": "supplementary:Table S27",
+      "source": "supplementary",
+      "title": "Buffer sensitivity on dependent graphs",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S28",
+      "pages": [
+        18,
+        19
+      ],
+      "id": "supplementary:Table S28",
+      "source": "supplementary",
+      "title": "Distribution-free one-step regret bound",
+      "registry_groups": [],
+      "implementation": [
+        "cm_theory/control.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S28b",
+      "pages": [
+        19
+      ],
+      "id": "supplementary:Table S28b",
+      "source": "supplementary",
+      "title": "Variance-aware one-step radius",
+      "registry_groups": [],
+      "implementation": [
+        "cm_theory/control.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S29",
+      "pages": [
+        19
+      ],
+      "id": "supplementary:Table S29",
+      "source": "supplementary",
+      "title": "Planning horizon and beam sweep",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/policies.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S30",
+      "pages": [
+        19
+      ],
+      "id": "supplementary:Table S30",
+      "source": "supplementary",
+      "title": "Oracle dispersion and retained-share grid",
+      "registry_groups": [
+        "supplementary_table_S30_oracle_dispersion"
+      ],
+      "implementation": [
+        "cm_theory/economics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S31",
+      "pages": [
+        29,
+        30
+      ],
+      "id": "supplementary:Table S31",
+      "source": "supplementary",
+      "title": "Reproduction map",
+      "registry_groups": [],
+      "implementation": [
+        "scripts/build_paper.py",
+        "scripts/records.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S32",
+      "pages": [
+        21
+      ],
+      "id": "supplementary:Table S32",
+      "source": "supplementary",
+      "title": "Budget-matched comparator definitions",
+      "registry_groups": [],
+      "implementation": [
+        "cm_experiments/execution.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S33",
+      "pages": [
+        21
+      ],
+      "id": "supplementary:Table S33",
+      "source": "supplementary",
+      "title": "Retained-share model for comparison arms",
+      "registry_groups": [],
+      "implementation": [
+        "cm_theory/economics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S34",
+      "pages": [
+        21
+      ],
+      "id": "supplementary:Table S34",
+      "source": "supplementary",
+      "title": "Selective-sensing and branch-cost model",
+      "registry_groups": [
+        "supplementary_table_S34_budget_aware_rule"
+      ],
+      "implementation": [
+        "cm_experiments/budget.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S35",
+      "pages": [
+        21,
+        22
+      ],
+      "id": "supplementary:Table S35",
+      "source": "supplementary",
+      "title": "Reporting conventions and record linkage",
+      "registry_groups": [],
+      "implementation": [
+        "paper/reported_results.json"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S36",
+      "pages": [
+        22,
+        23
+      ],
+      "id": "supplementary:Table S36",
+      "source": "supplementary",
+      "title": "E1–E20 experiment and falsification definitions",
+      "registry_groups": [],
+      "implementation": [
+        "docs/PAPER_SUPPORT.md"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S37",
+      "pages": [
+        23
+      ],
+      "id": "supplementary:Table S37",
+      "source": "supplementary",
+      "title": "Fallback, false-safe and harm-miss rates",
+      "registry_groups": [
+        "supplementary_table_S37_input_fallback_counts"
+      ],
+      "implementation": [
+        "cross_morse/statistics.py"
+      ],
+      "record_sets": [
+        "input_gate"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in input_gate; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S38",
+      "pages": [
+        23,
+        24
+      ],
+      "id": "supplementary:Table S38",
+      "source": "supplementary",
+      "title": "Results-record schema",
+      "registry_groups": [],
+      "implementation": [
+        "records/specs.json",
+        "cross_morse/provenance.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S39",
+      "pages": [
+        24
+      ],
+      "id": "supplementary:Table S39",
+      "source": "supplementary",
+      "title": "Separated data-role contract",
+      "registry_groups": [],
+      "implementation": [
+        "cross_morse/split_contract.py",
+        "cross_morse/role_evidence.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S40",
+      "pages": [
+        24
+      ],
+      "id": "supplementary:Table S40",
+      "source": "supplementary",
+      "title": "Comparison-arm information restrictions",
+      "registry_groups": [],
+      "implementation": [
+        "cm_experiments/execution.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make registry-check"
+      ],
+      "coverage": "protocol_check",
+      "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
+      "notes": [],
+      "evidence_kind": "protocol"
+    },
+    {
+      "kind": "table",
+      "label": "Table S41",
+      "pages": [
+        24,
+        25
+      ],
+      "id": "supplementary:Table S41",
+      "source": "supplementary",
+      "title": "Qualification cost components",
+      "registry_groups": [
+        "supplementary_table_S41_qualification_cost_components"
+      ],
+      "implementation": [
+        "cm_campaigns/accounting.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make paper",
+        "make compare-runs"
+      ],
+      "coverage": "run_columns",
+      "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S42",
+      "pages": [
+        25
+      ],
+      "id": "supplementary:Table S42",
+      "source": "supplementary",
+      "title": "Budget-matched test power",
+      "registry_groups": [
+        "supplementary_table_S42_power_of_budget_matched_test"
+      ],
+      "implementation": [
+        "cm_theory/inference.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S43",
+      "pages": [
+        25,
+        26
+      ],
+      "id": "supplementary:Table S43",
+      "source": "supplementary",
+      "title": "Experiment outcomes, estimators and thresholds",
+      "registry_groups": [],
+      "implementation": [
+        "paper/reported_results.json"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S44",
+      "pages": [
+        26
+      ],
+      "id": "supplementary:Table S44",
+      "source": "supplementary",
+      "title": "Per-input tail-cost model",
+      "registry_groups": [
+        "supplementary_table_S44_per_input_cost_model"
+      ],
+      "implementation": [
+        "cm_theory/economics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [
+        "Keep observed timing, arithmetic nominal-work approximations, adopted timing anchors and modelled tails separately identified."
+      ],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S45",
+      "pages": [
+        26
+      ],
+      "id": "supplementary:Table S45",
+      "source": "supplementary",
+      "title": "Inserted-site attribution",
+      "registry_groups": [
+        "supplementary_table_S45_inserted_site_attribution"
+      ],
+      "implementation": [
+        "cross_morse/core.py"
+      ],
+      "record_sets": [
+        "inserted_site"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in inserted_site; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [],
+      "evidence_kind": "mixed"
+    },
+    {
+      "kind": "table",
+      "label": "Table S46",
+      "pages": [
+        26
+      ],
+      "id": "supplementary:Table S46",
+      "source": "supplementary",
+      "title": "Budget-matched frontier",
+      "registry_groups": [
+        "supplementary_table_S46_budget_matched_frontier"
+      ],
+      "implementation": [
+        "cm_experiments/execution.py",
+        "cm_campaigns/arm_campaign.py"
+      ],
+      "record_sets": [
+        "budget_matched"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in budget_matched; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [
+        "Record the executed E6 variant and paid-operation ledger; the S46b retained-share range is not a confidence interval."
+      ],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S46b",
+      "pages": [
+        27
+      ],
+      "id": "supplementary:Table S46b",
+      "source": "supplementary",
+      "title": "D_compare arm outcomes",
+      "registry_groups": [
+        "supplementary_table_S46_budget_matched_frontier",
+        "supplementary_table_S46b_arm_level_outcomes"
+      ],
+      "implementation": [
+        "cm_experiments/execution.py",
+        "cm_campaigns/arm_campaign.py"
+      ],
+      "record_sets": [
+        "budget_matched"
+      ],
+      "commands": [
+        "make records-check",
+        "make records-tables"
+      ],
+      "coverage": "record_outputs",
+      "required_evidence": "Original raw files and traceable summaries in budget_matched; record builders emit set-level tables, not the exact manuscript layout.",
+      "notes": [
+        "Record the executed E6 variant and paid-operation ledger; the S46b retained-share range is not a confidence interval."
+      ],
+      "evidence_kind": "reported_measurements"
+    },
+    {
+      "kind": "table",
+      "label": "Table S47",
+      "pages": [
+        27
+      ],
+      "id": "supplementary:Table S47",
+      "source": "supplementary",
+      "title": "Decision boundaries and power",
+      "registry_groups": [
+        "supplementary_table_S47_decision_boundary_and_power"
+      ],
+      "implementation": [
+        "cm_theory/inference.py",
+        "cm_theory/economics.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make theory",
+        "make si-check"
+      ],
+      "coverage": "arithmetic_check",
+      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
+      "notes": [],
+      "evidence_kind": "analytical"
+    },
+    {
+      "kind": "table",
+      "label": "Table S48",
+      "pages": [
+        31
+      ],
+      "id": "supplementary:Table S48",
+      "source": "supplementary",
+      "title": "Policy outcomes and admission criteria",
+      "registry_groups": [],
+      "implementation": [
+        "paper/build/tables.py"
+      ],
+      "record_sets": [],
+      "commands": [
+        "make scientific-audit"
+      ],
+      "coverage": "original_analysis_required",
+      "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
+      "notes": [
+        "Peptides radius measurements are an evaluated arm; the printed Holm value 0.070 does not pass 0.05, so the registered lifecycle returns qC on those inputs."
+      ],
+      "evidence_kind": "mixed"
+    }
+  ]
+}

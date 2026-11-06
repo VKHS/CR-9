@@ -1,0 +1,8 @@
+{
+ "experiment": "per-input nominal execution time (Supplementary Table S23b)",
+ "hardware": "x86_64 CPU; torch 2.10.0+cpu; python 3.12.14",
+ "period": "2026-10-29T14:51:43.433890+00:00/2026-10-29T14:56:06.062114+00:00",
+ "produced_by": "scripts/export_records.py from-runs --set nominal_time on 2 sealed run(s): arxiv, peptides_func",
+ "protocol": "read from the runs' sealed config.json, results_summary.json and candidate execution records",
+ "synthetic": true
+}

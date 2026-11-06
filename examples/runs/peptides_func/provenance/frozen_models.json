@@ -1,0 +1,53 @@
+{
+  "captured_after_stage": "train",
+  "checkpoints": {
+    "train/plant_seed1_best.pt": {
+      "artifact": {
+        "bytes": 13837,
+        "path": "train/plant_seed1_best.pt",
+        "sha256": "39f22b60efc67c18b2225bf01181c61e3f26948244196ce4a119ba276ac9de8b"
+      },
+      "backbone_sha256": "bc13257aa0a09d340fb56bbdc5e651ac316c3e624f9ae311be77ddb454c9c05f",
+      "backbone_tensors": 16,
+      "head_sha256": "9fcd9f25b48fca585331f2b0201e111343bea78e755ba05999539140976fdc43",
+      "head_tensors": 2
+    },
+    "train/plant_seed2_best.pt": {
+      "artifact": {
+        "bytes": 13837,
+        "path": "train/plant_seed2_best.pt",
+        "sha256": "03ca90406450e5e8273e6063615a57d4ce251b5afc88a6d27071ea28c9083131"
+      },
+      "backbone_sha256": "d555dc015f39c38729e849be8ccf7fda6d47e279aab9dc3314c60b8041639ff2",
+      "backbone_tensors": 16,
+      "head_sha256": "493fa829e8547c2059f09a414e28077b1a472acf72bfed1d94c2c44d9a46fe76",
+      "head_tensors": 2
+    },
+    "train/q0_seed1_best.pt": {
+      "artifact": {
+        "bytes": 13837,
+        "path": "train/q0_seed1_best.pt",
+        "sha256": "dcf6095dabffaa6af776096859596a24559ad25358e90c6c6ad502015818e9c4"
+      },
+      "backbone_sha256": "bb57e41c5c64286d943593e223f1517cdd01b96f58b37ad435bfe81cd16d70b6",
+      "backbone_tensors": 16,
+      "head_sha256": "847ee06190a52c6c3f0075e519617c5a4b5f315d4d39894871e5849ca7f47101",
+      "head_tensors": 2
+    },
+    "train/q0_seed2_best.pt": {
+      "artifact": {
+        "bytes": 13837,
+        "path": "train/q0_seed2_best.pt",
+        "sha256": "a5a2f6778c2626e00ba6d7974b3f37a1f4b4968ec9f791233dd07b7adc7eab08"
+      },
+      "backbone_sha256": "a5a581a3742a8147efabbff1f8bb22aaee9692bdad5d40310e44cbbddfb2a9ba",
+      "backbone_tensors": 16,
+      "head_sha256": "396cd82dc1f4f21708af3237491f24b972443aeacd83b30c4e715c3889dbdad6",
+      "head_tensors": 2
+    }
+  },
+  "hash_method": "sorted named tensors; dtype/shape and length-prefixed CPU uint8 storage bytes",
+  "head_prefix": "head.",
+  "model_key": "model",
+  "schema_version": "1.1"
+}

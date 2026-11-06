@@ -1,0 +1,223 @@
+{
+  "date": "2026-11-06",
+  "base_commit": "89bbd136625d581027a84755cef0715cf2231a5f",
+  "scope": "Current-source software, mathematics, printed arithmetic, source correspondence and evidence-import validation. Original benchmark observations were not available and were not reproduced.",
+  "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+  "source_fingerprint_scope": "cross_morse/ and runtime Python entry points; the experiment executor, campaign audit, paper tooling, documentation and tests are additionally identified by the Git revision and release checksums.",
+  "software_checks": {
+    "status": "PASS",
+    "unit_tests": {
+      "command": "make test (recorded CPU environment)",
+      "status": "PASS",
+      "tests_run": 1051,
+      "passed": 1050,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 135.021
+    },
+    "no_torch_tests": {
+      "command": "make test-no-torch (interpreter without PyTorch)",
+      "status": "PASS",
+      "tests_run": 758,
+      "passed": 743,
+      "skipped": 15,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 114.353
+    },
+    "skip_scope": {
+      "full_suite": "Private cluster profile excluded from the public package",
+      "no_torch": "PyTorch-dependent cases; exercised separately by the full CPU suite"
+    },
+    "environment": {
+      "status": "PINNED_PACKAGES_MATCH",
+      "package_count": 53,
+      "differences": [],
+      "python": "3.12.14",
+      "observed_python": "3.12.14",
+      "python_patch_matches": true,
+      "scope": "package versions and Python major/minor/platform; not wheel hashes, native-library identity or GPU compatibility"
+    },
+    "thread_limits": {
+      "OMP_NUM_THREADS": 2,
+      "OPENBLAS_NUM_THREADS": 2,
+      "MKL_NUM_THREADS": 2
+    },
+    "package_verification": {
+      "command": "make verify",
+      "status": "PASS",
+      "source_files": 1118,
+      "registered_arithmetic_checks": 798
+    },
+    "analytical_statements": {
+      "command": "make theory-full",
+      "counts": {
+        "PASS": 91,
+        "FAIL": 0,
+        "ADVISORY": 0,
+        "INFO": 4
+      },
+      "statement_groups": 25,
+      "check_generators": 43,
+      "seed": 20261104,
+      "scope": "Seeded numerical checks under stated hypotheses, not a formal proof"
+    },
+    "supplementary_arithmetic": {
+      "command": "make si-report",
+      "counts": {
+        "PASS": 657,
+        "ADVISORY": 5,
+        "FAIL": 0,
+        "INFO": 26
+      },
+      "scope": "Relationships among printed inputs; advisory interpretations and rounding are retained"
+    },
+    "model_inventory": {
+      "command": "make model-inventory",
+      "profiles": 7,
+      "source_records_match": true,
+      "table_S5_counts_agree": true,
+      "scope": "Full-profile model instantiation and parameter counts; not historical checkpoint equivalence"
+    },
+    "experiment_execution": {
+      "tests": 126,
+      "skipped": 0,
+      "scope": "Includes actual trained synthetic E6 execution, immutable operation-bound replay, exact-cap comparator fallback and infeasibility; no benchmark performance inference"
+    },
+    "diagram_checks": {
+      "figures": 7,
+      "status": "PASS",
+      "scope": "SVG and PNG-source fingerprints; revised evidence-chain layout visually inspected"
+    }
+  },
+  "preserved_scientific_inputs": {
+    "comparison_base": "89bbd136625d581027a84755cef0715cf2231a5f",
+    "files_compared": 734,
+    "files_changed": 0,
+    "paths": [
+      "cross_morse/",
+      "configs/",
+      "examples/",
+      "source_snapshots/",
+      "paper/reported_results.json",
+      "paper/registered_constants.json"
+    ],
+    "experiment_executor_and_auditors_changed": true
+  },
+  "manuscript_review": {
+    "reviewed_by": "ChatGPT: AI-assisted contextual review requested by author",
+    "main_sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+    "supplementary_sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
+    "local_pdf_bytes_verified": true,
+    "reviewed_registry_groups": 34,
+    "numbered_displays": 90,
+    "numerical_targets_changed": false,
+    "personal_author_cell_review_attested": false,
+    "review": "paper/transcription_check.json",
+    "notes": "paper/MANUSCRIPT_REVIEW.md",
+    "inventory": "paper/display_manifest.json"
+  },
+  "scientific_audit": {
+    "status": "INCOMPLETE_OR_INVALID",
+    "expected_exit_code": 1,
+    "blockers": 26,
+    "blocker_counts": {
+      "budget_campaign_missing": 1,
+      "confirmation_campaign_missing": 1,
+      "manuscript_numbers_unlinked": 7,
+      "missing_auxiliary_set": 10,
+      "missing_official_archive": 7
+    },
+    "official_archives": 0,
+    "required_official_archives": 7,
+    "auxiliary_record_sets": 0,
+    "required_auxiliary_record_sets": 10,
+    "original_measurements_added": false,
+    "confirmation_scope": "Original unrounded heterogeneous test outputs, paired means, joint nine-test Holm decisions and native-run links; original test programs are preserved and hashed but their raw P values are not recomputed by this gate.",
+    "publication_ready": false
+  },
+  "smoke_runs": [
+    {
+      "dataset": "Peptides-func",
+      "status": "PASS",
+      "command": "python run_cross_morse.py --config <peptides_smoke_with_recorded_model_overrides.json> --dataset Peptides-func --profile smoke --device cpu --threads 2 --data-root <data-directory> --output-dir <new-directory>",
+      "configuration_base": "configs/peptides_func_smoke.json",
+      "model_overrides": {
+        "encoder_layers": 2,
+        "encoder_hidden": 24,
+        "head_hidden": 20,
+        "block_mlp_hidden": 24,
+        "block_mlp_layers": 3
+      },
+      "identities": {
+        "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+        "config_sha256": "ca38fa2a76611a4270aa219c491d273424d08dacd877b3608824c17bb34942a1"
+      },
+      "completed_stages": [
+        "prepare",
+        "train",
+        "explore",
+        "fit",
+        "select",
+        "confirm",
+        "admit",
+        "evaluate"
+      ],
+      "scope": "fresh CPU synthetic lifecycle exercising non-default encoder, head and GINE widths; no official benchmark data",
+      "numerical_replay": "PASS",
+      "checkpoint_reexecution": {
+        "status": "PASS",
+        "predictors": 4,
+        "maximum_probability_error": 0.0
+      },
+      "outcome": "comparator retained; no performance improvement claim",
+      "final_summary_sha256": "b19d5aa8147204057fb74f5ff6bd5b156e6b578e78de721c380cf23fcfd8e995",
+      "executed_on": "2026-11-02",
+      "archive_round_trip": {
+        "status": "PASS",
+        "files": 362,
+        "tables_rebuilt": 11,
+        "figures_rebuilt": 6
+      },
+      "sealed_test_role_record_exports": {
+        "sensor_parameters": "PASS",
+        "nominal_time": "PASS"
+      },
+      "model_inventory": {
+        "architecture": "DesignatedSitePlant",
+        "architecture_widths": {
+          "block_mlp_hidden": 24,
+          "block_mlp_layers": 3,
+          "encoder_hidden": 24,
+          "encoder_layers": 2,
+          "head_hidden": 20,
+          "head_layers": 2,
+          "hidden_dim": 16,
+          "native_layers": 2
+        },
+        "parameter_buffer_and_optimizer_counts": "separate",
+        "parameter_components": "summed from named checkpoint parameters"
+      }
+    }
+  ],
+  "smoke_runs_history_note": "The smoke_runs entries preserve the earlier validation event at the same core runtime identity. They are not claimed as newly executed benchmark runs in this revision; current E6 synthetic execution is covered above.",
+  "historical_examples": {
+    "count": 2,
+    "datasets": [
+      "ogbn-arxiv",
+      "Peptides-func"
+    ],
+    "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+    "scope": "sealed synthetic observations; separate from current-runtime execution",
+    "numerical_replay": {
+      "status": "PASS",
+      "complete_runs": 2,
+      "predictor_comparisons": 8
+    }
+  },
+  "historical_development_record": "https://github.com/VKHS/CR-9/tree/89bbd136625d581027a84755cef0715cf2231a5f",
+  "live_zenodo_operations": "not performed",
+  "local_container_execution": "not performed; inspect the hosted container workflow for the published commit",
+  "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml"
+}

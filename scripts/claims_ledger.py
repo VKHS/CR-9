@@ -1,0 +1,243 @@
+#!/usr/bin/env python3
+"""Generate the manuscript registry's claim-to-evidence map and registration badge.
+
+This deterministic map describes indexes and available builders. Index flags and
+DOI strings are registrations, not fresh integrity checks, proof of publication,
+or proof that every manuscript value is supported. `make review` performs those
+separate checks and states the bounded scope of its scientific evidence audit.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts.availability import DATASETS  # noqa: E402
+from scripts._paper_common import runtime_source_fingerprint  # noqa: E402
+
+LEDGER = ROOT / "paper" / "CLAIMS.md"
+BADGE = ROOT / "docs" / "badges" / "evidence.json"
+RUN_DERIVED = {"1", "2", "S4", "S12", "S12c", "S13", "S14", "S15", "S23", "S41"}
+KIND_TEXT = {"author_reported_measurements": "measurement", "mixed": "measurement + derived",
+             "derived_arithmetic": "derived arithmetic", "analytical_sensitivity": "analytical sensitivity"}
+DOI = re.compile(r"10\.\d{4,9}/[A-Za-z0-9._;()/:-]+")
+
+
+def registered_doi(value) -> str | None:
+    if value in (None, ""):
+        return None
+    if not isinstance(value, str) or not DOI.fullmatch(value):
+        raise ValueError(f"Invalid registered DOI: {value!r}")
+    return value
+
+
+def registration_state(root: Path = ROOT, *, index_path: Path | None = None, records_root: Path | None = None) -> dict:
+    """Read registrations without upgrading index flags to fresh verification."""
+    root = Path(root)
+    index_path = index_path or root / "runs" / "index.json"
+    records_root = records_root or root / "records"
+    scope = json.loads((root / "release" / "release_scope.json").read_text(encoding="utf-8"))
+    registered_doi(scope.get("code_archive_doi"))
+    index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.is_file() else {"schema": "cross-morse-runs-index-1", "runs": []}
+    if index.get("schema") != "cross-morse-runs-index-1" or not isinstance(index.get("runs"), list):
+        raise ValueError("Invalid runs index schema")
+    official, seen = {}, set()
+    for entry in index["runs"]:
+        if not isinstance(entry, dict) or entry.get("dataset") not in DATASETS or entry["dataset"] in seen:
+            raise ValueError("Run index has an unknown or duplicate dataset entry")
+        seen.add(entry["dataset"])
+        registered_doi(entry.get("deposit_doi"))
+        if entry.get("verified") is True and entry.get("scientific_run") is True and entry.get("profile") == "full":
+            official[entry["dataset"]] = entry
+    specs = json.loads((root / "records" / "specs.json").read_text(encoding="utf-8"))
+    if specs.get("schema") != "cross-morse-records-specs-1":
+        raise ValueError("Invalid record specifications")
+    records_index_path = records_root / "index.json"
+    indexed = json.loads(records_index_path.read_text(encoding="utf-8")) if records_index_path.is_file() else {"schema": "cross-morse-records-index-1", "sets": []}
+    if indexed.get("schema") != "cross-morse-records-index-1" or not isinstance(indexed.get("sets"), list):
+        raise ValueError("Invalid records index schema")
+    verified, seen = [], set()
+    for entry in indexed["sets"]:
+        if not isinstance(entry, dict) or entry.get("set") not in specs["sets"] or entry["set"] in seen:
+            raise ValueError("Record index has an unknown or duplicate set")
+        seen.add(entry["set"])
+        if entry.get("verified") is True and entry.get("synthetic") is False:
+            verified.append(entry["set"])
+    return {"scope": scope, "official": official, "records": {"verified": verified, "defined": list(specs["sets"])},
+            "source_sha256": runtime_source_fingerprint(root)}
+
+
+def table_tokens(label: str) -> set[str]:
+    """Extract tables, excluding figure labels in combined registry headings."""
+    tables = re.split(r"\b(?:and\s+)?Figures?\b", label, maxsplit=1)[0]
+    if not re.search(r"\bTables?\b", tables):
+        return set()
+    return set(re.findall(r"\bS\d+[a-z]?\b|(?<=Table )\b[12]\b|(?<=Tables )\b[12]\b", tables))
+
+
+def record_sets_by_table(specs: dict) -> dict[str, list[str]]:
+    mapping: dict[str, list[str]] = {}
+    for name, spec in specs["sets"].items():
+        for label in spec.get("manuscript_tables", []):
+            for token in table_tokens(label):
+                mapping.setdefault(token, []).append(name)
+    return mapping
+
+
+def build(root: Path = ROOT, *, index_path: Path | None = None, records_root: Path | None = None) -> dict:
+    sources = json.loads((root / "paper" / "sources.json").read_text(encoding="utf-8"))
+    specs = json.loads((root / "records" / "specs.json").read_text(encoding="utf-8"))
+    st = registration_state(root, index_path=index_path, records_root=records_root)
+    official, records = st["official"], st["records"]
+    registered_sets = set(records["verified"])
+    by_table = record_sets_by_table(specs)
+    dois = {dataset: registered_doi(entry.get("deposit_doi")) for dataset, entry in official.items()}
+    n_official = len(official)
+    rows = []
+    for key, group in sources["table_groups"].items():
+        label = group.get("label", key)
+        tokens = table_tokens(label)
+        kind = group.get("evidence_kind", "mixed")
+        sets = sorted({s for token in tokens for s in by_table.get(token, [])})
+        run_derived = bool(tokens & RUN_DERIVED)
+        experiments = sorted({e for s in sets for e in specs["sets"][s].get("experiments", [])})
+        producers, required, status = [], [], []
+        if run_derived:
+            producers.append("run-derived columns: eight-stage archive (`make paper`)")
+            required.append("official run archives for the reported datasets")
+            status.append(f"{n_official}/7 official archives registered; {sum(bool(v) for v in dois.values())} DOI references")
+        for name in sets:
+            experiments_text = ", ".join(specs["sets"][name].get("experiments", [])) or "declared experiment records"
+            producers.append(f"record set `{name}` ({experiments_text}; `make records-tables`)")
+            required.append(f"`records/{name}/` with raw sources")
+            status.append(f"`{name}` {'registered' if name in registered_sets else 'not registered'}; trace check required")
+        if not run_derived and not sets:
+            if tokens == {"S5d"}:
+                producers.append("`scripts/model_inventory.py`; sealed `train/model_inventory.json` for benchmark identity")
+                required.append("archived checkpoints and inventories for the original benchmark models")
+                status.append("released configurations are countable; historical identity requires run evidence")
+            elif kind in {"derived_arithmetic", "analytical_sensitivity"}:
+                producers.append("registered formulas and inputs (`make registry-check` covers enumerated identities)")
+                required.append("the source observations for any measured inputs")
+                status.append("arithmetic validation does not establish the measured inputs")
+            else:
+                producers.append("source observations and the comparison target in `paper/reported_results.json`")
+                required.append("original observations identified by the manuscript provenance")
+                status.append("no dedicated display builder is declared for this registry group")
+        rows.append({"key": key, "label": label, "pages": group.get("pages", []), "source": group.get("source"),
+                     "evidence_kind": kind, "experiments": experiments, "producers": producers,
+                     "required": required, "status": status})
+    rows.sort(key=lambda row: (0 if row["source"] == "main" else 1, _label_sort(row["label"])))
+    counts = {row["label"]: sum(other["label"] == row["label"] for other in rows) for row in rows}
+    for row in rows:
+        if counts[row["label"]] > 1:
+            row["label"] = f"{row['label']} (`{row['key']}`)"
+    return {"schema": "cross-morse-claims-ledger-1", "official_archives": n_official, "official_total": len(DATASETS),
+            "dois": dois, "record_sets_registered": sorted(registered_sets), "record_sets_defined": sorted(records["defined"]),
+            "source_sha256": st["source_sha256"], "registered_coverage_complete": set(official) == set(DATASETS) and registered_sets == set(records["defined"]),
+            "scientific_evidence_verified": False, "rows": rows}
+
+
+def _label_sort(label: str):
+    match = re.search(r"(S?)(\d+)([a-z]?)", label)
+    return (1 if match.group(1) else 0, int(match.group(2)), match.group(3)) if match else (9, 0, "")
+
+
+def render(ledger: dict) -> str:
+    n, total = ledger["official_archives"], ledger["official_total"]
+    registered, defined = ledger["record_sets_registered"], ledger["record_sets_defined"]
+    lines = ["# Claim-to-evidence map", "",
+             "Generated from `paper/sources.json`, `records/specs.json` and the run/record indexes. "
+             "`make claims-check` checks freshness. This map covers the registered manuscript groups, "
+             "including those without a dedicated display builder.", "", "## Registered coverage", "",
+             f"- Official full-profile archives registered: **{n} of {total}**.",
+             f"- Auxiliary measurement-record sets registered: **{len(registered)} of {len(defined)}**.",
+             f"- Runtime source identity: `{ledger['source_sha256']}`.", "",
+             "Registration flags and DOI references do not establish fresh byte integrity, public deposit availability, "
+             "or agreement with the manuscript. `make review` performs those checks; its scientific audit covers "
+             "enumerated core results and declared auxiliary records, not every statement in the paper.", "",
+             "| Dataset | Index registration | Registered DOI reference |", "|---|---|---|"]
+    for dataset in DATASETS:
+        doi = ledger["dois"].get(dataset)
+        label = "registered" if dataset in ledger["dois"] else "not registered"
+        lines.append(f"| {dataset} | {label} | " + (f"[{doi}](https://doi.org/{doi})" if doi else "—") + " |")
+    lines += ["", "| Record set | Index registration |", "|---|---|"]
+    for name in defined:
+        lines.append(f"| `{name}` | {'registered' if name in registered else 'not registered'} |")
+    lines += ["", "## Manuscript groups and builders", "",
+              "Run builders reconstruct the named run-derived columns; record builders emit files named after the "
+              "record set (for example `baselines.tex`), with the corresponding manuscript table labels in their titles. "
+              "Analytical calculations use registered formulas and inputs. Registry plots remain transcriptions or "
+              "analytical scenarios rather than replays of benchmark observations.", "",
+              "| Manuscript item | Pages | Evidence kind | Builder or source | Required evidence | Status |",
+              "|---|---|---|---|---|---|"]
+    for row in ledger["rows"]:
+        pages = ", ".join(str(p) for p in row["pages"]) or "—"
+        doc = "main" if row["source"] == "main" else "SI"
+        cells = [f"{row['label']} ({doc})", pages, KIND_TEXT.get(row["evidence_kind"], row["evidence_kind"]),
+                 "; ".join(row["producers"]), "; ".join(row["required"]), "; ".join(row["status"])]
+        lines.append("| " + " | ".join(cell.replace("|", r"\|") for cell in cells) + " |")
+    return "\n".join(lines) + "\n"
+
+
+def badge(ledger: dict) -> dict:
+    n, total = ledger["official_archives"], ledger["official_total"]
+    registered, defined = len(ledger["record_sets_registered"]), len(ledger["record_sets_defined"])
+    return {"schemaVersion": 1, "label": "registered evidence", "message": f"{n}/{total} archives · {registered}/{defined} record sets",
+            "color": "blue" if ledger["registered_coverage_complete"] else "orange" if n or registered else "lightgrey"}
+
+
+def write(ledger: dict, *, ledger_path: Path, badge_path: Path) -> None:
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    badge_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text(render(ledger), encoding="utf-8")
+    badge_path.write_text(json.dumps(badge(ledger), indent=1) + "\n", encoding="utf-8")
+
+
+def check(ledger: dict, *, ledger_path: Path, badge_path: Path) -> list[str]:
+    problems = []
+    for path, expected in ((ledger_path, render(ledger)), (badge_path, json.dumps(badge(ledger), indent=1) + "\n")):
+        if not path.is_file() or path.read_text(encoding="utf-8") != expected:
+            problems.append(f"{path} is stale; run `make claims`")
+    return problems
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--index", type=Path)
+    parser.add_argument("--records", type=Path)
+    parser.add_argument("--output", type=Path, help="directory for CLAIMS.md and evidence.json instead of the tree")
+    parser.add_argument("--check", action="store_true")
+    parser.add_argument("--json", type=Path)
+    args = parser.parse_args(argv)
+    try:
+        ledger = build(args.root, index_path=args.index, records_root=args.records)
+        ledger_path = args.output / "CLAIMS.md" if args.output else args.root / "paper" / "CLAIMS.md"
+        badge_path = args.output / "evidence.json" if args.output else args.root / "docs" / "badges" / "evidence.json"
+        if args.check:
+            problems = check(ledger, ledger_path=ledger_path, badge_path=badge_path)
+            for problem in problems:
+                print("CHECK FAILED:", problem, file=sys.stderr)
+            if problems:
+                return 1
+            print(f"claim map matches the indexes ({ledger['official_archives']}/{ledger['official_total']} archives, "
+                  f"{len(ledger['record_sets_registered'])}/{len(ledger['record_sets_defined'])} record sets registered)")
+            return 0
+        write(ledger, ledger_path=ledger_path, badge_path=badge_path)
+        if args.json:
+            args.json.parent.mkdir(parents=True, exist_ok=True)
+            args.json.write_text(json.dumps(ledger, indent=1) + "\n", encoding="utf-8")
+        print(f"wrote {ledger_path} and {badge_path} ({len(ledger['rows'])} manuscript groups)")
+        return 0
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

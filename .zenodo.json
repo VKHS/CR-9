@@ -1,0 +1,34 @@
+{
+  "title": "CROSS-MORSE: Cross-Spectral Control of Message Passing in Frozen Graph Neural Networks (reference implementation)",
+  "upload_type": "software",
+  "license": "BSD-3-Clause",
+  "creators": [
+    {
+      "name": "Khalili Sadaghiani, Abdolvahab",
+      "affiliation": "Linköping University"
+    },
+    {
+      "name": "Nunez-Yanez, Jose",
+      "affiliation": "Linköping University"
+    }
+  ],
+  "description": "CROSS-MORSE reference implementation for inference-time control of frozen graph neural networks. Includes seven dataset adapters, 21 configurations, experiment and Slurm drivers, tests, environment specifications, two complete synthetic examples, and artifact-based result builders. The official benchmark archives and auxiliary measurements are not deposited in this release; see AVAILABILITY.md. Companion manuscript under review.",
+  "keywords": [
+    "graph neural networks",
+    "adaptive message passing",
+    "cross-spectral analysis",
+    "nominal-relative control",
+    "model predictive control",
+    "risk-aware deployment",
+    "reproducibility"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/VKHS/CR-9",
+      "relation": "isSupplementTo",
+      "resource_type": "software",
+      "scheme": "url"
+    }
+  ],
+  "access_right": "open"
+}

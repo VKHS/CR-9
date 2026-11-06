@@ -1,0 +1,92 @@
+{
+  "schema_version": "2.0",
+  "scope": "Implemented policy routes and eight lifecycle stages for all seven benchmark datasets.",
+  "entrypoint": "run_cross_morse.py",
+  "stages": [
+    "prepare",
+    "train",
+    "explore",
+    "fit",
+    "select",
+    "confirm",
+    "admit",
+    "evaluate"
+  ],
+  "route_families": [
+    "nominal",
+    "best_depth",
+    "learned_stop",
+    "phase",
+    "fixed_sequence",
+    "mpc_ol",
+    "one_step",
+    "radius",
+    "mpc_rh"
+  ],
+  "profiles": {
+    "smoke": "synthetic task-specific software validation",
+    "pilot": "official-data integration and resource check at reduced computation",
+    "full": "registered dataset-specific experiment configuration"
+  },
+  "implemented_checks": [
+    "transport arithmetic and nominal identity",
+    "direct recovery semantics",
+    "state and prediction integrity",
+    "trajectory-level support",
+    "nested comparator reconstruction",
+    "confirmation eligibility",
+    "descriptive admission",
+    "exact comparator fallback",
+    "stage label separation",
+    "artifact-verified parent chain",
+    "shared anchor regression",
+    "held-out target noninterference",
+    "exact frozen scoring assessment",
+    "global oracle feasibility",
+    "numeric lifecycle replay",
+    "trusted-checkpoint prediction reexecution",
+    "portable numeric evidence bundle",
+    "explicit manuscript-to-run association",
+    "dataset/task/metric consistency",
+    "whole-graph isolation and label-role grouping",
+    "nonlinear benchmark metric recomputation",
+    "native and inserted A0 identity",
+    "Roman-empire split campaign",
+    "registered-constant verification against the manuscript registry (scripts/check_paper_constants.py)",
+    "run-versus-manuscript comparison and result binding (scripts/compare_with_manuscript.py)",
+    "runtime source identity (scripts/source_fingerprint.py)",
+    "numerical verification of every analytical statement (cm_theory; docs/THEORY.md)",
+    "budget-aware work bound of Algorithm S3 against cm_experiments.budget",
+    "derived supplementary table arithmetic (scripts/check_si_identities.py)"
+  ],
+  "outside_scope": [
+    "upstream code and task adapters of the external baselines (pinned by commit in each study plan)",
+    "exact reproduction of manuscript spectral coefficients and architecture",
+    "independent-graph certification for arxiv",
+    "novel-input g_input serving branch",
+    "MPC sequence coverage assessment",
+    "three-arm inserted-site attribution E13",
+    "extended ensemble grid E = 16, 20 (E14)",
+    "equal-budget factorials (Tables S16, S16b)",
+    "cross-backbone substitutions (Table S25)",
+    "modelled 99th-percentile cost (Table S44)"
+  ],
+  "datasets": [
+    "ogbn-arxiv",
+    "ogbn-products",
+    "ogbn-proteins",
+    "Roman-empire",
+    "PascalVOC-SP",
+    "COCO-SP",
+    "Peptides-func"
+  ],
+  "experiment_status": "docs/METHOD.md (method and experiment scope)",
+  "implementation_notes": "paper/IMPLEMENTATION_NOTES.md",
+  "out_of_lifecycle_experiments": {
+    "E3-E6": "cm_experiments/ (schedules, development selection, execution, budget, replay); scripts/run_budget_arms.py; scripts/arm_campaign.py; hpc/run_budget_arms_arrhenius.sh",
+    "E12": "cm_experiments/upstream.py; scripts/run_upstream_baseline.py; hpc/run_upstream_baseline_arrhenius.sh",
+    "E17": "cm_campaigns/timing.py (TimingSession)",
+    "accounting": "hpc/capture_arrhenius_accounting.sh; hpc/finalize_arm_accounting.sh; cm_campaigns/accounting.py",
+    "records": "scripts/export_records.py -> records/<set>/ -> scripts/records.py"
+  }
+}

@@ -1,0 +1,1171 @@
+{
+  "_provenance": {
+    "title": "CROSS-MORSE: Cross-Spectral Control of Message Passing in Frozen Graph Neural Networks",
+    "authors": [
+      "Abdolvahab Khalili Sadaghiani",
+      "Jose Nunez-Yanez"
+    ],
+    "affiliation": "Linköping University, Linköping, Sweden",
+    "venue": "Scientific Reports manuscript",
+    "main_text_pages": 16,
+    "supplementary_pages": 38,
+    "repository": "https://github.com/VKHS/CR-9",
+    "transcription_date": "2026-11-01",
+    "transcription_rule": "Protocol constants and reporting targets transcribed from the identified manuscript sources; execution choices are documented in IMPLEMENTATION_NOTES.md.",
+    "scope": "Registered constants, thresholds, grids and backbone settings from the manuscript; released_full_profiles records independently instantiated source-model counts. Companion file: reported_results.json.",
+    "source_index": "paper/sources.json"
+  },
+  "data_roles_table_S2": {
+    "official_training_allocation": {
+      "D_fit": 0.6,
+      "D_explore": 0.2,
+      "D_select": 0.1,
+      "D_confirm": 0.05,
+      "D_compare": 0.05
+    },
+    "D_admit": "official validation split (untouched by any decision that fixes the policy; also labelled calibration split in the supplementary text)",
+    "D_test": "official test split; evaluator only",
+    "plant_seeds": 12,
+    "controller_seeds": 12,
+    "selection_folds": {
+      "outer": 5,
+      "inner": 4
+    },
+    "exploration_trajectory_folds": 5,
+    "internal_checkpoint_validation": "an internal D_fit validation subset; never reuses D_admit",
+    "roman_empire_repeats": "the procedure is repeated over the ten official splits",
+    "single_graph_units": {
+      "ogbn-arxiv": "32 METIS cores, 2-hop buffer",
+      "ogbn-proteins": "32 degree-stratified buffered cores, 2-hop buffer",
+      "ogbn-products": "64 METIS cores, 2-hop buffer",
+      "Roman-empire": "10 official splits (paired small-sample analysis)"
+    },
+    "multi_graph_units": {
+      "PascalVOC-SP": "complete graphs; official training 8498; D_confirm 425; D_compare 425; independent admission J = 1428; test 1429",
+      "COCO-SP": "complete graphs; official training 113286; D_confirm 5664; D_compare 5665; independent admission J = 5000; test 5000",
+      "Peptides-func": "complete graphs; official training 10873; D_confirm 544; D_compare 544; independent admission J = 2331; test 2331"
+    },
+    "D_compare": "Reserved 5% of official training for E3-E6 comparisons, disjoint from confirmation and admission; never changes the deployed policy.",
+    "current_protocol_note": "Current SI Table S2 separates five training roles (60/20/10/5/5). Confirmation fixes the policy before untouched validation admission; D_compare is an independent diagnostic comparison set. Transcription alone does not prove the executed masks were disjoint.",
+    "multi_graph_counts": {
+      "PascalVOC-SP": {
+        "official_train": 8498,
+        "D_confirm": 425,
+        "D_compare": 425,
+        "D_admit": 1428,
+        "D_test": 1429
+      },
+      "COCO-SP": {
+        "official_train": 113286,
+        "D_confirm": 5664,
+        "D_compare": 5665,
+        "D_admit": 5000,
+        "D_test": 5000
+      },
+      "Peptides-func": {
+        "official_train": 10873,
+        "D_confirm": 544,
+        "D_compare": 544,
+        "D_admit": 2331,
+        "D_test": 2331
+      }
+    }
+  },
+  "entry_contract_eq5_table_S3": {
+    "epsilon_plant_nats": 0.004,
+    "tau_PDD_percentage_points": 1.0,
+    "tau_DIL_nats": 0.02,
+    "tau_sup": 0.8,
+    "selected_strata_fraction": 1.0,
+    "epsilon_headroom_nats": 0.003,
+    "gates": {
+      "nominal graph value": "U(Delta_plant) < -0.004 nats; failure: stop or improve plant",
+      "depth qualification": "PDD <= 1.0 pp and DIL gap <= 0.020 nats; failure: do not credit controller with plant rescue",
+      "registry support": "phi_registry >= 0.80 and selected strata = 1.00; failure: prune bank or collect exploration",
+      "residual headroom": "U(Delta_oracle) < -0.003 nats; failure: retain strongest open loop"
+    },
+    "log_depth_grid_loss_eq6": "DIL_log d = (1/log2(d_K/d_1)) sum_j (l_{d_j}+l_{d_{j+1}})/2 (log2 d_{j+1} - log2 d_j) on a geometric depth grid"
+  },
+  "support_eq7": {
+    "p_min": 0.05,
+    "n_min_ESS": 64,
+    "omega_max_star": 0.2,
+    "ESS_definition": "(sum w)^2 / sum w^2 on one weight vector per (stratum, action) cell",
+    "omega_max_definition": "max_i w_i / sum_j w_j",
+    "identity": "ESS >= 64 implies omega_max <= 0.125, so omega_max_star = 0.20 is nonbinding on the same cells (Table S18)"
+  },
+  "transport_adapter_eq8_eq10": {
+    "common_action": "a = (rho, nu, alpha, m): w = (1-rho) e_N + rho w~(m); T = (1-nu) I + nu sum_m w_m K~_m; G_{l+1} = phi(T H W + b); H_{l+1} = LN[(1-alpha) G_{l+1} + alpha H^ref]",
+    "resolvent_eq9": "K~_{eta,T} = eta sum_{t=0}^{T} (1-eta)^t P^t + (1-eta)^{T+1} I; registered truncation order T = 8; T sparse products per step when powers are formed on line",
+    "executed_range_eq10": "h_bar_a = nu_a[(1-rho_a) + rho_a sum_{t=0}^{T} t eta_a (1-eta_a)^t]",
+    "identity_quantities": "identity mass (1-eta)^{T+1}; executed identity coefficient (1-nu) + nu rho [eta + (1-eta)^{T+1}]",
+    "inserted_site_form": "V_a(H, R) = (1-tau_a) H + tau_a[(1-alpha_a) T_a H + alpha_a R], tau_A0 = 0 (literal bypass), (tau_a, alpha_a, T_a) = (nu_a, alpha_a, (1-rho_a) P + rho_a K~_{eta_a, T})",
+    "resolvent_mass_correction_lemma2": "||K_eta - K~_{eta,T}||_inf <= 2 (1-eta)^{T+1}"
+  },
+  "action_registry_table_S6": {
+    "columns": [
+      "id",
+      "role",
+      "rho",
+      "nu",
+      "alpha",
+      "mode",
+      "eta",
+      "T",
+      "exploration_probability",
+      "interpretation"
+    ],
+    "actions": [
+      {
+        "id": 0,
+        "role": "nominal",
+        "rho": 0.0,
+        "nu": 0.7,
+        "alpha": 0.25,
+        "mode": "nominal",
+        "eta": null,
+        "T": null,
+        "exploration_probability": 0.28,
+        "interpretation": "complete q_N^ctrl tuple"
+      },
+      {
+        "id": 1,
+        "role": "weak local",
+        "rho": 0.2,
+        "nu": 0.55,
+        "alpha": 0.25,
+        "mode": "one step",
+        "eta": null,
+        "T": null,
+        "exploration_probability": 0.09,
+        "interpretation": "conservative local transport"
+      },
+      {
+        "id": 2,
+        "role": "strong local",
+        "rho": 0.2,
+        "nu": 0.85,
+        "alpha": 0.2,
+        "mode": "one step",
+        "eta": null,
+        "T": null,
+        "exploration_probability": 0.09,
+        "interpretation": "high local transport"
+      },
+      {
+        "id": 3,
+        "role": "short safe",
+        "rho": 0.25,
+        "nu": 0.7,
+        "alpha": 0.25,
+        "mode": "resolvent",
+        "eta": 0.5,
+        "T": 8,
+        "exploration_probability": 0.09,
+        "interpretation": "short resolvent"
+      },
+      {
+        "id": 4,
+        "role": "short recovery",
+        "rho": 0.3,
+        "nu": 0.65,
+        "alpha": 0.35,
+        "mode": "resolvent",
+        "eta": 0.5,
+        "T": 8,
+        "exploration_probability": 0.09,
+        "interpretation": "short range with stronger reference"
+      },
+      {
+        "id": 5,
+        "role": "medium",
+        "rho": 0.3,
+        "nu": 0.7,
+        "alpha": 0.2,
+        "mode": "resolvent",
+        "eta": 0.2,
+        "T": 8,
+        "exploration_probability": 0.09,
+        "interpretation": "medium resolvent"
+      },
+      {
+        "id": 6,
+        "role": "medium recovery",
+        "rho": 0.35,
+        "nu": 0.6,
+        "alpha": 0.35,
+        "mode": "resolvent",
+        "eta": 0.2,
+        "T": 8,
+        "exploration_probability": 0.09,
+        "interpretation": "medium range with recovery"
+      },
+      {
+        "id": 7,
+        "role": "long conservative",
+        "rho": 0.25,
+        "nu": 0.5,
+        "alpha": 0.4,
+        "mode": "resolvent",
+        "eta": 0.08,
+        "T": 8,
+        "exploration_probability": 0.08,
+        "interpretation": "longer range with lower transport; at T = 8 nearly half of the kernel's row mass stays on its diagonal, and the executed operator has identity coefficient 0.57"
+      },
+      {
+        "id": 8,
+        "role": "source reset",
+        "rho": null,
+        "nu": null,
+        "alpha": null,
+        "mode": "direct",
+        "eta": null,
+        "T": null,
+        "exploration_probability": 0.05,
+        "interpretation": "H_{l+1} <- H_0"
+      },
+      {
+        "id": 9,
+        "role": "last-safe recovery",
+        "rho": null,
+        "nu": null,
+        "alpha": null,
+        "mode": "direct",
+        "eta": null,
+        "T": null,
+        "exploration_probability": 0.05,
+        "interpretation": "H_{l+1} <- H_{tau_safe}"
+      }
+    ],
+    "exploration_probabilities_sum": 1.0,
+    "derived_table_S6b": {
+      "A0": {
+        "nu": 0.7,
+        "kernel_hops": 1.0,
+        "executed_range_hops_per_step": 0.7,
+        "max_reach_hops": 1,
+        "kernel_identity_mass": null,
+        "executed_identity_coefficient": 0.3,
+        "sparse_products_per_step": 1
+      },
+      "A1": {
+        "nu": 0.55,
+        "kernel_hops": 1.0,
+        "executed_range_hops_per_step": 0.55,
+        "max_reach_hops": 1,
+        "kernel_identity_mass": null,
+        "executed_identity_coefficient": 0.45,
+        "sparse_products_per_step": 1
+      },
+      "A2": {
+        "nu": 0.85,
+        "kernel_hops": 1.0,
+        "executed_range_hops_per_step": 0.85,
+        "max_reach_hops": 1,
+        "kernel_identity_mass": null,
+        "executed_identity_coefficient": 0.15,
+        "sparse_products_per_step": 1
+      },
+      "A3": {
+        "nu": 0.7,
+        "kernel_hops": 0.995,
+        "executed_range_hops_per_step": 0.697,
+        "max_reach_hops": 8,
+        "kernel_identity_mass": 0.002,
+        "executed_identity_coefficient": 0.388,
+        "sparse_products_per_step": 8
+      },
+      "A4": {
+        "nu": 0.65,
+        "kernel_hops": 0.994,
+        "executed_range_hops_per_step": 0.646,
+        "max_reach_hops": 8,
+        "kernel_identity_mass": 0.002,
+        "executed_identity_coefficient": 0.448,
+        "sparse_products_per_step": 8
+      },
+      "A5": {
+        "nu": 0.7,
+        "kernel_hops": 1.377,
+        "executed_range_hops_per_step": 0.964,
+        "max_reach_hops": 8,
+        "kernel_identity_mass": 0.1342,
+        "executed_identity_coefficient": 0.37,
+        "sparse_products_per_step": 8
+      },
+      "A6": {
+        "nu": 0.6,
+        "kernel_hops": 1.439,
+        "executed_range_hops_per_step": 0.864,
+        "max_reach_hops": 8,
+        "kernel_identity_mass": 0.1342,
+        "executed_identity_coefficient": 0.47,
+        "sparse_products_per_step": 8
+      },
+      "A7": {
+        "nu": 0.5,
+        "kernel_hops": 1.205,
+        "executed_range_hops_per_step": 0.603,
+        "max_reach_hops": 8,
+        "kernel_identity_mass": 0.4722,
+        "executed_identity_coefficient": 0.569,
+        "sparse_products_per_step": 8
+      }
+    },
+    "band_sensitivity_figure_S15b": {
+      "band_edges": [
+        0.0,
+        0.333,
+        0.667,
+        1.0,
+        1.333,
+        1.667,
+        2.0
+      ],
+      "A1": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "A2": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "A3": [
+        0.01,
+        0.05,
+        0.09,
+        0.13,
+        0.18,
+        0.23
+      ],
+      "A4": [
+        0.03,
+        0.09,
+        0.15,
+        0.22,
+        0.29,
+        0.36
+      ],
+      "A5": [
+        0.03,
+        0.02,
+        0.07,
+        0.13,
+        0.2,
+        0.26
+      ],
+      "A6": [
+        0.01,
+        0.08,
+        0.17,
+        0.26,
+        0.36,
+        0.46
+      ],
+      "A7": [
+        0.07,
+        0.17,
+        0.27,
+        0.38,
+        0.48,
+        0.59
+      ]
+    }
+  },
+  "sensing_eq11_table_S8": {
+    "windows": "degree-8 Chebyshev polynomial windows G_b = g_b(L) on L_sym; six fixed windows, three retained bands; band definitions selected inside training folds then frozen",
+    "band_power": "p_lb = ||G_b H_l||_F^2 / (sum_b' ||G_b' H_l||_F^2 + eps)",
+    "source_alignment": "c_lb = <G_b H_l, G_b H_0>_F / (||G_b H_l||_F ||G_b H_0||_F + eps)",
+    "measurement_vector": [
+      "entropy",
+      "margin",
+      "source-current disagreement (JS)",
+      "effective rank",
+      "normalized Dirichlet energy",
+      "band power (3)",
+      "source alignment (3)",
+      "transport history (accumulated mass, expected range, relative depth)",
+      "degree-weighted band power (3)",
+      "total state energy",
+      "reachability statistic (7, per registered action)"
+    ],
+    "sensing_cost_identity": "8 r/(1+r) of a nominal step per sensed site with full-state degree-8 sensing, r = E/(N d) the sparse-to-dense ratio; r = 0.013 (arxiv), 0.583 (proteins), 0.049 (products), 0.004 (Roman), 0.044 (Pascal, COCO), 0.016 (Peptides)",
+    "reduced_sensor": "The reported executed profiles are (k, P_s) = (32,4) on proteins and (64,2) on Pascal; k = 0 denotes full-state sensing elsewhere. Observer cadence is separate. A Gaussian sketch gives the stated band-power relative SD bound sqrt(2/k).",
+    "observer_diagnostics": "innovation and NIS are observer diagnostics, not measurement-vector coordinates",
+    "measurement_dimensions": {
+      "cheap": 9,
+      "spectral_and_reach": 16,
+      "full_total": 25,
+      "with_spectral_age": 26
+    },
+    "acquisition_contract": "Cheap support features update every site. Spectral power/alignment cache between acquisitions; reach is recomputed from cached powers for the next nominal operator and zero at terminal depth. Add spectral age when P_s > 1. Cached measurements are not certificates.",
+    "observer_update_period": 2,
+    "executed_sensor_profiles": {
+      "ogbn-arxiv": {
+        "sketch_width_k": 0,
+        "sensing_period_P_s": 1,
+        "reported_resolvent_fraction_f_res": 0.21
+      },
+      "ogbn-proteins": {
+        "sketch_width_k": 32,
+        "sensing_period_P_s": 4,
+        "reported_resolvent_fraction_f_res": 0.061
+      },
+      "Roman-empire": {
+        "sketch_width_k": 0,
+        "sensing_period_P_s": 1,
+        "reported_resolvent_fraction_f_res": 0.27
+      },
+      "PascalVOC-SP": {
+        "sketch_width_k": 64,
+        "sensing_period_P_s": 2,
+        "reported_resolvent_fraction_f_res": 0.24
+      },
+      "COCO-SP": {
+        "sketch_width_k": 0,
+        "sensing_period_P_s": 1,
+        "reported_resolvent_fraction_f_res": 0.25
+      },
+      "Peptides-func": {
+        "sketch_width_k": 0,
+        "sensing_period_P_s": 1,
+        "reported_resolvent_fraction_f_res": 0.19
+      }
+    }
+  },
+  "observer_eq12_table_S9": {
+    "state_dimension": 16,
+    "covariance_rank": 4,
+    "trajectory_folds": 5,
+    "filters": "6 candidates, 3 active, degree 8",
+    "observer_period": 2,
+    "validation": "normalized innovation squared, innovation bias and whiteness",
+    "action_critic": "128-128-64 SiLU multilayer perceptron with dropout 0.10 and mean/log-scale heads",
+    "sequence_models": "transition, stage-cost and terminal-value models: two-layer 128-dimensional residual networks",
+    "training": "AdamW 1e-3, weight decay 1e-4, batch 512, 200 epochs, patience 20; cross-fitted by complete trajectories; calibrated on the action or sequence actually selected",
+    "horizons": [
+      1,
+      4,
+      8,
+      16,
+      32
+    ],
+    "beam_width": 16,
+    "top_k": 2,
+    "gamma": 0.97,
+    "deterministic_ties": "lower complexity, smaller E, lower compute, configuration hash",
+    "ensemble_sizes_registered": [
+      1,
+      2,
+      4,
+      8,
+      12
+    ],
+    "extended_diagnostic_grid_E14": [
+      1,
+      2,
+      4,
+      8,
+      12,
+      16,
+      20
+    ],
+    "loss_clipping_B": {
+      "primary": 0.1,
+      "sensitivity": [
+        0.05,
+        0.2
+      ]
+    },
+    "critic_target_eq13": "Delta_{l,h}(a) = E[l_{l+h}(a -> pi_N) - l_{l+h}(pi_N) | I_l]; h = 1 for one-action models",
+    "training_source_status": "Training hyperparameters are retained implementation configuration; actual run manifest and source identity govern reproducibility. Do not infer a completed training run from these constants."
+  },
+  "policy_families_eq15_table_S10": {
+    "open_loop": [
+      "nominal",
+      "best depth",
+      "learned stop",
+      "phase",
+      "fixed sequence",
+      "MPC-OL"
+    ],
+    "feedback": [
+      "one-step",
+      "radius",
+      "MPC-RH"
+    ],
+    "radius_score_eq16": "pi_radius(s_l) = argmin_{a in A_sup(s_l)} [mu^(a) + kappa sigma^(a) + r_conf(a) + r_op(a) + lambda_rho c_rho(a)]",
+    "sequence_objective_eq17": "J_H = sum_{h=0}^{H-1} gamma^h [c^_{l+h} + kappa sigma^_{l+h} + lambda_rho c_rho(a_{l+h}) + lambda_T c_T(a_{l+h})] + gamma^H lambda_V V^_{l+H}",
+    "mpc_ol": "solves Eq. (17) once at l = 0 and executes the sequence unchanged",
+    "mpc_rh": "re-solves at every depth and executes the first action"
+  },
+  "selection_eq19_algorithm_S4": {
+    "epsilon_R_nats": {
+      "graph_level_CE": 0.003,
+      "mean_multilabel_BCE": 0.0015
+    },
+    "epsilon_eq_nats": 0.002,
+    "delta_s": 0.025,
+    "bootstrap_resamples": 10000,
+    "rule": "Q_s = {q in Q_feas : U_s(q) < -epsilon_R, U_s(q) <= U_min + epsilon_eq}; q^_s = q_C if Q_s empty, else lexicographic argmin over complexity C(q)",
+    "intervals": "paired cluster max-t bootstrap with comparator reconstruction inside every resample; [L_s, U_s] = Delta^_s(q) -/+ r_s(q)",
+    "datasets_using_BCE_margins": [
+      "ogbn-proteins",
+      "Peptides-func"
+    ]
+  },
+  "confirmation_eq20_table_S11": {
+    "contrasts": {
+      "state-conditioned route": {
+        "held_out_contrast": "conditional state destruction",
+        "practical_margin_nats": 0.002,
+        "fail_output": "strongest open-loop predecessor or q_C"
+      },
+      "radius": {
+        "held_out_contrast": "radius minus deterministic one-step",
+        "practical_margin_nats": 0.0015,
+        "fail_output": "one-step if one-step in Q_s, otherwise q_C"
+      },
+      "MPC-RH": {
+        "held_out_contrast": "MPC-RH minus MPC-OL",
+        "practical_margin_nats": 0.002,
+        "fail_output": "MPC-OL if MPC-OL in Q_s, otherwise q_C"
+      },
+      "Full profile": {
+        "held_out_contrast": "Full retained effect minus Lean",
+        "practical_margin_fraction": 0.02,
+        "fail_output": "Lean"
+      }
+    },
+    "holm_family": "nine prespecified mechanism contrasts across datasets, Holm-adjusted at level 0.05 (Supplementary Table S14)",
+    "margin_rule": "A retained mechanism must pass the prespecified Holm-adjusted 0.05 test against zero and exceed the practical margin in the beneficial direction at the held-out point estimate. Equality at the margin chooses the simpler output. A small P against zero alone does not establish the practical margin.",
+    "holm_alpha": 0.05
+  },
+  "admission_eq27_theorem2_table_S13": {
+    "B": 0.1,
+    "delta_a": 0.025,
+    "epsilon_a_nats": {
+      "graph_level_CE": 0.003,
+      "mean_multilabel_BCE": 0.0015
+    },
+    "bound": "U_a = D_bar + sqrt(2 S^2 log(2/delta_a)/J) + 14 B log(2/delta_a)/(3 (J-1)); admit iff U_a <= -epsilon_a and the metric gate holds",
+    "sensitivity_B": [
+      0.05,
+      0.2
+    ],
+    "corollary2_constant_nats": 2.045,
+    "corollary2_minimum_J": "J > 1 + 14 B log(2/delta_a) / (3 (|D_bar| - epsilon_a))",
+    "single_graph_rule": "descriptive clipped-loss cluster bootstrap over the buffered cores (arxiv, proteins, products) or paired small-sample interval over the ten official splits (Roman-empire): pass when D_bar <= -epsilon_a, U_desc < 0 and the metric gate holds; no coverage statement",
+    "clipped_fraction_bound": "f <= [(J-1) S^2/J + D_bar^2]/B^2: at most 2.84% (Pascal), 3.44% (COCO), 1.36% (Peptides)"
+  },
+  "statistical_tests": {
+    "mechanism_contrasts": "one Holm family of nine contrasts at 0.05; equivalence claims use two one-sided tests at the prespecified margin",
+    "roman_empire": "paired small-sample interval over ten official splits",
+    "minimum_detectable_effect": "2.80 standard errors at two-sided 0.05 and 3.34 at the first Holm step alpha/4",
+    "budget_matched_arms": "E3-E6 evaluated on reserved D_compare against frozen qM under a common expected-work ceiling; one Holm family of four contrasts per dataset; independent confirmation on D_confirm precedes comparison."
+  },
+  "sensitivity_grids_table_S18": {
+    "minimum_propensity": [
+      0.025,
+      0.05,
+      0.075,
+      0.1
+    ],
+    "minimum_ESS": [
+      32,
+      64,
+      96,
+      128
+    ],
+    "maximum_normalized_weight": [
+      0.1,
+      0.15,
+      0.2,
+      0.25
+    ],
+    "selection_margin_epsilon_R": {
+      "CE": [
+        0.0025,
+        0.003,
+        0.005
+      ],
+      "mean_BCE": [
+        0.001,
+        0.0015,
+        0.0025
+      ]
+    },
+    "equivalence_margin_epsilon_eq": [
+      0.001,
+      0.002,
+      0.004
+    ],
+    "clip_B": [
+      0.05,
+      0.1,
+      0.2
+    ]
+  },
+  "budget_matched_comparison_section4_table_S32_S40": {
+    "arms": {
+      "E3": "initial-input schedule predictor (network of the critic's parameter count, decodes a supported sequence from pooled H_0 and graph statistics)",
+      "E4": "initial-input distillation of the feedback policy",
+      "E5": "no-observation replanning on model-predicted states with the same model calls as MPC-RH",
+      "E6": "budget-aware rule q_B with the selective-sensing certificate tau_l = max(0.002, 2 L_J r_l)"
+    },
+    "retained_share_grid_phi_x": {
+      "fixed_sequence_regimes": [
+        0.2,
+        0.35,
+        0.55
+      ],
+      "MPC_OL_regimes": [
+        0.1,
+        0.25,
+        0.45
+      ]
+    },
+    "ensemble_law_kappa_band": [
+      0.03,
+      0.04
+    ],
+    "kappa_midpoint": 0.035,
+    "decision_boundary_proposition10": "the initial-input predictor is the better deployment iff phi_x^gain > 1 (against the fully observed rule) or > r_B (against the budget-aware rule) under the contract; priced work: feedback preferable iff lambda < lambda*_pred",
+    "implementation_scope": "SI p7 explicitly distinguishes formal branch-complete Algorithm S3 from bounded model-call planning with scheduled acquisition in the accompanying runtime; every E6 result must name its executable variant."
+  },
+  "deployment_economics_definition2": {
+    "exchange_rate": "lambda* = |Delta| / (E C(q_D) - E C(q_C)) in nats per nominal execution of added work",
+    "amortization": "M* = 3600 C_qual / [theta (E C(q_D) - E C(q_C)) t_nom] served inputs at tolerated share theta = 0.1",
+    "cost_identity_eq32": "C_expected = (1 - p_fallback) C_controller + p_fallback C_qC",
+    "assurance_cost": "C_assure = C_controller + C_qC (two-branch configuration)"
+  },
+  "backbones_table_S5": {
+    "ogbn-arxiv": {
+      "architecture": "MLP4-512 encoder; post-training adapter at the native aggregation call; softmax head",
+      "backbone_family": "shared transport plant",
+      "depth": 256,
+      "hidden": 512,
+      "parameters_M": 3.1,
+      "precision": "bf16 plant / fp32 statistics",
+      "optimizer": "AdamW 3e-4, weight decay 1e-4, cosine; 500 epochs, patience 50",
+      "checkpoint_rule": "minimum internal-Dfit validation CE; 12 seeds",
+      "hardware": "one NVIDIA GH200 96 GB",
+      "measured_hours_per_seed": 1.8,
+      "native_call": "shared-weight propagation step after the encoder; l indexes the 256 unrolled applications",
+      "identity_test_E1": {
+        "precision": "bf16",
+        "max_relative_state_deviation": 0.004,
+        "state_limit": 0.008,
+        "test_loss_deviation_nats": 3e-05,
+        "loss_limit_nats": 0.0001,
+        "inserted_sites": 0
+      }
+    },
+    "ogbn-proteins": {
+      "architecture": "MLP4-512 with edge-feature aggregation; adapter at the native aggregation call; sigmoid mean-BCE head",
+      "backbone_family": "edge-weighted transport plant",
+      "depth": 128,
+      "hidden": 512,
+      "parameters_M": 3.52,
+      "precision": "bf16 plant / fp32 statistics",
+      "optimizer": "AdamW 2e-4, weight decay 1e-5, cosine; 400 epochs, patience 40",
+      "checkpoint_rule": "minimum internal-Dfit validation BCE; 12 seeds",
+      "hardware": "one NVIDIA GH200 96 GB",
+      "measured_hours_per_seed": 2.4,
+      "native_call": "edge-weighted propagation step; edge features enter the kernel weights; 128 unrolled steps",
+      "identity_test_E1": {
+        "precision": "bf16",
+        "max_relative_state_deviation": 0.004,
+        "state_limit": 0.008,
+        "test_loss_deviation_nats": 3e-05,
+        "loss_limit_nats": 0.0001,
+        "inserted_sites": 0
+      }
+    },
+    "ogbn-products": {
+      "architecture": "scalable MLP3-512; exact full-graph sparse propagation with dense calls chunked at 65536 rows; softmax head",
+      "backbone_family": "shared transport plant with full-graph sparse propagation",
+      "depth": 64,
+      "hidden": 512,
+      "parameters_M": 3.36,
+      "precision": "bf16 plant / fp32 evaluator",
+      "optimizer": "AdamW 5e-4, weight decay 1e-5, cosine; batch 65,536; 300 epochs, patience 30",
+      "checkpoint_rule": "minimum internal-Dfit validation CE; 12 seeds",
+      "hardware": "one NVIDIA GH200 96 GB",
+      "measured_hours_per_seed": 4.8,
+      "native_call": "full-graph sparse propagation at every step; only dense calls chunk at 65536 rows; 64 unrolled steps",
+      "identity_test_E1": {
+        "precision": "bf16",
+        "max_relative_state_deviation": 0.004,
+        "state_limit": 0.008,
+        "test_loss_deviation_nats": 3e-05,
+        "loss_limit_nats": 0.0001,
+        "inserted_sites": 0
+      }
+    },
+    "Roman-empire": {
+      "architecture": "heterophily encoder4-384; adapter at the native aggregation call; softmax head",
+      "backbone_family": "heterophily plant (ego and neighbour maps)",
+      "depth": 256,
+      "hidden": 384,
+      "parameters_M": 2.52,
+      "precision": "fp32",
+      "optimizer": "AdamW 1e-3, weight decay 5e-4; 800 epochs, patience 100",
+      "checkpoint_rule": "minimum internal-Dfit validation CE per split",
+      "hardware": "one NVIDIA GH200 96 GB",
+      "measured_hours_per_seed": 0.45,
+      "native_call": "heterophily-aware propagation step: ego and neighbour representations enter the native update separately; 256 unrolled steps",
+      "identity_test_E1": {
+        "precision": "fp32",
+        "max_relative_state_deviation": 4e-07,
+        "state_limit": 1e-05,
+        "test_loss_deviation_nats": 3e-08,
+        "loss_limit_nats": 1e-06,
+        "inserted_sites": 0
+      }
+    },
+    "PascalVOC-SP": {
+      "architecture": "GraphGPS-style 6x128 backbone; frozen then post-training instrumented; softmax head",
+      "backbone_family": "GPS-style plant: 6 native local-MPNN sites plus 122 inserted parameter-free control sites",
+      "depth": 128,
+      "hidden": 128,
+      "parameters_M": 3.14,
+      "precision": "bf16 plant / fp32 statistics",
+      "optimizer": "AdamW 5e-4, weight decay 1e-5; batch 32; 300 epochs, patience 30",
+      "checkpoint_rule": "minimum internal-Dfit validation CE; 12 seeds",
+      "hardware": "one NVIDIA GH200 96 GB",
+      "measured_hours_per_seed": 1.1,
+      "native_call": "local MPNN branch of each GPS block; global-attention branch untouched; 128 controlled transport sites = 21 sub-steps per native block plus 2 boundary sites",
+      "identity_test_E1": {
+        "precision": "bf16",
+        "max_relative_state_deviation": 0.004,
+        "state_limit": 0.008,
+        "test_loss_deviation_nats": 3e-05,
+        "loss_limit_nats": 0.0001,
+        "inserted_sites": 122,
+        "native_sites": 6
+      }
+    },
+    "COCO-SP": {
+      "architecture": "GraphGPS-style 6x128 backbone; frozen then post-training instrumented; softmax head",
+      "backbone_family": "GPS-style plant: 6 native local-MPNN sites plus 122 inserted parameter-free control sites",
+      "depth": 128,
+      "hidden": 128,
+      "parameters_M": 3.18,
+      "precision": "bf16 plant / fp32 statistics",
+      "optimizer": "AdamW 5e-4, weight decay 1e-5; batch 32; 300 epochs, patience 30",
+      "checkpoint_rule": "minimum internal-Dfit validation CE; 12 seeds",
+      "hardware": "one NVIDIA GH200 96 GB",
+      "measured_hours_per_seed": 1.3,
+      "native_call": "as PascalVOC-SP",
+      "identity_test_E1": {
+        "precision": "bf16",
+        "max_relative_state_deviation": 0.004,
+        "state_limit": 0.008,
+        "test_loss_deviation_nats": 3e-05,
+        "loss_limit_nats": 0.0001,
+        "inserted_sites": 122,
+        "native_sites": 6
+      }
+    },
+    "Peptides-func": {
+      "architecture": "GINE-style 8x128 backbone with degree-normalized linear aggregation (edge features as nonnegative scalar edge weights); frozen then post-training instrumented; sigmoid AP head",
+      "backbone_family": "linear-GINE-style plant: 8 native sites plus 56 inserted parameter-free control sites",
+      "depth": 64,
+      "hidden": 128,
+      "parameters_M": 5.1,
+      "precision": "bf16 plant / fp32 statistics",
+      "optimizer": "AdamW 1e-3, weight decay 1e-5; batch 128; 250 epochs, patience 30",
+      "checkpoint_rule": "maximum internal-Dfit validation AP with BCE tie-break; 12 seeds",
+      "hardware": "one NVIDIA GH200 96 GB",
+      "measured_hours_per_seed": 0.9,
+      "native_call": "degree-normalized linear aggregation of the trained plant; the standard nonlinear GINE message is not used; 64 controlled transport sites = 8 sub-steps per native layer",
+      "identity_test_E1": {
+        "precision": "bf16",
+        "max_relative_state_deviation": 0.004,
+        "state_limit": 0.008,
+        "test_loss_deviation_nats": 3e-05,
+        "loss_limit_nats": 0.0001,
+        "inserted_sites": 56,
+        "native_sites": 8
+      }
+    }
+  },
+  "exploration_support_table_S7": {
+    "ogbn-arxiv": {
+      "trajectories": 12800,
+      "minimum_count": 128,
+      "minimum_propensity": 0.052,
+      "qualified_fraction": 0.92,
+      "failure_remediation": "collect/prune on failure",
+      "failed_cell_minimum_ESS": 31,
+      "failed_cell_maximum_normalized_weight": 0.17
+    },
+    "ogbn-proteins": {
+      "trajectories": 14400,
+      "minimum_count": 144,
+      "minimum_propensity": 0.054,
+      "qualified_fraction": 0.95,
+      "failure_remediation": "collect/prune on failure",
+      "failed_cell_minimum_ESS": 36,
+      "failed_cell_maximum_normalized_weight": 0.16
+    },
+    "ogbn-products": {
+      "trajectories": 19200,
+      "minimum_count": 192,
+      "minimum_propensity": 0.058,
+      "qualified_fraction": 0.98,
+      "failure_remediation": "collect/prune on failure",
+      "failed_cell_minimum_ESS": 41,
+      "failed_cell_maximum_normalized_weight": 0.15
+    },
+    "Roman-empire": {
+      "trajectories": 9600,
+      "minimum_count": 96,
+      "minimum_propensity": 0.051,
+      "qualified_fraction": 0.9,
+      "failure_remediation": "collect/prune on failure",
+      "failed_cell_minimum_ESS": 28,
+      "failed_cell_maximum_normalized_weight": 0.18
+    },
+    "PascalVOC-SP": {
+      "trajectories": 20480,
+      "minimum_count": 128,
+      "minimum_propensity": 0.052,
+      "qualified_fraction": 0.93,
+      "failure_remediation": "collect/prune on failure",
+      "failed_cell_minimum_ESS": 34,
+      "failed_cell_maximum_normalized_weight": 0.16
+    },
+    "COCO-SP": {
+      "trajectories": 32000,
+      "minimum_count": 200,
+      "minimum_propensity": 0.061,
+      "qualified_fraction": 0.98,
+      "failure_remediation": "collect/prune on failure",
+      "failed_cell_minimum_ESS": 43,
+      "failed_cell_maximum_normalized_weight": 0.15
+    },
+    "Peptides-func": {
+      "trajectories": 24000,
+      "minimum_count": 150,
+      "minimum_propensity": 0.056,
+      "qualified_fraction": 0.95,
+      "failure_remediation": "downgrade on failure",
+      "failed_cell_minimum_ESS": 37,
+      "failed_cell_maximum_normalized_weight": 0.16
+    }
+  },
+  "qualification_cost_table_S41": {
+    "component_shares": {
+      "exploration_logging": 0.4,
+      "observer_critic_sequence_fitting": 0.15,
+      "nested_comparator_and_candidate_selection": 0.35,
+      "confirmation_evaluation": 0.05,
+      "admission_evaluation": 0.05
+    },
+    "plant_multiplier": 1.176,
+    "accounting_note": "Stage allocation shares and multipliers follow the source. E3-E6 is a separate campaign; scheduler records distinguish per-seed, HPO and total GPU-hours."
+  },
+  "precision_tolerances_table_S5c": {
+    "bf16": {
+      "state_relative": 0.008,
+      "loss_nats": 0.0001
+    },
+    "fp32": {
+      "state_relative": 1e-05,
+      "loss_nats": 1e-06
+    },
+    "unit_roundoff": {
+      "bf16": "2^-8 = 3.9e-3",
+      "fp32": "2^-23"
+    }
+  },
+  "model_class_definition1": {
+    "requirements": [
+      "intermediate node representations readable through standard runtime hooks",
+      "aggregation call wrappable as a nonnegative row-normalizable linear operator with coefficients independent of the current hidden state",
+      "native update U_l, learned parameters, numerical precision, nominal execution and prediction head unchanged; U_l Lipschitz in its message argument"
+    ],
+    "covered": [
+      "GCN",
+      "SGC",
+      "APPNP",
+      "GCNII normalized-aggregation layers",
+      "local message-passing branch of hybrid local-global models (GraphGPS-style)",
+      "GPR-GNN through its nonnegative per-step propagation P"
+    ],
+    "excluded": [
+      "prediction-only interfaces",
+      "fused kernels that expose no hook",
+      "state-dependent kernels such as attention weights",
+      "signed per-step propagation operators",
+      "edge-conditioned nonlinear messages such as the standard GINE message",
+      "topology-changing interventions"
+    ],
+    "membership_test": "the nominal-identity test E1 (Table S5c)"
+  },
+  "backbones_source_status": {
+    "reference": "Supplementary Tables S5 and S5d",
+    "execution_identity": "train/model_inventory.json, sealed checkpoint hashes and runtime source identity",
+    "parity": "requires archived architecture, checkpoint inventory and source identity",
+    "comparison_command": "make compare-runs",
+    "count_scope": "One instantiated predictor: encoder, native updates and prediction head; separate controller parameters and ensemble/seed/depth multiplication excluded. All parameter elements are counted even when frozen; buffers are reported separately.",
+    "reported_count_scope": "The parameters_M values in backbones_table_S5 are the manuscript's benchmark-plant counts at the printed precision; every released full profile instantiates a plant whose exact count agrees with its Table S5 value at that precision (make model-inventory, make registry-check).",
+    "released_full_profiles": {
+      "ogbn-arxiv": {
+        "configuration": "configs/arxiv_full.json",
+        "input_dim": 128,
+        "num_outputs": 40,
+        "parameter_count": 3116632,
+        "buffer_elements": 0,
+        "dimension_source": "cross_morse/data.py::prepare_data expected nodes/features/outputs; cross_morse/tasks.py::_DATASETS",
+        "parameter_components": {
+          "encoder": 2832432,
+          "shared": 262656,
+          "norm": 1024,
+          "head": 20520
+        },
+        "architecture_widths": {
+          "hidden_dim": 512,
+          "encoder_layers": 4,
+          "encoder_hidden": 1040,
+          "head_hidden": 0,
+          "head_layers": 1
+        },
+        "table_S5_parameters_M": 3.1,
+        "agrees_with_table_S5_at_printed_precision": true
+      },
+      "ogbn-proteins": {
+        "configuration": "configs/proteins_full.json",
+        "input_dim": 8,
+        "num_outputs": 112,
+        "parameter_count": 3517068,
+        "buffer_elements": 0,
+        "dimension_source": "cross_morse/data.py::prepare_data expected nodes/features/outputs; cross_morse/tasks.py::_DATASETS",
+        "parameter_components": {
+          "encoder": 3195932,
+          "shared": 262656,
+          "norm": 1024,
+          "head": 57456
+        },
+        "architecture_widths": {
+          "hidden_dim": 512,
+          "encoder_layers": 4,
+          "encoder_hidden": 1140,
+          "head_hidden": 0,
+          "head_layers": 1
+        },
+        "table_S5_parameters_M": 3.52,
+        "agrees_with_table_S5_at_printed_precision": true
+      },
+      "ogbn-products": {
+        "configuration": "configs/products_full.json",
+        "input_dim": 100,
+        "num_outputs": 47,
+        "parameter_count": 3358895,
+        "buffer_elements": 0,
+        "dimension_source": "cross_morse/data.py::prepare_data expected nodes/features/outputs; cross_morse/tasks.py::_DATASETS",
+        "parameter_components": {
+          "encoder": 3071104,
+          "shared": 262656,
+          "norm": 1024,
+          "head": 24111
+        },
+        "architecture_widths": {
+          "hidden_dim": 512,
+          "encoder_layers": 3,
+          "encoder_hidden": 1472,
+          "head_hidden": 0,
+          "head_layers": 1
+        },
+        "table_S5_parameters_M": 3.36,
+        "agrees_with_table_S5_at_printed_precision": true
+      },
+      "Roman-empire": {
+        "configuration": "configs/roman_empire_full.json",
+        "input_dim": 300,
+        "num_outputs": 18,
+        "parameter_count": 2524946,
+        "buffer_elements": 0,
+        "dimension_source": "cross_morse/data.py::prepare_data expected nodes/features/outputs; cross_morse/tasks.py::_DATASETS",
+        "parameter_components": {
+          "encoder": 2221568,
+          "shared": 147840,
+          "ego": 147840,
+          "norm": 768,
+          "head": 6930
+        },
+        "architecture_widths": {
+          "hidden_dim": 384,
+          "encoder_layers": 4,
+          "encoder_hidden": 896,
+          "head_hidden": 0,
+          "head_layers": 1
+        },
+        "table_S5_parameters_M": 2.52,
+        "agrees_with_table_S5_at_printed_precision": true
+      },
+      "PascalVOC-SP": {
+        "configuration": "configs/pascalvoc_sp_full.json",
+        "input_dim": 14,
+        "num_outputs": 21,
+        "parameter_count": 3140277,
+        "buffer_elements": 0,
+        "dimension_source": "cross_morse/datasets.py::pack_lrgb (14 node-feature channels); cross_morse/tasks.py::_DATASETS",
+        "parameter_components": {
+          "encoder": 1920,
+          "blocks": 3042336,
+          "head": 96021
+        },
+        "architecture_widths": {
+          "hidden_dim": 128,
+          "encoder_layers": 1,
+          "encoder_hidden": 128,
+          "head_hidden": 640,
+          "head_layers": 2,
+          "native_layers": 6,
+          "attention_heads": 4,
+          "feedforward_hidden": 1584
+        },
+        "table_S5_parameters_M": 3.14,
+        "agrees_with_table_S5_at_printed_precision": true
+      },
+      "COCO-SP": {
+        "configuration": "configs/coco_sp_full.json",
+        "input_dim": 14,
+        "num_outputs": 81,
+        "parameter_count": 3178737,
+        "buffer_elements": 0,
+        "dimension_source": "cross_morse/datasets.py::pack_lrgb (14 node-feature channels); cross_morse/tasks.py::_DATASETS",
+        "parameter_components": {
+          "encoder": 1920,
+          "blocks": 3042336,
+          "head": 134481
+        },
+        "architecture_widths": {
+          "hidden_dim": 128,
+          "encoder_layers": 1,
+          "encoder_hidden": 128,
+          "head_hidden": 640,
+          "head_layers": 2,
+          "native_layers": 6,
+          "attention_heads": 4,
+          "feedforward_hidden": 1584
+        },
+        "table_S5_parameters_M": 3.18,
+        "agrees_with_table_S5_at_printed_precision": true
+      },
+      "Peptides-func": {
+        "configuration": "configs/peptides_func_full.json",
+        "input_dim": 174,
+        "num_outputs": 10,
+        "parameter_count": 5114130,
+        "buffer_elements": 0,
+        "dimension_source": "cross_morse/datasets.py::atom_one_hot and ATOM_FEATURE_DIMS; cross_morse/tasks.py::_DATASETS",
+        "parameter_components": {
+          "encoder": 22400,
+          "blocks": 5002760,
+          "head": 88970
+        },
+        "architecture_widths": {
+          "hidden_dim": 128,
+          "encoder_layers": 1,
+          "encoder_hidden": 128,
+          "head_hidden": 640,
+          "head_layers": 2,
+          "native_layers": 8,
+          "block_mlp_hidden": 672,
+          "block_mlp_layers": 3
+        },
+        "table_S5_parameters_M": 5.1,
+        "agrees_with_table_S5_at_printed_precision": true
+      }
+    },
+    "inventory_command": "make model-inventory",
+    "manuscript_source": {
+      "document": "supplementary",
+      "pages": [
+        3
+      ],
+      "table": "S5",
+      "source_index": "paper/sources.json"
+    },
+    "default_width_plant": {
+      "ogbn-arxiv": 1138216,
+      "scope": "Table S5d, released default configuration: the arxiv plant built with the default widths (encoder width equal to the hidden width, linear head) at 128 inputs and 40 outputs; scripts/model_inventory.py --default-widths instantiates it."
+    },
+    "width_keys": {
+      "encoder_hidden": "width of the encoder's hidden layers (transport plants); the last encoder layer outputs hidden_dim",
+      "head_hidden": "hidden width of a two-layer prediction head; 0 selects a linear head",
+      "feedforward_hidden": "feed-forward hidden width of each GPS block",
+      "block_mlp_hidden": "hidden width of the update MLP of each linear-GINE block",
+      "block_mlp_layers": "two- or three-layer update MLP of each linear-GINE block"
+    }
+  },
+  "dataset_statistics_table_S6c_S23b": {
+    "_scope": "Published dataset statistics used in the Table S6c and S23b propagation estimates, with hidden width d and controlled depth L from Table S5. E retains each provider's reported edge convention; it is not a uniform undirected-pair count or the runtime operator's post-processing adjacency count. These identities do not measure execution work, encoder/head costs or elapsed time.",
+    "_sources": {
+      "ogb": "https://ogb.stanford.edu/docs/nodeprop/ ; dataset table, with its note that loaded undirected graphs have twice the reported edge count",
+      "heterophily": "https://github.com/yandex-research/heterophilous-graphs ; Roman-empire dataset-statistics table",
+      "lrgb": "https://github.com/vijaydwivedi75/lrgb ; dataset-statistics table; Dwivedi et al., NeurIPS 2022, Table 2 (https://papers.nips.cc/paper/2022/file/8c3c666820ea055a77726d66fc7d447f-Paper-Datasets_and_Benchmarks.pdf)"
+    },
+    "ogbn-arxiv": {
+      "nodes": 169343,
+      "reported_edges": 1166243,
+      "edge_count_convention": "directed citation edges in the OGB table; runtime symmetrization is separate",
+      "graphs": 1
+    },
+    "ogbn-proteins": {
+      "nodes": 132534,
+      "reported_edges": 39561252,
+      "edge_count_convention": "OGB undirected edge count; loaded bidirectional adjacency has twice this count",
+      "graphs": 1
+    },
+    "ogbn-products": {
+      "nodes": 2449029,
+      "reported_edges": 61859140,
+      "edge_count_convention": "OGB undirected edge count; loaded bidirectional adjacency has twice this count",
+      "graphs": 1
+    },
+    "Roman-empire": {
+      "nodes": 22662,
+      "reported_edges": 32927,
+      "edge_count_convention": "undirected edges in the original dataset-statistics table",
+      "graphs": 1
+    },
+    "PascalVOC-SP": {
+      "mean_nodes_per_graph": 479.4,
+      "mean_reported_edges_per_graph": 2710.48,
+      "edge_count_convention": "LRGB mean adjacency entries per graph; E/N is the reported mean degree",
+      "graphs": 11355
+    },
+    "COCO-SP": {
+      "mean_nodes_per_graph": 476.88,
+      "mean_reported_edges_per_graph": 2693.67,
+      "edge_count_convention": "LRGB mean adjacency entries per graph; E/N is the reported mean degree",
+      "graphs": 123286
+    },
+    "Peptides-func": {
+      "mean_nodes_per_graph": 150.94,
+      "mean_reported_edges_per_graph": 307.3,
+      "edge_count_convention": "LRGB mean adjacency entries per graph; E/N is the reported mean degree",
+      "graphs": 15535
+    },
+    "identities": {
+      "sparse_to_dense_ratio_r": "E / (N d), printed to three decimals in Table S6c",
+      "full_state_sensing_share": "8 r / (1 + r) of one nominal step for degree-8 sensing at every site; halved at P_s = 2",
+      "residual": "m - 1 - 8 r / (1 + r) with the per-member multiplier m of Table S23 (full-state sensing at every site)",
+      "admissible_sketch_ratio": "min(1, (m - 1) / (8 r / (1 + r))), the largest (k/d)/P_s compatible with m",
+      "W_nom": "L (N d^2 + E d), the paper's propagation-work estimate using published edge counts (Table S23b prints arxiv, proteins and Roman); not a measurement of total runtime operations"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# Gain and cost ledger (main Table 2) -- SYNTHETIC SOFTWARE EXAMPLES: these values are not benchmark results
+"# generated from 2 run(s) [examples]; runtime source b5005fc53d31; runs: ogbn-arxiv:arxiv, Peptides-func:peptides_func"
+Dataset,"q_C identity, E","deployed rule, E",C_qC,C_expected (overhead),C_assure (overhead),lambda* (mnats per nominal unit),qualification (GPU-h or CPU-h),test-stage effect over q_C
+ogbn-arxiv,"learned stop, E = 2, full","learned stop, E = 2, full",3.382,3.382 (+0%),3.382 (+0%),,0.0010 h (cpu),"+0.00 [+0.00, +0.00] pp; +0.00000 [+0.00000, +0.00000] CE"
+Peptides-func,"phase schedule, E = 2","phase schedule, E = 2",3.540,3.540 (+0%),3.540 (+0%),,0.0190 h (cpu),"+0.00 [+0.00, +0.00] pp; +0.00000 [+0.00000, +0.00000] BCE"

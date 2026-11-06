@@ -1,0 +1,77 @@
+name: CPU container verification
+
+on:
+  push:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - environment/**
+      - Makefile
+      - scripts/**
+      - cm_theory/**
+      - cm_experiments/**
+      - cm_campaigns/**
+      - cross_morse/**
+      - paper/build/**
+      - tests/**
+      - .github/workflows/container.yml
+  pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - environment/**
+      - Makefile
+      - scripts/**
+      - cm_theory/**
+      - cm_experiments/**
+      - cm_campaigns/**
+      - cross_morse/**
+      - paper/build/**
+      - tests/**
+      - .github/workflows/container.yml
+  workflow_dispatch:
+  schedule:
+    - cron: "41 5 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker:
+    name: Build the CPU image and verify the source, tests and offline review
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build
+        run: docker build -t cross-morse:verify .
+      - name: Verify source and run the full CPU test suite without network access
+        run: docker run --rm --network none cross-morse:verify make verify test PYTHON=python
+      - name: Run the offline reviewer path inside the image
+        id: review
+        run: |
+          mkdir -p "$RUNNER_TEMP/reports"
+          docker run --rm --network none --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp -e MPLCONFIGDIR=/tmp/matplotlib \
+            -v "$RUNNER_TEMP/reports":/reports cross-morse:verify \
+            make review PYTHON=python REVIEW_OFFLINE=1 REVIEW_ROOT=/reports/review
+          test -f "$RUNNER_TEMP/reports/review/REVIEW_REPORT.md"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ always() && steps.review.outcome != 'skipped' }}
+        with:
+          name: container-review-report
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/reports/review/REVIEW_REPORT.md
+            ${{ runner.temp }}/reports/review/review.json
+            ${{ runner.temp }}/reports/review/review-*/CLAIMS.md
+            ${{ runner.temp }}/reports/review/review-*/AVAILABILITY_STATEMENT.txt
+            ${{ runner.temp }}/reports/review/review-*/*.json
+            ${{ runner.temp }}/reports/review/review-*/paper

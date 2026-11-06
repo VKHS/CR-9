@@ -1,0 +1,226 @@
+{
+ "benchmark_dataset": "ogbn-arxiv",
+ "data_kind": "synthetic",
+ "dataset": "ogbn-arxiv",
+ "environment": {
+  "cuda_runtime": null,
+  "cudnn_deterministic": false,
+  "deterministic_algorithms_enabled": false,
+  "device": "cpu",
+  "gpu": null,
+  "machine": "x86_64",
+  "numpy": "2.3.5",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "precision": "fp32",
+  "python": "3.12.14",
+  "python_implementation": "CPython",
+  "tf32_matmul": false,
+  "torch": "2.10.0+cpu"
+ },
+ "identities": {
+  "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+  "prepared_fingerprint": "9216d1272dc38d0dc1538c96739c84cd18bfe34f68c77debb642372ed1b421f7",
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "unit_sha256": "102f5f005748224879d337ba8c8fb33cdbf830615e628f06578fecb639262641"
+ },
+ "is_benchmark_data": false,
+ "packages": {
+  "Jinja2": "3.1.6",
+  "MarkupSafe": "3.0.3",
+  "PyMuPDF": "1.26.6",
+  "PyYAML": "6.0.3",
+  "aiohappyeyeballs": "2.7.1",
+  "aiohttp": "3.14.4",
+  "aiosignal": "1.4.0",
+  "annotated-types": "0.8.0",
+  "artifact_tool_v2": "2.8.106",
+  "attrs": "26.1.0",
+  "cadquery": "2.7.0",
+  "cadquery-ocp": "7.8.1.1.post1",
+  "casadi": "3.7.2",
+  "certifi": "2026.10.19",
+  "cffi": "2.1.1",
+  "charset-normalizer": "3.5.2",
+  "contourpy": "1.3.3",
+  "cryptography": "50.0.2",
+  "cycler": "0.12.1",
+  "et_xmlfile": "2.0.0",
+  "ezdxf": "1.4.4",
+  "filelock": "4.2.4",
+  "fonttools": "4.61.1",
+  "frozenlist": "1.8.0",
+  "fsspec": "2026.9.0",
+  "idna": "3.19",
+  "joblib": "1.5.3",
+  "kiwisolver": "1.4.9",
+  "littleutils": "0.2.4",
+  "lxml": "6.1.1",
+  "matplotlib": "3.10.8",
+  "more-itertools": "11.1.0",
+  "mpmath": "1.3.0",
+  "msgpack": "1.2.1",
+  "multidict": "6.7.1",
+  "multimethod": "1.12",
+  "networkx": "3.7",
+  "nlopt": "2.11.0",
+  "numpy": "2.3.5",
+  "ogb": "1.3.6",
+  "openpyxl": "3.1.5",
+  "outdated": "0.2.2",
+  "packaging": "26.3",
+  "pandas": "2.2.3",
+  "path": "17.1.1",
+  "pdf2image": "1.17.0",
+  "pdfminer.six": "20251230",
+  "pdfplumber": "0.11.9",
+  "pillow": "12.3.0",
+  "pip": "26.2.2",
+  "propcache": "0.5.2",
+  "pycparser": "3.11",
+  "pydantic": "2.14.1",
+  "pydantic_core": "2.50.1",
+  "pyhumps": "3.8.0",
+  "pymetis": "2025.2.2",
+  "pyparsing": "3.3.2",
+  "pypdf": "6.10.0",
+  "pypdfium2": "5.14.0",
+  "python-dateutil": "2.9.0.post0",
+  "python-docx": "1.2.0",
+  "python-pptx": "1.0.2",
+  "pytz": "2026.5",
+  "reportlab": "4.4.9",
+  "requests": "2.34.2",
+  "runtype": "0.5.3",
+  "scikit-learn": "1.8.0",
+  "scipy": "1.17.0",
+  "seaborn": "0.13.2",
+  "setuptools": "84.1.0",
+  "six": "1.17.0",
+  "sympy": "1.14.0",
+  "threadpoolctl": "3.6.0",
+  "torch": "2.10.0+cpu",
+  "tqdm": "4.70.1",
+  "trame": "3.13.2",
+  "trame-client": "3.13.6",
+  "trame-common": "1.2.7",
+  "trame-components": "2.5.0",
+  "trame-server": "3.14.0",
+  "trame-vtk": "2.11.16",
+  "trame-vuetify": "3.2.5",
+  "typing-inspection": "0.4.4",
+  "typing_extensions": "4.16.0",
+  "tzdata": "2026.5",
+  "urllib3": "2.8.0",
+  "uv": "0.13.4",
+  "vtk": "9.3.1",
+  "websockets": "16.0",
+  "wheel": "0.48.0",
+  "wslink": "2.5.7",
+  "xlrd": "2.0.1",
+  "xlsxwriter": "3.2.9",
+  "yarl": "1.25.1",
+  "zstandard": "0.25.0"
+ },
+ "policy_lock": {
+  "comparator_hash": "fce702bb8c7c7cef54009fb6e06f6654f1ed2aabcb9088e1bb7c8d9e109a31a6",
+  "deployed_hash": "fce702bb8c7c7cef54009fb6e06f6654f1ed2aabcb9088e1bb7c8d9e109a31a6",
+  "model_hashes": {
+   "fit/full/controller.pt": "9bbf435dde4482a82489aa4cee9ea6ef1b323fe7434527dd90ffab0abca6d2e2",
+   "fit/lean/controller.pt": "f5c46e63adf799477a2a2f04aa26eace181c4d2c913e4ff00c5d9c5fe8133fee",
+   "train/plant_seed1_best.pt": "d4a17ff736ec730e250835756a3434530543613e8c4da003150734f5095b0476",
+   "train/plant_seed2_best.pt": "621c2f0cb2eb79962166598b12d7fe6a603b27a1c40fb76a619aaca450a535c7",
+   "train/q0_seed1_best.pt": "3e8c5eec06e6197abf9835e3ae03f0f6b17a0e3f7d77fc2aa64cc6eed56ba9a4",
+   "train/q0_seed2_best.pt": "d9b41cc94550e0f4649bfb93d2542bf5b7d4c1dd0bb2bb846827f1ec91f062af"
+  }
+ },
+ "profile": "smoke",
+ "run_name": "arxiv",
+ "schema": "cross-morse-run-manifest-1",
+ "scientific_run": false,
+ "seeds": {
+  "bootstrap_seeds": {
+   "admission": 314165,
+   "final": 314166,
+   "selection": 314163
+  },
+  "ensemble_seeds": {
+   "qC": [
+    1,
+    2
+   ],
+   "qD": [
+    1,
+    2
+   ]
+  },
+  "partition_seed": 314159,
+  "split_index": null,
+  "training_seeds": [
+   1,
+   2
+  ]
+ },
+ "source_data": {
+  "num_features": 12,
+  "num_graphs": 1,
+  "num_nodes": 160,
+  "num_outputs": 4,
+  "source": "synthetic_fixture",
+  "source_array_hashes": {
+   "edge_index": "ddbb7e114537fd4c22ef5ba8061829c1c4372c19017205e08b40265d7070c7e7",
+   "x": "35dedcb0aa3d8a4f76f7f60ab5c434383e1477a0e497b33a1715d63d5a5767a0",
+   "y": "837e5df7788952710873eca29a428ccb82f51cc039f1437674eceff50c08c78f"
+  }
+ },
+ "splits": {
+  "arrays": {
+   "clusters.npz": {
+    "bytes": 1556,
+    "sha256": "763b7e089d4ee6676c253ab96833619193be1dc9f4f2c743752f86de0324eef3"
+   },
+   "official_splits.npz": {
+    "bytes": 2026,
+    "sha256": "ac5f5014c191ca39be874bc8161ac89cc27923f7cebea39177456bb29c84d72f"
+   },
+   "splits.npz": {
+    "bytes": 3956,
+    "sha256": "102f5f005748224879d337ba8c8fb33cdbf830615e628f06578fecb639262641"
+   }
+  },
+  "comparison_reserved_at": "prepare",
+  "graph_role_hashes": null,
+  "independent_graphs": false,
+  "official_split_axis": "node",
+  "official_split_hashes": {
+   "test": "5805e21c23157b5091a6e2ef73982ba3464cc0cc73642ef5ec75addd64f6d59a",
+   "train": "3c99a813c2d300c0a4fd4269462f147e3023ab6115a0bd5595f4fa41c69fc8d1",
+   "valid": "38982c31b52ad4dab5826a9c2d708354922f0e04a7b912e01fda8450a9578738"
+  },
+  "role_hashes": {
+   "admit": "38982c31b52ad4dab5826a9c2d708354922f0e04a7b912e01fda8450a9578738",
+   "compare": "50872d234494300b233b33aad00e1330822c3c3abf0eff48d9013a6e025d91ec",
+   "confirm": "51049ba5d26a304c4ebc57bb3ebabf8d25f3a84d94b2d534627513afed187e9d",
+   "explore": "f4c09ea956b657e1ba0a92798fdcc6ea84ef5d3b815eba8a60f7ca9b420dad9d",
+   "fit": "e3bb5bc83f6f699f7296167b7ea252c462ba033d9ef26cb2cbcd8aaa8662b85a",
+   "fit_train": "5863507a68e3ec70e4ba6ab16e6597c76a25930ae907f0406f729e3e952798c2",
+   "fit_val": "edfeeed949d89b95e0d8cf9c8ed187509ee04aa8310463da66f77752d7a16cf5",
+   "select": "a8c2461426087ae5d5cdb02d12bca82e58ec268cb34310a1cc3a7cbe0d8d58f3",
+   "test": "5805e21c23157b5091a6e2ef73982ba3464cc0cc73642ef5ec75addd64f6d59a"
+  },
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": {
+   "admit": 32,
+   "compare": 5,
+   "confirm": 5,
+   "explore": 19,
+   "fit": 57,
+   "fit_train": 52,
+   "fit_val": 5,
+   "select": 10,
+   "test": 32
+  },
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "statistical_unit": "balanced synthetic core",
+  "unit": "node"
+ }
+}

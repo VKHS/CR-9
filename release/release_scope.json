@@ -1,0 +1,69 @@
+{
+  "schema_version": "3.0",
+  "release_type": "reference-implementation-with-role-isolated-evaluation",
+  "repository_url": "https://github.com/VKHS/CR-9",
+  "code_archive_doi": null,
+  "scientific_scope": [
+    "ogbn-arxiv",
+    "ogbn-products",
+    "ogbn-proteins",
+    "Roman-empire",
+    "PascalVOC-SP",
+    "COCO-SP",
+    "Peptides-func"
+  ],
+  "original_trained_weights_included": false,
+  "original_result_archives_included": false,
+  "full_official_dataset_runs_verified": [],
+  "one_command_original_tables_reproduction_claimed": false,
+  "published_numbers_inserted_as_computed_results": false,
+  "official_datasets_redistributed": false,
+  "all_paper_dataset_adapters_implemented": true,
+  "all_external_baselines_and_hpo_reproduced": false,
+  "all_E1_E20_audits_reproduced": false,
+  "full_graph_execution_for_products": true,
+  "partition_local_execution_for_products": false,
+  "bundled_synthetic_examples_included": true,
+  "bundled_examples_are_benchmark_results": false,
+  "bundled_example_run_roots": [
+    "examples/runs/arxiv",
+    "examples/runs/peptides_func"
+  ],
+  "run_archive_contract": {
+    "pack": "scripts/archive_run.py",
+    "ingest": "scripts/ingest_run.py",
+    "index": "runs/index.json",
+    "tables_and_figures": "scripts/build_paper.py (make tables, make figures)",
+    "manifests": "scripts/run_manifests.py (make manifests)",
+    "availability_statement": "scripts/availability.py (make availability, make availability-check)"
+  },
+  "manuscript_registry": {
+    "role": "Numerical comparison targets and protocol constants transcribed with page provenance; run-derived tables and figures read archived observations.",
+    "registered_constants": "paper/registered_constants.json",
+    "reported_results": "paper/reported_results.json",
+    "implementation_notes": "paper/IMPLEMENTATION_NOTES.md",
+    "constant_check": "scripts/check_paper_constants.py",
+    "run_comparison": "scripts/compare_with_manuscript.py",
+    "values_are_transcribed_not_computed": true
+  },
+  "data_use_sequence": "official train 60/20/10/5/5 fit/explore/select/confirm/compare; compare reserved during prepare; official validation admit; official test after lock",
+  "validated_runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+  "site_profile_policy": "configs/arrhenius-site.env.example ships the Arrhenius partition, architecture, module, environment and storage layout; the NAISS allocation and storage project identifiers are placeholders filled from the project's NAISS page before submitting jobs",
+  "measurement_records_contract": {
+    "specs": "records/specs.json",
+    "tool": "scripts/records.py (make records-index, make records-check, make records-tables)",
+    "index": "records/index.json",
+    "record_sets": 10,
+    "trace": "every summary value is re-read from its raw log at its printed precision"
+  },
+  "manuscript_documents": "PDFs are not distributed. paper/sources.json retains reference hashes, sizes, page counts and table/page mappings; optional local copies can be byte-verified.",
+  "scientific_evidence_gate": "scripts/scientific_evidence_audit.py",
+  "source_provenance": {
+    "based_on_repository": "https://github.com/VKHS/CR-7",
+    "based_on_commit": "702290b6aa4ce6c6d5bf1a4709fc64eb51807e70",
+    "corrections_date": "2026-10-30",
+    "benchmark_results_recreated": false
+  },
+  "paper_support_inventory": "paper/display_manifest.json",
+  "current_manuscript_review": "paper/transcription_check.json"
+}

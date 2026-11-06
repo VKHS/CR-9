@@ -1,0 +1,640 @@
+{
+  "calibration": {
+    "actions": {
+      "0": {
+        "radius": 0.0,
+        "row_count": 3,
+        "selected_action_only": false,
+        "small_sample": true,
+        "source": "analytic nominal-relative identity",
+        "trajectory_count": 2
+      },
+      "1": {
+        "radius": 0.016735867597162724,
+        "row_count": 1,
+        "selected_action_only": false,
+        "small_sample": true,
+        "source": "held-out all-logged-action trajectory maxima",
+        "trajectory_count": 1
+      },
+      "3": {
+        "radius": 0.007531159557402134,
+        "row_count": 2,
+        "selected_action_only": false,
+        "small_sample": true,
+        "source": "held-out all-logged-action trajectory maxima",
+        "trajectory_count": 2
+      },
+      "4": {
+        "radius": 0.02169711049646139,
+        "row_count": 2,
+        "selected_action_only": false,
+        "small_sample": true,
+        "source": "held-out all-logged-action trajectory maxima",
+        "trajectory_count": 2
+      },
+      "7": {
+        "radius": 0.022000628523528576,
+        "row_count": 1,
+        "selected_action_only": false,
+        "small_sample": true,
+        "source": "held-out all-logged-action trajectory maxima",
+        "trajectory_count": 1
+      },
+      "9": {
+        "radius": 0.4365657549351454,
+        "row_count": 3,
+        "selected_action_only": false,
+        "small_sample": true,
+        "source": "held-out all-logged-action trajectory maxima",
+        "trajectory_count": 2
+      }
+    },
+    "aggregation": "maximum absolute residual per calibration trajectory within each action/cell",
+    "alpha": 0.05,
+    "cells": {},
+    "coverage_status": "EMPIRICAL_ONLY; held-out trajectories share a graph; no finite-sample coverage claim",
+    "empirical_quantile_level": 0.95,
+    "fallback": "action-pooled radius if cell too small; infinity if action unobserved",
+    "minimum_trajectories_for_cell": 20,
+    "quantile_method": "numpy higher empirical quantile, not a conformal guarantee",
+    "selection_preference": "none; all logged actions; separate post-freeze assessment"
+  },
+  "calibration_assessment": {
+    "assessment_labels_used_for_fitting": false,
+    "data_role": "Dexplore assessment holdout",
+    "estimand": "absolute nominal-relative critic residual within empirical radius on matched logged states",
+    "policies": [
+      {
+        "all_actions": {
+          "covered_rows": 1,
+          "finite_radius_rows": 0,
+          "ipw_residual_radius_coverage": 1.0,
+          "matched_residual_radius_coverage": 1.0,
+          "matched_rows": 1,
+          "matched_trajectories": 1
+        },
+        "eligible_rows": 10,
+        "kappa": 0.0,
+        "kind": "one_step",
+        "nominal_matches": 0,
+        "nonnominal_actions": {
+          "covered_rows": 1,
+          "finite_radius_rows": 0,
+          "ipw_residual_radius_coverage": 1.0,
+          "matched_residual_radius_coverage": 1.0,
+          "matched_rows": 1,
+          "matched_trajectories": 1
+        },
+        "recovery_or_unscorable_rows": 2
+      },
+      {
+        "all_actions": {
+          "covered_rows": 4,
+          "finite_radius_rows": 4,
+          "ipw_residual_radius_coverage": 1.0,
+          "matched_residual_radius_coverage": 1.0,
+          "matched_rows": 4,
+          "matched_trajectories": 1
+        },
+        "eligible_rows": 10,
+        "kappa": 1.0,
+        "kind": "radius",
+        "nominal_matches": 4,
+        "nonnominal_actions": {
+          "covered_rows": 0,
+          "finite_radius_rows": 0,
+          "ipw_residual_radius_coverage": null,
+          "matched_residual_radius_coverage": null,
+          "matched_rows": 0,
+          "matched_trajectories": 0
+        },
+        "recovery_or_unscorable_rows": 2
+      }
+    ],
+    "policy_state_distribution_coverage": "NOT_MEASURED",
+    "radii_frozen_before_assessment": true,
+    "rows": 12,
+    "schema_version": "calibration-assessment-2",
+    "scope": "off-policy logged-history diagnostic; not complete-policy, sequence, or independent-graph coverage",
+    "score_contract": "mean_kappa_sigma_radius_transport_v2",
+    "sequence_coverage": "NOT_MEASURED",
+    "trajectories": 2
+  },
+  "calibration_partition": {
+    "assessment_fraction": 0.2,
+    "assessment_used_for_selection": false,
+    "calibration_fraction": 0.2,
+    "data_role": "Dexplore",
+    "fingerprint": "df22e09a984432e0ce4b211f9fbe6144503b75f270ced7295638d6203d7d9fe3",
+    "group_definition": "complete seed_index/trajectory pair; not independent graphs",
+    "groups": {
+      "assessment": [
+        3,
+        10
+      ],
+      "model_fit": [
+        0,
+        1,
+        2,
+        4,
+        6,
+        7,
+        9,
+        11
+      ],
+      "radius_fit": [
+        5,
+        8
+      ]
+    },
+    "protocol": "trajectory_holdout_v2",
+    "role_codes": {
+      "0": "model_fit",
+      "1": "radius_fit",
+      "2": "assessment"
+    },
+    "rows": {
+      "assessment": 12,
+      "model_fit": 48,
+      "radius_fit": 12
+    },
+    "shared_graph": true,
+    "split_seed": 319876
+  },
+  "crossfit_folds": 3,
+  "final_fit": {
+    "fitting_rows": 48,
+    "fitting_trajectories": 8,
+    "internal_optimization_trajectories": 7,
+    "internal_validation_groups": [
+      6
+    ],
+    "internal_validation_trajectories": 1,
+    "model_training": {
+      "critic": {
+        "best_epoch": 2,
+        "best_internal_validation_loss": 0.08624880760908127,
+        "epochs_run": 3,
+        "history": [
+          {
+            "epoch": 0,
+            "internal_validation_loss": 0.09234490245580673,
+            "train_loss": 0.5040140151977539,
+            "validation_target_rows": 6
+          },
+          {
+            "epoch": 1,
+            "internal_validation_loss": 0.08944831043481827,
+            "train_loss": 0.49109235405921936,
+            "validation_target_rows": 6
+          },
+          {
+            "epoch": 2,
+            "internal_validation_loss": 0.08624880760908127,
+            "train_loss": 0.4854481518268585,
+            "validation_target_rows": 6
+          }
+        ],
+        "status": "trained",
+        "train_rows": 42,
+        "validation_rows": 6,
+        "validation_status": "heldout trajectories"
+      },
+      "stage": {
+        "best_epoch": 2,
+        "best_internal_validation_loss": 0.1506737619638443,
+        "epochs_run": 3,
+        "history": [
+          {
+            "epoch": 0,
+            "internal_validation_loss": 0.20141184329986572,
+            "train_loss": 0.9830060601234436,
+            "validation_target_rows": 6
+          },
+          {
+            "epoch": 1,
+            "internal_validation_loss": 0.17292241752147675,
+            "train_loss": 0.8773778080940247,
+            "validation_target_rows": 6
+          },
+          {
+            "epoch": 2,
+            "internal_validation_loss": 0.1506737619638443,
+            "train_loss": 0.7793291211128235,
+            "validation_target_rows": 6
+          }
+        ],
+        "status": "trained",
+        "train_rows": 42,
+        "validation_rows": 6,
+        "validation_status": "heldout trajectories"
+      },
+      "terminal": {
+        "best_epoch": 2,
+        "best_internal_validation_loss": 0.0262459646910429,
+        "epochs_run": 3,
+        "history": [
+          {
+            "epoch": 0,
+            "internal_validation_loss": 0.06661701202392578,
+            "train_loss": 0.9810991883277893,
+            "validation_target_rows": 1
+          },
+          {
+            "epoch": 1,
+            "internal_validation_loss": 0.044140417128801346,
+            "train_loss": 0.8753418922424316,
+            "validation_target_rows": 1
+          },
+          {
+            "epoch": 2,
+            "internal_validation_loss": 0.0262459646910429,
+            "train_loss": 0.778967022895813,
+            "validation_target_rows": 1
+          }
+        ],
+        "status": "trained",
+        "train_rows": 7,
+        "validation_rows": 1,
+        "validation_status": "heldout trajectories"
+      },
+      "transition": {
+        "best_epoch": 2,
+        "best_internal_validation_loss": 0.4166776239871979,
+        "epochs_run": 3,
+        "history": [
+          {
+            "epoch": 0,
+            "internal_validation_loss": 0.44738250970840454,
+            "train_loss": 1.0333455801010132,
+            "validation_target_rows": 6
+          },
+          {
+            "epoch": 1,
+            "internal_validation_loss": 0.43141958117485046,
+            "train_loss": 0.9877089262008667,
+            "validation_target_rows": 6
+          },
+          {
+            "epoch": 2,
+            "internal_validation_loss": 0.4166776239871979,
+            "train_loss": 0.9439626932144165,
+            "validation_target_rows": 6
+          }
+        ],
+        "status": "trained",
+        "train_rows": 42,
+        "validation_rows": 6,
+        "validation_status": "heldout trajectories"
+      }
+    },
+    "nis_threshold": 6.0
+  },
+  "fingerprint": "df22e09a984432e0ce4b211f9fbe6144503b75f270ced7295638d6203d7d9fe3",
+  "folds": [
+    {
+      "early_stopping": "internal fitting trajectories; never the OOF fold",
+      "fitting_rows": 30,
+      "fitting_trajectories": 5,
+      "fold": 0,
+      "heldout_rows": 18,
+      "heldout_trajectories": 3,
+      "rmse": 0.01857378848870228,
+      "trajectory_overlap": 0
+    },
+    {
+      "early_stopping": "internal fitting trajectories; never the OOF fold",
+      "fitting_rows": 30,
+      "fitting_trajectories": 5,
+      "fold": 1,
+      "heldout_rows": 18,
+      "heldout_trajectories": 3,
+      "rmse": 0.010986547698881254,
+      "trajectory_overlap": 0
+    },
+    {
+      "early_stopping": "internal fitting trajectories; never the OOF fold",
+      "fitting_rows": 36,
+      "fitting_trajectories": 6,
+      "fold": 2,
+      "heldout_rows": 12,
+      "heldout_trajectories": 2,
+      "rmse": 0.04593634552366671,
+      "trajectory_overlap": 0
+    }
+  ],
+  "implementation_choices": {
+    "NIS": "empirical internal-validation 99th percentile, lower floor state_dim",
+    "calibration": "held-out trajectory-max radii; disjoint assessment partition",
+    "latent": "PCA16 unless configured; conditioned ridge; covariance rank4 plus diagonal",
+    "normalization": "training median/MAD, replacement by median, clip[-5,5]",
+    "operational_penalty": 0.0,
+    "support_unit": "mean inverse propensity within model-fit seed/trajectory/action/stratum cell",
+    "terminal": "remaining nominal CE increment; unavailable if no finite fitting targets"
+  },
+  "oof_rmse": 0.026498502853057368,
+  "oof_rmse_scope": "cross-fitted model-fit partition only; holdouts reported separately",
+  "profile": "lean",
+  "rows": 72,
+  "schema_version": "cross-morse-learning-audit-2",
+  "support": {
+    "cells": {
+      "2:0": {
+        "action": 0,
+        "ess": 4.0,
+        "ess_upper_bound_from_max_weight": 16.0,
+        "max_normalized_weight": 0.25,
+        "min_propensity": 0.2800000011920929,
+        "qualified": true,
+        "row_count": 4,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.25,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 4
+      },
+      "2:1": {
+        "action": 1,
+        "ess": 4.999999999999999,
+        "ess_upper_bound_from_max_weight": 24.999999999999996,
+        "max_normalized_weight": 0.2,
+        "min_propensity": 0.09000000357627869,
+        "qualified": true,
+        "row_count": 6,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.20000000000000004,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 5
+      },
+      "2:2": {
+        "action": 2,
+        "ess": 3.0,
+        "ess_upper_bound_from_max_weight": 9.0,
+        "max_normalized_weight": 0.3333333333333333,
+        "min_propensity": 0.09000000357627869,
+        "qualified": true,
+        "row_count": 3,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.3333333333333333,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 3
+      },
+      "2:3": {
+        "action": 3,
+        "ess": 1.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.09000000357627869,
+        "qualified": false,
+        "row_count": 1,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 1.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 1
+      },
+      "2:4": {
+        "action": 4,
+        "ess": 2.0,
+        "ess_upper_bound_from_max_weight": 4.0,
+        "max_normalized_weight": 0.5,
+        "min_propensity": 0.09000000357627869,
+        "qualified": true,
+        "row_count": 3,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.5,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 2
+      },
+      "2:5": {
+        "action": 5,
+        "ess": 2.0,
+        "ess_upper_bound_from_max_weight": 4.0,
+        "max_normalized_weight": 0.5,
+        "min_propensity": 0.09000000357627869,
+        "qualified": true,
+        "row_count": 2,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.5,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 2
+      },
+      "2:6": {
+        "action": 6,
+        "ess": 1.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.09000000357627869,
+        "qualified": false,
+        "row_count": 1,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 1.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 1
+      },
+      "2:7": {
+        "action": 7,
+        "ess": 2.0,
+        "ess_upper_bound_from_max_weight": 4.0,
+        "max_normalized_weight": 0.5,
+        "min_propensity": 0.07999999821186066,
+        "qualified": true,
+        "row_count": 2,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.5,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 2
+      },
+      "2:8": {
+        "action": 8,
+        "ess": 2.0,
+        "ess_upper_bound_from_max_weight": 4.0,
+        "max_normalized_weight": 0.5,
+        "min_propensity": 0.05000000074505806,
+        "qualified": true,
+        "row_count": 2,
+        "stratum": 2,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.5,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 2
+      },
+      "2:9": {
+        "action": 9,
+        "ess": 0.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.0,
+        "qualified": false,
+        "row_count": 0,
+        "stratum": 2,
+        "sum_normalized_weights": 0.0,
+        "sum_squared_normalized_weights": 0.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 0
+      },
+      "5:0": {
+        "action": 0,
+        "ess": 6.999999999999997,
+        "ess_upper_bound_from_max_weight": 48.999999999999986,
+        "max_normalized_weight": 0.14285714285714288,
+        "min_propensity": 0.2800000011920929,
+        "qualified": true,
+        "row_count": 10,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0000000000000002,
+        "sum_squared_normalized_weights": 0.1428571428571429,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 7
+      },
+      "5:1": {
+        "action": 1,
+        "ess": 0.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.0,
+        "qualified": false,
+        "row_count": 0,
+        "stratum": 5,
+        "sum_normalized_weights": 0.0,
+        "sum_squared_normalized_weights": 0.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 0
+      },
+      "5:2": {
+        "action": 2,
+        "ess": 1.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.09000000357627869,
+        "qualified": false,
+        "row_count": 2,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 1.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 1
+      },
+      "5:3": {
+        "action": 3,
+        "ess": 0.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.0,
+        "qualified": false,
+        "row_count": 0,
+        "stratum": 5,
+        "sum_normalized_weights": 0.0,
+        "sum_squared_normalized_weights": 0.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 0
+      },
+      "5:4": {
+        "action": 4,
+        "ess": 4.999999999999999,
+        "ess_upper_bound_from_max_weight": 24.999999999999996,
+        "max_normalized_weight": 0.2,
+        "min_propensity": 0.09000000357627869,
+        "qualified": true,
+        "row_count": 5,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.20000000000000004,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 5
+      },
+      "5:5": {
+        "action": 5,
+        "ess": 2.0,
+        "ess_upper_bound_from_max_weight": 4.0,
+        "max_normalized_weight": 0.5,
+        "min_propensity": 0.09000000357627869,
+        "qualified": true,
+        "row_count": 2,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 0.5,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 2
+      },
+      "5:6": {
+        "action": 6,
+        "ess": 1.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.09000000357627869,
+        "qualified": false,
+        "row_count": 1,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 1.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 1
+      },
+      "5:7": {
+        "action": 7,
+        "ess": 1.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.07999999821186066,
+        "qualified": false,
+        "row_count": 1,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 1.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 1
+      },
+      "5:8": {
+        "action": 8,
+        "ess": 1.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.05000000074505806,
+        "qualified": false,
+        "row_count": 2,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 1.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 1
+      },
+      "5:9": {
+        "action": 9,
+        "ess": 1.0,
+        "ess_upper_bound_from_max_weight": 1.0,
+        "max_normalized_weight": 1.0,
+        "min_propensity": 0.05000000074505806,
+        "qualified": false,
+        "row_count": 1,
+        "stratum": 5,
+        "sum_normalized_weights": 1.0,
+        "sum_squared_normalized_weights": 1.0,
+        "support_arithmetic_valid": true,
+        "trajectory_count": 1
+      }
+    },
+    "dependence": "diagnostic support only; repeated graph trajectories are not independent graphs",
+    "qualified_fraction": 0.5,
+    "registered_strata": [
+      2,
+      5
+    ],
+    "thresholds": {
+      "max_normalized_weight": 1.0,
+      "n_min": 2.0,
+      "p_min": 0.05
+    },
+    "unit": "complete seed/trajectory; mean inverse propensity within a cell"
+  },
+  "terminal_available": true,
+  "train_data_role": "Dexplore only; trajectory-partitioned fitting, calibration, assessment",
+  "trajectories": 12
+}

@@ -1,0 +1,44 @@
+{
+ "command": [
+  "scripts/export_records.py",
+  "from-runs",
+  "--set",
+  "sensor_parameters",
+  "--root",
+  "examples/records",
+  "--run",
+  "examples/runs/arxiv",
+  "--run",
+  "examples/runs/peptides_func"
+ ],
+ "exporter": "scripts/export_records.py",
+ "inputs": [
+  {
+   "file": "arxiv/config.json",
+   "sha256": "a1fd493604e19f78b6fbb1b0a7f09d287f14354ada4054e777b677b6ac7d08cc"
+  },
+  {
+   "file": "arxiv/final/results_summary.json",
+   "sha256": "50c86db4512943aa786beb2922c1204543bec119423bea468cc2f7c0a871750e"
+  },
+  {
+   "file": "arxiv/predictions/fce702bb8c7c7cef5400.json",
+   "sha256": "76adac34ed358cdfb11afa5518c96c84988f426154a7b0447e4f63ce5c9260b6"
+  },
+  {
+   "file": "peptides_func/config.json",
+   "sha256": "bed1ae3f8e9467c5d32e5a0ede9e3577eb412dab4ccd3ffd300f3262602970ca"
+  },
+  {
+   "file": "peptides_func/final/results_summary.json",
+   "sha256": "e972cd01748bc08b278903abec0024f8284d76ecd9f04a801b5ee90f90ea4d43"
+  },
+  {
+   "file": "peptides_func/predictions/64637bcf4ba34c4918c2.json",
+   "sha256": "e96435c2d845c5b96b4b3714c2a5d28cd690a4f9873f1f567b26b1bd0880ffa3"
+  }
+ ],
+ "repository_commit": "6dd3f30ee05b8ced0412df688f725b4eb5155857",
+ "runtime_source_sha256": "fbab5e5b06a0783d73bcbae495dccdd0662ecb377b2b62f7e9d7dd79ba17be6e",
+ "schema": "cross-morse-record-source-1"
+}

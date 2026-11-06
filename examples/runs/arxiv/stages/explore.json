@@ -1,0 +1,80 @@
+{
+  "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+  "label_accesses": [
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    },
+    {
+      "nodes": 19,
+      "role": "explore",
+      "stage": "explore"
+    }
+  ],
+  "manifest_sha256": "1cc488bf73daa74822c4970e49b7298d490e2f7416b0998d7dfdb3eba4eed3db",
+  "seconds_this_attempt": 0.4917326110007707,
+  "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+  "stage": "explore",
+  "status": "COMPLETE"
+}

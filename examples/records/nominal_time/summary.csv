@@ -1,0 +1,3 @@
+dataset,quantity,value,unit,source_file,locator
+ogbn-arxiv (synthetic),t_nom_seconds,0.001856871002,s,raw/arxiv/t_nom.json,json:/t_nom_seconds
+Peptides-func (synthetic),t_nom_seconds,0.001495748688,s,raw/peptides_func/t_nom.json,json:/t_nom_seconds

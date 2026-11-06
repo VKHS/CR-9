@@ -1,0 +1,65 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "CROSS-MORSE",
+  "description": "Reference implementation of CROSS-MORSE: inference-time control of message passing in frozen graph neural networks, with seven dataset adapters, a sealed eight-stage lifecycle, numerical replay, run-archive and measurement-record contracts, and evidence-backed table and figure builders.",
+  "codeRepository": "https://github.com/VKHS/CR-9",
+  "issueTracker": "https://github.com/VKHS/CR-9/issues",
+  "license": "https://spdx.org/licenses/BSD-3-Clause",
+  "programmingLanguage": [
+    {
+      "@type": "ComputerLanguage",
+      "name": "Python",
+      "version": ">=3.11"
+    }
+  ],
+  "runtimePlatform": "Python 3.12",
+  "operatingSystem": "Linux",
+  "softwareRequirements": [
+    "numpy>=1.26,<3",
+    "scipy>=1.11,<2",
+    "ogb==1.3.6",
+    "pymetis>=2023.1",
+    "torch (CPU or CUDA build matching the host; recorded CPU pin in environment/requirements-cpu.lock)"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Abdolvahab",
+      "familyName": "Khalili Sadaghiani",
+      "email": "abdolvahab.khalili.sadaghiani@liu.se",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Linköping University"
+      }
+    },
+    {
+      "@type": "Person",
+      "givenName": "Jose",
+      "familyName": "Nunez-Yanez",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Linköping University"
+      }
+    }
+  ],
+  "keywords": [
+    "graph neural networks",
+    "adaptive message passing",
+    "cross-spectral analysis",
+    "nominal-relative control",
+    "model predictive control",
+    "risk-aware deployment",
+    "reproducibility"
+  ],
+  "developmentStatus": "active",
+  "readme": "https://github.com/VKHS/CR-9/blob/main/README.md",
+  "buildInstructions": "https://github.com/VKHS/CR-9/blob/main/docs/GETTING_STARTED.md",
+  "continuousIntegration": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
+  "referencePublication": {
+    "@type": "ScholarlyArticle",
+    "name": "CROSS-MORSE: Cross-Spectral Control of Message Passing in Frozen Graph Neural Networks",
+    "author": "Abdolvahab Khalili Sadaghiani and Jose Nunez-Yanez",
+    "publisher": "Scientific Reports (manuscript under review)"
+  }
+}
