@@ -24,10 +24,12 @@ agreement with Table S5 at its printed precision.
 parameter counts against the manuscript targets.
 
 [CLAIMS.md](CLAIMS.md) is the generated claim-to-evidence ledger: every table group
-of `sources.json` with its producing experiment, the deposit it requires and the status
-of that deposit in the checkout (`make claims`, checked by `make claims-check`).
+of `sources.json` with its producing experiment, its builder and how this release
+regenerates it (`make claims`, checked by `make claims-check`).
 [AVAILABILITY_STATEMENT.txt](AVAILABILITY_STATEMENT.txt) is the journal availability
 paragraph generated from the same state (`make availability-statement`).
+`run_cross_morse.sh reproduce` regenerates the run-derived results and compares
+them with `reported_results.json` ([HPC guide](../docs/HPC.md)).
 
 ## Check references
 
@@ -103,9 +105,5 @@ structure, referenced paths, source identities and generated views.
 [MANUSCRIPT_REVIEW.md](MANUSCRIPT_REVIEW.md) records the contextual review of the
 provided PDFs. The associated review binds the exact document bytes, registry
 files and table-page map. This checks correspondence of the supplied sources;
-original observations remain necessary for independent empirical replay.
-
-The obsolete development workspace is retained in
-[the preceding Git revision](https://github.com/VKHS/CR-9/tree/89bbd136625d581027a84755cef0715cf2231a5f).
-The current paper presentation contains the completed study and its verification
-requirements.
+`run_cross_morse.sh reproduce` regenerates the observations and its report
+compares them with these registries ([HPC guide](../docs/HPC.md)).

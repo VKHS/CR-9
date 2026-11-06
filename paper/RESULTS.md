@@ -18,7 +18,7 @@ Loss is the paired CE or mean multilabel BCE difference against the named datase
 | COCO-SP | MPC-RH, E=8 | CE | -0.00905 | [-0.01270, -0.00540] | +0.65 macro F1 | [0.42, 0.88] |
 | Peptides-func | radius, E=4 (evaluated arm) | BCE | -0.00303 | [-0.00470, -0.00130] | +0.58 AP | [0.09, 1.07] |
 
-**Peptides:** the radius values are the reported evaluated-arm measurements. The printed Holm value 0.070 does not pass the registered 0.05 threshold. The original corrected confirmation record is needed to support a different final policy. The evaluated-arm values remain visible here and separately named in the CSV.
+**Peptides:** the radius values are the reported evaluated-arm measurements. The printed Holm value 0.070 does not pass the registered 0.05 threshold, so the registered confirmation rule returns q_C; a different final policy requires its own corrected confirmation record. The evaluated-arm values remain visible here and separately named in the CSV. A regenerated run records its own confirmation decision in `confirm/decision.json`.
 
 ## Main Table 2: reported work and analytical cost quantities
 
@@ -36,23 +36,23 @@ The unit is one nominal full-depth execution. Expected cost is branch-weighted w
 
 ## Registered confirmation interpretation
 
-This separate view applies the frozen confirmation interpretation already recorded in the repository. When it returns qC, zero paired effect follows from comparator identity; it is not a replacement measurement. The full original decision record remains required for independent verification of each historical deployment.
+This separate view applies the frozen confirmation interpretation already recorded in the repository. When it returns qC, zero paired effect follows from comparator identity; it is not a replacement measurement. A regenerated run records the complete decision trail of its own deployment: selection ledger, confirmation and admission records and the policy lock.
 
 | Dataset | Registered final rule | Loss difference, nats | Interpretation |
 |---|---|---|---|
-| ogbn-arxiv | radius | -0.00450 | Reported policy outcome; original run required for replay |
-| ogbn-proteins | radius | -0.00380 | Reported policy outcome; original run required for replay |
+| ogbn-arxiv | radius | -0.00450 | Reported policy outcome; a regenerated run records its own decision trail |
+| ogbn-proteins | radius | -0.00380 | Reported policy outcome; a regenerated run records its own decision trail |
 | ogbn-products | qC returned | +0.00000 | Comparator identity; no new measurement |
-| Roman-empire | MPC-RH | -0.00572 | Reported arm; full selector ledger required |
-| PascalVOC-SP | MPC-RH | -0.00842 | Reported arm; full selector ledger required |
-| COCO-SP | MPC-RH | -0.00905 | Reported arm; full selector ledger required |
+| Roman-empire | MPC-RH | -0.00572 | Reported arm; a regenerated run records the full selector ledger |
+| PascalVOC-SP | MPC-RH | -0.00842 | Reported arm; a regenerated run records the full selector ledger |
+| COCO-SP | MPC-RH | -0.00905 | Reported arm; a regenerated run records the full selector ledger |
 | Peptides-func | qC returned | +0.00000 | Comparator identity; no new measurement |
 
-Roman, Pascal and COCO need the complete eligible candidate ledger to reconcile the reported MPC-RH choices with the representative rows in S12/S12c. S14 requires its original nine-test joint family; local per-run tests have a different scope. See [the source review](MANUSCRIPT_REVIEW.md) and [implementation notes](IMPLEMENTATION_NOTES.md).
+On Roman, Pascal and COCO the complete eligible candidate ledger decides between the reported MPC-RH choices and the radius preference of the representative rows in S12/S12c; a regenerated run records that ledger in `select/candidates.json` and `select/decision.json`. S14 reports one joint nine-test family; local per-run tests have a different scope. See [the source review](MANUSCRIPT_REVIEW.md) and [implementation notes](IMPLEMENTATION_NOTES.md).
 
-## Reproduction inputs
+## Regenerating these results
 
-The indexes currently register **0/7** official archives and **0/10** auxiliary measurement sets. The source registry records what the paper reports; `make paper` reconstructs supported outputs from original observations after registration. `make scientific-audit` checks their evidence and decision records. The [registration guide](../docs/EVIDENCE_REGISTRATION.md) covers the already completed runs.
+This release distributes no run outputs. `bash run_cross_morse.sh reproduce` regenerates them on a Slurm GPU cluster and writes `REPRODUCTION_REPORT.md`, which rebuilds Tables 1–2 from the regenerated runs and places each value of the tables above beside the regenerated one; `make compare RUN_ROOT=...` compares a single run. The [HPC guide](../docs/HPC.md) covers the site settings, the compute and the outputs.
 
 ## Source identities
 

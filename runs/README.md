@@ -1,11 +1,14 @@
-# Official-data run archives
+# Run archive index
 
-This directory receives the verified run archives behind the paper's reported numbers, one
-subdirectory per dataset (`arxiv/`, `proteins/`, `products/`, `roman_empire/` with
-`split_00` … `split_09`, `pascalvoc_sp/`, `coco_sp/`, `peptides_func/`). Large archives
-can be stored in a persistent deposit; each indexed DOI must identify the actual
-archive. Git tracks this guide and `index.json`. Current deposited coverage is
-listed in [AVAILABILITY.md](../AVAILABILITY.md).
+This release distributes no run archives: `run_cross_morse.sh reproduce`
+regenerates the runs ([HPC guide](../docs/HPC.md)), and `index.json` is empty.
+The index accepts verified archives, one subdirectory per dataset (`arxiv/`,
+`proteins/`, `products/`, `roman_empire/` with `split_00` … `split_09`,
+`pascalvoc_sp/`, `coco_sp/`, `peptides_func/`), for example the sealed archives
+a reproduction packs with `CM_PACK_ARCHIVES=1`. Large archives can be stored in
+a persistent deposit; each indexed DOI must identify the actual archive. Git
+tracks this guide and `index.json`; [AVAILABILITY.md](../AVAILABILITY.md) states
+the release scope.
 
 `index.json` is written exclusively by `scripts/ingest_run.py` (`make ingest-run`), which
 verifies the archive's manifest and the sealed stage chain before registering it. The

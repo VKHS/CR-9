@@ -2,22 +2,24 @@
 
 [Documentation](README.md) · [Availability](../AVAILABILITY.md)
 
-The current manuscript support revision records its executed checks in
-[VALIDATION.json](VALIDATION.json). The original development records remain
-available in [Git history](https://github.com/VKHS/CR-9/tree/89bbd136625d581027a84755cef0715cf2231a5f).
-
 The machine-readable [validation record](VALIDATION.json) records the executed
-checks, environment and scope. A source fingerprint identifies runtime code;
-a Git commit additionally identifies documentation, examples and packaging.
-Historical fixture validation does not establish that the current runtime
-produced those observations.
+checks of this release with their environment, scope and the runtime
+fingerprint they validated: the full test suite with PyTorch, the analytical
+statements, the supplementary arithmetic, the model inventory and fresh
+synthetic smoke runs of the runtime, and, under
+`reproduction_launcher_validation`, the checks of the reproduction launcher
+(the test suite without PyTorch and a simulated Slurm cluster covering
+submission, recovery and the report). Both name the released runtime
+`0aba361b…`. A source fingerprint identifies runtime code; a Git commit
+additionally identifies documentation, examples and packaging. Historical
+fixture validation does not establish that the current runtime produced those
+observations.
 
 The record identifies the checks executed for this revision and distinguishes
 current-source validation from replay of historical examples. Deposit-client
 tests use a stateful mocked transport; a passing test does not imply that a live
-Zenodo upload was performed. Historical development records remain available
-through the linked Git revision, and GitHub Actions results belong to the
-displayed commit.
+Zenodo upload was performed. GitHub Actions results belong to the displayed
+commit.
 
 ## Re-run the software checks
 
@@ -62,9 +64,11 @@ verification are separate operations in the [registration guide](EVIDENCE_REGIST
 make scientific-audit PYTHON=python REPORT_ROOT=../cm-validation
 ```
 
-This checks official benchmark archives, measurement sets, model identity and
-result bindings. It returns nonzero when required records are missing or invalid;
-[AVAILABILITY.md](../AVAILABILITY.md) lists the registered deposits.
+This checks registered benchmark archives, measurement sets, model identity and
+result bindings, and returns nonzero while required records are missing or
+invalid; this release registers none ([AVAILABILITY.md](../AVAILABILITY.md)). A
+regenerated suite is checked by its own report (`run_cross_morse.sh reproduce`)
+and by `make compare RUN_ROOT=...` for a single run.
 
 The repository's GitHub Actions workflow validates the published checkout. Check
 its result for the commit you use.

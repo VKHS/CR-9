@@ -5,8 +5,8 @@
 Abdolvahab Khalili Sadaghiani and Jose Nunez-Yanez · Linköping University
 
 [![Software checks](https://github.com/VKHS/CR-9/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CR-9/actions/workflows/quality.yml)
-[![Evidence coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json)](paper/CLAIMS.md)
-[Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md) · [Paper references](paper/README.md)
+[![Reproduction](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json)](docs/HPC.md)
+[Reproduce the paper](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
 
 CROSS-MORSE attaches an external controller to a frozen graph predictor. At
 inference, intermediate representations guide whether and how propagation
@@ -16,59 +16,78 @@ selection, confirmation, and admission protocol.
 
 ![Frozen predictor and external feedback controller](docs/assets/architecture.svg)
 
+## Reproduce the paper
+
+One launcher regenerates every benchmark result of the paper on a Slurm GPU
+cluster: the sealed eight-stage lifecycle on all seven datasets (Roman-empire on
+its ten official splits) and a report that rebuilds the paper's run-derived
+tables from the regenerated runs and places every regenerated value beside the
+printed one.
+
+```bash
+git clone https://github.com/VKHS/CR-9.git && cd CR-9
+$EDITOR run_cross_morse.sh            # SITE SETTINGS: account, partition, GPU request, storage, modules
+bash run_cross_morse.sh check         # settings, runtime identity and job plan; creates and submits nothing
+bash run_cross_morse.sh reproduce     # setup, seven lifecycles, report
+bash run_cross_morse.sh status        # progress
+```
+
+| | |
+|---|---|
+| Site settings | One block at the top of `run_cross_morse.sh`, preset to the authors' cluster (NAISS Arrhenius, one NVIDIA GH200 per job); or a profile selected with `CM_ENV_FILE`, which keeps the launcher byte-identical |
+| Identity | `check` and `reproduce` verify the runtime fingerprint `0aba361b…` of the released Python code; every run seals it with its source snapshot, configuration, data-role membership, checkpoints and decision records |
+| Resilience | Jobs that reach their time limit checkpoint at a safe boundary and requeue themselves; a GPU or driver failure requeues the job on another node; `reproduce resume` continues a suite |
+| Report | `REPRODUCTION_REPORT.md` places each dataset's deployed policy and paired effect beside main Table 1, summarises the comparison of every readable quantity (exact, inside the printed 95% interval, or outside), embeds the rebuilt Tables 1–2 and records the GPU-hours used; a results ZIP holds every run's decision records |
+| First run | `bash run_cross_morse.sh reproduce smoke` exercises the complete orchestration on synthetic data in minutes; `pilot` uses the official data with reduced compute |
+
+The [HPC guide](docs/HPC.md) documents every setting, job, record and exit
+code, and the compute the paper reports per dataset; the
+[Arrhenius walkthrough](docs/ARRHENIUS_SESSION.md) is the authors' session.
+
 ## For reviewers
+
+Without a GPU, check the software and replay the two bundled synthetic runs:
 
 ```bash
 make review REVIEW_OFFLINE=1 REPORT_ROOT=../cm-reports
 ```
 
-This checks the checkout and replays the bundled examples. It writes
-`../cm-reports/review/REVIEW_REPORT.md` with a one-line verdict
-(`EVIDENCE COMPLETE`, `EVIDENCE INCOMPLETE`, `SOFTWARE-ONLY` or `SOFTWARE FAILURE`), the
-status of each check and paths to its output. Omit `REVIEW_OFFLINE=1` to fetch
-registered run deposits, rebuild supported outputs and audit the official evidence.
-Downloads and verification can take substantial time for full benchmark archives.
-The [reviewer guide](docs/REVIEWER_GUIDE.md) maps each concern to its evidence and
-explains the additional inputs needed for a complete check; the
-[reviewer FAQ](docs/REVIEWER_FAQ.md) answers the questions a reader of this
+This writes `../cm-reports/review/REVIEW_REPORT.md` with the status of each
+check and its output; the verdict `SOFTWARE-ONLY` means every software and
+example check passed. The [reviewer guide](docs/REVIEWER_GUIDE.md) maps each
+review concern to its code, commands and the records a reproduction produces;
+the [reviewer FAQ](docs/REVIEWER_FAQ.md) answers the questions a reader of this
 repository is likely to ask, each with the file that holds the fact and the
-command that checks it. The
-[claim-to-evidence ledger](paper/CLAIMS.md) lists all 34 manuscript table groups,
-their registered evidence and builder coverage. The complete display inventory also covers the protocol tables and method figures outside those numerical groups. These statuses describe automated
-checks of the supplied artifacts; they do not certify every scientific claim.
+command that checks it. The [claim-to-evidence ledger](paper/CLAIMS.md) lists
+all 34 manuscript table groups with their builders.
 `make docker-review` provides the same entry point in a CPU container.
 
 ## Paper and supplementary results
 
 This repository supports the completed experimental study **CROSS-MORSE:
 Cross-Spectral Control of Message Passing in Frozen Graph Neural Networks**.
-The authors identify the supplied 16-page paper and 38-page supplement as the
-completed measured study. Their exact document identities, protocol constants
-and reported numerical values are recorded in `paper/`.
+The exact identities of the 16-page paper and 38-page supplement, the protocol
+constants and every reported numerical value are recorded in `paper/`.
 
 - [Reported results](paper/RESULTS.md) presents the seven-dataset loss, official-metric
   and cost results, including the distinction between an evaluated arm and the
   policy returned by the registered confirmation rule.
 - [Complete paper support inventory](paper/PAPER_SUPPORT.md) maps all **90 numbered
-  tables and figures** to source pages, numerical registries, implementation,
-  reconstruction commands and the underlying evidence required.
-- [Manuscript review](paper/MANUSCRIPT_REVIEW.md) records the contextual review of
-  the current PDFs and the precise decisions that need reconciliation with the
-  original experiment records.
+  tables and figures** to source pages, numerical registries, implementation and
+  reconstruction commands.
+- [Manuscript review](paper/MANUSCRIPT_REVIEW.md) records the contextual review that
+  binds the registry to the PDFs.
 
 ```bash
 make paper-report-check    # document identities, complete display map and current reports
 make verify                # implementation, reference arithmetic and sealed example checks
-make paper                 # rebuild supported outputs from registered official observations
-make scientific-audit      # check the original experiment evidence and decision records
+make compare RUN_ROOT=/abs/run REPORT_ROOT=/abs/reports   # one regenerated run beside the paper
 ```
 
-The reported measurements and the availability of their original artifacts are
-tracked separately. The registration counts below describe what a reader can
-currently retrieve through this repository. Mathematical bounds, resampled
-uncertainty, fitted cost laws and analytical sensitivities retain their scientific
-meaning in the paper. The earlier development workspace is retained in
-[Git history](https://github.com/VKHS/CR-9/tree/89bbd136625d581027a84755cef0715cf2231a5f).
+Mathematical bounds, resampled uncertainty, fitted cost laws and analytical
+sensitivities retain their scientific meaning in the paper; the registry
+records which entries are measurements, derived arithmetic or analytical
+sensitivities.
 
 ## Try the software
 
@@ -106,22 +125,21 @@ uses the registered full execution budget and explicit model widths. The seven
 full-profile parameter totals agree with Supplementary Table S5 at its printed
 precision; the [parameter inventory](docs/DATASETS.md#model-parameter-inventory)
 records their architecture settings and counting scope.
-`make model-inventory` instantiates and counts them; `make compare-runs` checks
-registered official archives against the manuscript targets. Pilot and full
-runs may download data and require substantial compute; see the
-[dataset guide](docs/DATASETS.md) and [HPC instructions](docs/HPC.md).
+`make model-inventory` instantiates and counts them. Pilot and full runs may
+download data and require substantial compute; see the
+[dataset guide](docs/DATASETS.md) and the [HPC guide](docs/HPC.md).
 
-| Dataset | Task | Entry point |
-|---|---|---|
-| ogbn-arxiv | Node classification | `run_cross_morse_arxiv.py` |
-| ogbn-products | Node classification | `run_cross_morse_products.py` |
-| ogbn-proteins | Multilabel node prediction | `run_cross_morse_proteins.py` |
-| Roman-empire | Node classification; ten official splits | `run_cross_morse_roman_empire.py` |
-| PascalVOC-SP | Node classification on independent graphs | `run_cross_morse_pascalvoc_sp.py` |
-| COCO-SP | Node classification on independent graphs | `run_cross_morse_coco_sp.py` |
-| Peptides-func | Multilabel graph prediction | `run_cross_morse_peptides_func.py` |
+| Dataset | Task | Entry point | Slurm wrapper |
+|---|---|---|---|
+| ogbn-arxiv | Node classification | `run_cross_morse_arxiv.py` | `run_cross_morse_arxiv.sh` |
+| ogbn-products | Node classification | `run_cross_morse_products.py` | `run_cross_morse_products.sh` |
+| ogbn-proteins | Multilabel node prediction | `run_cross_morse_proteins.py` | `run_cross_morse_proteins.sh` |
+| Roman-empire | Node classification; ten official splits | `run_cross_morse_roman_empire.py` | `run_cross_morse_roman_empire.sh` |
+| PascalVOC-SP | Node classification on independent graphs | `run_cross_morse_pascalvoc_sp.py` | `run_cross_morse_pascalvoc_sp.sh` |
+| COCO-SP | Node classification on independent graphs | `run_cross_morse_coco_sp.py` | `run_cross_morse_coco_sp.sh` |
+| Peptides-func | Multilabel graph prediction | `run_cross_morse_peptides_func.py` | `run_cross_morse_peptides_func.sh` |
 
-For example, run an arxiv pilot on a CUDA device:
+For example, run an arxiv pilot on a CUDA device without Slurm:
 
 ```bash
 python run_cross_morse_arxiv.py --profile pilot --device cuda \
@@ -134,40 +152,22 @@ test labels are used after policy lock. Supported operators, statistical
 assumptions, and the exact implemented variants are explained in the
 [method guide](docs/METHOD.md).
 
-## Reproduction status
+## Release scope
 
 <!-- availability:start -->
-**Registered:** 0 of 7 official benchmark archives, 0 of 10 auxiliary measurement sets, and 2 complete synthetic examples. See [availability and reconstruction scope](AVAILABILITY.md).
+**Release:** the complete code, configurations, reproduction launcher and the registry of the paper's reported values. Run outputs are regenerated with `bash run_cross_morse.sh reproduce` ([guide](docs/HPC.md)); 2 complete synthetic example runs replay without a GPU. See [availability](AVAILABILITY.md).
 <!-- availability:end -->
 
-`make verify` checks the software package and bundled examples.
-`make scientific-audit` checks the official experiment evidence and returns a
-nonzero status while required records are missing. The [paper reference guide](paper/README.md)
-explains the numerical registry, source identities and result builders.
-
-The [archive guide](docs/RUN_ARCHIVES.md) covers packing, resumable Zenodo uploads,
-publication and ingestion. Draft DOI reservations are kept separate from published
-records; reviewer downloads must match the registered filename, byte count and
-SHA-256. `make availability-statement` generates a manuscript paragraph from the
-registered state. `make degeneracy-check` identifies patterns in baseline resource
-measurements for inspection, and `make decision-check` checks confirmation-rule
-consistency. [REPRODUCIBILITY.md](REPRODUCIBILITY.md) maps the reproducibility
-checklist to implementation files and the records needed to verify results.
-
-Authors with completed runs can use the [evidence-registration guide](docs/EVIDENCE_REGISTRATION.md).
-`make evidence-discover EVIDENCE_ROOT=/abs/export EVIDENCE_PLAN=/abs/new-plan.json`
-inspects an existing export tree and proposes unambiguous complete full-profile
-run paths. It reports rejected, incomplete and duplicate candidates before any
-deposit or registration. The [paper-support contract](docs/PAPER_SUPPORT.md)
-maps E1–E20 to the observations, runtime checks and manuscript decisions needed
-to support each claim.
-One private plan drives preflight, packing, resumable deposits, registration and
-manuscript bindings, including the ten-split Roman campaign. Record mappings trace
-summary values and declared calculations to copied original files. PDF registration
-records document identities and a named contextual source review; the current review
-is AI-assisted and bound to the PDF and registry hashes. Numeric text searches are
-advisory. `make readiness` checks the current evidence and review report for outstanding
-requirements.
+`make verify` checks the software package and bundled examples. A regenerated
+run is checked with `make compare RUN_ROOT=...`, replayed numerically with
+`make replay RUN_ROOT=...`, and packed for sharing with `make archive-run`; the
+[archive guide](docs/RUN_ARCHIVES.md) covers packing, verification, ingestion
+and the table builders. `make availability-statement` generates the
+manuscript's availability paragraph from this release.
+[REPRODUCIBILITY.md](REPRODUCIBILITY.md) maps the reproducibility checklist to
+implementation files and to the records a reproduction produces, and the
+[paper-support contract](docs/PAPER_SUPPORT.md) maps E1–E20 to the observations,
+runtime checks and decisions that support each claim.
 
 ## Source and reference checks
 
@@ -194,34 +194,34 @@ recomputed supplementary values with their notes to `REPORT_ROOT`.
 
 `make model-inventory` separately constructs all seven full-profile models and
 checks their actual parameter counts. These checks establish configuration and
-arithmetic consistency. Reconstructing benchmark losses, metrics, timings and
-GPU-hours requires the corresponding run archives and measurement records:
-`make paper` builds results from those observations, and `make compare-runs`
-compares them with the manuscript targets.
+arithmetic consistency; benchmark losses, metrics, timings and GPU-hours come
+from executing the lifecycle, which `run_cross_morse.sh reproduce` does and
+compares with the paper.
 
 ## Repository guide
 
 | Location | Purpose |
 |---|---|
-| `cross_morse/` | Models, transport, sensing, policies, statistics, and the eight-stage lifecycle |
-| `configs/`, `run_cross_morse*.py`, `run_cross_morse*.sh` | Dataset profiles and local/Slurm entry points |
+| `run_cross_morse.sh`, `run_cross_morse_<dataset>.sh` | Reproduction launcher with the SITE SETTINGS block; dataset wrappers |
+| `cross_morse/`, `run_cross_morse*.py` | Models, transport, sensing, policies, statistics, and the eight-stage lifecycle (the fingerprinted runtime) |
+| `configs/` | Smoke, pilot and full profiles of every dataset; site-profile templates |
 | `cm_experiments/`, `cm_campaigns/`, `hpc/` | Budget-matched arms, external-baseline harness, campaigns, and measurement capture |
 | `cm_theory/` | Reference implementations and numerical verification of the analytical statements |
 | `examples/` | Two complete synthetic runs and their replay outputs |
 | `paper/` | Source metadata, numerical comparison targets, and result builders |
-| `runs/`, `records/`, `manifests/` | Official evidence indexes, record schemas, and split/seed specifications |
-| `scripts/`, `tests/`, `environment/` | Verification, packaging, tests, and environment specifications |
-| `docs/` | Practical guides for use, method, experiments, archives, validation and review |
+| `runs/`, `records/`, `manifests/` | Run and record indexes, record schemas, and split/seed specifications |
+| `scripts/`, `tests/`, `environment/` | Reproduction support, verification, packaging, tests, and environment specifications |
+| `docs/` | Guides for reproduction, method, experiments, archives, validation and review |
 | `Dockerfile`, `environment/apptainer.def` | CPU containers using recorded Python package versions (`make docker-verify`, `make docker-review`) |
 
-For the next step, use [experiment instructions](docs/EXPERIMENTS.md),
+For the next step, use the [HPC guide](docs/HPC.md),
+[experiment instructions](docs/EXPERIMENTS.md),
 [archive and result reconstruction](docs/RUN_ARCHIVES.md), or
 [validation commands](docs/VALIDATION.md). `make help` lists the common commands.
 
 ## Citation and license
 
 Use [CITATION.cff](CITATION.cff) and identify the source commit used in an
-experiment. The accompanying manuscript is under review; this repository does
-not assert publication or a public result-archive DOI. Software is licensed
+experiment. The accompanying manuscript is under review. Software is licensed
 under [BSD-3-Clause](LICENSE); manuscript and figure rights are described in
 [NOTICE](NOTICE). Contributions should follow [CONTRIBUTING.md](CONTRIBUTING.md).

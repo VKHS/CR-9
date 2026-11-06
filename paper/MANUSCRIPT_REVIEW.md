@@ -90,23 +90,33 @@ not a replacement for the original nine-contrast record.
 
 ## Repository evidence and the availability paragraph
 
-At this review, `runs/index.json` contains no registered official run archives,
-and `records/index.json` contains no deposited measurement sets. This describes
-the contents available in this checkout; it does not say that the author has
-not performed the experiments.
+This repository is a code release. `release/release_scope.json` declares that
+its results are regenerated (`"result_distribution": "regenerate"`);
+`runs/index.json` and `records/index.json` register no archives. This describes
+the contents of the release; it does not say that the experiments were not
+performed. `bash run_cross_morse.sh reproduce` regenerates the lifecycle runs of
+all seven datasets, and its report rebuilds the run-derived tables and places
+every compared quantity beside the value printed in the paper
+([HPC guide](../docs/HPC.md)).
 
-The main paper's page-15 availability paragraph describes seven deposited run
-archives and the external experiment records with Zenodo DOIs. That deposit
-statement needs the actual archive registrations and DOI receipts to be
-verifiable from the repository. Source registration, reported numerical tables
-and successful software tests do not supply those missing original files.
+The main paper's page-15 availability paragraph and the supplementary "Data and
+code availability" paragraph describe run archives and experiment records
+deposited at Zenodo DOIs listed in these two indexes, and `make paper`
+rebuilding the tables from the ingested archives. That description does not
+match this release. [AVAILABILITY_STATEMENT.txt](AVAILABILITY_STATEMENT.txt) is
+the paragraph generated from the release scope (`make availability-statement`);
+it states what the repository contains and how the results are regenerated.
 
-The existing [run archive workflow](../docs/RUN_ARCHIVES.md),
+A regenerated run records its own complete candidate ledger and selector trace
+(`select/`), its local confirmation family (`confirm/decision.json`) and its
+admission regime (`admit/decision.json`). The cross-dataset nine-contrast
+family of Table S14 is audited separately
+([Joint S14 confirmation](../docs/S14_CONFIRMATION.md)). The
+[run archive workflow](../docs/RUN_ARCHIVES.md),
 [evidence registration workflow](../docs/EVIDENCE_REGISTRATION.md) and
-[paper support contract](../docs/PAPER_SUPPORT.md) define the original files
-and replay steps. The generated [claim ledger](CLAIMS.md) and
-[availability statement](AVAILABILITY_STATEMENT.txt) report the current indexed
-coverage. Official result builds continue to require their source observations.
+[paper support contract](../docs/PAPER_SUPPORT.md) apply to a release that
+publishes archives; the generated [claim ledger](CLAIMS.md) maps every
+registered numerical group to its builder.
 
 ## Verify these sources
 

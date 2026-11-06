@@ -68,6 +68,9 @@ interpreter, `nvidia-smi` and `module list`, and writes
 `arrhenius/observed_environment.json`, `arrhenius/requirements-gpu.lock`,
 `arrhenius/nvidia-smi.txt` and `arrhenius/modules.txt`. It is executed inside a
 GPU allocation after `submit setup` ([docs/HPC.md](../docs/HPC.md)).
-Those output files are not yet captured and therefore not yet in this directory;
-every completed run nevertheless seals its own `environment.json` with the same
-information for that run.
+The GPU recipe itself is the SITE SETTINGS block of `run_cross_morse.sh` (the
+NVHPC and Python modules and the `torch==2.12.1+cu130` wheel on Arrhenius). The
+setup job of a reproduction writes `cross_morse_requirements.lock` into the
+environment. Every run seals its own `environment.json`, and the launcher writes
+the job's package list, module list and `nvidia-smi` output into the run's
+`launcher/` directory, so each result names the GPU environment that produced it.
