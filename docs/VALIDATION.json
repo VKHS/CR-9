@@ -1,6 +1,7 @@
 {
   "date": "2026-11-06",
   "base_commit": "89bbd136625d581027a84755cef0715cf2231a5f",
+  "base_commit_note": "Development revision that preceded the published history; the published history begins at fa9691d8f232cd3763bc1850ab9ff40fcafe7a46. The checks below were executed on that revision with the runtime fingerprint recorded in source_sha256.",
   "scope": "Current-source software, mathematics, printed arithmetic, source correspondence and evidence-import validation. Original benchmark observations were not available and were not reproduced.",
   "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
   "source_fingerprint_scope": "cross_morse/ and runtime Python entry points; the experiment executor, campaign audit, paper tooling, documentation and tests are additionally identified by the Git revision and release checksums.",
@@ -135,7 +136,8 @@
     "required_auxiliary_record_sets": 10,
     "original_measurements_added": false,
     "confirmation_scope": "Original unrounded heterogeneous test outputs, paired means, joint nine-test Holm decisions and native-run links; original test programs are preserved and hashed but their raw P values are not recomputed by this gate.",
-    "publication_ready": false
+    "publication_ready": false,
+    "release_scope": "This release distributes code and regenerates its results (release/release_scope.json: result_distribution = regenerate). The gate's blockers are the registrations of a release that publishes archives; run_cross_morse.sh reproduce regenerates the lifecycle runs, and its report compares them with the paper."
   },
   "smoke_runs": [
     {
@@ -216,7 +218,94 @@
       "predictor_comparisons": 8
     }
   },
-  "historical_development_record": "https://github.com/VKHS/CR-9/tree/89bbd136625d581027a84755cef0715cf2231a5f",
+  "reproduction_launcher_validation": {
+    "date": "2026-11-06",
+    "base_commit": "fa9691d8f232cd3763bc1850ab9ff40fcafe7a46",
+    "validated_tree": "the commit that adds this record",
+    "scope": "Reproduction launcher run_cross_morse.sh, scripts/reproduction.py, the code-release scope of the generated views and the hpc/ drivers' use of the launcher's site settings. Slurm, the GPU and the Python runtime of a job are simulated; no benchmark data, training or GPU execution.",
+    "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+    "runtime_unchanged": true,
+    "environment": {
+      "python": "3.13.18",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "matplotlib": "3.11.2",
+      "pytorch": "absent",
+      "scope": "development sandbox, not the recorded CPU environment; PyTorch-dependent tests were not executed in this revision"
+    },
+    "checks": {
+      "package_verification": {
+        "command": "make verify",
+        "status": "PASS",
+        "source_files": 1121,
+        "registered_arithmetic_checks": 798,
+        "analytical_statements": {
+          "PASS": 91,
+          "FAIL": 0,
+          "INFO": 4,
+          "battery": "quick, seed 20261104"
+        },
+        "supplementary_arithmetic": {
+          "PASS": 657,
+          "ADVISORY": 5,
+          "FAIL": 0,
+          "INFO": 26
+        }
+      },
+      "no_torch_tests": {
+        "command": "make test-no-torch",
+        "status": "PASS",
+        "tests_run": 777,
+        "passed": 762,
+        "skipped": 15,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 115.847
+      },
+      "launcher_tests": {
+        "modules": [
+          "tests/test_reproduction_launcher.py",
+          "tests/test_reproduction.py"
+        ],
+        "tests": 19,
+        "status": "PASS",
+        "simulated_cluster": "stub sbatch, squeue, sacct, scontrol (requeue, node exclusion), sinfo, module and nvidia-smi; a runner stub that writes complete runs, checkpoints, fails or returns without its artifact",
+        "scenarios": [
+          "check: runtime identity, configurations and the job plan with the paper's GPU-hours; nothing written or submitted; an empty account is refused",
+          "a modified runtime is refused by check and reproduce unless CM_ALLOW_SOURCE_CHANGE=1, which the suite manifest records",
+          "reproduce: numbered suite, frozen run sources, the Roman-empire campaign and the setup -> runs (afterok) -> report (afterany) job graph with its job table",
+          "a dataset wrapper reproduces only its dataset",
+          "setup, single runs and the ten Roman-empire array tasks executed; status, report, GPU-hours from accounting, run registry, live log and a redacted results ZIP",
+          "checkpointed requeue of the same job at the time limit; a continuation job where requeue is refused; continuation budget exhausted (exit 75, TIME_BUDGET)",
+          "GPU or driver failure: node excluded and job requeued; GPU health failure",
+          "runtime failure and missing artifact (exit 74)",
+          "report deferred while runs are queued; reproduce resume skips complete and queued runs",
+          "site-env prints the effective settings that the hpc/ drivers read; help and usage",
+          "scripts/reproduction.py: fingerprint, compute reference, dataset selection, run state, scheduler parsing, suite creation, report beside the paper, tables rebuilt from a suite, refused comparison reported, status"
+        ]
+      },
+      "release_audit": {
+        "command": "make audit",
+        "status": "PASS"
+      },
+      "scientific_audit": {
+        "command": "make scientific-audit",
+        "status": "INCOMPLETE_OR_INVALID",
+        "blockers": 26,
+        "unchanged_from": "scientific_audit above"
+      }
+    },
+    "preserved_scientific_inputs": {
+      "comparison_base": "fa9691d8f232cd3763bc1850ab9ff40fcafe7a46",
+      "files_compared": 734,
+      "files_changed": 2,
+      "changed": [
+        "configs/arrhenius-site.env.example",
+        "configs/public.env.example"
+      ],
+      "changed_scope": "site profiles of the launcher; no configuration, runtime, example or registry file changed"
+    }
+  },
   "live_zenodo_operations": "not performed",
   "local_container_execution": "not performed; inspect the hosted container workflow for the published commit",
   "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml"

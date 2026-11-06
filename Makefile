@@ -132,14 +132,20 @@ help:
 	  '  make paper-report-check  check current manuscript, display inventory and report freshness' \
 	  '  make faq-check           check that docs/REVIEWER_FAQ.md names only existing files and targets' \
 	  '' \
-	  'Run and reproduce:' \
+	  'Reproduce the paper on a Slurm GPU cluster (docs/HPC.md; edit SITE SETTINGS in run_cross_morse.sh):' \
+	  '  bash run_cross_morse.sh check             settings, runtime fingerprint and job plan; submits nothing' \
+	  '  bash run_cross_morse.sh reproduce smoke   the whole job graph on synthetic data, in minutes' \
+	  '  bash run_cross_morse.sh reproduce         all seven datasets; the suite report compares them with the paper' \
+	  '  bash run_cross_morse.sh status | report   follow the latest suite; rebuild its report' \
+	  '' \
+	  'Run and replay locally:' \
 	  '  make reproduce            replay the two bundled synthetic examples into REPORT_ROOT' \
 	  '  make example-paper        rebuild tables and figures from those examples' \
 	  '  make train-sample DATASET=Peptides-func   execute a fresh synthetic CPU lifecycle' \
 	  '  make prepare-data DATASET=ogbn-arxiv PROFILE=pilot   prepare official data; may download' \
 	  '  make replay / reexecute   replay statistics or checkpoints from RUN_ROOT' \
 	  '' \
-	  'Official evidence (requires deposited observations):' \
+	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
 	  '  make paper                build supported tables/figures from official archives and records' \
 	  '  make compare-runs         compare official model inventories and results with the manuscript' \
 	  '  make scientific-audit     report missing evidence and model/decision mismatches; fails if incomplete' \
@@ -388,7 +394,8 @@ NUMPY_TESTS := test_paper_registry test_records test_export_records test_availab
  test_evidence_registration test_registration_pipeline_safety test_registration_sources_safety test_registration_clone_safety \
  test_evidence_discovery \
  test_theory_battery test_theory_formulas test_theory_review_regressions test_si_identities \
- test_arrhenius_discovery test_reviewer_faq test_paper_support_report test_review_confirmation test_s14_confirmation test_selection_figure
+ test_arrhenius_discovery test_reviewer_faq test_paper_support_report test_review_confirmation test_s14_confirmation test_selection_figure \
+ test_reproduction test_reproduction_launcher
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

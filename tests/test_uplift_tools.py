@@ -42,7 +42,11 @@ class ClaimsLedgerTests(unittest.TestCase):
         self.assertEqual(claims_ledger.check(ledger, ledger_path=claims_ledger.LEDGER, badge_path=claims_ledger.BADGE), [])
         badge = claims_ledger.badge(ledger)
         self.assertEqual(badge["schemaVersion"], 1)
-        self.assertIn("archives", badge["message"])
+        # This release declares regenerated results (release_scope.json result_distribution);
+        # a registration release reports archive coverage instead.
+        self.assertEqual(ledger["result_distribution"], "regenerate")
+        self.assertIn("run_cross_morse.sh", badge["message"])
+        self.assertIn("archives", claims_ledger.badge(dict(ledger, result_distribution="registered_archives"))["message"])
         text = claims_ledger.render(ledger)
         self.assertIn("| Table S15b (SI) |", text)
         self.assertIn("record set `baselines`", text)

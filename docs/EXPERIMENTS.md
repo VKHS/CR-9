@@ -3,8 +3,11 @@
 [Documentation](README.md) · [Method](METHOD.md) · [Availability](../AVAILABILITY.md)
 
 The core lifecycle and additional comparison studies have separate outputs. This
-guide describes their execution and export. Registered archives are indexed under
-[`runs/`](../runs/index.json) and [`records/`](../records/index.json).
+guide describes their execution and export. The core lifecycle of all seven
+datasets is regenerated on a Slurm cluster by `bash run_cross_morse.sh reproduce`
+([HPC guide](HPC.md)); the studies below run from their own drivers.
+[`runs/`](../runs/index.json) and [`records/`](../records/index.json) index
+archives that a release registers; this release registers none.
 
 ## Core benchmark campaign
 
@@ -21,8 +24,10 @@ python -B scripts/validate_run_manifest.py ../cm-runs/arxiv-full \
   --require-complete --json
 ```
 
-Equivalent wrappers exist for all seven datasets. Capture the actual environment
-and allocation accounting, then pack and ingest completed runs using
+Equivalent wrappers exist for all seven datasets. On a Slurm cluster,
+`run_cross_morse.sh reproduce` executes this campaign for every dataset and
+records the environment and allocation accounting of each job
+([HPC guide](HPC.md)). Completed runs are packed and ingested with
 [Run archives](RUN_ARCHIVES.md).
 
 ## E3–E6: comparison at a declared work budget
@@ -134,7 +139,11 @@ The snippet illustrates one attempt; the remaining indices must also execute.
 Final receipts identify checkpoints, prediction files, split identities and timing
 traces. Export recomputes official scores from predictions rather than trusting a
 receipt's score. The Slurm wrapper is
-[`hpc/run_upstream_baseline_arrhenius.sh`](../hpc/run_upstream_baseline_arrhenius.sh).
+[`hpc/run_upstream_baseline_arrhenius.sh`](../hpc/run_upstream_baseline_arrhenius.sh);
+[`hpc/run_budget_arms_arrhenius.sh`](../hpc/run_budget_arms_arrhenius.sh) runs
+the E3–E6 arms. Both read the cluster settings from the SITE SETTINGS block of
+`run_cross_morse.sh` (`bash run_cross_morse.sh site-env` prints them), so one
+edit configures every Slurm job of the repository.
 
 ## Timing and accounting
 

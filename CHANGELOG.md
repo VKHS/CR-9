@@ -1,8 +1,44 @@
 # Changelog
 
+## 2026-11-06 — Reproduction launcher and code-release scope
+
+- `run_cross_morse.sh` is now the reproduction launcher of the paper. A SITE
+  SETTINGS block at the top holds everything cluster-specific (account,
+  partition, GPU request, storage, modules, PyTorch wheel, wall times); the
+  defaults are the authors' Arrhenius setting with the allocation left empty.
+  `check` verifies the settings, the runtime fingerprint and the complete job
+  plan with the paper's GPU-hours without submitting; `reproduce [full|pilot|smoke]`
+  freezes the source and configurations into a numbered suite and submits the
+  environment setup, one run for each of six datasets, the ten Roman-empire
+  splits as one array and a report job; `status`, `report` and
+  `reproduce resume SUITE` follow and recover a suite.
+- Resilience: checkpointed requeue at the time limit (USR1 180 s before the
+  limit, exit 75), requeue on another node after a GPU or driver failure (exit
+  76), GPU health checks with retries, failure classes and exit codes, stable
+  live logs, a run registry and job table per suite, and a finalizer that
+  records scheduler accounting.
+- `scripts/reproduction.py` writes the suite identity and the report:
+  `REPRODUCTION_REPORT.md` places each dataset's deployed policy and paired
+  effect beside main Table 1, summarizes the comparison of every quantity
+  `scripts/compare_with_manuscript.py` reads (exact, interval, outside), embeds
+  Tables 1 and 2 rebuilt from the regenerated runs, records the GPU-hours used
+  and packs a results ZIP.
+- `release/release_scope.json` declares a code release whose results are
+  regenerated; the availability page, the claim ledger, the manuscript
+  availability paragraph, the paper reports and the badge are generated from
+  that scope. The registration workflow is unchanged for releases that publish
+  archives.
+- `hpc/` drivers read the launcher's site settings (`run_cross_morse.sh site-env`).
+- Tests: `tests/test_reproduction.py` and `tests/test_reproduction_launcher.py`
+  (a simulated Slurm cluster: suite submission, setup, single runs, the Roman
+  array, the report, checkpointed and infrastructure requeues, GPU-health and
+  runtime failures, missing artifacts, report deferral and resumption).
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged: source
+  fingerprint `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+
 ## 2026-11-06 — Current manuscript support
 
-- Replaced the obsolete revision workspace with the current paper results, complete display inventory and source-bound contextual review. Earlier development material remains available in [the previous revision](https://github.com/VKHS/CR-9/tree/89bbd136625d581027a84755cef0715cf2231a5f).
+- Replaced the obsolete revision workspace with the current paper results, complete display inventory and source-bound contextual review.
 - Added joint S14 confirmation evidence replay and tightened E6 certificate and budget replay checks.
 - Kept the reported numerical targets and original runtime source identity. Registered artifact coverage is reported separately from the authors’ completed measurements.
 
