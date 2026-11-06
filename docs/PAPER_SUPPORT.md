@@ -3,10 +3,10 @@
 [Method](METHOD.md) · [Analytical statements](THEORY.md) · [Claims ledger](../paper/CLAIMS.md) · [Evidence registration](EVIDENCE_REGISTRATION.md)
 
 The objective is an inspectable chain from each scientific claim to its
-assumptions, executed method, original observations and reconstruction command.
-The registered archive and record counts describe deposited material. They do
-not establish that every theorem, experiment or manuscript sentence is supported.
-Current counts come from [AVAILABILITY.md](../AVAILABILITY.md); this document is an
+assumptions, executed method, observations and reconstruction command. This
+release distributes code and the registry of reported values;
+`run_cross_morse.sh reproduce` regenerates the observations and its report
+compares them with the paper ([HPC guide](HPC.md)). This document is an
 acceptance contract, not a second results registry or a declaration of completion.
 
 ## What each check establishes
@@ -18,7 +18,8 @@ acceptance contract, not a second results registry or a declaration of completio
 | Printed arithmetic | `make si-report` | Recomputes enumerated relationships from printed inputs with explicit precision; cannot establish how those inputs were measured |
 | Source identity | `make fingerprint`, `make verify-manifest` | Runtime identity and complete release-file integrity; historical observations retain the source that produced them |
 | Original experiments | `make scientific-audit` | Replays and inspects the registered core archives, required auxiliary records, support/selector/budget invariants and enumerated manuscript bindings |
-| Reproduction by a reader | `make review REQUIRE_EVIDENCE=1 ...`, then `make readiness ...` | Checks selected public deposits, fresh results, comparisons, PDF identities and report freshness within the documented audit scope |
+| Reproduction by a reader | `bash run_cross_morse.sh reproduce`, then `REPRODUCTION_REPORT.md` of the suite | Regenerates every lifecycle with the released runtime, rebuilds the run-derived tables and compares every readable quantity with the paper (exact, interval, outside) |
+| Registered archives | `make review REQUIRE_EVIDENCE=1 ...`, then `make readiness ...` | Checks registered public deposits, fresh results, comparisons, PDF identities and report freshness within the documented audit scope |
 
 A mathematical bound requires its hypotheses. A software test requires the
 actual implementation it claims to test. A measured result requires observations.

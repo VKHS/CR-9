@@ -1,6 +1,19 @@
 {
   "schema_version": "3.0",
   "release_type": "reference-implementation-with-role-isolated-evaluation",
+  "result_distribution": "regenerate",
+  "result_distribution_note": "This release distributes the implementation, configurations, the Slurm reproduction launcher and the registry of the paper's reported values; it distributes no run outputs. run_cross_morse.sh reproduce regenerates every benchmark result and its report places each regenerated value beside the printed one.",
+  "reproduction_launcher": {
+    "entry_point": "run_cross_morse.sh",
+    "modes": [
+      "check",
+      "reproduce",
+      "status",
+      "report"
+    ],
+    "support": "scripts/reproduction.py",
+    "guide": "docs/HPC.md"
+  },
   "repository_url": "https://github.com/VKHS/CR-9",
   "code_archive_doi": null,
   "scientific_scope": [
@@ -48,7 +61,7 @@
   },
   "data_use_sequence": "official train 60/20/10/5/5 fit/explore/select/confirm/compare; compare reserved during prepare; official validation admit; official test after lock",
   "validated_runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
-  "site_profile_policy": "configs/arrhenius-site.env.example ships the Arrhenius partition, architecture, module, environment and storage layout; the NAISS allocation and storage project identifiers are placeholders filled from the project's NAISS page before submitting jobs",
+  "site_profile_policy": "run_cross_morse.sh carries the Arrhenius site settings (partition, GPU request, architecture, modules, PyTorch wheel, storage layout) in its SITE SETTINGS block; configs/arrhenius-site.env.example holds the NAISS allocation and storage project as placeholders for a private copy, and configs/public.env.example is the template for another cluster",
   "measurement_records_contract": {
     "specs": "records/specs.json",
     "tool": "scripts/records.py (make records-index, make records-check, make records-tables)",

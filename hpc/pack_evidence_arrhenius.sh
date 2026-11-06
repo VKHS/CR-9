@@ -7,7 +7,7 @@
 # Preflight and pack the official run archives on the cluster, one dataset per array task.
 #
 #   sbatch --account=<allocation> --partition=<partition> [--gpus=1 if the partition requires it] \
-#     --export=ALL,CM_SOURCE_ROOT=/abs/CR-9,CM_ENV_FILE=/abs/arrhenius.env,CM_EVIDENCE_PLAN=/abs/plan.json \
+#     --export=ALL,CM_SOURCE_ROOT=/abs/CR-9,CM_EVIDENCE_PLAN=/abs/plan.json \
 #     hpc/pack_evidence_arrhenius.sh
 #
 # Packing is CPU and storage work; no GPU is used. Pass --account and --partition explicitly, as for
@@ -18,16 +18,17 @@
 # deposits_dir; concurrent tasks serialize their state updates. Nothing is deposited or published here.
 set -Eeuo pipefail
 : "${CM_SOURCE_ROOT:?Set the reviewed repository directory}"
-: "${CM_ENV_FILE:?Set the trusted Arrhenius environment profile}"
 : "${CM_EVIDENCE_PLAN:?Set the evidence plan (scripts/evidence_pipeline.py template)}"
-[[ -f "$CM_ENV_FILE" && -d "$CM_SOURCE_ROOT" && -f "$CM_EVIDENCE_PLAN" ]] || { echo 'Missing source, profile or plan' >&2; exit 2; }
-source "$CM_ENV_FILE"
-if [[ -n "${CM_BUILD_MODULE:-}${CM_PYTHON_MODULE:-}" ]]; then
+[[ -d "$CM_SOURCE_ROOT" && -f "$CM_EVIDENCE_PLAN" ]] || { echo 'Missing source or plan' >&2; exit 2; }
+# Site settings: the SITE SETTINGS block of run_cross_morse.sh (CM_ENV_FILE, when set, overrides it).
+eval "$(bash "$CM_SOURCE_ROOT/run_cross_morse.sh" site-env)" || { echo 'Cannot read the site settings of run_cross_morse.sh' >&2; exit 2; }
+if [[ -n "${CM_BUILD_MODULE}${CM_PYTHON_MODULE}" ]]; then
+  if ! type module >/dev/null 2>&1 && [[ -f "${MODULESHOME:-/nonexistent}/init/bash" ]]; then source "${MODULESHOME}/init/bash"; fi
   module purge
   # shellcheck disable=SC2086
-  module load ${CM_BUILD_MODULE:-} ${CM_PYTHON_MODULE:-}
+  module load ${CM_BUILD_MODULE} ${CM_PYTHON_MODULE}
 fi
-PYTHON="${CM_PYTHON:-${CM_VENV_DIR:?}/bin/python}"
+PYTHON="${CM_PYTHON:-${CM_VENV_DIR}/bin/python}"
 [[ -x "$PYTHON" ]] || { echo 'Configured interpreter missing' >&2; exit 2; }
 cd "$CM_SOURCE_ROOT"
 export PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"

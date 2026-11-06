@@ -2,26 +2,32 @@
 
 ## Availability statement
 
-The CROSS-MORSE reference implementation, seven dataset adapters, configurations, environment specifications, tests and reproducibility tools are available at [https://github.com/VKHS/CR-9](https://github.com/VKHS/CR-9). Official datasets are obtained from their providers and are not redistributed. This release registers **0 of 7 official full-profile dataset archives** and **0 of 10 auxiliary measurement-record sets**; it includes **2 complete synthetic example runs**. Reconstruction of the manuscript's benchmark results is not established by this release.
+The CROSS-MORSE reference implementation, the seven dataset adapters with their configurations, the Slurm reproduction launcher, environment specifications, tests and the registry of the values reported in the paper are available at [https://github.com/VKHS/CR-9](https://github.com/VKHS/CR-9). This is a code release: it distributes no run outputs, and the official datasets are obtained from their providers by the adapters and are not redistributed. `bash run_cross_morse.sh reproduce` regenerates every benchmark result of the paper on a Slurm GPU cluster; each run seals the runtime fingerprint, configuration, data-role membership, checkpoints and decision records it was produced with, and the suite's report rebuilds the run-derived tables and places each regenerated value beside the printed one. The release includes **2 complete synthetic example runs** for verification without benchmark data.
 
-## Registered artifacts
+## What the release contains
 
-Missing official archives: ogbn-arxiv, ogbn-proteins, ogbn-products, Roman-empire, PascalVOC-SP, COCO-SP, Peptides-func.
+| Component | Location |
+|---|---|
+| Reference implementation and the sealed eight-stage lifecycle | `cross_morse/`, `run_cross_morse*.py` |
+| Reproduction launcher for Slurm GPU clusters and the seven dataset wrappers | `run_cross_morse.sh`, `run_cross_morse_<dataset>.sh`; [HPC guide](docs/HPC.md) |
+| Smoke, pilot and full-profile configurations; split rules, seeds and folds | `configs/`, `manifests/registered/`, `cross_morse/split_contract.py` |
+| Experiments outside the lifecycle: E3–E6 arms, retrained baselines, E17 timing, scheduler accounting | `cm_experiments/`, `cm_campaigns/`, `hpc/`; [Experiments](docs/EXPERIMENTS.md) |
+| Registry of the values reported in the paper and its protocol constants | `paper/reported_results.json`, `paper/registered_constants.json` |
+| Builders of the run-derived tables and figures; comparison of a run with the paper | `paper/build/`, `scripts/build_paper.py`, `scripts/compare_with_manuscript.py` |
+| Analytical statements and supplementary arithmetic | `cm_theory/`, `scripts/check_si_identities.py` |
+| Environment specifications and containers | `environment/`, `Dockerfile` |
+| Complete synthetic example runs | 2 under `examples/runs/` |
 
-Auxiliary measurement records: **0 of 10 sets**. Missing: baselines, budget_matched, cross_backbone, ensemble_grid, factorials, input_gate, inserted_site, negative_controls, nominal_time, sensor_parameters.
+## Regenerating the results
 
-Archive identities are recorded in [runs/index.json](runs/index.json); measured-record coverage is recorded in [records/index.json](records/index.json). Index registration does not itself verify public availability; `make fetch-deposits` checks the registered run deposits and their bytes. Synthetic examples exercise the software workflow and do not supply official benchmark measurements.
+Edit the SITE SETTINGS block of `run_cross_morse.sh` for the cluster (or select a profile with `CM_ENV_FILE`), then `bash run_cross_morse.sh check` verifies the settings and the runtime fingerprint and prints the job plan, and `bash run_cross_morse.sh reproduce` submits the study: one setup job, the eight-stage lifecycle of every dataset (Roman-empire on its ten official splits) and one report job. Runs that reach their time limit checkpoint and requeue themselves; a GPU or driver failure requeues the job on another node.
 
-Synthetic record examples: 2 sets (nominal_time, sensor_parameters); `make example-records-check` traces their values to the saved files.
+The report rebuilds the run-derived columns of main Tables 1–2 and Supplementary Tables S4, S12, S12c, S13–S15, S23 and S41; numerical plots related to main Figs. 2c and 4d and Supplementary Fig. S9; a partial internal-method map related to main Fig. 5a; an entry-loss depth diagnostic; and stage-cost bars related to Table S41 with `scripts/build_paper.py`, and `scripts/compare_with_manuscript.py` places every compared quantity of a full-profile run beside the printed value (exact at the printed precision, inside the printed 95% interval, or outside). The experiments outside the lifecycle and their record exporters are run as described in [Experiments](docs/EXPERIMENTS.md); `make records-check` traces a record set to its raw files. Registry plots use transcribed table values and analytical scenarios; they are not a replay of benchmark observations. Auxiliary tables require their corresponding validated measurement-record sets. Numerical plot builders do not reproduce every printed panel or its exact artwork; paper/PAPER_SUPPORT.md states the display-specific scope.
 
-## Reconstruction scope
-
-With validated input archives, `make tables figures` builds the run-derived columns of main Tables 1–2 and Supplementary Tables S4, S12, S12c, S13–S15, S23 and S41; numerical plots related to main Figs. 2c and 4d and Supplementary Fig. S9; a partial internal-method map related to main Fig. 5a; an entry-loss depth diagnostic; and stage-cost bars related to Table S41 for the registered datasets. `make records-tables` builds the registered auxiliary sets. Registry plots use transcribed table values and analytical scenarios; they are not a replay of benchmark observations. Auxiliary tables require their corresponding validated measurement-record sets. Numerical plot builders do not reproduce every printed panel or its exact artwork; paper/PAPER_SUPPORT.md states the display-specific scope.
-
-`make reproduce` and `make example-paper` use the bundled synthetic runs. `make compare-runs` checks reported outcomes; `make scientific-audit` additionally requires complete applicable archives, measurement records, model identities and result bindings.
+`make reproduce` and `make example-paper` replay the bundled synthetic runs without a GPU. The run and record indexes (`runs/index.json`, `records/index.json`) accept archives that a reproduction packs with `scripts/archive_run.py`; this release registers none.
 
 ## Source identity
 
-Runtime source identity: `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb` (`make fingerprint`). Each run records its computation-source identity and environment. Paper PDFs are not distributed here; [paper/sources.json](paper/sources.json) retains their hashes and page references. Numerical comparison targets remain in [paper/reported_results.json](paper/reported_results.json).
+Runtime source identity: `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb` (`make fingerprint`). `run_cross_morse.sh` checks it before a reproduction and every run records it with its environment. Paper PDFs are not distributed here; [paper/sources.json](paper/sources.json) retains their hashes and page references. Numerical comparison targets remain in [paper/reported_results.json](paper/reported_results.json).
 
-See [Getting started](docs/GETTING_STARTED.md) and [Run archives](docs/RUN_ARCHIVES.md) for execution and deposit commands. Generated by `scripts/availability.py`; `make availability-check` verifies freshness and claim consistency.
+See [HPC and reproduction](docs/HPC.md) and [Getting started](docs/GETTING_STARTED.md). Generated by `scripts/availability.py`; `make availability-check` verifies freshness and claim consistency.

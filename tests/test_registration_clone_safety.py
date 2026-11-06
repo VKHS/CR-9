@@ -278,7 +278,9 @@ class HpcPlanFailureTests(unittest.TestCase):
             root = Path(tmp)
             plan = root / "plan.json"
             profile = root / "profile.env"
-            profile.write_text(f"CM_PYTHON={sys.executable}\n")
+            # A profile that keeps the job's environment states that explicitly; the
+            # launcher's SITE SETTINGS would otherwise request the authors' modules.
+            profile.write_text(f"CM_PYTHON={sys.executable}\nCM_BUILD_MODULE=\nCM_PYTHON_MODULE=\n")
             env = {k: v for k, v in os.environ.items() if not k.startswith("CM_")}
             env.update(CM_SOURCE_ROOT=str(ROOT), CM_ENV_FILE=str(profile), CM_EVIDENCE_PLAN=str(plan), CM_DATASET_INDEX="0")
             plan.write_text("{broken json")

@@ -95,6 +95,8 @@ REQUIRED = (
     "cm_campaigns/confirmation.py", "scripts/audit_s14_confirmation.py", "tests/test_review_confirmation.py",
     "tests/test_s14_confirmation.py", "tests/test_selection_figure.py", "docs/S14_CONFIRMATION.md",
     "scripts/paper_support_report.py", "tests/test_paper_support_report.py",
+    # Reproduction launcher: suite identity, status and report; simulated-cluster tests.
+    "scripts/reproduction.py", "tests/test_reproduction.py", "tests/test_reproduction_launcher.py",
     *(f"paper/bindings/{stem}_full.json" for stem in DATASETS.values()),
     *(f"cross_morse/{name}.py" for name in (
         "__init__", "core", "data", "training", "exploration", "learning", "policies", "statistics", "pipeline", "common", "provenance", "recovery", "scoring", "review", "reexecution", "datasets", "tasks", "evaluation", "runtime")),

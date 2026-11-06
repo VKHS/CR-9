@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "label": "registered evidence",
- "message": "0/7 archives \u00b7 0/10 record sets",
- "color": "lightgrey"
+ "label": "reproduction",
+ "message": "run_cross_morse.sh reproduce",
+ "color": "blue"
 }

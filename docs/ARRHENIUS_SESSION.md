@@ -1,133 +1,95 @@
-# Register completed Arrhenius experiments
+# Reproduce the paper on Arrhenius
 
-[Documentation](README.md) · [Evidence registration](EVIDENCE_REGISTRATION.md) · [Paper support](../paper/PAPER_SUPPORT.md)
+[Documentation](README.md) · [HPC guide](HPC.md) · [Reviewer guide](REVIEWER_GUIDE.md) · [Experiments](EXPERIMENTS.md)
 
-The authors describe the paper and supplement as a completed measured study.
-This session locates the corresponding original outputs and makes them available
-for independent reconstruction. Keep the producing source revision, checkpoint
-bytes and original decision records attached to each run.
+The paper's experiments ran on the NAISS Arrhenius cluster, one NVIDIA GH200
+96 GB per job. `run_cross_morse.sh` ships with that setting in its SITE SETTINGS
+block: partition `gpu`, `--gpus=1`, 16 CPU threads, aarch64 nodes, the modules
+`GPU/buildenv-nvhpc/25.9-cu13.0` and `GPU/Python/3.13.5-bare-gcc-2025b-eb`, the
+persistent environment `venv_arrhenius_gh200` with the `torch==2.12.1+cu130`
+wheel, and the project-disk layout. This page is the complete session on
+Arrhenius; the [HPC guide](HPC.md) explains every step for any other cluster.
 
-## 1. Locate original outputs
+## 1. Clone and add the allocation
 
-Use an existing full-profile export root. Keep the evidence directory outside
-both that root and the source checkout. The discovery tool reads the original
-files and writes a new report and proposed registration plan.
-
-```bash
-umask 077
-mkdir -p /abs/cm-evidence
-make evidence-discover \
-  EVIDENCE_ROOT=/abs/original-exports \
-  DISCOVERY_OUTPUT=/abs/cm-evidence/discovery.json \
-  EVIDENCE_PLAN=/abs/cm-evidence/plan.json \
-  DEPOSITS_DIR=/abs/cm-evidence/deposits
-```
-
-For a storage-intensive scan on Arrhenius, configure the existing discovery
-wrapper with absolute paths in the submission environment:
+Log in to an Arrhenius login node, change to the project disk and clone:
 
 ```bash
-export CM_SOURCE_ROOT=/abs/CR-9
-export CM_ENV_FILE=/abs/private/arrhenius.env
-export CM_EVIDENCE_ROOT=/abs/original-exports
-export CM_EVIDENCE_DIR=/abs/cm-evidence
-mkdir -p "$CM_EVIDENCE_DIR/logs"
-sbatch --account=<allocation> --partition=<partition> \
-  --chdir="$CM_EVIDENCE_DIR" \
-  --output="$CM_EVIDENCE_DIR/logs/discovery-%j.out" \
-  --error="$CM_EVIDENCE_DIR/logs/discovery-%j.err" --export=ALL \
-  "$CM_SOURCE_ROOT/hpc/discover_evidence_arrhenius.sh"
+cd /nobackup/proj/disk/<storage project>
+git clone https://github.com/VKHS/CR-9.git
+cd CR-9
+cp configs/arrhenius-site.env.example configs/arrhenius.env.example   # git-ignored
+$EDITOR configs/arrhenius.env.example
 ```
 
-The trusted environment profile selects the Python interpreter and site modules.
-The wrapper preserves discovery exit status and creates private, nonoverwriting
-reports. A candidate is eligible only after its complete stage chain and source
-identities pass the inventory. Pilot and synthetic runs remain separate. Roman
-requires the parent campaign with all ten official split directories.
+Fill the two values from the project's NAISS page: `CM_ACCOUNT`, the GPU
+allocation (the project id with its `-gpu` suffix), and `CM_STORAGE_PROJECT`,
+the project that owns the disk. Suites, logs, caches, datasets and the
+environment then live under `/nobackup/proj/disk/<storage project>/cross_morse`.
+The launcher finds the private copy by itself and stays byte-identical to the
+released file.
 
-## 2. Resolve each discovered candidate
-
-| Discovery status | Action |
-|---|---|
-| `UNIQUE_CANDIDATE` | Match its checkpoint, source, configuration, seeds and policy to the original experiment record, then preflight it |
-| `AMBIGUOUS` | Identify the original result-producing experiment from its provenance; do not select a run by its score |
-| `MISSING` | Locate the corresponding original run or export; retain the missing status until its files are available |
-| `UNRESOLVED_SCAN` | Inspect unreadable paths or explicit scan bounds, choose a suitable root or limit, and create a new report |
-| `REJECTED` | Inspect the stated missing or inconsistent artifact; preserve the original files and report the issue |
-
-A new reproduction is a distinct experiment. Use the plan's
-`relationship_to_manuscript` field to identify an exact original run, a refactor
-with established prediction equivalence, or a later revision. The run's source
-snapshot and fingerprint remain those of its producer.
-
-## 3. Collect the complete evidence package
-
-| Required material | Where it belongs |
-|---|---|
-| Seven full-profile archives, including ten Roman splits | Dataset entries in the private plan, then `runs/index.json` |
-| Checkpoints, complete selection ledgers, role membership, confirmation/admission records, predictions and measured work | Original sealed run archives |
-| Ten auxiliary sets: baselines, factorials, negative controls, input gate, nominal timing, sensor settings, cross-backbone, ensemble grid, inserted-site and budget-matched measurements | Original raw files imported with the existing record exporters or traceable mappings |
-| E3–E6 comparison campaign, paid-operation logs and common budgets | `budget_campaign` in the plan and `BUDGET_CAMPAIGN` in the reviewer commands |
-| Joint nine-test S14 confirmation family and exact policy decisions before admission | The confirmation campaign consumed by `make confirmation-audit` |
-| Original GH200 timing repetitions and scheduler accounting | Raw sources behind timing and resource records; retain precision, batch, warmup, synchronization and denominators |
-| Final main and supplementary PDFs | Local copies matching `paper/sources.json` for byte verification |
-
-The [complete display inventory](../paper/PAPER_SUPPORT.md) also identifies
-analyses without a dedicated figure builder. Preserve their original generating
-scripts and source arrays. Protocol tables and analytical calculations remain
-linked to their actual definitions and source inputs.
-
-## 4. Preflight, pack and register
-
-Complete the private plan with actual paths, the manuscript relationship,
-license and raw-record mappings. Then run:
+## 2. Check the setting
 
 ```bash
-make evidence-preflight EVIDENCE_PLAN=/abs/cm-evidence/plan.json FULL_AUDIT=always
-make evidence-pack EVIDENCE_PLAN=/abs/cm-evidence/plan.json
-make evidence-status EVIDENCE_PLAN=/abs/cm-evidence/plan.json
+bash run_cross_morse.sh check
 ```
 
-Follow [the registration guide](EVIDENCE_REGISTRATION.md#4-publish-and-register)
-for deposit, publication and registration. Its explicit publication switch and
-public-byte verification remain in force. Keep credentials in the environment
-and local paths in the private plan. Registration refreshes the public indexes;
-it does not infer that every manuscript conclusion is established.
+Expect `ok` for the runtime fingerprint (`0aba361b…`, the released runtime),
+the seven full-profile configurations, `sbatch`, the account, the `gpu`
+partition, the project disk and the two modules, and the plan of nine jobs:
+setup, seven runs (Roman-empire as an array of ten) and the report. The
+environment is reported as absent until the first setup job has run. Nothing
+is created or submitted.
 
-The joint S14 campaign is checked separately from per-run local confirmation:
+## 3. Exercise the cluster path in minutes
 
 ```bash
-make confirmation-audit CONFIRMATION_CAMPAIGN=/abs/cm-evidence/confirmation
+bash run_cross_morse.sh reproduce smoke
+bash run_cross_morse.sh status
 ```
 
-The heterogeneous original raw-test outputs retain their analysis provenance;
-the checker replays their joint Holm family and frozen decision rule. It does
-not replace block, permutation or crossed bootstrap tests with a different test.
+The smoke profile uses synthetic data with the real orchestration: the setup
+job builds the environment once (the step that takes longest the first time),
+then every dataset and all ten Roman-empire splits pass through the eight
+stages, and the report job writes `REPRODUCTION_REPORT.md`. Its numbers carry no
+scientific meaning; it confirms modules, environment, GPU access, logs and the
+Slurm chain before the full study is spent.
 
-## 5. Rebuild and inspect the public evidence
-
-After the archive, auxiliary records and manuscript bindings are registered:
+## 4. Regenerate the paper
 
 ```bash
-make paper
-make compare-runs REPORT_ROOT=/abs/cm-evidence/review
-make scientific-audit \
-  BUDGET_CAMPAIGN=/abs/cm-evidence/budget-campaign \
-  CONFIRMATION_CAMPAIGN=/abs/cm-evidence/confirmation \
-  MANUSCRIPT_PDF=/abs/paper.pdf \
-  SUPPLEMENTARY_PDF=/abs/supplement.pdf \
-  REPORT_ROOT=/abs/cm-evidence/review
-make review REQUIRE_EVIDENCE=1 \
-  BUDGET_CAMPAIGN=/abs/cm-evidence/budget-campaign \
-  CONFIRMATION_CAMPAIGN=/abs/cm-evidence/confirmation \
-  MANUSCRIPT_PDF=/abs/paper.pdf \
-  SUPPLEMENTARY_PDF=/abs/supplement.pdf \
-  REPORT_ROOT=/abs/cm-evidence/review
+bash run_cross_morse.sh reproduce
+tail -n 100 -F /nobackup/proj/disk/<storage project>/cross_morse/logs/CROSS_MORSE_LIVE.out
+bash run_cross_morse.sh status
 ```
 
-Review the exact current inputs and generated comparisons. Retain unfavorable
-or contradictory outcomes and resolve them against the original records. In
-particular, the source review identifies Peptides confirmation, the complete
-Roman/Pascal/COCO selection ledgers, model identities and the executed E6 variant
-as requiring explicit evidence. Use `make readiness` with the same campaign,
-PDF and review-report paths for the final completeness check.
+The datasets download from their official providers into the shared cache on
+first use. Jobs that reach the 24-hour limit checkpoint and requeue themselves;
+a GH200 that fails its health check is excluded and the job requeued. When a run
+needs attention, `status` names it and `launcher/stderr.log` in its directory
+holds the reason; `bash run_cross_morse.sh reproduce resume <suite>` resubmits
+what is unfinished.
+
+## 5. Read and keep the result
+
+The report job writes, in the suite directory:
+
+- `REPRODUCTION_REPORT.md`: every dataset's deployed policy and paired loss
+  effect beside main Table 1, the comparison levels of every quantity the
+  comparison tool reads, the rebuilt Tables 1 and 2, the GPU-hours from Slurm
+  accounting and the state of every run;
+- `SUITE_STATUS.json`: the same in machine-readable form;
+- `CMR_<n>_RESULTS.zip`: report, manifests, comparisons, rebuilt tables,
+  accounting and every run's decision records, ready to copy off the cluster.
+
+`CM_PACK_ARCHIVES=1 bash run_cross_morse.sh report <suite>` additionally packs
+each run as a sealed archive with its checkpoints for sharing.
+
+## 6. Experiments outside the lifecycle
+
+The budget-matched arms (E3–E6), the retrained external baselines and the E17
+timing protocol use `hpc/run_budget_arms_arrhenius.sh`,
+`hpc/run_upstream_baseline_arrhenius.sh` and
+`hpc/capture_arrhenius_accounting.sh`. They read the same SITE SETTINGS through
+`run_cross_morse.sh site-env`; [Experiments](EXPERIMENTS.md) lists their inputs.
