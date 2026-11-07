@@ -65,6 +65,7 @@ make reconstruction-example REPORT_ROOT=../cm-reports
 make artifact-catalog-check
 bash run_cross_morse.sh check                 # on a Slurm cluster: settings, runtime identity, plan
 bash run_cross_morse.sh reproduce             # regenerate all seven datasets and the report
+bash hpc/produce_paper_outputs_arrhenius.sh <suite>   # every other measured output from those runs
 ```
 
 `make paper` downloads and verifies the published measured outputs and rebuilds every
@@ -72,8 +73,9 @@ numbered display ([Reconstruction](docs/RECONSTRUCTION.md)). The next three exer
 software and the two bundled synthetic examples.
 The launcher regenerates the lifecycle results; the E3–E6 campaign, the external
 baselines and the other auxiliary record sets run from their drivers
-([Experiments](docs/EXPERIMENTS.md)), and the cross-dataset S14 family is audited
-by [its checker](docs/S14_CONFIRMATION.md). The
+([Experiments](docs/EXPERIMENTS.md)), all submitted by one command
+([Producing the measured outputs](docs/PRODUCTION.md)), and the cross-dataset S14
+family is built from the sealed runs and audited by [its checker](docs/S14_CONFIRMATION.md). The
 [reviewer guide](docs/REVIEWER_GUIDE.md) explains each verdict. A passing
 automated report establishes the checks it enumerates; it does not resolve every
 scientific judgment in peer review.

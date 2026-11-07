@@ -670,7 +670,7 @@ def _verified_record_set(records_root: Path, name: str) -> dict:
     if result.get("synthetic") is not False:
         raise PipelineError(f"{name}: synthetic records cannot be installed as manuscript measurements")
     rows = read_summary(target, specs["sets"][name], specs["summary_columns"])
-    validate_record_coverage(name, rows, specs["sets"][name], CONTRACTS[name])
+    validate_record_coverage(name, rows, specs["sets"][name], CONTRACTS[name], path=target)
     return result
 
 

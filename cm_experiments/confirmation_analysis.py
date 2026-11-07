@@ -745,7 +745,8 @@ def campaign_family(campaign, manuscript_root=ROOT) -> dict:
     for key, files in tests.items():
         files["result_json"] = read_json(files["result"])
     return {"root": campaign, "status": checked["status"], "input_identity": checked["input_identity"],
-            "rows": rows, "tests": tests, "bindings": checked["official_run_bindings"]}
+            "rows": rows, "tests": tests, "bindings": checked["official_run_bindings"],
+            "production_kind": checked.get("production_kind")}
 
 
 def check_binding(run: SealedRun, family: dict, dataset: str) -> str:
@@ -806,12 +807,33 @@ def policy_pair(run: SealedRun, key: str, family=None, *, allow_fixture=False) -
     return dict(left, registry_index=li), dict(right, registry_index=ri), source
 
 
-def campaign_seeds(family, key) -> list[int]:
+def ensemble_level(family, key) -> bool:
+    """A repository-built campaign's test carries the single 'ensemble' seed level: a contrast of the policies'
+    E-member ensembles with one observation per unit, not a per-seed array."""
+    from cm_campaigns.confirmation import ENSEMBLE_SEED_LEVEL, REPOSITORY_BUILT
+    return (family.get("production_kind") == REPOSITORY_BUILT
+            and list(family["rows"][key]["seed_ids"]) == [ENSEMBLE_SEED_LEVEL])
+
+
+def campaign_seeds(family, key) -> list[int] | None:
+    """The S14 test's checkpoint seed population; None for the ensemble level of a repository-built campaign."""
+    if ensemble_level(family, key):
+        return None
     values = family["rows"][key]["seed_ids"]
     try:
         return sorted(int(v) for v in values)
     except (TypeError, ValueError):
         raise RunnerError(f"{key}: the campaign's seed IDs are not checkpoint seeds: {values}") from None
+
+
+def e16_seed_population(family, key, run: SealedRun) -> tuple[list[int], str]:
+    """The seeds the E16 per-graph, per-seed array is compared with: the S14 test's per-seed population, or the
+    parent run's registered training seeds when the campaign's test is ensemble-level."""
+    population = campaign_seeds(family, key)
+    if population is None:
+        return (sorted(int(s) for s in run.config["training"]["seeds"]),
+                "the run's registered training seeds (the S14 test is ensemble-level: one observation per unit)")
+    return population, "the S14 test's seed population"
 
 
 # ============================================================================= S14b / S18b: planning
@@ -838,7 +860,7 @@ def plan_confirmation(parents, output, *, campaign=None, manuscript_root=ROOT, s
         seed_source = "the run's training seeds"
         chosen = [int(s) for s in seeds] if seeds is not None else None
         if chosen is None and family is not None:
-            chosen, seed_source = campaign_seeds(family, key), "the S14 test's seed population"
+            chosen, seed_source = e16_seed_population(family, key, run)
             if not set(chosen) <= set(trained):
                 if not run.synthetic:
                     raise RunnerError(f"{key}: S14 seeds {chosen} are not checkpoints of this run ({trained})")
@@ -1289,13 +1311,18 @@ def export_confirmation(output, *, campaign=None, manuscript_root=ROOT, root=Non
         row = family["rows"].get(dataset["contrast"])
         same_pair = row is not None and (dataset["left"]["hash"], dataset["right"]["hash"]) == (
             row["left_policy_sha256"], row["right_policy_sha256"])
+        ensemble = row is not None and ensemble_level(family, dataset["contrast"])
         try:
-            population = None if row is None else sorted(int(v) for v in row["seed_ids"])
-        except (TypeError, ValueError):
+            population = None if row is None else e16_seed_population(family, dataset["contrast"],
+                                                                       SealedRun(dataset["parent"]))[0]
+        except RunnerError:
             population = None
         same_seeds = population == [int(s) for s in dataset["seeds"]]
         agreement[dataset["contrast"]] = {"E16_policy_pair_is_the_S14_test_pair": same_pair,
-                                          "E16_seeds_are_the_S14_seed_population": same_seeds}
+                                          "E16_seeds_are_the_S14_seed_population": same_seeds,
+                                          "S14_seed_axis": "ensemble" if ensemble else "per-seed",
+                                          "E16_seed_reference": ("the parent run's registered training seeds" if ensemble
+                                                                 else "the S14 test's seed population")}
         if dataset["synthetic"]:
             continue
         # The graph share and J_old come from this run: it must be the campaign's original run of the dataset.
@@ -1303,7 +1330,9 @@ def export_confirmation(output, *, campaign=None, manuscript_root=ROOT, root=Non
         if row is not None and not same_pair:
             raise RunnerError(f"{dataset['contrast']}: the E16 policies are not the joint campaign's test policies")
         if row is not None and not same_seeds:
-            raise RunnerError(f"{dataset['contrast']}: the E16 seeds differ from the S14 test's seed population")
+            raise RunnerError(f"{dataset['contrast']}: the E16 seeds differ from "
+                              + ("the parent run's registered training seeds (the S14 test is ensemble-level)"
+                                 if ensemble else "the S14 test's seed population"))
     alpha = float(plan.get("alpha") or _holm_alpha())
     analysis, arrays = analyze_confirmation(output, plan, tests, alpha=alpha)
     analysis["campaign"] = {"status": family["status"], "input_identity": family["input_identity"],

@@ -118,17 +118,27 @@ def template(name: str) -> dict:
         raise MappingError(f"{name} is not a set of records/specs.json")
     spec, contract = specs["sets"][name], _contract(name)
     per_seed = set(spec.get("per_seed_quantities", []))
-    rows = []
+    rows, raw_files = [], [{"from": None, "to": "raw/REPLACE/original_output.json"}]
     if name == "baselines":
+        # Every row of a complete set (cm_campaigns.baselines): the internal rows of Table S15 (keys from the
+        # registered comparator and deployed rows of Table S15b) and the external comparisons, with the quantities
+        # the tables read, and the study plan, upstream identity and adapter archive of every external comparison.
+        from cm_campaigns.baselines import REQUIRED, dataset_methods, study_paths
         ledger = _registry()["supplementary_table_S15b_per_rerun_resource_ledger"]
+        raw_files = []
         for dataset in contract["datasets"]:
-            for method in [row["method"] for row in ledger[dataset]]:
-                for quantity in spec["quantities"]:
-                    if quantity in per_seed:
-                        rows.append(_row({"dataset": dataset, "method": method, "seed": "{seed}"}, quantity, spec,
-                                         for_each={"seed": SEEDS}))
-                    else:
-                        rows.append(_row({"dataset": dataset, "method": method, "seed": ""}, quantity, spec))
+            listed = [row["method"] for row in ledger[dataset]]
+            qc = next(m for m in listed if m.endswith(" (qC)"))
+            qd = next((m for m in listed if m.endswith(" (deployed)")), None)
+            for method, role in dataset_methods(dataset, qc, qd).items():
+                for quantity in sorted(per_seed):
+                    rows.append(_row({"dataset": dataset, "method": method, "seed": "{seed}"}, quantity, spec,
+                                     for_each={"seed": SEEDS}))
+                for quantity in REQUIRED[role]:
+                    rows.append(_row({"dataset": dataset, "method": method, "seed": ""}, quantity, spec))
+                if role == "external":
+                    paths = study_paths(dataset, method, "REPLACE_WITH_ADAPTER_COMMIT")
+                    raw_files += [{"from": None, "to": paths[key]} for key in ("plan", "upstream", "adapter_archive")]
     elif contract.get("coverage_keys"):
         for values in contract["coverage_rows"]:
             for quantity in spec["quantities"]:
@@ -157,7 +167,7 @@ def template(name: str) -> dict:
                          "source_file/locator. Then: python -B scripts/export_records.py from-mapping --mapping THIS_FILE"),
             "_quantities": spec["quantities"], "_keys": spec["keys"], "_manuscript_tables": spec["manuscript_tables"],
             "provenance": {field: None for field in specs["provenance_fields"]},
-            "raw_files": [{"from": None, "to": "raw/REPLACE/original_output.json"}],
+            "raw_files": raw_files,
             "rows": rows}
 
 
@@ -527,7 +537,7 @@ def build(mapping_path: Path, *, records_root: Path, replace: bool = False, allo
             if contract.get("coverage") == "declared_rows":
                 _declared_coverage(name, rows, spec, contract)
             else:
-                validate_record_coverage(name, rows, spec, contract)
+                validate_record_coverage(name, rows, spec, contract, path=target)
         except ValueError as exc:
             coverage_complete = False
             if not allow_partial:

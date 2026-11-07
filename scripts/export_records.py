@@ -5,8 +5,10 @@
     python -B scripts/export_records.py budget-matched --campaign /abs/arm_campaign_export \
         --hardware "NVIDIA GH200 96 GB, Arrhenius" --period "2026-11-02/2026-11-09"
 
-    # E12/E17: pinned-upstream studies of scripts/run_upstream_baseline.py, E17 timing rows, sacct exports
+    # E12/E17: pinned-upstream studies of scripts/run_upstream_baseline.py with their plans and adapter checkouts,
+    # the internal rows of scripts/run_internal_baselines.py, E17 timing rows, sacct exports
     python -B scripts/export_records.py baselines --study /abs/studies/arxiv_amp --study /abs/studies/arxiv_admp \
+        --checkouts /abs/baselines --internal /abs/baselines-internal \
         --timing /abs/timing/arxiv.csv --accounting /abs/accounting/sacct.psv \
         --hardware "NVIDIA GH200 96 GB, Arrhenius" --period "2026-11-02/2026-11-09"
 
@@ -30,6 +32,15 @@ SHA-256 and archive path, unless ``--copy-predictions`` / ``--copy-observations`
 
 Nothing is filled in: a study without its predictions, a timing row whose scheduler job is absent
 from the accounting, or a campaign without its complete analysis stops the export.
+
+``baselines`` is staged and installed atomically. For every study it writes the validated plan
+(``raw/<slug>/<method>/plan.json``), the upstream identity (``upstream.json``: repository URL of the source
+checkout's ``origin``, source and adapter commits, the adapter archive's SHA-256) and the adapter checkout
+archived at its pinned commit (``code/adapters/<slug>/<method>/adapter-<commit>.tar``; the upstream source is
+referenced, never copied). The checkouts are found through ``--checkouts``, and each checkout's commit must be
+the plan's. A set the record audit does not accept as complete (``cm_campaigns.baselines``: the internal rows
+of the seven datasets, the fourteen external comparisons with their study code, every timing row bound to a
+completed GPU allocation) is written only with ``--allow-partial`` and never into ``records/``.
 """
 from __future__ import annotations
 
@@ -38,18 +49,20 @@ import csv
 import hashlib
 import json
 import math
+import os
 import re
 import shutil
 import statistics
 import subprocess
 import sys
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts._paper_common import runtime_source_fingerprint  # noqa: E402
-from scripts.records import RECORDS, cmd_index, load_specs  # noqa: E402
+from scripts.records import RECORDS, cmd_index, is_official_root, load_specs  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SPECS_PATH = RECORDS / "specs.json"
@@ -137,6 +150,41 @@ def start_set(root: Path, name: str, replace: bool) -> Path:
 
 def finish_set(root: Path, target: Path, *, keys: list[str], rows: list[dict], provenance: dict,
                argv: list[str], inputs: list[dict]) -> None:
+    write_set_files(target, keys=keys, rows=rows, provenance=provenance, argv=argv, inputs=inputs)
+    if cmd_index(root, SPECS_PATH) != 0:
+        raise ExportError(f"{target.name}: scripts/records.py index failed")
+
+
+def stage_set(root: Path, name: str, replace: bool) -> tuple[Path, Path]:
+    """A staging directory beside the records root (same filesystem) holding ``<name>/raw`` and ``<name>/code``."""
+    specs = load_specs(root, SPECS_PATH)
+    if name not in specs["sets"]:
+        raise ExportError(f"{name} is not a record set of records/specs.json")
+    if (root / name).exists() and not replace:
+        raise ExportError(f"{root / name} exists; pass --replace to rebuild it from the inputs")
+    root.mkdir(parents=True, exist_ok=True)
+    parent = ROOT.parent if root.is_relative_to(ROOT) else root.parent
+    if parent.stat().st_dev != root.stat().st_dev:
+        raise ExportError("staging and records must share a filesystem for atomic installation")
+    staging = Path(tempfile.mkdtemp(prefix=f"cm-record-{name}-", dir=parent))
+    (staging / name / "raw").mkdir(parents=True)
+    (staging / name / "code").mkdir()
+    return staging, staging / name
+
+
+def install_staged(root: Path, staging: Path, target: Path, *, replace: bool) -> Path:
+    """Hash and trace the staged set, then install it with the records index (the old set stays on failure)."""
+    from scripts.record_mapping import install_verified_set
+    from scripts.records import verify_set, write_manifest
+    specs = load_specs(root, SPECS_PATH)
+    write_manifest(target)
+    verify_set(target, specs["sets"][target.name], specs)
+    return install_verified_set(staging, target, root, specs, replace=replace)
+
+
+def write_set_files(target: Path, *, keys: list[str], rows: list[dict], provenance: dict, argv: list[str],
+                    inputs: list[dict]) -> None:
+    """summary.csv, code/SOURCE.json and provenance.json of a set whose raw/ files are in place."""
     if not rows:
         raise ExportError(f"{target.name}: no values to export")
     with (target / "summary.csv").open("w", encoding="utf-8", newline="") as handle:
@@ -156,8 +204,6 @@ def finish_set(root: Path, target: Path, *, keys: list[str], rows: list[dict], p
         if not str(provenance.get(field, "")).strip():
             raise ExportError(f"{target.name}: provenance field {field!r} is empty; pass it explicitly")
     dump_json(target / "provenance.json", provenance)
-    if cmd_index(root, SPECS_PATH) != 0:
-        raise ExportError(f"{target.name}: scripts/records.py index failed")
 
 
 def value_row(keys: dict, quantity: str, value, unit: str, source: str, locator: str) -> dict:
@@ -230,16 +276,23 @@ def export_budget_matched(args) -> Path:
 
 
 # ----------------------------------------------------------------------------- baselines (E12, E17)
-def read_timing(paths: list[Path]) -> dict[tuple[str, str], list[dict]]:
+STUDY_SCHEMA = "cm-upstream-study-1"
+
+
+def read_timing_file(path: Path) -> list[dict]:
     from cm_campaigns.timing import COLUMNS
+    with Path(path).open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != list(COLUMNS):
+            raise ExportError(f"{Path(path).name}: timing rows must have the E17 columns {list(COLUMNS)}")
+        return list(reader)
+
+
+def read_timing(paths: list[Path]) -> dict[tuple[str, str], list[dict]]:
     groups: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for path in paths:
-        with Path(path).open(encoding="utf-8", newline="") as handle:
-            reader = csv.DictReader(handle)
-            if reader.fieldnames != list(COLUMNS):
-                raise ExportError(f"{Path(path).name}: timing rows must have the E17 columns {list(COLUMNS)}")
-            for row in reader:
-                groups[(row["dataset"], row["method"])].append(row)
+        for row in read_timing_file(path):
+            groups[(row["dataset"], row["method"])].append(row)
     return groups
 
 
@@ -252,6 +305,22 @@ def read_accounting(paths: list[Path]) -> dict[str, dict]:
                 raise ExportError(f"conflicting scheduler records for allocation {key}")
             allocations[key] = row
     return allocations
+
+
+def bind_timing_job(key: str, allocations: dict, by_job: dict) -> tuple[str | None, str | None]:
+    """(allocation, None) when a timing row's job key names exactly one allocation of the sacct exports.
+
+    The key is the sacct key Cluster|JobIDRaw|Submit|Start, or slurm:<JobID> as the runners record it
+    (cm_experiments.timing_records.timing_job_key); otherwise (None, the reason).
+    """
+    if key in allocations:
+        return key, None
+    if key.startswith("slurm:"):
+        matched = sorted({k for k, _ in by_job.get(key.split(":", 1)[1], [])})
+        if len(matched) == 1:
+            return matched[0], None
+        return None, f"{len(matched)} allocations carry job {key}" if matched else f"no allocation carries job {key}"
+    return None, f"no allocation of the sacct exports carries {key}"
 
 
 def study_plan(study: Path) -> dict:
@@ -277,155 +346,460 @@ def attempt_job_ids(attempt_dir: Path) -> set[str]:
     return ids
 
 
+# --- E12 study plans and adapter code (Part of the set: raw/<slug>/<method>/{plan,upstream}.json, code/adapters/)
+def _git(path: Path, *args) -> str | None:
+    try:
+        out = subprocess.run(["git", "-C", str(path), *args], capture_output=True, text=True, check=False, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return out.stdout.strip() if out.returncode == 0 else None
+
+
+def public_url(url: str | None) -> str | None:
+    """A remote URL without the user:password@ part of a scheme URL."""
+    if not url:
+        return None
+    from urllib.parse import urlsplit, urlunsplit
+    parts = urlsplit(url)
+    if parts.scheme and "@" in parts.netloc:
+        return urlunsplit((parts.scheme, parts.netloc.rsplit("@", 1)[1], parts.path, parts.query, parts.fragment))
+    return url
+
+
+def study_plan_files(directories) -> list[tuple[Path, dict]]:
+    """The cm-upstream-study-1 plans under the --checkouts directories (files at most three levels deep)."""
+    from cm_experiments.upstream import validate_plan
+    found = []
+    for directory in directories:
+        directory = Path(directory).resolve()
+        if not directory.is_dir():
+            raise ExportError(f"--checkouts {directory}: not a directory")
+        for current, folders, files in os.walk(directory):
+            depth = len(Path(current).relative_to(directory).parts)
+            folders[:] = sorted(f for f in folders if f != ".git") if depth < 2 else []
+            for name in sorted(f for f in files if f.endswith(".json")):
+                path = Path(current) / name
+                try:
+                    value = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if isinstance(value, dict) and value.get("schema") == STUDY_SCHEMA:
+                    try:
+                        found.append((path, validate_plan(value)))
+                    except ValueError as exc:
+                        raise ExportError(f"{path}: {exc}") from None
+    return found
+
+
+def study_checkouts(plan: dict, plans: list[tuple[Path, dict]]) -> tuple[tuple[Path, Path] | None, str | None]:
+    """The source and adapter checkouts of a study, resolved as scripts/run_upstream_baseline.py resolves them.
+
+    The plan file under --checkouts whose content equals the study's plan names them relative to its own
+    directory. Each checkout's HEAD must be the plan's commit. (None, reason) when a checkout is missing.
+    """
+    from cm_experiments.artifacts import canonical
+    where = f"{plan['dataset']}/{plan['method']}"
+    identity = canonical(plan)
+    matches = sorted({path for path, other in plans if canonical(other) == identity})
+    if not matches:
+        return None, f"{where}: no plan file under --checkouts equals the study's plan; its adapter is not archived"
+    located = {((path.parent / plan["source_directory"]).resolve(), (path.parent / plan["adapter_directory"]).resolve())
+               for path in matches}
+    if len(located) != 1:
+        raise ExportError(f"{where}: the plan files {[str(p) for p in matches]} name different checkouts")
+    source, adapter = located.pop()
+    for kind, path, commit in (("source", source, plan["source_commit"]), ("adapter", adapter, plan["adapter_commit"])):
+        if not path.is_dir():
+            return None, f"{where}: the {kind} checkout {path.name} is missing"
+        head = _git(path, "rev-parse", "--verify", "HEAD^{commit}")
+        if head is None:
+            raise ExportError(f"{where}: the {kind} checkout {path} is not a git checkout")
+        if head != commit:
+            raise ExportError(f"{where}: the {kind} checkout is at commit {head[:12]}; the plan pins {commit[:12]}")
+    return (source, adapter), None
+
+
+def package_study(target: Path, plan: dict, source: Path, adapter: Path) -> dict:
+    """Write the validated plan, the upstream identity and the adapter archive of one external comparison."""
+    from cm_campaigns.baselines import UPSTREAM_SCHEMA, study_paths
+    from cm_experiments.artifacts import canonical
+    where = f"{plan['dataset']}/{plan['method']}"
+    paths = study_paths(plan["dataset"], plan["method"], plan["adapter_commit"])
+    dump_json(target / paths["plan"], plan)
+    archive = target / paths["adapter_archive"]
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with archive.open("xb") as handle:
+            result = subprocess.run(["git", "-C", str(adapter), "archive", "--format=tar", plan["adapter_commit"]],
+                                    stdout=handle, stderr=subprocess.PIPE, check=False, timeout=600)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ExportError(f"{where}: git archive of the adapter checkout failed: {exc}") from None
+    if result.returncode != 0:
+        raise ExportError(f"{where}: git archive of the adapter checkout failed: "
+                          + result.stderr.decode(errors="replace").strip()[-300:])
+    digest = sha256_file(archive)
+    upstream = {
+        "schema": UPSTREAM_SCHEMA, "dataset": plan["dataset"], "method": plan["method"], "plan": paths["plan"],
+        "plan_sha256": canonical(plan),
+        "upstream_repository": public_url(_git(source, "remote", "get-url", "origin")),
+        "source_commit": plan["source_commit"], "adapter_commit": plan["adapter_commit"],
+        "adapter_repository": public_url(_git(adapter, "remote", "get-url", "origin")),
+        "adapter_archive": {"file": paths["adapter_archive"], "sha256": digest, "commit": plan["adapter_commit"],
+                            "format": "git archive --format=tar of the adapter checkout at adapter_commit"},
+        "source_copied": False,
+        "scope": ("the upstream third-party source is referenced by its repository URL and source_commit and is not "
+                  "copied; the adapter code is archived at its pinned commit; plan_sha256 is the canonical hash the "
+                  "study's attempts record (attempt.json plan_sha256)")}
+    dump_json(target / paths["upstream"], upstream)
+    return {"dataset": plan["dataset"], "method": plan["method"], "plan": paths["plan"],
+            "upstream": paths["upstream"], "adapter_archive": paths["adapter_archive"], "adapter_archive_sha256": digest,
+            "source_commit": plan["source_commit"], "adapter_commit": plan["adapter_commit"]}
+
+
+# --- the internal rows (scripts/run_internal_baselines.py)
+def internal_rows(target: Path, collected: dict) -> tuple[list[dict], list[tuple[Path, str]], list[dict]]:
+    """Score and GPU-hour rows of every internal method, the runs' timing files, and the inputs (SOURCE.json).
+
+    Each run's sealed result directory is copied unchanged to raw/internal/<slug>/<run>/. A single run's rows point
+    into it; a campaign's per-seed mean and GPU-hour sum are written to raw/<slug>/<method>/ with the inputs' SHA-256.
+    """
+    from cm_campaigns.baselines import method_directory
+    from cm_campaigns.contract import SLUGS
+    from cm_experiments.internal_baselines import DEFINITIONS
+    rows, timing, inputs = [], [], [{"file": f"{collected['output'].name}/plan.json", "sha256": collected["plan_sha256"]}]
+    for block in collected["datasets"]:
+        dataset, slug = block["dataset"], SLUGS[block["dataset"]]
+        bases = {}
+        for member in block["members"]:
+            name = member["entry"]["member"]
+            base = bases[name] = f"raw/internal/{slug}/{safe_name(name)}"
+            for relative in member["files"]:
+                copy_into(target, member["directory"] / relative, f"{base}/{relative}")
+            inputs.append({"file": f"{collected['output'].name}/{member['directory'].relative_to(collected['output']).as_posix()}"
+                                   "/result.json", "sha256": sha256_file(member["directory"] / "result.json")})
+            if member["timing_rows"]:
+                timing.append((member["directory"] / "timing.csv", f"{base}/timing.csv"))
+        single = len(block["members"]) == 1
+        for index, method in enumerate(block["methods"]):
+            folder = f"raw/{slug}/{method_directory(method['key'])}"
+            keys = {"dataset": dataset, "method": method["key"], "seed": ""}
+            for item in method["seeds"]:
+                seeded = {**keys, "seed": str(item["seed"])}
+                if single:
+                    part = item["parts"][0]
+                    rows.append(value_row(seeded, "score", part["score_reported"], part["unit"],
+                                          f"{bases[part['member']]}/{part['file']}", "json:/score_reported"))
+                    continue
+                relative = f"{folder}/seed-{item['seed']}/score_mean.json"
+                dump_json(target / relative, {
+                    "score_reported": item["value"], "unit": item["unit"], "seed": item["seed"],
+                    "splits": [{"run": p["member"], "score_reported": p["score_reported"],
+                                "file": f"{bases[p['member']]}/{p['file']}", "sha256": p["sha256"]} for p in item["parts"]],
+                    "definition": "mean over the official split runs of the seed's score (internal_baselines score)"})
+                rows.append(value_row(seeded, "score", item["value"], item["unit"], relative, "json:/score_reported"))
+            if single:
+                part = method["gpu_parts"][0]
+                rows.append(value_row(keys, "gpu_hours", part["gpu_hours"], "GPU-h",
+                                      f"{bases[part['member']]}/gpu_hours.json", f"json:/methods/{index}/gpu_hours"))
+                continue
+            relative = f"{folder}/gpu_hours.json"
+            dump_json(target / relative, {
+                "gpu_hours": method["gpu_hours"],
+                "splits": [{"run": p["member"], "gpu_hours": p["gpu_hours"],
+                            "file": f"{bases[p['member']]}/gpu_hours.json", "locator": f"json:/methods/{index}/gpu_hours",
+                            "sha256": sha256_file(target / bases[p["member"]] / "gpu_hours.json")}
+                           for p in method["gpu_parts"]],
+                "definition": DEFINITIONS["gpu_hours"]})
+            rows.append(value_row(keys, "gpu_hours", method["gpu_hours"], "GPU-h", relative, "json:/gpu_hours"))
+    return rows, timing, inputs
+
+
 def export_baselines(args) -> Path:
+    from cm_campaigns.baselines import audit
     from cm_campaigns.contract import METRICS, SLUGS
     from cm_campaigns.numeric import probability_scores
     from cm_campaigns.timing import ratios
     studies = [Path(s).resolve() for s in args.study]
     timing_paths = [Path(p).resolve() for p in args.timing]
     accounting_paths = [Path(p).resolve() for p in args.accounting]
-    if not studies and not timing_paths:
-        raise ExportError("give at least one --study or --timing input")
+    if not studies and not timing_paths and not args.internal:
+        raise ExportError("give at least one --study, --internal or --timing input")
+    root = Path(args.root).resolve()
+    if args.allow_partial and is_official_root(root):
+        raise ExportError("records/ holds complete measured sets only; write a partial set to another --root")
+    reasons: list[str] = []
+
+    # Inputs verified before anything is written: study plans, checkouts, the internal runner outputs.
+    plans = {study: study_plan(study) for study in studies}
+    comparisons = [(p["dataset"], p["method"]) for p in plans.values()]
+    if len(set(comparisons)) != len(comparisons):
+        raise ExportError("two studies of the same dataset-method comparison")
+    plan_files = study_plan_files(args.checkouts)
+    checkouts = {}
+    for study, plan in plans.items():
+        located, reason = study_checkouts(plan, plan_files) if args.checkouts else (
+            None, f"{plan['dataset']}/{plan['method']}: no --checkouts directory; its adapter is not archived")
+        if reason:
+            reasons.append(reason)
+        checkouts[study] = located
+    internals = []
+    if args.internal:
+        from cm_experiments.ensemble_grid import RunnerError
+        from cm_experiments.internal_baselines import collect_internal_baselines
+        for output in args.internal:
+            try:
+                internals.append(collect_internal_baselines(output))
+            except (RunnerError, ValueError) as exc:
+                raise ExportError(f"--internal {Path(output).name}: {exc}") from None
+        covered = [d["dataset"] for item in internals for d in item["datasets"]]
+        if len(set(covered)) != len(covered):
+            raise ExportError("two --internal outputs measure the same dataset")
+        for item in internals:
+            reasons += item["reasons"]
+    synthetic = any(item["synthetic"] for item in internals)
+    if synthetic and is_official_root(root):
+        raise ExportError("synthetic example runs cannot be exported into records/; use another --root")
+
     allocations = read_accounting(accounting_paths) if accounting_paths else {}
     by_job = defaultdict(list)
     for key, row in allocations.items():
         for job in {row["job_id"], row["job_id_raw"]}:
             by_job[str(job)].append((key, row))
-    timing = read_timing(timing_paths) if timing_paths else {}
-    root = Path(args.root).resolve()
-    target = start_set(root, "baselines", args.replace)
-    inputs, rows = [], []
-    for path in accounting_paths:
-        copy_into(target, path, f"raw/accounting/{safe_name(path.name)}")
-        inputs.append({"file": f"accounting/{path.name}", "sha256": sha256_file(path)})
-    for path in timing_paths:
-        copy_into(target, path, f"raw/timing/{safe_name(path.name)}")
-        inputs.append({"file": f"timing/{path.name}", "sha256": sha256_file(path)})
+    staging, target = stage_set(root, "baselines", args.replace)
+    try:
+        inputs, rows, packaged = [], [], []
+        for path in accounting_paths:
+            copy_into(target, path, f"raw/accounting/{safe_name(path.name)}")
+            inputs.append({"file": f"accounting/{path.name}", "sha256": sha256_file(path)})
+        timing_sources = []
+        for path in timing_paths:
+            timing_sources.append((path, copy_into(target, path, f"raw/timing/{safe_name(path.name)}"), "supplied"))
+            inputs.append({"file": f"timing/{path.name}", "sha256": sha256_file(path)})
 
-    for study in studies:
-        plan = study_plan(study)
-        dataset, method, metric = plan["dataset"], plan["method"], METRICS[plan["dataset"]]
-        base = f"raw/{SLUGS[dataset]}/{safe_name(method)}"
-        keys = {"dataset": dataset, "method": method, "seed": ""}
-        jobs: set[str] = set()
-        # every HPO attempt, failed and pruned ones included
-        attempts = []
-        for path in sorted(study.glob("hpo/trial-*/attempt.json")):
-            record = load_json(path)
-            attempts.append({k: record.get(k) for k in ("index", "status", "development_score", "elapsed_seconds",
-                                                        "process_exit_code", "reason")})
-            jobs |= attempt_job_ids(path.parent)
-        if len(attempts) != len(plan["trials"]):
-            raise ExportError(f"{study.name}: {len(attempts)} HPO attempts recorded for {len(plan['trials'])} registered trials")
-        dump_json(target / base / "hpo_attempts.json", {"count": len(attempts), "attempts": attempts,
-                                                        "completed": sum(a["status"] == "COMPLETE" for a in attempts)})
-        rows.append(value_row(keys, "hpo_trials", len(attempts), "trials", f"{base}/hpo_attempts.json", "json:/count"))
-        # final fits: score recomputed from the saved predictions
-        per_seed: dict[int, list[tuple[int, float, str]]] = defaultdict(list)
-        parameter_counts = set()
-        for path in sorted(study.glob("final/seed-*/split-*/attempt.json")):
-            record = load_json(path)
-            if record.get("status") != "COMPLETE":
-                raise ExportError(f"{path.parent.relative_to(study)}: final fit is {record.get('status')}; "
-                                  "a registered seed cannot be dropped")
-            jobs |= attempt_job_ids(path.parent)
-            receipt = load_json(path.parent / "adapter_output" / "receipt.json")
-            predictions = (path.parent / "adapter_output" / receipt["predictions"]).resolve()
-            if not predictions.is_relative_to((path.parent / "adapter_output").resolve()):
-                raise ExportError(f"{path.parent.name}: receipt points outside the adapter output")
-            scored = probability_scores(predictions, metric, graph_mean_loss=dataset in ("PascalVOC-SP", "COCO-SP", "Peptides-func"))
-            seed, split = int(record["seed"]), int(record["split"])
-            leaf = f"{base}/seed-{seed}/split-{split}"
-            # Test predictions of the large benchmarks run to hundreds of MB per fit: they stay in the study
-            # archive, identified by SHA-256 and archive path, unless the set should carry them (--copy-predictions).
-            if args.copy_predictions:
-                copy_into(target, predictions, f"{leaf}/{predictions.name}")
-            reported = scored["score"] * (1.0 if metric == "ap" else 100.0)
-            dump_json(target / leaf / "score.json", {
-                "metric": metric, "score": scored["score"], "score_reported": reported,
-                "unit": "AP" if metric == "ap" else "%", "loss": scored["loss"], "observations": scored["n_observations"],
-                "units": scored["n_units"], "predictions_sha256": sha256_file(predictions),
-                "predictions_in_study_archive": predictions.relative_to(study).as_posix(),
-                "predictions_copied": bool(args.copy_predictions)})
-            per_seed[seed].append((split, reported, f"{leaf}/score.json"))
-            if receipt.get("parameter_count") is not None:
-                parameter_counts.add(int(receipt["parameter_count"]))
-        seeds = sorted(per_seed)
-        if studies and len(seeds) != len(plan["seed_ids"]):
-            raise ExportError(f"{study.name}: final fits cover {len(seeds)} of {len(plan['seed_ids'])} registered seeds")
-        for seed in seeds:
-            items = sorted(per_seed[seed])
-            seed_keys = {**keys, "seed": str(seed)}
-            if len(items) == 1:
-                rows.append(value_row(seed_keys, "score", items[0][1], "AP" if metric == "ap" else "%",
-                                      items[0][2], "json:/score_reported"))
-            else:   # Roman-empire: the seed's score is the mean over the ten official splits
-                mean = statistics.fmean(v for _, v, _ in items)
-                dump_json(target / base / f"seed-{seed}" / "score_mean.json", {
-                    "score_reported": mean, "splits": [{"split": s, "score_reported": v, "file": f} for s, v, f in items]})
-                rows.append(value_row(seed_keys, "score", mean, "%", f"{base}/seed-{seed}/score_mean.json",
-                                      "json:/score_reported"))
-        if len(parameter_counts) > 1:
-            raise ExportError(f"{study.name}: final fits report different parameter counts {sorted(parameter_counts)}")
-        if parameter_counts:
-            count = parameter_counts.pop()
-            dump_json(target / base / "parameters.json", {"parameter_count": count, "params_millions": count / 1e6})
-            rows.append(value_row(keys, "params_millions", count / 1e6, "M", f"{base}/parameters.json", "json:/params_millions"))
-        # GPU-hours of every attempt's allocation (HPO and final fits)
-        if allocations:
-            matched, missing = {}, sorted(j for j in jobs if j not in by_job)
-            if missing and not args.allow_missing_accounting:
-                raise ExportError(f"{study.name}: allocations {missing[:5]} are absent from the sacct exports")
-            for job in jobs:
-                for key, row in by_job.get(job, []):
-                    matched[key] = row
-            total = sum(r["gpu_hours"] for r in matched.values())
-            dump_json(target / base / "accounting.json", {
-                "gpu_hours": total, "scope": "allocated GPUs x allocation seconds / 3600 over every HPO and final-fit "
-                "allocation of the study; allocation hours, not utilisation", "missing_job_ids": missing,
-                "allocations": [{"job_id": r["job_id"], "state": r["state"], "exit_code": r["exit_code"],
-                                 "seconds": r["seconds"], "allocated_gpus": r["allocated_gpus"],
-                                 "gpu_hours": r["gpu_hours"]} for _, r in sorted(matched.items())]})
-            rows.append(value_row(keys, "gpu_hours", total, "GPU-h", f"{base}/accounting.json", "json:/gpu_hours"))
+        for study in studies:
+            plan = plans[study]
+            dataset, method, metric = plan["dataset"], plan["method"], METRICS[plan["dataset"]]
+            base = f"raw/{SLUGS[dataset]}/{safe_name(method)}"
+            keys = {"dataset": dataset, "method": method, "seed": ""}
+            jobs: set[str] = set()
+            # every HPO attempt, failed and pruned ones included
+            attempts = []
+            for path in sorted(study.glob("hpo/trial-*/attempt.json")):
+                record = load_json(path)
+                attempts.append({k: record.get(k) for k in ("index", "status", "development_score", "elapsed_seconds",
+                                                            "process_exit_code", "reason")})
+                jobs |= attempt_job_ids(path.parent)
+            if len(attempts) != len(plan["trials"]):
+                raise ExportError(f"{study.name}: {len(attempts)} HPO attempts recorded for {len(plan['trials'])} "
+                                  "registered trials")
+            dump_json(target / base / "hpo_attempts.json", {"count": len(attempts), "attempts": attempts,
+                                                            "completed": sum(a["status"] == "COMPLETE" for a in attempts)})
+            rows.append(value_row(keys, "hpo_trials", len(attempts), "trials", f"{base}/hpo_attempts.json", "json:/count"))
+            # final fits: score recomputed from the saved predictions
+            per_seed: dict[int, list[tuple[int, float, str]]] = defaultdict(list)
+            parameter_counts = set()
+            for path in sorted(study.glob("final/seed-*/split-*/attempt.json")):
+                record = load_json(path)
+                if record.get("status") != "COMPLETE":
+                    raise ExportError(f"{path.parent.relative_to(study)}: final fit is {record.get('status')}; "
+                                      "a registered seed cannot be dropped")
+                jobs |= attempt_job_ids(path.parent)
+                receipt = load_json(path.parent / "adapter_output" / "receipt.json")
+                predictions = (path.parent / "adapter_output" / receipt["predictions"]).resolve()
+                if not predictions.is_relative_to((path.parent / "adapter_output").resolve()):
+                    raise ExportError(f"{path.parent.name}: receipt points outside the adapter output")
+                scored = probability_scores(predictions, metric,
+                                            graph_mean_loss=dataset in ("PascalVOC-SP", "COCO-SP", "Peptides-func"))
+                seed, split = int(record["seed"]), int(record["split"])
+                leaf = f"{base}/seed-{seed}/split-{split}"
+                # Test predictions of the large benchmarks run to hundreds of MB per fit: they stay in the study
+                # archive, identified by SHA-256 and archive path, unless the set should carry them (--copy-predictions).
+                if args.copy_predictions:
+                    copy_into(target, predictions, f"{leaf}/{predictions.name}")
+                reported = scored["score"] * (1.0 if metric == "ap" else 100.0)
+                dump_json(target / leaf / "score.json", {
+                    "metric": metric, "score": scored["score"], "score_reported": reported,
+                    "unit": "AP" if metric == "ap" else "%", "loss": scored["loss"], "observations": scored["n_observations"],
+                    "units": scored["n_units"], "predictions_sha256": sha256_file(predictions),
+                    "predictions_in_study_archive": predictions.relative_to(study).as_posix(),
+                    "predictions_copied": bool(args.copy_predictions)})
+                per_seed[seed].append((split, reported, f"{leaf}/score.json"))
+                if receipt.get("parameter_count") is not None:
+                    parameter_counts.add(int(receipt["parameter_count"]))
+            seeds = sorted(per_seed)
+            if len(seeds) != len(plan["seed_ids"]):
+                raise ExportError(f"{study.name}: final fits cover {len(seeds)} of {len(plan['seed_ids'])} registered seeds")
+            for seed in seeds:
+                items = sorted(per_seed[seed])
+                seed_keys = {**keys, "seed": str(seed)}
+                if len(items) == 1:
+                    rows.append(value_row(seed_keys, "score", items[0][1], "AP" if metric == "ap" else "%",
+                                          items[0][2], "json:/score_reported"))
+                else:   # Roman-empire: the seed's score is the mean over the ten official splits
+                    mean = statistics.fmean(v for _, v, _ in items)
+                    dump_json(target / base / f"seed-{seed}" / "score_mean.json", {
+                        "score_reported": mean, "splits": [{"split": s, "score_reported": v, "file": f} for s, v, f in items]})
+                    rows.append(value_row(seed_keys, "score", mean, "%", f"{base}/seed-{seed}/score_mean.json",
+                                          "json:/score_reported"))
+            if len(parameter_counts) > 1:
+                raise ExportError(f"{study.name}: final fits report different parameter counts {sorted(parameter_counts)}")
+            if parameter_counts:
+                count = parameter_counts.pop()
+                dump_json(target / base / "parameters.json", {"parameter_count": count, "params_millions": count / 1e6})
+                rows.append(value_row(keys, "params_millions", count / 1e6, "M", f"{base}/parameters.json",
+                                      "json:/params_millions"))
+            # GPU-hours of every attempt's allocation (HPO and final fits)
+            if allocations:
+                matched, missing = {}, sorted(j for j in jobs if j not in by_job)
+                if missing and not args.allow_missing_accounting:
+                    raise ExportError(f"{study.name}: allocations {missing[:5]} are absent from the sacct exports")
+                if missing:
+                    reasons.append(f"{dataset}/{method}: allocations {missing[:5]} are absent from the sacct exports")
+                for job in jobs:
+                    for key, row in by_job.get(job, []):
+                        matched[key] = row
+                total = sum(r["gpu_hours"] for r in matched.values())
+                dump_json(target / base / "accounting.json", {
+                    "gpu_hours": total, "scope": "allocated GPUs x allocation seconds / 3600 over every HPO and final-fit "
+                    "allocation of the study; allocation hours, not utilisation", "missing_job_ids": missing,
+                    "allocations": [{"job_id": r["job_id"], "state": r["state"], "exit_code": r["exit_code"],
+                                     "seconds": r["seconds"], "allocated_gpus": r["allocated_gpus"],
+                                     "gpu_hours": r["gpu_hours"]} for _, r in sorted(matched.items())]})
+                rows.append(value_row(keys, "gpu_hours", total, "GPU-h", f"{base}/accounting.json", "json:/gpu_hours"))
+            else:
+                reasons.append(f"{dataset}/{method}: no sacct export gives the GPU-hours of its attempts")
+            # E12 study plan, upstream identity and adapter code
+            if checkouts[study] is not None:
+                packaged.append(package_study(target, plan, *checkouts[study]))
 
-    # E17: serial cost and wall time of every timed method (external and internal rows)
-    for (dataset, method), group in sorted(timing.items()):
-        jobs = sorted({r["job_key"] for r in group})
-        if allocations:
-            unknown = [j for j in jobs if j not in allocations]
-            if unknown:
-                raise ExportError(f"{dataset}/{method}: timing rows name allocations {unknown[:3]} absent from the sacct exports")
-            bad = [j for j in jobs if allocations[j]["allocated_gpus"] < 1 or not allocations[j]["state"].startswith("COMPLETED")]
-            if bad:
-                raise ExportError(f"{dataset}/{method}: timing was not taken in a completed GPU allocation: {bad[:3]}")
-        measured = ratios(group)
-        slug = SLUGS.get(dataset, safe_name(dataset))
-        base = f"raw/{slug}/{safe_name(method)}"
-        dump_json(target / base / "timing_ratios.json", {
-            "wall_ratio": measured["wall_ratio"], "work_ratio": measured["work_ratio"],
-            "observations": measured["observations"], "job_keys": jobs,
-            "definition": "means over the post-warm-up repeats of method/nominal wall seconds and work (protocol E17)"})
-        keys = {"dataset": dataset, "method": method, "seed": ""}
-        rows.append(value_row(keys, "serial_cost", measured["work_ratio"], "nominal executions",
-                              f"{base}/timing_ratios.json", "json:/work_ratio"))
-        rows.append(value_row(keys, "wall_time", measured["wall_ratio"], "nominal executions",
-                              f"{base}/timing_ratios.json", "json:/wall_ratio"))
-    provenance = {
-        "experiment": "E12 retrained external baselines and E17 timing protocol",
-        "produced_by": "scripts/run_upstream_baseline.py (pinned upstream code, 48 HPO attempts, registered seeds); "
-                       "cm_campaigns.timing.TimingSession; hpc/capture_arrhenius_accounting.sh; "
-                       "scripts/export_records.py baselines",
-        "hardware": args.hardware, "period": args.period,
-        "protocol": ("scores recomputed from each final fit's saved test predictions with the official metric; "
-                     "GPU-hours from the original sacct allocations of every attempt; serial cost and wall time as "
-                     "post-warm-up ratios to the nominal execution on the same input"),
-        "synthetic": False,
-        "studies_archive": {"doi": args.archive_doi, "sha256": args.archive_sha256,
-                            "studies": [s.name for s in studies]},
-    }
-    finish_set(root, target, keys=["dataset", "method", "seed"], rows=rows, provenance=provenance,
-               argv=sys.argv if args.argv is None else args.argv, inputs=inputs)
-    return target
+        # The internal rows of Tables S15 and S15b (scripts/run_internal_baselines.py)
+        for item in internals:
+            internal, timed, sources = internal_rows(target, item)
+            rows += internal
+            inputs += sources
+            timing_sources += [(path, relative, "internal") for path, relative in timed]
+
+        # E17: serial cost and wall time of every timed method (external and internal rows)
+        timing: dict[tuple[str, str], list[dict]] = defaultdict(list)
+        origins: dict[tuple[str, str], dict] = defaultdict(dict)
+        for path, relative, origin in timing_sources:
+            for row in read_timing_file(path):
+                timing[(row["dataset"], row["method"])].append(row)
+                origins[(row["dataset"], row["method"])].setdefault(relative, origin)
+        for (dataset, method), sources in sorted(origins.items()):
+            if len(set(sources.values())) > 1:
+                raise ExportError(f"{dataset}/{method}: timed both by the internal runner and by a supplied timing file")
+        for (dataset, method), group in sorted(timing.items()):
+            jobs = sorted({r["job_key"] for r in group})
+            bound = {}
+            if allocations:
+                for job in jobs:
+                    allocation, reason = bind_timing_job(job, allocations, by_job)
+                    if allocation is None:
+                        raise ExportError(f"{dataset}/{method}: timing rows name {job}: {reason} of the sacct exports")
+                    bound[job] = allocation
+                bad = [j for j, a in bound.items()
+                       if allocations[a]["allocated_gpus"] < 1 or not allocations[a]["state"].startswith("COMPLETED")]
+                if bad:
+                    raise ExportError(f"{dataset}/{method}: timing was not taken in a completed GPU allocation: {bad[:3]}")
+            else:
+                reasons.append(f"{dataset}/{method}: no sacct export binds its timing rows to completed GPU allocations")
+            measured = ratios(group)
+            slug = SLUGS.get(dataset, safe_name(dataset))
+            base = f"raw/{slug}/{safe_name(method)}"
+            dump_json(target / base / "timing_ratios.json", {
+                "wall_ratio": measured["wall_ratio"], "work_ratio": measured["work_ratio"],
+                "observations": measured["observations"], "job_keys": jobs, "allocations": bound,
+                "timing_files": sorted(origins[(dataset, method)]),
+                "definition": "means over the post-warm-up repeats of method/nominal wall seconds and work (protocol E17)"})
+            keys = {"dataset": dataset, "method": method, "seed": ""}
+            rows.append(value_row(keys, "serial_cost", measured["work_ratio"], "nominal executions",
+                                  f"{base}/timing_ratios.json", "json:/work_ratio"))
+            rows.append(value_row(keys, "wall_time", measured["wall_ratio"], "nominal executions",
+                                  f"{base}/timing_ratios.json", "json:/wall_ratio"))
+
+        # The record audit of a complete set: every internal row of the seven datasets, the fourteen external
+        # comparisons and their study plans, upstream identities and adapter archives (cm_campaigns.baselines).
+        try:
+            coverage = audit(rows, target)
+        except ValueError as exc:
+            coverage = None
+            reasons.append(str(exc))
+        reasons = list(dict.fromkeys(reasons))
+        if reasons and not args.allow_partial:
+            raise ExportError("the baselines set is incomplete (" + "; ".join(reasons[:6])
+                              + (f"; and {len(reasons) - 6} more" if len(reasons) > 6 else "")
+                              + "); pass --allow-partial to write it to another --root")
+        provenance = {
+            "experiment": "E12 retrained external baselines, the internal rows of Supplementary Tables S15 and S15b, "
+                          "and the E17 timing protocol",
+            "produced_by": "scripts/run_upstream_baseline.py (pinned upstream code, 48 HPO attempts, registered seeds); "
+                           + ("scripts/run_internal_baselines.py (cm_experiments/internal_baselines.py); " if internals else "")
+                           + "cm_campaigns.timing.TimingSession; hpc/capture_arrhenius_accounting.sh; "
+                           "scripts/export_records.py baselines",
+            "hardware": args.hardware, "period": args.period,
+            "protocol": ("external comparisons: scores recomputed from each final fit's saved test predictions with the "
+                         "official metric, GPU-hours from the original sacct allocations of every attempt; internal rows: "
+                         "each configuration executed on D_test once per plant checkpoint and scored with the official "
+                         "metric, GPU-hours from the sealed lifecycle stage and training times (definitions); serial cost "
+                         "and wall time as post-warm-up ratios to the nominal execution on the same input"),
+            "synthetic": synthetic,
+            "coverage_complete": coverage is not None, "measurement_complete": not reasons,
+            "incomplete_measurement": reasons,
+            "studies_archive": {"doi": args.archive_doi, "sha256": args.archive_sha256,
+                                "studies": [s.name for s in studies]},
+            "study_code": {"packaged": packaged,
+                           "scope": "validated plan, upstream repository and commits, and the adapter checkout archived "
+                                    "at its pinned commit; the upstream third-party source is not copied"},
+        }
+        if internals:
+            from cm_experiments.internal_baselines import DEFINITIONS
+            provenance["internal"] = {
+                "definitions": DEFINITIONS,
+                "plans": [{"output": item["output"].name, "plan_sha256": item["plan_sha256"],
+                           "datasets": [d["dataset"] for d in item["datasets"]],
+                           "ledgers": {d["dataset"]: d["ledger"] for d in item["datasets"]},
+                           "warmup": item["plan"]["warmup"], "repetitions": item["plan"]["repetitions"],
+                           "graph_quantiles": item["plan"]["graph_quantiles"]} for item in internals]}
+            from cm_experiments.ensemble_grid import public_plan
+            for item in internals:
+                destination = target / "code" / "internal" / safe_name(item["output"].name) / "plan.json"
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(public_plan(item["output"]), encoding="utf-8")
+            for name in ("cm_experiments/internal_baselines.py", "scripts/run_internal_baselines.py",
+                         "cm_campaigns/baselines.py"):
+                copy_into(target, ROOT / name, f"code/{name}")
+        write_set_files(target, keys=["dataset", "method", "seed"], rows=rows, provenance=provenance,
+                        argv=sys.argv if args.argv is None else args.argv, inputs=inputs)
+        return install_staged(root, staging, target, replace=args.replace)
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
+
+
+def baselines_arguments(p) -> None:
+    """The options of ``export_records.py baselines`` (also ``run_internal_baselines.py export``)."""
+    p.add_argument("--study", type=Path, action="append", default=[],
+                   help="study directory of scripts/run_upstream_baseline.py (one per external comparison)")
+    p.add_argument("--internal", type=Path, action="append", default=[],
+                   help="output directory of scripts/run_internal_baselines.py (the internal rows of S15 and S15b)")
+    p.add_argument("--checkouts", type=Path, action="append", default=[],
+                   help="directory holding the E12 study plans (cm-upstream-study-1 JSON) with their upstream and adapter "
+                        "checkouts: a plan file equal to a study's plan names the checkouts relative to its own "
+                        "directory, as scripts/run_upstream_baseline.py resolves them; the adapter is archived from there")
+    p.add_argument("--timing", type=Path, action="append", default=[], help="E17 timing rows (timing.csv layout)")
+    p.add_argument("--accounting", type=Path, action="append", default=[], help="original sacct export (repeatable)")
+    p.add_argument("--allow-missing-accounting", action="store_true",
+                   help="continue when attempts are absent from the sacct exports (the set is then partial)")
+    p.add_argument("--allow-partial", action="store_true",
+                   help="write a set the audit does not accept as complete (missing datasets, comparisons, adapters or "
+                        "accounting) to another --root; never a deposit")
+    p.add_argument("--copy-predictions", action="store_true", help="also copy every final fit's prediction NPZ into raw/")
+    p.add_argument("--archive-doi", default=None, help="DOI of the archived studies")
+    p.add_argument("--archive-sha256", default=None)
+    p.add_argument("--root", type=Path, default=RECORDS, help="records root (default records/)")
+    p.add_argument("--replace", action="store_true", help="rebuild an existing set from the inputs")
+    p.add_argument("--hardware", required=True)
+    p.add_argument("--period", required=True)
 
 
 # ----------------------------------------------------------------------------- from sealed runs
@@ -644,15 +1018,9 @@ def main(argv=None) -> int:
     p.add_argument("--archive-doi", default=None)
     p.add_argument("--archive-sha256", default=None)
     common(p)
-    p = sub.add_parser("baselines", help="E12/E17 from upstream studies, timing rows and sacct exports")
-    p.add_argument("--study", type=Path, action="append", default=[])
-    p.add_argument("--timing", type=Path, action="append", default=[])
-    p.add_argument("--accounting", type=Path, action="append", default=[])
-    p.add_argument("--allow-missing-accounting", action="store_true")
-    p.add_argument("--copy-predictions", action="store_true", help="also copy every final fit's prediction NPZ into raw/")
-    p.add_argument("--archive-doi", default=None, help="DOI of the archived studies")
-    p.add_argument("--archive-sha256", default=None)
-    common(p)
+    p = sub.add_parser("baselines", help="E12/E17 from upstream studies, the internal-baselines runner, timing rows "
+                       "and sacct exports")
+    baselines_arguments(p)
     p = sub.add_parser("from-runs", help="quantities that sealed runs record about themselves")
     p.add_argument("--set", required=True, choices=("sensor_parameters", "nominal_time"))
     p.add_argument("--run", type=Path, action="append", default=[])

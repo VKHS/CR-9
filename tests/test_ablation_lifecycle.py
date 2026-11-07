@@ -105,8 +105,24 @@ class VariantTests(unittest.TestCase):
         with self.assertRaisesRegex(RunnerError, "one operation of each kind"):
             ablation.validate_spec(twice)
         with self.assertRaisesRegex(RunnerError, "unknown observer"):
-            ablation.validate_spec(ablation.variant_spec("x", [{"op": "observer", "kind": "history_mlp"}],
+            ablation.validate_spec(ablation.variant_spec("x", [{"op": "observer", "kind": "smoother"}],
                                                          study="modules"))
+        for bad in ({"window": 0, "width": 128}, {"window": 4}, {"window": 4.0, "width": 128}):
+            with self.assertRaisesRegex(RunnerError, "window and width"):
+                ablation.validate_spec(ablation.variant_spec(
+                    "x", [{"op": "observer", "kind": "history_mlp", **bad}], study="modules"))
+        with self.assertRaisesRegex(RunnerError, "transport actions"):
+            ablation.validate_spec(ablation.variant_spec("x", [{"op": "action_bank", "allowed": [0]}],
+                                                         study="factorial"))
+        with self.assertRaisesRegex(RunnerError, "'off'"):
+            ablation.validate_spec(ablation.variant_spec("x", [{"op": "risk_control", "mode": "on"}],
+                                                         study="factorial"))
+        with self.assertRaisesRegex(RunnerError, "removes both resets"):
+            ablation.validate_spec(ablation.variant_spec(
+                "x", [{"op": "remove_reset", "action": 8}, {"op": "risk_control", "mode": "off"}], study="factorial"))
+        with self.assertRaisesRegex(RunnerError, "unknown variant operation"):
+            ablation.validate_spec(ablation.variant_spec("x", [{"op": "support", "mode": "unrestricted"}],
+                                                         study="factorial"))
 
     def test_arm_operations(self):
         config = config_of(ARXIV)
@@ -126,16 +142,35 @@ class VariantTests(unittest.TestCase):
                                      study="modules", module="observer", arm="ema")
         self.assertEqual(ablation.observer_ablation(spec), {"variant": "observer:ema", "deleted": [],
                                                             "observer": "ema", "ema_weight": .5})
+        history = ablation.module_operations("observer", "history_mlp", config)    # two observer periods, width 128
+        self.assertEqual(history, [{"op": "observer", "kind": "history_mlp", "window": 4, "width": 128}])
+        self.assertEqual(ablation.module_operations("observer", "history_mlp", config, history_window_length=6,
+                                                    history_width=32),
+                         [{"op": "observer", "kind": "history_mlp", "window": 6, "width": 32}])
+        with self.assertRaisesRegex(RunnerError, "positive integers"):
+            ablation.module_operations("observer", "history_mlp", config, history_window_length=0)
+        spec = ablation.variant_spec("observer:history_mlp", history, study="modules", module="observer",
+                                     arm="history_mlp")
+        ablation.validate_spec(spec, config)
+        self.assertEqual(ablation.observer_ablation(spec)["history"], {"window": 4, "width": 128})
 
     def test_factorial_cell_operations(self):
         arxiv, pascal = ("A", "O", "X"), ("S", "O", "X")
+        memoryless, no_transport = {"op": "observer", "kind": "memoryless"}, {"op": "action_bank", "allowed": [0, 8, 9]}
+        risk_off = {"op": "risk_control", "mode": "off"}
         self.assertEqual(ablation.factorial_operations("111", arxiv), [])
-        self.assertEqual([op["op"] for op in ablation.factorial_operations("000", arxiv)],
-                         ["observer", "action_bank", "support"])
-        self.assertEqual(ablation.factorial_operations("010", arxiv),
-                         [{"op": "action_bank", "allowed": [0]}, {"op": "support", "mode": "unrestricted"}])
+        self.assertEqual(ablation.factorial_operations("000", arxiv), [memoryless, no_transport, risk_off])
+        self.assertEqual(ablation.factorial_operations("010", arxiv), [no_transport, risk_off])
+        self.assertEqual(ablation.factorial_operations("001", arxiv), [memoryless, no_transport])
+        self.assertEqual(ablation.factorial_operations("110", arxiv), [risk_off])
         self.assertEqual(ablation.factorial_operations("011", pascal), [])          # S: the Lean profile, not a fit
-        self.assertEqual(ablation.factorial_operations("101", pascal), [{"op": "observer", "kind": "memoryless"}])
+        self.assertEqual(ablation.factorial_operations("101", pascal), [memoryless])
+        self.assertEqual(ablation.factorial_operations("100", pascal), [memoryless, risk_off])
+        for factors, distinct in ((arxiv, 8), (pascal, 4)):         # one lifecycle per distinct operation set
+            operations = [ablation.factorial_operations(cell, factors) for cell in factorial.CELLS]
+            self.assertEqual(len({canonical(ops) for ops in operations}), distinct)
+            for ops in operations:
+                ablation.validate_spec(ablation.variant_spec("x", ops, study="factorial"))
         support = {"cells": {"0:0": {"stratum": 0, "action": 0, "qualified": True}}, "qualified_fraction": .1}
         opened = ablation.unrestricted_support(support, config_of(ARXIV))
         self.assertEqual(len(opened["cells"]), 2 * 3 * 10)
@@ -148,6 +183,72 @@ class VariantTests(unittest.TestCase):
         self.assertTrue(set(draws) <= set(range(10)))
         self.assertGreater(len(set(draws)), 5)
         self.assertNotEqual(draws, [ablation.donor_index(8, ("explore", t, t % 2), 10) for t in range(200)])
+
+
+# ============================================================================= history-MLP observer (NumPy parts)
+class HistoryObserverTests(unittest.TestCase):
+    def test_capacity_follows_the_registered_window_and_width(self):
+        from cm_experiments.ensemble_grid import registered_constants
+        full = json.loads((ROOT / "configs" / "arxiv_full.json").read_text())
+        self.assertEqual(ablation.history_window(full), 2 * full["controller"]["observer_period"])
+        self.assertEqual(ablation.history_window(full), 4)
+        self.assertIn(f"{ablation.HISTORY_WIDTH}-dimensional",
+                      registered_constants()["observer_eq12_table_S9"]["sequence_models"])
+        d = full["controller"]["state_dim"]
+        self.assertEqual(ablation.history_parameters(4, 128, d), 12048)
+        cells = {f"{b}:{a}": [] for b in range(full["controller"]["depth_bins"]) for a in range(10)}
+        payload = {"basis": [[0.0] * d] * 25, "conditioned": cells}
+        self.assertEqual(ablation.conditioned_parameters(payload), 13120)        # one global + 40 cell transitions
+        self.assertEqual(ablation.conditioned_parameters(dict(payload, conditioned={})), 320)
+
+    def test_windows_follow_each_trajectory_and_repeat_its_first_measurement(self):
+        rng = np.random.default_rng(3)
+        groups, depths = np.repeat([4, 1, 7], [5, 3, 1]), np.r_[np.arange(5), np.arange(3), [0]]
+        start = {4: 0, 1: 5, 7: 8}
+        latent = rng.normal(size=(9, 2))
+        order = rng.permutation(9)
+        windows = ablation.history_windows(latent[order], groups[order], depths[order], 3)
+        for k, i in enumerate(order):
+            expected = [latent[start[groups[i]] + max(depths[i] - lag, 0)] for lag in (2, 1, 0)]   # oldest first
+            np.testing.assert_array_equal(windows[k], np.stack(expected))
+        with self.assertRaisesRegex(RunnerError, "record_stride 1"):
+            ablation.history_windows(latent[:3], np.zeros(3), np.array([0, 1, 3]), 2)
+
+    def test_inputs_forward_pass_and_filter_arithmetic(self):
+        rng = np.random.default_rng(5)
+        d, w, h = 3, 2, 4
+        model = {"window": w, "width": h, "w1": rng.normal(size=(h, w * d + 13)).tolist(),
+                 "b1": rng.normal(size=h).tolist(), "w2": rng.normal(size=(d, h)).tolist(),
+                 "b2": rng.normal(size=d).tolist(), "scaler": {"mean": [0.1, -0.2, 0.0], "scale": [2.0, 0.5, 1.0]}}
+        mlp = ablation.HistoryMLP(model)
+        window, u = rng.normal(size=(w, d)), rng.normal(size=3)
+        x = np.concatenate([window.reshape(-1), u, np.eye(10)[7]])
+        np.testing.assert_array_equal(ablation.history_inputs(window[None], u[None], [7])[0], x)
+        self.assertEqual(float(np.abs(ablation.history_inputs(window[None], u[None], [-1])[0, -10:]).sum()), 0.0)
+        hidden = np.asarray(model["w1"]) @ x + model["b1"]
+        hidden = hidden / (1 + np.exp(-hidden))
+        expected = window[-1] + ((np.asarray(model["w2"]) @ hidden + model["b2"]) * model["scaler"]["scale"]
+                                 + model["scaler"]["mean"])
+        np.testing.assert_allclose(mlp.predict(window, u, 7), expected, rtol=1e-12)
+        with self.assertRaisesRegex(ValueError, "declared window"):
+            ablation.HistoryMLP(dict(model, window=3))
+        a = rng.normal(size=(d, d))
+        q = a @ a.T + np.eye(d)
+        r = 0.25 * q + 1e-3 * np.eye(d)
+        constants = ablation.history_filter(q, r)
+        s = q + r
+        np.testing.assert_allclose(constants["gain"], q @ np.linalg.inv(s), atol=1e-12)
+        np.testing.assert_allclose(constants["posterior"], (np.eye(d) - constants["gain"]) @ q, atol=1e-10)
+        prior, observation, previous = rng.normal(size=d), rng.normal(size=d), rng.normal(size=d)
+        z, nis, bias, whiteness, error = ablation.history_correct(prior, observation, constants, previous)
+        e = observation - prior
+        np.testing.assert_allclose(error, e)
+        np.testing.assert_allclose(z, prior + constants["gain"] @ e)
+        self.assertAlmostEqual(nis, float(e @ np.linalg.solve(s, e)), places=10)
+        self.assertAlmostEqual(bias, float(np.mean(e / np.sqrt(np.diag(s)))), places=12)
+        self.assertAlmostEqual(whiteness, float(e @ previous / (np.linalg.norm(e) * np.linalg.norm(previous))),
+                               places=12)
+        self.assertEqual(ablation.history_correct(prior, observation, constants)[3], 0.0)   # no previous innovation
 
 
 # ============================================================================= planning
@@ -175,6 +276,11 @@ class PlanningTests(Workspace):
             self.assertEqual(job["through"], "confirm")
             self.assertTrue(job["run"].startswith(str(self.root / "s17" / "runs")))
         self.assertEqual(lifecycles[0]["variant"]["operations"], [])
+        history = next(j for j in lifecycles if j["variant"]["id"] == "observer:history_mlp")
+        self.assertEqual(history["variant"]["operations"],
+                         [{"op": "observer", "kind": "history_mlp", "window": 4, "width": 128}])
+        self.assertEqual(plan["settings"]["history_mlp"]["width"], 128)
+        self.assertIsNone(plan["settings"]["history_mlp"]["window"])            # rule: two observer periods
         public = ensemble_grid.public_plan(self.root / "s17")
         self.assertNotIn(str(EXAMPLES), public)
 
@@ -237,6 +343,10 @@ class PlanningTests(Workspace):
         for cell in fac["jobs"][0]["cells"]:
             self.assertEqual(cell["fitted"]["operations"], ablation.factorial_operations(cell["cell"], ("A", "O", "X")))
             self.assertEqual(cell["fitted"]["run"], plan["jobs"][cells[cell["cell"]]["lifecycle_job"]]["run"])
+            self.assertEqual(cell["definition"]["stopping"] is not None, cell["cell"][1] == "1")   # O = 1 cells stop
+            self.assertNotIn("switch_variant", cell)
+        self.assertEqual(len({canonical(c["definition"]) for c in fac["jobs"][0]["cells"]}), 8)
+        self.assertEqual(fac["stopping_rule"]["threshold_nats"], 1e-7)
         parent = ablation.plan_factorial_fit([ARXIV], self.root / "fac2", complete="parent", through="fit", **FIXTURE)
         plan = json.loads(parent.read_text())
         self.assertEqual(len(plan["jobs"]), 7)
@@ -505,6 +615,8 @@ class CollectionAndExportTests(Workspace):
         self.assertIn("cm_experiments/ablation_lifecycle.py", source["experiment_code"])
         rows = read_summary(target, spec, all_specs["summary_columns"])
         self.assertEqual({r["module"] for r in rows}, {m["module"] for m in spec["modules"]})
+        observer_rows = {r["arm"] for r in rows if r["module"] == "observer" and r["quantity"] == "innovation_rmse"}
+        self.assertEqual(observer_rows, {"raw", "ema", "global", "conditioned", "history_mlp"})   # the extra E8 arm
         out = self.root / "display"
         view = fake_records("module_ablations", rows, spec=spec)
         build_one("supplementary:Table S17", context(records={"module_ablations": view}), out)
@@ -512,6 +624,8 @@ class CollectionAndExportTests(Workspace):
             table = list(csv.DictReader(handle))
         self.assertEqual(len(table), 10)
         self.assertTrue(all(r["observed signature"] for r in table), table)
+        observer = next(r for r in table if r["module"] == "observer")
+        self.assertEqual(observer["observed signature"].count("/"), 3)     # the generator prints the four registered
         self.assertNotIn("No observations", (out / "tables" / "S17.md").read_text())
 
     def test_sweep_refuses_changed_ablation_results_and_other_sweeps(self):
@@ -581,7 +695,7 @@ class FittedFactorialOrchestrationTests(Workspace):
             yield
 
         def controller(ctx, cell, root):
-            return "nominal" if cell["switches"]["action_bank"] == "nominal" else "registered"
+            return "nominal" if cell["switches"]["action_bank"] == "no_transport" else "registered"
 
         with patch.object(factorial, "ParentContext", FakeContext), patch.object(factorial, "_execute", fake_execute), \
                 patch.object(factorial, "cell_scopes", fake_scopes), patch.object(factorial, "cell_scope", fake_scope), \
@@ -594,6 +708,10 @@ class FittedFactorialOrchestrationTests(Workspace):
         cells = {c["cell"]: c for c in result["cells"]}
         self.assertEqual(cells["010"]["fitted"]["variant_id"], "factorial-A0-O1-X0")
         self.assertNotIn("/", cells["010"]["fitted"]["run"])
+        for name, cell in cells.items():           # the fake observer stops member 1 at depth 2 in the O = 1 cells
+            self.assertEqual(cell["stopping"]["stopped"], 1 if name[1] == "1" else 0)
+            self.assertEqual(cell["definition"]["observer"], "conditioned" if name[1] == "1" else "memoryless")
+        self.assertEqual(cells["010"]["integration_domain"]["terminal_depths"], [2, 6])
         records = self.root / "records"
         with self.assertRaisesRegex(RunnerError, "no completion record"):
             factorial.export_factorial(output, root=records, allow_partial=True)
@@ -699,27 +817,90 @@ class LifecycleExecutionTests(unittest.TestCase):
                                         seed=1, units=4)
         ops = (ablation.module_operations("transport_history", "no_history", config)
                + [{"op": "observer", "kind": "raw"}, {"op": "remove_reset", "action": 9},
-                  {"op": "support", "mode": "unrestricted"},
                   {"op": "scramble", "coordinates": names, "indices": ablation.coordinate_indices(names, config),
                    "seed": 1, "pool": record}])
         spec = ablation.variant_spec("all", ops, study="modules")
         before = {(owner, name): getattr(owner, name) for owner, name in (
             (learning, "ConditionedObserver"), (learning, "_fit_observer"), (learning, "_features"),
-            (learning, "_support"), (exploration, "sensor_bank"), (exploration, "collect_trajectory"),
-            (policies, "sensor_bank"), (policies, "recovery_action"), (policies, "beam_plan"),
-            (policies, "_execute_policy"), (learning.Controller, "supported"))}
+            (learning, "_support"), (learning, "_fit_one"), (exploration, "sensor_bank"),
+            (exploration, "collect_trajectory"), (policies, "sensor_bank"), (policies, "recovery_action"),
+            (policies, "beam_plan"), (policies, "_execute_policy"), (learning.Controller, "supported"))}
         with ablation.installed(spec, run_dir=self.work):
             self.assertIs(learning.ConditionedObserver, ablation.observer_class())
             self.assertIs(policies.sensor_bank, ablation._scrambled_sensor_bank)
+            self.assertIs(learning._fit_one, before[(learning, "_fit_one")])     # only a history observer needs it
             self.assertEqual(policies.recovery_action([1, 2]), 8)            # A9 removed in feedback decisions
             token = ablation._OPEN_LOOP.set(True)
             self.assertEqual(policies.recovery_action([1, 2], last_safe_available=False), 8)
             ablation._OPEN_LOOP.reset(token)
             with self.assertRaisesRegex(RunnerError, "another ablation variant"):
                 ablation.install(spec, run_dir=self.work)
+        cell = ablation.variant_spec("cell", ablation.factorial_operations("000", ("A", "O", "X"))[1:]
+                                     + ablation.module_operations("observer", "history_mlp", config), study="factorial")
+        controller = learning.Controller.load(self.parent / "fit" / "full", "cpu")
+        y = np.full(25, 0.5)
+        with ablation.installed(cell, run_dir=self.work):
+            self.assertIs(learning._support, ablation._support)
+            self.assertIs(learning._fit_one, ablation._fit_one)
+            self.assertEqual(policies.recovery_action([1, 2]), 0)            # risk control off: nominal fallback
+            self.assertEqual(controller.supported(y, 0), [0])                # A0 only: no transport, no reset
+            self.assertEqual(controller.supported(np.full(25, np.nan), 0), [])
+        self.assertEqual(policies.recovery_action([1, 2]), 9)
         after = {(owner, name): getattr(owner, name) for owner, name in before}
         self.assertEqual(after, before)
         self.assertIsNone(ablation.active_spec())
+
+    def test_history_mlp_observer_lifecycle_and_measurement(self):
+        from cross_morse.exploration import load_records
+        from cross_morse.learning import Controller, _groups
+        output = self.work / "history"
+        ablation.plan_modules([self.parent], output, role="test", complete="parent", through="fit", reps=20,
+                              allow_fixture=True, modules=["observer:history_mlp"])
+        plan = json.loads((output / "plan.json").read_text())
+        self.run_study(output)
+        job = next(j for j in plan["jobs"] if j["kind"] == "lifecycle")
+        run = Path(job["run"])
+        config = config_of(self.parent)
+        window, d = 2 * config["controller"]["observer_period"], config["controller"]["state_dim"]
+        for fold in ("folds/fold_00", "final_fit"):
+            self.assertTrue((run / "fit" / "full" / fold / "history_mlp.last.pt").is_file())
+        records = load_records(run / "explore")
+        np.testing.assert_array_equal(_groups(records), np.unique(np.column_stack(
+            (records["seed_index"], records["trajectory"])), axis=0, return_inverse=True)[1])
+        with ablation.installed(job["variant"], run_dir=run):
+            controller = Controller.load(run / "fit" / "full", "cpu")
+            observer = controller.observer
+            self.assertEqual(observer.kind, "history_mlp")
+            fit = observer.payload["ablation_fit"]["history_fit"]
+            self.assertEqual((fit["window"], fit["width"]), (window, 128))
+            self.assertEqual(fit["parameters"], ablation.history_parameters(window, 128, d))
+            self.assertEqual(ablation.observer_parameters(observer)["transition_parameters"], fit["parameters"])
+            rows = np.flatnonzero((records["seed_index"] == records["seed_index"][0])
+                                  & (records["trajectory"] == records["trajectory"][0]))
+            rows = rows[np.argsort(records["depth"][rows])]
+            state = controller.start(records["y"][rows[0]])
+            self.assertEqual(state.history_window.shape, (window, d))
+            for i in rows[1:]:                      # every update equals the declared predictor-corrector
+                depth, previous = int(records["depth"][i]), int(records["previous_action"][i])
+                prior = observer.history.predict(state.history_window, observer.normalize(state.y)[5:8], previous)
+                state_next = controller.observe(state, records["y"][i], depth, previous)
+                if depth % observer.period:
+                    np.testing.assert_allclose(state_next.z, prior)
+                else:
+                    z, nis, *_ = ablation.history_correct(prior, observer.transform(records["y"][i]),
+                                                          observer._history, state.innovation)
+                    np.testing.assert_allclose(state_next.z, z)
+                    self.assertAlmostEqual(state_next.nis, nis)
+                state = state_next
+        measure = next(j for j in plan["jobs"] if j["kind"] == "measure")
+        directory = output / "jobs" / measure["slug"]
+        contrasts = json.loads((directory / "contrasts.json").read_text())["contrasts"]
+        self.assertTrue(math.isfinite(contrasts["observer:history_mlp"]["values"]["innovation_rmse"]))
+        arm = json.loads((directory / "arms" / "observer__history_mlp.json").read_text())
+        self.assertEqual(arm["observer_parameters"]["kind"], "history_mlp")
+        results = json.loads(ablation.collect_study(output).read_text())
+        self.assertIn(("observer", "history_mlp", "ogbn-arxiv"),
+                      {(r["module"], r["arm"], r["dataset"]) for r in results["rows"]})
 
     def test_module_lifecycles_measure_collect_and_export(self):
         from cross_morse.learning import Controller
@@ -829,12 +1010,34 @@ class LifecycleExecutionTests(unittest.TestCase):
         memoryless = critic(jobs["factorial-A1-O0-X1"])      # the observer is
         self.assertTrue(all(np.allclose(parent_critic[k].numpy(), same[k].numpy()) for k in parent_critic))
         self.assertFalse(all(np.allclose(parent_critic[k].numpy(), memoryless[k].numpy()) for k in parent_critic))
-        result = json.loads(next((output / "factorial" / "jobs").rglob("factorial.json")).read_text())
+        path = next((output / "factorial" / "jobs").rglob("factorial.json"))
+        result = json.loads(path.read_text())
         self.assertEqual(result["mode"], "fitted")
         cells = {c["cell"]: c for c in result["cells"]}
-        self.assertEqual(cells["000"]["activity"] >= 0, True)
+        depth = config_of(self.parent)["model"]["depth"]
+        executions = np.load(path.parent / "executions.npz")
+        for name, cell in cells.items():
+            counts = np.asarray(cell["action_counts"])
+            if name[0] == "0":                       # A = 0: no transport action A1-A7
+                self.assertEqual(int(counts[1:8].sum()), 0)
+            if name[2] == "0":                       # X = 0: no reset A8/A9
+                self.assertEqual(int(counts[8:].sum()), 0)
+            stopped = executions[f"cell{name}_stopped"]
+            terminal = executions[f"cell{name}_terminal_depth"]
+            self.assertTrue(np.all((terminal >= 1) & (terminal <= depth)))
+            self.assertTrue(np.all((terminal < depth) == (stopped == 1)))
+            if name[1] == "0":                       # the memoryless observer never stops
+                self.assertEqual(int(stopped.sum()), 0)
+            self.assertEqual(cell["stopping"]["stopped"], int(stopped.sum()))
+            self.assertEqual(int(executions[f"cell{name}_actions"].sum()), int(np.sum(terminal)))
+            self.assertEqual(cell["definition"]["admissible_actions"][0], 0)
+        for name in ("000", "010"):      # A0 only, no reset: the nominal trajectory, stopped or not
+            self.assertEqual(cells[name]["activity"], 0.0)
+        # a read-only observer on the nominal trajectory reproduces cell 000 unless it stopped an execution
+        self.assertEqual(["000", "010"] in result["coinciding_cells"], cells["010"]["stopping"]["stopped"] == 0)
         target = ablation.export_factorial_fit(output, root=self.work / "records", allow_partial=True)
         verify_set(target, specs()["sets"]["factorials"], specs())
+        self.assertTrue((target / "raw" / "ogbn-arxiv" / "executions.npz").is_file())
 
 
 if __name__ == "__main__":

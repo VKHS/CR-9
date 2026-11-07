@@ -547,6 +547,28 @@ class MainPaperDisplayTests(unittest.TestCase):
         with self.assertRaisesRegex(DisplayInputError, "rh_minus_ol of ogbn-arxiv"):
             build_one("main:Figure 3", self.ctx(records={"mechanism_contrasts": missing}), self.base / "out/no_contrasts")
 
+    def test_figures_2_and_3_use_a_validated_campaign_whatever_its_printed_agreement(self):
+        # A valid campaign whose values differ from the printed S14 (check_campaign: REFERENCE_MISMATCH) still
+        # feeds the generators; the comparison step reports the difference.  An invalid campaign is refused.
+        from cm_campaigns.confirmation import check_campaign
+        from tests.test_s14_confirmation import S14CampaignTests
+        fixture = S14CampaignTests("test_complete_family_reconstructs_effects_and_returns_failed_peptides_to_comparator")
+        fixture.setUp()
+        self.addCleanup(fixture.tearDown)
+        fixture.change_result("Peptides/radius", p_value_zero=.025)
+        self.assertEqual(check_campaign(fixture.root, manuscript_root=ROOT)["status"], "REFERENCE_MISMATCH")
+        ctx = context(runs=self.runs, records=self.records, campaigns={"confirmation": fixture.root})
+        writer, rows = self.build("main:Figure 2", ctx, name="fig2_mismatch")
+        panel_d = {r["contrast"]: r for r in read_data(writer, "panel_d")}
+        self.assertAlmostEqual(num(panel_d["Peptides/radius"]["raw_P"]), .025)
+        self.assertAlmostEqual(num(panel_d["Peptides/radius"]["holm_P"]), .05)
+        status = {(r["group"], r["path"]): r["status"] for r in rows}
+        self.assertNotEqual(status[("supplementary_table_S14_mechanism_contrasts_submitted_protocol", "8/raw_P")], "exact")
+        self.build("main:Figure 3", ctx, name="fig3_mismatch")
+        fixture.change_result("COCO/RH", p_value_kind="locally_Holm_adjusted")
+        with self.assertRaisesRegex(DisplayInputError, "original unrounded"):
+            build_one("main:Figure 2", ctx, self.base / "out" / "fig2_invalid")
+
     # ------------------------------------------------------------------ Figure 4
     def test_figure_4_panels(self):
         writer, rows = self.build("main:Figure 4")

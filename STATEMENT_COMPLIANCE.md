@@ -4,12 +4,12 @@ The paper's registered data-availability statement:
 
 > The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
-**3 of 12 items fulfilled**; 8 awaiting the publication of the measured outputs; 1 missing. Published artifacts: 0 of 37 (`release/paper_artifacts.json`).
+**2 of 12 items fulfilled**; 10 awaiting the publication of the measured outputs; 0 missing. Published artifacts: 0 of 37 (`release/paper_artifacts.json`).
 
 | Statement item | Status | Where | Remaining |
 |---|---|---|---|
-| complete experiment code | Missing | release/experiment_code.json | not executable with the released code: Factorials: Table S16, ogbn-arxiv cells 010 and 011 (with only A0 admissible every feedback fallback returns A0 or the support-mask reset, the support audit depends only on the exploration log and feedback routes execute all L sites, so the observer factor cannot act: cells 010 and 011 reproduce 000 and 001; the stopping-depth change the paper describes has no counterpart in the released runtime); E7, E8 module ablations: Table S36, E8 history-MLP arm (the manuscript defines no architecture or fitting rule for the history-MLP observer and module_ablations registers no arm for it; the raw, EMA, global and conditioned observers are executed); E11: Table S27 (the released runtime records the k-hop buffer as a context diagnostic and resamples the METIS or degree-stratified cores, so the buffer changes no admission statistic; the paper does not define how the buffer enters the resampling units) |
-| configurations | Fulfilled | `configs/` and the experiment configurations | — |
+| complete experiment code | Awaiting measured outputs | 32 experiments mapped to their code in `release/experiment_code.json` | E12: adapter code of the fourteen external comparisons, archived at its pinned commit (published inside records:baselines and copied to experiments/baselines/) |
+| configurations | Awaiting measured outputs | `configs/` and the experiment configurations | E12: study plans of the fourteen external comparisons (48 HPO configurations, 12 optimization seeds, pinned upstream source and adapter commits) (published inside records:baselines and copied to experiments/baselines/) |
 | source data | Awaiting measured outputs | `paper/source_data/` (written by the publication step) | generated from the published outputs |
 | split and seed manifests | Awaiting measured outputs | `manifests/registered/` (design); `manifests/published/` (executed) | executed memberships of 7 runs |
 | environment specification | Awaiting measured outputs | `environment/`, `Dockerfile`, SITE SETTINGS of `run_cross_morse.sh` | observed environment of the reported runs: environment/observed/arxiv.json, environment/observed/proteins.json, environment/observed/products.json, environment/observed/roman_empire.json, environment/observed/pascalvoc_sp.json, environment/observed/coco_sp.json, environment/observed/peptides_func.json, environment:gpu |
@@ -21,6 +21,14 @@ The paper's registered data-availability statement:
 | one-command reconstruction of every reported table and figure | Awaiting measured outputs | `make paper` (scripts/reconstruct_paper.py) | 37 artifacts unpublished; displays needing them cannot be rebuilt yet |
 | follows established reproducibility guidance | Fulfilled | `REPRODUCIBILITY.md` | — |
 
-Items awaiting measured outputs have their code, structure and checks in place; they are fulfilled when `hpc/publish_paper_artifacts_arrhenius.sh` uploads the outputs of the reported runs to the release `paper-artifacts` and the updated manifest is committed. `make paper` then rebuilds every table and figure from those outputs and compares each computed value with the printed one.
+Items awaiting measured outputs have their code, structure and checks in place. On the cluster, after `bash run_cross_morse.sh reproduce` has completed the seven lifecycle runs:
+
+```bash
+bash hpc/produce_paper_outputs_arrhenius.sh <suite>      # every other measured output, one Slurm job graph
+bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   # release paper-artifacts
+make statement-fulfilled                                 # every item fulfilled
+```
+
+The first command is described in [docs/PRODUCTION.md](docs/PRODUCTION.md); its last job writes the map of all artifacts. The second uploads them to the release `paper-artifacts`, downloads and verifies them, rebuilds every table and figure with `make paper` and writes the manifests, observed environments and source data into the checkout (`CM_PUBLISH_COMMIT=1` commits and pushes them). The reconstruction item is fulfilled when every display is rebuilt and every compared value agrees with the printed one; `paper/source_data/compare/` lists each difference.
 
 Generated by `scripts/statement_check.py --write`; `make statement-check` verifies it is current.

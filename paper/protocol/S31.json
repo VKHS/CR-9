@@ -61,11 +61,11 @@
     "cm_theory/budget.py",
     "cm_campaigns/timing.py"
    ],
-   "absent": [
-    "per-input timing traces"
-   ],
    "experiments": [
     "E17"
+   ],
+   "records": [
+    "input_gate"
    ]
   },
   "R05": {
@@ -126,8 +126,8 @@
    "module": [
     "cm_theory/stability.py"
    ],
-   "absent": [
-    "tube-audit record"
+   "records": [
+    "tube_audit"
    ]
   },
   "R10": {
@@ -150,11 +150,12 @@
    "module": [
     "cm_theory/spectral.py"
    ],
-   "absent": [
-    "E18 displacement record"
-   ],
    "experiments": [
     "E18"
+   ],
+   "records": [
+    "band_power_audit",
+    "band_bound_tightness"
    ]
   },
   "R12": {
@@ -296,8 +297,8 @@
    "displays": [
     "supplementary:Table S30"
    ],
-   "absent": [
-    "admission-split oracle record (the runtime oracle is the D_explore headroom diagnostic of select/entry_complete.json)"
+   "records": [
+    "oracle_dispersion"
    ]
   },
   "R23": {
@@ -416,11 +417,11 @@
    "displays": [
     "supplementary:Table S27"
    ],
-   "absent": [
-    "admission records at alternative buffers (E11 is not executed by the runtime)"
-   ],
    "experiments": [
     "E11"
+   ],
+   "records": [
+    "buffer_sensitivity"
    ]
   },
   "R33": {
@@ -434,8 +435,8 @@
     "select/candidates.json",
     "select/unit_scores.npz"
    ],
-   "absent": [
-    "beam-width sweep (the registry fixes the beam width)"
+   "records": [
+    "horizon_beam_sweep"
    ]
   },
   "R34": {
@@ -445,11 +446,11 @@
    "module": [
     "cm_theory/control.py"
    ],
-   "absent": [
-    "E9 record"
-   ],
    "experiments": [
     "E9"
+   ],
+   "records": [
+    "search_enumeration"
    ]
   }
  }

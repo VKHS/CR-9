@@ -298,24 +298,31 @@ def table_s27(ctx, out):
         for hops in spec["grid"]["buffer_hops"]:
             keys = {"dataset": dataset, "buffer_hops": int(hops)}
             mean = require_value(rec, "clipped_effect_nats", **keys)
-            half = require_value(rec, "half_width_nats", **keys)
-            upper = require_value(rec, "upper_nats", **keys)
+            # A buffer left with one resampling unit has no interval (the record omits it).
+            half = value_of(rec, "half_width_nats", **keys)
+            upper = value_of(rec, "upper_nats", **keys)
             admitted = require_value(rec, "admitted", **keys)
-            if admitted:
+            if upper is None:
+                decision = "one resampling unit: no interval"
+            elif admitted:
                 decision = "pass"
             elif upper >= 0:
                 decision = "interval includes zero"
             else:
                 decision = f"D_bar above -{epsilon:g}"
-            rows.append([SHORT[dataset], integer(hops), num(mean, 4), num(half, 4), num(upper, 4, signed=True), decision])
+            rows.append([SHORT[dataset], integer(hops), num(mean, 4), num(half, 4) if half is not None else "—",
+                         num(upper, 4, signed=True) if upper is not None else "—", decision])
             data.append([dataset, hops, mean, half, upper, admitted, value_of(rec, "resampling_units", **keys), epsilon,
-                         *source(rec, "upper_nats", **keys)])
+                         *source(rec, "clipped_effect_nats" if upper is None else "upper_nats", **keys)])
             if int(hops) == registered:
                 out.compare(MAIN_T1, (dataset, "admission_D_bar"), mean)
                 out.compare(MAIN_T1, (dataset, "admission_U_desc"), upper)
     out.table(["Dataset", "buffer (hops)", "D_bar", "half-width", "U_desc", "decision at eps_a"], rows,
-              notes=["Clipped paired effect on D_admit, one-sided cluster-bootstrap half-width and upper limit at each "
-                     "buffer; decision by the descriptive rule (D_bar <= -eps_a and U_desc < 0)."])
+              notes=["Clipped paired effect on D_admit (the registered value at every buffer) and the one-sided "
+                     "block-bootstrap half-width and upper limit over the buffer's resampling units "
+                     "(cm_experiments/buffered_admission.py); decision by the descriptive rule (D_bar <= -eps_a and "
+                     "U_desc < 0). At the registered buffer each unit is one core and the row reproduces the run's "
+                     "sealed admission."])
     out.data("buffer_sensitivity", ["dataset", "buffer_hops", "clipped_effect_nats", "half_width_nats", "upper_nats",
                                     "admitted", "resampling_units", "epsilon_a", "source_file", "locator"], data)
     out.uses("records", "buffer_sensitivity", sorted({row[-2] for row in data}))

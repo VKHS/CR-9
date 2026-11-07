@@ -77,7 +77,11 @@ Reliability (Figure S16)
   the held-out RMSE of that one-step risk prediction (the measurement module_ablations calls innovation_rmse);
   nis_coverage the fraction of assessment-row innovations (observer updates) whose NIS lies in the two-sided
   (1 - alpha) chi-square region with the latent dimension as degrees of freedom; pooled over datasets with equal
-  weights (sqrt of the mean of the per-dataset mean squared errors; mean of the per-dataset fractions);
+  weights (sqrt of the mean of the per-dataset mean squared errors; mean of the per-dataset fractions). The E8
+  history-MLP observer (cm_experiments.ablation_lifecycle: an MLP over the last w = 2 P latent vectors in the sealed
+  observer's latent space, fitted on the same model-fit rows with the final fit's seed + 68, NIS never invalidating
+  as for the global KF) is measured the same way and kept in observers.json under ``additional_variants``; the
+  reliability_diagnostics contract registers the four levels above, so it enters no summary row;
 * harm, per dataset: executed decisions of the deployed feedback rule with a finite risk prediction; predicted
   safe iff the critic's calibrated upper limit mu + r <= 0 (flagged otherwise); harmful iff Delta_l > tol;
   false-safe = safe and harmful / executed decisions; harm-miss = safe and harmful / harmful; the point-prediction
@@ -127,7 +131,7 @@ SETS = ("action_gap_audit", "decision_traces", "reliability_diagnostics")
 AUDIT_FILES = ("cm_experiments/decision_audit.py", "scripts/run_decision_audit.py")
 REUSED_FILES = ("cm_experiments/ensemble_grid.py", "cm_experiments/input_gate.py",
                 "cm_experiments/negative_controls.py", "cm_experiments/predictability.py",
-                "cm_experiments/artifacts.py", "cm_experiments/budget.py")
+                "cm_experiments/artifacts.py", "cm_experiments/budget.py", "cm_experiments/ablation_lifecycle.py")
 DATASETS = ("ogbn-arxiv", "ogbn-proteins", "ogbn-products", "Roman-empire", "PascalVOC-SP", "COCO-SP",
             "Peptides-func")
 FEEDBACK_ROUTES = ("one_step", "radius", "mpc_rh")
@@ -135,6 +139,9 @@ PLANNING_ROUTES = ("mpc_rh", "mpc_ol")
 CATEGORIES = ("schedule_nominal", "state_conditioned", "exclusive_sequence", "recovery", "input_fallback")
 OBSERVER_LEVELS = ("raw", "EMA", "global KF", "conditioned KF")
 MODULE_ARMS = {"raw": "raw", "EMA": "ema", "global KF": "global", "conditioned KF": "conditioned"}
+# Measured with the four levels and kept in observers.json (additional_variants); not a reliability_diagnostics level
+# of records/specs.json, so it is deposited raw and enters no summary row.
+ADDITIONAL_OBSERVERS = {"history MLP": "history_mlp"}
 ORIGINS = ("policy", "fixed_schedule", "nominal", "recovery_no_support", "recovery_observer", "recovery_budget",
            "recovery_no_finite_score", "recovery_support_mismatch")
 GAP_KINDS = {0: "not audited", 1: "one-step/radius score gap", 2: "beam root gap (final beam)",
@@ -630,6 +637,7 @@ def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=
     routes = fixture_route.values() if isinstance(fixture_route, dict) else [fixture_route]
     if any(r is not None and r not in FEEDBACK_ROUTES for r in routes):
         raise RunnerError(f"a fixture rule override names a feedback route of {FEEDBACK_ROUTES}")
+    from .ablation_lifecycle import HISTORY_WIDTH
     threshold = certificate_floor() if near_zero_threshold is None else float(near_zero_threshold)
     if not threshold > 0 or not 0 < ema_weight <= 1 or not 0 < gate_alpha < 1 or not perturbation_factor >= 0:
         raise RunnerError("declare a positive near-zero threshold, 0 < EMA weight <= 1, 0 < gate alpha < 1 and a "
@@ -706,6 +714,10 @@ def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=
         "audit": {"inputs": int(audit_inputs), "seed": int(audit_seed),
                   "scope": "per-site gap, perturbation and consequence analysis; decision traces use every input"},
         "observer": {"levels": list(OBSERVER_LEVELS), "ema_weight": float(ema_weight), "study": bool(observer_study),
+                     "additional": {name: {"module_ablations_arm": arm, "window": "2 x controller.observer_period",
+                                           "width": HISTORY_WIDTH,
+                                           "kept": "observers.json additional_variants (no summary row)"}
+                                    for name, arm in ADDITIONAL_OBSERVERS.items()},
                      "region": "two-sided (1 - calibration_alpha) chi-square, dof = latent dimension"},
         "calibration": {"trajectories": int(calibration_trajectories), "seed": int(audit_seed)},
         "bootstrap": {"reps": int(reps or first.config["admission"]["bootstrap_reps"]),
@@ -1230,9 +1242,11 @@ def critic_predictions(critic, scaler, observer, records, rows, device):
 
 
 def observer_phase(run_root, controller, profile, directory, device, *, ema_weight):
-    """E8: risk RMSE and NIS consistency of the four observer variants on the D_explore assessment partition."""
+    """E8: risk RMSE and NIS consistency of the four observer variants on the D_explore assessment partition, and of
+    the history-MLP observer (``additional_variants``)."""
     from cross_morse.exploration import load_records
-    from cross_morse.learning import _holdout_groups
+    from cross_morse.learning import _fingerprint, _holdout_groups
+    from .ablation_lifecycle import FINAL_FIT_SEED as LIFECYCLE_FINAL_SEED, HISTORY_SEED_OFFSET, history_observer
     records = load_records(Path(run_root) / "explore")
     config = controller.config
     roles = _partition(records, controller, run_root, profile)
@@ -1258,11 +1272,17 @@ def observer_phase(run_root, controller, profile, directory, device, *, ema_weig
         variants[name] = LatentObserver(base, weight, second)
     variants["global KF"] = global_kf(base, records, observer_rows)
     variants["conditioned KF"] = base
+    if LIFECYCLE_FINAL_SEED != FINAL_FIT_SEED:
+        raise RunnerError("the history MLP's seed must follow the runtime's final-fit seed")
+    variants["history MLP"] = history_observer(base.payload, records, observer_rows, config, directory=directory,
+                                               device=device, seed=FINAL_FIT_SEED + HISTORY_SEED_OFFSET,
+                                               fingerprint=_fingerprint(records, config))
     alpha = float(config["controller"].get("calibration_alpha", 0.05))
     low, high = chi_square_region(base.dimension, alpha)
     target = np.asarray(records["delta"], dtype=np.float64)[assessment]
-    result, arrays = {}, {"assessment_rows": assessment, "delta": target}
-    for name in OBSERVER_LEVELS:
+    result, additional, arrays = {}, {}, {"assessment_rows": assessment, "delta": target}
+    arms = dict(MODULE_ARMS, **ADDITIONAL_OBSERVERS)
+    for name in OBSERVER_LEVELS + tuple(ADDITIONAL_OBSERVERS):
         observer = variants[name]
         critic, scaler, audit = train_critic(observer, records, fitting, fit_rows, validation_rows, config, directory,
                                              device, name)
@@ -1270,15 +1290,17 @@ def observer_phase(run_root, controller, profile, directory, device, *, ema_weig
         nis, innovations = innovation_events(observer, records, assessment)
         inside = (nis >= low) & (nis <= high)
         squared = float(np.sum((target - prediction) ** 2))
-        result[name] = {"assessment_rows": int(len(assessment)), "squared_error_sum": squared,
-                        "mse": squared / len(assessment), "rmse": math.sqrt(squared / len(assessment)),
-                        "nis_events": int(len(nis)), "nis_in_region": int(inside.sum()),
-                        "nis_coverage": float(inside.mean()) if len(nis) else None,
-                        "innovation_rms": float(np.sqrt(np.mean(innovations ** 2))) if len(innovations) else None,
-                        "training": {k: v for k, v in audit.items() if k != "history"},
-                        "module_ablations_arm": MODULE_ARMS[name]}
-        arrays[f"prediction_{MODULE_ARMS[name]}"] = prediction
-        arrays[f"nis_{MODULE_ARMS[name]}"] = nis
+        (result if name in OBSERVER_LEVELS else additional)[name] = {
+            "assessment_rows": int(len(assessment)), "squared_error_sum": squared,
+            "mse": squared / len(assessment), "rmse": math.sqrt(squared / len(assessment)),
+            "nis_events": int(len(nis)), "nis_in_region": int(inside.sum()),
+            "nis_coverage": float(inside.mean()) if len(nis) else None,
+            "innovation_rms": float(np.sqrt(np.mean(innovations ** 2))) if len(innovations) else None,
+            "training": {k: v for k, v in audit.items() if k != "history"},
+            "module_ablations_arm": arms[name]}
+        arrays[f"prediction_{arms[name]}"] = prediction
+        arrays[f"nis_{arms[name]}"] = nis
+    additional["history MLP"]["observer_fit"] = variants["history MLP"].payload["history_fit"]
     sealed = Path(run_root) / "fit" / profile / "calibration_assessment.npz"
     parity = None
     if sealed.is_file():
@@ -1292,8 +1314,11 @@ def observer_phase(run_root, controller, profile, directory, device, *, ema_weig
             "alpha": alpha, "region": [low, high], "ema_weight": float(ema_weight),
             "rows": {"model_fit": int(len(fitting)), "assessment": int(len(assessment)),
                      "internal_validation_groups": len(validation_groups)},
-            "variants": result, "conditioned_parity": parity,
-            "innovation_covariance": "second moment of model-fit innovations (raw, EMA)"}, arrays
+            "variants": result, "additional_variants": additional, "conditioned_parity": parity,
+            "innovation_covariance": "second moment of model-fit innovations (raw, EMA)",
+            "history_mlp": ("cm_experiments.ablation_lifecycle.history_observer: window 2 x observer period, width 128, "
+                            "fitted on the model-fit rows of the sealed final fit; not a reliability_diagnostics level")
+            }, arrays
 
 
 # ----------------------------------------------------------------------------- the execution phase (PyTorch)
@@ -1839,6 +1864,21 @@ def summarize_reliability(plan, jobs, *, stress_dataset=None) -> dict:
         keys = {"diagnostic": "observer", "level": level}
         rows += [_row(keys, "risk_rmse", math.sqrt(np.mean([p["mse"] for p in per_dataset.values()]))),
                  _row(keys, "nis_coverage", float(np.mean([p["nis_coverage"] for p in per_dataset.values()])))]
+    details["observer_additional"] = {}
+    for level in ADDITIONAL_OBSERVERS:          # measured and deposited; not a level of the contract (no row)
+        per_dataset = {}
+        for dataset, results in observed.items():
+            v = [r.get("additional_variants", {}).get(level) for r in results]
+            if any(x is None for x in v):
+                continue
+            events = sum(x["nis_events"] for x in v)
+            per_dataset[dataset] = {"mse": math.fsum(x["squared_error_sum"] for x in v) / sum(x["assessment_rows"] for x in v),
+                                    "nis_coverage": sum(x["nis_in_region"] for x in v) / events if events else None,
+                                    "runs": len(v)}
+        if per_dataset:
+            details["observer_additional"][level] = {
+                "datasets": per_dataset, "risk_rmse": math.sqrt(np.mean([p["mse"] for p in per_dataset.values()])),
+                "module_ablations_arm": ADDITIONAL_OBSERVERS[level]}
     for d_index, dataset in enumerate(DATASETS):
         chosen = [s for j, s in strata if j["entry"]["dataset"] == dataset]
         if not chosen:

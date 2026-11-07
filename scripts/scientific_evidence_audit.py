@@ -453,8 +453,19 @@ def check_campaign_binding(paths, inspected, binding):
             "aggregate": aggregate, "relationship_to_manuscript": binding["relationship_to_manuscript"]}
 
 
-def validate_record_coverage(name, rows, spec, contract):
-    """Check the table's actual row keys, without inventing dataset coverage."""
+def validate_record_coverage(name, rows, spec, contract, path=None):
+    """Check the table's actual row keys, without inventing dataset coverage.
+
+    The baselines set (analyzer ``baselines``) is checked by ``cm_campaigns.baselines.audit``: the internal rows
+    of the seven datasets (their method keys follow from each dataset's comparator and deployed rows), the
+    fourteen external comparisons, and, given the set directory ``path``, their study plans, upstream
+    identities and adapter archives.
+    """
+    if contract.get("analyzer") == "baselines":
+        from cm_campaigns.baselines import audit
+        if spec["keys"] != ["dataset", "method", "seed"]:
+            raise ValueError(f"{name}: record schema differs from the baselines coverage keys")
+        return audit(rows, path)
     keys = contract.get("coverage_keys")
     if keys is None:
         if {r["dataset"] for r in rows} != set(contract["datasets"]):
@@ -569,7 +580,7 @@ def build_report(root=ROOT, *, budget_campaign=None, software_runs=(), manuscrip
                 if result.get("synthetic"):
                     raise ValueError("Synthetic records are not accepted as auxiliary evidence")
                 rows = read_summary(path, specs["sets"][name], specs["summary_columns"])
-                coverage = validate_record_coverage(name, rows, specs["sets"][name], contract)
+                coverage = validate_record_coverage(name, rows, specs["sets"][name], contract, path=path)
                 record_results[name] = {"evidence_kind": "measured_auxiliary_records", "coverage": coverage, **result}
             except (OSError, ValueError, KeyError, TypeError) as exc:
                 block("invalid_auxiliary_set", name, exc, "FAIL")
@@ -591,21 +602,21 @@ def build_report(root=ROOT, *, budget_campaign=None, software_runs=(), manuscrip
     if confirmation_campaign is None:
         report["confirmation_family"] = {"status": "PENDING", "family_size": 9,
                                          "original_test_p_values_recomputed": False}
-        block("confirmation_campaign_missing", "S14", "Supply --confirmation-campaign with original unrounded nine-test outputs, paired observations and pre-admission locks")
+        block("confirmation_campaign_missing", "S14", "Supply --confirmation-campaign with the nine-test campaign: the original outputs with paired observations and pre-admission locks, or the campaign scripts/build_s14_campaign.py builds from the sealed runs")
     else:
         try:
             from cm_campaigns.confirmation import check_campaign as check_confirmation_campaign, bind_official_runs
             result = check_confirmation_campaign(Path(confirmation_campaign), manuscript_root=root)
             report["confirmation_family"] = result
             if result["status"] != "PASS":
-                block("confirmation_reference_mismatch", "S14", "Original S14 tests differ from printed manuscript values; inspect confirmation_family.manuscript_comparisons", "FAIL")
+                block("confirmation_reference_mismatch", "S14", "S14 tests differ from the printed manuscript values; inspect confirmation_family.manuscript_comparisons", "FAIL")
             linkage = bind_official_runs(result, {dataset: [Path(run["path"]) for run in evidence["runs"]]
                                                   for dataset, evidence in official.items()})
             result["official_run_linkage"] = linkage
             if linkage["status"] != "PASS":
                 if result["status"] == "PASS":
                     result["status"] = "PENDING"
-                block("confirmation_official_run_linkage", "S14", "Original S14 input identities must match all seven validated official archives, including every Roman split")
+                block("confirmation_official_run_linkage", "S14", "S14 input identities must match all seven validated official archives, including every Roman split")
         except (OSError, ValueError, KeyError, IndexError, TypeError, RuntimeError) as exc:
             report["confirmation_family"] = {"status": "FAIL", "error": str(exc),
                                              "original_test_p_values_recomputed": False}
@@ -635,7 +646,7 @@ def main(argv=None):
     parser.add_argument("--records", type=Path, help="auxiliary record root; uses this checkout's record specification")
     parser.add_argument("--output", type=Path, help="JSON report path; the full report also goes to stdout")
     parser.add_argument("--budget-campaign", type=Path)
-    parser.add_argument("--confirmation-campaign", type=Path, help="original nine-test S14 campaign, observations and policy locks")
+    parser.add_argument("--confirmation-campaign", type=Path, help="nine-test S14 campaign (original, or built by scripts/build_s14_campaign.py)")
     parser.add_argument("--software-run", action="append", type=Path, default=[])
     parser.add_argument("--manuscript-pdf", type=Path, help="optional local main manuscript copy for byte verification")
     parser.add_argument("--supplementary-pdf", type=Path, help="optional local supplement copy for byte verification")

@@ -1,5 +1,48 @@
 # Changelog
 
+## 2026-11-07 — Every reported experiment executable; one command produces the measured outputs
+
+- One command produces every measured output of the availability statement on the
+  cluster from the seven completed lifecycle runs:
+  `bash hpc/produce_paper_outputs_arrhenius.sh <suite>` (`scripts/paper_outputs.py`
+  `plan | submit | status | collect`, `make paper-outputs`) verifies the sealed runs,
+  executes every runner's own plan step, submits one Slurm job graph with the
+  dependencies between the runners and ends with the map of all artifacts that
+  `bash hpc/publish_paper_artifacts_arrhenius.sh all <map>` publishes.
+  `make statement-fulfilled` is the final gate. [Producing the measured
+  outputs](docs/PRODUCTION.md) describes the job graph.
+- Factorials (Tables S16, S16b): every cell of both 2^3 designs is executable and
+  distinct. The observer factor carries a read-only stopping rule (the fitted
+  terminal-value model stops an execution when the remaining nominal depths are
+  predicted to raise the loss), risk-controlled execution is its own operation, and
+  `factorial.json` records each cell's definition, stopping depths and action counts.
+- E8 history-MLP observer (Table S36): a one-hidden-layer predictor over the last 2P
+  latent vectors with a constant-gain update, executed as the module-ablation arm
+  `observer:history_mlp` and measured in the decision audit.
+- E11 buffer sensitivity (Table S27): `cm_experiments/buffered_admission.py` regroups
+  the sealed per-core paired losses into the resampling units of each buffer (walk
+  dependence, blocks around a maximum independent set) and applies the runtime's own
+  admission statistic; at the registered buffer it reproduces the sealed decision.
+- S14 joint confirmation built from the sealed runs: `scripts/build_s14_campaign.py
+  plan | run | assemble` (`cm_campaigns/s14_builder.py`) executes the nine tests with
+  the runtime's confirm-stage code; `check_campaign` audits such a campaign with the
+  admission links reported as post hoc findings, and Figures 2–3 build from any
+  validated campaign while the comparison reports differences from the printed S14.
+- Internal rows of Tables S15 and S15b (E12, E17): `scripts/run_internal_baselines.py
+  plan | run` (`cm_experiments/internal_baselines.py`) scores every internal route's
+  configuration on D_test once per plant checkpoint, times q_C and the deployed rule
+  with the E17 session inside completed GPU allocations, and takes the GPU-hours from
+  the runs' stage times as Table S41; `scripts/export_records.py baselines --internal`
+  adds these rows. `cm_campaigns/baselines.py` holds the method keys the S15 generator
+  reads and the completeness audit of the set.
+- E12: the export of the `baselines` record set packs every external comparison's
+  study plan and its adapter code at the pinned commit (`--checkouts`); publication
+  copies them to `experiments/baselines/`, and `make statement-check` lists the
+  experiment-code and configuration items as awaiting that publication.
+- Tables S31 and S35 link every row to the record set that its runner produces.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged: source
+  fingerprint `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+
 ## 2026-11-07 — Registered availability statement: published outputs, display generators, one command
 
 - `release/availability_statement.json` holds the paper's registered data- and

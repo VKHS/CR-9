@@ -24,7 +24,11 @@ def digest(text):
 
 
 class S14CampaignTests(unittest.TestCase):
+    # The fixture's optimization seed population; ("ensemble",) is the single level of a repository-built campaign.
+    SEEDS = ("0", "1")
+
     def setUp(self):
+        self.lifecycle = {}       # dataset -> lifecycle pre-admission lock policies differing from the joint decision
         self.temp = tempfile.TemporaryDirectory()
         self.base = Path(self.temp.name)
         self.root = self.base / "campaign"
@@ -40,7 +44,7 @@ class S14CampaignTests(unittest.TestCase):
         self.manifest.update(status="author_completed", synthetic=False, evidence_kind="original_confirmation_tests")
         self.protocol["registered_at"] = "2020-01-02T00:00:00+00:00"
         for spec in self.protocol["contrasts"]:
-            spec["seed_ids"] = ["0", "1"]
+            spec["seed_ids"] = list(self.SEEDS)
             spec["method"].update(name="original fixture test method, not a scientific result",
                                   tail="greater" if spec["beneficial_direction"] > 0 else "less", command="original_analysis --original-config")
             for key in ("analysis_code", "analysis_config", "environment"):
@@ -101,7 +105,7 @@ class S14CampaignTests(unittest.TestCase):
             result = {"schema": RESULT_SCHEMA, "contrast_id": key, "dataset": dataset,
                       "synthetic": False, "evidence_kind": "original_confirmation_test", "p_value_kind": "unadjusted_against_zero",
                       "numeric_precision": "unrounded", "data_role": "D_confirm", "statistical_unit": unit,
-                      "unit_count": count, "loss": loss, "seed_ids": ["0", "1"],
+                      "unit_count": count, "loss": loss, "seed_ids": list(self.SEEDS),
                       "intervention_valid": True, "intervention_scope": "controller_observations_only", "method_name": "original fixture test method, not a scientific result",
                       "tail": "greater" if direction > 0 else "less", "protocol_sha256": self.manifest["protocol"]["sha256"],
                       "paired_losses_sha256": entry["paired_losses"]["sha256"],
@@ -134,9 +138,10 @@ class S14CampaignTests(unittest.TestCase):
         with path.open("w", newline="") as handle:
             writer = csv.writer(handle)
             writer.writerow(["seed_id", "unit_id", "left_loss_nats", "right_loss_nats", "unit_weight"])
-            for seed in (0, 1):
+            for index, seed in enumerate(self.SEEDS):
+                offset = 0.0 if len(self.SEEDS) == 1 else (.0001 if index else -.0001)
                 for unit in self.roles[dataset]["confirmation_units"]:
-                    writer.writerow([str(seed), unit, 1 + effect + (.0001 if seed else -.0001), 1, 1])
+                    writer.writerow([seed, unit, 1 + effect + offset, 1, 1])
         entry["paired_losses"] = {"path": entry["paired_losses"]["path"], "sha256": sha256(path)}
 
     def seal(self):
@@ -156,7 +161,7 @@ class S14CampaignTests(unittest.TestCase):
                 binding.update(source_sha256=digest("fixture-source"), config_sha256=config_hash(config),
                                unit_sha256=digest(dataset + str(split)))
                 native_candidates = copy.deepcopy(candidates)
-                policies = dict(self.policies[dataset])
+                policies = dict(self.policies[dataset], **self.lifecycle.get(dataset, {}))
                 if dataset == "Roman-empire":
                     components = {row["hash"]: row["split_policy_hashes"][split]["hash"] for row in candidates}
                     for row in native_candidates:
@@ -472,6 +477,89 @@ class S14CampaignTests(unittest.TestCase):
         self.write("campaign.json", self.manifest)
         with self.assertRaisesRegex(ValueError, "Synthetic"):
             check_campaign(self.root, manuscript_root=self.manuscript)
+
+    # -- repository-built campaigns (cm_campaigns/s14_builder.py) --------------------------------
+    def relink(self, **changes):
+        """Rewrite every admission link (outside the joint-lock digest) and the manifest."""
+        for entry in self.manifest["datasets"]:
+            link = read_json(self.root / entry["admission_link"]["path"])
+            link.update(changes)
+            entry["admission_link"] = self.write(entry["admission_link"]["path"], link)
+        self.write("campaign.json", self.manifest)
+
+    def declare_repository_built(self):
+        self.manifest["production"] = {"kind": "repository_built", "builder": "cm_campaigns/s14_builder.py",
+                                       "provenance": self.write("provenance.json", {"fixture_only": True})}
+        self.write("campaign.json", self.manifest)
+
+    def test_repository_built_campaign_reports_post_hoc_admission_instead_of_failing(self):
+        # The lifecycle admitted before the joint lock and no joint lock governed it.
+        self.relink(joint_lock_sha256=None, admission_started_at="2020-01-05T12:00:00+00:00")
+        with self.assertRaisesRegex(ValueError, "admission did not use the joint decision lock"):
+            check_campaign(self.root, manuscript_root=self.manuscript)          # imported: strict, unchanged
+        self.declare_repository_built()
+        result = check_campaign(self.root, manuscript_root=self.manuscript)
+        self.assertEqual(result["status"], "PASS")                               # values agree with the printed ones
+        self.assertEqual((result["production_kind"], result["post_hoc"]), ("repository_built", True))
+        self.assertEqual(set(result["admission_findings"]), {row["dataset"] for row in self.manifest["datasets"]})
+        for finding in result["admission_findings"].values():
+            self.assertFalse(finding["admission_governed_by_joint_lock"])
+            self.assertFalse(finding["admission_after_joint_lock"])
+            self.assertTrue(finding["lifecycle_lock_agrees_with_joint_decision"])
+        self.assertEqual(len(result["admission_findings"]["Roman-empire"]["run_locks"]), 10)
+        self.assertTrue(any(limit.startswith("Repository-built campaign") for limit in result["limits"]))
+        # A changed printed-value comparison is the only status distinction.
+        self.change_result("Peptides/radius", p_value_zero=.025)
+        self.relink(joint_lock_sha256=None, admission_started_at="2020-01-05T12:00:00+00:00")
+        self.declare_repository_built()
+        self.assertEqual(check_campaign(self.root, manuscript_root=self.manuscript)["status"], "REFERENCE_MISMATCH")
+
+    def test_repository_built_campaign_reports_a_lifecycle_lock_that_differs_from_the_joint_decision(self):
+        # Peptides' own confirm stage kept the radius; the joint family returns q_C.
+        self.lifecycle["Peptides-func"] = {"confirmed_hash": self.targets["Peptides-func"]}
+        self.seal()
+        with self.assertRaisesRegex(ValueError, "original executable lock differs from the joint decision"):
+            check_campaign(self.root, manuscript_root=self.manuscript)
+        self.declare_repository_built()
+        result = check_campaign(self.root, manuscript_root=self.manuscript)
+        self.assertEqual(result["status"], "PASS")
+        self.assertFalse(result["post_hoc"])
+        peptides = result["admission_findings"]["Peptides-func"]
+        self.assertFalse(peptides["lifecycle_lock_agrees_with_joint_decision"])
+        self.assertEqual(peptides["lifecycle_confirmed_hash"], self.targets["Peptides-func"])
+        self.assertEqual(peptides["joint_confirmed_hash"], self.policies["Peptides-func"]["comparator_hash"])
+        self.assertFalse(peptides["run_locks"][0]["lifecycle_lock_agrees_with_joint_decision"])
+        self.assertTrue(all(f["lifecycle_lock_agrees_with_joint_decision"] for d, f in result["admission_findings"].items()
+                            if d != "Peptides-func"))
+
+    def test_repository_built_identities_stay_strict(self):
+        self.manifest["production"] = {"kind": "repository_built", "builder": "cm_campaigns/s14_builder.py"}
+        self.write("campaign.json", self.manifest)
+        with self.assertRaisesRegex(ValueError, "production provenance"):
+            check_campaign(self.root, manuscript_root=self.manuscript)
+        self.declare_repository_built()
+        entry = self.manifest["datasets"][0]
+        link = read_json(self.root / entry["admission_link"]["path"])
+        link["role_manifest_sha256"] = "0" * 64
+        entry["admission_link"] = self.write(entry["admission_link"]["path"], link)
+        self.write("campaign.json", self.manifest)
+        with self.assertRaisesRegex(ValueError, "another dataset or other reserved roles"):
+            check_campaign(self.root, manuscript_root=self.manuscript)
+
+    def test_ensemble_seed_level_links_official_runs_only_for_a_repository_built_campaign(self):
+        fixture = S14CampaignTests("test_complete_family_reconstructs_effects_and_returns_failed_peptides_to_comparator")
+        fixture.SEEDS = ("ensemble",)
+        fixture.setUp()
+        self.addCleanup(fixture.tearDown)
+        imported = check_campaign(fixture.root, manuscript_root=fixture.manuscript)
+        self.assertEqual(imported["rows"][0]["seed_count"], 1)
+        paths = fixture.native_runs()
+        with self.assertRaisesRegex(ValueError, "seed population differs"):
+            bind_official_runs(imported, paths)
+        fixture.declare_repository_built()
+        report = check_campaign(fixture.root, manuscript_root=fixture.manuscript)
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(bind_official_runs(report, paths)["status"], "PASS")
 
 
 if __name__ == "__main__":

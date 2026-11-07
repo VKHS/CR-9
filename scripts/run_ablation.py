@@ -8,7 +8,11 @@ fitted factorial cells (S16, S16b): plan, run and export (cm_experiments/ablatio
 
 plan     reads sealed parent runs (a Roman-empire parent is its campaign of split runs) and writes
          <output>/plan.json and one configuration per variant lifecycle (the parent's configuration plus its
-         ``ablation_variant``); factorial-fit also writes <output>/factorial/plan.json (fitted mode).
+         ``ablation_variant``); factorial-fit also writes <output>/factorial/plan.json (fitted mode: one lifecycle
+         per distinct set of cell operations -- O = 0 memoryless observer, A = 0 no transport actions A1-A7,
+         X = 0 risk-controlled execution off -- and the read-only observer's stopping rule in the O = 1 cells).
+         modules: the observer arms are raw, ema, global and history_mlp (the E8 history-MLP observer, window
+         --history-window, default two observer-update periods, and width --history-width, default 128).
 run      jobs 0..n-1 are the variant lifecycles: the parent's sealed prepare/train outputs are copied and
          sealed under the variant, then explore -> fit (-> select -> confirm) run as
          ``python -B -m cm_experiments.ablation_lifecycle <run_cross_morse.py arguments>`` (variant installed);
@@ -60,7 +64,9 @@ def _plan(args):
                                  input_gate=getattr(args, "input_gate", ()),
                                  negative_controls=getattr(args, "negative_controls", ()),
                                  allow_fixture=args.allow_fixture, allow_source_change=args.allow_source_change,
-                                 study="modules" if args.study == "modules" else "e18")
+                                 study="modules" if args.study == "modules" else "e18",
+                                 history_window_length=getattr(args, "history_window", None),
+                                 history_width=getattr(args, "history_width", ablation.HISTORY_WIDTH))
 
 
 def _run(args):
@@ -129,6 +135,10 @@ def parser():
                            help="sealed input_gate run of a parent (comparator branch; repeatable)")
             p.add_argument("--negative-controls", type=Path, action="append", default=[],
                            help="sealed negative_controls run of a parent (comparator branch; repeatable)")
+            p.add_argument("--history-window", type=int, default=None,
+                           help="history-MLP observer window w (default: 2 x controller.observer_period of each parent)")
+            p.add_argument("--history-width", type=int, default=128,
+                           help="history-MLP hidden width (default 128, the registered consequence-model width)")
         if name == "factorial-fit":
             p.add_argument("--warmup", type=int, default=1, help="discarded warm-up executions per cell")
         p = actions.add_parser("run", help="execute the variant lifecycles, then the measurement")

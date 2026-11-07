@@ -34,7 +34,7 @@
       "quantities": {
         "serial_cost": "nominal executions (nominal = 1), measured after warm-up",
         "wall_time": "controller-branch wall time in nominal executions (nominal = 1)",
-        "gpu_hours": "qualification or retraining GPU-hours from the scheduler accounting",
+        "gpu_hours": "GPU-hours: external comparisons from the scheduler accounting of their studies; internal rows from the runs' stage times as Table S41 (backbone training, plus the qualification stages for feedback routes and the deployed rule)",
         "score": "official test metric of one optimization seed (percent or AP points)",
         "hpo_trials": "hyperparameter trials under the shared 48-trial ceiling",
         "params_millions": "trainable parameters (millions)"
@@ -43,7 +43,7 @@
         "score"
       ],
       "table": "seed_mean_sd",
-      "notes": "Exported by scripts/export_records.py baselines from the pinned-upstream studies of scripts/run_upstream_baseline.py, the E17 timing rows (cm_campaigns.timing) and the original sacct exports. Rows without a seed carry per-method quantities; the score SD over the optimization seeds is computed from the per-seed rows."
+      "notes": "Exported by scripts/export_records.py baselines from four inputs: the pinned-upstream studies of scripts/run_upstream_baseline.py (--study), each comparison's plan, upstream identity and adapter archive at its pinned commit stored in raw/<dataset>/<method>/plan.json, raw/<dataset>/<method>/upstream.json and code/adapters/<dataset>/<method>/adapter-<commit>.tar (the upstream source is referenced, not copied); the internal rows of Tables S15 and S15b, measured on the seven sealed lifecycle runs by scripts/run_internal_baselines.py (--internal; definitions in cm_experiments/internal_baselines.py and the provenance); the E17 timing rows (cm_campaigns.timing); and the original sacct exports. Internal methods are keyed by route name, '<route> (qC)' and '<route> (deployed)'. Rows without a seed carry per-method quantities; per-seed score rows are keyed by the optimization seed (external) or the plant seed (internal; Roman-empire: the mean over the ten split runs), and the score SD is computed from them. A complete set has the internal rows of all seven datasets and all fourteen external comparisons, each with plan, upstream identity and adapter archive."
     },
     "factorials": {
       "title": "Equal-budget 2^3 factorials",
@@ -65,7 +65,7 @@
         "relative_time": "time relative to cell 000"
       },
       "table": "list",
-      "notes": "The paper's equal-budget design is the fitted mode: `python -B scripts/run_ablation.py factorial-fit` fits one controller per distinct set of cell operations (cm_experiments/ablation_lifecycle.py) and cm_experiments/factorial.py executes each cell with its own controller; the switch mode of `scripts/run_experiment.py factorial` applies the factors to the parent's fitted controllers. provenance.mode names the mode."
+      "notes": "The paper's equal-budget design is the fitted mode: `python -B scripts/run_ablation.py factorial-fit` fits one controller per distinct set of cell operations (cm_experiments/ablation_lifecycle.py) and cm_experiments/factorial.py executes each cell with its own controller; the switch mode of `scripts/run_experiment.py factorial` applies the same cell operations to the parent's fitted controllers. provenance.mode names the mode. Factors, bit 1 = present: A, the transport actions A1-A7 in feedback decisions (0: A0 and, when X = 1, the resets A8/A9); O, the runtime's conditioned observer with the read-only stopping rule (0: a memoryless observer re-initialised from every measurement, with critic and consequence models fitted on its own features; it never stops); X, risk-controlled execution: the registered support masks, the resets A8/A9 in feedback decisions and MPC-RH planning, the registered recovery and stops restricted to the registered support domain (0: every stratum-action cell qualified, no resets, recovery to A0, stops in any stratum); S, the Full profile or its registered Lean counterpart from the same lifecycle. Stopping rule (O = 1): at every controlled depth after the observer update, a valid state (NIS within the fitted threshold; with X = 1 also A0 qualified in the measurement's support stratum) stops the execution when the cell's fitted terminal-value model predicts a CE increase above 1e-7 nats over the remaining nominal depths; the prediction is then the head at that depth. relative_time is the synchronized wall time around the runtime call, stopped executions timed to the stop. raw/.../executions.npz holds every execution's stopping depth; provenance.cell_definitions and provenance.stopping_rule record the definitions."
     },
     "negative_controls": {
       "title": "Negative controls and unsupported regimes",
@@ -323,11 +323,11 @@
         "buffer_hops"
       ],
       "quantities": {
-        "clipped_effect_nats": "clipped paired loss effect D_bar of the confirmed rule minus q_C on D_admit with the cores built at this buffer (nats)",
-        "half_width_nats": "U_desc minus D_bar: one-sided half-width of the cluster-bootstrap interval at this buffer (nats)",
-        "upper_nats": "U_desc: one-sided (1 - alpha) cluster-bootstrap upper limit of the clipped effect (nats)",
+        "clipped_effect_nats": "clipped paired loss effect D_bar of the confirmed rule minus q_C on D_admit: the registered clipped mean, identical at every buffer (nats)",
+        "half_width_nats": "U_desc minus D_bar: one-sided half-width of the block bootstrap over this buffer's resampling units; absent when one unit remains (nats)",
+        "upper_nats": "U_desc: one-sided (1 - alpha) block-bootstrap upper limit of the clipped effect over this buffer's resampling units; absent when one unit remains (nats)",
         "admitted": "descriptive admission decision at epsilon_a: 1 when D_bar <= -epsilon_a and U_desc < 0, otherwise 0",
-        "resampling_units": "number of resampling units entering the cluster bootstrap at this buffer"
+        "resampling_units": "number of blocks (independence number of the core link graph at this buffer); equals the scored cores at the registered buffer; non-increasing in the buffer"
       },
       "datasets": [
         "ogbn-arxiv",
@@ -346,7 +346,8 @@
         "buffer_hops": 2
       },
       "table": "list",
-      "notes": "The released runtime cannot produce this set. cross_morse/data.py records the k-hop buffer as a context diagnostic only (buffer_role context_diagnostic_only; propagation on the full graph), and cross_morse.statistics.admission resamples the METIS or degree-stratified cores of prepared/clusters.npz, so data.buffer_hops changes no admission statistic. The paper states that the intervals widen with the buffer because the effective number of independent clusters falls, but does not define how the buffer enters the resampling units. The producing experiment must define that unit construction (and record resampling_units) before the set can be measured; scripts/run_sweep.py refuses the sweep until it exists. Rows are written by scripts/export_sweep_records.py from a sweep results file with these keys and quantities."
+      "notes": "Produced by scripts/run_sweep.py plan --sweep buffer_sensitivity --parent <arxiv run> --parent <proteins run> / run / collect with cm_experiments/buffered_admission.py, then scripts/export_sweep_records.py. The released runtime records the k-hop buffer only as a context diagnostic and resamples the cores of prepared/clusters.npz; the paper does not define how the buffer enters the resampling units, so this experiment defines it. At buffer k, cores c and c' are linked when s_k(c,c') = max(E_k(c<-c'), E_k(c'<-c)) exceeds tau, the maximum of s over core pairs at the registered 2-hop buffer, where E_k(c<-c') is the probability that a simple random walk on the prepared graph started at a D_admit node of c' enters core c within k steps. The resampling units are blocks around the lexicographically first maximum independent set of the link graph (every other core joins the root it depends on most), so resampling_units is the independence number and is non-increasing in k. cross_morse.statistics.admission is applied to the blocks (block difference = scored-node-weighted mean of its cores' clipped paired losses from admit/paired_units.npz; block weight = scored-node count) with the sealed replicates, alpha, clip, epsilon_a and seed. At the registered buffer each block is one core and the row reproduces admit/decision.json exactly; the runner refuses a parent that does not. A buffer left with one unit has no interval: half_width_nats and upper_nats are absent and admitted = 0.",
+      "sparse_quantities": true
     },
     "confirmation_contrasts": {
       "title": "Contrasts of the nine-test confirmation family on separated confirmation data",
@@ -661,7 +662,8 @@
             "raw",
             "ema",
             "global",
-            "conditioned"
+            "conditioned",
+            "history_mlp"
           ],
           "signature": [
             {
@@ -677,7 +679,7 @@
               "decimals": 4
             }
           ],
-          "runtime": "variant lifecycles (cm_experiments/ablation_lifecycle.py): raw (weight 1) and EMA (0.5) latent averages and one global ridge transition against the runtime's conditioned observer"
+          "runtime": "variant lifecycles (cm_experiments/ablation_lifecycle.py): raw (weight 1) and EMA (0.5) latent averages, one global ridge transition and the history-MLP observer (a one-hidden-layer SiLU predictor over the last 2P latent vectors in the conditioned observer's latent space, with a constant-gain update; E8, Supplementary Table S36) against the runtime's conditioned observer; Table S17 prints the four registered arms and the history-MLP arm is exported beside them"
         },
         {
           "module": "radius_uncertainty",

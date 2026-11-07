@@ -14,14 +14,22 @@
     python -B scripts/run_sweep.py plan --sweep module_ablations --parent /abs/runs/arxiv ... --output /abs/sweeps/modules \
         [--ablations /abs/ablations/modules]
 
+    # S27: descriptive admission at cluster buffers 2-32 hops on the sealed arxiv and proteins runs
+    # (no lifecycle is executed; ``run`` regroups the sealed per-core admission losses, one job per parent)
+    python -B scripts/run_sweep.py plan --sweep buffer_sensitivity --parent /abs/runs/arxiv \
+        --parent /abs/runs/proteins --output /abs/sweeps/buffer
+    python -B scripts/run_sweep.py run --plan /abs/sweeps/buffer/plan.json [--only <job id>]
+    python -B scripts/run_sweep.py collect --plan /abs/sweeps/buffer/plan.json
+
 ``plan`` writes plan.json and one configuration per variant (the parent's configuration
 with one registered key changed). ``run`` executes the released lifecycle on every
 variant, stage by stage from prepare through select, in a fresh output directory
 (``run_cross_morse.py --config <variant> --stage <stage> --resume``); it is safe to
 repeat. ``collect`` measures every row and writes results.json for
 scripts/export_sweep_records.py. A Roman-empire parent is its campaign directory of
-split runs. buffer_sensitivity is refused: the released runtime has no buffer-aware
-resampling unit (the buffer_sensitivity contract of records/specs.json).
+split runs. For buffer_sensitivity, ``run`` measures each parent with
+cm_experiments/buffered_admission.py (which defines the buffer's resampling units) and
+refuses a parent whose registered-buffer row does not reproduce admit/decision.json.
 """
 from __future__ import annotations
 
@@ -32,6 +40,7 @@ from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from cm_experiments.buffered_admission import run_buffer_jobs  # noqa: E402
 from cm_experiments.sweeps import SWEEPS, SweepError, collect, plan_sweep, run_plan  # noqa: E402
 
 
@@ -61,13 +70,15 @@ def main(argv=None) -> int:
     p.add_argument("--ablations", type=Path, action="append", default=[],
                    help="module_ablations: collected experiment directory of scripts/run_ablation.py modules "
                         "(repeatable)")
-    p = sub.add_parser("run", help="execute the planned variant lifecycles")
+    p.add_argument("--buffers", default=None,
+                   help="buffer_sensitivity: buffer grid in hops, comma separated (default: the contract's)")
+    p = sub.add_parser("run", help="execute the planned variant lifecycles (buffer_sensitivity: its measurement jobs)")
     p.add_argument("--plan", type=Path, required=True)
-    p.add_argument("--data-root", type=Path, required=True)
+    p.add_argument("--data-root", type=Path, default=None, help="dataset root (lifecycle variants only)")
     p.add_argument("--device", default="cuda")
     p.add_argument("--threads", type=int, default=16)
     p.add_argument("--python", default=sys.executable)
-    p.add_argument("--only", action="append", default=None, help="variant identifier (repeatable)")
+    p.add_argument("--only", action="append", default=None, help="variant or buffer job identifier (repeatable)")
     p.add_argument("--dry-run", action="store_true", help="print the commands without executing them")
     p = sub.add_parser("collect", help="measure every row and write results.json")
     p.add_argument("--plan", type=Path, required=True)
@@ -82,10 +93,25 @@ def main(argv=None) -> int:
                               horizons=_numbers(args.horizons, int), beams=_numbers(args.beams, int),
                               profile=args.profile, ensemble=args.ensemble, grids=grids or None,
                               variants=not args.no_variants, replicate=not args.no_replicate,
-                              allow_source_change=args.allow_source_change, ablations=args.ablations or None)
+                              allow_source_change=args.allow_source_change, ablations=args.ablations or None,
+                              buffers=_numbers(args.buffers, int))
             plan = json.loads(path.read_text(encoding="utf-8"))
-            print(f"wrote {path} ({len(plan['variants'])} variant lifecycle run(s))")
+            if plan["sweep"] == "buffer_sensitivity":
+                print(f"wrote {path} ({len(plan['settings']['jobs'])} buffer measurement job(s))")
+            else:
+                print(f"wrote {path} ({len(plan['variants'])} variant lifecycle run(s))")
         elif args.command == "run":
+            plan = json.loads(args.plan.read_text(encoding="utf-8"))
+            if plan.get("sweep") == "buffer_sensitivity":
+                if args.dry_run:
+                    print("\n".join(job["id"] for job in plan["settings"]["jobs"]
+                                    if not args.only or job["id"] in args.only))
+                    return 0
+                written = run_buffer_jobs(args.plan, only=args.only)
+                print(f"{len(written)} buffer measurement job(s) complete")
+                return 0
+            if args.data_root is None:
+                raise SweepError("--data-root is required to execute lifecycle variants")
             commands = run_plan(args.plan, data_root=args.data_root, device=args.device, threads=args.threads,
                                 python=args.python, only=args.only, dry_run=args.dry_run)
             for command in commands if args.dry_run else ():

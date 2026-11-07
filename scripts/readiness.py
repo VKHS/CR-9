@@ -141,7 +141,7 @@ def evidence_items(args) -> list[dict]:
             if result.get("synthetic") is not False:
                 raise ValueError("synthetic records are not official evidence")
             validate_record_coverage(name, read_summary(path, specs["sets"][name], specs["summary_columns"]),
-                                     specs["sets"][name], contract)
+                                     specs["sets"][name], contract, path=path)
             verified.append(name)
         except (OSError, ValueError, KeyError, TypeError) as exc:
             invalid.append(f"{name}: {exc}")

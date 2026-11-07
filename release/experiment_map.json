@@ -62,8 +62,7 @@
   "outside_scope": [
     "upstream code and task adapters of the external baselines (pinned by commit in each study plan)",
     "exact reproduction of manuscript spectral coefficients and architecture",
-    "independent-graph certification for arxiv",
-    "buffer-aware resampling units of descriptive admission (Table S27, E11): the paper does not define them"
+    "independent-graph certification for arxiv"
   ],
   "datasets": [
     "ogbn-arxiv",
@@ -90,6 +89,7 @@
     "tube audit, depth diagnostics": "cm_experiments/trajectory_audit.py; scripts/run_trajectory_audit.py",
     "action gaps, decision traces, reliability": "cm_experiments/decision_audit.py; scripts/run_decision_audit.py",
     "E17 runtime scaling and timing anchors, E14 scores": "cm_experiments/timing_records.py; scripts/run_timing_records.py",
-    "display generators": "paper/build/displays/ (one generator per numbered table and figure; make paper)"
+    "display generators": "paper/build/displays/ (one generator per numbered table and figure; make paper)",
+    "E11 buffer sensitivity": "cm_experiments/{sweeps,buffered_admission}.py; scripts/run_sweep.py; scripts/export_sweep_records.py"
   }
 }

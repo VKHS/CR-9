@@ -73,6 +73,24 @@ and by `make compare RUN_ROOT=...` for a single run.
 The repository's GitHub Actions workflow validates the published checkout. Check
 its result for the commit you use.
 
+## Registered statement validation — 7 November 2026
+
+The `registered_statement_validation` section of [VALIDATION.json](VALIDATION.json)
+records the checks of the availability-statement work based on commit `f513af0`:
+
+| Check | Executed result |
+|---|---|
+| Full suite, CPU PyTorch job of the hosted workflow | 1,618 tests: 1,616 passed, 2 skipped |
+| Suite in an interpreter without PyTorch | 1,325 tests: 1,274 passed, 51 PyTorch-dependent tests skipped |
+| Repository verification | Passed, including the statement check, the artifact plan and generated views |
+| `make paper-offline` with nothing published | 20 displays built from repository sources, 70 awaiting the measured outputs, no generator errors |
+| Statement items | 2 fulfilled, 10 awaiting the measured outputs, none missing |
+
+The runner tests execute the factorial cells, the history-MLP observer, the S14
+builder and the internal rows of Tables S15 and S15b on synthetic smoke lifecycles;
+the production pipeline is exercised against a simulated Slurm cluster. No benchmark
+observation was produced.
+
 ## Availability and reconstruction validation — 7 November 2026
 
 The `availability_reconstruction_validation` section of [VALIDATION.json](VALIDATION.json)

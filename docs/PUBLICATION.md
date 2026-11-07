@@ -1,6 +1,6 @@
 # Publishing the measured outputs
 
-[Documentation](README.md) · [Availability](../AVAILABILITY.md) · [Statement compliance](../STATEMENT_COMPLIANCE.md) · [Reconstruction](RECONSTRUCTION.md) · [HPC guide](HPC.md)
+[Documentation](README.md) · [Availability](../AVAILABILITY.md) · [Statement compliance](../STATEMENT_COMPLIANCE.md) · [Producing the outputs](PRODUCTION.md) · [Reconstruction](RECONSTRUCTION.md) · [HPC guide](HPC.md)
 
 The paper's data-availability statement places the checkpoints, predictions,
 propensity-logged trajectories, statistical outputs, split and seed manifests and
@@ -30,13 +30,26 @@ against its declared SHA-256 and size, so the two tiers describe the same run.
 
 ## Publish from Arrhenius
 
-On a login node, in a checkout of this repository:
+On a login node, in a checkout of this repository, after `bash run_cross_morse.sh reproduce`
+has completed the seven lifecycle runs:
+
+```bash
+bash hpc/produce_paper_outputs_arrhenius.sh $CM_BASE/outputs/CROSS_MORSE_REPRODUCTION_0001   # every other artifact
+python3 -B scripts/paper_outputs.py status --work $CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001
+export GITHUB_TOKEN=...                                           # fine-grained token, contents: write on VKHS/CR-9
+bash hpc/publish_paper_artifacts_arrhenius.sh all $CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001/paper-artifacts.map.json
+make statement-fulfilled                                          # every item of the statement fulfilled
+```
+
+[Producing the outputs](PRODUCTION.md) describes the job graph that the first command
+submits; its final job writes the map of all 37 artifacts, so nothing is edited by hand.
+`all` runs `pack` and `publish` below in one step. Directories produced outside that
+workflow are published with a map written by hand:
 
 ```bash
 bash hpc/publish_paper_artifacts_arrhenius.sh template           # writes paper-artifacts.map.json
 $EDITOR $CM_BASE/paper-artifacts/paper-artifacts.map.json         # absolute directory of each artifact
 bash hpc/publish_paper_artifacts_arrhenius.sh pack $CM_BASE/paper-artifacts/paper-artifacts.map.json
-export GITHUB_TOKEN=...                                           # fine-grained token, contents: write on VKHS/CR-9
 bash hpc/publish_paper_artifacts_arrhenius.sh publish
 ```
 

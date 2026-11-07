@@ -244,5 +244,58 @@ class PaperArtifactTransport(unittest.TestCase):
         self.assertEqual(hashlib.sha256(joined).hexdigest(), digest)
 
 
+class BaselineStudyView(unittest.TestCase):
+    """The E12 study plans and adapter archives of a published baselines set become files of the checkout."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.records = self.tmp / "fetched" / "records"
+        self.checkout = self.tmp / "checkout"
+        self.checkout.mkdir()
+        base = self.records / "baselines"
+        self.archive = base / "code/adapters/arxiv/AMP/adapter-0123456789ab.tar"
+        self.archive.parent.mkdir(parents=True)
+        self.archive.write_bytes(bytes(1024))
+        study = base / "raw/arxiv/AMP"
+        study.mkdir(parents=True)
+        (study / "plan.json").write_text('{"schema": "cm-upstream-study-1", "method": "AMP"}\n', encoding="utf-8")
+        self.upstream = {"dataset": "ogbn-arxiv", "method": "AMP", "plan": "raw/arxiv/AMP/plan.json",
+                         "source_commit": "a" * 40, "upstream_repository": "https://example.org/amp.git",
+                         "adapter_archive": {"file": "code/adapters/arxiv/AMP/adapter-0123456789ab.tar",
+                                             "sha256": pa.sha256_file(self.archive), "commit": "0123456789ab" + "c" * 28}}
+        self.write_upstream()
+
+    def write_upstream(self):
+        (self.records / "baselines/raw/arxiv/AMP/upstream.json").write_text(json.dumps(self.upstream), encoding="utf-8")
+
+    def test_plans_and_adapter_archives_are_copied_byte_for_byte(self):
+        self.assertEqual(pa.derive_baseline_studies(self.records, self.checkout), ["ogbn-arxiv/AMP"])
+        view = self.checkout / "experiments/baselines"
+        index = json.loads((view / "INDEX.json").read_text(encoding="utf-8"))
+        self.assertEqual(index["schema"], pa.BASELINE_SCHEMA)
+        (study,) = index["studies"]
+        self.assertEqual((study["dataset"], study["method"]), ("ogbn-arxiv", "AMP"))
+        for key in ("plan", "upstream", "adapter_archive"):
+            path = view / study[key]["file"]
+            self.assertEqual(pa.sha256_file(path), study[key]["sha256"])
+        self.assertEqual((view / study["adapter_archive"]["file"]).read_bytes(), self.archive.read_bytes())
+
+    def test_no_baselines_set_writes_nothing(self):
+        self.assertIsNone(pa.derive_baseline_studies(self.tmp / "absent", self.checkout))
+        self.assertFalse((self.checkout / "experiments").exists())
+
+    def test_a_changed_archive_or_an_escaping_path_is_refused(self):
+        self.archive.write_bytes(b"changed")
+        with self.assertRaisesRegex(pa.ArtifactError, "differs from its recorded SHA-256"):
+            pa.derive_baseline_studies(self.records, self.checkout)
+        self.archive.write_bytes(bytes(1024))
+        self.upstream["plan"] = "../../outside.json"
+        (self.records / "outside.json").write_text("{}", encoding="utf-8")
+        self.write_upstream()
+        with self.assertRaisesRegex(pa.ArtifactError, "is not a file inside"):
+            pa.derive_baseline_studies(self.records, self.checkout)
+
+
 if __name__ == "__main__":
     unittest.main()

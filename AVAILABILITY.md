@@ -6,12 +6,12 @@ The paper's registered data-availability statement:
 
 > The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
-**3 of 12 items fulfilled**, 8 awaiting the publication of the measured outputs, 1 missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).
+**2 of 12 items fulfilled**, 10 awaiting the publication of the measured outputs, 0 missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).
 
 | Statement item | Status | Where in the repository |
 |---|---|---|
-| complete experiment code | Missing | release/experiment_code.json |
-| configurations | Fulfilled | `configs/` and the experiment configurations |
+| complete experiment code | Awaiting measured outputs | 32 experiments mapped to their code in `release/experiment_code.json` |
+| configurations | Awaiting measured outputs | `configs/` and the experiment configurations |
 | source data | Awaiting measured outputs | `paper/source_data/` (written by the publication step) |
 | split and seed manifests | Awaiting measured outputs | `manifests/registered/` (design); `manifests/published/` (executed) |
 | environment specification | Awaiting measured outputs | `environment/`, `Dockerfile`, SITE SETTINGS of `run_cross_morse.sh` |

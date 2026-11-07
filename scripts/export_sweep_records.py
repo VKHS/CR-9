@@ -8,7 +8,9 @@ The set is ``<root>/<record set>/`` (default root: records/) in the layout of
 records/README.md: ``summary.csv`` with the contract's keys followed by
 quantity, value, unit, source_file and locator; ``raw/computed/`` holding the
 computed JSON files the values are read from, each with the SHA-256 of the sealed
-run files it was computed from; ``raw/results.json`` and ``raw/plan.json``;
+run files it was computed from; the files the sweep deposits (attached ablation
+studies under ``raw/ablations/``, buffer measurement jobs under ``raw/jobs/``);
+``raw/results.json`` and ``raw/plan.json``;
 ``code/SOURCE.json``; ``provenance.json`` and ``MANIFEST.json``. The contract is
 ``records/specs.json`` (``sets[<record set>]``). The set is verified with
 scripts/records.py (every value re-read from its raw file) and the root's
@@ -49,7 +51,13 @@ PROTOCOLS = {
                         "outputs, explore->confirm re-executed with the declared variant installed) executing the "
                         "audited rule on the held-out role with every arm's controller, paired ablated minus complete; "
                         "the comparator branch from sealed input_gate and negative_controls runs",
-    "buffer_sensitivity": "descriptive admission at each cluster buffer",
+    "buffer_sensitivity": "descriptive admission at each cluster buffer k: the sealed per-core clipped paired losses of "
+                          "admit/paired_units.npz regrouped into blocks (cores linked when the k-step random-walk entry "
+                          "dependence exceeds its maximum over core pairs at the registered buffer; roots = the "
+                          "lexicographically first maximum independent set of the link graph, every other core joins "
+                          "the root it depends on most) and cross_morse.statistics.admission applied to the blocks "
+                          "with the sealed replicates, alpha, clip and seed; the registered buffer reproduces "
+                          "admit/decision.json exactly (cm_experiments/buffered_admission.py)",
 }
 
 
@@ -135,8 +143,10 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
             writer.writerow([row["keys"][k] for k in keys] + [row["quantity"], fmt(row["value"]), row["unit"],
                                                               f"raw/{row['source_file']}", row["locator"]])
     experiment_code = ["cm_experiments/sweeps.py", "scripts/run_sweep.py"]
-    if results.get("deposits"):
+    if results.get("ablations"):
         experiment_code += ["cm_experiments/ablation_lifecycle.py", "scripts/run_ablation.py"]
+    if name == "buffer_sensitivity":
+        experiment_code.append("cm_experiments/buffered_admission.py")
     dump_json(target / "code" / "SOURCE.json", {
         "schema": "cross-morse-record-source-1", "exporter": "scripts/export_sweep_records.py",
         "experiment_code": experiment_code,

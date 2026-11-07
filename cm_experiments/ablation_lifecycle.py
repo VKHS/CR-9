@@ -43,7 +43,8 @@ Operations (process-local patches)
                     average, declared weight) updated at the registered observer cadence with a constant
                     innovation covariance (second moment of the model-fit innovations), no dynamics;
                     ``global`` (the conditioned observer's latent space with one global ridge transition
-                    and its own residual Q, R = 0.25 Q + 1e-3 I); ``memoryless`` (the decision state
+                    and its own residual Q, R = 0.25 Q + 1e-3 I); ``history_mlp`` (an MLP over a fixed window
+                    of the last w latent measurement vectors; below); ``memoryless`` (the decision state
                     re-initialised from every measurement, the factorial O = 0).  The critic and the
                     consequence models are fitted on the variant's own features.  The runtime's conditioned
                     observer is the complete arm.  The Controller's charged work counts the conditioned
@@ -51,22 +52,54 @@ Operations (process-local patches)
 ``remove_reset``    a direct reset (A8 source reset or A9 last-safe reset) is never admissible in feedback
                     decisions (one-step, radius, MPC-RH planning) and the recovery fallback uses the
                     other reset; registered open-loop schedules and the MPC-OL plan are unchanged.
-``action_bank``     feedback decisions may choose only A0; recovery resets unchanged (the factorial A = 0).
-``support``         every registered (stratum, action) cell is qualified, fixed at fit time in the sealed
-                    controller (the factorial X = 0).
+``action_bank``     feedback decisions (one-step, radius, MPC-RH planning) may not choose the transport actions
+                    A1-A7 (``allowed`` = [0, 8, 9]; the factorial A = 0); the resets stay under ``risk_control``.
+``risk_control``    risk-controlled execution off (the factorial X = 0): every registered (stratum, action) cell is
+                    qualified, fixed at fit time in the sealed controller; the resets A8/A9 are never admissible in
+                    feedback decisions or MPC-RH planning and every recovery fallback returns A0.
+
+History-MLP observer (E8; ``{"op": "observer", "kind": "history_mlp", "window": w, "width": h}``)
+--------------------------------------------------------------------------------------------------
+The conditioned observer's latent space (median/MAD normalization and PCA basis of dimension d =
+controller.state_dim), measurement-update rule and cadence (controller.observer_period, P), with the conditioned
+ridge transition replaced by an MLP over a fixed window of the last w latent vectors:
+
+    prior  z_{l|l-1} = z_{l-1} + f([z_{l-w}, ..., z_{l-1}], u_{l-1}, onehot(a_{l-1}))
+
+where u = (normalized relative depth, transported mass, hops), the conditioned design's exogenous input, and f has
+one hidden SiLU layer of width h.  Window entries are the measured latent vector at update depths (l % P = 0) and
+the prior elsewhere (the measurement is not fused between updates); at depth 0 the window repeats the first
+measurement.  At an update depth the measurement z~_l corrects the prior with the gain K = Q (Q + R)^-1; the
+innovation e = z~_l - prior gives NIS = e' (Q + R)^-1 e, bias and whiteness as in the runtime; the posterior
+covariance is (I - K) Q (I - K)' + K R K' (rank + diagonal); between updates the state is the prior with
+covariance Q.  Fitting: the conditioned observer's objective, one-step latent prediction of z(y_{l+1}) on the same
+model-fit rows, teacher-forced on measured windows exactly as the ridge transition is fitted on measured pairs,
+trained with the runtime's recipe for its learned latent transition (cross_morse.learning._train_network: AdamW
+with the registered learning rate, weight decay, batch, epochs and patience; standardized increment targets;
+internal validation on 10% of the rows' trajectory groups; seed = fold seed + 68, after the four networks of
+``_fit_one``); Q = residual covariance of the fitted f on the model-fit rows (rank + diagonal, + 1e-4 I) and
+R = 0.25 Q + 1e-3 I (the runtime's identification convention).  Defaults: w = 2 P (two registered observer-update
+periods: 4), h = 128 (the registered width of the runtime's learned consequence models, Supplementary Table S9).
+At the registered d = 16 the MLP has (4*16 + 13)*128 + 128 + 128*16 + 16 = 12,048 parameters against at most
+41*(16 + 4)*16 = 13,120 for the conditioned observer's ridge transitions (one global and one per fitted depth-bin
+and action cell); both counts are recorded in the fitted payload (``ablation_fit.history_fit``).
 
 Studies
 -------
 ``modules``  (S17) per parent run: one lifecycle per (module, arm) of spectral_bands {deleted, scrambled},
              source_alignment {no_alignment}, confidence_sensors {no_confidence}, transport_history
-             {no_history}, observer {raw, ema, global} and recovery_type {source_only, last_safe_only}, plus
-             one replicate lifecycle with no operation (the complete arm; ``complete="parent"`` uses the
-             parent instead).  The comparator branch (branch on/off) is a serving-time switch outside the
-             lifecycle: it is read from sealed ``input_gate`` and ``negative_controls`` runs of the parent.
+             {no_history}, observer {raw, ema, global, history_mlp} and recovery_type {source_only,
+             last_safe_only}, plus one replicate lifecycle with no operation (the complete arm;
+             ``complete="parent"`` uses the parent instead).  The history-MLP arm is exported as an extra observer
+             arm (records/specs.json registers raw, EMA, global and conditioned; the S17 generator prints those).
+             The comparator branch (branch on/off) is a serving-time switch outside the lifecycle: it is read from
+             sealed ``input_gate`` and ``negative_controls`` runs of the parent.
 ``e18``      one lifecycle deleting every spectral and reachability coordinate (and the spectral age), the
              matched confidence/history control, against the complete arm.
 ``factorial`` (S16, S16b) one lifecycle per distinct cell variant (A, O, X on arxiv; O, X on PascalVOC-SP,
-             where S selects the registered Full or Lean profile of the same fitted lifecycle); the cells are
+             where S selects the registered Full or Lean profile of the same fitted lifecycle): O = 0 the
+             memoryless observer, A = 0 ``action_bank``, X = 0 ``risk_control`` (cm_experiments.factorial.
+             cell_operations); the cells, with the read-only observer's stopping rule of the O = 1 cells, are
              executed and exported by ``cm_experiments.factorial`` in its ``fitted`` mode.
 
 Measurement (modules and e18; ``measure`` jobs)
@@ -140,9 +173,15 @@ LIFECYCLE_MODULES = {
     "source_alignment": ("no_alignment",),
     "confidence_sensors": ("no_confidence",),
     "transport_history": ("no_history",),
-    "observer": ("raw", "ema", "global"),
+    "observer": ("raw", "ema", "global", "history_mlp"),
     "recovery_type": ("source_only", "last_safe_only"),
 }
+OBSERVER_KINDS = ("raw", "ema", "global", "history_mlp", "memoryless")
+NO_TRANSPORT = [0, 8, 9]           # the factorial A = 0: A0 and the resets (the resets stay under risk_control)
+RESET_ACTIONS = (8, 9)
+HISTORY_WIDTH = 128                # registered width of the runtime's learned consequence models (Table S9)
+HISTORY_SEED_OFFSET = 68           # 17 * 4: after the seeds _fit_one gives its four networks (seed + 17 k)
+FINAL_FIT_SEED = 7919              # cross_morse.learning.fit_controller's final fit
 COMPLETE_ARMS = {"observer": "conditioned", "recovery_type": "both"}
 POSTHOC_MODULES = {"comparator_branch": ("branch_off",)}
 E18_MODULE, E18_ARM = "spectral_coordinates", "deleted"
@@ -275,8 +314,26 @@ def coordinate_indices(names, config) -> list[int]:
 
 
 # ============================================================================= variant specifications
+def history_window(config: dict) -> int:
+    """The history-MLP observer's default window: two registered observer-update periods (2 P)."""
+    return 2 * int(config.get("controller", {}).get("observer_period", 2))
+
+
+def history_parameters(window: int, width: int, dimension: int) -> int:
+    """Parameters of the history MLP: window * d latent inputs, 3 exogenous, 10 action indicators; d outputs."""
+    inputs = int(window) * int(dimension) + 3 + 10
+    return inputs * int(width) + int(width) + int(width) * int(dimension) + int(dimension)
+
+
+def conditioned_parameters(payload: dict) -> int:
+    """Parameters of the conditioned observer's ridge transitions: one global and one per fitted cell, (d + 4) x d."""
+    dimension = len(payload["basis"][0])
+    return (1 + len(payload.get("conditioned") or {})) * (dimension + 4) * dimension
+
+
 def module_operations(module: str, arm: str, config: dict, *, ema_weight: float = .5, pool=None,
-                      scramble_seed: int = DEFAULT_SCRAMBLE_SEED) -> list[dict]:
+                      scramble_seed: int = DEFAULT_SCRAMBLE_SEED, history_window_length=None,
+                      history_width: int = HISTORY_WIDTH) -> list[dict]:
     if module in ("spectral_bands", "source_alignment", "confidence_sensors", "transport_history", E18_MODULE):
         names = module_coordinates(module, config)
         if arm == "scrambled":
@@ -293,6 +350,11 @@ def module_operations(module: str, arm: str, config: dict, *, ema_weight: float 
             if not 0 < float(ema_weight) < 1:
                 raise RunnerError("the EMA weight must lie in (0, 1)")
             op["ema_weight"] = float(ema_weight)
+        if arm == "history_mlp":
+            window = history_window(config) if history_window_length is None else history_window_length
+            if type(window) is not int or type(history_width) is not int or window < 1 or history_width < 1:
+                raise RunnerError("the history-MLP window and width are positive integers")
+            op.update(window=window, width=history_width)
         return [op]
     if module == "recovery_type":
         return [{"op": "remove_reset", "action": {"source_only": 9, "last_safe_only": 8}[arm]}]
@@ -300,16 +362,10 @@ def module_operations(module: str, arm: str, config: dict, *, ema_weight: float 
 
 
 def factorial_operations(cell: str, factors) -> list[dict]:
-    """A factorial cell's fitted components (factor bit 0 = component removed)."""
-    ops = []
-    bits = dict(zip(factors, cell))
-    if bits.get("O") == "0":
-        ops.append({"op": "observer", "kind": "memoryless"})
-    if bits.get("A") == "0":
-        ops.append({"op": "action_bank", "allowed": [0]})
-    if bits.get("X") == "0":
-        ops.append({"op": "support", "mode": "unrestricted"})
-    return ops
+    """A factorial cell's fitted components (cm_experiments.factorial.cell_operations of the cell's switches):
+    O = 0 the memoryless observer, A = 0 no transport actions, X = 0 risk-controlled execution off."""
+    from .factorial import cell_operations, cell_switches
+    return cell_operations(cell_switches(cell, factors, "full"))
 
 
 def variant_spec(variant_id: str, operations: list[dict], *, study: str, module=None, arm=None) -> dict:
@@ -336,19 +392,25 @@ def validate_spec(spec: dict, config: dict | None = None) -> None:
             if kind == "scramble" and not {"file", "sha256", "units", "depths"} <= set(op.get("pool") or {}):
                 raise RunnerError("a scramble names its donor pool file, SHA-256 and shape")
         elif kind == "observer":
-            if op.get("kind") not in ("raw", "ema", "global", "memoryless"):
+            if op.get("kind") not in OBSERVER_KINDS:
                 raise RunnerError(f"unknown observer variant {op.get('kind')!r}")
+            if op["kind"] == "history_mlp" and not all(type(op.get(k)) is int and op[k] >= 1
+                                                       for k in ("window", "width")):
+                raise RunnerError("a history-MLP observer declares a positive integer window and width")
         elif kind == "remove_reset":
             if op.get("action") not in (8, 9):
                 raise RunnerError("only the direct resets A8 and A9 can be removed")
         elif kind == "action_bank":
-            if op.get("allowed") != [0]:
-                raise RunnerError("the declared action-bank restriction is A0 only")
-        elif kind == "support":
-            if op.get("mode") != "unrestricted":
-                raise RunnerError("the declared support operation is 'unrestricted'")
+            if op.get("allowed") != NO_TRANSPORT:
+                raise RunnerError(f"the declared action-bank restriction removes the transport actions A1-A7 "
+                                  f"(allowed {NO_TRANSPORT})")
+        elif kind == "risk_control":
+            if op.get("mode") != "off":
+                raise RunnerError("the declared risk-control operation is 'off'")
         else:
             raise RunnerError(f"unknown variant operation {kind!r}")
+    if {"remove_reset", "risk_control"} <= set(kinds):
+        raise RunnerError("risk_control off already removes both resets")
 
 
 def variant_config(parent_config: dict, spec: dict) -> dict:
@@ -368,6 +430,8 @@ def observer_ablation(spec: dict | None) -> dict:
     result = {"variant": (spec or {}).get("id"), "deleted": deleted, "observer": observer.get("kind", "conditioned")}
     if "ema_weight" in observer:
         result["ema_weight"] = float(observer["ema_weight"])
+    if observer.get("kind") == "history_mlp":
+        result["history"] = {"window": int(observer["window"]), "width": int(observer["width"])}
     return result
 
 
@@ -589,8 +653,11 @@ def _arm(name, module, arm, lifecycle=None, *, parent=None) -> dict:
 def plan_modules(parents, output, *, modules=None, role="compare", complete="replicate", through="confirm",
                  reps=None, max_graphs=0, ema_weight=.5, scramble_seed=DEFAULT_SCRAMBLE_SEED, scramble_units=1024,
                  input_gate=(), negative_controls=(), allow_fixture=False, allow_source_change=False,
-                 study="modules") -> Path:
-    """S17 (study ``modules``) or E18 (study ``e18``): variant lifecycles and their measurement jobs."""
+                 study="modules", history_window_length=None, history_width=HISTORY_WIDTH) -> Path:
+    """S17 (study ``modules``) or E18 (study ``e18``): variant lifecycles and their measurement jobs.
+
+    ``history_window_length`` (default: two observer-update periods of each parent) and ``history_width``
+    (default 128) declare the history-MLP observer arm."""
     if study not in ("modules", "e18"):
         raise RunnerError("plan_modules plans the modules and e18 studies")
     if complete not in ("replicate", "parent") or through not in ("fit", "select", "confirm"):
@@ -599,6 +666,10 @@ def plan_modules(parents, output, *, modules=None, role="compare", complete="rep
         raise RunnerError("the held-out role is compare or test; decision roles are never reused")
     if int(max_graphs) < 0 or int(scramble_units) < 1:
         raise RunnerError("max_graphs is nonnegative and the donor pool holds at least one trajectory")
+    if history_window_length is not None and (type(history_window_length) is not int or history_window_length < 1):
+        raise RunnerError("the history-MLP window is a positive integer")
+    if type(history_width) is not int or history_width < 1:
+        raise RunnerError("the history-MLP width is a positive integer")
     if not parents:
         raise RunnerError("give at least one sealed --parent run")
     selection = _module_selection(modules) if study == "modules" else {E18_MODULE: [E18_ARM]}
@@ -627,7 +698,8 @@ def plan_modules(parents, output, *, modules=None, role="compare", complete="rep
                                          pool_file, seed=scramble_seed, units=scramble_units)
                     pools[str(pool_file)] = pool["sha256"]
                 ops = module_operations(module, arm, run.config, ema_weight=ema_weight, pool=pool,
-                                        scramble_seed=scramble_seed)
+                                        scramble_seed=scramble_seed, history_window_length=history_window_length,
+                                        history_width=history_width)
                 entry = _lifecycle_job(output, jobs, configs, run, dataset,
                                        variant_spec(f"{module}:{arm}", ops, study=study, module=module, arm=arm),
                                        through=through, pool_file=pool_file)
@@ -653,7 +725,13 @@ def plan_modules(parents, output, *, modules=None, role="compare", complete="rep
         "modules": {m: list(a) for m, a in selection.items()}, "posthoc": posthoc, "jobs": jobs,
         "settings": {"ema_weight": float(ema_weight), "scramble_seed": int(scramble_seed),
                      "scramble_units": int(scramble_units), "max_graphs": int(max_graphs),
-                     "reps": None if reps is None else int(reps)},
+                     "reps": None if reps is None else int(reps),
+                     "history_mlp": {"window": history_window_length, "width": int(history_width),
+                                     "window_rule": "2 x controller.observer_period of each parent" if
+                                     history_window_length is None else "declared",
+                                     "width_rule": "registered width of the runtime's learned consequence models "
+                                                   "(Supplementary Table S9)" if history_width == HISTORY_WIDTH
+                                     else "declared"}},
         "pools": pools, "installer": installer_identity(), "ablation_code": code_identity(),
         "definitions": DEFINITIONS,
         "protocol": ("variant lifecycles from byte copies of the parent's sealed prepare/train outputs, explore->"
@@ -745,7 +823,9 @@ _ROUTE = contextvars.ContextVar("cm_ablation_route", default=None)
 _OPEN_LOOP = contextvars.ContextVar("cm_ablation_open_loop", default=False)
 _TRAJECTORY = contextvars.ContextVar("cm_ablation_trajectory", default=None)
 _FITTING = contextvars.ContextVar("cm_ablation_fitting", default=False)
+_FIT_CONTEXT = contextvars.ContextVar("cm_ablation_fit_context", default=None)
 _OBSERVER_CLASS = None
+_HISTORY_CLASS = None
 
 
 def active_spec():
@@ -782,6 +862,8 @@ def install(spec: dict, *, run_dir=None) -> Installation:
         observer = observer_class()
         patches += [(learning, "ConditionedObserver", observer), (learning, "_fit_observer", _fit_observer),
                     (learning, "_features", _features)]
+        if any(op["op"] == "observer" and op["kind"] == "history_mlp" for op in spec["operations"]):
+            patches.append((learning, "_fit_one", _fit_one))      # the fold's directory, device, seed for the MLP
     pool = None
     if "scramble" in kinds:
         op = next(o for o in spec["operations"] if o["op"] == "scramble")
@@ -797,10 +879,10 @@ def install(spec: dict, *, run_dir=None) -> Installation:
         patches += [(exploration, "sensor_bank", _scrambled_sensor_bank),
                     (policies, "sensor_bank", _scrambled_sensor_bank),
                     (exploration, "collect_trajectory", _collect_trajectory)]
-    if kinds & {"remove_reset", "action_bank"}:
+    if kinds & {"remove_reset", "action_bank", "risk_control"}:
         patches += [(learning.Controller, "supported", _supported), (policies, "recovery_action", _recovery_action),
                     (policies, "beam_plan", _beam_plan), (policies, "_execute_policy", _execute_policy)]
-    if "support" in kinds:
+    if "risk_control" in kinds:
         patches.append((learning, "_support", _support))
     originals = {}
     applied = []
@@ -832,19 +914,271 @@ def _original(owner_name, name):
     return _ACTIVE["originals"][f"{owner_name}.{name}"]
 
 
+# ----------------------------------------------------------------------------- history-MLP observer (E8)
+def history_inputs(windows, exogenous, actions, dtype=np.float64) -> np.ndarray:
+    """Rows [window (oldest first, flattened), u, onehot(action)] of the history MLP's input."""
+    windows = np.asarray(windows)
+    actions = np.asarray(actions, dtype=np.int64).reshape(-1)
+    onehot = np.zeros((len(actions), 10), dtype=dtype)
+    known = (actions >= 0) & (actions < 10)
+    onehot[np.flatnonzero(known), actions[known]] = 1
+    return np.column_stack((windows.reshape(len(windows), -1).astype(dtype, copy=False),
+                            np.asarray(exogenous).astype(dtype, copy=False), onehot))
+
+
+def history_windows(latent, groups, depths, window: int, dtype=np.float64) -> np.ndarray:
+    """[rows, window, d] measured latent windows ending at every row's depth along its own trajectory (the rows of a
+    trajectory hold consecutive depths; the first measurement repeats before the trajectory's first depth)."""
+    latent = np.asarray(latent)
+    groups, depths, window = np.asarray(groups), np.asarray(depths, dtype=np.int64), int(window)
+    out = np.empty((len(latent), window, latent.shape[1]), dtype=dtype)
+    order = np.lexsort((depths, groups))
+    ordered = groups[order]
+    cuts = np.flatnonzero(np.r_[True, ordered[1:] != ordered[:-1], True])
+    for begin, end in zip(cuts[:-1], cuts[1:]):
+        rows = order[begin:end]
+        if not np.array_equal(depths[rows], np.arange(depths[rows[0]], depths[rows[0]] + len(rows))):
+            raise RunnerError("the history window needs every depth of a trajectory (exploration record_stride 1)")
+        position = np.arange(len(rows))
+        for k in range(window):
+            out[rows, k] = latent[rows[np.maximum(position - (window - 1 - k), 0)]]
+    return out
+
+
+class HistoryMLP:
+    """The fitted history MLP f (NumPy forward): the latent increment of the next measurement."""
+
+    def __init__(self, model: dict):
+        self.window, self.width = int(model["window"]), int(model["width"])
+        self.w1, self.b1 = np.asarray(model["w1"], dtype=np.float64), np.asarray(model["b1"], dtype=np.float64)
+        self.w2, self.b2 = np.asarray(model["w2"], dtype=np.float64), np.asarray(model["b2"], dtype=np.float64)
+        self.mean = np.asarray(model["scaler"]["mean"], dtype=np.float64)
+        self.scale = np.asarray(model["scaler"]["scale"], dtype=np.float64)
+        self.dimension = int(self.w2.shape[0])
+        if (self.w1.shape != (self.width, self.window * self.dimension + 13)
+                or self.w2.shape != (self.dimension, self.width)):
+            raise ValueError("the history MLP's weights do not match its declared window and width")
+
+    def increments(self, inputs, chunk: int = 65536) -> np.ndarray:
+        inputs = np.asarray(inputs)
+        out = np.empty((len(inputs), self.dimension))
+        for start in range(0, len(inputs), chunk):
+            hidden = inputs[start:start + chunk].astype(np.float64) @ self.w1.T + self.b1
+            hidden = hidden * 0.5 * (1.0 + np.tanh(0.5 * hidden))          # SiLU, x * sigmoid(x)
+            out[start:start + chunk] = (hidden @ self.w2.T + self.b2) * self.scale + self.mean
+        return out
+
+    def predict(self, window, exogenous, action) -> np.ndarray:
+        window = np.asarray(window, dtype=np.float64)
+        return window[-1] + self.increments(history_inputs(window[None], np.asarray(exogenous)[None], [action]))[0]
+
+
+def history_filter(q, r) -> dict:
+    """Constants of the history observer's measurement update: S = Q + R, K = Q S^-1 and the Joseph-form posterior
+    covariance (I - K) Q (I - K)' + K R K' (compressed to rank + diagonal by the observer)."""
+    q, r = np.asarray(q, dtype=np.float64), np.asarray(r, dtype=np.float64)
+    innovation = q + r
+    inverse = np.linalg.inv(innovation)
+    gain = np.linalg.solve(innovation, q.T).T          # the runtime's gain arithmetic with prior covariance Q
+    complement = np.eye(len(q)) - gain
+    return {"inverse": inverse, "gain": gain, "posterior": complement @ q @ complement.T + gain @ r @ gain.T,
+            "scale": np.sqrt(np.maximum(np.diag(innovation), 1e-12))}
+
+
+def history_correct(prior, observation, constants: dict, previous_innovation=None) -> tuple:
+    """(state, NIS, bias, whiteness, innovation) of one measurement update of the history observer."""
+    prior, observation = np.asarray(prior, dtype=np.float64), np.asarray(observation, dtype=np.float64)
+    error = observation - prior
+    nis = max(0.0, float(error @ constants["inverse"] @ error))
+    previous = np.zeros_like(error) if previous_innovation is None else np.asarray(previous_innovation, dtype=np.float64)
+    whiteness = float(error @ previous / max(np.linalg.norm(error) * np.linalg.norm(previous), 1e-12))
+    return prior + constants["gain"] @ error, nis, float(np.mean(error / constants["scale"])), whiteness, error
+
+
+class HistoryFilter:
+    """Mixin: the history-MLP observer's predictor-corrector on an observer of the runtime's latent space (it uses the
+    host's ``normalize``, ``transform``, ``start``, ``q``, ``r``, ``rank``, ``period``, ``profile``, ``dimension``
+    and ``nis_threshold``).  The state carries its window (``history_window``); a state without one (a planner's
+    predicted state) repeats its latent vector."""
+
+    def _history_setup(self, model: dict) -> None:
+        from cross_morse.learning import _low_rank_diagonal
+        self.history = HistoryMLP(model)
+        if self.history.dimension != self.dimension:
+            raise ValueError("the history MLP's latent dimension differs from the observer's")
+        self._history = history_filter(self.q, self.r)
+        self._history["posterior"] = _low_rank_diagonal(self._history["posterior"], self.rank)
+
+    def _history_window(self, state) -> np.ndarray:
+        window = getattr(state, "history_window", None)
+        if window is None or np.shape(window) != (self.history.window, self.dimension):
+            return np.repeat(np.asarray(state.z, dtype=np.float64)[None], self.history.window, axis=0)
+        return np.asarray(window, dtype=np.float64)
+
+    def _history_prior(self, state, action) -> np.ndarray:
+        return self.history.predict(self._history_window(state), self.normalize(state.y)[5:8], int(action))
+
+    def _history_start(self, state):
+        state.history_window = np.repeat(np.asarray(state.z, dtype=np.float64)[None], self.history.window, axis=0)
+        return state
+
+    def _history_transition(self, state, action):
+        return self._history_prior(state, action), self.q.copy()
+
+    def _history_observe(self, state, y, depth, previous_action):
+        from cross_morse.learning import ControllerState, _profile_y
+        raw = _profile_y(y, self.profile)
+        finite = bool(np.isfinite(raw).all())
+        if depth < state.depth:
+            raise ValueError("Observer depth cannot move backwards")
+        if depth > state.depth + 1:
+            result = self.start(raw, previous_action, depth)
+            result.valid = False
+            return result
+        window = self._history_window(state)
+        if depth == state.depth + 1:
+            prior, past = self._history_prior(state, previous_action), window[1:]
+        else:
+            prior, past = np.asarray(state.z, dtype=np.float64).copy(), window[:-1]
+        if depth % self.period:
+            result = ControllerState(prior, self.q.copy(), state.nis, state.bias, state.whiteness, raw, int(depth),
+                                     int(previous_action), finite and bool(np.isfinite(prior).all()) and state.valid,
+                                     state.innovation)
+            result.history_window = np.vstack((past, prior[None]))
+            return result
+        observation = self.transform(raw)
+        z, nis, bias, whiteness, error = history_correct(prior, observation, self._history, state.innovation)
+        valid = finite and bool(np.isfinite(z).all()) and np.isfinite(nis) and nis <= self.nis_threshold
+        result = ControllerState(z, self._history["posterior"].copy(), nis, bias, whiteness, raw, int(depth),
+                                 int(previous_action), bool(valid), error)
+        result.history_window = np.vstack((past, observation[None]))
+        return result
+
+
+def _runtime_observer():
+    """The released runtime's ConditionedObserver (also while an AblationObserver is installed in its place)."""
+    import cross_morse.learning as learning
+    return next(c for c in learning.ConditionedObserver.__mro__
+                if c.__module__ == "cross_morse.learning" and c.__name__ == "ConditionedObserver")
+
+
+def history_observer_class():
+    """``HistoryObserver``: the runtime's latent space and update rule with the history-MLP transition, outside any
+    installed variant (payload: the conditioned observer's, with ``history_mlp``, ``q`` and ``r`` of the fit)."""
+    global _HISTORY_CLASS
+    if _HISTORY_CLASS is not None:
+        return _HISTORY_CLASS
+    base = _runtime_observer()
+
+    class HistoryObserver(HistoryFilter, base):
+        def __init__(self, payload):
+            super().__init__(payload)
+            self.kind = "history_mlp"
+            self._history_setup(payload["history_mlp"])
+
+        def start(self, y, previous_action=-1, depth=0):
+            return self._history_start(super().start(y, previous_action, depth))
+
+        def transition(self, state, action):
+            return self._history_transition(state, action)
+
+        def observe(self, state, y, depth, previous_action):
+            return self._history_observe(state, y, depth, previous_action)
+
+    HistoryObserver.__module__ = __name__
+    _HISTORY_CLASS = HistoryObserver
+    return HistoryObserver
+
+
+def fit_history_mlp(payload: dict, records, rows, config: dict, *, window: int, width: int, directory=None,
+                    device="cpu", seed: int = FINAL_FIT_SEED + HISTORY_SEED_OFFSET, fingerprint=None,
+                    stop_requested=None) -> dict:
+    """Fit the history MLP f in the latent space of the conditioned observer ``payload`` on ``rows`` (model-fit rows
+    of complete trajectories): the module docstring's objective, recipe, internal validation and Q/R convention."""
+    import torch
+    from torch import nn
+    from cross_morse.learning import _groups, _holdout_groups, _low_rank_diagonal, _profile_y, _train_network
+    window, width, seed = int(window), int(width), int(seed)
+    rows = np.asarray(rows, dtype=np.int64)
+    median, scale = np.asarray(payload["median"], dtype=np.float64), np.asarray(payload["scale"], dtype=np.float64)
+    center, basis = np.asarray(payload["center"], dtype=np.float64), np.asarray(payload["basis"], dtype=np.float64)
+
+    def normalized(values):
+        values = _profile_y(np.asarray(values)[rows], payload["profile"])
+        return np.clip((np.where(np.isfinite(values), values, median) - median) / scale, -5, 5)
+    now, following = normalized(records["y"]), normalized(records["y_next"])
+    latent, latent_next = (now - center) @ basis, (following - center) @ basis
+    windows = history_windows(latent, _groups(records)[rows], np.asarray(records["depth"])[rows], window,
+                              dtype=np.float32)
+    inputs = history_inputs(windows, now[:, 5:8], np.asarray(records["action"])[rows], dtype=np.float32)
+    del windows
+    holdout = _holdout_groups(records)[rows]
+    unique = np.unique(holdout)
+    if len(unique) < 2:
+        raise RunnerError("the history MLP needs at least two trajectory groups for its internal validation")
+    count = min(len(unique) - 1, max(1, int(math.ceil(0.10 * len(unique)))))
+    chosen = np.random.default_rng(seed).permutation(unique)[:count]
+    validation = np.isin(holdout, chosen)
+    torch.manual_seed(seed)
+    if str(device).startswith("cuda"):
+        torch.cuda.manual_seed_all(seed)
+    dimension = basis.shape[1]
+    net = nn.Sequential(nn.Linear(inputs.shape[1], width), nn.SiLU(), nn.Linear(width, dimension))
+    with contextlib.ExitStack() as stack:
+        if directory is None:
+            directory = stack.enter_context(tempfile.TemporaryDirectory(prefix="cm-history-mlp-"))
+        scaler, audit = _train_network(net, inputs, (latent_next - latent).astype(np.float32),
+                                       np.flatnonzero(~validation), np.flatnonzero(validation), config,
+                                       Path(directory) / "history_mlp.last.pt",
+                                       f"{fingerprint or 'history-mlp'}:history_mlp:{window}:{width}", str(device),
+                                       stop_requested or (lambda: False), seed)
+    if scaler is None:
+        raise RunnerError(f"the history MLP has no finite fitting targets ({audit.get('reason')})")
+    state = {k: v.detach().cpu().double().numpy() for k, v in net.state_dict().items()}
+    model = {"window": window, "width": width, "activation": "SiLU", "w1": state["0.weight"].tolist(),
+             "b1": state["0.bias"].tolist(), "w2": state["2.weight"].tolist(), "b2": state["2.bias"].tolist(),
+             "scaler": {"mean": [float(v) for v in np.ravel(scaler["mean"])],
+                        "scale": [float(v) for v in np.ravel(scaler["scale"])]}}
+    residual = latent_next - (latent + HistoryMLP(model).increments(inputs))
+    rank = int(payload["rank"])
+    q = _low_rank_diagonal(residual.T @ residual / max(len(residual) - 1, 1) + np.eye(dimension) * 1e-4, rank)
+    r = _low_rank_diagonal(0.25 * q + np.eye(dimension) * 1e-3, rank)
+    return {"model": model, "q": q.tolist(), "r": r.tolist(), "audit": {
+        "window": window, "width": width, "latent_dimension": int(dimension),
+        "parameters": history_parameters(window, width, dimension),
+        "conditioned_transition_parameters": conditioned_parameters(payload),
+        "rows": int(len(rows)), "validation_rows": int(validation.sum()), "validation_groups": int(count),
+        "seed": seed, "residual_rms": float(np.sqrt(np.mean(residual ** 2))) if residual.size else None,
+        "training": {k: v for k, v in audit.items() if k != "history"},
+        "objective": "one-step latent prediction of z(y_{l+1}) from the measured window ending at l (teacher-forced), "
+                     "u_l and a_l; squared error of standardized increments (cross_morse.learning._train_network)",
+        "noise": "Q = residual covariance on the model-fit rows (rank + diagonal, + 1e-4 I); R = 0.25 Q + 1e-3 I"}}
+
+
+def history_observer(base_payload: dict, records, rows, config: dict, *, window=None, width=HISTORY_WIDTH,
+                     directory=None, device="cpu", seed=FINAL_FIT_SEED + HISTORY_SEED_OFFSET, fingerprint=None):
+    """A history-MLP observer fitted outside a lifecycle (the decision audit's E8 study): the sealed conditioned
+    observer's latent space, the MLP fitted on its model-fit rows, NIS never invalidating (as its global KF)."""
+    window = history_window(config) if window is None else int(window)
+    fit = fit_history_mlp(base_payload, records, rows, config, window=window, width=width, directory=directory,
+                          device=device, seed=seed, fingerprint=fingerprint)
+    payload = copy.deepcopy(base_payload)
+    payload.update(history_mlp=fit["model"], history_fit=fit["audit"], q=fit["q"], r=fit["r"], conditioned={},
+                   nis_threshold=1e12,
+                   identification="history MLP transition over the last w latent vectors; R=0.25Q+1e-3I (E8)")
+    return history_observer_class()(payload)
+
+
 # ----------------------------------------------------------------------------- observer layer
 def observer_class():
     """``AblationObserver``: the runtime's ConditionedObserver with deletion and observer variants."""
     global _OBSERVER_CLASS
     if _OBSERVER_CLASS is not None:
         return _OBSERVER_CLASS
-    import cross_morse.learning as learning
-    base = learning.ConditionedObserver
-    while getattr(base, "_cm_ablation_observer", False):
-        base = base.__mro__[1]
+    base = _runtime_observer()
     from cross_morse.learning import ControllerState, _profile_y
 
-    class AblationObserver(base):
+    class AblationObserver(HistoryFilter, base):
         _cm_ablation_observer = True
 
         def __init__(self, payload):
@@ -867,6 +1201,11 @@ def observer_class():
                                                  dtype=np.float64)
                 self._inverse = np.linalg.inv(self.innovation_cov)
                 self._innovation_scale = np.sqrt(np.maximum(np.diag(self.innovation_cov), 1e-12))
+            elif self.kind == "history_mlp":
+                fit = (payload.get("ablation_fit") or {}).get("history_mlp")
+                if fit is None:
+                    raise ValueError("a history-MLP observer payload holds its fitted MLP (ablation_fit.history_mlp)")
+                self._history_setup(fit)
 
         def normalize(self, y):
             if len(self.deleted):
@@ -884,6 +1223,8 @@ def observer_class():
             state = super().start(y, previous_action, depth)
             if self.kind in ("raw", "ema"):
                 state.cov = self.innovation_cov.copy()
+            elif self.kind == "history_mlp":
+                state = self._history_start(state)
             return state
 
         def transition(self, state, action):
@@ -891,6 +1232,8 @@ def observer_class():
                 return np.asarray(state.z, dtype=np.float64).copy(), self.r.copy()
             if self.kind in ("raw", "ema"):
                 return np.asarray(state.z, dtype=np.float64).copy(), self.innovation_cov.copy()
+            if self.kind == "history_mlp":
+                return self._history_transition(state, action)
             return super().transition(state, action)
 
         def observe(self, state, y, depth, previous_action):
@@ -898,6 +1241,8 @@ def observer_class():
                 if depth < state.depth:
                     raise ValueError("Observer depth cannot move backwards")
                 return self.start(y, previous_action, depth)
+            if self.kind == "history_mlp":
+                return self._history_observe(state, y, depth, previous_action)
             if self.kind not in ("raw", "ema"):
                 return super().observe(state, y, depth, previous_action)
             raw = _profile_y(y, self.profile)
@@ -981,7 +1326,45 @@ def _fit_observer(records, indices, config):
         payload["ablation_fit"] = {"innovation_covariance": (second + 1e-6 * np.eye(dimension)).tolist(),
                                    "innovation_events": int(len(innovations)),
                                    "rule": "second moment of the model-fit innovations plus 1e-6 I"}
+    elif kind == "history_mlp":
+        context = _FIT_CONTEXT.get() or {}
+        fit = fit_history_mlp(payload, fitting, indices, config, window=ablation["history"]["window"],
+                              width=ablation["history"]["width"], directory=context.get("directory"),
+                              device=context.get("device", "cpu"),
+                              seed=int(context.get("seed", FINAL_FIT_SEED)) + HISTORY_SEED_OFFSET,
+                              fingerprint=context.get("fingerprint"), stop_requested=context.get("stop_requested"))
+        payload.update(conditioned={}, q=fit["q"], r=fit["r"],
+                       identification="history MLP transition over the last w latent vectors; R=0.25Q+1e-3I "
+                                      "(ablation variant)")
+        payload["ablation_fit"] = {"history_mlp": fit["model"], "history_fit": fit["audit"]}
     return observer_class()(payload)
+
+
+def _fit_one(records, fitting_indices, config, directory, fingerprint, device, stop_requested, seed):
+    """The runtime's fold fit with its directory, device, fingerprint and seed visible to the history-MLP fit."""
+    token = _FIT_CONTEXT.set({"directory": Path(directory), "fingerprint": fingerprint, "device": str(device),
+                              "stop_requested": stop_requested, "seed": int(seed)})
+    try:
+        return _original("cross_morse.learning", "_fit_one")(records, fitting_indices, config, directory, fingerprint,
+                                                             device, stop_requested, seed)
+    finally:
+        _FIT_CONTEXT.reset(token)
+
+
+def observer_parameters(observer) -> dict:
+    """Latent dimension and transition parameters of a fitted observer (the E8 capacity comparison)."""
+    payload, kind = observer.payload, getattr(observer, "kind", "conditioned")
+    dimension = int(observer.dimension)
+    if kind == "history_mlp":
+        fit = (payload.get("ablation_fit") or {}).get("history_mlp") or payload.get("history_mlp")
+        transition = history_parameters(fit["window"], fit["width"], dimension)
+    elif kind in ("raw", "ema", "memoryless"):
+        transition = 0
+    elif kind == "global":
+        transition = (dimension + 4) * dimension
+    else:
+        transition = conditioned_parameters(payload)
+    return {"kind": kind, "latent_dimension": dimension, "transition_parameters": int(transition)}
 
 
 def latent_innovations(observer, records, indices) -> np.ndarray:
@@ -1080,17 +1463,22 @@ def _supported(self, y, depth):
     actions = _original("Controller", "supported")(self, y, depth)
     if not _restricted():
         return actions
-    for op in _ACTIVE["spec"]["operations"]:
-        if op["op"] == "remove_reset":
-            actions = [a for a in actions if a != op["action"]]
-        elif op["op"] == "action_bank":
-            actions = [a for a in actions if a in op["allowed"]]
+    ops = {op["op"]: op for op in _ACTIVE["spec"]["operations"]}
+    if "risk_control" in ops:           # every cell admissible (as the sealed unrestricted audit), no reset
+        actions = [] if not np.isfinite(np.asarray(y, dtype=np.float64)).all() else [
+            a for a in range(10) if a not in RESET_ACTIONS]
+    if "remove_reset" in ops:
+        actions = [a for a in actions if a != ops["remove_reset"]["action"]]
+    if "action_bank" in ops:
+        actions = [a for a in actions if a in ops["action_bank"]["allowed"]]
     return actions
 
 
 def _recovery_action(supported, last_safe_available=True):
     if not _restricted():
         return _original("cross_morse.policies", "recovery_action")(supported, last_safe_available)
+    if _ops("risk_control"):
+        return 0                        # risk-controlled execution off: every fallback is the nominal step
     removed = {op["action"] for op in _ops("remove_reset")}
     if 0 in supported:
         return 0
@@ -1126,7 +1514,8 @@ def unrestricted_support(support: dict, config: dict) -> dict:
                                                                        "row_count": 0, "trajectory_count": 0})
             cell["qualified"] = True
     support["qualified_fraction"] = 1.0
-    support["switch"] = "unrestricted: every registered action admissible in every stratum (ablation variant)"
+    support["switch"] = ("unrestricted: every registered action admissible in every stratum (risk_control off; "
+                         "the resets A8/A9 are removed from feedback decisions at execution)")
     return support
 
 
@@ -1593,6 +1982,7 @@ def run_measure_job(plan, entry, output, *, device="cuda") -> Path:
                                          max_graphs=entry["max_graphs"])
             if arm["module"] == "observer" or name == "complete":
                 record["latent_innovation"] = latent_innovation_rms(run_root, controller, profile)
+                record["observer_parameters"] = observer_parameters(controller.observer)
         record["risk"] = assessment_rmse(run_root, profile)
         record.update(arm=dict(arm, run=Path(arm["run"]).name), run=Path(run_root).name,
                       controller_sha256=sha256(Path(run_root) / "fit" / profile / "controller.pt"))

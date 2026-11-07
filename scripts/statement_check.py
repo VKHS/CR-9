@@ -7,7 +7,8 @@ evaluated from what the repository holds and what its release has published:
     fulfilled                  the repository and its published outputs provide it
     awaiting_measured_outputs  the code and structure are complete; the measured
                                outputs of the reported experiments are not yet
-                               published (hpc/publish_paper_artifacts_arrhenius.sh)
+                               published (hpc/produce_paper_outputs_arrhenius.sh,
+                               then hpc/publish_paper_artifacts_arrhenius.sh all)
     missing                    a repository-side gap (code, generator, configuration)
 
     python -B scripts/statement_check.py            # print the evaluation
@@ -69,6 +70,35 @@ def evaluate(root: Path = ROOT) -> dict:
 
     # Complete experiment code
     experiments = _json(root / EXPERIMENTS, {"experiments": []})["experiments"]
+
+    def published_with_outputs(item_id):
+        """Code or configurations that travel inside a measured artifact and are copied into the checkout when
+        it is published (E12: the study plans and adapter code of the external comparisons, inside
+        records:baselines, copied to experiments/baselines/ by scripts/paper_artifacts.py derive)."""
+        pending, changed = [], []
+        for e in experiments:
+            declared = e.get("published_with_outputs")
+            if not declared or item_id not in declared.get("items", []):
+                continue
+            view_path = root / declared["view"]
+            view = _json(view_path)
+            parts = declared["parts"][item_id] if isinstance(declared["parts"], dict) else declared["parts"]
+            if declared["artifact"] not in published or view is None:
+                pending.append(f"{e['experiment']}: {parts} (published inside {declared['artifact']} "
+                               f"and copied to {Path(declared['view']).parent.as_posix()}/)")
+                continue
+            entries = view.get("studies") or []
+            if len(entries) != declared.get("count", len(entries)):
+                changed.append(f"{declared['view']} lists {len(entries)} of {declared['count']} entries")
+            for entry in entries:
+                for value in entry.values():
+                    if isinstance(value, dict) and "file" in value and "sha256" in value:
+                        path = view_path.parent / value["file"]
+                        if not path.is_file() or _sha(path) != value["sha256"]:
+                            changed.append(f"{(Path(declared['view']).parent / value['file']).as_posix()} differs "
+                                           "from its published identity")
+        return pending, changed
+
     absent = sorted({p for e in experiments for p in e.get("code", []) if not (root / p).exists()})
     produced = {o for e in experiments for o in e.get("outputs", [])}
     needed = {a["id"] for a in required if a["kind"] in ("records", "campaign", "run")}
@@ -76,22 +106,31 @@ def evaluate(root: Path = ROOT) -> dict:
     # Parts of a reported experiment that the released code cannot execute, declared with the reason.
     gaps = [f"{e['experiment']}: {gap['display']} ({gap['reason']})"
             for e in experiments for gap in e.get("not_executable", [])]
-    if absent or unproduced or gaps or not experiments:
+    pending, changed = published_with_outputs("experiment_code")
+    where = f"{len(experiments)} experiments mapped to their code in `release/experiment_code.json`"
+    if absent or unproduced or gaps or changed or not experiments:
         item("experiment_code", MISSING, "release/experiment_code.json",
              "; ".join(filter(None, [f"code not found: {', '.join(absent)}" if absent else "",
                                      f"no producing experiment for {', '.join(unproduced)}" if unproduced else "",
                                      "not executable with the released code: " + "; ".join(gaps) if gaps else "",
+                                     "; ".join(changed),
                                      "no experiment-code map" if not experiments else ""])))
+    elif pending:
+        item("experiment_code", AWAITING, where, "; ".join(pending))
     else:
-        item("experiment_code", FULFILLED, f"{len(experiments)} experiments mapped to their code in "
-                                           "`release/experiment_code.json`")
+        item("experiment_code", FULFILLED, where)
 
     # Configurations
     configs = [f"configs/{STEMS[d]}_{p}.json" for d in DATASETS for p in ("smoke", "pilot", "full")]
     configs += sorted({c for e in experiments for c in e.get("configurations", [])})
     absent = [c for c in configs if not (root / c).exists()]
-    item("configurations", MISSING if absent else FULFILLED, "`configs/` and the experiment configurations",
-         ", ".join(absent))
+    pending, changed = published_with_outputs("configurations")
+    if absent or changed:
+        item("configurations", MISSING, "`configs/` and the experiment configurations", ", ".join(absent + changed))
+    elif pending:
+        item("configurations", AWAITING, "`configs/` and the experiment configurations", "; ".join(pending))
+    else:
+        item("configurations", FULFILLED, "`configs/` and the experiment configurations")
 
     # Generators
     without = [i for i in display_ids if i not in framework.GENERATORS]
@@ -218,10 +257,19 @@ def render(evaluation: dict) -> str:
              "| Statement item | Status | Where | Remaining |", "|---|---|---|---|"]
     for row in evaluation["items"]:
         lines.append(f"| {row['phrase']} | {LABEL[row['status']]} | {row['where']} | {row['remaining'] or '—'} |")
-    lines += ["", "Items awaiting measured outputs have their code, structure and checks in place; they are "
-              "fulfilled when `hpc/publish_paper_artifacts_arrhenius.sh` uploads the outputs of the reported runs "
-              "to the release `paper-artifacts` and the updated manifest is committed. `make paper` then rebuilds "
-              "every table and figure from those outputs and compares each computed value with the printed one.", "",
+    lines += ["", "Items awaiting measured outputs have their code, structure and checks in place. On the cluster, "
+              "after `bash run_cross_morse.sh reproduce` has completed the seven lifecycle runs:", "",
+              "```bash",
+              "bash hpc/produce_paper_outputs_arrhenius.sh <suite>      # every other measured output, one Slurm job graph",
+              "bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   # release paper-artifacts",
+              "make statement-fulfilled                                 # every item fulfilled",
+              "```", "",
+              "The first command is described in [docs/PRODUCTION.md](docs/PRODUCTION.md); its last job writes the map "
+              "of all artifacts. The second uploads them to the release `paper-artifacts`, downloads and verifies "
+              "them, rebuilds every table and figure with `make paper` and writes the manifests, observed "
+              "environments and source data into the checkout (`CM_PUBLISH_COMMIT=1` commits and pushes them). "
+              "The reconstruction item is fulfilled when every display is rebuilt and every compared value agrees "
+              "with the printed one; `paper/source_data/compare/` lists each difference.", "",
               "Generated by `scripts/statement_check.py --write`; `make statement-check` verifies it is current.", ""]
     return "\n".join(lines)
 

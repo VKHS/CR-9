@@ -13,7 +13,102 @@ Its source targets are the reviewed [reported results](../paper/reported_results
 `confirm/decision.json` applies its declared local family. That result cannot
 stand in for the cross-dataset S14 family.
 
-## Commands and result scope
+The campaign (`campaign:confirmation`) has two origins. The repository builds it
+from the seven sealed lifecycle runs (build path, next section), or an author
+imports the original test files (import path, after it). The same auditor
+validates both; the differences are listed under each path.
+
+## Build path: from the sealed lifecycle runs
+
+[cm_campaigns/s14_builder.py](../cm_campaigns/s14_builder.py) computes the nine
+tests with the released runtime's own confirm-stage code and writes them in the
+campaign format below. Run it outside the checkout:
+
+```bash
+python -B scripts/build_s14_campaign.py plan --parent ../cm-runs/arxiv-full --parent ../cm-runs/proteins-full \
+    --parent ../cm-runs/products-full --parent ../cm-runs/roman_empire-full \
+    --parent ../cm-runs/pascalvoc_sp-full --parent ../cm-runs/coco_sp-full \
+    --parent ../cm-runs/peptides_func-full --output ../s14-build
+python -B scripts/build_s14_campaign.py run --output ../s14-build [--job K] --device cuda --trust-local-checkpoints
+python -B scripts/build_s14_campaign.py assemble --output ../s14-build --campaign ../s14-campaign
+python -B scripts/audit_s14_confirmation.py ../s14-campaign --output ../s14-audit.json
+```
+
+The Roman-empire parent is the campaign directory of its ten split runs. Every
+parent must be complete (all eight stages sealed).
+
+- **plan** reads no labels. It fixes each dataset's target policy from the
+  selection record: the provisional policy of Eq. (19) when the run selected a
+  feedback route; when it selected q_C, the feedback candidate with the lowest
+  D_select upper limit U (`confirmation_analysis.strongest_feedback`, as in
+  Table S14's products row). The pairs are: state, the matched-shuffle state
+  control of the target minus the target; radius, the radius minus its
+  registered one-step predecessor; RH, MPC-RH (`replanning_pair`) minus its
+  MPC-OL predecessor. `plan` registers `protocol.json` with its registration
+  time, the policy hashes, the confirmation units and weights, the methods and
+  the hashed test code under `<output>/registration/`. It refuses a missing
+  dataset, an incomplete run, unit counts other than those of the table below,
+  and a selection that a row cannot test (e.g. Pascal selecting a radius).
+- **run** executes one job per run and source. A *read* job serves a target
+  that belongs to the run's confirmation closure (`confirm/contrast_registry.json`):
+  the run's sealed `confirm/paired_contrasts.json` row is the contrast. Its two
+  sides are rescored from the sealed D_confirm predictions and must reproduce
+  the sealed per-unit differences and weights exactly; its statistics are the
+  sealed `confirm/decision.json` row, replayed with
+  `cross_morse.statistics.confirmation`. A *compute* job (the target is not in
+  the closure, e.g. products, which selected q_C) executes the contrast on
+  D_confirm with the mechanism-contrast machinery of
+  `cm_experiments/confirmation_analysis.py`. Each Roman split chooses its source
+  separately.
+- **assemble** writes the campaign, then records the auditor's verdict in
+  `<output>/campaign_check.json`. A test without a valid measurement is refused,
+  never substituted.
+
+Statistics. Cluster and graph rows use the confirm stage's paired whole-unit
+bootstrap (cluster weights are the scored-sample counts; graphs are equal): the
+effect is the weighted mean, the 95% interval the 2.5% and 97.5% bootstrap
+percentiles, P the one-sided null-centred bootstrap P against zero in the
+beneficial direction, and P vs margin the runtime's one-sided bootstrap P
+against the margin. Roman-empire uses d_k, the D_confirm loss of split k under
+MPC-RH minus MPC-OL. Its test is the one-sided paired Student t test of the ten
+d_k (9 df) with the two-sided 95% t interval over splits.
+
+Seed level. The runtime's contrast is a contrast of E-member ensemble
+predictions, one paired observation per unit. A repository-built test
+therefore carries the single seed level `ensemble`; seeds are never resampled
+and never counted as units.
+
+Protocol position. On complete runs the joint lock is fixed after the
+lifecycle's own admission stages. With the released runtime it cannot precede
+them: the joint lock binds each run's `admit/pre_admission_lock.json`, and the
+admit stage writes that file in the same call that opens the D_admit labels.
+The campaign therefore declares `production.kind: repository_built` and records
+the admission as it happened. Its admission links name no governing joint lock
+when admission came first, and they compare the lifecycle's own pre-admission
+lock (the run's local confirmation family) with the joint decision.
+
+What the auditor does differently for `production.kind: repository_built`:
+
+- The admission-link conditions are evaluated and reported in
+  `admission_findings`, per dataset (and per Roman split lock), instead of being
+  required: joint-lock governance, admission after the joint lock, admission
+  predictor and lifecycle lock equal to the joint decision. `post_hoc: true`
+  summarizes that some admission was not governed by, or did not follow, the
+  joint lock. The link's dataset and role identities, the run-binding identities
+  and every other check stay strict.
+- `production.builder` and the `production.provenance` reference are required.
+- `bind_official_runs` accepts the single `ensemble` seed level.
+- The status is `PASS`, or `REFERENCE_MISMATCH` when values differ from the
+  printed S14 at printed precision; findings never change it.
+
+The display generators (Table S14, Figures 2, 3 and S9) use any campaign the
+auditor validates, whatever its printed agreement. The comparison step reports
+differences from the printed values. The E10 runner
+(`scripts/run_confirmation_analysis.py confirmation`) runs its per-graph,
+per-seed estimate over the parent run's registered training seeds when the
+campaign carries the `ensemble` level.
+
+## Import path: original test files
 
 Create an incomplete import template outside the checkout, attach the original
 files, and audit the resulting directory:
@@ -51,6 +146,9 @@ bootstraps and Roman small-sample tests retain their own code, configuration,
 environment and original unrounded outputs. This auditor hashes that code but
 does not execute it or substitute a generic statistical test. Full regeneration
 of each original test remains a separate review of the preserved analysis.
+For a repository-built campaign that code is the builder, and its tests are
+regenerated by running the build path again on the same sealed runs. The report
+also carries `production_kind`, `post_hoc` and `admission_findings`.
 
 The scientific audit only gives the confirmation gate `PASS` when all seven
 validated official archives also match the campaign. Missing archives leave the
@@ -114,6 +212,8 @@ the saved input identity, so keep generated reports outside that directory.
 `manuscript_sha256` must match the registered main and supplementary PDFs. It
 references the protocol, all nine tests, seven dataset bindings, and the joint
 decision lock. The template provides the exact field names and expected IDs.
+A repository-built campaign also carries `production`: `kind: repository_built`,
+`builder`, and references to its `provenance.json` and public `code/plan.json`.
 
 Move the template's `protocol_template` object into the referenced `protocol.json`
 and complete it from the original registration. Its schema is
@@ -175,7 +275,8 @@ IDs `split=0:123` and unit keys `split=0` through `split=9`; split qualification
 preserves distinct official masks without calling ten masks independent graphs.
 The scientific audit reconstructs these memberships from the sealed prepared
 splits/clusters and checks the exact role identity. It also checks optimization
-seed IDs against the original training configuration.
+seed IDs against the original training configuration. A repository-built
+campaign's single `ensemble` level (one observation per unit) is accepted.
 
 Dataset bindings reference the original `select/decision.json`,
 `select/candidates.json`, selection lock time and admission link. Every
@@ -220,7 +321,10 @@ role-manifest hash, actual admission start time and original pre-admission lock.
 The original lock's comparator/confirmed/configuration identities must agree.
 The required ordering is roles reserved before registration, registration and
 selection fixed before tests, all tests complete before the joint lock, and
-admission started after that lock.
+admission started after that lock. For a repository-built campaign, the
+admission conditions of this paragraph are reported in `admission_findings`
+(and `post_hoc`) instead of required, as described under the build path. All
+other conditions apply unchanged.
 
 These are checked historical declarations and file identities. Hashes and
 self-reported timestamps alone do not independently prove when labels were

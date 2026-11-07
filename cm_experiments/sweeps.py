@@ -7,13 +7,16 @@ Each sweep fills one record contract of ``records/specs.json``:
 ``module_ablations``    matched module ablations (Table S17): three modules from sealed contrasts, the
                         other seven from the variant lifecycles of cm_experiments/ablation_lifecycle.py
                         attached to the plan (``ablations``)
-``buffer_sensitivity``  cluster-buffer sensitivity of descriptive admission (Table S27)
+``buffer_sensitivity``  cluster-buffer sensitivity of descriptive admission (Table S27): the sealed per-core
+                        paired losses regrouped into the resampling units of each buffer
+                        (cm_experiments/buffered_admission.py, which states the unit definition)
 
 A quantity is recomputed from the parent run's sealed outputs whenever that is
 exact: main Eq. (19) on the sealed simultaneous upper limits for the selection
 margins, ``cross_morse.statistics.admission`` with the stage's seed for the clip
-level, the registered support rule on the logged per-cell statistics for the
-support masks, and confirmation contrasts already sealed in ``confirm/``.
+level and for the buffered resampling units, the registered support rule on the
+logged per-cell statistics for the support masks, and confirmation contrasts
+already sealed in ``confirm/``.
 Settings that change execution (planner horizon and beam width, the support
 thresholds' effect on routes) are measured by new lifecycle runs: the parent's
 configuration with one registered key changed, executed by the released
@@ -61,6 +64,7 @@ UNITS = {
     "warning_lead_change_depths": "depths", "false_safe_rate_change": "fraction", "risk_rmse_change": "nats",
     "action_entropy_change": "nats", "innovation_rmse": "nats", "clean_score_change": "points",
     "worst_harm_change_nats": "nats",
+    "clipped_effect_nats": "nats", "half_width_nats": "nats", "upper_nats": "nats", "resampling_units": "units",
 }
 
 
@@ -366,7 +370,7 @@ class Collector:
 def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | None = None,
                horizons=None, beams=None, profile: str | None = None, ensemble: int | None = None,
                grids: dict | None = None, variants: bool = True, replicate: bool = True,
-               allow_source_change: bool = False, ablations=None) -> Path:
+               allow_source_change: bool = False, ablations=None, buffers=None) -> Path:
     """Write ``plan.json`` and the variant configurations of one sweep.
 
     ``horizon``, ``horizons`` and ``beams`` replace the registered horizon and the two
@@ -383,12 +387,16 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
     one lifecycle run of each parent's unchanged configuration, whose outcome is
     reported next to the parent's. Variants must execute the runtime source that
     sealed the parent; ``allow_source_change`` records a mismatch instead of refusing it.
+
+    ``buffer_sensitivity`` plans one measurement job per sealed parent (arxiv,
+    proteins) on the buffer grid of the contract, or on ``buffers``; it executes no
+    lifecycle (cm_experiments/buffered_admission.py).
     """
     spec = load_spec(sweep)
-    if sweep == "buffer_sensitivity":
-        raise SweepError("buffer_sensitivity cannot be produced by the released runtime: " + spec["notes"])
     if ablations and sweep != "module_ablations":
         raise SweepError("only the module_ablations sweep takes ablation experiments")
+    if buffers is not None and sweep != "buffer_sensitivity":
+        raise SweepError("only the buffer_sensitivity sweep takes a buffer grid")
     output = Path(output).resolve()
     if (output / "plan.json").exists():
         raise SweepError(f"{output}/plan.json exists; use a new sweep directory")
@@ -439,6 +447,9 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
                                                 {}, {"parameter": "replicate", "setting": None, "replicate": True}))
     elif sweep == "module_ablations":
         settings = {"modules": [m["module"] for m in spec["modules"]], "ablations": attach_ablations(ablations)}
+    elif sweep == "buffer_sensitivity":
+        from .buffered_admission import plan_settings
+        settings = plan_settings(entries, spec, buffers)
     current = _runtime_sha256()
     mismatch = sorted({s for e in entries for s in e["runtime_source_sha256"]} - {current})
     if planned and mismatch and not allow_source_change:
@@ -486,11 +497,20 @@ def parameter_grid(parameter: str, run: SealedRun, grids: dict | None) -> list[f
 def run_plan(plan_path: Path, *, data_root: Path, device: str, threads: int = 16,
              python: str = sys.executable, only: list[str] | None = None, dry_run: bool = False,
              runner=subprocess.run) -> list[list[str]]:
-    """Execute every planned variant with the released lifecycle, stage by stage."""
+    """Execute every planned variant with the released lifecycle, stage by stage.
+
+    A buffer_sensitivity plan has no lifecycle variants: its measurement jobs run
+    here (``only`` selects job identifiers) and no command is returned.
+    """
     plan_path = Path(plan_path).resolve()
     plan = read_json(plan_path)
     if plan.get("schema") != PLAN_SCHEMA:
         raise SweepError("not a sweep plan")
+    if plan["sweep"] == "buffer_sensitivity":
+        if not dry_run:
+            from .buffered_admission import run_buffer_jobs
+            run_buffer_jobs(plan_path, only=only)
+        return []
     base = plan_path.parent
     commands = []
     for variant in plan["variants"]:
@@ -534,6 +554,9 @@ def collect(plan_path: Path) -> Path:
         collect_sensitivity(plan, base, collector)
     elif sweep == "module_ablations":
         collect_module_ablations(plan, collector)
+    elif sweep == "buffer_sensitivity":
+        from .buffered_admission import collect_buffer
+        collect_buffer(plan_path, plan, collector)
     else:
         raise SweepError(f"{sweep} has no collector")
     synthetic = {p["synthetic"] for p in plan["parents"]}

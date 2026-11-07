@@ -731,11 +731,66 @@ def map_template(path: Path) -> dict:
     return template
 
 
+BASELINE_STUDIES = Path("experiments") / "baselines"
+BASELINE_SCHEMA = "cross-morse-baseline-studies-1"
+
+
+def _inside(root: Path, relative: str) -> Path:
+    path = (root / relative).resolve()
+    require(path.is_relative_to(root.resolve()) and path.is_file(), f"{relative} is not a file inside {root}")
+    return path
+
+
+def derive_baseline_studies(records: Path, checkout: Path) -> list[str] | None:
+    """The E12 study plans and adapter code of the published baselines set, as files of the checkout.
+
+    The baselines record set carries, for every external comparison, the validated study plan (48 HPO
+    configurations, 12 optimization seeds, pinned upstream source and adapter commits), ``upstream.json``
+    (upstream repository and commits) and the adapter checkout archived at its pinned commit. They are copied
+    byte for byte into ``experiments/baselines/<dataset>/<method>/`` with ``INDEX.json``.
+    """
+    source = Path(records) / "baselines"
+    if not source.is_dir():
+        return None
+    target = Path(checkout) / BASELINE_STUDIES
+    if target.exists():
+        shutil.rmtree(target)
+    studies = []
+    for upstream_path in sorted(source.glob("raw/*/*/upstream.json")):
+        upstream = read_json(upstream_path)
+        archive = upstream.get("adapter_archive") or {}
+        plan = _inside(source, upstream["plan"])
+        adapter = _inside(source, archive["file"])
+        require(sha256_file(adapter) == archive["sha256"], f"{archive['file']} differs from its recorded SHA-256")
+        folder = target / upstream_path.parent.relative_to(source / "raw")
+        folder.mkdir(parents=True, exist_ok=True)
+        files = {"plan": folder / "plan.json", "upstream": folder / "upstream.json", "adapter_archive": folder / adapter.name}
+        shutil.copyfile(plan, files["plan"])
+        shutil.copyfile(upstream_path, files["upstream"])
+        shutil.copyfile(adapter, files["adapter_archive"])
+        studies.append({"dataset": upstream["dataset"], "method": upstream["method"],
+                        "adapter_commit": archive.get("commit"), "source_commit": upstream.get("source_commit"),
+                        "upstream_repository": upstream.get("upstream_repository") or upstream.get("source_repository"),
+                        **{key: {"file": path.relative_to(target).as_posix(), "sha256": sha256_file(path)}
+                           for key, path in files.items()}})
+    if not studies:
+        return None
+    write_json(target / "INDEX.json", {"schema": BASELINE_SCHEMA, "source": "records:baselines",
+                                       "description": "E12 study plans and adapter code of the external comparisons, "
+                                                      "copied from the published baselines record set",
+                                       "studies": studies})
+    return [f"{s['dataset']}/{s['method']}" for s in studies]
+
+
 def derive(fetched: Path, *, workspace: Path | None = None, checkout: Path = ROOT) -> dict:
-    """Commit-sized views of the published outputs: split/seed manifests, observed environments, source data."""
+    """Commit-sized views of the published outputs: split/seed manifests, observed environments, source data,
+    and the E12 study plans and adapter code."""
     import subprocess
     fetched, checkout = Path(fetched).resolve(), Path(checkout).resolve()
     written = {}
+    studies = derive_baseline_studies(fetched / "records", checkout)
+    if studies:
+        written["baseline_studies"] = studies
     runs = fetched / "runs"
     if runs.is_dir() and any(p.is_dir() for p in runs.iterdir()):
         target = checkout / "manifests" / "published"

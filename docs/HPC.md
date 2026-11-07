@@ -202,10 +202,12 @@ without checkpoints or prediction arrays; with `CM_PACK_ARCHIVES=1` each run is
 also packed as a sealed archive (`scripts/archive_run.py`) that
 `scripts/archive_run.py --verify` and `scripts/ingest_run.py` accept.
 
-`bash hpc/publish_paper_artifacts_arrhenius.sh` publishes the runs of a suite,
-with the record sets and campaigns, as the assets of this repository's release
-`paper-artifacts`, from which `make paper` rebuilds every table and figure
-([Publishing the measured outputs](PUBLICATION.md)).
+`bash hpc/produce_paper_outputs_arrhenius.sh <suite>` produces every other measured
+output from the suite's runs as one job graph ([Producing the measured outputs](PRODUCTION.md)),
+and `bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json`
+publishes the runs with the record sets and campaigns as the assets of this
+repository's release `paper-artifacts`, from which `make paper` rebuilds every table
+and figure ([Publishing the measured outputs](PUBLICATION.md)).
 
 On `reproduce resume`, the launcher restores the saved suite settings while
 preserving explicit environment overrides. It queries the scheduler before
@@ -280,6 +282,8 @@ outside a run. BF16 profiles require BF16 support.
 The budget-matched arms (E3–E6), the retrained external baselines and the E17
 timing protocol have their own Slurm scripts under `hpc/`; they read the same
 SITE SETTINGS through `run_cross_morse.sh site-env`.
+`bash hpc/produce_paper_outputs_arrhenius.sh <suite>` submits every auxiliary
+experiment as one job graph ([Producing the measured outputs](PRODUCTION.md)).
 [Experiments](EXPERIMENTS.md) gives their inputs and commands, and
 `hpc/capture_arrhenius_accounting.sh` exports the scheduler accounting of any
 job list without account or node names.

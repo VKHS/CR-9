@@ -102,3 +102,17 @@ source/config/unit/prediction identities without editing the sealed history. See
 The static profile manifest describes what is configured. The stage manifests,
 saved numerical observations and executable checks establish what a particular
 run actually contains.
+
+## External-baseline studies (E12)
+
+The retrained external baselines of Supplementary Tables S15 and S15b run through the
+pinned-upstream harness [`cm_experiments/upstream.py`](../cm_experiments/upstream.py).
+Each of the fourteen dataset-method comparisons has a study plan (48 HPO
+configurations, twelve optimization seeds, the upstream source and adapter commits) and
+an adapter checkout. `scripts/export_records.py baselines` packs the plans and the
+adapter code, archived at its pinned commit, into the `baselines` record set; when that
+set is published, `scripts/paper_artifacts.py derive` copies them into
+`experiments/baselines/<dataset>/<method>/` (`plan.json`, `upstream.json`,
+`adapter-<commit>.tar`) with `INDEX.json`, and `make statement-check` verifies every
+file against its published SHA-256. The upstream methods themselves are referenced by
+repository and commit.

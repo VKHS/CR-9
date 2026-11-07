@@ -14,7 +14,8 @@
 # (export GITHUB_TOKEN=...), uploads the parts to the release `paper-artifacts`, records their
 # SHA-256 in release/paper_artifacts.json, downloads everything back and verifies it, rebuilds
 # every table and figure with `scripts/reconstruct_paper.py`, and writes the split/seed manifests, observed
-# environments and source data to commit. Set CM_PUBLISH_COMMIT=1 to commit and push them.
+# environments, source data and the E12 study plans and adapter code (experiments/baselines/) to commit.
+# Set CM_PUBLISH_COMMIT=1 to commit and push them.
 #
 # Cluster settings come from the SITE SETTINGS block of run_cross_morse.sh.
 set -Eeuo pipefail
@@ -54,7 +55,7 @@ publish_here() {
     "${PYTHON}" -B scripts/paper_artifacts.py fetch --dest "${FETCHED}" --tier analysis || true
     note "rebuilding every table and figure from the downloaded artifacts"
     "${PYTHON}" -B scripts/reconstruct_paper.py --offline --artifacts "${FETCHED}" --output-dir "${WORKSPACE}" || true
-    note "writing split/seed manifests, observed environments and source data into the checkout"
+    note "writing split/seed manifests, observed environments, source data and the E12 study plans into the checkout"
     "${PYTHON}" -B scripts/paper_artifacts.py derive --fetched "${FETCHED}" --workspace "${WORKSPACE}"
     note "refreshing the statement compliance, availability page, claim ledger and paper reports"
     "${PYTHON}" -B scripts/statement_check.py --write || true
@@ -67,6 +68,8 @@ publish_here() {
                    paper/source_data STATEMENT_COMPLIANCE.md AVAILABILITY.md README.md paper/CLAIMS.md
                    paper/AVAILABILITY_STATEMENT.txt paper/PAPER_SUPPORT.md paper/RESULTS.md docs/badges/evidence.json
                    RELEASE_MANIFEST.json SHA256SUMS.txt)
+    # E12 study plans and adapter code, copied from the published baselines record set by derive.
+    [[ -d experiments/baselines ]] && changed+=(experiments/baselines)
     if [[ "${CM_PUBLISH_COMMIT:-0}" == "1" ]]; then
         git add "${changed[@]}"
         git commit -m "Publish the measured outputs of the paper as release assets"

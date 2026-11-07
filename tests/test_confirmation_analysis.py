@@ -614,6 +614,51 @@ class ConfirmationTests(Workspace):
         with self.assertRaisesRegex(RunnerError, "not a variance share"):
             ca.deployment_share(run)
 
+    def test_ensemble_level_campaign_uses_the_parents_registered_training_seeds(self):
+        key, run = "Peptides/radius", SealedRun(EXAMPLES / "peptides_func")
+        built = {"production_kind": "repository_built", "rows": {key: {"seed_ids": ["ensemble"]}}}
+        self.assertTrue(ca.ensemble_level(built, key))
+        self.assertIsNone(ca.campaign_seeds(built, key))
+        seeds, source = ca.e16_seed_population(built, key, run)
+        self.assertEqual(seeds, sorted(int(s) for s in run.config["training"]["seeds"]))
+        self.assertIn("registered training seeds", source)
+        # Per-seed campaigns keep their own population; an imported campaign has no ensemble level.
+        per_seed = {"production_kind": "repository_built", "rows": {key: {"seed_ids": ["2", "1"]}}}
+        self.assertFalse(ca.ensemble_level(per_seed, key))
+        self.assertEqual(ca.e16_seed_population(per_seed, key, run), ([1, 2], "the S14 test's seed population"))
+        imported = {"production_kind": "imported_original", "rows": {key: {"seed_ids": ["ensemble"]}}}
+        with self.assertRaisesRegex(RunnerError, "not checkpoint seeds"):
+            ca.campaign_seeds(imported, key)
+        # Planning: the E16 array of an ensemble-level campaign runs over the parent's registered seeds.
+        from unittest import mock
+        left, right, _ = ca.policy_pair(run, key, allow_fixture=True)
+        with mock.patch.object(ca, "campaign_family", return_value={**built, "root": self.root, "status": "PASS",
+                                                                    "input_identity": "0" * 64}), \
+                mock.patch.object(ca, "policy_pair", return_value=(left, right, "joint S14 campaign policy hashes")), \
+                mock.patch.object(ca, "check_binding", return_value="bound to the campaign's original run identity"):
+            path = ca.plan_confirmation([EXAMPLES / "peptides_func"], self.root / "conf", campaign=self.root, reps=40)
+        dataset = json.loads(path.read_text())["datasets"][0]
+        self.assertEqual(dataset["seeds"], seeds)
+        self.assertIn("registered training seeds", dataset["seed_source"])
+
+    def test_export_records_the_ensemble_seed_axis_of_a_repository_built_campaign(self):
+        from tests.test_s14_confirmation import S14CampaignTests
+        output, _, _ = self.fabricate()
+        fixture = S14CampaignTests(S14_FIXTURE)
+        fixture.SEEDS = ("ensemble",)
+        fixture.setUp()
+        self.addCleanup(fixture.tearDown)
+        fixture.declare_repository_built()
+        written = ca.export_confirmation(output, campaign=fixture.root, manuscript_root=fixture.manuscript,
+                                         root=self.records)
+        analysis = json.loads((written["confirmation_sensitivity"] / "raw" / "confirmation_analysis.json").read_text())
+        agreement = analysis["campaign"]["agreement"]["Pascal/RH"]
+        self.assertEqual(agreement["S14_seed_axis"], "ensemble")
+        self.assertEqual(agreement["E16_seed_reference"], "the parent run's registered training seeds")
+        self.assertFalse(agreement["E16_seeds_are_the_S14_seed_population"])     # fixture array: seeds 1..5, parent: 1, 2
+        for name, target in written.items():
+            verify_set(target, specs()["sets"][name], specs())
+
     def test_paired_array_refuses_misaligned_seeds(self):
         output, plan, _ = self.fabricate(datasets=("Peptides-func",))
         job = plan["jobs"][1]

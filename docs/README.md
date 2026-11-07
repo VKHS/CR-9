@@ -7,6 +7,7 @@
 | Guide | Purpose |
 |---|---|
 | [Reconstruction](RECONSTRUCTION.md) | `make paper`: download and verify the published outputs, rebuild all 90 displays with their source data, compare with the printed values |
+| [Producing the measured outputs](PRODUCTION.md) | One command on the cluster: every runner of `release/experiment_code.json` as one Slurm job graph from the seven completed runs, ending with the map that publication reads |
 | [Publishing the measured outputs](PUBLICATION.md) | How the reported runs, record sets, campaigns and environment enter the release `paper-artifacts` |
 | [Statement compliance](../STATEMENT_COMPLIANCE.md) | Each item of the registered availability statement, where the repository fulfils it, and what awaits publication |
 

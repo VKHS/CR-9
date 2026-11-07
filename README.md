@@ -38,8 +38,9 @@ chain, writes each table (CSV, Markdown, LaTeX) and figure (PNG, SVG) with its
 source data, and places every computed value beside the value printed in the paper
 (`displays/compare/`). [Statement compliance](STATEMENT_COMPLIANCE.md) states, item by
 item, what is fulfilled and what awaits publication;
-[Publishing the measured outputs](docs/PUBLICATION.md) describes how the outputs of
-the reported runs enter the release.
+[Producing the measured outputs](docs/PRODUCTION.md) produces all of them on the
+cluster with one command, and [Publishing the measured outputs](docs/PUBLICATION.md)
+describes how they enter the release.
 
 ## Regenerate the results on a Slurm cluster
 
@@ -200,7 +201,7 @@ assumptions, and the exact implemented variants are explained in the
 ## Release scope
 
 <!-- availability:start -->
-**Availability statement:** 3 of 12 items fulfilled; measured outputs published: 0 of 37 ([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the outputs published with the [release](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) and compares them with the paper; see [availability](AVAILABILITY.md).
+**Availability statement:** 2 of 12 items fulfilled; measured outputs published: 0 of 37 ([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the outputs published with the [release](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) and compares them with the paper; see [availability](AVAILABILITY.md).
 <!-- availability:end -->
 
 `make verify` checks the software package and bundled examples. A regenerated

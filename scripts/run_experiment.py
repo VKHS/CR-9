@@ -126,7 +126,9 @@ def parser():
             p.add_argument("--warmup", type=int, default=1, help="discarded warm-up executions per cell")
             p.add_argument("--max-graphs", type=int, default=0, help="software check only: truncate the role")
             p.add_argument("--switches", type=Path, default=None,
-                           help="JSON {factor: [switch, [off, on]]} overriding the factor-to-switch table")
+                           help="JSON {factor: [switch, [off, on]]} overriding the factor-to-switch table (switches: "
+                                "action_bank no_transport|registered, observer memoryless|conditioned, execution "
+                                "unrestricted|risk_controlled, profile lean|full); eight distinct cells are required")
         p = actions.add_parser("run", help="execute the plan with the released runtime")
         p.add_argument("--output", type=Path, required=True)
         p.add_argument("--job", type=int, default=None, help="execute one job of the plan (default: all)")

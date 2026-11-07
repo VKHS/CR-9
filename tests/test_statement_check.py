@@ -77,6 +77,67 @@ class StatementCheck(unittest.TestCase):
         self.assertEqual(rows["experiment_code"]["status"], sc.MISSING)
         self.assertIn("Table S99 (no configuration key)", rows["experiment_code"]["remaining"])
 
+    def _with_view(self, mutate=None):
+        """The E12 declaration pointed at a temporary experiments/baselines/ view of fourteen studies."""
+        import hashlib
+        experiments = copy.deepcopy(sc._json(ROOT / sc.EXPERIMENTS))
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        view = Path(tmp.name) / "experiments" / "baselines"
+        studies = []
+        for index in range(14):
+            folder = view / f"dataset{index}" / "method"
+            folder.mkdir(parents=True)
+            entry = {"dataset": f"dataset{index}", "method": "method"}
+            for key, name, data in (("plan", "plan.json", b'{"schema": "cm-upstream-study-1"}'),
+                                    ("upstream", "upstream.json", b"{}"),
+                                    ("adapter_archive", "adapter-0123456789ab.tar", bytes(512))):
+                (folder / name).write_bytes(data)
+                entry[key] = {"file": f"dataset{index}/method/{name}", "sha256": hashlib.sha256(data).hexdigest()}
+            studies.append(entry)
+        (view / "INDEX.json").write_text(json.dumps({"studies": studies}), encoding="utf-8")
+        if mutate:
+            mutate(view)
+        declared = [e for e in experiments["experiments"] if e.get("published_with_outputs")]
+        self.assertEqual([e["experiment"] for e in declared], ["E12"])
+        declared[0]["published_with_outputs"]["view"] = str(view / "INDEX.json")
+        path = Path(tmp.name) / "experiment_code.json"
+        path.write_text(json.dumps(experiments), encoding="utf-8")
+        return path
+
+    def test_code_and_configurations_inside_an_unpublished_artifact_await_it(self):
+        rows = {row["id"]: row for row in self.evaluate(self.manifest)["items"]}
+        for key in ("experiment_code", "configurations"):
+            self.assertEqual(rows[key]["status"], sc.AWAITING, key)
+            self.assertIn("records:baselines", rows[key]["remaining"])
+        self.assertIn("adapter code", rows["experiment_code"]["remaining"])
+        self.assertIn("48 HPO configurations", rows["configurations"]["remaining"])
+
+    def test_published_study_plans_and_adapters_fulfil_code_and_configurations(self):
+        path = self._with_view()
+        with mock.patch.object(sc, "EXPERIMENTS", str(path)):
+            status = {row["id"]: row["status"] for row in self.evaluate(published(self.manifest))["items"]}
+        self.assertEqual(status["experiment_code"], sc.FULFILLED)
+        self.assertEqual(status["configurations"], sc.FULFILLED)
+
+    def test_a_changed_or_incomplete_view_is_a_gap(self):
+        def change(view):
+            (view / "dataset3" / "method" / "adapter-0123456789ab.tar").write_bytes(b"changed")
+        path = self._with_view(change)
+        with mock.patch.object(sc, "EXPERIMENTS", str(path)):
+            rows = {row["id"]: row for row in self.evaluate(published(self.manifest))["items"]}
+        self.assertEqual(rows["experiment_code"]["status"], sc.MISSING)
+        self.assertIn("adapter-0123456789ab.tar differs", rows["experiment_code"]["remaining"])
+
+        def drop(view):
+            index = json.loads((view / "INDEX.json").read_text(encoding="utf-8"))
+            (view / "INDEX.json").write_text(json.dumps({"studies": index["studies"][:13]}), encoding="utf-8")
+        path = self._with_view(drop)
+        with mock.patch.object(sc, "EXPERIMENTS", str(path)):
+            rows = {row["id"]: row for row in self.evaluate(published(self.manifest))["items"]}
+        self.assertEqual(rows["configurations"]["status"], sc.MISSING)
+        self.assertIn("lists 13 of 14 entries", rows["configurations"]["remaining"])
+
     def test_report_names_every_item(self):
         text = sc.render(self.evaluate(self.manifest))
         statement = sc._json(ROOT / sc.STATEMENT)

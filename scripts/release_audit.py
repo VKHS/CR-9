@@ -109,6 +109,11 @@ REQUIRED = (
     "STATEMENT_COMPLIANCE.md", "docs/PUBLICATION.md", "hpc/publish_paper_artifacts_arrhenius.sh",
     "paper/build/displays/__init__.py", "paper/build/displays/framework.py", "paper/build/displays/testing.py",
     "tests/test_paper_artifacts.py", "tests/test_reconstruct_paper.py", "tests/test_statement_check.py",
+    # Every reported experiment executable; one command produces the measured outputs on the cluster.
+    "scripts/paper_outputs.py", "hpc/produce_paper_outputs_arrhenius.sh", "docs/PRODUCTION.md",
+    "tests/test_paper_outputs.py", "cm_campaigns/s14_builder.py", "scripts/build_s14_campaign.py",
+    "tests/test_s14_builder.py", "cm_experiments/buffered_admission.py", "cm_campaigns/baselines.py",
+    "cm_experiments/internal_baselines.py", "scripts/run_internal_baselines.py", "tests/test_internal_baselines.py",
     *(f"paper/bindings/{stem}_full.json" for stem in DATASETS.values()),
     *(f"cross_morse/{name}.py" for name in (
         "__init__", "core", "data", "training", "exploration", "learning", "policies", "statistics", "pipeline", "common", "provenance", "recovery", "scoring", "review", "reexecution", "datasets", "tasks", "evaluation", "runtime")),

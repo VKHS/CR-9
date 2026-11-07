@@ -1257,10 +1257,11 @@ def table_s31(ctx, out):
                                        *EXAMPLE_RUNS])
     out.table(["quantity (location)", "estimator", "record"], rows,
               notes=["Records are the artifacts of this repository: run-archive files written by the runtime, "
-                     "measurement-record sets (records/specs.json), campaign "
-                     "exports and analytical modules; every path was checked to exist.",
-                     f"Rows whose record the released code does not produce: {', '.join(absent)}; a record contract "
-                     "that covers the row's display is linked where one is declared."])
+                     "measurement-record sets (records/specs.json) and the experiment code that produces them "
+                     "(release/experiment_code.json), campaign exports and analytical modules; every path was "
+                     "checked to exist.",
+                     *([f"Rows whose record the released code does not produce: {', '.join(absent)}; a record "
+                        "contract that covers the row's display is linked where one is declared."] if absent else [])])
     out.data("linkage", ["row", "kind", "item", "verified"], linkage_rows(ctx, text))
 
 
@@ -1320,9 +1321,11 @@ def table_s35(ctx, out):
     out.uses("repository", "linkage", ["paper/protocol/S35.json", "records/specs.json", *EXAMPLE_RUNS])
     out.table(["ID", "convention", "supporting record"], rows,
               notes=["Supporting records are artifacts of this repository (run-archive files written by the runtime, "
-                     "record sets, campaign exports, modules and tests); every path was checked to exist.",
-                     f"Conventions whose supporting record the released code does not produce: {', '.join(absent)}; "
-                     "a record contract that covers the convention's display is linked where one is declared."])
+                     "record sets and the experiment code that produces them, campaign exports, modules and tests); "
+                     "every path was checked to exist.",
+                     *([f"Conventions whose supporting record the released code does not produce: {', '.join(absent)}; "
+                        "a record contract that covers the convention's display is linked where one is declared."]
+                       if absent else [])])
     out.data("linkage", ["convention", "kind", "item", "verified"], linkage_rows(ctx, text))
 
 

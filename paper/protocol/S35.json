@@ -95,12 +95,13 @@
    "run": [
     "select/entry_complete.json"
    ],
-   "absent": [
-    "admission-split oracle and scaling logs"
-   ],
    "displays": [
     "supplementary:Table S30",
     "supplementary:Figure S2"
+   ],
+   "records": [
+    "oracle_dispersion",
+    "runtime_scaling"
    ]
   },
   "C13": {
@@ -162,11 +163,11 @@
    "run": [
     "train/entry_depth_values.npz"
    ],
-   "absent": [
-    "pilot depth-probe records"
-   ],
    "displays": [
     "supplementary:Figure S14"
+   ],
+   "records": [
+    "depth_diagnostics"
    ]
   },
   "C20": {
@@ -194,11 +195,11 @@
    "module": [
     "cm_theory/stability.py"
    ],
-   "absent": [
-    "tube-audit record"
-   ],
    "displays": [
     "supplementary:Table S22"
+   ],
+   "records": [
+    "tube_audit"
    ]
   },
   "C23": {

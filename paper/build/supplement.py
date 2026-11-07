@@ -349,15 +349,20 @@ def _ensemble_displays(root, data):
 
 
 def _confirmation_data(campaign, manuscript_root):
+    """The validated joint S14 campaign.  check_campaign refuses an invalid campaign; a valid one feeds the
+    displays whether or not its values agree with the printed S14 (status PASS or REFERENCE_MISMATCH): that
+    agreement is the separate comparison step's verdict (manuscript_comparisons), never a generator input."""
     from cm_campaigns.confirmation import check_campaign
     before = directory_inventory(Path(campaign))
     checked = check_campaign(Path(campaign), manuscript_root=Path(manuscript_root))
-    require(checked["status"] == "PASS", "S14 original-test campaign does not agree with its registered source targets")
+    require(checked["status"] in ("PASS", "REFERENCE_MISMATCH"), f"S14 campaign validation returned {checked['status']}")
     inventory = directory_inventory(Path(campaign))
     require(inventory == before and _digest_inventory(before) == checked["input_identity"],
             "S14 input files changed during verification or the build")
     source = _input_identity(campaign, "original_confirmation_campaign", inventory=inventory,
                              original_test_p_values_recomputed=False, verifier_schema=checked["schema"],
+                             reference_status=checked["status"], production_kind=checked.get("production_kind"),
+                             post_hoc=checked.get("post_hoc", False),
                              scope=checked["scope"], original_run_linkage="Scientific audit separately requires all seven official archives",
                              verification_contract_files=[_file_identity(Path(manuscript_root) / relative, "registered_manuscript_contract")
                                                           for relative in ("paper/sources.json", "paper/registered_constants.json", "paper/reported_results.json")])

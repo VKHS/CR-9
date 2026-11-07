@@ -4,6 +4,17 @@ The heterogeneous original cluster, graph-bootstrap and small-sample tests are
 preserved as hashed inputs. This auditor verifies paired effects and replays
 Holm plus the registered point-margin/fallback decisions; it does NOT replace
 those tests with one generic test or execute arbitrary supplied analysis code.
+
+Two campaign origins are audited.  An imported campaign carries the original
+test files; every requirement, including the admission links, is strict.  A
+campaign that cm_campaigns/s14_builder.py builds from the sealed lifecycle runs
+declares ``production.kind == "repository_built"``.  Its joint lock is fixed
+after the lifecycle's own admission stages, so the admission-link conditions
+(joint-lock governance, admission after the joint lock, lifecycle pre-admission
+lock equal to the joint decision) are evaluated and reported in
+``admission_findings`` with a ``post_hoc`` flag instead of being required, and
+its tests may carry the single ``ensemble`` seed level (one observation per
+unit).  Every other requirement is the same for both origins.
 """
 from __future__ import annotations
 
@@ -22,6 +33,8 @@ ROLE_SCHEMA = "cm-s14-data-roles-1"
 RESULT_SCHEMA = "cm-s14-original-test-1"
 LOCK_SCHEMA = "cm-s14-joint-lock-1"
 ROLES = ("fit", "explore", "select", "confirm", "compare", "admit", "test")
+REPOSITORY_BUILT = "repository_built"      # production.kind of a campaign built by cm_campaigns/s14_builder.py
+ENSEMBLE_SEED_LEVEL = "ensemble"           # its seed axis: the policies' E-member ensembles, one observation per unit
 # This is the family in S14, not the selected local family emitted by one run.
 FAMILY = {
     "arxiv/state": ("ogbn-arxiv", "state", "buffered_cluster", 32, "CE", 1, .002),
@@ -241,7 +254,9 @@ def composite_policy_hash(split_policy_hashes):
     return hashlib.sha256(canonical({"split_policy_hashes": split_policy_hashes})).hexdigest()
 
 
-def _run_bindings(root, entry, decision, selection, original_lock_ref):
+def _run_bindings(root, entry, decision, selection, original_lock_ref, findings=None):
+    """Original run bindings.  ``findings`` (a list) switches the comparison of each lifecycle pre-admission
+    lock with the joint decision from a requirement to a reported finding (repository-built campaigns)."""
     dataset = entry["dataset"]
     bindings = entry.get("run_bindings")
     expected = list(range(10)) if dataset == "Roman-empire" else [None]
@@ -289,8 +304,16 @@ def _run_bindings(root, entry, decision, selection, original_lock_ref):
                     binding["candidates"]["sha256"] == entry["candidates"]["sha256"] and
                     binding["pre_admission_lock"]["sha256"] == original_lock_ref["sha256"],
                     f"{dataset}: joint confirmation is not bound to the original selector/lock bytes")
-        require(lock.get("confirmed_hash") == wanted["confirmed_hash"] and lock.get("comparator_hash") == wanted["comparator_hash"]
-                and lock.get("config_sha256") == identities["config_sha256"], f"{dataset}: original run predictor/configuration lock disagrees")
+        agrees = lock.get("confirmed_hash") == wanted["confirmed_hash"] and lock.get("comparator_hash") == wanted["comparator_hash"]
+        if findings is None:
+            require(agrees and lock.get("config_sha256") == identities["config_sha256"],
+                    f"{dataset}: original run predictor/configuration lock disagrees")
+        else:
+            require(lock.get("config_sha256") == identities["config_sha256"], f"{dataset}: original run configuration lock disagrees")
+            findings.append({"split_index": binding["split_index"], "lifecycle_lock_agrees_with_joint_decision": agrees,
+                             "lifecycle_comparator_hash": lock.get("comparator_hash"),
+                             "lifecycle_confirmed_hash": lock.get("confirmed_hash"),
+                             "joint_comparator_hash": wanted["comparator_hash"], "joint_confirmed_hash": wanted["confirmed_hash"]})
         require(wanted["confirmed_hash"] in hashes, f"{dataset}: confirmed policy missing from original candidates")
         output.append({"split_index": binding["split_index"], "identities": {"dataset": dataset, **identities},
                        "artifacts": {"select/decision.json": binding["selection"]["sha256"],
@@ -346,7 +369,10 @@ def bind_official_runs(report, official_runs):
                         and native_lock.get(index_key) == index,
                         f"{dataset}: joint pre-admission lock differs from the actual native confirmation decision")
             seed_ids = set(map(str, config["training"]["seeds"]))
-            require(all(set(test["seed_ids"]) == seed_ids for test in report["rows"] if test["dataset"] == dataset),
+            # A repository-built test is a contrast of E-member ensembles (training seeds[:E]): one level.
+            ensemble = report.get("production_kind") == REPOSITORY_BUILT and bool(seed_ids)
+            require(all(set(test["seed_ids"]) == seed_ids or (ensemble and test["seed_ids"] == [ENSEMBLE_SEED_LEVEL])
+                        for test in report["rows"] if test["dataset"] == dataset),
                     f"{dataset}: S14 optimization seed population differs from the original run")
             independent = dataset in ("PascalVOC-SP", "COCO-SP", "Peptides-func")
             splits = evidence.arrays("prepared/graph_splits.npz" if independent else "prepared/splits.npz")
@@ -394,6 +420,14 @@ def check_campaign(campaign: Path, *, manuscript_root: Path) -> dict:
     sources = read_json(manuscript_root / "paper/sources.json")
     expected_sources = {key: value["sha256"] for key, value in sources["documents"].items()}
     require(manifest.get("manuscript_sha256") == expected_sources, "S14 campaign is bound to a different manuscript identity")
+    production = manifest.get("production")
+    repository_built = isinstance(production, dict) and production.get("kind") == REPOSITORY_BUILT
+    if repository_built:
+        # The builder and its production record travel with the campaign.
+        _text(production.get("builder"), "production builder")
+        _reference(root, production.get("provenance"), "production provenance")
+        if production.get("plan") is not None:
+            _reference(root, production["plan"], "production plan")
     protocol = _json_reference(root, manifest["protocol"], "prespecified S14 protocol")
     require(protocol.get("schema") == PROTOCOL_SCHEMA and protocol.get("family") == "Supplementary Table S14",
             "Incorrect confirmation protocol family")
@@ -500,19 +534,42 @@ def check_campaign(campaign: Path, *, manuscript_root: Path) -> dict:
     expected_policies = {dataset: {k: row[k] for k in ("comparator_hash", "provisional_hash", "confirmed_hash")}
                          for dataset, row in decisions.items()}
     require(lock.get("policies") == expected_policies, "Locked policies disagree with joint confirmation and Q_s-or-qC fallback")
-    run_bindings = {}
+    run_bindings, admission_findings = {}, {}
     for dataset, entry in datasets.items():
         link = _json_reference(root, entry["admission_link"], f"{dataset} admission link")
-        require(link.get("dataset") == dataset and link.get("joint_lock_sha256") == manifest["joint_decision_lock"]["sha256"],
-                f"{dataset}: admission did not use the joint decision lock")
-        require(link.get("confirmed_hash") == decisions[dataset]["confirmed_hash"] and link.get("role_manifest_sha256") == entry["role_manifest"]["sha256"],
-                f"{dataset}: admission predictor or reserved roles differ from the joint lock")
-        require(_stamp(link.get("admission_started_at"), f"{dataset} admission time") > locked_at,
-                f"{dataset}: admission labels were accessed before joint confirmation was fixed")
+        if not repository_built:
+            require(link.get("dataset") == dataset and link.get("joint_lock_sha256") == manifest["joint_decision_lock"]["sha256"],
+                    f"{dataset}: admission did not use the joint decision lock")
+            require(link.get("confirmed_hash") == decisions[dataset]["confirmed_hash"] and link.get("role_manifest_sha256") == entry["role_manifest"]["sha256"],
+                    f"{dataset}: admission predictor or reserved roles differ from the joint lock")
+            require(_stamp(link.get("admission_started_at"), f"{dataset} admission time") > locked_at,
+                    f"{dataset}: admission labels were accessed before joint confirmation was fixed")
+            original_lock = _json_reference(root, link["original_pre_admission_lock"], f"{dataset} original run lock")
+            require(original_lock.get("confirmed_hash") == decisions[dataset]["confirmed_hash"] and original_lock.get("comparator_hash") == decisions[dataset]["comparator_hash"],
+                    f"{dataset}: original executable lock differs from the joint decision")
+            run_bindings[dataset] = _run_bindings(root, entry, decisions[dataset], selections[dataset], link["original_pre_admission_lock"])
+            continue
+        # Repository-built: identities stay strict; the admission's relation to the joint lock is reported.
+        require(link.get("dataset") == dataset and link.get("role_manifest_sha256") == entry["role_manifest"]["sha256"],
+                f"{dataset}: admission link names another dataset or other reserved roles")
+        started = _stamp(link.get("admission_started_at"), f"{dataset} admission time")
         original_lock = _json_reference(root, link["original_pre_admission_lock"], f"{dataset} original run lock")
-        require(original_lock.get("confirmed_hash") == decisions[dataset]["confirmed_hash"] and original_lock.get("comparator_hash") == decisions[dataset]["comparator_hash"],
-                f"{dataset}: original executable lock differs from the joint decision")
-        run_bindings[dataset] = _run_bindings(root, entry, decisions[dataset], selections[dataset], link["original_pre_admission_lock"])
+        lock_findings = []
+        run_bindings[dataset] = _run_bindings(root, entry, decisions[dataset], selections[dataset],
+                                              link["original_pre_admission_lock"], findings=lock_findings)
+        lifecycle = (original_lock.get("confirmed_hash") == decisions[dataset]["confirmed_hash"]
+                     and original_lock.get("comparator_hash") == decisions[dataset]["comparator_hash"]
+                     and all(row["lifecycle_lock_agrees_with_joint_decision"] for row in lock_findings))
+        admission_findings[dataset] = {
+            "admission_started_at": link["admission_started_at"], "joint_lock_locked_at": lock["locked_at"],
+            "admission_governed_by_joint_lock": link.get("joint_lock_sha256") == manifest["joint_decision_lock"]["sha256"],
+            "admission_after_joint_lock": started > locked_at,
+            "admission_predictor_is_joint_confirmed_policy": link.get("confirmed_hash") == decisions[dataset]["confirmed_hash"],
+            "lifecycle_lock_agrees_with_joint_decision": lifecycle,
+            "lifecycle_confirmed_hash": original_lock.get("confirmed_hash"),
+            "joint_confirmed_hash": decisions[dataset]["confirmed_hash"], "run_locks": lock_findings}
+    post_hoc = any(not row["admission_governed_by_joint_lock"] or not row["admission_after_joint_lock"]
+                   for row in admission_findings.values())
     reference = read_json(manuscript_root / "paper/reported_results.json")["supplementary_table_S14_mechanism_contrasts_submitted_protocol"]
     comparisons = []
     for row in reference:
@@ -525,16 +582,23 @@ def check_campaign(campaign: Path, *, manuscript_root: Path) -> dict:
             comparisons.append({"contrast_id": row["contrast"], "quantity": name, "actual": observed,
                                 "reported": printed, "agrees_at_printed_precision": _reference_match(observed, printed)})
     matches = all(item["agrees_at_printed_precision"] for item in comparisons)
+    limits = ["Raw P values retain the heterogeneous original test methods; archived analysis code/configuration are hashed and preserved, not executed by this auditor.",
+              "Timestamp ordering and author evidence classifications are checked declarations, not independent proof of historical data access.",
+              "Selector eligibility is read from original candidate ledgers; scientific-audit separately binds their exact hashes and identities to the ingested official run manifests. Full nested-selection replay and checkpoint re-execution remain separate checks."]
+    if repository_built:
+        limits.append("Repository-built campaign: its tests were produced from the sealed lifecycle runs by the builder named in production "
+                      "(rerunnable from its plan); the admission-link conditions are reported in admission_findings and summarized by "
+                      "post_hoc, not required, because the joint lock follows the lifecycle's own admission stages.")
     return {"schema": "cm-s14-audit-1", "status": "PASS" if matches else "REFERENCE_MISMATCH",
             "campaign": str(root), "input_identity": input_identity(root), "joint_inputs_sha256": digest,
             "family_size": 9, "alpha": alpha, "data_role": "D_confirm", "rows": list(tested.values()),
             "policy_decisions": decisions, "manuscript_comparisons": comparisons, "official_run_bindings": run_bindings,
             "role_identities": {dataset: _role_identity(data["roles"], data["confirmation_units"]) for dataset, data in role_maps.items()},
+            "production_kind": REPOSITORY_BUILT if repository_built else "imported_original",
+            "post_hoc": bool(repository_built and post_hoc), "admission_findings": admission_findings,
             "original_test_p_values_recomputed": False,
             "scope": "Original-test file integrity, prespecified identities, paired effect reconstruction, joint Holm and strict point-margin/fallback replay",
-            "limits": ["Raw P values retain the heterogeneous original test methods; archived analysis code/configuration are hashed and preserved, not executed by this auditor.",
-                       "Timestamp ordering and author evidence classifications are checked declarations, not independent proof of historical data access.",
-                       "Selector eligibility is read from original candidate ledgers; scientific-audit separately binds their exact hashes and identities to the ingested official run manifests. Full nested-selection replay and checkpoint re-execution remain separate checks."]}
+            "limits": limits}
 
 
 def template(manuscript_root: Path) -> dict:

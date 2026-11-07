@@ -404,8 +404,8 @@
   },
   "registered_statement_validation": {
     "date": "2026-11-07",
-    "base_commit": "2b8e89b2f527967addf7a6c7e848fa56552c7c95",
-    "scope": "The registered data- and code-availability statement: published-output manifest and publication tooling (pack, publish, fetch and verify exercised against a local mock of the GitHub REST API), the one-command reconstruction, one generator per numbered display, the experiment runners and their record exports. Runner execution paths are exercised on synthetic smoke lifecycles in the CPU PyTorch job. No benchmark observation was produced or reproduced; the measured outputs await publication.",
+    "base_commit": "f513af0a863ec4e68372307417f89fc232bb96ed",
+    "scope": "The registered data- and code-availability statement: published-output manifest and publication tooling (pack, publish, fetch and verify exercised against a local mock of the GitHub REST API), the one-command production of the measured outputs (scripts/paper_outputs.py against a simulated Slurm cluster and the bundled example runs), the one-command reconstruction, one generator per numbered display, and the experiment runners and their record exports, including the factorial cells, the history-MLP observer, the buffer sensitivity, the S14 builder and the internal rows of Tables S15 and S15b. Runner execution paths are exercised on synthetic smoke lifecycles in the CPU PyTorch job. No benchmark observation was produced or reproduced; the measured outputs await publication.",
     "runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
     "runtime_unchanged": true,
     "reported_numerical_registries_unchanged": true,
@@ -417,25 +417,25 @@
       "numeric": {
         "command": "make test-no-torch (interpreter without PyTorch)",
         "status": "PASS",
-        "tests_run": 1225,
-        "skipped": 47,
+        "tests_run": 1325,
+        "skipped": 51,
         "failures": 0,
         "errors": 0
       },
       "hosted_full": {
         "command": "make test (CPU PyTorch job of .github/workflows/quality.yml)",
         "status": "PASS",
-        "tests_run": 1518,
+        "tests_run": 1618,
         "skipped": 2,
         "failures": 0,
         "errors": 0,
-        "seconds": 633.088,
-        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42405693625"
+        "seconds": 393.161,
+        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42417871555"
       },
       "hosted_container": {
         "command": "make verify test in the CPU container (.github/workflows/container.yml)",
         "status": "PASS",
-        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42405693583"
+        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42417871551"
       },
       "reconstruction_without_published_outputs": {
         "command": "make paper-offline (nothing published)",
@@ -445,22 +445,24 @@
       }
     },
     "statement_items": {
-      "fulfilled": 3,
-      "awaiting_measured_outputs": 8,
-      "missing": 1,
-      "missing_detail": "complete experiment code: three parts of reported experiments are declared not executable with the released runtime (release/experiment_code.json)"
+      "fulfilled": 2,
+      "awaiting_measured_outputs": 10,
+      "missing": 0,
+      "awaiting_detail": "checkpoints, predictions, trajectories, statistical outputs, split and seed manifests, observed environments, source data and the reconstruction await the measured outputs; complete experiment code and configurations await the E12 study plans and adapter code, published inside records:baselines and copied to experiments/baselines/"
     },
     "display_generators": 90,
-    "experiments_mapped": 31,
+    "experiments_mapped": 32,
     "record_contracts": 31,
     "required_artifacts": 37,
     "tooling_sha256": {
-      "scripts/statement_check.py": "56ce4aec7893edfae1c1736cc69f63541c2a70282d7ea058f90ac9416232955d",
-      "scripts/paper_artifacts.py": "c700cdd806d3a8c1cd8bd07881e3ed711a1e951f4d663748696b93b34c685490",
-      "scripts/reconstruct_paper.py": "71d7021d004c6fc82041364db18cdf9d20b37a59cf50b06e70ccefa982ad90e0",
+      "scripts/statement_check.py": "dd8570a3f349d951538705f2bd40109d75cee39a8e2e9f727623b5f1821d0680",
+      "scripts/paper_artifacts.py": "b959723dcd7906c0f0071b09d8199070e3acac6498b55fe74b882a749c0cf450",
+      "scripts/reconstruct_paper.py": "6ede310c81f1c99186728da09ec353a57e8e320896061cc33df3f2d9c47a8275",
+      "scripts/paper_outputs.py": "2f0c802b0e3bd9086b2faa76cefd3c3d22990d590e03531c933cb3c4e7712803",
+      "hpc/produce_paper_outputs_arrhenius.sh": "46a0e38a6dc6b3ac1a4b31a92d2a98b4653e25d8cce54f97890dba1b32cd1e9b",
       "paper/build/displays/framework.py": "7859924cf7e870cedf02e585a84d0adb4f03be8ddc088aa0d70eebf619ce7ed0",
       "release/availability_statement.json": "b3d2973b5c9eaa91a8b506b42802b7f0af7dd45d168e5a1d9f51660a59ce8eea",
-      "release/experiment_code.json": "c96627e33e3209fbc1f08f1ef133e1ce918d646baac2d34ec755be4ace03f644"
+      "release/experiment_code.json": "d9ae4c577deed0b0d26e1cdd1fe215b595c84e299763c049bb379a7172c8cd5c"
     }
   }
 }

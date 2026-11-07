@@ -11,9 +11,10 @@ timing and accounting. Each set carries the raw files its summary values are rea
 from; `scripts/records.py` traces every summary value to its raw file, and the
 display generators in `paper/build/displays/` read the verified sets. The code that
 produces each set is listed with its command in
-[`release/experiment_code.json`](../release/experiment_code.json), together with any
-part the released runtime cannot execute (`not_executable`); the published sets
-are assets of the release `paper-artifacts` ([publication guide](../docs/PUBLICATION.md)).
+[`release/experiment_code.json`](../release/experiment_code.json);
+`bash hpc/produce_paper_outputs_arrhenius.sh` runs all of them on the cluster
+([production guide](../docs/PRODUCTION.md)), and the published sets are assets of
+the release `paper-artifacts` ([publication guide](../docs/PUBLICATION.md)).
 
 ## Record sets
 
@@ -24,7 +25,7 @@ Defined in [`specs.json`](specs.json); the directory name of a set is its key.
 | `action_gap_audit` | S21, Fig. S17 | — | dataset | `median_gap_nats`, `p5_gap_nats`, `near_zero_threshold_nats`, `near_zero_fraction`, `switch_fraction`, `recovery_index_stability`, `beam_sequence_stability`, `decision_sites` | scripts/run_decision_audit.py |
 | `band_bound_tightness` | Fig. S18 | E18 | action, spectral_scale | `displacement_ratio` | scripts/run_experiment_b.py |
 | `band_power_audit` | Fig. S18c, S8, S22 | E18 | dataset, baseline, action, spectrum | `tightness_ratio`, `tightness_ratio_max`, `window_bound_ratio`, `retained_statistic_ratio`, `omitted_band_share`, `approximation_error_share`, `degree_factor`, `update_gain_p95`, `logged_statistic_ratio`, `audited_states`, `exact_spectrum_states`, `ranking_spearman`, `replay_max_abs_deviation`, `update_lipschitz_max`, `shared_weight_spectral_norm`, `activation_lipschitz` | scripts/run_experiment_b.py |
-| `baselines` | S15, S15b | E12, E17 | dataset, method, seed | `serial_cost`, `wall_time`, `gpu_hours`, `score`, `hpo_trials`, `params_millions` | scripts/export_records.py; scripts/run_upstream_baseline.py |
+| `baselines` | S15, S15b | E12, E17 | dataset, method, seed | `serial_cost`, `wall_time`, `gpu_hours`, `score`, `hpo_trials`, `params_millions` | scripts/export_records.py; scripts/run_internal_baselines.py; scripts/run_upstream_baseline.py |
 | `budget_matched` | S46, S46b | E3, E4, E5, E6 | dataset, arm, configuration | `effect_vs_qc_nats`, `effect_vs_feedback_nats`, `effect_vs_feedback_ci_low_nats`, `effect_vs_feedback_ci_high_nats`, `p_holm`, `work_ratio`, `ceiling` | scripts/arm_campaign.py; scripts/run_budget_arms.py |
 | `buffer_sensitivity` | S27 | E11 | dataset, buffer_hops | `clipped_effect_nats`, `half_width_nats`, `upper_nats`, `admitted`, `resampling_units` | scripts/export_sweep_records.py; scripts/run_sweep.py |
 | `confirmation_contrasts` | S14b | E10 | contrast | `effect_nats`, `interval_low_nats`, `interval_high_nats`, `p_value_zero`, `unit_count` | scripts/run_confirmation_analysis.py |

@@ -6,15 +6,19 @@ The from-runs tests read the bundled synthetic example runs.
 """
 from __future__ import annotations
 
-import csv
+import contextlib
 import copy
+import csv
 import hashlib
 import importlib.util
+import io
 import json
 import math
 import shutil
 import statistics
+import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -322,12 +326,27 @@ class BudgetMatchedTests(unittest.TestCase):
         self.assertFalse((self.root / "budget_matched").exists())
 
 
-def plan(dataset="ogbn-arxiv", method="AMP") -> dict:
+def plan(dataset="ogbn-arxiv", method="AMP", *, source_commit="a" * 40, adapter_commit="b" * 40) -> dict:
     return {"schema": "cm-upstream-study-1", "dataset": dataset, "method": method,
             "trials": [{"lr": 10 ** (-3 - i / 48), "layers": 2 + i % 3, "trial": i} for i in range(48)],
             "seed_ids": list(range(1, 13)), "search_seed": 0, "selection_role": "internal_training_validation",
-            "direction": "maximize", "metric_unit": "native_0_to_1", "source_commit": "a" * 40, "adapter_commit": "b" * 40,
-            "adapter_argv": ["{python}", "adapter.py"], "source_directory": "upstream", "adapter_directory": "adapter"}
+            "direction": "maximize", "metric_unit": "native_0_to_1", "source_commit": source_commit,
+            "adapter_commit": adapter_commit, "adapter_argv": ["{python}", "adapter.py"],
+            "source_directory": "upstream", "adapter_directory": "adapter"}
+
+
+def git_checkout(path: Path, files: dict[str, str], *, origin: str | None = None) -> str:
+    """A git repository with one commit (a test fixture standing in for an upstream or adapter checkout)."""
+    path.mkdir(parents=True)
+    for name, text in files.items():
+        (path / name).write_text(text, encoding="utf-8")
+    git = ["git", "-C", str(path), "-c", "user.name=fixture", "-c", "user.email=fixture@example.org",
+           "-c", "commit.gpgsign=false", "-c", "init.defaultBranch=main"]
+    for args in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "fixture"]):
+        subprocess.run([*git, *args], check=True, capture_output=True)
+    if origin:
+        subprocess.run([*git, "remote", "add", "origin", origin], check=True, capture_output=True)
+    return subprocess.run([*git, "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
 
 
 SACCT_HEADER = "Cluster|JobIDRaw|JobID|Submit|Start|End|State|ElapsedRaw|AllocTRES|ExitCode"
@@ -342,9 +361,9 @@ def job_key(job: int) -> str:
     return f"arrhenius|{job}|2026-11-02T08:00:00|2026-11-02T08:00:05"
 
 
-def write_study(root: Path, *, drop_seed=None, classes=4) -> tuple[Path, list[int], dict[int, float]]:
+def write_study(root: Path, *, drop_seed=None, classes=4, study_plan=None) -> tuple[Path, list[int], dict[int, float]]:
     """An upstream study in the layout of cm_experiments.upstream.execute_attempt (fixture values)."""
-    p = plan()
+    p = study_plan or plan()
     rng = np.random.default_rng(11)
     jobs, scores = [], {}
     for i in range(48):
@@ -411,9 +430,11 @@ class BaselinesTests(unittest.TestCase):
         write_timing(timing, timing_job)
         return study, sacct, timing, jobs, scores
 
-    def argv(self, study, sacct, timing):
+    def argv(self, study, sacct, timing, *, partial=True):
+        # one comparison of fourteen: the audit does not accept the set as complete (--allow-partial, another root)
         return ["baselines", "--study", str(study), "--accounting", str(sacct), "--timing", str(timing),
-                "--root", str(self.root), "--hardware", "fixture", "--period", "fixture"]
+                "--root", str(self.root), "--hardware", "fixture", "--period", "fixture",
+                *(["--allow-partial"] if partial else [])]
 
     def test_scores_hours_and_ratios_are_recomputed(self):
         study, sacct, timing, jobs, scores = self.inputs()
@@ -461,6 +482,169 @@ class BaselinesTests(unittest.TestCase):
         lines = sacct.read_text().splitlines()
         sacct.write_text("\n".join(lines[:-3] + lines[-1:]) + "\n")
         self.assertEqual(run(self.argv(study, sacct, timing)), 2)
+
+    # ------------------------------------------------------------------ E12 study plans and adapter code
+    def checkouts(self, *, origin="https://user:secret@example.org/upstream/amp.git"):
+        """The author's plan directory: the plan with its upstream and adapter checkouts beside it."""
+        directory = self.tmp / "checkouts"
+        study = directory / "arxiv_AMP"
+        source = git_checkout(study / "upstream", {"model.py": "upstream method\n"}, origin=origin)
+        adapter = git_checkout(study / "adapter", {"adapter.py": "print('adapter')\n", "README": "adapter\n"})
+        value = plan(source_commit=source, adapter_commit=adapter)
+        (study / "plan.json").write_text(json.dumps(value, indent=2))
+        return directory, value
+
+    def test_study_plan_upstream_identity_and_adapter_archive_are_packaged(self):
+        directory, value = self.checkouts()
+        study, sacct, timing, _, _ = self.inputs(study_plan=value)
+        self.assertEqual(run(self.argv(study, sacct, timing) + ["--checkouts", str(directory)]), 0)
+        target = self.root / "baselines"
+        self.assertEqual(json.loads((target / "raw/arxiv/AMP/plan.json").read_text()), value)
+        upstream = json.loads((target / "raw/arxiv/AMP/upstream.json").read_text())
+        archive = upstream["adapter_archive"]
+        self.assertEqual((upstream["dataset"], upstream["method"], upstream["plan"]),
+                         ("ogbn-arxiv", "AMP", "raw/arxiv/AMP/plan.json"))
+        self.assertEqual(archive["file"], f"code/adapters/arxiv/AMP/adapter-{value['adapter_commit'][:12]}.tar")
+        self.assertEqual(archive["commit"], value["adapter_commit"])
+        self.assertEqual(upstream["adapter_commit"], value["adapter_commit"])
+        self.assertEqual(upstream["source_commit"], value["source_commit"])
+        self.assertEqual(upstream["upstream_repository"], "https://example.org/upstream/amp.git")   # no credentials
+        self.assertIs(upstream["source_copied"], False)
+        self.assertEqual(hashlib.sha256((target / archive["file"]).read_bytes()).hexdigest(), archive["sha256"])
+        with tarfile.open(target / archive["file"]) as tar:
+            self.assertEqual(sorted(m.name for m in tar.getmembers() if m.isfile()), ["README", "adapter.py"])
+        self.assertFalse(any("model.py" in p.name for p in target.rglob("*")))      # the upstream source is not copied
+        self.assertEqual(records.cmd_check(self.root, export_records.SPECS_PATH), 0)
+        provenance = json.loads((target / "provenance.json").read_text())
+        self.assertEqual(provenance["study_code"]["packaged"][0]["adapter_archive"], archive["file"])
+        self.assertFalse(provenance["coverage_complete"])                      # one comparison of fourteen
+        # the set carries exactly what the publication step copies into experiments/baselines/
+        from cm_campaigns.baselines import check_studies
+        with self.assertRaisesRegex(ValueError, "ogbn-proteins/AMP") as caught:
+            check_studies(target)
+        self.assertNotIn("ogbn-arxiv/AMP", str(caught.exception))
+        # publication copies plan, upstream identity and adapter archive into the checkout byte for byte
+        from scripts import paper_artifacts
+        checkout = self.root / "checkout"
+        checkout.mkdir()
+        self.assertEqual(paper_artifacts.derive_baseline_studies(self.root, checkout), ["ogbn-arxiv/AMP"])
+        view = json.loads((checkout / "experiments/baselines/INDEX.json").read_text())
+        (study_view,) = view["studies"]
+        self.assertEqual(study_view["upstream_repository"], "https://example.org/upstream/amp.git")
+        self.assertEqual(study_view["adapter_archive"]["sha256"], archive["sha256"])
+        self.assertEqual((checkout / "experiments/baselines" / study_view["plan"]["file"]).read_bytes(),
+                         (target / "raw/arxiv/AMP/plan.json").read_bytes())
+
+    def test_checkouts_are_verified_against_the_plan(self):
+        directory, value = self.checkouts()
+        study, sacct, timing, _, _ = self.inputs(study_plan=value)
+        argv = self.argv(study, sacct, timing, partial=False)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertEqual(run(argv), 2)                                       # no --checkouts: never complete
+        self.assertIn("its adapter is not archived", err.getvalue())
+        self.assertFalse((self.root / "baselines").exists())
+        adapter = directory / "arxiv_AMP" / "adapter"
+        (adapter / "adapter.py").write_text("changed\n")
+        subprocess.run(["git", "-C", str(adapter), "-c", "user.name=f", "-c", "user.email=f@example.org", "-c",
+                        "commit.gpgsign=false", "commit", "-q", "-am", "later"], check=True, capture_output=True)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):                                    # a checkout at another commit
+            self.assertEqual(run(self.argv(study, sacct, timing) + ["--checkouts", str(directory)]), 2)
+        self.assertIn("the plan pins", err.getvalue())
+        subprocess.run(["git", "-C", str(adapter), "checkout", "-q", value["adapter_commit"]], check=True,
+                       capture_output=True)
+        shutil.rmtree(directory / "arxiv_AMP" / "upstream")
+        self.assertEqual(run(self.argv(study, sacct, timing) + ["--checkouts", str(directory)]), 0)   # partial only
+        provenance = json.loads((self.root / "baselines" / "provenance.json").read_text())
+        self.assertTrue(any("upstream is missing" in r for r in provenance["incomplete_measurement"]))
+        self.assertFalse((self.root / "baselines" / "raw/arxiv/AMP/upstream.json").exists())
+
+    def test_partial_or_synthetic_sets_never_enter_records(self):
+        study, sacct, timing, _, _ = self.inputs()
+        before = sorted(p.name for p in records.RECORDS.iterdir())
+        argv = self.argv(study, sacct, timing)
+        argv[argv.index("--root") + 1] = str(records.RECORDS)
+        self.assertEqual(run(argv), 2)
+        self.assertEqual(sorted(p.name for p in records.RECORDS.iterdir()), before)
+
+    # ------------------------------------------------------------------ the internal rows (run_internal_baselines.py)
+    def internal(self, job_key="slurm:4242_0"):
+        from tests.test_internal_baselines import complete_jobs, plan_examples
+        output = self.tmp / "internal"
+        plan_examples(output)
+        complete_jobs(output, job_key=job_key, device="cuda:0")
+        return output
+
+    def test_internal_rows_and_their_timing_join_the_set(self):
+        output = self.internal()
+        study, sacct, timing, _, _ = self.inputs()
+        sacct.write_text(sacct.read_text() + "arrhenius|5150|4242_0|2026-11-02T08:00:00|2026-11-02T08:00:05|"
+                         "2026-11-02T09:00:05|COMPLETED|3600|billing=16,cpu=16,gres/gpu=1,mem=64G,node=1|0:0\n")
+        argv = ["baselines", "--internal", str(output), "--study", str(study), "--accounting", str(sacct),
+                "--timing", str(timing), "--root", str(self.root), "--hardware", "fixture", "--period", "fixture"]
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertEqual(run(argv), 2)                  # CPU lifecycles and one comparison: partial only
+        self.assertIn("not GPU-hours", err.getvalue())
+        self.assertEqual(run(argv + ["--allow-partial"]), 0)
+        target = self.root / "baselines"
+        rows = read_summary(target / "summary.csv")
+        plan_value = json.loads((output / "plan.json").read_text())
+        for dataset in plan_value["datasets"]:
+            for method in dataset["methods"]:
+                mine = [r for r in rows if (r["dataset"], r["method"]) == (dataset["dataset"], method["key"])]
+                with self.subTest(dataset=dataset["dataset"], method=method["key"]):
+                    self.assertEqual(sorted(r["seed"] for r in mine if r["quantity"] == "score"), ["1", "2"])
+                    self.assertEqual({r["quantity"] for r in mine if not r["seed"]},
+                                     {"gpu_hours", "serial_cost", "wall_time"} if method["role"] == "qC" else {"gpu_hours"})
+        qc = {r["quantity"]: r for r in rows if r["method"] == "learned stop (qC)" and not r["seed"]}
+        self.assertEqual(float(qc["serial_cost"]["value"]), 2.6)
+        self.assertEqual(qc["serial_cost"]["source_file"], "raw/arxiv/learned_stop_qC/timing_ratios.json")
+        self.assertEqual(qc["gpu_hours"]["source_file"], "raw/internal/arxiv/arxiv/gpu_hours.json")
+        ratios = json.loads((target / "raw/arxiv/learned_stop_qC/timing_ratios.json").read_text())
+        self.assertEqual(ratios["allocations"], {"slurm:4242_0": "arrhenius|5150|2026-11-02T08:00:00|2026-11-02T08:00:05"})
+        score = next(r for r in rows if r["method"] == "MPC-OL" and r["seed"] == "1")
+        self.assertEqual(score["source_file"], "raw/internal/arxiv/arxiv/scores/MPC-OL/seed1.json")
+        self.assertTrue((target / "raw/internal/arxiv/arxiv/ARTIFACT_MANIFEST.json").is_file())
+        self.assertEqual(records.cmd_check(self.root, export_records.SPECS_PATH), 0)
+        provenance = json.loads((target / "provenance.json").read_text())
+        self.assertTrue(provenance["synthetic"])
+        self.assertIn("scripts/run_internal_baselines.py", provenance["produced_by"])
+        self.assertEqual(provenance["internal"]["definitions"]["gpu_hours"][:40],
+                         json.loads((output / "plan.json").read_text())["definitions"]["gpu_hours"][:40])
+
+    def test_internal_timing_needs_its_completed_gpu_allocation(self):
+        output = self.internal()
+        base = ["baselines", "--internal", str(output), "--root", str(self.root), "--hardware", "fixture",
+                "--period", "fixture", "--allow-partial"]
+        self.assertEqual(run(base), 0)                           # without accounting: partial, and recorded so
+        provenance = json.loads((self.root / "baselines" / "provenance.json").read_text())
+        self.assertTrue(any("no sacct export binds its timing rows" in r for r in provenance["incomplete_measurement"]))
+        sacct = self.tmp / "other.psv"
+        sacct.write_text("\n".join([SACCT_HEADER, sacct_row(999)]) + "\n")
+        self.assertEqual(run(base + ["--replace", "--accounting", str(sacct)]), 2)      # a key no allocation carries
+        failed = self.tmp / "failed.psv"
+        failed.write_text(SACCT_HEADER + "\narrhenius|5150|4242_0|2026-11-02T08:00:00|2026-11-02T08:00:05|"
+                          "2026-11-02T09:00:05|FAILED|3600|billing=16,cpu=16,gres/gpu=1,mem=64G,node=1|1:0\n")
+        self.assertEqual(run(base + ["--replace", "--accounting", str(failed)]), 2)
+        self.assertTrue((self.root / "baselines" / "summary.csv").is_file())      # the earlier set stays installed
+
+    def test_internal_outputs_are_verified_and_never_timed_twice(self):
+        output = self.internal()
+        base = ["baselines", "--internal", str(output), "--root", str(self.root), "--hardware", "fixture",
+                "--period", "fixture", "--allow-partial"]
+        supplied = self.tmp / "supplied.csv"
+        write_timing(supplied, 1, method="learned stop (qC)")
+        self.assertEqual(run(base + ["--timing", str(supplied)]), 2)
+        self.assertEqual(run(base + ["--internal", str(output)]), 2)             # one dataset, two outputs
+        score = next((output / "jobs").rglob("scores/MPC-OL/seed1.json"))
+        score.write_text(score.read_text().replace('"seed": 1', '"seed": 1 '))
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertEqual(run(base), 2)
+        self.assertIn("does not verify", err.getvalue())
+        self.assertFalse((self.root / "baselines").exists())
 
 
 if __name__ == "__main__":

@@ -108,7 +108,8 @@ def main(argv=None) -> int:
         return 2
     if status["artifacts_awaiting_publication"]:
         print(f"{len(status['artifacts_awaiting_publication'])} artifact(s) await publication of the measured "
-              "outputs (hpc/publish_paper_artifacts_arrhenius.sh); displays that need them are not yet complete.",
+              "outputs (hpc/produce_paper_outputs_arrhenius.sh, then hpc/publish_paper_artifacts_arrhenius.sh all); "
+              "displays that need them are not yet complete.",
               file=sys.stderr)
         return 1
     if status["incomplete"] or status["values_differ"]:

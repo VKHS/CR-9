@@ -32,6 +32,8 @@ from collections import Counter
 
 import numpy as np
 
+from cm_campaigns.baselines import (DEPLOYED as ROLE_DEPLOYED, QC as ROLE_QC, ROUTE_METHOD,  # noqa: F401
+                                    S15_ROUTES, internal_methods, method_keys)
 from cm_campaigns.contract import ADMITTED, ARMS, BASELINE_SEEDS, EXTERNAL, HPO_TRIALS, METRICS, RECORD_SETS, UNITS
 from cm_theory import economics, factorial
 from scripts._paper_common import BCE_DATASETS, ROUTE_NAMES
@@ -41,12 +43,9 @@ from .framework import (DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputEr
                         num, pyplot)
 
 Z95 = 1.959963984540054
-ROUTE_METHOD = {"nominal": "full-depth plant", "best_depth": "best fixed depth", "learned_stop": "learned stop",
-                "phase": "optimized phase", "fixed_sequence": "best fixed sequence", "mpc_ol": "MPC-OL",
-                "one_step": "one-step", "radius": "radius", "mpc_rh": "MPC-RH"}
-# Internal routes tabulated in Supplementary Table S15 (the comparator's and the deployed rule's
-# route are added when they lie outside this set).
-S15_ROUTES = ("nominal", "best_depth", "phase", "fixed_sequence", "mpc_ol", "radius", "mpc_rh")
+# ROUTE_METHOD (method names of Table S15) and S15_ROUTES (the internal routes it tabulates; the comparator's and
+# the deployed rule's route are added when they lie outside this set) come from cm_campaigns.baselines, which the
+# runner of the internal rows (cm_experiments/internal_baselines.py) and the record audit share.
 FAMILY_OPEN, FAMILY_FEEDBACK = "internal open loop", "internal feedback"
 FAMILY_DEPLOYED, FAMILY_EXTERNAL = "CROSS-MORSE deployment", "external (re-trained)"
 ARM_LABELS = {label.split()[0]: label for label in BUDGET_ARMS}
@@ -273,9 +272,7 @@ def sparse_ratio(ctx, dataset: str) -> dict:
 
 def method_labels(ledger: dict) -> tuple[str, str | None]:
     """Method keys of the comparator and deployed rows in the baselines set (Table S15b labels)."""
-    qc = f"{ROUTE_METHOD[ledger['qc_route']]} (qC)"
-    qd = None if ledger["returned"] else f"{ROUTE_METHOD[ledger['qd_route']]} (deployed)"
-    return qc, qd
+    return method_keys(ledger["qc_route"], ledger["qd_route"], ledger["returned"])
 
 
 def method_value(base, quantity: str, dataset: str, method: str):
@@ -318,26 +315,24 @@ def route_cost_range(ledger: dict, route: str):
 def method_rows(ctx, dataset: str, base, gate) -> tuple[dict, list[dict]]:
     """Rows of Supplementary Table S15 for one dataset (also the points of Figure S4)."""
     ledger = run_ledger(ctx, dataset, gate)
-    qc_label, qd_label = method_labels(ledger)
     params = plant_parameters(ctx, dataset)
     open_loop = _open_loop_routes(ctx)
     native = METRICS.get(dataset) == "ap"
-    routes = [r for r in ROUTE_NAMES if r in S15_ROUTES or r in (ledger["qc_route"], ledger["qd_route"])]
     rows = []
-    for route in routes:
+    # The internal rows and their keys: the definition the runner of the internal rows and the record audit share.
+    for item in internal_methods(ledger["qc_route"], ledger["qd_route"], ledger["returned"]):
+        route, key = item["route"], item["key"]
         name = ROUTE_METHOD[route]
-        is_qc = route == ledger["qc_route"]
-        is_qd = route == ledger["qd_route"] and not ledger["returned"]
+        is_qc = item["role"] == ROLE_QC
+        is_qd = item["role"] == ROLE_DEPLOYED
         returned_qc = is_qc and ledger["returned"]
         internal_family = FAMILY_OPEN if route in open_loop else FAMILY_FEEDBACK
         if returned_qc:
-            label, family, key = f"{name} (qC, returned)", FAMILY_DEPLOYED, qc_label
-        elif is_qc:
-            label, family, key = qc_label, internal_family, qc_label
-        elif is_qd:
-            label, family, key = qd_label, FAMILY_DEPLOYED, qd_label
+            label, family = f"{name} (qC, returned)", FAMILY_DEPLOYED
+        elif is_qc or is_qd:
+            label, family = key, internal_family if is_qc else FAMILY_DEPLOYED
         else:
-            label, family, key = name, internal_family, name
+            label, family = name, internal_family
         if is_qc or is_qd:
             low = high = ledger["C_qC"] if is_qc else ledger["C_ctrl"]
         else:

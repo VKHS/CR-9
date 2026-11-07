@@ -64,9 +64,11 @@ class ContractTests(unittest.TestCase):
         self.assertTrue(set(run_audits.S21_QUANTITIES) < set(da.DEFINITIONS["action_gap_audit"]))
         self.assertEqual(da.OBSERVER_LEVELS[0], "raw")         # Figure S16b normalizes by the raw observer
         self.assertEqual(da.registered_horizons(), [1, 4, 8, 16, 32])
-        self.assertEqual(set(da.MODULE_ARMS.values()),
-                         set(next(m for m in specs()["sets"]["module_ablations"]["modules"]
-                                  if m["module"] == "observer")["arms"]))
+        registered = set(next(m for m in specs()["sets"]["module_ablations"]["modules"]
+                              if m["module"] == "observer")["arms"])
+        # the four levels are registered arms; the contract may also register the E8 history-MLP arm
+        self.assertLessEqual(set(da.MODULE_ARMS.values()), registered)
+        self.assertLessEqual(registered, set(da.MODULE_ARMS.values()) | set(da.ADDITIONAL_OBSERVERS.values()))
 
     def test_registered_threshold_and_tolerance(self):
         from cm_experiments.budget import Certificate
@@ -698,6 +700,11 @@ class AuditExecutionTests(unittest.TestCase):
             self.assertEqual(sorted(observers["variants"]), sorted(da.OBSERVER_LEVELS))
             for level in da.OBSERVER_LEVELS:
                 self.assertTrue(math.isfinite(observers["variants"][level]["rmse"]))
+            history = observers["additional_variants"]["history MLP"]      # E8 history MLP: raw only, no level row
+            self.assertTrue(math.isfinite(history["rmse"]))
+            self.assertEqual(history["module_ablations_arm"], "history_mlp")
+            self.assertEqual(history["observer_fit"]["window"], 2 * observers["period"])
+            self.assertIn("prediction_history_mlp", np.load(directory / "observers.npz").files)
             self.assertIsNotNone(observers["conditioned_parity"])
             calibration = json.loads((directory / "calibration.json").read_text())
             self.assertEqual(calibration["status"], "CALIBRATED")

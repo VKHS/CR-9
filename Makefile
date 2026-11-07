@@ -107,7 +107,8 @@ endef
 
 .PHONY: help verify check test test-no-torch test-release \
  tables figures paper paper-offline paper-from-index paper-from-runs fetch-artifacts paper-artifacts-status \
- paper-artifacts-plan paper-artifacts-check statement statement-check example-paper example-paper-check \
+ paper-artifacts-plan paper-artifacts-check statement statement-check statement-fulfilled example-paper example-paper-check \
+ paper-outputs paper-outputs-plan paper-outputs-submit paper-outputs-status paper-outputs-collect \
  manifests manifests-check availability availability-check \
  records-index records-check records-tables example-records example-records-check \
  arm-help arm-run arm-check arm-parent arm-replay arm-campaign-template arm-campaign-plan arm-campaign-run \
@@ -158,6 +159,12 @@ help:
 	  '  make train-sample DATASET=Peptides-func   execute a fresh synthetic CPU lifecycle' \
 	  '  make prepare-data DATASET=ogbn-arxiv PROFILE=pilot   prepare official data; may download' \
 	  '  make replay / reexecute   replay statistics or checkpoints from RUN_ROOT' \
+	  '' \
+	  'Produce and publish the measured outputs (docs/PRODUCTION.md; Arrhenius):' \
+	  '  make paper-outputs SUITE=<reproduction suite>   plan and submit every producing job' \
+	  '  make paper-outputs-status PRODUCE_WORK=<work>    follow the jobs' \
+	  '  bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   publish' \
+	  '  make statement-fulfilled  every item of the registered availability statement fulfilled' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
 	  '  make paper                build supported tables/figures from official archives and records' \
@@ -229,6 +236,34 @@ statement:
 
 statement-check:
 	"$(PYTHON)" -B scripts/statement_check.py --check
+
+# The final gate: every item of the registered statement fulfilled (after publication).
+statement-fulfilled:
+	"$(PYTHON)" -B scripts/statement_check.py --require-fulfilled
+
+# Produce every measured output of the statement on the cluster from a completed reproduction suite
+# (docs/PRODUCTION.md): SUITE=<suite of bash run_cross_morse.sh reproduce> [PRODUCE_WORK=<dir>]
+# [PRODUCE_ARGS='--budget-campaign DIR --baselines DIR ...']. Then publish the map that collect writes:
+# bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json; then make statement-fulfilled.
+paper-outputs:
+	@test -n "$(SUITE)" || { echo 'Set SUITE to a completed reproduction suite' >&2; exit 2; }
+	bash hpc/produce_paper_outputs_arrhenius.sh "$(SUITE)" $(if $(PRODUCE_WORK),--work "$(PRODUCE_WORK)",) $(PRODUCE_ARGS)
+
+paper-outputs-plan:
+	@test -n "$(SUITE)" -a -n "$(PRODUCE_WORK)" || { echo 'Set SUITE and PRODUCE_WORK' >&2; exit 2; }
+	"$(PYTHON)" -B scripts/paper_outputs.py plan --runs "$(SUITE)" --work "$(PRODUCE_WORK)" $(PRODUCE_ARGS)
+
+paper-outputs-submit:
+	@test -n "$(PRODUCE_WORK)" || { echo 'Set PRODUCE_WORK' >&2; exit 2; }
+	"$(PYTHON)" -B scripts/paper_outputs.py submit --work "$(PRODUCE_WORK)"
+
+paper-outputs-status:
+	@test -n "$(PRODUCE_WORK)" || { echo 'Set PRODUCE_WORK' >&2; exit 2; }
+	"$(PYTHON)" -B scripts/paper_outputs.py status --work "$(PRODUCE_WORK)"
+
+paper-outputs-collect:
+	@test -n "$(PRODUCE_WORK)" || { echo 'Set PRODUCE_WORK' >&2; exit 2; }
+	"$(PYTHON)" -B scripts/paper_outputs.py collect --work "$(PRODUCE_WORK)"
 
 # A single workspace of the supported outputs, with every manuscript display accounted for.
 reconstruct:
@@ -472,7 +507,8 @@ NUMPY_TESTS := test_paper_registry test_records test_export_records test_availab
  test_paper_artifacts test_reconstruct_paper test_statement_check \
  test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
- test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle
+ test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \
+ test_s14_builder test_paper_outputs test_internal_baselines
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v
