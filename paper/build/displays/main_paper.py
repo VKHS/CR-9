@@ -91,56 +91,6 @@ ASSURANCE_ROWS = ("ogbn-arxiv", "PascalVOC-SP")
 
 
 # ---------------------------------------------------------------------------
-# Record-set contracts this module reads that records/specs.json does not define
-# ---------------------------------------------------------------------------
-
-RECORD_CONTRACTS = {
-    "tube_audit": {
-        "title": "Plug-in trajectory tube audit (main Proposition 2)",
-        "manuscript_tables": ["Supplementary Table S22", "main Figure 2a"],
-        "experiments": [],
-        "keys": ["dataset"],
-        "quantities": {
-            "final_bound_nats": "product-sum tube bound of Proposition 2 at the final depth with the empirical per-depth constants (nats)",
-            "observed_error_median_nats": "median over audited D_explore trajectories of |predicted minus realized loss| at the final depth (nats)",
-            "observed_error_p95_nats": "95th percentile of the same observed loss error (nats)",
-        },
-        "table": "list",
-        "notes": "One row per dataset whose deployed rule is a fitted transition model; computed from the exploration trajectories and the frozen consequence models of the run.",
-    },
-    "mechanism_contrasts": {
-        "title": "Held-out mechanism contrasts outside the nine-test family",
-        "manuscript_tables": ["main Figure 3a-b"],
-        "experiments": [],
-        "keys": ["dataset", "contrast"],
-        "quantities": {
-            "effect_nats": "paired D_confirm contrast of the dataset's strongest feedback configuration (nats): state = conditional state destruction minus intact; rh_minus_ol = MPC-RH minus MPC-OL at the registered horizon and ensemble size",
-            "interval_low_nats": "lower end of the 95% interval on the dataset's registered statistical unit (nats)",
-            "interval_high_nats": "upper end of that interval (nats)",
-        },
-        "table": "list",
-        "notes": "Required for every (dataset, contrast) cell of Figure 3a-b that neither the joint S14 family nor the deployed rule's own confirm/decision.json supplies; produced by the confirm-stage contrast code of cross_morse.pipeline on D_confirm.",
-    },
-    "decision_traces": {
-        "title": "Executed decision origins and within-depth action entropy of the deployed rules",
-        "manuscript_tables": ["main Figure 3c-d"],
-        "experiments": [],
-        "keys": ["dataset"],
-        "quantities": {
-            "same_depth_action_entropy": "entropy (nats) of the executed actions among D_test decisions at the same controlled depth, averaged over depths with weights equal to their decision counts",
-            "fraction_schedule_nominal": "fraction of D_test decisions taken from a fixed schedule or the nominal action",
-            "fraction_state_conditioned": "fraction of D_test decisions chosen by a one-step or radius score of the current measurements",
-            "fraction_exclusive_sequence": "fraction of D_test decisions taken from a receding-horizon planned sequence",
-            "fraction_recovery": "fraction of D_test decisions that are registered recovery actions",
-            "fraction_input_fallback": "fraction of D_test decisions on inputs returned to q_C by the input gate or by a global q_C return",
-        },
-        "table": "list",
-        "notes": "The five fractions of a dataset sum to one. Sealed runs keep per-decision origins only for whole-graph executions, so graph-level traces must be exported from the serving-time execution records.",
-    },
-}
-
-
-# ---------------------------------------------------------------------------
 # Small helpers
 # ---------------------------------------------------------------------------
 

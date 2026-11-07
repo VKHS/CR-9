@@ -12,8 +12,7 @@ Sources
   the selection-stage paired effects (``select/decision.json``). A Roman-empire
   campaign enters with its costs averaged over the splits and with the campaign's
   small-sample effect summary; per-split values stay in the source data.
-* Verified measurement-record sets (``records/specs.json`` and the contracts of
-  ``records/specs.d``): baselines, factorials, negative_controls, input_gate,
+* Verified measurement-record sets (``records/specs.json``): baselines, factorials, negative_controls, input_gate,
   nominal_time, sensor_parameters, cross_backbone, ensemble_grid, inserted_site,
   budget_matched, timing_anchors, ensemble_grid_scores, runtime_scaling,
   reliability_diagnostics, confirmation_sensitivity and band_bound_tightness.

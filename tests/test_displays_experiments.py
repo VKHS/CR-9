@@ -21,7 +21,7 @@ REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding=
 
 
 def spec(name):
-    return json.loads((ROOT / "records/specs.d" / f"{name}.json").read_text(encoding="utf-8"))
+    return json.loads((ROOT / "records/specs.json").read_text(encoding="utf-8"))["sets"][name]
 
 
 def resolved(rows):

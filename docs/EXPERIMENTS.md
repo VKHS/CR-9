@@ -5,9 +5,12 @@
 The core lifecycle and additional comparison studies have separate outputs. This
 guide describes their execution and export. The core lifecycle of all seven
 datasets is regenerated on a Slurm cluster by `bash run_cross_morse.sh reproduce`
-([HPC guide](HPC.md)); the studies below run from their own drivers.
-[`runs/`](../runs/index.json) and [`records/`](../records/index.json) index
-archives that a release registers; this release registers none.
+([HPC guide](HPC.md)); the studies below run from their own drivers on completed
+lifecycle runs. [`release/experiment_code.json`](../release/experiment_code.json)
+maps every experiment behind a reported table or figure to its code, command,
+configurations, outputs and displays. The measured outputs of the reported
+experiments are published with the release `paper-artifacts`
+([publication guide](PUBLICATION.md)).
 
 ## Core benchmark campaign
 

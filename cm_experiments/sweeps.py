@@ -1,6 +1,6 @@
 """Sensitivity sweeps and module ablations derived from sealed lifecycle runs.
 
-Each sweep fills one record contract of ``records/specs.d``:
+Each sweep fills one record contract of ``records/specs.json``:
 
 ``horizon_beam_sweep``  MPC-RH planning horizon and beam width (Supplementary Table S29, Figure S5)
 ``sensitivity_grids``   support thresholds, selection margins and clip level (Table S18)
@@ -39,7 +39,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-SPECS_DIR = ROOT / "records" / "specs.d"
+SPECS_PATH = ROOT / "records" / "specs.json"
 SWEEPS = ("horizon_beam_sweep", "sensitivity_grids", "module_ablations", "buffer_sensitivity")
 LIFECYCLE_THROUGH_SELECT = ("prepare", "train", "explore", "fit", "select")
 PLAN_SCHEMA = "cm-sweep-plan-1"
@@ -65,10 +65,10 @@ class SweepError(ValueError):
 
 # ----------------------------------------------------------------------------- small helpers
 def load_spec(name: str) -> dict:
-    path = SPECS_DIR / f"{name}.json"
-    if name not in SWEEPS or not path.is_file():
-        raise SweepError(f"{name} is not a sweep record contract of records/specs.d")
-    return json.loads(path.read_text(encoding="utf-8"))
+    sets = json.loads(SPECS_PATH.read_text(encoding="utf-8"))["sets"]
+    if name not in SWEEPS or name not in sets:
+        raise SweepError(f"{name} is not a sweep record contract of records/specs.json")
+    return sets[name]
 
 
 def read_json(path: Path):

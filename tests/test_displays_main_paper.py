@@ -310,8 +310,7 @@ def decision_traces(traces=TRACES):
 
 
 def _contract(name):
-    from paper.build.displays.main_paper import RECORD_CONTRACTS
-    return RECORD_CONTRACTS[name]
+    return json.loads((ROOT / "records/specs.json").read_text(encoding="utf-8"))["sets"][name]
 
 
 def read_data(writer, name):

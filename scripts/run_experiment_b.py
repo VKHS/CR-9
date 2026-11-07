@@ -10,9 +10,9 @@
 
 Experiments: predictability (E2), search-enumeration (E9), band-audit (E18),
 negative-controls (Supplementary Table S19) and input-gate (Tables S23/S37).
-The parent run is never written. ``export`` writes records/<set>/ by default;
-sets defined only in records/specs.d are installed without touching
-records/index.json until the contract is registered in records/specs.json.
+The parent run is never written. ``export`` verifies the set against its
+contract in records/specs.json and installs it, with its index entry, under
+records/<set>/ by default (or under --root).
 """
 from __future__ import annotations
 
@@ -161,7 +161,7 @@ def main(argv=None):
                                        argv=["scripts/run_experiment_b.py", *(argv if argv is not None else sys.argv[1:])])
         print(json.dumps(result, indent=2, default=str))
         return 0
-    except (ExperimentError, ValueError, OSError, RuntimeError) as exc:
+    except (ExperimentError, ValueError, OSError, RuntimeError, ImportError) as exc:
         if a.action == "run":
             directory = Path(a.plan).resolve().parent
             if (directory / "experiment.json").is_file() and not (directory / "ARTIFACT_MANIFEST.json").exists():

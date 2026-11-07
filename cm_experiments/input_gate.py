@@ -49,10 +49,11 @@ GATE_SCHEMA = "cm-static-input-gate-1"
 STATIC_NAMES = ("log1p_nodes", "log1p_degree_volume", "log1p_mean_degree", "log1p_max_degree")
 GIB = float(2**30)
 RAW_EXPORTS = ("raw/gate.json", "raw/development_units.csv", "raw/deployment_units.csv", "raw/memory.json",
-               "raw/timing.csv")
+               "raw/timing.csv", "raw/parity.json")
 DEFINITIONS = {
     "fallback_probability": "fraction of evaluation units (graphs, or buffered cores of a single graph) returned to "
-                            "q_C by the static input gate g_input",
+                            "q_C by the static input gate g_input (a numerical controller failure served by q_C is "
+                            "not a gate event)",
     "deployed_wall_overhead_percent": "100 x (sum over units of the gated rule's synchronized wall time, gate "
                                       "included / sum of q_C's wall time - 1), post-warm-up means",
     "gpu_memory_gib": "peak allocated GPU memory of the deployed path over the evaluation units (GiB)",
@@ -364,7 +365,7 @@ def run_input_gate(plan_path, *, device="cpu", trust=False):
             units.append({
                 "dataset": parent.dataset, "seed": ensemble_seeds,
                 "unit_id": f"graph:{eid}" if collection else f"core:{unit}", "input_id": eid,
-                "g_input": g_effective, "gate_score": repr(score),
+                "g_input": int(g), "served_controller": g_effective, "gate_score": repr(score),
                 "comparator_work": repr(c_trace["work"] * share), "controller_work": repr(m_trace.get("work", 0.) * share),
                 "gate_work": repr(gate_work * share), "actual_work": repr(deployed_work * share),
                 "fallback_predictions_equal": "" if g_effective else int(np.array_equal(gated[rows], p_c[rows])),
@@ -385,7 +386,16 @@ def run_input_gate(plan_path, *, device="cpu", trust=False):
     parent.verify("evaluate" if role == "test" else "admit")
     write_csv(run.raw("deployment_units.csv"), units)
     write_csv(run.raw("timing.csv"), timings)
-    np.savez_compressed(run.raw("predictions.npz"), **{k: np.concatenate(v) for k, v in predictions.items()})
+    stacked = {k: np.concatenate(v) for k, v in predictions.items()}
+    np.savez_compressed(run.raw("predictions.npz"), **stacked)
+    parity = {"scope": "the served comparator branch against the parent's sealed test-role q_C predictions"}
+    sealed = root / "final/qC_probabilities.npy"
+    if role == "test" and sealed.is_file():
+        stored = np.load(sealed, mmap_mode="r", allow_pickle=False)
+        parity["qC_max_abs_deviation"] = float(np.max(np.abs(np.asarray(stored[stacked["observation_id"]], dtype=np.float64)
+                                                             - stacked["qC"])))
+        parity["sealed_qC_sha256"] = sha256(sealed)
+    write_json(run.raw("parity.json"), parity)
     write_json(run.raw("memory.json"), {"host_peak_bytes": host_peak_bytes(), "device": str(device),
                                         "host_scope": "ru_maxrss of the serving process, data loading included",
                                         "gpu_scope": "max over units of the peak allocated bytes of the gate and the "
@@ -433,6 +443,7 @@ def summarize_input_gate(dirs):
         keys = {"dataset": dataset}
         units = entry["units"]
         g = np.array([int(u["g_input"]) for u in units])
+        served = np.array([int(u.get("served_controller", u["g_input"])) for u in units])
         deployed = np.array([float(u["deployed_seconds"]) for u in units])
         reference = np.array([float(u["comparator_seconds"]) for u in units])
         harm = np.array([float(u["harm"]) if u["harm"] != "" else np.nan for u in units])
@@ -454,9 +465,9 @@ def summarize_input_gate(dirs):
             harmful = scored & (harm > 0)
             if (passed & scored).any():
                 measured["false_safe_rate"] = float(np.mean(harmful[passed & scored]))
-                sites = sum(int(u["decision_sites"]) for u, p in zip(units, passed) if p)
+                sites = sum(int(u["decision_sites"]) for u, p in zip(units, served) if p)
                 if sites:
-                    measured["stepwise_support_rejection"] = sum(int(u["recovery_sites"]) for u, p in zip(units, passed) if p) / sites
+                    measured["stepwise_support_rejection"] = sum(int(u["recovery_sites"]) for u, p in zip(units, served) if p) / sites
             if harmful.any():
                 measured["harm_miss_rate"] = float(np.mean(passed[harmful]))
         else:

@@ -197,11 +197,16 @@ def render_support(manifest: dict, sources: dict, state: dict) -> str:
               "from subsequent reproductions. "
               "Fresh verification of the registered files is performed by `make review` and `make scientific-audit`."), "",
              "## What the checking paths cover", "",
-             "A command in the tables below is a relevant check or builder. It does not imply that the command "
-             "recreates the entire printed display. Run builders reconstruct their documented columns; "
-             "record builders emit set-level summaries; figure builders provide related summaries and selected panel data. The original "
-             "analysis and artwork remain required where no full-display builder is declared. Mathematical "
-             "and protocol checks do not establish the empirical origin of an input.", "",
+             ("The first implementation of every display is its full-display generator in `paper/build/displays/`; "
+              "`make paper` runs it on the published outputs and writes the complete table or figure with its source "
+              "data. The other commands are related checks and builders: run builders reconstruct their documented "
+              "columns, record builders emit set-level summaries. Mathematical and protocol checks do not establish "
+              "the empirical origin of an input." if _repository_release(state) else
+              "A command in the tables below is a relevant check or builder. It does not imply that the command "
+              "recreates the entire printed display. Run builders reconstruct their documented columns; "
+              "record builders emit set-level summaries; figure builders provide related summaries and selected panel data. The original "
+              "analysis and artwork remain required where no full-display builder is declared. Mathematical "
+              "and protocol checks do not establish the empirical origin of an input."), "",
              _table(["Checking or reconstruction scope", "Displays"],
                     [[label, counts[key]] for key, label in COVERAGE.items()]), "",
              "[display_manifest.json](display_manifest.json) retains each display's complete implementation "

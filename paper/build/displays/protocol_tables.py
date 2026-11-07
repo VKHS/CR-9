@@ -1087,11 +1087,8 @@ def table_s11(ctx, out):
 # ---------------------------------------------------------------------------
 
 def record_sets(ctx) -> dict[str, dict]:
-    """Record-set contracts: records/specs.json plus the contracts declared in records/specs.d/."""
-    sets = dict(ctx.record_specs["sets"])
-    for path in sorted((ctx.root / "records" / "specs.d").glob("*.json")):
-        sets.setdefault(path.stem, json.loads(path.read_text(encoding="utf-8")))
-    return sets
+    """Record-set contracts registered in records/specs.json."""
+    return dict(ctx.record_specs["sets"])
 
 
 def covering_contracts(ctx, displays, experiments=()) -> list[str]:
@@ -1260,7 +1257,7 @@ def table_s31(ctx, out):
                                        *EXAMPLE_RUNS])
     out.table(["quantity (location)", "estimator", "record"], rows,
               notes=["Records are the artifacts of this repository: run-archive files written by the runtime, "
-                     "measurement-record sets (records/specs.json and the contracts of records/specs.d), campaign "
+                     "measurement-record sets (records/specs.json), campaign "
                      "exports and analytical modules; every path was checked to exist.",
                      f"Rows whose record the released code does not produce: {', '.join(absent)}; a record contract "
                      "that covers the row's display is linked where one is declared."])

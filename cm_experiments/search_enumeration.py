@@ -264,7 +264,7 @@ def run_search_enumeration(plan_path, *, device="cpu", trust=False):
     from cross_morse.common import precision_context
     from cross_morse.data import load_data
     from cross_morse.learning import Controller
-    from cross_morse.policies import PlanningBudgetExceeded, beam_plan, execute_policy
+    from cross_morse.policies import PlanningBudgetExceeded, PolicyExecutionError, beam_plan, execute_policy
     from cross_morse.provenance import sha256_state_dict
     from cross_morse.runtime import graph_operator
     from cross_morse.tasks import probabilities, sample_losses
@@ -293,7 +293,14 @@ def run_search_enumeration(plan_path, *, device="cpu", trust=False):
             x = episode.x.to(device)
             prefix = None
             if plan["prefix_policy"] is not None:
-                _, trace = execute_policy(model, x, graph, config, plan["prefix_policy"], controller, None)
+                try:
+                    _, trace = execute_policy(model, x, graph, config, plan["prefix_policy"], controller, None)
+                except PolicyExecutionError as error:
+                    instances.extend({"input_id": eid, "member_seed": seed, "depth": depth, "horizon": horizon,
+                                      "planner": plan["planner"], "status": "PREFIX_POLICY_FAILED",
+                                      "reason": error.reason}
+                                     for depth in plan["depths"] for horizon in plan["horizons"])
+                    continue
                 prefix = {"actions": trace["actions"], "safe_depths": trace["safe_depths"]}
             task = model.task
 
@@ -315,6 +322,9 @@ def run_search_enumeration(plan_path, *, device="cpu", trust=False):
                                                     max_sequences=plan["max_sequences"])
                         except FamilyTooLarge as exc:
                             instances.append(dict(record, status="FAMILY_TOO_LARGE", reason=str(exc)))
+                            continue
+                        except FloatingPointError as exc:
+                            instances.append(dict(record, status="NONFINITE_OBJECTIVE", reason=str(exc)))
                             continue
                         budget = {"calls": 0}
                         try:

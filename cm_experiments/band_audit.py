@@ -229,6 +229,10 @@ def audit_state(model, graph, windows, h, h0, last_safe, depth, baseline, regist
         energy_density = (spectrum["vectors"].T @ weighted.double().to(spectrum["vectors"].device)).square().sum(1).cpu().numpy()
         band_index = np.minimum(BANDS - 1, np.floor(spectrum["values"] * 3).astype(np.int64))
         band_power = np.bincount(band_index, weights=energy_density, minlength=BANDS)
+        total_density = float(energy_density.sum())
+        # spectral energy scale of the state (Fig. S18c abscissa): energy-weighted mean eigenvalue of L_sym
+        mean_eigenvalue = (float(np.sum(spectrum["values"] * energy_density)) / total_density
+                           if total_density > 0 else None)
     rows = []
     for action in TRANSPORT_ACTIONS:
         x = apply_transport(graph, hf, ACTIONS[action]) - nominal_p
@@ -255,7 +259,7 @@ def audit_state(model, graph, windows, h, h0, last_safe, depth, baseline, regist
             exact = [max(s[b], float(np.max(np.abs(difference[band_index == b]), initial=0.))) for b in range(BANDS)]
             ideal = math.sqrt(sum(exact[b]**2 * band_power[b] for b in range(BANDS)))
             omitted = sum(exact[b]**2 * band_power[b] for b in range(BANDS) if b not in registered)
-            row.update(spectral_displacement=spectral, ideal_bound=ideal,
+            row.update(spectral_displacement=spectral, ideal_bound=ideal, state_mean_eigenvalue=mean_eigenvalue,
                        tightness_ratio=spectral / ideal if ideal > 0 else None,
                        omitted_band_share=omitted / ideal**2 if ideal > 0 else None,
                        spectral_parity_relative_error=abs(spectral - dy) / max(dy, 1e-300))

@@ -29,7 +29,7 @@ ARMS = ("E3", "E4", "E5", "E6")
 
 
 def contract(name: str) -> dict:
-    return json.loads((ROOT / "records/specs.d" / f"{name}.json").read_text(encoding="utf-8"))
+    return SPECS[name]
 
 
 def records(name: str, rows: list[dict]):
@@ -732,7 +732,7 @@ class Declarations(unittest.TestCase):
             for need in generator.needs:
                 kind, _, name = need.partition(":")
                 if kind == "records":
-                    self.assertTrue(name in SPECS or (ROOT / "records/specs.d" / f"{name}.json").is_file(), need)
+                    self.assertIn(name, SPECS, need)
                 elif kind == "run":
                     self.assertIn(name, DATASETS)
                 else:

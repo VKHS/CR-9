@@ -58,10 +58,34 @@ def _specs():
 
 
 def _contract(name: str) -> dict:
+    """The coverage contract of a set: cm_campaigns.contract, else the rows the set declares itself.
+
+    Sets declared only in records/specs.json (the experiments of paper/build/displays) carry
+    their dataset list and grid in the specification; a mapping must then cover every declared
+    dataset with every quantity, and its remaining key values are those the rows declare.
+    """
     from cm_campaigns.contract import RECORD_SETS
-    if name not in RECORD_SETS:
+    if name in RECORD_SETS:
+        return RECORD_SETS[name]
+    spec = _specs()["sets"].get(name)
+    if spec is None:
         raise MappingError(f"{name} is not a registered record set")
-    return RECORD_SETS[name]
+    return {"tables": list(spec.get("manuscript_tables", [])), "datasets": list(spec.get("datasets", [])),
+            "coverage": "declared_rows", "grid": dict(spec.get("grid") or {}), "analyzer": None}
+
+
+def _declared_coverage(name: str, rows: list[dict], spec: dict, contract: dict) -> None:
+    """Every declared dataset is present and every key row carries every quantity."""
+    if contract["datasets"]:
+        present = {row.get("dataset") for row in rows}
+        if not set(contract["datasets"]) <= present:
+            raise ValueError(f"{name}: datasets without rows: {sorted(set(contract['datasets']) - present)}")
+    observed = {}
+    for row in rows:
+        observed.setdefault(tuple(row[k] for k in spec["keys"]), set()).add(row["quantity"])
+    for key, quantities in observed.items():
+        if quantities != set(spec["quantities"]):
+            raise ValueError(f"{name}: incomplete quantities for {key}; missing={sorted(set(spec['quantities']) - quantities)}")
 
 
 def _unit(description: str):
@@ -100,6 +124,14 @@ def template(name: str) -> dict:
         for values in contract["coverage_rows"]:
             for quantity in spec["quantities"]:
                 rows.append(_row(dict(zip(contract["coverage_keys"], values)), quantity, spec))
+    elif contract.get("coverage") == "declared_rows":
+        datasets = contract["datasets"] or ["REPLACE"]
+        others = [k for k in spec["keys"] if k != "dataset"]
+        for_each = {k: [str(v) for v in contract["grid"].get(k, ["REPLACE"])] for k in others}
+        for dataset in (datasets if "dataset" in spec["keys"] else [None]):
+            for quantity in spec["quantities"]:
+                keys = {k: ("{" + k + "}" if k != "dataset" else dataset) for k in spec["keys"]}
+                rows.append(_row(keys, quantity, spec, **({"for_each": for_each} if for_each else {})))
     else:
         extra_keys = [k for k in spec["keys"] if k != "dataset"]
         loops = {"cell": FACTORIAL_CELLS, "arm": INSERTED_SITE_ARMS if name == "inserted_site" else BUDGET_ARMS,
@@ -483,7 +515,10 @@ def build(mapping_path: Path, *, records_root: Path, replace: bool = False, allo
                          "unit": str(row["unit"]).strip(), "source_file": source_file, "locator": locator})
         coverage_complete = True
         try:
-            validate_record_coverage(name, rows, spec, contract)
+            if contract.get("coverage") == "declared_rows":
+                _declared_coverage(name, rows, spec, contract)
+            else:
+                validate_record_coverage(name, rows, spec, contract)
         except ValueError as exc:
             coverage_complete = False
             if not allow_partial:

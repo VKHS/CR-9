@@ -18,11 +18,14 @@ import numpy as np
 from cross_morse import statistics
 from paper.build.displays import run_audits
 from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, RunView
-from paper.build.displays.run_audits import RECORD_CONTRACTS
 from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table, write_files
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding="utf-8"))
+SPECS = json.loads((ROOT / "records/specs.json").read_text(encoding="utf-8"))["sets"]
+# The measurement-record contracts these generators introduced, registered in records/specs.json.
+RECORD_CONTRACTS = {name: SPECS[name] for name in ("action_gap_audit", "tube_audit", "oracle_dispersion",
+                                                   "depth_diagnostics")}
 EXAMPLE_NODE = ROOT / "examples/runs/arxiv"
 EXAMPLE_GRAPH = ROOT / "examples/runs/peptides_func"
 # route, complexity, open loop, profile, ensemble, loss offset, normalized cost
@@ -506,12 +509,9 @@ def gap_rows(values):
 
 class RecordContractTests(unittest.TestCase):
     def test_contracts_have_the_registered_spec_fields(self):
-        specs = json.loads((ROOT / "records/specs.json").read_text())["sets"]
-        reference = set(next(iter(specs.values())))
         for name, spec in RECORD_CONTRACTS.items():
-            self.assertNotIn(name, specs)
             self.assertTrue({"title", "manuscript_tables", "experiments", "keys", "quantities", "table",
-                             "notes"} <= set(spec) <= reference | {"notes"}, name)
+                             "notes"} <= set(spec), name)
 
     def test_s21_interpretation_against_the_registered_calibration_alpha(self):
         values = {"ogbn-arxiv": {"median_gap_nats": 0.0062, "p5_gap_nats": 0.0011, "near_zero_fraction": 0.041,
@@ -630,7 +630,7 @@ class ConfirmationTests(unittest.TestCase):
             build_one("supplementary:Table S14", ctx, self.out)
 
     def test_figure_s9_original_sizes_and_two_way_rescaling(self):
-        spec = json.loads((ROOT / "records/specs.d/confirmation_sensitivity.json").read_text())
+        spec = SPECS["confirmation_sensitivity"]
         rows = []
         for item in REGISTRY["supplementary_table_S14b_separated_data_sensitivity"]:
             for quantity, value in (("units_old", item["J_old"]), ("effect_nats", item["effect"]),

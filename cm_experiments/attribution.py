@@ -24,9 +24,6 @@ in the raw result next to them.
 from __future__ import annotations
 
 import copy
-import json
-import shutil
-import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -35,8 +32,9 @@ from .artifacts import canonical, sha256, write_json
 from .ensemble_grid import (FEEDBACK_ROUTES, ParentContext, RunnerError, SealedRun, candidate_identity,
                             check_identity, check_role, code_files, create_plan, ensemble_probabilities,
                             environment_record, job_directory, json_safe, load_plan, member_runs, paired_effect,
-                            provenance_hardware, provenance_period, read_json, read_member, runtime_source_sha256,
-                            save_arrays, selected_jobs, slug, utc_now, write_member, write_record_set)
+                            provenance_hardware, provenance_period, public_plan, read_json, read_member,
+                            runtime_source_sha256, save_arrays, selected_jobs, slug, utc_now, write_member,
+                            write_record_set)
 
 ARMS = ("native, open loop", "inserted, open loop (q_C identity)", "native, feedback", "inserted, feedback (deployed)")
 ARM_DESIGN = ({"arm": ARMS[0], "policy": "comparator", "sites": "native"},
@@ -246,7 +244,7 @@ def _run_attribution_job(plan, entry, directory, device):
                                "members": []}
         for seed in entry["member_seeds"]:
             path = directory / "members" / arm["member_key"] / f"seed{seed}.npy"
-            if not path.exists():
+            if not path.with_suffix(".json").exists():
                 rows, totals = ctx.predict(models[seed], candidate, controller, role)
                 write_member(path, rows, {**expected, "seed": int(seed), "trace": totals,
                                           "checkpoint_sha256": sha256(run.root / "train" / f"plant_seed{seed}_best.pt")})
@@ -286,7 +284,7 @@ def write_attribution_result(directory, entry, *, role, rows, arrays, ledgers, p
         row.update(policy=design[row["arm"]]["policy"], sites=design[row["arm"]]["sites"],
                    candidate=candidate_identity(design[row["arm"]]["candidate"]),
                    work_ratio=ledger["deployed_work"] / reference_work if reference_work else None, **ledger)
-    unit_file = save_arrays(directory / "unit_losses.npz", **arrays)
+    unit_file = save_arrays(directory / "unit_losses.npz", replace=True, **arrays)   # attribution.json: marker
     write_json(directory / "attribution.json", json_safe({
         "schema": "cm-inserted-site-attribution-1", "experiment": "E13", "dataset": entry["dataset"],
         "member": entry["member"], "role": role, "layout": layout, "member_seeds": entry["member_seeds"],
@@ -342,4 +340,5 @@ def export_attribution(output, *, root=None, replace=False, allow_partial=False,
                      "set); paired per-unit effect against q_C with its unit standard error; work ratios in raw/"),
         "synthetic": synthetic.pop(), "role": plan["role"], "plan_sha256": sha256(output / "plan.json")}
     return write_record_set("inserted_site", rows, files, provenance, root=root, replace=replace,
-                            allow_partial=allow_partial, command=command, inputs=inputs)
+                            allow_partial=allow_partial, command=command, inputs=inputs,
+                            generated={"code/plan.json": public_plan(output)})

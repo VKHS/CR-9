@@ -2,7 +2,7 @@
 
 Supplementary Table S5c reads the E1 nominal-identity record that the train stage
 of every sealed run writes (``train/entry_initial.json``). Tables S17, S18, S27,
-S29 and Figure S5 read the sweep record sets of ``records/specs.d``
+S29 and Figure S5 read the sweep record sets of ``records/specs.json``
 (``module_ablations``, ``sensitivity_grids``, ``buffer_sensitivity``,
 ``horizon_beam_sweep``) produced by ``cm_experiments/sweeps.py``. Table S43
 assembles every experiment's outcome from the sealed runs and the measurement
@@ -534,8 +534,8 @@ def table_s17(ctx, out):
     notes = ["A module is credited by its matched comparison only; signatures are read from the module_ablations "
              "record set (ranges span the datasets that hold the contrast)."]
     if missing:
-        notes.append("No observations for: " + ", ".join(missing) + " (see records/specs.d/module_ablations.json, "
-                     "field runtime).")
+        notes.append("No observations for: " + ", ".join(missing) + " (see the module_ablations contract in "
+                     "records/specs.json, field runtime).")
     out.table(["module", "failure targeted", "comparison", "observed signature", "removal/downgrade rule"], rows,
               notes=notes)
     out.data("signatures", ["module", "arm", "dataset", "quantity", "value", "unit", "source_file", "locator"], data)

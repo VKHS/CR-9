@@ -10,7 +10,7 @@ quantity, value, unit, source_file and locator; ``raw/computed/`` holding the
 computed JSON files the values are read from, each with the SHA-256 of the sealed
 run files it was computed from; ``raw/results.json`` and ``raw/plan.json``;
 ``code/SOURCE.json``; ``provenance.json`` and ``MANIFEST.json``. The contract is
-``records/specs.d/<record set>.json``. The set is verified with
+``records/specs.json`` (``sets[<record set>]``). The set is verified with
 scripts/records.py (every value re-read from its raw file) and the root's
 index.json is rewritten for every set it holds. Synthetic example sweeps are
 refused under records/.
@@ -32,7 +32,6 @@ from scripts.records import (MANIFEST, RECORDS, RecordsError, is_official_root, 
                              write_index, write_manifest)
 
 ROOT = Path(__file__).resolve().parents[1]
-SPECS_DIR = RECORDS / "specs.d"
 SUMMARY_TAIL = ["quantity", "value", "unit", "source_file", "locator"]
 RESULTS_SCHEMA = "cm-sweep-results-1"
 PROTOCOLS = {
@@ -51,19 +50,16 @@ PROTOCOLS = {
 
 
 def merged_specs() -> dict:
-    """records/specs.json together with the sweep contracts of records/specs.d."""
-    specs = json.loads((RECORDS / "specs.json").read_text(encoding="utf-8"))
-    for path in sorted(SPECS_DIR.glob("*.json")):
-        specs["sets"][path.stem] = json.loads(path.read_text(encoding="utf-8"))
-    return specs
+    """The registered record contracts (records/specs.json)."""
+    return json.loads((RECORDS / "specs.json").read_text(encoding="utf-8"))
 
 
 def index_root(root: Path, specs: dict) -> list[dict]:
-    """scripts/records.py index over every set of the root, with the specs.d contracts included."""
+    """scripts/records.py index over every set of the root."""
     entries = []
-    for path in sorted(p for p in root.iterdir() if p.is_dir() and p.name != "specs.d"):
+    for path in sorted(p for p in root.iterdir() if p.is_dir()):
         if path.name not in specs["sets"]:
-            raise ExportError(f"{path.name}: not a record set of records/specs.json or records/specs.d")
+            raise ExportError(f"{path.name}: not a record set of records/specs.json")
         write_manifest(path)
         entries.append(verify_set(path, specs["sets"][path.name], specs))
     write_index(root, specs, entries)
@@ -78,8 +74,9 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
         raise ExportError("expected results.json of scripts/run_sweep.py collect")
     name = results["record_set"]
     specs = merged_specs()
-    if name not in specs["sets"] or not (SPECS_DIR / f"{name}.json").is_file():
-        raise ExportError(f"{name} is not a sweep contract of records/specs.d")
+    from cm_experiments.sweeps import SWEEPS
+    if name not in specs["sets"] or name not in SWEEPS:
+        raise ExportError(f"{name} is not a sweep contract of records/specs.json")
     spec = specs["sets"][name]
     if not results["rows"]:
         raise ExportError(f"{name}: the sweep collected no values")

@@ -36,7 +36,6 @@ Cell protocol (the six quantities of the record set):
 from __future__ import annotations
 
 import copy
-import math
 from pathlib import Path
 
 import numpy as np
@@ -45,8 +44,8 @@ from .artifacts import sha256, write_json
 from .ensemble_grid import (FEEDBACK_ROUTES, ParentContext, RunnerError, SealedRun, candidate_identity, check_identity,
                             check_role, code_files, create_plan, ensemble_probabilities, environment_record,
                             job_directory, json_safe, load_plan, member_runs, provenance_hardware, provenance_period,
-                            read_json, runtime_source_sha256, save_array, save_arrays, selected_jobs, slug, utc_now,
-                            write_record_set)
+                            public_plan, read_json, runtime_source_sha256, save_array, save_arrays, selected_jobs,
+                            slug, utc_now, write_record_set)
 
 CELLS = ("000", "100", "010", "001", "110", "101", "011", "111")
 DESIGNS = {"ogbn-arxiv": {"table": "S16", "factors": ("A", "O", "X"), "route": None},
@@ -177,15 +176,16 @@ def joint_bootstrap(unit_values: dict, weights, *, reps: int, seed: int) -> np.n
     The draws are those of cross_morse.statistics.paired_bootstrap with the same seed, so each
     column's quantiles are that function's marginal interval.
     """
-    names = list(unit_values)
-    matrix = np.stack([np.asarray(unit_values[c], dtype=np.float64) for c in names], axis=1)
-    w = np.ones(len(matrix)) if weights is None else np.asarray(weights, dtype=np.float64)
+    columns = [np.asarray(unit_values[c], dtype=np.float64) for c in unit_values]
+    n = len(columns[0])
+    w = np.ones(n, dtype=np.float64) if weights is None else np.asarray(weights, dtype=np.float64)
     rng = np.random.default_rng(seed)
-    draws = np.empty((reps, len(names)), dtype=np.float64)
+    draws = np.empty((reps, len(columns)), dtype=np.float64)
     for start in range(0, reps, 1024):
-        ids = rng.integers(0, len(matrix), size=(min(1024, reps - start), len(matrix)))
+        ids = rng.integers(0, n, size=(min(1024, reps - start), n))
         bw = w[ids]
-        draws[start:start + len(ids)] = np.einsum("ru,ruc->rc", bw, matrix[ids]) / bw.sum(axis=1)[:, None]
+        for j, d in enumerate(columns):     # the same arithmetic as paired_bootstrap, column by column
+            draws[start:start + len(ids), j] = (bw * d[ids]).sum(axis=1) / bw.sum(axis=1)
     return draws
 
 
@@ -402,7 +402,7 @@ def write_factorial_result(directory, plan, entry, *, sums, counts, unit_ids, le
         rows_mask = np.isfinite(terminal[name]).all(axis=1)
         if not truncated and not rows_mask.all():
             raise RunnerError(f"cell {name}: role rows without a prediction")
-        prediction_sha = save_array(directory / "predictions" / f"cell{name}.npy", terminal[name])
+        prediction_sha = save_array(directory / "predictions" / f"cell{name}.npy", terminal[name], replace=True)
         metric = metric_score(terminal[name][rows_mask], labels[rows_mask], spec)
         item = ledger[name]
         rows.append({"cell": name, "factors": cell["factors"], "switches": cell["switches"],
@@ -415,7 +415,7 @@ def write_factorial_result(directory, plan, entry, *, sums, counts, unit_ids, le
                                             "terminal_depths": sorted(set(item["terminal_depths"])),
                                             "after_stop": "the stopped policy's output at every later depth"},
                      "terminal_predictions": {"file": f"predictions/cell{name}.npy", "sha256": prediction_sha}})
-    unit_file = save_arrays(directory / "unit_dil.npz", **arrays)
+    unit_file = save_arrays(directory / "unit_dil.npz", replace=True, **arrays)   # factorial.json: marker
     write_json(directory / "factorial.json", json_safe({
         "schema": "cm-factorial-1", "dataset": entry["dataset"], "table": entry["table"], "member": entry["member"],
         "factors": entry["factors"], "role": role, "cells": rows, "contrasts": contrasts,
@@ -481,4 +481,5 @@ def export_factorial(output, *, root=None, replace=False, allow_partial=False, h
         "synthetic": synthetic.pop(), "role": plan["role"], "factor_switches": plan["factor_switches"],
         "cell_definition_status": plan["cell_definition_status"], "plan_sha256": sha256(output / "plan.json")}
     return write_record_set("factorials", rows, files, provenance, root=root, replace=replace,
-                            allow_partial=allow_partial, command=command, inputs=inputs)
+                            allow_partial=allow_partial, command=command, inputs=inputs,
+                            generated={"code/plan.json": public_plan(output)})

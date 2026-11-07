@@ -246,8 +246,10 @@ class ParentRun:
             if not (allow_fixture and self.synthetic):
                 raise ExperimentError("the confirmed policy is open-loop; a feedback teacher is required "
                                       "(a synthetic fixture may declare --allow-fixture)")
-            teacher = copy.deepcopy(next(c for c in candidates if c["route"] == "mpc_rh"
-                                         and c["ensemble"] == comparator["ensemble"]))
+            options = [c for c in candidates if c["route"] == "mpc_rh" and c["ensemble"] == comparator["ensemble"]]
+            if not options:
+                raise ExperimentError("the fixture registers no MPC-RH candidate at the comparator's ensemble size")
+            teacher = copy.deepcopy(options[0])
             override = True
         return teacher, comparator, {"confirmed_index": decision["confirmed_index"],
                                      "comparator_index": decision["comparator_index"],
@@ -419,22 +421,23 @@ def compare_rows(saved, recomputed, where):
 
 
 def load_contract(record_set):
-    """Record contract from records/specs.json, or from records/specs.d before registration."""
+    """The record contract of records/specs.json, the only contract location."""
     from scripts.records import RECORDS, load_specs
     specs = load_specs(RECORDS, RECORDS / "specs.json")
-    if record_set in specs["sets"]:
-        return specs, specs["sets"][record_set], True, "records/specs.json"
-    path = RECORDS / "specs.d" / f"{record_set}.json"
-    if not path.is_file():
-        raise ExperimentError(f"no record contract for {record_set}")
-    return specs, read_json(path), False, f"records/specs.d/{record_set}.json"
+    if record_set not in specs["sets"]:
+        raise ExperimentError(f"{record_set} is not a record set of records/specs.json")
+    return specs, specs["sets"][record_set]
 
 
 def _public_plan(plan):
-    public = copy.deepcopy(plan)
-    if "path" in public.get("parent", {}):
-        public["parent"]["path"] = Path(public["parent"]["path"]).name
-    return public
+    """The plan as deposited: every declared filesystem location reduced to its final name."""
+    def strip(value):
+        if isinstance(value, dict):
+            return {k: (Path(v).name if k == "path" and isinstance(v, str) else strip(v)) for k, v in value.items()}
+        if isinstance(value, list):
+            return [strip(v) for v in value]
+        return value
+    return strip(copy.deepcopy(plan))
 
 
 def _private_findings(target):
@@ -459,9 +462,8 @@ def export_record_set(experiment, results_dirs, *, summarize, raw_exports, hardw
     The exported values are recomputed over all directories (pooling repeated
     splits of one dataset) and written to raw/summary.json with the SHA-256 of
     every input; summary.csv points into that file. Only quantities named by
-    the record contract are exported; others stay in raw/summary.json. A set
-    of records/specs.json is installed with the index; a set defined only in
-    records/specs.d is verified and installed without touching index.json.
+    the record contract (records/specs.json) are exported; others stay in
+    raw/summary.json. The verified set is installed with its index entry.
     """
     from scripts.export_records import fmt, git_head
     from scripts.records import RECORDS, is_official_root, verify_set, write_manifest
@@ -472,7 +474,8 @@ def export_record_set(experiment, results_dirs, *, summarize, raw_exports, hardw
     if not dirs or len(set(dirs)) != len(dirs):
         raise ExperimentError("give one or more distinct sealed result directories")
     record_set = EXPERIMENTS[experiment]["record_set"]
-    specs, spec, registered, contract_path = load_contract(record_set)
+    specs, spec = load_contract(record_set)
+    contract_path = "records/specs.json"
     loaded = []
     for d in dirs:
         verify(d)
@@ -518,7 +521,8 @@ def export_record_set(experiment, results_dirs, *, summarize, raw_exports, hardw
                 source = d / relative
                 if not source.is_file():
                     raise ExperimentError(f"{d.name} lacks {relative}")
-                destination = target / "raw" / label / relative
+                inner = Path(relative)
+                destination = target / "raw" / label / (inner.relative_to("raw") if inner.parts[0] == "raw" else inner)
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, destination)
             write_json(target / "code" / label / "plan.json", _public_plan(plan))
@@ -556,24 +560,16 @@ def export_record_set(experiment, results_dirs, *, summarize, raw_exports, hardw
                             f"{EXPERIMENTS[experiment]['module']} on {len(dirs)} sealed run(s)"),
             "hardware": str(hardware), "period": str(period), "protocol": protocol,
             "synthetic": bool(synthetic), "truncated_runs": truncated, "parents": parents,
-            "record_contract": contract_path, "registered_in_specs_json": registered,
+            "record_contract": contract_path,
             "runtime_source_sha256": sorted({exp["runtime_source_sha256"] for _, exp, _, _ in loaded})})
         findings = _private_findings(target)
         if findings and not allow_private:
             raise ExperimentError("redact private infrastructure identifiers before depositing: " + ", ".join(findings[:10]))
         write_manifest(target)
         entry = verify_set(target, spec, specs)
-        final = records_root / record_set
-        if registered:
-            from scripts.record_mapping import install_verified_set
-            install_verified_set(staging, target, records_root, specs, replace=replace)
-        else:
-            if final.exists():
-                if not replace:
-                    raise ExperimentError(f"{final} exists; pass --replace to rebuild it")
-                shutil.rmtree(final)
-            os.replace(target, final)
-        return {"set": record_set, "path": str(final), "rows": len(rows), "indexed": registered,
+        from scripts.record_mapping import install_verified_set
+        final = install_verified_set(staging, target, records_root, specs, replace=replace)
+        return {"set": record_set, "path": str(final), "rows": len(rows), "indexed": True,
                 "record_contract": contract_path, "verification": entry,
                 "not_exported": sorted({r["quantity"] for r in other})}
     finally:

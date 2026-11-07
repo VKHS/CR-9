@@ -29,15 +29,13 @@ Planning, statistics and export are torch-free; execution imports the runtime la
 """
 from __future__ import annotations
 
-import copy
 import csv
-import hashlib
 import json
 import math
 import os
 import platform
+import re
 import shutil
-import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -58,6 +56,9 @@ STAGES = ("prepare", "train", "explore", "fit", "select", "confirm", "admit", "e
 RUNNER_FILES = ("cm_experiments/ensemble_grid.py", "cm_experiments/attribution.py",
                 "cm_experiments/backbones.py", "cm_experiments/factorial.py", "scripts/run_experiment.py")
 SUMMARY_TAIL = ("quantity", "value", "unit", "source_file", "locator")
+# Official scores as Table S26 prints them: percent / F1 / AUC points, AP in native units.
+OFFICIAL_SCORE = {"accuracy": (100.0, "%"), "macro_f1": (100.0, "F1 points"), "rocauc": (100.0, "AUC points"),
+                  "ap": (1.0, "AP")}
 
 
 class RunnerError(ValueError):
@@ -77,7 +78,7 @@ def utc_now() -> str:
 
 
 def slug(text) -> str:
-    out = "".join(c if c.isalnum() or c in "._-" else "_" for c in str(text)).strip("_")
+    out = re.sub(r"[^A-Za-z0-9._-]+", "_", str(text)).strip("_")
     if not out:
         raise RunnerError(f"cannot form a file name from {text!r}")
     return out
@@ -102,10 +103,10 @@ def json_safe(value):
     return value
 
 
-def save_array(path, array) -> str:
-    """Atomic .npy write that never replaces an existing file; returns its SHA-256."""
+def save_array(path, array, *, replace=False) -> str:
+    """Atomic .npy write; an existing file is replaced only on request. Returns its SHA-256."""
     path = Path(path)
-    if path.exists():
+    if path.exists() and not replace:
         raise FileExistsError(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".npy")
@@ -119,9 +120,9 @@ def save_array(path, array) -> str:
     return sha256(path)
 
 
-def save_arrays(path, **arrays) -> str:
+def save_arrays(path, *, replace=False, **arrays) -> str:
     path = Path(path)
-    if path.exists():
+    if path.exists() and not replace:
         raise FileExistsError(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".npz")
@@ -225,7 +226,7 @@ class SealedRun:
     def identity(self) -> dict:
         manifests = {path.name: sha256(path) for path in sorted((self.root / "provenance" / "stages").glob("*.json"))}
         units = self.root / "prepared" / "splits.npz"
-        return {"run": str(self.root), "name": self.root.name, "dataset": self.dataset,
+        return {"name": self.root.name, "dataset": self.dataset,
                 "synthetic": self.synthetic, "config_sha256": canonical(self.config),
                 "run_state_config_sha256": self.state.get("config_sha256"),
                 "runtime_source_sha256": self.state.get("source_sha256"),
@@ -245,7 +246,12 @@ def check_role(run: SealedRun, role: str) -> None:
         if run.state.get("status") != "COMPLETE":
             raise RunnerError(f"{run.root.name}: the test role is opened only after the run is sealed")
     else:
+        from cross_morse.split_contract import require_reserved_comparison
         run.require("confirm")
+        try:
+            require_reserved_comparison(run.json("prepared/metadata.json"), run.npz("prepared/splits.npz"))
+        except ValueError as exc:
+            raise RunnerError(f"{run.root.name}: {exc}") from None
 
 
 def check_identity(run: SealedRun, planned: dict) -> None:
@@ -349,20 +355,36 @@ def _git_head():
     return git_head()
 
 
+def public_plan(output) -> str:
+    """The plan as deposited under code/: absolute locations reduced to their final names."""
+    def strip(value):
+        if isinstance(value, dict):
+            return {k: strip(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [strip(v) for v in value]
+        if isinstance(value, str) and value.startswith("/") and len(Path(value).parts) > 2:
+            return Path(value).name
+        return value
+    return json.dumps(strip(read_json(Path(output) / "plan.json")), indent=2, sort_keys=True) + "\n"
+
+
 def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: dict, *, root=None,
                      replace: bool = False, allow_partial: bool = False, command=None,
-                     inputs=()) -> Path:
+                     inputs=(), generated=None) -> Path:
     """Write records/<set> exactly as scripts/records.py verifies it, then install it atomically.
 
     ``rows``: the set's keys, quantity, value (float), unit, source_file (``raw/...`` or ``code/...``)
     and a locator into that file.  ``files``: {set-relative path: original file}, copied
-    unchanged.  The set is staged, hashed (MANIFEST.json), traced value by value
-    (``scripts.records.verify_set``) and installed with ``scripts.record_mapping.install_verified_set``,
-    which re-verifies the other deposited sets without re-indexing them.
+    unchanged; ``generated``: {set-relative path: text} written by the exporter (the public plan).
+    The set is staged, scanned for private infrastructure identifiers, hashed (MANIFEST.json),
+    traced value by value (``scripts.records.verify_set``) and installed with
+    ``scripts.record_mapping.install_verified_set``, which re-verifies the other deposited sets
+    without re-indexing them.
     """
     from scripts.records import RECORDS as OFFICIAL, is_official_root, load_specs, verify_set, write_manifest
     from scripts.export_records import fmt
-    from scripts.record_mapping import install_verified_set
+    from scripts.record_mapping import _private_scan, install_verified_set
+    generated = dict(generated or {})
     from scripts.scientific_evidence_audit import validate_record_coverage
     from cm_campaigns.contract import RECORD_SETS
     specs = load_specs(OFFICIAL, SPECS_PATH)
@@ -392,7 +414,7 @@ def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: d
         if identity in seen:
             raise RunnerError(f"{set_name}: duplicate row {identity}")
         seen.add(identity)
-        if row["source_file"] not in files:
+        if row["source_file"] not in files and row["source_file"] not in generated:
             raise RunnerError(f"{set_name}: {row['source_file']} is not among the deposited files")
     if not rows:
         raise RunnerError(f"{set_name}: no values to export")
@@ -413,16 +435,20 @@ def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: d
         (target / "raw").mkdir(parents=True)
         (target / "code").mkdir()
         copied = []
-        for relative, source in sorted(files.items()):
+        for relative in sorted(set(files) | set(generated)):
             parts = Path(relative).parts
-            if Path(relative).is_absolute() or ".." in parts or parts[0] not in ("raw", "code") or relative in (
-                    "code/SOURCE.json",):
-                raise RunnerError(f"set paths must lie under raw/ or code/: {relative}")
-            source = Path(source)
-            if source.is_symlink() or not source.is_file():
-                raise RunnerError(f"original output missing or not a regular file: {source}")
+            if (Path(relative).is_absolute() or ".." in parts or parts[0] not in ("raw", "code")
+                    or relative == "code/SOURCE.json" or (relative in files and relative in generated)):
+                raise RunnerError(f"set paths must be distinct and lie under raw/ or code/: {relative}")
             destination = target / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
+            if relative in generated:
+                destination.write_text(generated[relative], encoding="utf-8")
+                copied.append({"path": relative, "generated": True, "sha256": sha256(destination)})
+                continue
+            source = Path(files[relative])
+            if source.is_symlink() or not source.is_file():
+                raise RunnerError(f"original output missing or not a regular file: {source}")
             shutil.copyfile(source, destination)
             if sha256(destination) != sha256(source):
                 raise RunnerError(f"{source} changed while it was copied")
@@ -442,6 +468,9 @@ def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: d
         record = dict(json_safe(provenance), coverage_complete=complete, synthetic=synthetic)
         (target / "provenance.json").write_text(json.dumps(record, indent=1, sort_keys=True, allow_nan=False) + "\n",
                                                 encoding="utf-8")
+        private = _private_scan(target)
+        if private:
+            raise RunnerError("redact private infrastructure identifiers before depositing:\n  " + "\n  ".join(private[:10]))
         write_manifest(target)
         verify_set(target, spec, specs)
         return install_verified_set(staging, target, root, specs, replace=replace)
@@ -450,10 +479,8 @@ def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: d
 
 
 def code_files(output) -> dict:
-    """The runner sources and the experiment plan, deposited under code/."""
-    files = {f"code/{name}": ROOT / name for name in RUNNER_FILES if (ROOT / name).is_file()}
-    files["code/plan.json"] = Path(output) / "plan.json"
-    return files
+    """The runner sources deposited under code/ (the public plan is passed as generated text)."""
+    return {f"code/{name}": ROOT / name for name in RUNNER_FILES if (ROOT / name).is_file()}
 
 
 def provenance_period(results: list[dict]) -> str:
@@ -572,9 +599,9 @@ def write_member(path, rows, record: dict) -> dict:
     """One member's role-row predictions and its execution record (resume-safe)."""
     path = Path(path)
     meta = path.with_suffix(".json")
-    if path.exists() or meta.exists():
-        raise RunnerError(f"{path} exists; refusing to replace an executed member")
-    digest = save_array(path, rows)
+    if meta.exists():
+        raise RunnerError(f"{path} exists with its record; refusing to replace an executed member")
+    digest = save_array(path, rows, replace=True)    # an orphan without its record is an interrupted write
     write_json(meta, json_safe(dict(record, prediction_file=path.name, prediction_sha256=digest)))
     return read_json(meta)
 
@@ -673,10 +700,12 @@ def grid_statistics(members, labels, units, config, grid, seeds, *, parent_seeds
         score = score_observations(probabilities, labels, units, config)
         losses[count] = score
         arrays[f"E{count}_unit_loss"] = score["loss"]
+        scale, score_unit = OFFICIAL_SCORE[score["metric_name"]]
         rows.append({"ensemble": count, "seeds": [int(s) for s in seeds[:count]], "distinct_checkpoints": count,
                      "new_checkpoints": sum(int(s) not in set(parent_seeds) for s in seeds[:count]),
                      "loss_nats": score["node_ce"], "loss_name": score["loss_name"],
                      "metric": score["metric"], "metric_name": score["metric_name"],
+                     "official_score": scale * score["metric"], "official_score_unit": score_unit,
                      "units": int(len(score["core_ids"]))})
         if count == max(grid):
             break
@@ -749,7 +778,7 @@ def _run_grid_job(plan, entry, directory, device):
     for seed in entry["seed_order"]:
         path = directory / "members" / f"seed{seed}.npy"
         source = run.root / "train" if seed in entry["parent_seeds"] else checkpoints
-        if not path.exists():
+        if not path.with_suffix(".json").exists():
             model = ctx.plant(seed, source)
             rows, totals = ctx.predict(model, comparator, controller, role)
             write_member(path, rows, {**expected, "seed": int(seed),
@@ -782,7 +811,8 @@ def write_grid_result(directory, entry, *, role, rows, arrays, checkpoints, memb
     directory = Path(directory)
     if environment is not None and not (directory / "environment.json").exists():
         write_json(directory / "environment.json", json_safe(environment))
-    unit_file = save_arrays(directory / "unit_losses.npz", **arrays)
+    # Derived files of an interrupted attempt are replaced; grid.json is the completion marker.
+    unit_file = save_arrays(directory / "unit_losses.npz", replace=True, **arrays)
     write_json(directory / "grid.json", json_safe({
         "schema": "cm-ensemble-grid-member-1", "experiment": "E14", "dataset": entry["dataset"],
         "member": entry["member"], "role": role, "comparator": entry["comparator"],
@@ -818,8 +848,11 @@ def collect_ensemble_grid(output) -> list[dict]:
         ensembles = []
         for i, e in enumerate(plan["grid"]):
             values = [g["ensembles"][i]["loss_nats"] for _, _, g in grids]
+            scores = [g["ensembles"][i]["official_score"] for _, _, g in grids]
             ensembles.append({"ensemble": e, "loss_nats": math.fsum(values) / len(values),
-                              "member_losses_nats": values, "loss_name": grids[0][2]["ensembles"][i]["loss_name"]})
+                              "member_losses_nats": values, "loss_name": grids[0][2]["ensembles"][i]["loss_name"],
+                              "official_score": math.fsum(scores) / len(scores), "member_official_scores": scores,
+                              "official_score_unit": grids[0][2]["ensembles"][i]["official_score_unit"]})
         datasets.append({"dataset": dataset["dataset"], "slug": dataset["slug"], "synthetic": dataset["synthetic"],
                          "aggregation": dataset["aggregation"], "ensembles": ensembles,
                          "members": [{"member": entry["member"], "grid": path, "grid_sha256": sha256(path),
@@ -876,6 +909,7 @@ def export_ensemble_grid(output, *, root=None, replace=False, allow_partial=Fals
             "plan_sha256": sha256(output / "plan.json")}
         return write_record_set("ensemble_grid", rows, files, provenance, root=root, replace=replace,
                                 allow_partial=allow_partial, command=command,
+                                generated={"code/plan.json": public_plan(output)},
                                 inputs=[{"file": str(Path(m["grid"]).relative_to(output)), "sha256": m["grid_sha256"]}
                                         for d in datasets for m in d["members"]])
     finally:

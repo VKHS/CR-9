@@ -47,7 +47,8 @@ import numpy as np
 
 from .artifacts import canonical, sha256, write_json
 from .ensemble_grid import (ROOT, STAGES, RunnerError, SealedRun, check_identity, code_files, create_plan, json_safe,
-                            load_plan, member_runs, read_json, selected_jobs, slug, utc_now, write_record_set)
+                            load_plan, member_runs, public_plan, read_json, selected_jobs, slug, utc_now,
+                            write_record_set)
 
 REGIME_DATASETS = {"arxiv / homophily": "ogbn-arxiv", "Roman / heterophily": "Roman-empire",
                    "Pascal / independent long range": "PascalVOC-SP"}
@@ -243,8 +244,12 @@ def run_cross_backbone(output, *, job=None, data_root=None, device="cuda", threa
         if canonical(read_json(entry["config"])) != entry["config_sha256"]:
             raise RunnerError(f"{entry['config']} changed after planning")
         if not sealed_run(entry["run"]):
-            subprocess.run(lifecycle_command(entry, data_root=data_root, device=device, threads=threads, python=python),
-                           cwd=ROOT, check=True)
+            command = lifecycle_command(entry, data_root=data_root, device=device, threads=threads, python=python)
+            code = subprocess.run(command, cwd=ROOT, check=False).returncode
+            if code == 75:
+                raise InterruptedError(f"lifecycle {entry['run']} checkpointed at a safe boundary")
+            if code != 0:
+                raise RunnerError(f"lifecycle {entry['run']} failed with exit code {code} (see its failure_summary.json)")
         executed.append(entry["run"])
     collected = collect_cross_backbone(output, require_complete=False)
     return {"executed_runs": executed, "collected_rows": [str(p) for p in collected]}
@@ -414,7 +419,8 @@ def export_cross_backbone(output, *, root=None, replace=False, allow_partial=Fal
         "synthetic": plan["synthetic"], "plan_sha256": sha256(output / "plan.json"),
         "substitute_plant": plan["settings"]["substitute_plant"]}
     return write_record_set("cross_backbone", rows, files, provenance, root=root, replace=replace,
-                            allow_partial=allow_partial, command=command, inputs=inputs)
+                            allow_partial=allow_partial, command=command, inputs=inputs,
+                            generated={"code/plan.json": public_plan(output)})
 
 
 # ----------------------------------------------------------------------------- GCNII substitute plant (torch)

@@ -50,7 +50,8 @@ HISTORY_COORDINATES = ("relative_depth", "normalized_mass", "normalized_hops", "
 DEFINITIONS = {
     "residual_activity": "fraction of evaluation units (x realizations) served by the controller (g_input = 1) "
                          "on which some member executed a non-nominal action",
-    "input_fallback": "fraction of evaluation units (x realizations) returned to q_C by g_input",
+    "input_fallback": "fraction of evaluation units (x realizations) returned to q_C by g_input (a numerical "
+                      "controller failure served by q_C is not a gate event)",
     "worst_pre_fallback_harm": "largest paired loss of the ungated confirmed policy q_M minus q_C over evaluation "
                                "units (x realizations), before the input fallback (nats)",
 }
@@ -353,7 +354,8 @@ def run_negative_controls(plan_path, *, device="cpu", trust=False):
                                   "comparator_loss": repr(loss_c[key]),
                                   "deployed_loss": repr(loss_m[key] if served else loss_c[key]),
                                   "controller_loss": repr(loss_m[key]) if key in loss_m else "",
-                                  "fallback": 1 - served, "g_input": served, "gate_score": repr(score),
+                                  "fallback": 1 - int(g), "g_input": int(g), "served_controller": served,
+                                  "gate_score": repr(score),
                                   "active": int(served and active), "nonnominal_actions": nonnominal,
                                   "harm": "" if harm is None else repr(harm)})
                 counter += 1

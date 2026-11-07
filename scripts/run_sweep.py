@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plan, execute and collect the sensitivity sweeps and module ablations of records/specs.d.
+"""Plan, execute and collect the sensitivity sweeps and module ablations (record contracts of records/specs.json).
 
     # S29 / Fig. S5: MPC-RH horizon and beam width on the sealed PascalVOC-SP run
     python -B scripts/run_sweep.py plan --sweep horizon_beam_sweep --parent /abs/runs/pascalvoc_sp --output /abs/sweeps/hb
@@ -19,7 +19,7 @@ variant, stage by stage from prepare through select, in a fresh output directory
 repeat. ``collect`` measures every row and writes results.json for
 scripts/export_sweep_records.py. A Roman-empire parent is its campaign directory of
 split runs. buffer_sensitivity is refused: the released runtime has no buffer-aware
-resampling unit (records/specs.d/buffer_sensitivity.json).
+resampling unit (the buffer_sensitivity contract of records/specs.json).
 """
 from __future__ import annotations
 

@@ -9,9 +9,10 @@ the confirmation and admission records, the final paired test units and the
 stage timing markers. The joint S14 family comes from the validated
 confirmation campaign.
 
-Quantities that no run, record set or campaign contains are read from the
-measurement-record contracts of :data:`RECORD_CONTRACTS`; a display that needs
-such a set waits for it rather than estimating its cells.
+Quantities that no run holds are read from measurement-record sets whose
+contracts are registered in records/specs.json (action_gap_audit, tube_audit,
+oracle_dispersion, depth_diagnostics); a display that needs such a set waits for
+it rather than estimating its cells.
 
 Roman-empire is a campaign of ten split runs. Unless a display states otherwise,
 effects and statistics are averaged over the splits (as main Table 1 does), gate
@@ -65,112 +66,6 @@ QUALIFICATION_STAGES = (("explore", "exploration logging", "exploration_logging"
                         ("confirm", "confirmation evaluation", "confirmation"),
                         ("admit", "admission evaluation", "admission"))
 PASS = {True: "pass", False: "fail", None: None}
-
-# ---------------------------------------------------------------------------
-# Measurement-record contracts for observations the lifecycle runs do not hold
-# ---------------------------------------------------------------------------
-# Each entry has the fields of an entry of records/specs.json["sets"]; it is the
-# content of records/specs.d/<name>.json. The producing experiment exports the
-# rows; the generators below read them through ctx.require_records(<name>).
-
-RECORD_CONTRACTS = {
-    "action_gap_audit": {
-        "title": "Action-gap and switching audit of the deployed rules",
-        "manuscript_tables": ["Supplementary Table S21", "Supplementary Figure S17"],
-        "experiments": [],
-        "keys": ["dataset"],
-        "quantities": {
-            "median_gap_nats": "median over the executed decision sites of the deployed rule of the gap m_l between "
-                               "the best and second-best supported scores (main Proposition 3; nats)",
-            "p5_gap_nats": "5th percentile of the same site gaps (nats)",
-            "near_zero_threshold_nats": "the near-zero gap threshold the audit applies (nats)",
-            "near_zero_fraction": "fraction of decision sites whose gap is below near_zero_threshold_nats",
-            "switch_fraction": "fraction of decision sites whose executed action changes when the state is "
-                               "perturbed by the registered perturbation (complement of mode-stable coverage)",
-            "recovery_index_stability": "fraction of trajectories whose last-safe (recovery) index is unchanged "
-                                        "under the perturbation",
-            "beam_sequence_stability": "fraction of replanning sites whose planned beam sequence is unchanged under "
-                                       "the perturbation; 1 for rules that do not plan",
-            "decision_sites": "number of executed decision sites entering the audit",
-        },
-        "table": "list",
-        "notes": "Computed from per-site decision logs of the deployed rule on its evaluation role and from a "
-                 "perturbed re-execution of the same inputs. The lifecycle runtime records score_gap only for "
-                 "one-step/radius decisions of node-level member traces (member_predictions/*.json decisions[]); "
-                 "MPC-RH beam decisions, per-graph decisions of the multigraph benchmarks and every perturbed "
-                 "re-execution are not recorded, so the exporter must write the raw per-site gaps and switches.",
-    },
-    "tube_audit": {
-        "title": "Plug-in trajectory-tube audit of main Proposition 2",
-        "manuscript_tables": ["Supplementary Table S22", "Supplementary Figure S17", "main Figure 2a"],
-        "experiments": [],
-        "keys": ["dataset"],
-        "quantities": {
-            "beta_median": "median over depths and audited trajectories of the plug-in factor beta_l",
-            "beta_p95": "95th percentile over depths and audited trajectories of beta_l",
-            "m_eps_op": "median over depths of the plug-in operator term M_l eps_l^op",
-            "reference_term": "median over depths of the plug-in reference term R_l e_l^ref",
-            "tube_coverage": "fraction of audited trajectories whose realized state error stays inside the tube at "
-                             "every depth",
-            "mode_stable_coverage": "fraction of audited trajectories whose realized and predicted runs keep the same "
-                                    "action, recovery mode and last-safe index at every depth (the fixed-mode "
-                                    "condition of Proposition 2)",
-            "final_bound_nats": "product-sum tube bound of Proposition 2 at the final depth with the empirical "
-                                "per-depth constants, sqrt(2) ||W_head||_2 e_L (cm_theory.stability.unrolled_bound "
-                                "and logit_loss_bound; nats)",
-            "observed_error_median_nats": "median over audited D_explore trajectories of |predicted minus realized "
-                                          "loss| at the final depth (nats)",
-            "observed_error_p95_nats": "95th percentile of the same observed loss error (nats)",
-        },
-        "table": "list",
-        "notes": "Computed from the exploration trajectories and the frozen consequence models of the run; the "
-                 "per-depth constants beta_l, M_l, eps_l^op, R_l and e_l^ref are kept as raw arrays. The runtime "
-                 "records none of them. The violation rate of Table S22 is 1 - mode_stable_coverage (convention C22). "
-                 "main_paper.py reads final_bound_nats and the two observed-error quantities of the same rows.",
-    },
-    "oracle_dispersion": {
-        "title": "Per-input oracle enumerated on the admission split",
-        "manuscript_tables": ["Supplementary Table S30", "Supplementary Figure S13"],
-        "experiments": [],
-        "keys": ["dataset"],
-        "quantities": {
-            "median_oracle_depth": "median over admission inputs of the depth of the per-input loss-minimizing "
-                                   "sequence in the enumerated family",
-            "oracle_depth_q25": "25th percentile of the per-input oracle depth",
-            "oracle_depth_q75": "75th percentile of the per-input oracle depth",
-            "fraction_differs_from_qc": "fraction of admission inputs whose oracle sequence differs from q_C",
-            "inputs": "number of admission inputs enumerated",
-        },
-        "table": "list",
-        "notes": "Diagnostic enumerated on D_admit after every decision is fixed (convention C12). The lifecycle "
-                 "records only the D_explore global-candidate headroom (select/entry_complete.json), not a per-input "
-                 "oracle on the admission split.",
-    },
-    "depth_diagnostics": {
-        "title": "Depth diagnostics of the plants and deployed rules",
-        "manuscript_tables": ["Supplementary Figure S14"],
-        "experiments": [],
-        "keys": ["dataset", "depth", "phase"],
-        "quantities": {
-            "source_alignment_change": "mean source alignment c_lb over the retained bands at depth l minus its "
-                                       "value at the first plotted depth, on the reference plant (D_fit validation)",
-            "policy_loss_change": "paired CE/BCE of the selected policy truncated at depth l minus its value at the "
-                                  "first plotted depth (nats)",
-            "first_intervention_depth_q25": "25th percentile over inputs of the first depth with a non-A0 action",
-            "first_intervention_depth_median": "median over inputs of the first depth with a non-A0 action",
-            "first_intervention_depth_q75": "75th percentile over inputs of the first depth with a non-A0 action",
-            "supported_deterioration_depth": "first depth after the plant's best-validation-loss depth whose "
-                                             "paired loss increase over that depth has a 95% interval above zero",
-            "transport_fraction": "fraction of executed sites of a depth phase (early, middle, late thirds) that "
-                                  "carry a non-A0 transport action",
-        },
-        "table": "list",
-        "notes": "Rows with a depth carry source_alignment_change or policy_loss_change; rows with a phase carry "
-                 "transport_fraction; the other quantities have neither. The lifecycle records nominal depth losses "
-                 "(train/entry_initial.json) but no per-depth source alignment, no truncated-policy losses and no "
-                 "per-graph action sequences for the multigraph benchmarks.",
-    },
-}
 
 
 # ---------------------------------------------------------------------------
