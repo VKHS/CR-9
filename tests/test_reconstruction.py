@@ -146,7 +146,9 @@ class ReconstructionTests(unittest.TestCase):
             output = Path(temporary) / "output"
             result = rc.reconstruct(output, index=ROOT / "runs/index.json", records_index=ROOT / "records/index.json")
             self.assertEqual(result["build_status"], "INPUTS_REQUIRED")
-            self.assertEqual(result["outputs"], [])
+            # Only the displays generated from the repository's own sources (protocol and analytical tables).
+            self.assertTrue(result["outputs"])
+            self.assertEqual({o["input_kind"] for o in result["outputs"]}, {"repository_sources"})
             self.assertEqual(len(result["displays"]), 90)
             self.assertFalse(result["all_displays_numerically_reconstructed"])
             self.assertEqual(rc.verify_workspace(output), result)
@@ -158,7 +160,8 @@ class ReconstructionTests(unittest.TestCase):
             rc.write_json(index, {"schema": "cross-morse-runs-index-1", "runs": [self.entry]})
             result = rc.reconstruct(directory / "output", index=index)
             self.assertEqual(len(result["unavailable_inputs"]), 1)
-            self.assertEqual(result["outputs"], [])
+            self.assertEqual(result["build_status"], "INPUTS_REQUIRED")
+            self.assertEqual({o["input_kind"] for o in result["outputs"]}, {"repository_sources"})
 
     def test_duplicate_run_would_not_silently_replace_evidence(self):
         with tempfile.TemporaryDirectory() as temporary:

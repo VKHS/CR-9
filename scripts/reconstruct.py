@@ -453,8 +453,11 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
             row["awaiting"] = built.get("missing", [])
         comparison = {state: sum((row.get("comparison") or {}).get(state, 0) for row in generated["displays"])
                       for state in ("exact", "differs", "not_comparable", "no_reference")}
+        # Displays generated from the repository's own sources (protocol, analytical) need no
+        # experiment input; they never turn a workspace without inputs into a reconstruction.
+        experimental = [o for o in outputs if o.get("input_kind") != "repository_sources"]
         result = {"schema": SCHEMA, "label": label,
-                  "build_status": "SUPPORTED_OUTPUTS_BUILT" if outputs else "INPUTS_REQUIRED",
+                  "build_status": "SUPPORTED_OUTPUTS_BUILT" if experimental else "INPUTS_REQUIRED",
                   "all_displays_numerically_reconstructed": all(row["full_numerical_display"] for row in displays),
                   "historical_experiment_identity_verified": False,
                   "synthetic_examples": synthetic, "inputs": inputs, "unavailable_inputs": unavailable,

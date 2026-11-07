@@ -393,6 +393,40 @@ class MechanismTests(Workspace):
 
 # ============================================================================= confirmation_contrasts / confirmation_sensitivity
 SIZES = {"PascalVOC-SP": 30, "COCO-SP": 36, "Peptides-func": 24}
+# Fixture admission variances S^2 and Table 1 test intervals (synthetic values; graph shares well inside (0, 1)).
+PARENTS = {"PascalVOC-SP": {"s2": 2.0e-4, "test": (-0.020, -0.004)},
+           "COCO-SP": {"s2": 3.0e-4, "test": (-0.024, -0.002)},
+           "Peptides-func": {"s2": 1.0e-4, "test": (-0.012, 0.002)}}
+
+
+def analytical_share(dataset, root):
+    """paper.build.displays.analytical.graph_variance_share on a sealed run (the Table S14b generator's g)."""
+    from paper.build.displays import analytical
+    from paper.build.displays.framework import RunView
+
+    class Context:
+        def require_run(self, name):
+            return RunView(name, root)
+    return analytical.graph_variance_share(Context(), dataset)
+
+
+def s14b_family(contrasts, tests, shares, j_old):
+    """Table S14b's arithmetic (analytical.table_s14b): J_new rows, raw P and the re-formed Holm family."""
+    from cm_theory.inference import holm_adjust
+    family, z = ca._family(), NORMAL.inv_cdf(0.975)
+    raw, se_new = {}, {}
+    for key, spec in family.items():
+        effect, low, high = (contrasts[(key, q)] for q in ("effect_nats", "interval_low_nats", "interval_high_nats"))
+        if spec[2] != "graph":
+            raw[key] = contrasts[(key, "p_value_zero")]
+            continue
+        dataset = spec[0]
+        g = shares[dataset]
+        se = (high - low) / (2 * z) * math.sqrt((1 - g) + g * j_old[dataset] / spec[3])
+        se_new[key] = se
+        raw[key] = 2 * (1 - NORMAL.cdf(abs(effect) / se))
+    holm = dict(zip(family, holm_adjust([raw[k] for k in family])))
+    return raw, holm, se_new
 
 
 class ConfirmationTests(Workspace):
@@ -413,15 +447,28 @@ class ConfirmationTests(Workspace):
         with self.assertRaisesRegex(RunnerError, "two-way model needs"):
             ca.plan_confirmation([EXAMPLES / "peptides_func"], self.root / "z", allow_fixture=True, seeds=[1])
 
+    def parent(self, dataset, *, s2, test):
+        """A copy of the multigraph example whose admission moments and Table 1 test interval are fixture values."""
+        target = self.root / "parents" / dataset
+        shutil.copytree(EXAMPLES / "peptides_func", target)
+        admit = json.loads((target / "admit" / "decision.json").read_text())
+        admit["empirical_bernstein"].update(units=SIZES[dataset], sample_variance=s2, mean=-0.006)
+        (target / "admit" / "decision.json").write_text(json.dumps(admit))
+        final = json.loads((target / "final" / "results_summary.json").read_text())
+        final["paired_qD_minus_qC_loss"].update(mean=(test[0] + test[1]) / 2, lower=test[0], upper=test[1])
+        (target / "final" / "results_summary.json").write_text(json.dumps(final))
+        return SealedRun(target)
+
     def fabricate(self, datasets=tuple(SIZES)):
         """A synthetic plan over the multigraph benchmarks and per-seed outputs from a known two-way model."""
-        run = SealedRun(EXAMPLES / "peptides_func")
-        left, right, source = ca.policy_pair(run, "Peptides/radius", allow_fixture=True)
+        left, right, source = ca.policy_pair(SealedRun(EXAMPLES / "peptides_func"), "Peptides/radius",
+                                             allow_fixture=True)
         seeds = [1, 2, 3, 4, 5]
         rng = np.random.default_rng(17)
         family, entries, jobs = ca._family(), [], []
         for dataset in datasets:
             key = ca.multigraph_contrasts()[dataset]
+            run = self.parent(dataset, **PARENTS[dataset])
             _, kind, _, j_new, _, direction, margin = family[key]
             entries.append({"dataset": dataset, "slug": dataset, "contrast": key, "kind": kind, "synthetic": True,
                             "member": run.root.name, "parent": str(run.root), "seeds": seeds,
@@ -470,43 +517,61 @@ class ConfirmationTests(Workspace):
                                                "confirmation_analysis.json").read_text()))
         family = ca._family()
         self.assertEqual({k[0] for k in contrasts}, set(family))
-        # Single-graph rows: the campaign's original D_confirm tests, unchanged.
+        # J_old rows: all nine contrasts carry the campaign's original tests, unchanged (the Table S14 values).
         for key, spec in family.items():
-            if spec[2] == "graph":
-                continue
             test = fixture.results[key]
             self.assertEqual(contrasts[(key, "effect_nats")], test["effect_nats"])
-            self.assertEqual(contrasts[(key, "interval_low_nats")], test["interval_nats"][0])
+            self.assertEqual((contrasts[(key, "interval_low_nats")], contrasts[(key, "interval_high_nats")]),
+                             tuple(test["interval_nats"]))
             self.assertEqual(contrasts[(key, "p_value_zero")], test["p_value_zero"])
-            self.assertEqual(contrasts[(key, "unit_count")], spec[3])
-        p_values = {key: fixture.results[key]["p_value_zero"] for key, spec in family.items() if spec[2] != "graph"}
-        z = NORMAL.inv_cdf(0.975)
+            # J_old: a single-graph row keeps its unit; a multigraph row is the validation split of its run.
+            self.assertEqual(contrasts[(key, "unit_count")], spec[3] if spec[2] != "graph" else SIZES[spec[0]])
+        shares, j_old = {}, {}
         for dataset, key in ca.multigraph_contrasts().items():
-            d = truth[dataset]
-            fit = ca.two_way_fit(d)
-            j, s = d.shape
-            v_old = fit["sigma2_graph"] / j + fit["sigma2_seed"] / s + fit["sigma2_residual"] / (j * s)
-            self.assertAlmostEqual(sensitivity[(key, "effect_nats")], float(d.mean()), places=9)
-            self.assertAlmostEqual(sensitivity[(key, "ci_low_nats")], float(d.mean()) - z * math.sqrt(v_old), places=9)
-            self.assertEqual(sensitivity[(key, "units_old")], j)
-            # The two sets agree: S14b's J_old row is the S18b/S9 J_old row.
+            # Figures S9/S18b read the same J_old row as Table S14b.
             for q2, q3 in (("effect_nats", "effect_nats"), ("interval_low_nats", "ci_low_nats"),
                            ("interval_high_nats", "ci_high_nats"), ("unit_count", "units_old")):
                 self.assertEqual(contrasts[(key, q2)], sensitivity[(key, q3)])
-            share = sensitivity[(key, "graph_variance_share")]
-            j_new = family[key][3]
-            se_new = math.sqrt(v_old) * math.sqrt((1 - share) + share * j / j_new)
-            p_values[key] = 2 * (1 - NORMAL.cdf(abs(float(d.mean())) / se_new))
-        holm = ca.holm_family(p_values, 0.05)
-        for dataset, key in ca.multigraph_contrasts().items():
-            self.assertAlmostEqual(sensitivity[(key, "holm_p")], holm[key]["holm_p"], places=9)
+            # g is the Table S14b generator's own graph share of the same sealed run.
+            parent = self.root / "parents" / dataset
+            expected = analytical_share(dataset, parent)
             row = next(c for c in analysis["contrasts"] if c["contrast"] == key)
-            expected = ca.label_survival(row["effect_nats"], row["se_new"], family[key][5], family[key][6],
-                                         holm[key]["multiplier"], 0.05)["probability"]
-            self.assertAlmostEqual(sensitivity[(key, "label_survival_probability")], expected, places=9)
-        self.assertTrue((written["confirmation_sensitivity"] / "raw" / "PascalVOC-SP" / "paired_per_graph.npz").is_file())
-        self.assertTrue((written["confirmation_contrasts"] / "raw" / "campaign" / "arxiv_state" / "test.json").is_file())
-        self.assertEqual(analysis["campaign"]["agreement"]["Pascal/RH"]["policy_pair_is_the_S14_test_pair"], False)
+            self.assertEqual(row["graph_variance_share"], expected["share"])            # raw: the identical float
+            self.assertAlmostEqual(sensitivity[(key, "graph_variance_share")], expected["share"], places=9)
+            hw_graph = NORMAL.inv_cdf(0.975) * math.sqrt(PARENTS[dataset]["s2"] / SIZES[dataset])
+            hw_test = (PARENTS[dataset]["test"][1] - PARENTS[dataset]["test"][0]) / 2
+            self.assertAlmostEqual(expected["share"], (hw_graph / hw_test) ** 2, places=14)
+            shares[dataset], j_old[dataset] = expected["share"], SIZES[dataset]
+        raw, holm, se_new = s14b_family(contrasts, fixture.results, shares, j_old)
+        for dataset, key in ca.multigraph_contrasts().items():
+            self.assertAlmostEqual(sensitivity[(key, "holm_p")], holm[key], places=9)
+            row = next(c for c in analysis["contrasts"] if c["contrast"] == key)
+            self.assertAlmostEqual(row["p_value_zero_new"], raw[key], places=12)
+            self.assertAlmostEqual(row["se_new"], se_new[key], places=15)
+            multiplier = ca.holm_family(raw, 0.05)[key]["multiplier"]
+            survival = ca.label_survival(contrasts[(key, "effect_nats")], se_new[key], family[key][5], family[key][6],
+                                         multiplier, 0.05)["probability"]
+            self.assertAlmostEqual(sensitivity[(key, "label_survival_probability")], survival, places=9)
+            # Figure S9/S18b rescale each side about the effect; Table S14b uses the symmetric interval.
+            factor = math.sqrt((1 - shares[dataset]) + shares[dataset] * j_old[dataset] / family[key][3])
+            self.assertAlmostEqual(row["interval_new_sidewise_nats"][0], contrasts[(key, "effect_nats")]
+                                   - (contrasts[(key, "effect_nats")] - contrasts[(key, "interval_low_nats")]) * factor,
+                                   places=15)
+        # The E16 direct estimate is deposited, labelled, and used by no exported value.
+        e16 = {e["contrast"]: e for e in analysis["e16_direct_estimate"]}
+        for dataset, key in ca.multigraph_contrasts().items():
+            fit = ca.two_way_fit(truth[dataset])
+            self.assertAlmostEqual(e16[key]["fit"]["sigma2_graph"], fit["sigma2_graph"], places=15)
+            self.assertAlmostEqual(e16[key]["own_estimate"]["effect_nats"], float(truth[dataset].mean()), places=12)
+            self.assertIn("not used", e16[key]["label"])
+            self.assertIn("campaign_row_rescaled_with_own_share", e16[key])
+            self.assertNotEqual(e16[key]["own_share"], sensitivity[(key, "graph_variance_share")])
+        for name in ("PascalVOC-SP/paired_per_graph.npz", "PascalVOC-SP/parent/admit_decision.json",
+                     "PascalVOC-SP/parent/results_summary.json", "campaign/Pascal_RH/test.json",
+                     "campaign/arxiv_state/test.json"):
+            self.assertTrue((written["confirmation_sensitivity"] / "raw" / name).is_file(), name)
+        self.assertEqual(analysis["campaign"]["agreement"]["Pascal/RH"]["E16_policy_pair_is_the_S14_test_pair"], False)
+        self.assertEqual(analysis["refused"], [])
 
     def test_an_incomplete_family_is_partial_and_never_reaches_records(self):
         output, _, _ = self.fabricate(datasets=("Peptides-func",))
@@ -520,10 +585,34 @@ class ConfirmationTests(Workspace):
         self.assertFalse((RECORDS / "confirmation_contrasts").exists())
         written = ca.export_confirmation(output, campaign=fixture.root, manuscript_root=fixture.manuscript,
                                          root=self.records, allow_partial=True)
-        sensitivity = values(written["confirmation_sensitivity"])
+        sensitivity, contrasts = values(written["confirmation_sensitivity"]), values(written["confirmation_contrasts"])
         self.assertNotIn(("Peptides/radius", "holm_p"), sensitivity)
         self.assertIn(("Peptides/radius", "graph_variance_share"), sensitivity)
-        self.assertEqual(len({k[0] for k in values(written["confirmation_contrasts"])}), 7)
+        self.assertEqual(len({k[0] for k in contrasts}), 9)          # the campaign's nine original tests
+        self.assertNotIn(("Pascal/RH", "unit_count"), contrasts)       # J_old needs the Pascal parent run
+        self.assertIn(("Peptides/radius", "unit_count"), contrasts)
+
+    def test_a_row_the_campaign_lacks_is_refused_not_substituted(self):
+        output, plan, _ = self.fabricate()
+        fixture = self.s14_fixture()
+        tests = ca.campaign_tests(ca.campaign_family(fixture.root, fixture.manuscript))
+        del tests["COCO/RH"]
+        analysis, _ = ca.analyze_confirmation(output, plan, tests, alpha=0.05)
+        self.assertEqual([r["contrast"] for r in analysis["refused"]], ["COCO/RH"])
+        self.assertNotIn("COCO/RH", [c["contrast"] for c in analysis["contrasts"]])
+        self.assertNotIn("COCO/RH", [r["contrast"] for r in analysis["family"]])
+        self.assertFalse(analysis["family_complete"])
+        self.assertTrue(all(c["holm_p"] is None for c in analysis["contrasts"]))
+        self.assertIn("COCO/RH", [e["contrast"] for e in analysis["e16_direct_estimate"]])
+
+    def test_graph_share_needs_a_proper_variance_share(self):
+        run = self.parent("PascalVOC-SP", s2=2.0e-4, test=(-0.008, -0.008))
+        with self.assertRaisesRegex(RunnerError, "zero-width"):
+            ca.deployment_share(run)
+        shutil.rmtree(run.root)
+        run = self.parent("PascalVOC-SP", s2=2.0e-2, test=(-0.009, -0.007))
+        with self.assertRaisesRegex(RunnerError, "not a variance share"):
+            ca.deployment_share(run)
 
     def test_paired_array_refuses_misaligned_seeds(self):
         output, plan, _ = self.fabricate(datasets=("Peptides-func",))
@@ -824,10 +913,22 @@ class ExecutionTests(unittest.TestCase):
         fixture = S14CampaignTests(S14_FIXTURE)
         fixture.setUp()
         self.addCleanup(fixture.tearDown)
+        try:
+            ca.deployment_share(SealedRun(self.runs["peptides"]))
+        except RunnerError as exc:
+            # A smoke run that returns q_C has a zero-width test interval: g is undefined and nothing is exported.
+            self.assertRegex(str(exc), "zero-width|not a variance share")
+            with self.assertRaises(RunnerError):
+                ca.export_confirmation(output, campaign=fixture.root, manuscript_root=fixture.manuscript,
+                                       root=self.records, allow_partial=True)
+            self.assertFalse((self.records / "confirmation_contrasts").exists())
+            return
         written = ca.export_confirmation(output, campaign=fixture.root, manuscript_root=fixture.manuscript,
                                          root=self.records, allow_partial=True)
         for name, target in written.items():
             verify_set(target, specs()["sets"][name], specs())
+        analysis = json.loads((written["confirmation_sensitivity"] / "raw" / "confirmation_analysis.json").read_text())
+        self.assertEqual([e["contrast"] for e in analysis["e16_direct_estimate"]], ["Peptides/radius"])
 
     def test_admission_oracle_reproduces_the_admission_comparator(self):
         output = self.work / "oracle"

@@ -24,28 +24,34 @@ Record sets
     (cross_morse.pipeline.Pipeline.predecessor).  Both are fixed from D_select before D_confirm is read.
 
 ``confirmation_contrasts`` and ``confirmation_sensitivity`` (one raw computation)
-    Single-graph rows of the nine-test family are the original D_confirm tests of the joint S14
-    campaign (validated by cm_campaigns.confirmation.check_campaign; their test records are deposited
-    unchanged).  For the three multigraph contrasts (Pascal/RH, COCO/RH, Peptides/radius) the S14
-    policy pair is executed on the official validation split (role ``admit``, J_old complete graphs)
-    with every optimization seed s of the S14 seed population, one checkpoint at a time, giving the
-    paired per-graph, per-seed array D_js = loss_js(left) - loss_js(right).  The two-way crossed
-    random-effects model of Note S24, D_js = mu + u_j + v_s + e_js, is fitted by the ANOVA method of
-    moments (components truncated at zero), and
+    The nine contrasts at their original sizes (Table S14b, J_old; Figure S9, grey) are the joint
+    S14 campaign's original tests, validated by cm_campaigns.confirmation.check_campaign -- the values
+    Table S14 shows: effect, 95% interval and P against zero of every row are read from the original
+    test records, which are deposited unchanged; a row the validated campaign lacks is refused.  J_old
+    of a multigraph row is the validation split, i.e. the J of the sealed run's admission record
+    (admit/decision.json, empirical Bernstein moments of Table S13); a single-graph row keeps its unit.
+    Only the graph component of the variance scales with the graph count (Table S14b, Note S24):
 
-        effect          D_bar = mean of D_js over graphs and seeds
-        V(J, S)         s_u^2 / J + s_v^2 / S + s_e^2 / (J S)
-        interval (J)    D_bar -/+ z_0.975 V(J, S)^(1/2)          (normal approximation)
-        graph share g   [s_u^2 / J_old + s_e^2 / (J_old S)] / V(J_old, S)   (the part that scales with 1/J)
-        P (J)           2 [1 - Phi(|D_bar| / V(J, S)^(1/2))]
+        g        = (hw_graph / hw_test)^2 = rho^-2, hw_graph = z_0.975 (S^2 / J)^(1/2) of the fixed deployed
+                   ensemble (admission moments), hw_test = half-width of the paired test-stage interval of the
+                   deployed rule (final/results_summary.json, main Table 1) -- the arithmetic of
+                   paper.build.displays.analytical.graph_variance_share
+        se_old   = (high - low) / (2 z_0.975) of the original interval;  se_new = se_old [(1 - g) + g J_old/J_new]^(1/2)
+        P_new    = 2 [1 - Phi(|effect| / se_new)] at J_new (the D_confirm size of FAMILY), effect held fixed
 
-    At J_new (the D_confirm size of FAMILY) the means are held fixed, V(J_new, S) =
-    V(J_old, S) [(1 - g) + g J_old / J_new] (the rescaling the display generators apply), the Holm
-    family is re-formed over the six original single-graph P values and the three rescaled P values,
-    and the label-survival probability of a contrast at Holm rank r is
-        Phi[(b D_bar - max(margin, z_{1 - alpha / (2 (m - r + 1))} V_new^(1/2))) / V_new^(1/2)]
+    The Holm family is re-formed over the six original single-graph P values and the three P_new, and
+    the label-survival probability of a contrast with Holm multiplier k is
+        Phi[(b effect - max(margin, z_{1 - alpha / (2 k)} se_new)) / se_new]
     with b its beneficial direction: the probability that a new D_confirm estimate is Holm-significant
     at that step in the beneficial direction and beyond the practical margin (the E10 label rule).
+
+    E16 direct estimate (deposited under raw/, a separate estimate not used for any exported quantity):
+    the S14 policy pair is executed on the validation split (role ``admit``) with every seed s of the
+    S14 seed population, one checkpoint at a time, giving D_js = loss_js(left) - loss_js(right); the
+    two-way model of Note S24, D_js = mu + u_j + v_s + e_js, is fitted by the ANOVA method of moments
+    (components truncated at zero): V(J, S) = s_u^2/J + s_v^2/S + s_e^2/(J S), its own share
+    [s_u^2/J + s_e^2/(J S)] / V(J, S), its own J_old and J_new intervals, and the campaign row rescaled
+    with that share.
 
 Workflow (``scripts/run_confirmation_analysis.py {mechanism|confirmation} plan|run|export``) as in
 cm_experiments.ensemble_grid: plan -> <output>/plan.json; run (one job with --job K) ->
@@ -861,9 +867,11 @@ def plan_confirmation(parents, output, *, campaign=None, manuscript_root=ROOT, s
         "campaign": None if family is None else {"path": str(family["root"]), "input_identity": family["input_identity"],
                                                  "status": family["status"]},
         "alpha": _holm_alpha(),
-        "protocol": ("S14 policy pair of each multigraph contrast executed on the official validation split (J_old "
-                     "graphs) with every seed of the S14 seed population, one checkpoint at a time; paired per-graph, "
-                     "per-seed losses; two-way seed-by-graph variance model of Note S24 fitted by the method of moments")})
+        "protocol": ("exported rows: the joint S14 campaign's original tests at J_old and the run-based graph share of "
+                     "Note S24 (admission moments and Table 1 test interval of each parent); executed here for the E16 "
+                     "direct estimate: the S14 policy pair of each multigraph contrast on the official validation split "
+                     "with every seed of the S14 seed population, one checkpoint at a time; paired per-graph, per-seed "
+                     "losses; two-way seed-by-graph model fitted by the method of moments")})
 
 
 def _holm_alpha() -> float:
@@ -990,7 +998,7 @@ def variance_of_mean(fit, graphs, seeds) -> float:
 
 
 def sensitivity(fit, j_new) -> dict:
-    """J_old interval, graph share and the D_confirm-size variance with fixed means (Note S24)."""
+    """The E16 direct estimate's own intervals and share: V(J, S) at the array's J_old and at J_new (Note S24)."""
     j_old, s = fit["graphs"], fit["seeds"]
     v_old = variance_of_mean(fit, j_old, s)
     if not v_old > 0:
@@ -1081,54 +1089,133 @@ def paired_array(output, plan, dataset) -> dict:
             "right_loss": right, "differences": left - right, "results": results}
 
 
-def single_graph_tests(family) -> dict:
-    """The six original D_confirm tests of the single-graph benchmarks, as validated by the auditor."""
+def campaign_tests(family) -> dict:
+    """The original test record of every contrast of the validated campaign (the values Table S14 shows)."""
     out = {}
-    for key, spec in _family().items():
-        if spec[2] == "graph":
-            continue
+    for key in _family():
+        if key not in family["rows"] or key not in family["tests"]:
+            continue                                           # refused later: never substituted
         row, files = family["rows"][key], family["tests"][key]
         result = files["result_json"]
         for field in ("effect_nats", "p_value_zero", "unit_count"):
             if result.get(field) != row.get(field):
                 raise RunnerError(f"{key}: the original test record and the validated campaign row differ in {field}")
-        out[key] = {"effect_nats": float(result["effect_nats"]), "interval_nats": [float(v) for v in result["interval_nats"]],
+        interval = [float(v) for v in result["interval_nats"]]
+        out[key] = {"effect_nats": float(result["effect_nats"]), "interval_nats": interval,
                     "p_value_zero": float(result["p_value_zero"]), "unit_count": int(result["unit_count"]),
                     "tail": result.get("tail"), "method_name": result.get("method_name"),
-                    "statistical_unit": result.get("statistical_unit"), "result_file": files["result"],
-                    "paired_file": files["paired"]}
+                    "data_role": result.get("data_role"), "statistical_unit": result.get("statistical_unit"),
+                    "seed_ids": result.get("seed_ids"), "result_file": files["result"], "paired_file": files["paired"]}
     return out
 
 
-def analyze_confirmation(output, plan, single, *, alpha) -> tuple[dict, dict]:
-    """The one raw computation behind both record sets: arrays, two-way fits, J_new family."""
-    family_keys = list(_family())
-    contrasts, arrays = [], {}
-    for dataset in plan["datasets"]:
+def deployment_share(run: SealedRun) -> dict:
+    """Graph share of the test-stage variance under the two-way model (Note S24): g = rho^-2.
+
+    The arithmetic of paper.build.displays.analytical.graph_variance_share: hw_graph = z_0.975 (S^2/J)^(1/2)
+    from the clipped admission moments of the fixed deployed ensemble (admit/decision.json, Table S13) and
+    hw_test the half-width of the deployed rule's paired test-stage interval (final/results_summary.json,
+    main Table 1); rho = hw_test / hw_graph.
+    """
+    eb = run.json("admit/decision.json").get("empirical_bernstein") or {}
+    if any(eb.get(k) is None for k in ("mean", "sample_variance", "units", "clip")):
+        raise RunnerError(f"{run.root.name}: the admission moments (D_bar, S^2, J, B) are not recorded")
+    paired = run.json("final/results_summary.json").get("paired_qD_minus_qC_loss") or {}
+    if paired.get("lower") is None or paired.get("upper") is None:
+        raise RunnerError(f"{run.root.name}: the Table 1 test interval is not recorded")
+    j, s2 = int(eb["units"]), float(eb["sample_variance"])
+    graph = Z975 * math.sqrt(s2 / j)
+    test = (float(paired["upper"]) - float(paired["lower"])) / 2.0
+    if graph <= 0 or test <= 0:
+        raise RunnerError(f"{run.root.name}: a zero-width admission or test interval leaves the two-way shares "
+                          "undefined")
+    if graph > test:
+        raise RunnerError(f"{run.root.name}: rho = hw_test / hw_graph = {test / graph:.3f} < 1, so (hw_graph/hw_test)^2 "
+                          "is not a variance share in [0, 1] under the two-way model of Note S24")
+    return {"J": j, "S2": s2, "D_bar": float(eb["mean"]), "B": float(eb["clip"]), "hw_graph_nats": graph,
+            "hw_test_nats": test, "ratio": test / graph, "graph_share": (graph / test) ** 2,
+            "test_interval_nats": [float(paired["lower"]), float(paired["upper"])],
+            "sources": {"S2, J": "admit/decision.json:/empirical_bernstein",
+                        "test interval": "final/results_summary.json:/paired_qD_minus_qC_loss"}}
+
+
+def rescaled_row(test, share, j_old, j_new) -> dict:
+    """An original J_old row at J_new with fixed effect (Table S14b; Figures S9 and S18b)."""
+    effect, (low, high) = test["effect_nats"], test["interval_nats"]
+    se_old = (high - low) / (2.0 * Z975)
+    factor = math.sqrt((1.0 - share) + share * j_old / j_new)
+    se_new = se_old * factor
+    return {"se_old": se_old, "rescaling_factor": factor, "se_new": se_new,
+            "interval_new_symmetric_nats": [effect - Z975 * se_new, effect + Z975 * se_new],
+            "interval_new_sidewise_nats": [effect - (effect - low) * factor, effect + (high - effect) * factor],
+            "p_value_zero_new": 2.0 * (1.0 - NORMAL.cdf(abs(effect) / se_new)) if se_new > 0 else None}
+
+
+def e16_estimate(array, dataset, test, j_admission) -> dict:
+    """The E16 direct estimate from the per-graph, per-seed array (separate; no exported quantity uses it)."""
+    from cross_morse.statistics import paired_bootstrap
+    fit = two_way_fit(array["differences"])
+    own = sensitivity(fit, dataset["J_new"])
+    fixed = paired_bootstrap(array["differences"].mean(axis=1), reps=dataset["bootstrap"]["reps"], alpha=0.025,
+                             seed=dataset["bootstrap"]["seed"])
+    out = {"contrast": dataset["contrast"], "dataset": dataset["dataset"],
+           "label": "E16 direct estimate of the two-way components (Note S24); separate from, and not used for, the "
+                    "exported S14b/S9/S18b quantities",
+           "left": dataset["left"], "right": dataset["right"], "pair_source": dataset["pair_source"],
+           "seeds": dataset["seeds"], "seed_source": dataset["seed_source"], "graphs": fit["graphs"],
+           "admission_graphs": j_admission, "fit": fit, "own_share": own["graph_variance_share"],
+           "own_estimate": own,
+           "fixed_seed_graph_bootstrap": {"mean": fixed["mean"], "lower": fixed["lower"], "upper": fixed["upper"],
+                                          "units": fixed["units"], "reps": fixed["bootstrap_replicates"],
+                                          "seed": fixed["bootstrap_seed"],
+                                          "scope": "graphs resampled, seeds fixed (diagnostic)"}}
+    if test is not None and j_admission is not None:
+        out["campaign_row_rescaled_with_own_share"] = rescaled_row(test, own["graph_variance_share"], j_admission,
+                                                                  dataset["J_new"])
+    return out
+
+
+def analyze_confirmation(output, plan, tests, *, alpha) -> tuple[dict, dict]:
+    """The one raw computation behind both record sets: the campaign's nine rows at J_old, the run-based
+    graph share and J_new family of the multigraph rows, and the E16 direct estimates."""
+    family = _family()
+    constants = json.loads((ROOT / "paper" / "registered_constants.json").read_text(encoding="utf-8"))
+    registered = constants["data_roles_table_S2"]["multi_graph_counts"]
+    planned = {d["contrast"]: d for d in plan["datasets"]}
+    contrasts, e16, arrays, refused = [], [], {}, []
+    for key, spec in family.items():
+        if spec[2] != "graph" or key not in planned:
+            continue
+        dataset = planned[key]
+        run = SealedRun(dataset["parent"])
         array = paired_array(output, plan, dataset)
-        fit = two_way_fit(array["differences"])
-        derived = sensitivity(fit, dataset["J_new"])
-        graph_means = array["differences"].mean(axis=1)
-        from cross_morse.statistics import paired_bootstrap
-        fixed = paired_bootstrap(graph_means, reps=dataset["bootstrap"]["reps"], alpha=0.025,
-                                 seed=dataset["bootstrap"]["seed"])
-        contrasts.append({"contrast": dataset["contrast"], "dataset": dataset["dataset"], "kind": dataset["kind"],
-                          "left": dataset["left"], "right": dataset["right"], "pair_source": dataset["pair_source"],
-                          "seeds": dataset["seeds"], "seed_source": dataset["seed_source"],
-                          "campaign_binding": dataset["campaign_binding"],
-                          "beneficial_direction": dataset["beneficial_direction"],
-                          "practical_margin_nats": dataset["practical_margin_nats"], "fit": fit, **derived,
-                          "units_old": derived["J_old"],
-                          "fixed_seed_graph_bootstrap": {"mean": fixed["mean"], "lower": fixed["lower"],
-                                                         "upper": fixed["upper"], "units": fixed["units"],
-                                                         "reps": fixed["bootstrap_replicates"],
-                                                         "seed": fixed["bootstrap_seed"],
-                                                         "scope": "graphs resampled, seeds fixed (diagnostic)"}})
         arrays[dataset["slug"]] = array
+        share = deployment_share(run)
+        if share["J"] != len(array["unit_id"]) and not dataset["synthetic"]:
+            raise RunnerError(f"{key}: the admission record has {share['J']} validation graphs, the E16 array "
+                              f"{len(array['unit_id'])}")
+        test = tests.get(key)
+        e16.append(e16_estimate(array, dataset, test, share["J"]))
+        if test is None:
+            continue                                           # refused below: never substituted
+        row = rescaled_row(test, share["graph_share"], share["J"], dataset["J_new"])
+        contrasts.append({"contrast": key, "dataset": dataset["dataset"],
+                          "source": "joint S14 campaign original test (Table S14 values)",
+                          "effect_nats": test["effect_nats"], "interval_low_nats": test["interval_nats"][0],
+                          "interval_high_nats": test["interval_nats"][1], "p_value_zero": test["p_value_zero"],
+                          "tail": test["tail"], "campaign_unit_count": test["unit_count"],
+                          "campaign_data_role": test["data_role"], "units_old": share["J"],
+                          "J_new": int(dataset["J_new"]),
+                          "registered_D_admit": registered.get(dataset["dataset"], {}).get("D_admit"),
+                          "registered_D_confirm": registered.get(dataset["dataset"], {}).get("D_confirm"),
+                          "graph_share_inputs": share, "graph_variance_share": share["graph_share"], **row,
+                          "beneficial_direction": dataset["beneficial_direction"],
+                          "practical_margin_nats": dataset["practical_margin_nats"],
+                          "campaign_binding": dataset["campaign_binding"]})
     by_key = {c["contrast"]: c for c in contrasts}
-    p_values = {key: single[key]["p_value_zero"] for key in single}
-    p_values.update({key: c["p_value_zero_new"] for key, c in by_key.items()})
-    complete = set(p_values) == set(family_keys)
+    p_values = {key: tests[key]["p_value_zero"] for key, spec in family.items() if spec[2] != "graph" and key in tests}
+    p_values.update({key: c["p_value_zero_new"] for key, c in by_key.items() if c["p_value_zero_new"] is not None})
+    complete = set(p_values) == set(family)
     holm = holm_family(p_values, alpha) if complete else None
     for contrast in contrasts:
         if holm is None:
@@ -1140,72 +1227,85 @@ def analyze_confirmation(output, plan, single, *, alpha) -> tuple[dict, dict]:
         contrast.update(holm_p=row["holm_p"], label_survival_probability=survival["probability"], holm=row,
                         survival=survival)
     family_rows = []
-    for key in family_keys:
-        if key in single:
-            s = single[key]
-            family_rows.append({"contrast": key, "source": "joint S14 campaign original D_confirm test",
-                                "effect_nats": s["effect_nats"], "interval_low_nats": s["interval_nats"][0],
-                                "interval_high_nats": s["interval_nats"][1], "p_value_zero": s["p_value_zero"],
-                                "unit_count": s["unit_count"], "tail": s["tail"], "method": s["method_name"],
-                                "raw_p_at_J_new": s["p_value_zero"]})
-        elif key in by_key:
-            c = by_key[key]
-            family_rows.append({"contrast": key, "source": "validation-split two-way analysis at J_old",
-                                "effect_nats": c["effect_nats"], "interval_low_nats": c["interval_low_nats"],
-                                "interval_high_nats": c["interval_high_nats"], "p_value_zero": c["p_value_zero_old"],
-                                "unit_count": c["J_old"], "tail": "two_sided", "method": "two-way normal approximation",
-                                "raw_p_at_J_new": c["p_value_zero_new"]})
-        if holm is not None and family_rows and family_rows[-1]["contrast"] == key:
-            family_rows[-1].update(holm_p_at_J_new=holm[key]["holm_p"], rank=holm[key]["rank"])
-    analysis = {"schema": "cm-confirmation-sensitivity-1", "experiment": "E10", "alpha": alpha,
+    for key, spec in family.items():
+        if key not in tests:
+            refused.append({"contrast": key, "reason": "the validated campaign holds no original test of this "
+                                                       "contrast; no value is substituted"})
+            continue
+        test = tests[key]
+        rescaled = key in by_key
+        family_rows.append({"contrast": key, "source": "joint S14 campaign original test (Table S14 values)",
+                            "effect_nats": test["effect_nats"], "interval_low_nats": test["interval_nats"][0],
+                            "interval_high_nats": test["interval_nats"][1], "p_value_zero": test["p_value_zero"],
+                            "tail": test["tail"], "method": test["method_name"], "campaign_unit_count": test["unit_count"],
+                            "unit_count": by_key[key]["units_old"] if rescaled else
+                            (test["unit_count"] if spec[2] != "graph" else None),
+                            "J_new": int(spec[3]), "rescaled": rescaled,
+                            "raw_p_at_J_new": by_key[key]["p_value_zero_new"] if rescaled else
+                            (test["p_value_zero"] if spec[2] != "graph" else None),
+                            "holm_p_at_J_new": None if holm is None else holm[key]["holm_p"],
+                            "rank": None if holm is None else holm[key]["rank"]})
+    analysis = {"schema": "cm-confirmation-sensitivity-2", "experiment": "E10", "alpha": alpha,
                 "family_complete": complete, "family": family_rows, "contrasts": contrasts,
+                "e16_direct_estimate": e16, "refused": refused,
                 "definitions": {
-                    "effect_nats": "mean over the J_old validation graphs and the S seeds of D_js = loss(left) - loss(right)",
-                    "interval": "D_bar -/+ z_0.975 V(J_old, S)^(1/2), V = s_u^2/J + s_v^2/S + s_e^2/(J S) (Note S24)",
-                    "graph_variance_share": "[s_u^2/J_old + s_e^2/(J_old S)] / V(J_old, S): the part of V that scales "
-                                            "with 1/J",
-                    "p_value_zero_old": "two-sided normal P of D_bar against zero at J_old",
-                    "p_value_zero_new": "two-sided normal P at J_new with V(J_new, S) = V(J_old, S)[(1 - g) + g J_old/J_new]",
-                    "holm_p": "Holm over the six original single-graph D_confirm P values and the three J_new P values",
-                    "label_survival_probability": "Phi[(b D_bar - max(margin, z_{1-alpha/(2 k)} se_new)) / se_new], "
-                                                  "k = the contrast's Holm multiplier at J_new"}}
+                    "J_old rows": "effect, 95% interval and P against zero: the joint S14 campaign's original test "
+                                  "records validated by check_campaign (the values Table S14 shows)",
+                    "units_old": "J_old of a multigraph row: the validation-split graph count J of the sealed run's "
+                                 "admission record (admit/decision.json:/empirical_bernstein/units)",
+                    "graph_variance_share": "(hw_graph / hw_test)^2, hw_graph = z_0.975 (S^2/J)^(1/2) of the admission "
+                                            "moments, hw_test = half-width of final/results_summary.json "
+                                            "paired_qD_minus_qC_loss (Note S24; analytical.graph_variance_share)",
+                    "se_new": "(high - low)/(2 z_0.975) [(1 - g) + g J_old/J_new]^(1/2), effect held fixed",
+                    "p_value_zero_new": "2 [1 - Phi(|effect| / se_new)] at J_new = the FAMILY D_confirm size",
+                    "holm_p": "Holm over the six original single-graph P values and the three J_new P values",
+                    "label_survival_probability": "Phi[(b effect - max(margin, z_{1-alpha/(2 k)} se_new)) / se_new], "
+                                                  "k = the contrast's Holm multiplier at J_new",
+                    "e16_direct_estimate": "separate estimate from the per-graph, per-seed validation-split array: "
+                                           "ANOVA method of moments, V = s_u^2/J + s_v^2/S + s_e^2/(J S), own share "
+                                           "[s_u^2/J + s_e^2/(J S)]/V; not used for any exported quantity"}}
     return analysis, arrays
 
 
 def export_confirmation(output, *, campaign=None, manuscript_root=ROOT, root=None, replace=False, allow_partial=False,
                         hardware=None, period=None, command=None) -> dict:
-    """Write confirmation_contrasts and confirmation_sensitivity from one analysis of the same raw arrays."""
+    """Write confirmation_contrasts and confirmation_sensitivity from one analysis (raw/confirmation_analysis.json).
+
+    Every exported value is the campaign's original test record, the sealed parent's admission record or a
+    quantity computed from them (graph share, Holm, label survival); the E16 arrays are deposited alongside.
+    """
     output = Path(output).resolve()
     plan = load_plan(output, "confirmation_contrasts")
     if campaign is None and plan.get("campaign"):
         campaign = plan["campaign"]["path"]
     if campaign is None:
-        raise RunnerError("the single-graph rows and the Holm family need the joint S14 campaign (--campaign)")
+        raise RunnerError("the nine J_old rows and the Holm family need the joint S14 campaign (--campaign)")
     family = campaign_family(campaign, manuscript_root)
     if plan.get("campaign") and plan["campaign"]["input_identity"] != family["input_identity"]:
         raise RunnerError("the joint S14 campaign changed after planning")
+    tests = campaign_tests(family)
     agreement = {}
     for dataset in plan["datasets"]:
-        row = family["rows"][dataset["contrast"]]
-        same_pair = (dataset["left"]["hash"], dataset["right"]["hash"]) == (row["left_policy_sha256"],
-                                                                          row["right_policy_sha256"])
+        row = family["rows"].get(dataset["contrast"])
+        same_pair = row is not None and (dataset["left"]["hash"], dataset["right"]["hash"]) == (
+            row["left_policy_sha256"], row["right_policy_sha256"])
         try:
-            population = sorted(int(v) for v in row["seed_ids"])
+            population = None if row is None else sorted(int(v) for v in row["seed_ids"])
         except (TypeError, ValueError):
             population = None
         same_seeds = population == [int(s) for s in dataset["seeds"]]
-        agreement[dataset["contrast"]] = {"policy_pair_is_the_S14_test_pair": same_pair,
-                                          "seeds_are_the_S14_seed_population": same_seeds}
+        agreement[dataset["contrast"]] = {"E16_policy_pair_is_the_S14_test_pair": same_pair,
+                                          "E16_seeds_are_the_S14_seed_population": same_seeds}
         if dataset["synthetic"]:
             continue
-        if not same_pair:
-            raise RunnerError(f"{dataset['contrast']}: the J_old policies are not the joint campaign's test policies")
-        if not same_seeds:
-            raise RunnerError(f"{dataset['contrast']}: the J_old seeds differ from the S14 test's seed population")
+        # The graph share and J_old come from this run: it must be the campaign's original run of the dataset.
         check_binding(SealedRun(dataset["parent"]), family, dataset["dataset"])
-    single = single_graph_tests(family)
+        if row is not None and not same_pair:
+            raise RunnerError(f"{dataset['contrast']}: the E16 policies are not the joint campaign's test policies")
+        if row is not None and not same_seeds:
+            raise RunnerError(f"{dataset['contrast']}: the E16 seeds differ from the S14 test's seed population")
     alpha = float(plan.get("alpha") or _holm_alpha())
-    analysis, arrays = analyze_confirmation(output, plan, single, alpha=alpha)
+    analysis, arrays = analyze_confirmation(output, plan, tests, alpha=alpha)
     analysis["campaign"] = {"status": family["status"], "input_identity": family["input_identity"],
                             "agreement": agreement}
     staging = Path(tempfile.mkdtemp(prefix="cm-confirmation-export-"))
@@ -1229,51 +1329,61 @@ def export_confirmation(output, *, campaign=None, manuscript_root=ROOT, root=Non
                 results.append(result)
                 inputs.append({"file": str((directory / "pair.json").relative_to(output)),
                                "sha256": sha256(directory / "pair.json")})
-        for key, test in single.items():
+        for dataset in plan["datasets"]:
+            # The sealed admission and test records behind J_old and the graph share, deposited unchanged.
+            parent = Path(dataset["parent"])
+            files[f"raw/{dataset['slug']}/parent/admit_decision.json"] = parent / "admit" / "decision.json"
+            files[f"raw/{dataset['slug']}/parent/results_summary.json"] = parent / "final" / "results_summary.json"
+        for key, test in tests.items():
             base = f"raw/campaign/{slug(key)}"
             files[f"{base}/test.json"] = test["result_file"]
             files[f"{base}/paired.csv"] = test["paired_file"]
             inputs.append({"file": f"campaign:{test['result_file'].relative_to(family['root']).as_posix()}",
                            "sha256": sha256(test["result_file"])})
-        family_index = {row["contrast"]: i for i, row in enumerate(analysis["family"])}
         contrast_index = {c["contrast"]: i for i, c in enumerate(analysis["contrasts"])}
+        slug_of = {d["contrast"]: d["slug"] for d in plan["datasets"]}
+        campaign_locators = {"effect_nats": "json:/effect_nats", "interval_low_nats": "json:/interval_nats/0",
+                             "interval_high_nats": "json:/interval_nats/1", "p_value_zero": "json:/p_value_zero"}
+        admission_units = ("json:/empirical_bernstein/units", "graphs")
         set2, set3 = [], []
         for key, spec in _family().items():
-            unit = UNIT_WORDS[spec[2]]
-            if key in single:
-                source = f"raw/campaign/{slug(key)}/test.json"
-                locators = {"effect_nats": "json:/effect_nats", "interval_low_nats": "json:/interval_nats/0",
-                            "interval_high_nats": "json:/interval_nats/1", "p_value_zero": "json:/p_value_zero",
-                            "unit_count": "json:/unit_count"}
-                values = {"effect_nats": single[key]["effect_nats"], "interval_low_nats": single[key]["interval_nats"][0],
-                          "interval_high_nats": single[key]["interval_nats"][1],
-                          "p_value_zero": single[key]["p_value_zero"], "unit_count": single[key]["unit_count"]}
-            elif key in contrast_index:
-                i = family_index[key]
-                row = analysis["family"][i]
-                source = "raw/confirmation_analysis.json"
-                locators = {q: f"json:/family/{i}/{q}" for q in ("effect_nats", "interval_low_nats",
-                                                                 "interval_high_nats", "p_value_zero", "unit_count")}
-                values = {q: row[q] for q in locators}
-            else:
-                continue
+            if key not in tests:
+                continue                                       # refused (analysis["refused"]): never substituted
+            source = f"raw/campaign/{slug(key)}/test.json"
+            test = tests[key]
+            values = {"effect_nats": test["effect_nats"], "interval_low_nats": test["interval_nats"][0],
+                      "interval_high_nats": test["interval_nats"][1], "p_value_zero": test["p_value_zero"]}
             units = {"effect_nats": "nats", "interval_low_nats": "nats", "interval_high_nats": "nats",
-                     "p_value_zero": "probability", "unit_count": unit}
-            for quantity in ("effect_nats", "interval_low_nats", "interval_high_nats", "p_value_zero", "unit_count"):
+                     "p_value_zero": "probability"}
+            for quantity, locator in campaign_locators.items():
                 set2.append({"contrast": key, "quantity": quantity, "value": values[quantity], "unit": units[quantity],
-                             "source_file": source, "locator": locators[quantity]})
+                             "source_file": source, "locator": locator})
+            if spec[2] != "graph":
+                set2.append({"contrast": key, "quantity": "unit_count", "value": test["unit_count"],
+                             "unit": UNIT_WORDS[spec[2]], "source_file": source, "locator": "json:/unit_count"})
+            elif key in contrast_index:
+                c = analysis["contrasts"][contrast_index[key]]
+                set2.append({"contrast": key, "quantity": "unit_count", "value": c["units_old"],
+                             "unit": admission_units[1],
+                             "source_file": f"raw/{slug_of[key]}/parent/admit_decision.json",
+                             "locator": admission_units[0]})
         for key, i in contrast_index.items():
             c = analysis["contrasts"][i]
-            quantities = {"effect_nats": ("effect_nats", "nats"), "ci_low_nats": ("interval_low_nats", "nats"),
-                          "ci_high_nats": ("interval_high_nats", "nats"), "units_old": ("units_old", "graphs"),
-                          "graph_variance_share": ("graph_variance_share", "fraction"),
-                          "holm_p": ("holm_p", "probability"),
-                          "label_survival_probability": ("label_survival_probability", "probability")}
-            for quantity, (field, unit) in quantities.items():
-                if c[field] is None:
+            source = f"raw/campaign/{slug(key)}/test.json"
+            rows = [("effect_nats", c["effect_nats"], "nats", source, campaign_locators["effect_nats"]),
+                    ("ci_low_nats", c["interval_low_nats"], "nats", source, campaign_locators["interval_low_nats"]),
+                    ("ci_high_nats", c["interval_high_nats"], "nats", source, campaign_locators["interval_high_nats"]),
+                    ("units_old", c["units_old"], "graphs", f"raw/{slug_of[key]}/parent/admit_decision.json",
+                     admission_units[0])]
+            for quantity, unit in (("graph_variance_share", "fraction"), ("holm_p", "probability"),
+                                   ("label_survival_probability", "probability")):
+                rows.append((quantity, c[quantity], unit, "raw/confirmation_analysis.json",
+                             f"json:/contrasts/{i}/{quantity}"))
+            for quantity, value, unit, source_file, locator in rows:
+                if value is None:
                     continue
-                set3.append({"contrast": key, "quantity": quantity, "value": c[field], "unit": unit,
-                             "source_file": "raw/confirmation_analysis.json", "locator": f"json:/contrasts/{i}/{field}"})
+                set3.append({"contrast": key, "quantity": quantity, "value": value, "unit": unit,
+                             "source_file": source_file, "locator": locator})
         synthetic = {d["synthetic"] for d in plan["datasets"]}
         if len(synthetic) != 1:
             raise RunnerError("synthetic and benchmark parents cannot share one record set")
@@ -1287,18 +1397,24 @@ def export_confirmation(output, *, campaign=None, manuscript_root=ROOT, root=Non
                     present.setdefault(row["contrast"], set()).add(row["quantity"])
                 lacking = [k for k in keys if len(present.get(k, ())) != count]
                 if lacking:
-                    raise RunnerError(f"{name}: incomplete contrasts {lacking} (all three multigraph benchmarks and the "
-                                      "complete nine-test family are required; --allow-partial writes elsewhere)")
+                    raise RunnerError(f"{name}: incomplete contrasts {lacking} (the complete validated campaign and the "
+                                      "three multigraph parent runs are required; --allow-partial writes elsewhere)")
         common = {"hardware": hardware or provenance_hardware(environments),
                   "period": period or provenance_period(results), "synthetic": synthetic,
                   "plan_sha256": sha256(output / "plan.json"), "experiment_code_sha256": experiment_code_identity(),
                   "campaign": {"status": family["status"], "input_identity": family["input_identity"]},
-                  "analysis_sha256": sha256(analysis_path), "family_complete": analysis["family_complete"]}
-        protocol = ("validation-split (D_admit, J_old graphs) paired per-graph, per-seed contrasts of the S14 policy "
-                    "pairs, one checkpoint per seed of the S14 seed population; two-way seed-by-graph model of Note S24 "
-                    "by the method of moments; J_old interval D_bar -/+ z V^(1/2); J_new = FAMILY D_confirm sizes with "
-                    "fixed means; Holm re-formed over the six original single-graph D_confirm P values and the three "
-                    "J_new P values")
+                  "analysis_sha256": sha256(analysis_path), "family_complete": analysis["family_complete"],
+                  "refused": analysis["refused"],
+                  "parent_runs": {d["dataset"]: {"name": Path(d["parent"]).name, "binding": d["campaign_binding"]}
+                                  for d in plan["datasets"]}}
+        protocol = ("J_old rows: effect, 95% interval and P against zero of all nine contrasts are the joint S14 "
+                    "campaign's original test records validated by check_campaign (the Table S14 values); J_old of a "
+                    "multigraph row is the validation-split graph count of the sealed admission record; graph share "
+                    "g = (hw_graph/hw_test)^2 from the clipped admission moments (Table S13) and the main Table 1 test "
+                    "interval of the same sealed run (Note S24); J_new = the FAMILY D_confirm sizes with fixed effects, "
+                    "se_new = se_old [(1 - g) + g J_old/J_new]^(1/2); Holm re-formed over the six original single-graph "
+                    "P values and the three J_new P values. raw/ also holds the E16 direct estimate (per-graph, "
+                    "per-seed validation-split array, two-way method of moments), which no exported quantity uses")
         generated = {"code/plan.json": public_plan(output)}
         coverage2 = {"tables": ["S14b"], "datasets": [], "coverage_keys": ["contrast"],
                      "coverage_rows": [[k] for k in _family()], "analyzer": "confirmation_contrasts"}
@@ -1309,8 +1425,8 @@ def export_confirmation(output, *, campaign=None, manuscript_root=ROOT, root=Non
             "confirmation_contrasts", set2, files,
             {**common, "experiment": "E10 nine-test confirmation family at the original sizes (Supplementary Table S14b)",
              "produced_by": "scripts/run_confirmation_analysis.py confirmation plan/run/export "
-                            "(cm_experiments/confirmation_analysis.py); single-graph rows: joint S14 campaign",
-             "protocol": protocol + "; single-graph rows are the original D_confirm tests of the joint S14 campaign"},
+                            "(cm_experiments/confirmation_analysis.py); row values: joint S14 campaign original tests",
+             "protocol": protocol},
             coverage=coverage2, root=root, replace=replace, allow_partial=allow_partial, command=command,
             inputs=inputs, generated=generated)
         written["confirmation_sensitivity"] = install_set(

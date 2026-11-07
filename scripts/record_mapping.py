@@ -75,11 +75,20 @@ def _contract(name: str) -> dict:
 
 
 def _declared_coverage(name: str, rows: list[dict], spec: dict, contract: dict) -> None:
-    """Every declared dataset is present and every key row carries every quantity."""
+    """Every declared dataset is present and every key row carries every quantity.
+
+    A contract with ``sparse_quantities`` (rows that by design carry different quantities, such as
+    per-depth and per-phase rows) only requires every quantity to occur in the set.
+    """
     if contract["datasets"]:
         present = {row.get("dataset") for row in rows}
         if not set(contract["datasets"]) <= present:
             raise ValueError(f"{name}: datasets without rows: {sorted(set(contract['datasets']) - present)}")
+    if spec.get("sparse_quantities"):
+        missing = set(spec["quantities"]) - {row["quantity"] for row in rows}
+        if missing:
+            raise ValueError(f"{name}: quantities without any row: {sorted(missing)}")
+        return
     observed = {}
     for row in rows:
         observed.setdefault(tuple(row[k] for k in spec["keys"]), set()).add(row["quantity"])

@@ -567,11 +567,28 @@ class TubeExportTests(Workspace):
         self.assertTrue(provenance["synthetic"])
         self.assertTrue((target / "code/cm_experiments/trajectory_audit.py").is_file())
         self.assertTrue((target / "raw/ogbn-arxiv/arxiv/tube_arrays.npz").is_file())
+        source = json.loads((target / "code/SOURCE.json").read_text())
+        self.assertEqual(source["exporter"], "scripts/run_trajectory_audit.py")
+        from cm_campaigns.contract import RECORD_SETS
+        self.assertNotIn("tube_audit", RECORD_SETS)              # the plan's coverage is scoped to the export
         view = record_view(target, "tube_audit")
         out = self.root / "s22"
         build_one("supplementary:Table S22", context(records={"tube_audit": view}), out)
         table = read_table(out, "S22")
         self.assertEqual([r["Dataset"] for r in table], ["arxiv", "Peptides"])
+
+    def test_trajectory_slices_pool_into_one_dataset_row(self):
+        output = self.root / "sliced"
+        ta.plan_tube_audit([EXAMPLES / "peptides_func"], output, max_trajectories=0, chunk_size=2)
+        plan = json.loads((output / "plan.json").read_text())
+        self.assertEqual([len(j["trajectories"]) for j in plan["jobs"]], [2, 1])
+        self.assertEqual({j["run_member"] for j in plan["jobs"]}, {"peptides_func"})
+        synthetic_tube_jobs(output)
+        target = ta.export_tube_audit(output, root=self.records)
+        verify_set(target, specs()["sets"]["tube_audit"], specs())
+        document = json.loads((target / "raw/Peptides-func/tube_audit.json").read_text())
+        self.assertEqual(document["counts"]["audited"], 3)
+        self.assertEqual([m["member"] for m in document["members"]], ["peptides_func.part000", "peptides_func.part001"])
 
     def test_export_refusals(self):
         with self.assertRaisesRegex(RunnerError, "has not completed"):
@@ -645,6 +662,44 @@ class DepthExportTests(Workspace):
         self.assertIn("figures/FigS14.png", writer.files)
         panel = (self.root / "s14/data/FigS14/panel_b.csv").read_text().splitlines()
         self.assertEqual(len(panel), 7)
+
+    def test_slices_of_one_run_merge_before_the_statistics(self):
+        whole, sliced = self.root / "whole", self.root / "sliced"
+        ta.plan_depth_diagnostics([EXAMPLES / "peptides_func"], whole)
+        ta.plan_depth_diagnostics([EXAMPLES / "peptides_func"], sliced, chunk_size=1)
+        plan = json.loads((sliced / "plan.json").read_text())
+        self.assertEqual([j["member"] for j in plan["jobs"]], ["peptides_func.part000", "peptides_func.part001"])
+        self.assertEqual([j["inputs"] for j in plan["jobs"]], [[24], [52]])
+        self.assertEqual([j["alignment_seeds"] for j in plan["jobs"]], [[1, 2], []])   # reference: first slice only
+        self.assertFalse(plan["truncated"])
+        for output in (whole, sliced):
+            plan = json.loads((output / "plan.json").read_text())
+            for entry in plan["jobs"]:
+                directory = job_directory(output, entry)
+                directory.mkdir(parents=True)
+                write_json(directory / "environment.json", ENVIRONMENT)
+                executions = {"input": [], "seed": [], "terminal": [], "actions": []}
+                for graph in entry["inputs"]:
+                    for seed in entry["member_seeds"]:
+                        executions["input"].append(graph)
+                        executions["seed"].append(seed)
+                        executions["terminal"].append(8)
+                        executions["actions"].append([0, 0, graph % 7 + 1, 0, 4, 0, 8, 0])
+                losses = np.array([[1.0 + 0.01 * k + 0.001 * g for g in entry["inputs"]] for k in range(4)])
+                alignment = np.full((len(entry["alignment_seeds"]), 4, 3), 0.7) if entry["alignment_seeds"] else None
+                if alignment is not None:
+                    alignment[:, 2:] = 0.6
+                ta.write_depth_job(directory, plan, entry, unit_ids=np.asarray(entry["inputs"]),
+                                   unit_counts=np.ones(len(entry["inputs"])), independent=True, unit_depth_loss=losses,
+                                   executions=executions, alignment=alignment, entry_dir=Path(entry["run"]),
+                                   started=utc_now(), parent_files=[])
+        values = []
+        for output, root in ((whole, self.records), (sliced, self.root / "records2")):
+            target = ta.export_depth_diagnostics(output, root=root)
+            verify_set(target, specs()["sets"]["depth_diagnostics"], specs())
+            values.append({(r["depth"], r["phase"], r["quantity"]): r["value"] for r in summary_rows(target, ta.DEPTH)})
+        self.assertEqual(values[0], values[1])
+        self.assertEqual(values[0][("4", ta.ALL, "source_alignment_change")], "-0.1")
 
     def test_depth_export_refusals(self):
         with self.assertRaisesRegex(RunnerError, "has not completed"):

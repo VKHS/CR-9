@@ -568,7 +568,7 @@ def rate_interval(strata, statistic, *, reps, seed) -> dict | None:
 
 
 # ============================================================================= planning (torch-free)
-def _deployment(run: SealedRun, fixture_route=None) -> dict:
+def _deployment(run: SealedRun, fixture_route=None, rule="deployed") -> dict:
     run.require("admit")
     candidates = run.candidates()
     lock = run.json("policy_lock.json")
@@ -577,8 +577,14 @@ def _deployment(run: SealedRun, fixture_route=None) -> dict:
     comparator = dict(candidates[lock["comparator_index"]], registry_index=lock["comparator_index"])
     confirmed = dict(candidates[lock["confirmed_index"]], registry_index=lock["confirmed_index"])
     result = {"deployed": deployed, "comparator": comparator, "confirmed": confirmed,
-              "admitted": bool(admission.get("passed")),
+              "admitted": bool(admission.get("passed")), "rule": "deployed",
               "global_return": lock["deployed_index"] == lock["comparator_index"], "fixture_override": None}
+    if rule == "provisional":
+        index = int(run.json("select/decision.json")["provisional_index"])
+        result.update(deployed=dict(candidates[index], registry_index=index), rule="provisional",
+                      global_return=index == lock["comparator_index"])
+    elif rule != "deployed":
+        raise RunnerError(f"the audited rule is 'deployed' (q_D) or 'provisional' (q_s of Eq. 19), not {rule!r}")
     if fixture_route is not None:
         if not run.synthetic:
             raise RunnerError("a fixture rule override is reserved for synthetic smoke parents")
@@ -606,8 +612,11 @@ def _evaluation_inputs(run: SealedRun, role: str) -> list[int]:
 def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=13, perturbation_factor=1.0,
                         near_zero_threshold=None, audit_inputs=0, audit_seed=0, gate_from=None, gate_alpha=.05,
                         gate_profile="full", ema_weight=.5, stress_dataset=None, calibration_trajectories=0,
-                        observer_study=True, fixture_route=None) -> Path:
-    """Declare the audit of every parent run (a Roman-empire campaign: every split run); nothing is executed."""
+                        observer_study=True, fixture_route=None, provisional=()) -> Path:
+    """Declare the audit of every parent run (a Roman-empire campaign: every split run); nothing is executed.
+
+    ``provisional``: datasets whose audited rule is the provisional selection q_s of main Eq. (19) instead of the
+    deployed rule q_D (e.g. a rule returned to q_C after confirmation); every output then names that rule."""
     if role not in ROLE_STAGES:
         raise RunnerError(f"evaluation role must be one of {sorted(ROLE_STAGES)}; decision roles are never reused")
     if not parents:
@@ -634,7 +643,8 @@ def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=
         members = []
         for run in runs:
             check_role(run, role)
-            found = _deployment(run, fixture_route.get(dataset) if isinstance(fixture_route, dict) else fixture_route)
+            found = _deployment(run, fixture_route.get(dataset) if isinstance(fixture_route, dict) else fixture_route,
+                                "provisional" if dataset in set(provisional or ()) else "deployed")
             deployed = found["deployed"]
             route = deployed["route"]
             profile = "full" if deployed.get("profile") in (None, "none") else deployed["profile"]
@@ -654,13 +664,14 @@ def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=
                 "run": str(run.root), "identity": run.identity(), "synthetic": run.synthetic,
                 "deployed": candidate_identity(deployed), "comparator": candidate_identity(found["comparator"]),
                 "confirmed": candidate_identity(found["confirmed"]), "route": route, "profile": profile,
-                "admitted": found["admitted"], "global_return": found["global_return"],
+                "admitted": found["admitted"], "global_return": found["global_return"], "rule": found["rule"],
                 "fixture_override": found["fixture_override"], "feedback": route in FEEDBACK_ROUTES,
                 "plans": route in PLANNING_ROUTES, "seeds": [int(s) for s in run.config["training"]["seeds"]],
                 "evaluation_inputs": len(inputs), "audited_inputs": audited,
                 "perturbation_seed": seed + int(seed_offset),
                 "gate": {"needed": (not found["global_return"]) or dataset == stress_dataset,
-                         "alpha": float(gate_alpha), "profile": gate_profile, "reused": reused},
+                         "alpha": reused["alpha"] if reused else float(gate_alpha),
+                         "profile": reused["profile"] if reused else gate_profile, "reused": reused},
                 "stress": dataset == stress_dataset,
                 "observer_study": bool(observer_study)})
             members.append(run.root.name)
@@ -700,8 +711,10 @@ def _reused_gate(directory: Path, run: SealedRun) -> dict:
     if executed.get("experiment") != "input_gate" or executed["parent"]["config_sha256"] != identity["config_sha256"] \
             or executed["parent"]["source_sha256"] != identity["runtime_source_sha256"]:
         raise RunnerError(f"{directory}: the gate must come from a sealed input_gate run of {run.root.name}")
+    declared = _read(directory / "plan.json")["gate"]
     return {"from": directory.name, "path": str(directory / "raw" / "gate.json"),
-            "gate_sha256": sha256(directory / "raw" / "gate.json")}
+            "gate_sha256": sha256(directory / "raw" / "gate.json"), "profile": declared["profile"],
+            "alpha": float(declared["alpha"])}
 
 
 # ============================================================================= execution (PyTorch)
@@ -1320,7 +1333,7 @@ def execution_phase(plan, entry, directory, ctx, run, device):
             gate = fit_development_gate(ctx.data, [plant(s) for s in members["confirmed"]], config, device,
                                         profile=entry["gate"]["profile"], alpha=entry["gate"]["alpha"])
         _dump(directory / "gate.json", dict(gate, frozen_before_evaluation_labels=True))
-    operator = None
+    operator, deployed_runs_schema = None, None
     observer = controllers["deployed"].observer if analyse else None
     spec = task_spec(config, ctx.data.metadata)
     labels = ctx.labels(role) if entry["feedback"] else None
@@ -1422,8 +1435,8 @@ def execution_phase(plan, entry, directory, ctx, run, device):
         # per-site analysis of the deployed rule on this input
         controller = controllers["deployed"]
         if operator is None:
-            operator = perturbation_operator(observer.r, observer.basis, observer.scale,
-                                             deployed_runs[0][2]["sensor_configuration"]["schema"],
+            deployed_runs_schema = list(deployed_runs[0][2]["sensor_configuration"]["schema"])
+            operator = perturbation_operator(observer.r, observer.basis, observer.scale, deployed_runs_schema,
                                              plan["perturbation"]["factor"])
         if entry["feedback"]:
             task = getattr(plant(members["deployed"][0]), "task", spec)   # the exploration targets' task spec
@@ -1478,7 +1491,11 @@ def execution_phase(plan, entry, directory, ctx, run, device):
                                               "unit_counts": counts, "unit_ids": unique_units})
     if any(sha256_state_dict(m) != frozen[s] for s, m in models.items()):
         raise RuntimeError("a frozen predictor changed during the audit")
-    parity = {"probabilities": probability_parity, "digests": {}}
+    parity = {"probabilities": probability_parity, "digests": {},
+              "decision_log": {"replayed_sites": len(site_rows), "mismatches": 0,
+                               "rule": "every replayed site matched the runtime decision log (support set, observer "
+                                       "validity and NIS, anchor update, argmin and score_gap, MPC-RH plan); a "
+                                       "mismatch stops the job"}}
     if collection:
         for (name, seed), digest in digests.items():
             sealed = _sealed_member(run, rules[name], seed, role, True)
@@ -1499,6 +1516,14 @@ def execution_phase(plan, entry, directory, ctx, run, device):
                                          ["input_id", "rule", "member", "route", "status", "terminal_depth",
                                           "nonnominal_actions", "recovery_sites", "failure"])
     files["parity.json"] = _dump(directory / "parity.json", parity)
+    if operator is not None:
+        source = run.root / "fit" / entry["profile"] / "controller.pt"
+        files["perturbation.json"] = _dump(directory / "perturbation.json", {
+            "definition": plan["perturbation"]["definition"], "factor": plan["perturbation"]["factor"],
+            "seed": entry["perturbation_seed"], "seed_parts": "[seed, input id, member seed, depth]",
+            "measurement_schema": deployed_runs_schema, "history_coordinates": list(HISTORY_COORDINATES),
+            "operator": operator, "observer_source": f"fit/{entry['profile']}/controller.pt",
+            "observer_source_sha256": sha256(source) if source.is_file() else None})
     if analyse:
         files.update(_site_files(directory, entry, site_rows, reliability, horizons))
     return files
@@ -1518,13 +1543,15 @@ def _site_files(directory, entry, site_rows, reliability, horizons):
         key = (r["input_id"], r["member"])
         trajectories[key] = trajectories.get(key, True) and not r["anchor_flip"]
     planning = sites["plan_stable"] >= 0
+    # The deposited per-site file (compact types; the exported values are recomputed from exactly these arrays).
     files["gaps.npz"] = save_arrays(
         directory / "gaps.npz", replace=True,
-        gap=sites["gap"][audited], kind=sites["kind"][audited], switch=sites["switch"][audited],
-        inversion=sites["inversion"][audited], input_id=sites["input_id"][audited], member=sites["member"][audited],
-        depth=sites["depth"][audited], plan_stable=sites["plan_stable"][planning],
-        anchor_stable=np.asarray([int(v) for v in trajectories.values()], dtype=np.int64),
-        excluded_origin=sites["origin"][~audited],
+        gap=sites["gap"][audited].astype(np.float32), kind=sites["kind"][audited].astype(np.int8),
+        switch=sites["switch"][audited].astype(np.int8), inversion=sites["inversion"][audited].astype(np.int8),
+        input_id=sites["input_id"][audited].astype(np.int32), member=sites["member"][audited].astype(np.int32),
+        depth=sites["depth"][audited].astype(np.int16), plan_stable=sites["plan_stable"][planning].astype(np.int8),
+        anchor_stable=np.asarray([int(v) for v in trajectories.values()], dtype=np.int8),
+        excluded_origin=sites["origin"][~audited].astype(np.int8),
         route=np.asarray(entry["route"]), feedback=np.asarray(int(entry["feedback"])))
     if entry["feedback"]:
         h = np.asarray(horizons, dtype=np.int64)
@@ -1648,6 +1675,24 @@ def _npz(path):
         return {k: data[k] for k in data.files}
 
 
+def parity_summary(members) -> dict:
+    """Sealed-action parity of the instrumented executions of one dataset (from the jobs' parity.json)."""
+    out = {"transductive_executions_compared": 0, "transductive_actions_equal": 0, "graph_digests_compared": 0,
+           "graph_digests_equal": 0, "decision_log_sites_replayed": 0}
+    for j in members:
+        parity = _read(j["directory"] / "parity.json")
+        for p in parity.get("probabilities", []):
+            if "actions_equal" in p:
+                out["transductive_executions_compared"] += 1
+                out["transductive_actions_equal"] += int(bool(p["actions_equal"]))
+        for d in parity.get("digests", {}).values():
+            if d.get("equal") is not None:
+                out["graph_digests_compared"] += 1
+                out["graph_digests_equal"] += int(bool(d["equal"]))
+        out["decision_log_sites_replayed"] += parity.get("decision_log", {}).get("replayed_sites", 0)
+    return out
+
+
 def _row(keys, quantity, value):
     value = float(value)
     if not math.isfinite(value):
@@ -1696,7 +1741,8 @@ def summarize_action_gaps(plan, jobs) -> dict:
                                 ORIGINS[o]: int(np.sum(np.concatenate([p["excluded_origin"] for p in parts]) == o))
                                 for o in range(len(ORIGINS))},
                             "planning_sites": int(len(plans)), "trajectories": int(len(anchors)),
-                            "runs": [j["entry"]["member"] for j in members], "quantiles": summary["quantiles"]}
+                            "runs": [j["entry"]["member"] for j in members], "quantiles": summary["quantiles"],
+                            "sealed_parity": parity_summary(members)}
     complete = {d["dataset"] for d in plan["datasets"]} >= set(DATASETS) and \
         len({j["entry"]["dataset"] for j in jobs}) == len(plan["datasets"]) and \
         all(len([r for r in rows if r["keys"]["dataset"] == d]) == len(DEFINITIONS["action_gap_audit"])
@@ -1719,7 +1765,8 @@ def summarize_decision_traces(plan, jobs) -> dict:
         details[dataset] = {"decision_weight": mass.total, "category_weights": mass.categories,
                             "runs": [j["entry"]["member"] for j in members],
                             "routes": sorted({j["entry"]["route"] for j in members}),
-                            "global_return": sorted({j["entry"]["global_return"] for j in members})}
+                            "global_return": sorted({j["entry"]["global_return"] for j in members}),
+                            "sealed_parity": parity_summary(members)}
     complete = set(details) >= set(DATASETS)
     return {"rows": rows, "details": details, "complete": complete}
 
@@ -1812,7 +1859,8 @@ def summarize_reliability(plan, jobs, *, stress_dataset=None) -> dict:
 SUMMARIZERS = {"action_gap_audit": summarize_action_gaps, "decision_traces": summarize_decision_traces,
                "reliability_diagnostics": summarize_reliability}
 DEPOSITED = {
-    "action_gap_audit": ("gaps.npz", "executions.csv", "parity.json", "audit.json", "environment.json"),
+    "action_gap_audit": ("gaps.npz", "perturbation.json", "executions.csv", "parity.json", "audit.json",
+                         "environment.json"),
     "decision_traces": ("decisions.json", "units.csv", "executions.csv", "parity.json", "audit.json",
                         "environment.json"),
     "reliability_diagnostics": ("reliability.npz", "calibration.json", "observers.json", "units.csv", "parity.json",

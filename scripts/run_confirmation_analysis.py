@@ -11,7 +11,10 @@ plan    reads sealed, complete parent runs (Roman-empire: the campaign directory
             mechanism     every Figure 3a-b cell that neither the joint S14 family nor the deployed
                           rule's confirm/decision.json supplies (or --cell DATASET=CONTRAST)
             confirmation  the PascalVOC-SP, COCO-SP and Peptides-func runs; --campaign identifies the
-                          S14 policy pairs and seed population (required for a benchmark export)
+                          S14 policy pairs and seed population.  Export: the nine J_old rows are the
+                          joint campaign's original tests, the graph share comes from each parent's
+                          admission moments and Table 1 interval; the executed per-seed validation-split
+                          array is deposited as the separate E16 direct estimate
             oracle        one job per (run, registered configuration at the comparator's ensemble size)
 run     executes the plan with the released runtime (one job with --job K, e.g. a Slurm array task);
         completed jobs are skipped, so an interrupted run resumes.  Needs --trust-local-checkpoints.

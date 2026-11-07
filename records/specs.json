@@ -432,7 +432,8 @@
         "transport_fraction": "fraction of executed sites of a depth phase (early, middle, late thirds) that carry a non-A0 transport action"
       },
       "table": "list",
-      "notes": "Rows with a depth carry source_alignment_change or policy_loss_change; rows with a phase carry transport_fraction; the other quantities have neither. The lifecycle records nominal depth losses (train/entry_initial.json) but no per-depth source alignment, no truncated-policy losses and no per-graph action sequences for the multigraph benchmarks."
+      "notes": "Rows with a depth carry source_alignment_change (reference plant only) or policy_loss_change; rows with a phase carry transport_fraction; the other quantities carry neither, and the key 'all' stands for an absent depth or phase. First-intervention quartiles are taken over executions (ensemble member x input). The lifecycle records nominal depth losses (train/entry_initial.json) but no per-depth source alignment, no truncated-policy losses and no per-graph action sequences for the multigraph benchmarks. Produced by scripts/run_trajectory_audit.py depth (cm_experiments/trajectory_audit.py).",
+      "sparse_quantities": true
     },
     "ensemble_grid_scores": {
       "title": "Official scores on the comparator ensemble grid",
@@ -1082,7 +1083,7 @@
         "observed_error_p95_nats": "95th percentile of the same observed loss error (nats)"
       },
       "table": "list",
-      "notes": "Computed from the exploration trajectories and the frozen consequence models of the run; the per-depth constants beta_l, M_l, eps_l^op, R_l and e_l^ref are kept as raw arrays. The runtime records none of them. The violation rate of Table S22 is 1 - mode_stable_coverage (convention C22). main_paper.py reads final_bound_nats and the two observed-error quantities of the same rows."
+      "notes": "One row per audited dataset. Computed from audited D_explore episodes of the deployed rule: a predicted (registered, undisturbed) run and a realized run under the declared input and edge-weight disturbance (provenance.perturbation), replayed jointly step by step; the per-depth constants beta_l, M_l, eps_l^op, R_l and e_l^ref are kept as raw arrays. The runtime records none of them. The violation rate of Table S22 is 1 - mode_stable_coverage (convention C22). main_paper.py reads final_bound_nats and the two observed-error quantities of the same rows. Produced by scripts/run_trajectory_audit.py tube (cm_experiments/trajectory_audit.py)."
     }
   }
 }

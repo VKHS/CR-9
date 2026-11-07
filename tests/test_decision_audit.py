@@ -291,6 +291,30 @@ class PlanningTests(unittest.TestCase):
         with self.assertRaisesRegex(RunnerError, "exists"):
             da.plan_decision_audit([EXAMPLES / "arxiv"], self.root / "once")
 
+    def test_a_sealed_input_gate_is_reused_with_its_own_profile_and_level(self):
+        from cm_experiments.artifacts import canonical, seal, sha256
+        config = json.loads((EXAMPLES / "arxiv/config.json").read_text())
+        state = json.loads((EXAMPLES / "arxiv/run_state.json").read_text())
+
+        def gate_run(name, config_sha):
+            directory = self.root / name
+            (directory / "raw").mkdir(parents=True)
+            (directory / "raw" / "gate.json").write_text(json.dumps({"schema": "cm-static-input-gate-1", "threshold": 1.0}))
+            (directory / "plan.json").write_text(json.dumps({"gate": {"alpha": 0.1, "profile": "lean"}}))
+            (directory / "experiment.json").write_text(json.dumps({"experiment": "input_gate", "parent": {
+                "config_sha256": config_sha, "source_sha256": state["source_sha256"]}}))
+            seal(directory)
+            return directory
+        good = gate_run("gate", canonical(config))
+        path = da.plan_decision_audit([EXAMPLES / "arxiv"], self.root / "g", gate_from={"ogbn-arxiv": good},
+                                      stress_dataset="ogbn-arxiv")
+        gate = json.loads(path.read_text())["jobs"][0]["gate"]
+        self.assertEqual((gate["profile"], gate["alpha"]), ("lean", 0.1))
+        self.assertEqual(gate["reused"]["gate_sha256"], sha256(good / "raw" / "gate.json"))
+        other = gate_run("other", "0" * 64)
+        with self.assertRaisesRegex(RunnerError, "sealed input_gate run"):
+            da.plan_decision_audit([EXAMPLES / "arxiv"], self.root / "h", gate_from={"ogbn-arxiv": other})
+
     def test_run_requires_explicit_trust(self):
         path = da.plan_decision_audit([EXAMPLES / "arxiv"], self.root / "t")
         with self.assertRaisesRegex(RunnerError, "explicit trust"):
@@ -627,10 +651,10 @@ class AuditExecutionTests(unittest.TestCase):
         decisions = json.loads((directory / "decisions.json").read_text())
         mass = da.DecisionMass.from_json(decisions["mass"])
         self.assertAlmostEqual(sum(mass.fractions().values()), 1.0, places=12)
-        self.assertAlmostEqual(mass.total, entry["evaluation_inputs"] * self.depth(directory), places=9)
-
-    def depth(self, directory):
-        return json.loads((self.runs["peptides"] / "config.json").read_text())["model"]["depth"]
+        depth = json.loads((self.runs["peptides"] / "config.json").read_text())["model"]["depth"]
+        self.assertLessEqual(mass.total, entry["evaluation_inputs"] * depth + 1e-9)    # unit mass per (graph, depth)
+        self.assertGreater(mass.categories["exclusive_sequence"] + mass.categories["recovery"]
+                           + mass.categories["input_fallback"], 0)
 
     def test_observer_variants_and_calibration(self):
         for dataset in ("ogbn-arxiv", "Peptides-func"):

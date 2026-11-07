@@ -528,6 +528,57 @@
         "supplementary:Table S30",
         "supplementary:Table S43"
       ]
+    },
+    {
+      "experiment": "Proposition 2 tube audit",
+      "title": "Plug-in trajectory tube of main Proposition 2 on audited D_explore episodes: predicted (registered) and realized (declared input and edge-weight disturbance) runs of the deployed rule, exact joint replay, plug-in constants, coverage, mode stability, bounds and loss errors",
+      "code": [
+        "cm_experiments/trajectory_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_theory/stability.py",
+        "scripts/run_trajectory_audit.py"
+      ],
+      "command": "python -B scripts/run_trajectory_audit.py tube plan --parent <arxiv run> --parent <Roman campaign> --parent <pascalvoc_sp run> --parent <coco_sp run> --parent <peptides_func run> --output <dir> [--chunk-size N]; ... tube run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... tube export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:tube_audit"
+      ],
+      "displays": [
+        "supplementary:Table S22",
+        "supplementary:Figure S17",
+        "main:Figure 2"
+      ]
+    },
+    {
+      "experiment": "Depth diagnostics",
+      "title": "Reference-plant source alignment on D_fit validation, truncated-policy loss by depth, first-intervention quartiles, supported deterioration depth and phase transport fractions of the deployed rules",
+      "code": [
+        "cm_experiments/trajectory_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_trajectory_audit.py"
+      ],
+      "command": "python -B scripts/run_trajectory_audit.py depth plan --parent <run or Roman campaign> (each dataset) --reference ogbn-arxiv --output <dir> [--chunk-size N]; ... depth run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... depth export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:depth_diagnostics"
+      ],
+      "displays": [
+        "supplementary:Figure S14"
+      ]
     }
   ]
 }

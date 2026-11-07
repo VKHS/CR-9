@@ -224,18 +224,14 @@ def finite_or_none(value):
     return value if value is not None and math.isfinite(value) else None
 
 
-def quantile(values, q: float):
-    values = np.asarray(values, dtype=np.float64)
-    values = values[np.isfinite(values)]
-    return float(np.quantile(values, q)) if len(values) else None
-
-
 @contextlib.contextmanager
 def record_coverage(set_name: str, datasets):
     """The planned dataset coverage for the scientific-audit check of ``write_record_set``.
 
-    ``cm_campaigns.contract.RECORD_SETS`` does not list these sets; an entry registered there takes
-    precedence, otherwise the plan's datasets are the declared coverage for this one export.
+    ``cm_campaigns.contract.RECORD_SETS`` does not list these sets, and the writer's fallback rule for
+    unlisted sets (every key row carries every quantity) contradicts the sparse depth_diagnostics layout
+    its contract prescribes.  An entry registered there takes precedence; otherwise the plan's datasets
+    are the declared coverage, for this one in-process export only.
     """
     from cm_campaigns.contract import RECORD_SETS
     added = set_name not in RECORD_SETS
@@ -414,8 +410,8 @@ def plan_tube_audit(parents, output, *, policy="deployed", max_trajectories=64, 
                                       "pair and a per-trajectory key, so both directions share one draw",
                          "default_source": "paper/registered_constants.json precision_tolerances_table_S5c.bf16."
                                            "state_relative (used when a magnitude is not declared)",
-                         "seed_rule": "numpy SeedSequence([audit_seed, trajectory, stream]); streams 0 input, "
-                                      "1 edges, 2 probes"},
+                         "seed_rule": "numpy SeedSequence([audit_seed, trajectory]).spawn(3): the input, edge-key "
+                                      "and secant-probe streams of that trajectory (independent of job slicing)"},
         "probes": {"random": int(probes), "coherent": 1, "relative_radius": float(probe_relative),
                    "scope": "native blocks of the designated-site plants only"},
         "chunk_size": int(chunk_size),
@@ -754,7 +750,8 @@ def export_tube_audit(output, *, root=None, replace=False, allow_partial=False, 
             "plan_sha256": plan_sha, "definitions": TUBE_DEFINITIONS, "skipped_datasets": skipped}
         with record_coverage(TUBE, [d["dataset"] for d in plan["datasets"]]):
             return write_record_set(TUBE, rows, files, provenance, root=root, replace=replace,
-                                    allow_partial=allow_partial, command=command, inputs=inputs,
+                                    allow_partial=allow_partial, inputs=inputs,
+                                    command=command or ["scripts/run_trajectory_audit.py", "tube", "export"],
                                     generated={"code/plan.json": public_plan(output)})
     finally:
         shutil.rmtree(staging, ignore_errors=True)
@@ -1028,8 +1025,12 @@ def _loss(probabilities, rows, labels, spec) -> float:
 
 
 def audit_trajectory(model, episode, graph, config, candidate, controller, reference, labels, rows, item, plan,
-                     entry, plant, device) -> tuple[dict, dict]:
-    """Predicted and realized closed-loop runs on one episode, their joint replay and raw measurements."""
+                     entry, plant, device, cache=None) -> tuple[dict, dict]:
+    """Predicted and realized closed-loop runs on one episode, their joint replay and raw measurements.
+
+    ``cache`` (a dict) keeps the predicted closed-loop run of the last episode: it is deterministic and the
+    same for every audited trajectory of one (checkpoint, graph), so it is executed once per episode.
+    """
     import torch
     from cross_morse.policies import PolicyExecutionError, execute_policy
     from cross_morse.tasks import task_spec
@@ -1044,12 +1045,19 @@ def audit_trajectory(model, episode, graph, config, candidate, controller, refer
     delta_p = operator_distance(graph, graph_realized)
     record = {"trajectory": int(item["trajectory"]), "seed": int(item["seed"]), "graph_id": item.get("graph_id"),
               "delta_p": delta_p, "started_utc": started}
-    try:
-        probs_p, trace_p = execute_policy(model, x, graph, config, candidate, controller, reference)
-    except PolicyExecutionError as error:
-        record.update(predicted_status="failed", predicted_failure=error.reason, realized_status="not_run",
+    cache = {} if cache is None else cache
+    episode_key = (int(item["seed"]), item.get("graph_id"))
+    if cache.get("key") != episode_key:
+        try:
+            cache.update(key=episode_key, value=execute_policy(model, x, graph, config, candidate, controller,
+                                                               reference))
+        except PolicyExecutionError as error:
+            cache.update(key=episode_key, value=error)
+    if isinstance(cache["value"], PolicyExecutionError):
+        record.update(predicted_status="failed", predicted_failure=cache["value"].reason, realized_status="not_run",
                       mode_stable=False, finished_utc=utc_now())
         return record, {}
+    probs_p, trace_p = cache["value"]
     predicted = _trace_summary(trace_p)
     realized, probs_r, failure = None, None, None
     try:
@@ -1109,8 +1117,11 @@ def _run_tube_job(plan, entry, directory, device):
         with ctx.data._label_scope("explore"):
             labels_all = ctx.data.labels("explore")
         rows_all = np.asarray(ctx.data.splits["explore"], dtype=np.int64)
-    plants, constants = {}, {}
-    for item in entry["trajectories"]:
+    plants, constants, cache = {}, {}, {}
+    # Episode order (checkpoint, graph) lets consecutive trajectories share the predicted closed-loop run.
+    order = sorted(entry["trajectories"], key=lambda t: (int(t["seed"]), -1 if t.get("graph_id") is None
+                                                         else int(t["graph_id"]), int(t["trajectory"])))
+    for item in order:
         if (directory / "trajectories" / f"{int(item['trajectory']):06d}.json").is_file():
             continue
         if sha256(run.root / item["file"]) != item["sha256"]:
@@ -1129,7 +1140,7 @@ def _run_tube_job(plan, entry, directory, device):
         else:
             episode, graph, labels, rows = ctx.data, ctx.graph, labels_all, rows_all
         record, raw = audit_trajectory(plants[seed], episode, graph, config, candidate, controller, ctx.reference,
-                                       labels, rows, item, plan, entry, constants[seed], ctx.device)
+                                       labels, rows, item, plan, entry, constants[seed], ctx.device, cache=cache)
         write_tube_trajectory(directory, record, raw)
         from cross_morse.common import stop_at_boundary
         stop_at_boundary()          # a signal stops here; the next run resumes after this trajectory
@@ -1555,7 +1566,8 @@ def export_depth_diagnostics(output, *, root=None, replace=False, allow_partial=
             "plan_sha256": plan_sha}
         with record_coverage(DEPTH, [d["dataset"] for d in plan["datasets"]]):
             return write_record_set(DEPTH, rows, files, provenance, root=root, replace=replace,
-                                    allow_partial=allow_partial, command=command, inputs=inputs,
+                                    allow_partial=allow_partial, inputs=inputs,
+                                    command=command or ["scripts/run_trajectory_audit.py", "depth", "export"],
                                     generated={"code/plan.json": public_plan(output)})
     finally:
         shutil.rmtree(staging, ignore_errors=True)
@@ -1673,10 +1685,10 @@ def _run_depth_job(plan, entry, directory, device):
             executions["seed"].append(int(seed))
             executions["terminal"].append(len(actions))
             executions["actions"].append(actions + [-1] * (int(entry["depth"]) - len(actions)))
-            if sealed_agree is not None:
-                sealed = run.root / "member_predictions" / f"{candidate['behavior_id']}_seed{seed}.json"
-                if sealed.is_file():
-                    sealed_agree.append(read_json(sealed).get("actions") == actions)
+            if sealed_agree is not None:     # diagnostic: the select stage's sealed full-graph member trace
+                sealed = f"member_predictions/{candidate['behavior_id']}_seed{seed}.json"
+                if (run.root / sealed).is_file():
+                    sealed_agree.append(run.json(sealed).get("actions") == actions)
         y, index = labels[positions], unit_index[positions]
         valid = None
         for k in range(len(grid)):
