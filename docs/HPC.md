@@ -202,6 +202,11 @@ without checkpoints or prediction arrays; with `CM_PACK_ARCHIVES=1` each run is
 also packed as a sealed archive (`scripts/archive_run.py`) that
 `scripts/archive_run.py --verify` and `scripts/ingest_run.py` accept.
 
+`bash hpc/publish_paper_artifacts_arrhenius.sh` publishes the runs of a suite,
+with the record sets and campaigns, as the assets of this repository's release
+`paper-artifacts`, from which `make paper` rebuilds every table and figure
+([Publishing the measured outputs](PUBLICATION.md)).
+
 On `reproduce resume`, the launcher restores the saved suite settings while
 preserving explicit environment overrides. It queries the scheduler before
 resubmission, leaves active jobs alone and submits only unfinished Roman split

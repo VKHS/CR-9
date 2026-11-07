@@ -1,0 +1,16 @@
+{
+ "display": "supplementary:Table S9",
+ "source": {"document": "supplementary", "pages": [6]},
+ "scope": "Object names and the registered sensitivity or failure rule of each object (third column). The implemented primary values (second column) are read from the full configurations and from the observer, critic and sequence-model definitions in cross_morse/learning.py and cross_morse/core.py; the loss-clipping sensitivity grid is read from paper/registered_constants.json.",
+ "rows": {
+  "trajectory_folds": {"object": "trajectory folds", "rule": "compare 3/5/10 where sample size permits"},
+  "observer": {"object": "observer state/covariance", "rule": "raw, EMA, global and conditioned filters; retain simplest calibrated"},
+  "filters": {"object": "filters", "rule": "band deletion, scrambling and rank-only controls"},
+  "critic": {"object": "action critic", "rule": "shared versus depth/action-conditioned alternatives"},
+  "sequence_models": {"object": "sequence models", "rule": "horizon and terminal-model deletion"},
+  "search": {"object": "horizons / beam / top-k", "rule": "beam 4/8/16/32; top-k 1/2/3"},
+  "observer_period": {"object": "observer period", "rule": "r ∈ {1, 2, 4}"},
+  "ensemble": {"object": "ensemble sizes", "rule": "single, equal-ensemble and equal-compute reports"},
+  "clipping": {"object": "loss clipping", "rule": "report clipped fractions and maximum unclipped harm"}
+ }
+}

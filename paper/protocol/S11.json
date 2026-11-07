@@ -1,0 +1,42 @@
+{
+ "display": "supplementary:Table S11",
+ "source": {
+  "document": "supplementary",
+  "pages": [
+   8
+  ]
+ },
+ "scope": "Route labels, pass outputs, the held-out contrast each confirmation kind tests and the unit of its differences (losses in nats; retained-gain fraction for Full minus Lean, as documented in cross_morse.statistics.confirmation). Margins are read by executing cross_morse.statistics.confirmation; predecessors are read from _stage_confirm in cross_morse/pipeline.py; the downgrade rule (predecessor if it belongs to Q_s, otherwise q_C) is that of cross_morse.statistics.confirmation.",
+ "rows": {
+  "state": {
+   "route": "state-conditioned route",
+   "contrast": "conditional state destruction",
+   "unit": "nats",
+   "pass": "state-conditioned route"
+  },
+  "radius": {
+   "route": "radius",
+   "contrast": "radius minus deterministic one-step",
+   "unit": "nats",
+   "pass": "radius"
+  },
+  "mpc": {
+   "route": "MPC-RH",
+   "contrast": "MPC-RH minus MPC-OL",
+   "unit": "nats",
+   "pass": "MPC-RH"
+  },
+  "full": {
+   "route": "Full profile",
+   "contrast": "Full retained effect minus Lean",
+   "unit": "fraction",
+   "pass": "Full"
+  }
+ },
+ "labels": {
+  "one_step": "one-step",
+  "mpc_ol": "MPC-OL",
+  "lean": "Lean",
+  "comparator": "strongest open-loop predecessor (q_C)"
+ }
+}

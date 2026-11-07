@@ -36,7 +36,7 @@ The unit is one nominal full-depth execution. Expected cost is branch-weighted w
 
 ## Registered confirmation interpretation
 
-This separate view applies the frozen confirmation interpretation already recorded in the repository. When it returns qC, zero paired effect follows from comparator identity; it is not a replacement measurement. A regenerated run records the complete decision trail of its own deployment: selection ledger, confirmation and admission records and the policy lock.
+This separate view applies the frozen confirmation interpretation already recorded in the repository. When it returns qC, zero paired effect follows from comparator identity; it is not a replacement measurement. Each published run carries the complete decision trail of its deployment: selection ledger, confirmation and admission records and the policy lock.
 
 | Dataset | Registered final rule | Loss difference, nats | Interpretation |
 |---|---|---|---|
@@ -50,9 +50,9 @@ This separate view applies the frozen confirmation interpretation already record
 
 On Roman, Pascal and COCO the complete eligible candidate ledger decides between the reported MPC-RH choices and the radius preference of the representative rows in S12/S12c; a regenerated run records that ledger in `select/candidates.json` and `select/decision.json`. S14 reports one joint nine-test family; local per-run tests have a different scope. See [the source review](MANUSCRIPT_REVIEW.md) and [implementation notes](IMPLEMENTATION_NOTES.md).
 
-## Regenerating these results
+## Reproducing these results
 
-This release includes synthetic example outputs. `bash run_cross_morse.sh reproduce` executes the registered dataset lifecycles on a Slurm GPU cluster and writes `REPRODUCTION_REPORT.md`, which rebuilds supported columns of Tables 1–2 from the regenerated runs and places each value of the tables above beside the regenerated one; `make compare RUN_ROOT=...` compares a single run. The [HPC guide](../docs/HPC.md) covers the site settings, the compute and the outputs. `make reconstruct` combines registered runs and auxiliary records in a hashed workspace; its report states the coverage of each numbered display. See the [reconstruction guide](../docs/RECONSTRUCTION.md) and [artifact catalog](../docs/ARTIFACT_CATALOG.md).
+`make paper` downloads the measured outputs published with the repository's release, verifies every byte, rebuilds Tables 1–2 and every other numbered display with `paper/build/displays/` and places each value above beside the rebuilt one (`displays/compare/`). `bash run_cross_morse.sh reproduce` regenerates the runs independently on another Slurm GPU cluster ([HPC guide](../docs/HPC.md)). See the [reconstruction guide](../docs/RECONSTRUCTION.md) and [publication guide](../docs/PUBLICATION.md).
 
 ## Source identities
 

@@ -63,13 +63,7 @@
     "upstream code and task adapters of the external baselines (pinned by commit in each study plan)",
     "exact reproduction of manuscript spectral coefficients and architecture",
     "independent-graph certification for arxiv",
-    "novel-input g_input serving branch",
-    "MPC sequence coverage assessment",
-    "three-arm inserted-site attribution E13",
-    "extended ensemble grid E = 16, 20 (E14)",
-    "equal-budget factorials (Tables S16, S16b)",
-    "cross-backbone substitutions (Table S25)",
-    "modelled 99th-percentile cost (Table S44)"
+    "buffer-aware resampling units of descriptive admission (Table S27, E11): the paper does not define them"
   ],
   "datasets": [
     "ogbn-arxiv",
@@ -87,6 +81,15 @@
     "E12": "cm_experiments/upstream.py; scripts/run_upstream_baseline.py; hpc/run_upstream_baseline_arrhenius.sh",
     "E17": "cm_campaigns/timing.py (TimingSession)",
     "accounting": "hpc/capture_arrhenius_accounting.sh; hpc/finalize_arm_accounting.sh; cm_campaigns/accounting.py",
-    "records": "scripts/export_records.py -> records/<set>/ -> scripts/records.py"
+    "records": "scripts/export_records.py -> records/<set>/ -> scripts/records.py",
+    "experiment code map": "release/experiment_code.json (every experiment behind a reported table or figure, its code, command, outputs and displays)",
+    "E13, E14, cross-backbone, factorials": "cm_experiments/{attribution,ensemble_grid,backbones,factorial}.py; scripts/run_experiment.py",
+    "E2, E9, E18, negative controls, input gate": "cm_experiments/{predictability,search_enumeration,band_audit,negative_controls,input_gate}.py; scripts/run_experiment_b.py",
+    "E19 grids, horizon/beam sweep, module ablations": "cm_experiments/sweeps.py; scripts/run_sweep.py; scripts/export_sweep_records.py",
+    "E10, mechanism contrasts, admission oracle": "cm_experiments/{confirmation_analysis,admission_oracle}.py; scripts/run_confirmation_analysis.py",
+    "tube audit, depth diagnostics": "cm_experiments/trajectory_audit.py; scripts/run_trajectory_audit.py",
+    "action gaps, decision traces, reliability": "cm_experiments/decision_audit.py; scripts/run_decision_audit.py",
+    "E17 runtime scaling and timing anchors, E14 scores": "cm_experiments/timing_records.py; scripts/run_timing_records.py",
+    "display generators": "paper/build/displays/ (one generator per numbered table and figure; make paper)"
   }
 }

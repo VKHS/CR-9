@@ -1,0 +1,719 @@
+{
+  "schema": "cross-morse-experiment-code-1",
+  "description": "Every experiment behind a reported table or figure, the code that executes it, the command, its configurations, the artifacts it produces (artifact identifiers of release/paper_artifacts.json) and the displays it supports. not_executable names a part of a reported experiment that the released code cannot execute, with the reason. scripts/statement_check.py verifies that every listed file exists, that every artifact a display needs has a producing experiment, and reports every not_executable part.",
+  "experiments": [
+    {
+      "experiment": "Lifecycle (E10, E15, E16, E19, E20)",
+      "title": "Eight-stage lifecycle of every dataset: prepare, train, explore, fit, select, confirm, admit, evaluate; separated data roles (E10), selection trace (E15), uncertainty hierarchy (E16), per-cell support (E19), Full/Lean profiles (E20)",
+      "code": [
+        "run_cross_morse.py",
+        "cross_morse/pipeline.py",
+        "cross_morse/runtime.py",
+        "cross_morse/statistics.py",
+        "run_cross_morse.sh"
+      ],
+      "command": "bash run_cross_morse.sh reproduce   (one dataset: python -B run_cross_morse_<dataset>.py --profile full --device cuda)",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "run:*"
+      ]
+    },
+    {
+      "experiment": "E3–E6",
+      "title": "Budget-matched comparison arms at the common ceiling: initial-input schedule predictor, distillation, no-observation replanning, selective sensing",
+      "code": [
+        "cm_experiments/runner.py",
+        "cm_experiments/campaign.py",
+        "cm_campaigns/arm_campaign.py",
+        "scripts/arm_campaign.py",
+        "scripts/run_budget_arms.py",
+        "hpc/run_budget_arms_arrhenius.sh"
+      ],
+      "command": "python -B scripts/arm_campaign.py execute --manifest <campaign.json>; python -B scripts/export_records.py budget-matched",
+      "configurations": [],
+      "outputs": [
+        "campaign:budget",
+        "records:budget_matched"
+      ]
+    },
+    {
+      "experiment": "S14 joint confirmation",
+      "title": "Nine-test mechanism confirmation family with joint Holm correction",
+      "code": [
+        "cm_campaigns/confirmation.py",
+        "scripts/audit_s14_confirmation.py"
+      ],
+      "command": "python -B scripts/audit_s14_confirmation.py <campaign>",
+      "configurations": [],
+      "outputs": [
+        "campaign:confirmation"
+      ]
+    },
+    {
+      "experiment": "E12",
+      "title": "Retraining-allowed external baselines under the shared 48-trial HPO ceiling",
+      "code": [
+        "cm_experiments/upstream.py",
+        "scripts/run_upstream_baseline.py",
+        "hpc/run_upstream_baseline_arrhenius.sh"
+      ],
+      "command": "python -B scripts/run_upstream_baseline.py --plan <baseline-plan.json> --output <study> --phase hpo|select|final",
+      "configurations": [],
+      "outputs": [
+        "records:baselines"
+      ]
+    },
+    {
+      "experiment": "E17",
+      "title": "Timing protocol and scheduler accounting",
+      "code": [
+        "cm_campaigns/timing.py",
+        "cm_campaigns/accounting.py",
+        "hpc/capture_arrhenius_accounting.sh",
+        "scripts/export_records.py"
+      ],
+      "command": "python -B scripts/export_records.py from-runs | baselines",
+      "configurations": [],
+      "outputs": [
+        "records:nominal_time",
+        "records:sensor_parameters",
+        "records:baselines"
+      ]
+    },
+    {
+      "experiment": "Observed environment",
+      "title": "GPU execution environment of the reported runs",
+      "code": [
+        "environment/arrhenius/capture_environment.sh"
+      ],
+      "command": "bash environment/arrhenius/capture_environment.sh <python> <directory>",
+      "configurations": [],
+      "outputs": [
+        "environment:gpu"
+      ]
+    },
+    {
+      "experiment": "E13",
+      "title": "Attribution of inserted-site transport: native-only and all-site arms of q_C and the confirmed feedback route at the same members and units",
+      "code": [
+        "cm_experiments/attribution.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_experiment.py"
+      ],
+      "command": "python -B scripts/run_experiment.py inserted-site plan --parent <pascalvoc_sp run> --parent <coco_sp run> --parent <peptides_func run> --output <dir>; ... inserted-site run --output <dir> --device cuda --trust-local-checkpoints; ... inserted-site export --output <dir>",
+      "configurations": [
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:inserted_site"
+      ],
+      "displays": [
+        "supplementary:Table S45",
+        "supplementary:Figure S18"
+      ]
+    },
+    {
+      "experiment": "E14",
+      "title": "Comparator on the extended ensemble grid E = 1, 2, 4, 8, 12, 16, 20 with distinct checkpoints and paired seeds",
+      "code": [
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_experiment.py"
+      ],
+      "command": "python -B scripts/run_experiment.py ensemble-grid plan --parent <run or Roman campaign> (each admitted dataset) --output <dir>; ... ensemble-grid run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... ensemble-grid export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:ensemble_grid"
+      ],
+      "displays": [
+        "supplementary:Table S26",
+        "supplementary:Table S26b"
+      ]
+    },
+    {
+      "experiment": "Cross-backbone substitutions",
+      "title": "Frozen substitute backbones behind the same adapter (GCNII on arxiv and Roman-empire, linear GINE on PascalVOC-SP) against the paper's plants",
+      "code": [
+        "cm_experiments/backbones.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_experiment.py",
+        "run_cross_morse.py"
+      ],
+      "command": "python -B scripts/run_experiment.py cross-backbone plan --parent <arxiv run> --parent <Roman campaign> --parent <pascalvoc_sp run> --output <dir>; ... cross-backbone run --output <dir> --data-root <data> --device cuda; ... cross-backbone export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json"
+      ],
+      "outputs": [
+        "records:cross_backbone"
+      ],
+      "displays": [
+        "supplementary:Table S25"
+      ]
+    },
+    {
+      "experiment": "Factorials",
+      "title": "Equal-budget 2^3 component factorials: ogbn-arxiv (A, O, X) and PascalVOC-SP (S, O, X)",
+      "code": [
+        "cm_experiments/factorial.py",
+        "cm_experiments/ablation_lifecycle.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_ablation.py",
+        "scripts/run_experiment.py"
+      ],
+      "command": "python -B scripts/run_ablation.py factorial-fit plan --parent <arxiv run> --parent <pascalvoc_sp run> --output <dir>; ... factorial-fit run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... factorial-fit export --output <dir> [--hardware <hw> --period <period>]",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/pascalvoc_sp_full.json"
+      ],
+      "outputs": [
+        "records:factorials"
+      ],
+      "displays": [
+        "supplementary:Table S16",
+        "supplementary:Table S16b",
+        "main:Figure 4"
+      ],
+      "not_executable": [
+        {
+          "display": "Table S16, ogbn-arxiv cells 010 and 011",
+          "reason": "with only A0 admissible every feedback fallback returns A0 or the support-mask reset, the support audit depends only on the exploration log and feedback routes execute all L sites, so the observer factor cannot act: cells 010 and 011 reproduce 000 and 001; the stopping-depth change the paper describes has no counterpart in the released runtime"
+        }
+      ]
+    },
+    {
+      "experiment": "E19 sensitivity grids",
+      "title": "Registered sensitivity grids of the support thresholds, selection margin, equivalence margin and clip level",
+      "code": [
+        "cm_experiments/sweeps.py",
+        "scripts/run_sweep.py",
+        "scripts/export_sweep_records.py"
+      ],
+      "command": "python -B scripts/run_sweep.py plan --sweep sensitivity_grids --parent <run> ... --output <dir>; ... run --plan <dir>/plan.json --data-root <data> --device cuda; ... collect --plan <dir>/plan.json; python -B scripts/export_sweep_records.py --results <dir>/results.json --hardware ... --period ...",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:sensitivity_grids"
+      ],
+      "displays": [
+        "supplementary:Table S18"
+      ]
+    },
+    {
+      "experiment": "Horizon and beam sweep",
+      "title": "MPC-RH horizon and beam-width sweep: selection effect and expected cost per configuration on D_select",
+      "code": [
+        "cm_experiments/sweeps.py",
+        "scripts/run_sweep.py",
+        "scripts/export_sweep_records.py"
+      ],
+      "command": "python -B scripts/run_sweep.py plan --sweep horizon_beam_sweep --parent <pascalvoc_sp run> --output <dir>; ... run --plan <dir>/plan.json --data-root <data> --device cuda; ... collect --plan <dir>/plan.json; python -B scripts/export_sweep_records.py --results <dir>/results.json --hardware ... --period ...",
+      "configurations": [
+        "configs/pascalvoc_sp_full.json"
+      ],
+      "outputs": [
+        "records:horizon_beam_sweep"
+      ],
+      "displays": [
+        "supplementary:Table S29",
+        "supplementary:Figure S5"
+      ]
+    },
+    {
+      "experiment": "E7, E8 module ablations",
+      "title": "Module-specific evaluation and ablation signatures: variant lifecycles (deleted or scrambled sensor coordinates, observer variants, restricted recovery) re-run from the sealed parent's prepare/train outputs, the sealed-contrast modules and the post hoc comparator branch",
+      "code": [
+        "cm_experiments/ablation_lifecycle.py",
+        "scripts/run_ablation.py",
+        "cm_experiments/sweeps.py",
+        "scripts/run_sweep.py",
+        "scripts/export_sweep_records.py",
+        "cm_experiments/ensemble_grid.py"
+      ],
+      "command": "python -B scripts/run_ablation.py modules plan --parent <run or Roman campaign> ... --output <dir> [--input-gate <input_gate run> --negative-controls <negative_controls run>]; ... modules run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... modules export --output <dir> --sweep <new sweep dir> --hardware <hw> --period <period>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:module_ablations"
+      ],
+      "displays": [
+        "supplementary:Table S17"
+      ],
+      "not_executable": [
+        {
+          "display": "Table S36, E8 history-MLP arm",
+          "reason": "the manuscript defines no architecture or fitting rule for the history-MLP observer and module_ablations registers no arm for it; the raw, EMA, global and conditioned observers are executed"
+        }
+      ]
+    },
+    {
+      "experiment": "E11",
+      "title": "Dependence sensitivity of descriptive admission to the cluster buffer (2 to 32 hops)",
+      "code": [
+        "cm_experiments/sweeps.py",
+        "scripts/run_sweep.py",
+        "scripts/export_sweep_records.py"
+      ],
+      "command": "python -B scripts/run_sweep.py plan --sweep buffer_sensitivity --parent <arxiv run> --parent <proteins run> --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json"
+      ],
+      "outputs": [
+        "records:buffer_sensitivity"
+      ],
+      "displays": [
+        "supplementary:Table S27"
+      ],
+      "not_executable": [
+        {
+          "display": "Table S27",
+          "reason": "the released runtime records the k-hop buffer as a context diagnostic and resamples the METIS or degree-stratified cores, so the buffer changes no admission statistic; the paper does not define how the buffer enters the resampling units"
+        }
+      ]
+    },
+    {
+      "experiment": "E2",
+      "title": "Sequence predictability: initial-input predictor of the feedback policy's executed sequences fitted on D_explore, evaluated on D_compare (phi_seq, phi_gain)",
+      "code": [
+        "cm_experiments/predictability.py",
+        "cm_experiments/schedules.py",
+        "cm_experiments/execution.py",
+        "cm_experiments/study_execution.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py predictability plan --parent <run> --output <dir>; ... predictability run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... predictability export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:predictability"
+      ],
+      "displays": [
+        "supplementary:Table S30",
+        "supplementary:Table S33",
+        "supplementary:Table S47"
+      ]
+    },
+    {
+      "experiment": "E9",
+      "title": "Search versus model error: exact enumeration at H <= 4 against the registered beam (2 e_H and zeta_H of main Proposition 8)",
+      "code": [
+        "cm_experiments/search_enumeration.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py search-enumeration plan --parent <run> --output <dir> [--planner mpc_rh|mpc_ol]; ... search-enumeration run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... search-enumeration export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:search_enumeration"
+      ],
+      "displays": []
+    },
+    {
+      "experiment": "Negative controls",
+      "title": "Graph-irrelevant, misleading-graph, sensor-bias and support-shift constructions behind the static input gate",
+      "code": [
+        "cm_experiments/negative_controls.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py negative-controls plan --parent <run> --output <dir>; ... negative-controls run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... negative-controls export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:negative_controls"
+      ],
+      "displays": [
+        "supplementary:Table S19",
+        "supplementary:Figure S16"
+      ]
+    },
+    {
+      "experiment": "Input gate",
+      "title": "Serving-time input gate g_input: fallback probability, deployed latency and memory, false-safe and harm-miss rates",
+      "code": [
+        "cm_experiments/input_gate.py",
+        "cm_experiments/protocol.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py input-gate plan --parent <run> --output <dir>; ... input-gate run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... input-gate export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:input_gate"
+      ],
+      "displays": [
+        "supplementary:Table S23",
+        "supplementary:Table S23b",
+        "supplementary:Table S37",
+        "supplementary:Table S47"
+      ]
+    },
+    {
+      "experiment": "E18",
+      "title": "Spectral displacement audit of main Proposition 6 and tightness of the band-limited bound (6.1)",
+      "code": [
+        "cm_experiments/band_audit.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py band-audit plan --parent <run sealed through explore> --output <dir>; ... band-audit run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... band-audit export --results <dir> --hardware <hw> --period <period>; ... band-audit export-tightness --results <dir> --dataset <dataset> --baseline shared --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:band_power_audit",
+        "records:band_bound_tightness"
+      ],
+      "displays": [
+        "supplementary:Figure S18",
+        "supplementary:Table S43"
+      ]
+    },
+    {
+      "experiment": "E17 runtime scaling",
+      "title": "Runtime and peak memory of the deployed rule against processed graph size: full benchmark graphs, breadth-first subgraphs and collection test graphs timed with the E17 TimingSession inside completed GPU allocations",
+      "code": [
+        "cm_experiments/timing_records.py",
+        "scripts/run_timing_records.py",
+        "cm_campaigns/timing.py",
+        "cm_campaigns/accounting.py",
+        "cm_experiments/ensemble_grid.py",
+        "hpc/capture_arrhenius_accounting.sh"
+      ],
+      "command": "python -B scripts/run_timing_records.py scaling plan --parent <run or Roman campaign> (each dataset) --output <dir>; ... scaling run --output <dir> [--job K] --device cuda --trust-local-checkpoints; bash hpc/capture_arrhenius_accounting.sh <job ids> <acct>; ... scaling export --output <dir> --accounting <acct>/sacct_original.psv",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:runtime_scaling"
+      ],
+      "displays": [
+        "supplementary:Figure S2"
+      ]
+    },
+    {
+      "experiment": "E17 timing anchors",
+      "title": "Throughput and training-time anchors that bracket the per-input nominal execution time of Definition 2",
+      "code": [
+        "cm_experiments/timing_records.py",
+        "scripts/run_timing_records.py",
+        "cm_campaigns/timing.py",
+        "cm_campaigns/accounting.py"
+      ],
+      "command": "python -B scripts/run_timing_records.py anchors plan --parent <run or Roman campaign> (each admitted dataset) --output <dir> --scaling-output <E17 scaling dir> [--accounting <sacct export> --job-map <job map>]; ... anchors run --output <dir>; ... anchors export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:timing_anchors"
+      ],
+      "displays": [
+        "supplementary:Table S23b"
+      ]
+    },
+    {
+      "experiment": "E14 official scores",
+      "title": "Official test scores of the comparator ensemble grid recomputed from the saved member predictions",
+      "code": [
+        "cm_experiments/timing_records.py",
+        "scripts/run_timing_records.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_experiment.py"
+      ],
+      "command": "python -B scripts/run_timing_records.py grid-scores export --grid-output <scripts/run_experiment.py ensemble-grid output>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:ensemble_grid_scores"
+      ],
+      "displays": [
+        "supplementary:Table S26"
+      ]
+    },
+    {
+      "experiment": "Figure 3 held-out mechanism contrasts",
+      "title": "Paired D_confirm contrasts (conditional state destruction minus intact; MPC-RH minus MPC-OL) of each dataset's strongest feedback configuration for the Figure 3a-b cells that neither the joint S14 family nor the deployed rule's confirmation record supplies",
+      "code": [
+        "cm_experiments/confirmation_analysis.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_confirmation_analysis.py"
+      ],
+      "command": "python -B scripts/run_confirmation_analysis.py mechanism plan --parent <run|Roman campaign> ... --output <dir>; ... mechanism run --output <dir> --job K --device cuda --trust-local-checkpoints; ... mechanism export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:mechanism_contrasts"
+      ],
+      "displays": [
+        "main:Figure 3"
+      ]
+    },
+    {
+      "experiment": "Admission-split oracle (C12)",
+      "title": "Per-input oracle enumerated on D_admit after every decision is fixed: depth prefixes of the executed sequences of the registered resource-feasible configurations at the comparator's ensemble size; oracle-depth quartiles and disagreement with q_C",
+      "code": [
+        "cm_experiments/admission_oracle.py",
+        "cm_experiments/confirmation_analysis.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_confirmation_analysis.py"
+      ],
+      "command": "python -B scripts/run_confirmation_analysis.py oracle plan --parent <run|Roman campaign> ... --output <dir>; ... oracle run --output <dir> --job K --device cuda --trust-local-checkpoints; ... oracle export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:oracle_dispersion"
+      ],
+      "displays": [
+        "supplementary:Table S30",
+        "supplementary:Table S43"
+      ]
+    },
+    {
+      "experiment": "Proposition 2 tube audit",
+      "title": "Plug-in trajectory tube of main Proposition 2 on audited D_explore episodes: predicted (registered) and realized (declared input and edge-weight disturbance) runs of the deployed rule, exact joint replay, plug-in constants, coverage, mode stability, bounds and loss errors",
+      "code": [
+        "cm_experiments/trajectory_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_theory/stability.py",
+        "scripts/run_trajectory_audit.py"
+      ],
+      "command": "python -B scripts/run_trajectory_audit.py tube plan --parent <arxiv run> --parent <Roman campaign> --parent <pascalvoc_sp run> --parent <coco_sp run> --parent <peptides_func run> --output <dir> [--chunk-size N]; ... tube run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... tube export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:tube_audit"
+      ],
+      "displays": [
+        "supplementary:Table S22",
+        "supplementary:Figure S17",
+        "main:Figure 2"
+      ]
+    },
+    {
+      "experiment": "Depth diagnostics",
+      "title": "Reference-plant source alignment on D_fit validation, truncated-policy loss by depth, first-intervention quartiles, supported deterioration depth and phase transport fractions of the deployed rules",
+      "code": [
+        "cm_experiments/trajectory_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_trajectory_audit.py"
+      ],
+      "command": "python -B scripts/run_trajectory_audit.py depth plan --parent <run or Roman campaign> (each dataset) --reference ogbn-arxiv --output <dir> [--chunk-size N]; ... depth run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... depth export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:depth_diagnostics"
+      ],
+      "displays": [
+        "supplementary:Figure S14"
+      ]
+    },
+    {
+      "experiment": "E10",
+      "title": "Confirmation-size sensitivity: the nine joint-S14 original tests at their original sizes (J_old: validation split for the multigraph rows), multigraph rows rescaled to the D_confirm sizes with the Note S24 graph share (hw_graph/hw_test)^2 from each sealed run's admission moments and Table 1 test interval, re-formed nine-test Holm family and label-survival probability; the E16 direct estimate (per-graph, per-seed validation-split array, two-way method of moments) deposited separately",
+      "code": [
+        "cm_experiments/confirmation_analysis.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_confirmation_analysis.py",
+        "cm_campaigns/confirmation.py"
+      ],
+      "command": "python -B scripts/run_confirmation_analysis.py confirmation plan --parent <pascalvoc_sp run> --parent <coco_sp run> --parent <peptides_func run> --campaign <joint S14 campaign> --output <dir>; ... confirmation run --output <dir> --job K --device cuda --trust-local-checkpoints; ... confirmation export --output <dir>",
+      "configurations": [
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:confirmation_contrasts",
+        "records:confirmation_sensitivity"
+      ],
+      "displays": [
+        "supplementary:Table S14b",
+        "supplementary:Figure S9",
+        "supplementary:Figure S18",
+        "supplementary:Table S43"
+      ]
+    },
+    {
+      "experiment": "Action-gap audit (Prop. 3)",
+      "title": "Per-site action gaps, near-zero fraction and switching under the registered observer-noise perturbation, recovery-index and beam-sequence stability of the deployed rules, from an instrumented serving-time execution with site-by-site decision-log replay",
+      "code": [
+        "cm_experiments/decision_audit.py",
+        "scripts/run_decision_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/negative_controls.py",
+        "cm_experiments/budget.py"
+      ],
+      "command": "python -B scripts/run_decision_audit.py plan --parent <run or Roman campaign> (each of the seven datasets) --stress-dataset <negative-controls dataset> [--provisional <dataset>] --output <dir>; ... run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... export --output <dir> --set action_gap_audit",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:action_gap_audit"
+      ],
+      "displays": [
+        "supplementary:Table S21",
+        "supplementary:Figure S17",
+        "supplementary:Table S33",
+        "supplementary:Table S34",
+        "supplementary:Table S47",
+        "supplementary:Figure S7"
+      ]
+    },
+    {
+      "experiment": "Figure 3c-d decision traces",
+      "title": "Executed D_test decision origins (schedule/nominal, state-conditioned, exclusive sequence, recovery, input fallback) and within-depth action entropy of the deployed rules behind g_input, from the same instrumented execution",
+      "code": [
+        "cm_experiments/decision_audit.py",
+        "scripts/run_decision_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/negative_controls.py"
+      ],
+      "command": "python -B scripts/run_decision_audit.py plan --parent <run or Roman campaign> (each of the seven datasets) [--gate-from <dataset>=<sealed input_gate run>] --output <dir>; ... run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... export --output <dir> --set decision_traces",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:decision_traces"
+      ],
+      "displays": [
+        "main:Figure 3"
+      ]
+    },
+    {
+      "experiment": "E7, E8 reliability diagnostics",
+      "title": "One-step and h-step risk coverage with unit-bootstrap intervals, observer-variant risk RMSE and NIS coverage (raw, EMA, global KF, conditioned KF), false-safe and harm-miss rates, and the clean-input fallback and residual activity of the deployed rules",
+      "code": [
+        "cm_experiments/decision_audit.py",
+        "scripts/run_decision_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/negative_controls.py"
+      ],
+      "command": "python -B scripts/run_decision_audit.py plan --parent <run or Roman campaign> (each of the seven datasets) --stress-dataset <negative-controls dataset> --output <dir>; ... run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... export --output <dir> --set reliability_diagnostics",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:reliability_diagnostics"
+      ],
+      "displays": [
+        "supplementary:Figure S16"
+      ]
+    },
+    {
+      "experiment": "E18 policy value",
+      "title": "Policy value of the spectral coordinates over matched confidence/history controls: a variant lifecycle without the spectral and reachability coordinates at Full sensing work, paired against the complete lifecycle",
+      "code": [
+        "cm_experiments/ablation_lifecycle.py",
+        "scripts/run_ablation.py",
+        "cm_experiments/ensemble_grid.py"
+      ],
+      "command": "python -B scripts/run_ablation.py e18-policy plan --parent <run or Roman campaign> ... --output <dir>; ... e18-policy run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... e18-policy export --output <dir> [--hardware <hw> --period <period>]",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:spectral_policy_value"
+      ],
+      "displays": []
+    }
+  ]
+}

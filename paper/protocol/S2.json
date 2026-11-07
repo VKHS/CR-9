@@ -1,0 +1,22 @@
+{
+ "display": "supplementary:Table S2",
+ "source": {"document": "supplementary", "pages": [2]},
+ "scope": "Label-use, operation and freeze descriptions of each data role. Allocations, fold counts and seeds are read from cross_morse/split_contract.py, data/sources.json and the full configurations.",
+ "rows": {
+  "fit": {"allocation_note": "internal checkpoint subset", "labels": "training labels",
+          "operation": "fit plant/head; audit entry contract and bands",
+          "frozen_after": "model, preprocessing, nominal action, band definitions"},
+  "explore": {"labels": "offline action outcomes", "operation": "fit observer, action and sequence models",
+              "frozen_after": "action registry, strata, model schemas"},
+  "select": {"labels": "nested training labels", "operation": "reconstruct q_C; compare every (π, E, b)",
+             "frozen_after": "candidate family, margins, selector"},
+  "confirm": {"allocation_note": "untouched by fitting", "labels": "selected contrast only",
+              "operation": "apply fixed mechanism map", "frozen_after": "teacher q_M, mechanism label and downgrade"},
+  "compare": {"allocation_note": "reserved at preparation", "labels": "comparison evaluator only",
+              "operation": "E3–E6 against frozen q_M and q_C",
+              "frozen_after": "independent comparison record; no automatic deployment switch"},
+  "admit": {"allocation_note": "disjoint from checkpointing", "labels": "locked admission labels",
+            "operation": "compare one executable rule with one q_C", "frozen_after": "G_admit"},
+  "test": {"labels": "evaluator only", "operation": "report q_0, q_N^ctrl, q_C, q_D", "frozen_after": "no further decision"}
+ }
+}

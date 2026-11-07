@@ -1,0 +1,10 @@
+{
+ "display": "supplementary:Table S1",
+ "source": {"document": "supplementary", "pages": [1, 2]},
+ "scope": "Design text of the E11 dependence-sensitivity analyses named in the 'dependence treatment' column. The lifecycle runner executes only the cluster bootstrap; no configuration or code expresses these sensitivity designs.",
+ "rows": {
+  "ogbn-arxiv": {"sensitivity": "core-count sensitivity"},
+  "ogbn-proteins": {"sensitivity": "isolated-message sensitivity"},
+  "ogbn-products": {"sensitivity": "32/64/128 sensitivity"}
+ }
+}

@@ -30,6 +30,11 @@ RUNS_INDEX ?= runs/index.json
 RECORDS_ROOT ?= records
 RECORDS_INDEX ?= $(RECORDS_ROOT)/index.json
 RECONSTRUCTION_ROOT ?= $(REPORT_ROOT)/reconstruction
+# One-command reconstruction from the outputs published with the repository's release.
+ARTIFACTS_ROOT ?= ../cm-artifacts
+PAPER_ROOT ?= ../cm-paper
+PAPER_TIER ?= analysis
+PUBLISH_MAP ?=
 RECONSTRUCTION_EXAMPLES_ROOT ?= $(REPORT_ROOT)/reconstruction-examples
 SUPPLEMENT_ROOT ?= $(REPORT_ROOT)/supplement
 REQUIRE_ALL_DISPLAYS ?= 0
@@ -101,7 +106,8 @@ define check-boolean
 endef
 
 .PHONY: help verify check test test-no-torch test-release \
- tables figures paper paper-from-runs example-paper example-paper-check \
+ tables figures paper paper-offline paper-from-index paper-from-runs fetch-artifacts paper-artifacts-status \
+ paper-artifacts-plan paper-artifacts-check statement statement-check example-paper example-paper-check \
  manifests manifests-check availability availability-check \
  records-index records-check records-tables example-records example-records-check \
  arm-help arm-run arm-check arm-parent arm-replay arm-campaign-template arm-campaign-plan arm-campaign-run \
@@ -195,7 +201,34 @@ figures:
 paper-from-runs:
 	"$(PYTHON)" -B scripts/build_paper.py all --index "$(RUNS_INDEX)" --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
 
-paper: paper-from-runs records-tables
+# The one command of the availability statement: download and verify the published outputs,
+# rebuild every numbered table and figure with its source data, compare with the printed values.
+paper:
+	"$(PYTHON)" -B scripts/reconstruct_paper.py --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)" \
+	  --tier "$(PAPER_TIER)"
+
+paper-offline:
+	"$(PYTHON)" -B scripts/reconstruct_paper.py --offline --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)"
+
+paper-from-index: paper-from-runs records-tables
+
+fetch-artifacts:
+	"$(PYTHON)" -B scripts/paper_artifacts.py fetch --dest "$(ARTIFACTS_ROOT)" --tier "$(PAPER_TIER)"
+
+paper-artifacts-status:
+	"$(PYTHON)" -B scripts/paper_artifacts.py status
+
+paper-artifacts-plan:
+	"$(PYTHON)" -B scripts/paper_artifacts.py plan
+
+paper-artifacts-check:
+	"$(PYTHON)" -B scripts/paper_artifacts.py plan --check
+
+statement:
+	"$(PYTHON)" -B scripts/statement_check.py --write
+
+statement-check:
+	"$(PYTHON)" -B scripts/statement_check.py --check
 
 # A single workspace of the supported outputs, with every manuscript display accounted for.
 reconstruct:
@@ -404,7 +437,7 @@ si-report:
 	"$(PYTHON)" -B scripts/check_si_identities.py --json-output "$(REPORT_ROOT)/si-identities.json" --markdown "$(REPORT_ROOT)/si-identities.md"
 
 # ---------------------------------------------------------------- whole-tree checks
-verify: registry-check theory si-check paper-report-check artifact-catalog-check faq-check fingerprint audit-artifacts example-views-check example-paper-check manifests-check records-check example-records-check availability-check claims-check availability-statement-check runs-check-if-present audit
+verify: registry-check theory si-check paper-report-check artifact-catalog-check faq-check fingerprint audit-artifacts example-views-check example-paper-check manifests-check records-check example-records-check availability-check claims-check availability-statement-check paper-artifacts-check statement-check runs-check-if-present audit
 check: verify
 
 .PHONY: runs-check-if-present
@@ -435,7 +468,11 @@ NUMPY_TESTS := test_paper_registry test_records test_export_records test_availab
  test_evidence_discovery \
  test_theory_battery test_theory_formulas test_theory_review_regressions test_si_identities \
  test_arrhenius_discovery test_reviewer_faq test_paper_support_report test_review_confirmation test_s14_confirmation test_selection_figure \
- test_reproduction test_reproduction_launcher test_artifact_catalog test_reconstruction test_supplement_build
+ test_reproduction test_reproduction_launcher test_artifact_catalog test_reconstruction test_supplement_build \
+ test_paper_artifacts test_reconstruct_paper test_statement_check \
+ test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
+ test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
+ test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

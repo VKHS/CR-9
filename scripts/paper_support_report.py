@@ -43,6 +43,7 @@ COVERAGE = {
     "partial_panels": "Related plots / partial panels",
     "method_illustration": "Method documentation",
     "original_analysis_required": "Original analysis required",
+    "full_display_generator": "Full-display generator",
 }
 SUPPLEMENT_SUFFIXES = ("5b", "5c", "5d", "6b", "6c", "12b", "12c", "14b",
                        "15b", "16b", "23b", "26b", "28b", "46b")
@@ -159,7 +160,18 @@ def _code_release(state: dict) -> bool:
     return (state.get("scope") or {}).get("result_distribution") == "regenerate" and not state.get("official")
 
 
+def _repository_release(state: dict) -> bool:
+    return (state.get("scope") or {}).get("result_distribution") == "repository_release"
+
+
 def _regeneration_note(state: dict) -> str | None:
+    if _repository_release(state):
+        return ("**Every numbered display has a generator** in `paper/build/displays/`: measured displays are rebuilt "
+                "from the outputs published with the repository's release (`release/paper_artifacts.json`), protocol "
+                "and analytical displays from the repository's configuration, registered constants and analytical "
+                "code. `make paper` runs them all, writes each display's source data and compares every computed value "
+                "with the printed one ([reconstruction guide](../docs/RECONSTRUCTION.md), "
+                "[statement compliance](../STATEMENT_COMPLIANCE.md)).")
     if not _code_release(state):
         return None
     return ("**Results in this release:** regenerated, not distributed. `bash run_cross_morse.sh reproduce` executes "
@@ -185,11 +197,16 @@ def render_support(manifest: dict, sources: dict, state: dict) -> str:
               "from subsequent reproductions. "
               "Fresh verification of the registered files is performed by `make review` and `make scientific-audit`."), "",
              "## What the checking paths cover", "",
-             "A command in the tables below is a relevant check or builder. It does not imply that the command "
-             "recreates the entire printed display. Run builders reconstruct their documented columns; "
-             "record builders emit set-level summaries; figure builders provide related summaries and selected panel data. The original "
-             "analysis and artwork remain required where no full-display builder is declared. Mathematical "
-             "and protocol checks do not establish the empirical origin of an input.", "",
+             ("The first implementation of every display is its full-display generator in `paper/build/displays/`; "
+              "`make paper` runs it on the published outputs and writes the complete table or figure with its source "
+              "data. The other commands are related checks and builders: run builders reconstruct their documented "
+              "columns, record builders emit set-level summaries. Mathematical and protocol checks do not establish "
+              "the empirical origin of an input." if _repository_release(state) else
+              "A command in the tables below is a relevant check or builder. It does not imply that the command "
+              "recreates the entire printed display. Run builders reconstruct their documented columns; "
+              "record builders emit set-level summaries; figure builders provide related summaries and selected panel data. The original "
+              "analysis and artwork remain required where no full-display builder is declared. Mathematical "
+              "and protocol checks do not establish the empirical origin of an input."), "",
              _table(["Checking or reconstruction scope", "Displays"],
                     [[label, counts[key]] for key, label in COVERAGE.items()]), "",
              "[display_manifest.json](display_manifest.json) retains each display's complete implementation "
@@ -249,7 +266,7 @@ def render_results(reported: dict, registered: dict, sources: dict, state: dict)
                           f"{cost['expected_overhead_pct']}%", f"{cost['C_assure']:g}",
                           "not applicable" if cost["C_099"] is None else f"{cost['C_099']:g}"])
         view = resolved_policy_view(reported, dataset, registered)
-        regenerated = _code_release(state)
+        regenerated = _code_release(state) or _repository_release(state)
         origin = ("Comparator identity; no new measurement" if view["comparator_identity"]
                   else ("Reported arm; a regenerated run records the full selector ledger" if regenerated
                         else "Reported arm; full selector ledger required") if row.get("selection_status")
@@ -285,6 +302,8 @@ def render_results(reported: dict, registered: dict, sources: dict, state: dict)
              "repository. When it returns qC, zero paired effect follows from comparator identity; it is not "
              "a replacement measurement. " + ("A regenerated run records the complete decision trail of its own "
              "deployment: selection ledger, confirmation and admission records and the policy lock." if _code_release(state)
+             else "Each published run carries the complete decision trail of its deployment: selection ledger, "
+             "confirmation and admission records and the policy lock." if _repository_release(state)
              else "The full original decision record remains required for independent verification of each historical "
              "deployment."), "",
              _table(["Dataset", "Registered final rule", "Loss difference, nats", "Interpretation"], resolved_rows), "",
@@ -293,6 +312,13 @@ def render_results(reported: dict, registered: dict, sources: dict, state: dict)
              "run records that ledger in `select/candidates.json` and `select/decision.json`. S14 reports one "
              "joint nine-test family; local per-run tests have a different scope. See [the source review](MANUSCRIPT_REVIEW.md) "
              "and [implementation notes](IMPLEMENTATION_NOTES.md).", ""] + (
+             ["## Reproducing these results", "",
+              "`make paper` downloads the measured outputs published with the repository's release, verifies every "
+              "byte, rebuilds Tables 1–2 and every other numbered display with `paper/build/displays/` and places each "
+              "value above beside the rebuilt one (`displays/compare/`). `bash run_cross_morse.sh reproduce` "
+              "regenerates the runs independently on another Slurm GPU cluster ([HPC guide](../docs/HPC.md)). See the "
+              "[reconstruction guide](../docs/RECONSTRUCTION.md) and [publication guide](../docs/PUBLICATION.md).", ""]
+             if _repository_release(state) else
              ["## Regenerating these results", "",
               "This release includes synthetic example outputs. `bash run_cross_morse.sh reproduce` executes the "
               "registered dataset lifecycles on a Slurm GPU cluster and writes `REPRODUCTION_REPORT.md`, which rebuilds supported columns of Tables 1–2 from the regenerated "
