@@ -87,7 +87,7 @@ Current runtime identity: `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcd
 
 [runs/index.json](../runs/index.json) and [records/index.json](../records/index.json) are the registration sources. Present archive payloads are checked against their sealed stage chains and file inventories; measurement sets are checked against their manifests and raw-value traces. An absent archive with a deposit reference requires a matching committed registration manifest. Public retrieval remains a separate check.
 
-This code release describes the generated benchmark artifacts above. Original completed runs or new reproductions can be registered with their actual source identities and an explicit relationship to the paper.
+No run archive is registered in runs/index.json. The measured outputs of the reported experiments are listed in [release/paper_artifacts.json](../release/paper_artifacts.json) as assets of the release paper-artifacts; original completed runs or new reproductions can also be registered here with their actual source identities and an explicit relationship to the paper.
 
 An `exact_result_producing_run` declaration identifies an author-declared original run; `post_result_revision` identifies a later reproduction, and `refactor_with_prediction_equivalence` identifies the declared equivalence case. This catalog checks declaration identities. It does not authenticate historical chronology, recompute result bindings or replace the scientific evidence audit.
 

@@ -200,7 +200,7 @@ assumptions, and the exact implemented variants are explained in the
 ## Release scope
 
 <!-- availability:start -->
-**Availability statement:** 2 of 12 items fulfilled; measured outputs published: 0 of 8 ([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the outputs published with the [release](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) and compares them with the paper; see [availability](AVAILABILITY.md).
+**Availability statement:** 3 of 12 items fulfilled; measured outputs published: 0 of 37 ([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the outputs published with the [release](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) and compares them with the paper; see [availability](AVAILABILITY.md).
 <!-- availability:end -->
 
 `make verify` checks the software package and bundled examples. A regenerated

@@ -6,7 +6,7 @@ The paper's registered data-availability statement:
 
 > The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
-**2 of 12 items fulfilled**, 8 awaiting the publication of the measured outputs, 2 missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).
+**3 of 12 items fulfilled**, 8 awaiting the publication of the measured outputs, 1 missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).
 
 | Statement item | Status | Where in the repository |
 |---|---|---|
@@ -19,13 +19,13 @@ The paper's registered data-availability statement:
 | predictions | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) |
 | propensity-logged trajectories | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) |
 | statistical outputs | Awaiting measured outputs | release `paper-artifacts`: runs, measurement-record sets and campaigns |
-| figure/table generators | Missing | `paper/build/displays/` |
+| figure/table generators | Fulfilled | `paper/build/displays/`: a generator for each of the 90 numbered displays |
 | one-command reconstruction of every reported table and figure | Awaiting measured outputs | `make paper` (scripts/reconstruct_paper.py) |
 | follows established reproducibility guidance | Fulfilled | `REPRODUCIBILITY.md` |
 
 ## Measured outputs
 
-The checkpoints, predictions, propensity-logged trajectories and statistical outputs of the reported experiments are assets of the release [`paper-artifacts`](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) of [https://github.com/VKHS/CR-9](https://github.com/VKHS/CR-9); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with the SHA-256 of each part, archive and file. Published: **0 of 8** required artifacts.
+The checkpoints, predictions, propensity-logged trajectories and statistical outputs of the reported experiments are assets of the release [`paper-artifacts`](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) of [https://github.com/VKHS/CR-9](https://github.com/VKHS/CR-9); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with the SHA-256 of each part, archive and file. Published: **0 of 37** required artifacts.
 
 | Artifact | Status | Files | Size | Checkpoints | Predictions | Trajectories | Statistical outputs |
 |---|---|---|---|---|---|---|---|
@@ -36,6 +36,35 @@ The checkpoints, predictions, propensity-logged trajectories and statistical out
 | `run:PascalVOC-SP` | awaiting measured outputs | — | — | — | — | — | — |
 | `run:COCO-SP` | awaiting measured outputs | — | — | — | — | — | — |
 | `run:Peptides-func` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:action_gap_audit` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:band_bound_tightness` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:baselines` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:budget_matched` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:buffer_sensitivity` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:confirmation_contrasts` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:confirmation_sensitivity` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:cross_backbone` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:decision_traces` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:depth_diagnostics` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:ensemble_grid` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:ensemble_grid_scores` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:factorials` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:horizon_beam_sweep` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:input_gate` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:inserted_site` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:mechanism_contrasts` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:module_ablations` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:negative_controls` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:nominal_time` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:oracle_dispersion` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:reliability_diagnostics` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:runtime_scaling` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:sensitivity_grids` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:sensor_parameters` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:timing_anchors` | awaiting measured outputs | — | — | — | — | — | — |
+| `records:tube_audit` | awaiting measured outputs | — | — | — | — | — | — |
+| `campaign:budget` | awaiting measured outputs | — | — | — | — | — | — |
+| `campaign:confirmation` | awaiting measured outputs | — | — | — | — | — | — |
 | `environment:gpu` | awaiting measured outputs | — | — | — | — | — | — |
 
 ## One command
