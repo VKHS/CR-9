@@ -365,7 +365,7 @@ def run_band_audit(plan_path, *, device="cpu", trust=False):
     parent.verify("explore")
     baselines = sorted({b for b, _ in suprema})
     densities = [{"baseline": b, "action": a, "lambda0": lam0,
-                  "tightness_ratio": repr(model_density_tightness(b, a, lam0, suprema[(b, a)]))}
+                  "tightness_ratio": repr(float(model_density_tightness(b, a, lam0, suprema[(b, a)])))}
                  for b in baselines for a in TRANSPORT_ACTIONS for lam0 in plan["lambda0"]]
     plant = next(iter(models.values()))
     norm = (float(torch.linalg.matrix_norm(plant.shared.weight.double(), ord=2))
@@ -397,7 +397,8 @@ def _text(value):
     if value is None:
         return ""
     if isinstance(value, float):
-        return repr(value)
+        # float() first: repr of a NumPy scalar is 'np.float64(...)' under NumPy 2
+        return repr(float(value))
     return value
 
 

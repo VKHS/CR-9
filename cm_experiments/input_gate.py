@@ -276,7 +276,7 @@ def run_input_gate(plan_path, *, device="cpu", trust=False):
                                 alpha=plan["gate"]["alpha"], max_graphs=plan["max_graphs"])
     write_json(run.raw("gate.json"), dict(gate, frozen_before_evaluation_labels=True, parent=parent.name))
     write_csv(run.raw("development_units.csv"),
-              [{"unit_id": u, "score": repr(s), "g_input": int(s <= gate["threshold"])}
+              [{"unit_id": u, "score": repr(float(s)), "g_input": int(s <= gate["threshold"])}
                for u, s in zip(gate["development_units"], gate["development_scores"])])
     role, timing = plan["evaluation_role"], plan["timing"]
     units, timings, predictions = [], [], {}
@@ -322,7 +322,7 @@ def run_input_gate(plan_path, *, device="cpu", trust=False):
                 synchronized(device)
                 elapsed = time.perf_counter() - began
                 timings.append({"input_id": eid, "repeat": repeat, "warmup": int(repeat < timing["warmup"]),
-                                "branch": name, "seconds": repr(elapsed)})
+                                "branch": name, "seconds": repr(float(elapsed))})
                 if repeat >= timing["warmup"]:
                     seconds[name].append(elapsed)
         mean = {k: float(np.mean(v)) for k, v in seconds.items()}
@@ -365,18 +365,18 @@ def run_input_gate(plan_path, *, device="cpu", trust=False):
             units.append({
                 "dataset": parent.dataset, "seed": ensemble_seeds,
                 "unit_id": f"graph:{eid}" if collection else f"core:{unit}", "input_id": eid,
-                "g_input": int(g), "served_controller": g_effective, "gate_score": repr(score),
-                "comparator_work": repr(c_trace["work"] * share), "controller_work": repr(m_trace.get("work", 0.) * share),
-                "gate_work": repr(gate_work * share), "actual_work": repr(deployed_work * share),
+                "g_input": int(g), "served_controller": g_effective, "gate_score": repr(float(score)),
+                "comparator_work": repr(float(c_trace["work"] * share)), "controller_work": repr(float(m_trace.get("work", 0.) * share)),
+                "gate_work": repr(float(gate_work * share)), "actual_work": repr(float(deployed_work * share)),
                 "fallback_predictions_equal": "" if g_effective else int(np.array_equal(gated[rows], p_c[rows])),
-                "comparator_loss": repr(loss_c[key]) if key in loss_c else "",
-                "controller_loss": repr(loss_m[key]) if key in loss_m else "",
-                "deployed_loss": repr(loss_d[key]) if key in loss_d else "",
-                "harm": repr(loss_m[key] - loss_c[key]) if key in loss_m and key in loss_c else "",
+                "comparator_loss": repr(float(loss_c[key])) if key in loss_c else "",
+                "controller_loss": repr(float(loss_m[key])) if key in loss_m else "",
+                "deployed_loss": repr(float(loss_d[key])) if key in loss_d else "",
+                "harm": repr(float(loss_m[key] - loss_c[key])) if key in loss_m and key in loss_c else "",
                 "controller_failure": "" if p_m is not None else m_trace.get("failure", ""),
-                "gate_seconds": repr(mean["gate"] * share), "controller_seconds": repr(mean["controller"] * share),
-                "comparator_seconds": repr(mean["comparator"] * share),
-                "deployed_seconds": repr(deployed_seconds * share),
+                "gate_seconds": repr(float(mean["gate"] * share)), "controller_seconds": repr(float(mean["controller"] * share)),
+                "comparator_seconds": repr(float(mean["comparator"] * share)),
+                "deployed_seconds": repr(float(deployed_seconds * share)),
                 "peak_gpu_bytes": max(peaks) if peaks else "",
                 "decision_sites": sites if g_effective else 0, "recovery_sites": recoveries if g_effective else 0})
     if not units:

@@ -351,13 +351,13 @@ def run_negative_controls(plan_path, *, device="cpu", trust=False):
                     units.append({"dataset": parent.dataset, "seed": realization,
                                   "unit_id": f"graph:{eid}" if collection else f"core:{unit}",
                                   "condition": control, "realization": realization, "input_id": eid,
-                                  "comparator_loss": repr(loss_c[key]),
-                                  "deployed_loss": repr(loss_m[key] if served else loss_c[key]),
-                                  "controller_loss": repr(loss_m[key]) if key in loss_m else "",
+                                  "comparator_loss": repr(float(loss_c[key])),
+                                  "deployed_loss": repr(float(loss_m[key] if served else loss_c[key])),
+                                  "controller_loss": repr(float(loss_m[key])) if key in loss_m else "",
                                   "fallback": 1 - int(g), "g_input": int(g), "served_controller": served,
-                                  "gate_score": repr(score),
+                                  "gate_score": repr(float(score)),
                                   "active": int(served and active), "nonnominal_actions": nonnominal,
-                                  "harm": "" if harm is None else repr(harm)})
+                                  "harm": "" if harm is None else repr(float(harm))})
                 counter += 1
     if not units:
         raise ExperimentError("no constructed evaluation unit was scored")

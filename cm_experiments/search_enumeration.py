@@ -368,7 +368,8 @@ def _text(value):
     if value is None:
         return ""
     if isinstance(value, float):
-        return repr(value)
+        # float() first: repr of a NumPy scalar is 'np.float64(...)' under NumPy 2
+        return repr(float(value))
     return value
 
 

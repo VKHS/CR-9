@@ -1417,7 +1417,7 @@ def execution_phase(plan, entry, directory, ctx, run, device):
         for u in units:
             unit_rows.append({"unit_id": f"graph:{u}" if collection else f"core:{u}", "input_id": input_id,
                               "g_input": "" if u not in decisions else decisions[u][1],
-                              "gate_score": "" if u not in decisions else repr(decisions[u][0]),
+                              "gate_score": "" if u not in decisions else repr(float(decisions[u][0])),
                               "served_by": "deployed" if served[u] else ("comparator" if not entry["global_return"]
                                                                           else "deployed (global return)"),
                               **stress.get(u, {})})
