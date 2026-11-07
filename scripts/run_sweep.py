@@ -52,6 +52,10 @@ def main(argv=None) -> int:
     p.add_argument("--grid", action="append", default=[], metavar="PARAMETER=V1,V2",
                    help="replace one registered Table S18 grid (smoke runs only)")
     p.add_argument("--no-variants", action="store_true", help="plan only the rows recomputed from the parents")
+    p.add_argument("--no-replicate", action="store_true",
+                   help="omit the lifecycle replicate of the unchanged parent configuration")
+    p.add_argument("--allow-source-change", action="store_true",
+                   help="record, instead of refusing, a runtime source that differs from the parents'")
     p = sub.add_parser("run", help="execute the planned variant lifecycles")
     p.add_argument("--plan", type=Path, required=True)
     p.add_argument("--data-root", type=Path, required=True)
@@ -72,7 +76,8 @@ def main(argv=None) -> int:
             path = plan_sweep(args.sweep, args.parent, args.output, horizon=args.horizon,
                               horizons=_numbers(args.horizons, int), beams=_numbers(args.beams, int),
                               profile=args.profile, ensemble=args.ensemble, grids=grids or None,
-                              variants=not args.no_variants)
+                              variants=not args.no_variants, replicate=not args.no_replicate,
+                              allow_source_change=args.allow_source_change)
             plan = json.loads(path.read_text(encoding="utf-8"))
             print(f"wrote {path} ({len(plan['variants'])} variant lifecycle run(s))")
         elif args.command == "run":

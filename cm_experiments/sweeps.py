@@ -332,6 +332,7 @@ class Collector:
         self.spec = load_spec(record_set)
         self.rows: list[dict] = []
         self.files: list[str] = []
+        self.replicates: list[dict] = []
 
     def add(self, name: str, keys: dict, values: dict, detail: dict, runs: list[SealedRun]) -> None:
         if set(keys) != set(self.spec["keys"]):
@@ -358,13 +359,20 @@ class Collector:
 # ----------------------------------------------------------------------------- plan
 def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | None = None,
                horizons=None, beams=None, profile: str | None = None, ensemble: int | None = None,
-               grids: dict | None = None, variants: bool = True) -> Path:
+               grids: dict | None = None, variants: bool = True, replicate: bool = True,
+               allow_source_change: bool = False) -> Path:
     """Write ``plan.json`` and the variant configurations of one sweep.
 
     ``horizon``, ``horizons`` and ``beams`` replace the registered horizon and the two
     grids of the horizon/beam contract, and ``grids`` the Table S18 grids, for
     example to exercise the sweep on the synthetic smoke runs; ``variants=False``
     plans only the rows that are recomputed from the parents.
+
+    A variant lifecycle run retrains the plants and refits the controllers, so its
+    outcome mixes the changed setting with retraining variation. ``replicate`` adds
+    one lifecycle run of each parent's unchanged configuration, whose outcome is
+    reported next to the parent's. Variants must execute the runtime source that
+    sealed the parent; ``allow_source_change`` records a mismatch instead of refusing it.
     """
     spec = load_spec(sweep)
     if sweep == "buffer_sensitivity":
@@ -382,7 +390,9 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
             raise SweepError(f"{parent}: split runs of different datasets")
         entries.append({"dataset": runs[0].dataset, "root": str(Path(parent).resolve()),
                         "members": [str(m) for m in members], "synthetic": runs[0].synthetic,
-                        "config_sha256": [canonical_sha256(r.config) for r in runs]})
+                        "config_sha256": [canonical_sha256(r.config) for r in runs],
+                        "runtime_source_sha256": sorted({read_json(m / "run_state.json")["source_sha256"]
+                                                         for m in members})})
     if sweep == "horizon_beam_sweep":
         if len(entries) != 1 or len(entries[0]["members"]) != 1:
             raise SweepError("the horizon and beam sweep takes exactly one sealed run")
@@ -394,6 +404,10 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
                 planned.append(_variant(output, run, f"H{point['horizon']}_B{point['beam_width']}",
                                         point["patch"], {"horizon": point["horizon"],
                                                          "beam_width": point["beam_width"]}))
+        if planned and replicate:
+            planned.append(_variant(output, run, "replicate", {}, {"horizon": settings["registered_horizon"],
+                                                                   "beam_width": settings["registered_beam_width"],
+                                                                   "replicate": True}))
     elif sweep == "sensitivity_grids":
         settings = {"grids": grids or {}}
         if variants:
@@ -408,12 +422,21 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
                             name = f"{safe_label(run.dataset)}_{run.root.name}_{parameter}_{value:g}"
                             planned.append(_variant(output, run, name, {f"/support/{parameter}": value},
                                                     {"parameter": parameter, "setting": value}))
+                    if replicate:
+                        planned.append(_variant(output, run, f"{safe_label(run.dataset)}_{run.root.name}_replicate",
+                                                {}, {"parameter": "replicate", "setting": None, "replicate": True}))
     elif sweep == "module_ablations":
         settings = {"modules": [m["module"] for m in spec["modules"]]}
+    current = _runtime_sha256()
+    mismatch = sorted({s for e in entries for s in e["runtime_source_sha256"]} - {current})
+    if planned and mismatch and not allow_source_change:
+        raise SweepError(f"the parent runs were sealed by runtime source {', '.join(mismatch)} but this checkout is "
+                         f"{current}; run the sweep from the parent's source snapshot (variant and parent must "
+                         "execute the same runtime) or pass allow_source_change")
     plan = {"schema": PLAN_SCHEMA, "sweep": sweep, "record_set": sweep, "parents": entries,
             "settings": settings, "variants": planned, "stages": list(LIFECYCLE_THROUGH_SELECT),
             "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "runtime_source_sha256": _runtime_sha256()}
+            "runtime_source_sha256": current, "parent_runtime_source_mismatch": mismatch if planned else []}
     write_json(output / "plan.json", plan)
     return output / "plan.json"
 
@@ -510,6 +533,8 @@ def collect(plan_path: Path) -> Path:
                "keys": collector.spec["keys"], "rows": collector.rows, "computed": collector.files,
                "plan_sha256": sha256_file(plan_path), "synthetic": synthetic.pop(),
                "parents": plan["parents"], "variants": plan["variants"], "unsupported": unsupported,
+               "replicates": collector.replicates,
+               "parent_runtime_source_mismatch": plan.get("parent_runtime_source_mismatch", []),
                "runtime_source_sha256": _runtime_sha256(),
                "collected_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")}
     write_json(base / "results.json", results)
@@ -594,7 +619,8 @@ def collect_horizon_beam(plan: dict, base: Path, collector: Collector) -> None:
     settings = plan["settings"]
     headroom = parent.json("select/entry_complete.json")["headroom"]
     bound = headroom.get("upper")
-    variants = {(v["keys"]["horizon"], v["keys"]["beam_width"]): v for v in plan["variants"]}
+    variants = {(v["keys"]["horizon"], v["keys"]["beam_width"]): v for v in plan["variants"]
+                if not v["keys"].get("replicate")}
     for point in settings["points"]:
         h, b = point["horizon"], point["beam_width"]
         if point["source"] == "parent":
@@ -615,6 +641,15 @@ def collect_horizon_beam(plan: dict, base: Path, collector: Collector) -> None:
         runs = [run] if run is parent else [run, parent]
         collector.add(f"{run.dataset}_H{h}_B{b}", {"dataset": run.dataset, "horizon": h, "beam_width": b},
                       values, detail, runs)
+    for variant in plan["variants"]:
+        if variant["keys"].get("replicate"):
+            run = _variant_run(base, variant)
+            h, b = variant["keys"]["horizon"], variant["keys"]["beam_width"]
+            j, candidate, effect = _mpc_rh(run, h, settings["profile"], settings["ensemble"])
+            _, _, parent_effect = _mpc_rh(parent, h, settings["profile"], settings["ensemble"])
+            collector.replicates.append({"variant": variant["id"], "horizon": h, "beam_width": b,
+                                         "selection_effect_nats": effect, "parent_selection_effect_nats": parent_effect,
+                                         "expected_serial_cost": candidate["cost"], "inputs": run.inputs()})
 
 
 # ----------------------------------------------------------------------------- Table S18 grids
@@ -622,6 +657,16 @@ def collect_sensitivity(plan: dict, base: Path, collector: Collector) -> None:
     grids = plan["settings"].get("grids") or {}
     variants = {}
     for variant in plan["variants"]:
+        if variant["keys"].get("replicate"):
+            parent, run = SealedRun(Path(variant["parent"])), _variant_run(base, variant)
+            reference, again = selection_outcome(parent), selection_outcome(run)
+            collector.replicates.append({
+                "variant": variant["id"], "parent": variant["parent"],
+                **route_quantities(again["candidates"][again["selected"]],
+                                   reference["candidates"][reference["selected"]]),
+                "eligible_count": len(again["eligible"]), "parent_eligible_count": len(reference["eligible"]),
+                "inputs": run.inputs()})
+            continue
         variants[(variant["parent"], variant["keys"]["parameter"], float(variant["keys"]["setting"]))] = variant
     for entry in plan["parents"]:
         members = [SealedRun(Path(m)) for m in entry["members"]]

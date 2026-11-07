@@ -12,7 +12,8 @@ evaluated from what the repository holds and what its release has published:
 
     python -B scripts/statement_check.py            # print the evaluation
     python -B scripts/statement_check.py --write    # also write STATEMENT_COMPLIANCE.md
-    python -B scripts/statement_check.py --check    # STATEMENT_COMPLIANCE.md is current; nothing missing
+    python -B scripts/statement_check.py --check    # STATEMENT_COMPLIANCE.md matches the repository
+    python -B scripts/statement_check.py --require-complete    # nothing missing on the repository side
     python -B scripts/statement_check.py --require-fulfilled   # every item fulfilled
 
 Nothing here downloads or computes results; it inspects files and manifests.
@@ -72,10 +73,14 @@ def evaluate(root: Path = ROOT) -> dict:
     produced = {o for e in experiments for o in e.get("outputs", [])}
     needed = {a["id"] for a in required if a["kind"] in ("records", "campaign", "run")}
     unproduced = sorted(i for i in needed if i not in produced and not (i.startswith("run:") and "run:*" in produced))
-    if absent or unproduced or not experiments:
+    # Parts of a reported experiment that the released code cannot execute, declared with the reason.
+    gaps = [f"{e['experiment']}: {gap['display']} ({gap['reason']})"
+            for e in experiments for gap in e.get("not_executable", [])]
+    if absent or unproduced or gaps or not experiments:
         item("experiment_code", MISSING, "release/experiment_code.json",
              "; ".join(filter(None, [f"code not found: {', '.join(absent)}" if absent else "",
                                      f"no producing experiment for {', '.join(unproduced)}" if unproduced else "",
+                                     "not executable with the released code: " + "; ".join(gaps) if gaps else "",
                                      "no experiment-code map" if not experiments else ""])))
     else:
         item("experiment_code", FULFILLED, f"{len(experiments)} experiments mapped to their code in "
@@ -225,6 +230,7 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--require-complete", action="store_true")
     parser.add_argument("--require-fulfilled", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -242,7 +248,7 @@ def main(argv=None) -> int:
         if current != text:
             print(f"{REPORT} is not current; run: python -B scripts/statement_check.py --write", file=sys.stderr)
             return 1
-    if evaluation["counts"][MISSING]:
+    if (args.require_complete or args.require_fulfilled) and evaluation["counts"][MISSING]:
         return 1
     if args.require_fulfilled and evaluation["counts"][AWAITING]:
         return 1

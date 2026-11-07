@@ -86,6 +86,14 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
     root = Path(root).resolve()
     if results.get("synthetic") and is_official_root(root):
         raise ExportError("synthetic example sweeps cannot be exported into records/; pass --root")
+    base = results_path.parent
+    computed = {}
+    for row in results["rows"]:
+        if row["source_file"] not in computed:
+            computed[row["source_file"]] = json.loads((base / row["source_file"]).read_text(encoding="utf-8"))
+        pointer = row["locator"].removeprefix("json:/values/")
+        if computed[row["source_file"]]["values"].get(pointer) != row["value"]:
+            raise ExportError(f"{name}: {row['keys']} / {row['quantity']} in results.json differs from its computed file")
     target = root / name
     if target.exists():
         if not replace:
@@ -93,7 +101,6 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
         shutil.rmtree(target)
     (target / "raw").mkdir(parents=True)
     (target / "code").mkdir()
-    base = results_path.parent
     for relative in results["computed"]:
         destination = target / "raw" / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -134,6 +141,8 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
         "variants": [{"id": v["id"], "patch": v["patch"], "config_sha256": v["config_sha256"]}
                      for v in results["variants"]],
         "not_measured": results.get("unsupported", []),
+        "lifecycle_replicates": [{k: v for k, v in r.items() if k != "inputs"} for r in results.get("replicates", [])],
+        "parent_runtime_source_mismatch": results.get("parent_runtime_source_mismatch", []),
     }
     for field in specs["provenance_fields"]:
         if not str(provenance.get(field, "")).strip():

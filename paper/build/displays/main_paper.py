@@ -151,12 +151,11 @@ def _f(value) -> float | None:
     return number if math.isfinite(number) else None
 
 
-def _plain(text: str) -> str:
-    return text.replace("−", "-")
-
-
-def _signed(value, decimals: int) -> str | None:
-    return num(value, decimals, signed=True)
+def _pct(fraction: float) -> str:
+    """Signed whole percent of a fraction, rounded half away from zero at the printed precision."""
+    value = 100.0 * fraction
+    whole = int(math.floor(abs(value) + 0.5 + 1e-9))
+    return f"{'-' if value < 0 and whole else '+'}{whole}%" if whole else "0%"
 
 
 def _trim(text: str | None, minimum: int = 4) -> str | None:
@@ -388,26 +387,33 @@ def ledgers(ctx, deps: dict, gate) -> dict:
 # ---------------------------------------------------------------------------
 
 def confirmation_text(dep: dict) -> str:
-    """Confirmation output of the run(s): each executed contrast with its Holm P and decision."""
-    rows = {}
-    for evidence in dep["member_evidence"]:
-        for row in evidence["confirmation"].get("contrasts") or []:
-            rows.setdefault(row.get("kind"), []).append(row)
-    if not rows:
-        return "no feedback candidate in Q_s; q_C retained" if not dep["Q_s"] else "no contrasts recorded"
-    parts = []
-    for kind, items in rows.items():
-        if len(items) == 1:
-            row = items[0]
+    """Executed confirmation contrasts: effect, Holm P and decision of every contrast of a run; a split
+    campaign reports in how many splits each contrast of the selected rule passes."""
+    if dep["is_campaign"]:
+        counts = {}
+        for member, evidence in zip(dep["members"], dep["member_evidence"]):
+            provisional, _ = _member_indices(dep, member)
+            for row in evidence["confirmation"].get("contrasts") or []:
+                if row.get("candidate_index") == provisional:
+                    passed, total = counts.get(row.get("kind"), (0, 0))
+                    counts[row.get("kind")] = (passed + bool(row.get("passes")), total + 1)
+        if counts:
+            return "; ".join(f"{kind}: pass in {p} of {n} splits" for kind, (p, n) in counts.items())
+    else:
+        rows = dep["evidence"]["confirmation"].get("contrasts") or []
+        several = len({row.get("candidate_index") for row in rows}) > 1
+        parts = []
+        for row in rows:
+            name = f"{row.get('kind')} (candidate {row.get('candidate_index')})" if several else str(row.get("kind"))
             if row.get("mean") is None:
-                parts.append(f"{kind}: unavailable")
+                parts.append(f"{name}: unavailable")
                 continue
-            parts.append(f"{kind} {row['mean']:+.5f} (Holm P = {row.get('holm_p_value_zero', 1.0):.3g}; "
+            holm = row.get("holm_p_value_zero")
+            parts.append(f"{name} {row['mean']:+.5f} (Holm P = {'n/a' if holm is None else format(holm, '.3g')}; "
                          f"{'pass' if row.get('passes') else 'fail'})")
-        else:
-            passed = sum(1 for row in items if row.get("passes"))
-            parts.append(f"{kind}: pass in {passed} of {len(items)} splits")
-    return "; ".join(parts)
+        if parts:
+            return "; ".join(parts)
+    return "no feedback candidate in Q_s; q_C retained" if not dep["Q_s"] else "no contrasts recorded"
 
 
 def admission_criterion(dep: dict) -> str:
@@ -541,10 +547,10 @@ def table_2(ctx, out):
                     lam += f" [{led['lambda_range'][0]:.1f}, {led['lambda_range'][1]:.1f}]"
                 lam += f" ({rate})"
             cells = [f"{ROUTE_WORDS[deployed['route']]}, {deployed['ensemble']}", num(led["C_qC"], 1),
-                     f"{num(led['C_expected'], 2)} ({100 * led['expected_overhead']:+.0f}%)",
+                     f"{num(led['C_expected'], 2)} ({_pct(led['expected_overhead'])})",
                      f"{tail['C_099'][1]:.1f} [{tail['C_099'][0]:.1f}, {tail['C_099'][2]:.1f}] "
-                     f"({tail['overhead_pct'][1]:+.0f}%)",
-                     f"{num(led['C_assure'], 1)} ({100 * led['assure_overhead']:+.0f}%)", lam,
+                     f"({_pct(tail['overhead_pct'][1] / 100.0)})",
+                     f"{num(led['C_assure'], 1)} ({_pct(led['assure_overhead'])})", lam,
                      integer(None if led["M_star_t_nom"] is None else led["M_star_t_nom"] / 1000.0),
                      f"{gain} {unit}; {_trim(num(loss['mean'], 5, signed=True))} {dep['loss_name']}"]
         rows.append([SHORT[dataset], route_identity(qc, style="table2"), *cells])
@@ -590,7 +596,7 @@ def table_2(ctx, out):
 
 def _style(plt):
     plt.rcParams.update({"axes.spines.top": False, "axes.spines.right": False, "axes.grid": True,
-                         "grid.color": GRID, "grid.linewidth": 0.5, "axes.edgecolor": MUTED,
+                         "axes.axisbelow": True, "grid.color": GRID, "grid.linewidth": 0.5, "axes.edgecolor": MUTED,
                          "xtick.color": MUTED, "ytick.color": MUTED, "axes.labelcolor": INK})
 
 
@@ -606,10 +612,9 @@ def _deployed_datasets(deps: dict) -> list[str]:
 def confirmation_family(ctx) -> dict:
     """The joint nine-test S14 family, validated by its dedicated campaign auditor."""
     from paper.build.supplement import _confirmation_data
+    campaign = ctx.require_campaign("confirmation")
     try:
-        checked, _ = _confirmation_data(ctx.require_campaign("confirmation"), ctx.root)
-    except DisplayInputError:
-        raise
+        checked, _ = _confirmation_data(campaign, ctx.root)
     except (OSError, ValueError, KeyError, TypeError) as exc:
         raise DisplayInputError(f"confirmation campaign: {exc}") from None
     return {row["contrast_id"]: row for row in checked["rows"]}
@@ -620,7 +625,7 @@ def ensemble_fits(ctx) -> dict:
     from paper.build.supplement import _ensemble_data
     view = ctx.require_records("ensemble_grid")
     try:
-        fits, points = _ensemble_data(view.rows, {"sets": {"ensemble_grid": view.spec}})
+        fits, _ = _ensemble_data(view.rows, {"sets": {"ensemble_grid": view.spec}})
     except (ValueError, KeyError, TypeError) as exc:
         raise DisplayInputError(f"ensemble_grid: {exc}") from None
     return {row["dataset"]: row for row in fits}
@@ -865,11 +870,15 @@ def figure_2(ctx, out):
     stage_index = {name: i for i, (name, _) in enumerate(STAGES)}
     shown = _deployed_datasets(deps)
     offsets = {d: (k - (len(shown) - 1) / 2) * 0.11 for k, d in enumerate(shown)}
+    points = [r["ratio"] for r in panel_b if r["ratio"] > 0]
+    floor = 0.15 * min([1.0, *points])
+    ceiling = 8.0 * max([1.0, *points, *[r["high"] for r in panel_b if r["high"] is not None]])
     for row in panel_b:
         x = stage_index[row["stage"]] + offsets[row["dataset"]]
         if row["low"] is not None:
-            ax.plot([x, x], [max(row["low"], 1e-3), row["high"]], color=COLORS[row["dataset"]], lw=1.6)
+            ax.plot([x, x], [max(row["low"], floor), row["high"]], color=COLORS[row["dataset"]], lw=1.6)
         ax.plot(x, row["ratio"], "o", color=COLORS[row["dataset"]], ms=6, mec="white", mew=0.6, zorder=3)
+    ax.set_ylim(floor, ceiling)
     returned = [d for d in DATASETS if deps[d]["returned"]]
     if returned:
         from matplotlib.transforms import blended_transform_factory
@@ -935,8 +944,8 @@ def figure_2(ctx, out):
         for row in panel_d:
             color = COLORS.get(row["dataset"], MUTED)
             ax.plot(row["rank"], max(row["raw_P"], 1e-6), "o", color=color, mec=INK, mew=0.6, ms=9, zorder=3)
-            ax.text(row["rank"], max(row["raw_P"], 1e-6) * 0.55, row["contrast"].replace("/", "\n"), ha="center", va="top",
-                    fontsize=6.5, color=color)
+            ax.text(row["rank"] + 0.18, max(row["raw_P"], 1e-6), row["contrast"].replace("/", "\n"), ha="left",
+                    va="center", fontsize=6.5, color=color)
         ax.set_yscale("log")
         ax.set_xticks(ranks)
         ax.legend(frameon=False, fontsize=7, loc="upper left")
@@ -980,13 +989,13 @@ def _figure_2_compare(out, deps, panel_a, panel_c, family, fits):
     for index, key in enumerate(FAMILY):
         if key in family:
             row = family[key]
-            out.compare(S14_GROUP, (index, "raw_P"), _p_text(row["p_value_zero"], 1e-4))
-            out.compare(S14_GROUP, (index, "holm_P"), _p_text(row["holm_p_value_zero"], 1e-3))
+            out.compare(S14_GROUP, (index, "raw_P"), _p_text(row["p_value_zero"], 1e-4, "< 1e-4"))
+            out.compare(S14_GROUP, (index, "holm_P"), _p_text(row["holm_p_value_zero"], 1e-3, "< 0.001"))
 
 
-def _p_text(value: float, floor: float):
-    """A P value below the printed floor is compared as the printed inequality text."""
-    return f"< {floor:g}" if value < floor else value
+def _p_text(value: float, floor: float, text: str):
+    """A P value below the printed floor of Table S14 is compared as the printed inequality."""
+    return text if value < floor else value
 
 
 # ---------------------------------------------------------------------------
@@ -1250,7 +1259,7 @@ def figure_4(ctx, out):
         ax.axhline(base, color=MUTED, ls="--", lw=0.9)
         ax.text(0.15, base, "no component", va="bottom", fontsize=7.5, color=MUTED)
         last = next(i for i, r in enumerate(cells) if r["cell"] == "111")
-        ax.text(last, cells[last]["interval_low"], "full\nsystem", ha="center", va="top", fontsize=7.5,
+        ax.text(last - 0.15, cells[last]["ld_integrated_loss"], "full\nsystem", ha="right", va="center", fontsize=7.5,
                 color=COLORS["ogbn-arxiv"])
     ax.set_xticks(list(x), [r["cell"] for r in cells])
     ax.set_xlabel("cell AOX (actions, observer, risk-controlled execution)")
@@ -1285,10 +1294,11 @@ def figure_4(ctx, out):
            bottom=[leds[d]["C_expected"] for d in DATASETS], color="white", edgecolor=COLORS["ogbn-arxiv"], hatch="///",
            label="to two-branch assurance cost $C_{assure}$")
     for i, d in enumerate(DATASETS):
-        ax.text(i + width / 2, leds[d]["C_expected"], f"{100 * leds[d]['expected_overhead']:+.0f}%", ha="center", va="bottom",
-                fontsize=6.5, color=INK)
-        if not deps[d]["returned"]:
-            ax.text(i + width / 2, leds[d]["C_assure"], f"{100 * leds[d]['assure_overhead']:+.0f}%", ha="center",
+        returned = deps[d]["returned"]
+        ax.text(i + width / 2, leds[d]["C_expected"], _pct(leds[d]["expected_overhead"]), ha="center",
+                va="bottom" if returned else "top", fontsize=6.5, color=INK if returned else "white", fontweight="bold")
+        if not returned:
+            ax.text(i + width / 2, leds[d]["C_assure"], _pct(leds[d]["assure_overhead"]), ha="center",
                     va="bottom", fontsize=6.5, color=MUTED)
     ax.set_xticks(positions, [SHORT[d] for d in DATASETS], rotation=30, ha="right")
     ax.set_ylabel("serial compute / one nominal execution")
@@ -1329,6 +1339,9 @@ def figure_4(ctx, out):
                 color=COLORS["Roman-empire"], lw=4, solid_capstyle="butt",
                 label="retrained adaptive architecture (range)" if i == 0 else None)
     ax.set_xticks(range(len(hours)), [SHORT[r["dataset"]] for r in hours], rotation=30, ha="right")
+    tallest = max([r["plant_training_hours"] + r["qualification_hours"] for r in hours] +
+                  [r["retrained_high_gpu_hours"] for r in hours])
+    ax.set_ylim(0, 1.4 * tallest)
     ax.set_ylabel("GPU-hours")
     ax.legend(frameon=False, fontsize=7, loc="upper left")
     _panel(ax, "e", "One-off cost: qualification versus retraining")
@@ -1494,7 +1507,7 @@ def figure_5(ctx, out):
     ax.axhline(0, color=INK, lw=0.6)
     ax.set_xlabel("serial compute relative to the full-depth plant")
     ax.set_ylabel("official score minus plant (points; AP in pp)")
-    ax.legend(frameon=False, fontsize=7, loc="upper left")
+    ax.legend(frameon=False, fontsize=7, loc="lower right")
     _panel(ax, "a", "Method map: score gain against serial compute")
 
     ax = axes[0, 1]
@@ -1535,11 +1548,20 @@ def figure_5(ctx, out):
     for d in shown:
         series = [(row[1], row[2]) for row in panel_d if row[0] == d]
         ax.plot([s[0] for s in series], [s[1] for s in series], color=COLORS[d], label=SHORT[d])
+    groups = {}
     for d, t_nom, m_star, *_ in markers:
         ax.plot(t_nom, m_star, "o", mfc="none", mec=COLORS[d], mew=1.8, ms=9)
-        mantissa, exponent = f"{m_star:.1e}".split("e")
-        ax.text(t_nom * 1.6, m_star, f"{SHORT[d]} {mantissa} × $10^{{{int(exponent)}}}$", fontsize=7, color=COLORS[d],
-                va="center")
+        groups.setdefault((f"{t_nom:.3g}", f"{m_star:.1e}"), []).append((d, t_nom, m_star))
+    placed = []
+    for (_, label), items in sorted(groups.items(), key=lambda item: item[1][0][1]):
+        d, t_nom, m_star = items[0]
+        mantissa, exponent = label.split("e")
+        y = m_star
+        if any(abs(math.log10(t_nom / t)) < 0.5 and abs(math.log10(m_star / m)) < 0.5 for t, m in placed):
+            y = m_star / 3.0
+        placed.append((t_nom, y))
+        ax.text(t_nom * 1.6, y, f"{', '.join(SHORT[i[0]] for i in items)} {mantissa} × $10^{{{int(exponent)}}}$",
+                fontsize=7, color=COLORS[d], va="center")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("$t_{nom}$: wall time per nominal execution (s)")
@@ -1625,6 +1647,8 @@ def budget_rows(ctx, deps, leds, budget) -> list[dict]:
         o = ceiling - 1.0
         spare_dec, spare_b = max(0.0, ceiling - e3["work_ratio"]), max(0.0, ceiling - e6["work_ratio"])
         l_plant = _f((dep["models"].get("qN") or {}).get("loss_nats"))
+        if l_plant is None or l_plant <= 0:
+            raise DisplayInputError(f"{dataset}: final/results_summary.json lacks the full-depth plant test loss")
         E = dep["qC"]["ensemble"]
         ensemble = []
         for k in kappa:
@@ -1668,8 +1692,14 @@ def figure_6(ctx, out):
     gate = ctx.require_records("input_gate")
     leds = ledgers(ctx, deps, gate)
     rows = budget_rows(ctx, deps, leds, ctx.require_records("budget_matched"))
-    columns = list(rows[0]) if rows else ["dataset"]
-    out.data("panels_abc", columns, [[r[c] for c in columns] for r in rows])
+    columns_b = ["dataset", "g_nats", "ceiling", "overhead_o", "phi_grid_low", "phi_grid_central", "phi_grid_high",
+                 "phi_measured", "r_B", "decoding_overhead", "budget_aware_overhead", "l_plant_nats",
+                 "phi_FB_ensemble_low", "phi_FB_ensemble_high", "phi_B_ensemble_low", "phi_B_ensemble_high"]
+    out.data("panel_b", columns_b, [[r[c] for c in columns_b] for r in rows])
+    columns_c = ["dataset", "g_nats", "margin_nats", "margin_low_nats", "margin_high_nats", "paired_se_nats", "MDE_nats",
+                 "MDE_holm_nats", "power_unit", "power_unit_low", "power_unit_high", "power_holm", "seed_shrinking_share",
+                 "power_seed_conservative", "power_seed_optimistic", "MDE_seed_conservative_nats", "MDE_seed_optimistic_nats"]
+    out.data("panel_c", columns_c, [[r[c] for c in columns_c] for r in rows])
     frontier = []
     for r in rows:
         d = r["dataset"]
@@ -1767,12 +1797,17 @@ def figure_6(ctx, out):
         ax.bar(i + 0.2, 1000 * r["MDE_nats"], 0.38, color="white", edgecolor=INK, hatch="///")
         ax.text(i + 0.2, 1000 * r["MDE_nats"], f"{100 * r['power_seed_conservative']:.0f}–{100 * r['power_seed_optimistic']:.0f}%",
                 ha="center", va="bottom", fontsize=6.5, color=MUTED)
-    ax.bar([], [], color=MUTED, label="margin FB−E3 at the ceiling (whiskers: retained-share grid); label: power at the registered unit")
-    ax.bar([], [], color="white", edgecolor=INK, hatch="///",
-           label=f"minimum detectable margin, 80% power; label: power with {seeds_label(ctx)} paired seeds")
+    from matplotlib.patches import Patch
+    handles = [Patch(color=MUTED, label="margin FB−E3 at the ceiling (whiskers: retained-share grid); "
+                                        "label: power at the registered unit"),
+               Patch(facecolor="white", edgecolor=INK, hatch="///",
+                     label=f"minimum detectable margin, 80% power; label: power with {seeds_label(ctx)} paired seeds")]
     ax.set_xticks(range(len(rows)), [SHORT[r["dataset"]] for r in rows])
+    tops = [1000 * max(r["margin_high_nats"], r["MDE_nats"]) for r in rows]
+    if tops:
+        ax.set_ylim(0, 1.3 * max(tops))
     ax.set_ylabel("mnats")
-    ax.legend(frameon=False, fontsize=7, loc="upper left")
+    ax.legend(handles=handles, frameon=False, fontsize=7, loc="upper left")
     _panel(ax, "c", "Power of the E3 contrast against the detectable margin")
 
     ax = axes[1, 1]
@@ -1782,12 +1817,16 @@ def figure_6(ctx, out):
         for k, value in enumerate(values):
             ax.bar(i + (k - 1.5) * 0.18, value, 0.18, color=COLORS[d] if k else "#d6d5cf", alpha=shades[k] if k else 1.0)
         ax.plot([i - 0.4, i + 0.4], [assure, assure], color=INK, lw=1.8)
-    for k, label in enumerate(("expected cost", "$C_{0.99}$, low tail", "$C_{0.99}$, central", "$C_{0.99}$, high tail")):
-        ax.bar([], [], color="#d6d5cf" if k == 0 else MUTED, alpha=1.0 if k == 0 else shades[k], label=label)
-    ax.plot([], [], color=INK, lw=1.8, label="two-branch assurance configuration $C_{assure}$")
+    from matplotlib.lines import Line2D
+    handles = [Patch(color="#d6d5cf" if k == 0 else MUTED, alpha=1.0 if k == 0 else shades[k], label=label)
+               for k, label in enumerate(("expected cost", "$C_{0.99}$, low tail", "$C_{0.99}$, central",
+                                          "$C_{0.99}$, high tail"))]
+    handles.append(Line2D([], [], color=INK, lw=1.8, label="two-branch assurance configuration $C_{assure}$"))
     ax.set_xticks(range(len(panel_d)), [SHORT[row[0]] for row in panel_d])
+    if panel_d:
+        ax.set_ylim(0, 1.35 * max(max(row[1:]) for row in panel_d))
     ax.set_ylabel("overhead over $q_C$ (%)")
-    ax.legend(ncol=2, frameon=False, fontsize=7, loc="upper left")
+    ax.legend(handles=handles, ncol=3, frameon=False, fontsize=7, loc="upper left")
     _panel(ax, "d", "Expected cost, modelled tail and the assurance configuration")
     if ctx.synthetic:
         fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")

@@ -74,7 +74,7 @@ def build_one(display_id: str, ctx: DisplayContext, out_dir: Path, *, registry: 
     _load_generators()
     generator = GENERATORS[display_id]
     writer = DisplayWriter(display_id, generator.stem, Path(out_dir), title=generator.title,
-                           synthetic=ctx.synthetic)
+                           synthetic=ctx.synthetic, scope=generator.scope)
     generator.function(ctx, writer)
     rows = compare(writer.comparisons, registry or {})
     return writer, rows

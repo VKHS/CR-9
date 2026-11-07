@@ -11,7 +11,7 @@ Prose that no configuration or code expresses is kept in
 ``paper/protocol/<stem>.json`` with its page provenance.
 
 Tables S5 and S5d also read sealed lifecycle runs (checkpoint inventories, per-seed
-training records, identity audits, sensor traces); they are measurement displays.
+training records, identity audits, sealed sensor settings); they are measurement displays.
 
 Printed values are reached only through ``out.compare``. Apart from S5d these tables
 have no group in ``paper/reported_results.json``; their comparisons name a proposed
@@ -253,13 +253,14 @@ def makefile_targets(ctx) -> set[str]:
 def runtime_writes(ctx, relative: str) -> bool:
     """A run-directory path written by the released runtime.
 
-    True when a bundled example run holds it, or when its last path component is a
-    string literal of the runtime source (newer outputs than the bundled examples).
+    True when a bundled example run holds it, or when the runtime source joins its
+    components literally (``self.out / "admit" / "prediction_execution.json"``), which
+    covers outputs newer than the bundled examples.
     """
     if any((ctx.root / run / relative).exists() for run in EXAMPLE_RUNS):
         return True
-    name = relative.rstrip("/").split("/")[-1]
-    return any(f'"{name}"' in source_text(ctx, path) for path in RUNTIME_SOURCES)
+    joined = " / ".join(f'"{part}"' for part in relative.rstrip("/").split("/"))
+    return any(joined in source_text(ctx, path) for path in RUNTIME_SOURCES)
 
 
 def pct(value: float) -> str:
@@ -526,21 +527,25 @@ def architecture(cfg: dict) -> dict:
     return configured_architecture(cfg)["architecture_widths"]
 
 
-def designated_sites(ctx, model: dict) -> dict:
-    """Native and inserted controlled sites under the site arithmetic of DesignatedSitePlant."""
-    depth, backbone = model["depth"], model.get("backbone", "shared_transport")
+def designated_sites(ctx, cfg: dict) -> dict:
+    """Native and inserted controlled sites under the site arithmetic of DesignatedSitePlant.
+
+    Transport plants act natively at every controlled step. GPS places one native
+    block per interval after an encoder boundary site, with a decoder boundary site at
+    the end; linear GINE places one native site per equal interval.
+    """
+    depth, backbone = cfg["model"]["depth"], cfg["model"].get("backbone", "shared_transport")
+    if backbone not in ("gps", "linear_gine"):
+        return {"native": depth, "inserted": 0, "substeps": 1, "boundary": 0}
+    layers = architecture(cfg)["native_layers"]
+    boundary = 0
     if backbone == "gps":
         match = re.search(r"\(control_depth - (\d+)\) // native_layers", source_text(ctx, "cross_morse/core.py"))
         if match is None:
             raise DisplayInputError("cross_morse/core.py declares no GPS boundary-site rule")
         boundary = int(match.group(1))
-        layers = model.get("native_layers", 6)
-        substeps = (depth - boundary) // layers
-        return {"native": layers, "inserted": depth - layers, "substeps": substeps, "boundary": boundary}
-    if backbone == "linear_gine":
-        layers = model.get("native_layers", 8)
-        return {"native": layers, "inserted": depth - layers, "substeps": depth // layers, "boundary": 0}
-    return {"native": depth, "inserted": 0, "substeps": 1, "boundary": 0}
+    return {"native": layers, "inserted": depth - layers, "substeps": (depth - boundary) // layers,
+            "boundary": boundary}
 
 
 def backbone_label(cfg: dict) -> str:
@@ -705,7 +710,7 @@ def table_s5b(ctx, out):
     for dataset in DATASETS:
         cfg = ctx.config(dataset, PROFILE)
         model = cfg["model"]
-        sites = designated_sites(ctx, model)
+        sites = designated_sites(ctx, cfg)
         values = {"depth": model["depth"], "dense_chunk_size": f"{model.get('dense_chunk_size', 0):,}",
                   "substeps": sites["substeps"], "boundary": sites["boundary"],
                   "a0_rho": format(a0.rho, "g"), "a0_nu": f"{a0.nu:.2f}", "a0_alpha": f"{a0.alpha:.2f}"}
@@ -749,31 +754,27 @@ def table_s5d(ctx, out):
     default = status["default_width_plant"]["ogbn-arxiv"]
     commands = next(d["commands"] for d in ctx.manifest["displays"] if d["id"] == "supplementary:Table S5d")
     compare_command = next(c for c in commands if "compare" in c)
-    plants, sensors, identity, inventory_rows = [], [], [], []
+    plants, sensors, identity = [], [], []
     for dataset in DATASETS:
         view = ctx.require_run(dataset)
         member_counts, natives, inserted = [], set(), set()
         for member in view.members():
+            sealed = member.json("config.json")
             inventory = member.json("train/model_inventory.json")
             member_counts += [checkpoint_parameters(r) for r in plant_checkpoints(inventory)]
-            manifest = member.json("train/manifest.json")
-            for row in manifest["checkpoints"]:
+            for row in member.json("train/manifest.json")["checkpoints"]:
                 if not row.get("baseline"):
                     natives.add(row["instrumentation"]["native_site_count"])
                     inserted.add(row["instrumentation"]["inserted_site_count"])
-            audit = member.json("train/entry_initial.json")
-            for record in audit["nominal_identity"]:
+            for record in member.json("train/entry_initial.json")["nominal_identity"]:
                 identity.append([dataset, record["seed"], record["max_relative_state_error"],
                                  record["state_tolerance"], record["absolute_fit_val_loss_deviation"],
-                                 record["loss_tolerance"], bool(record["pass"]),
-                                 member.json("config.json")["model"]["precision"]])
-            sealed = member.json("config.json")
+                                 record["loss_tolerance"], bool(record["pass"]), sealed["model"]["precision"]])
             sensors.append([dataset, sealed["sensor"]["sketch_dim"], sealed["sensor"]["sensing_period"],
                             sealed["controller"]["observer_period"]])
         count = unique(member_counts, f"{dataset} plant parameter count")
         plants.append([dataset, count, unique(natives, "native sites"), unique(inserted, "inserted sites"),
                        len(member_counts)])
-        inventory_rows.append([dataset, count, len(member_counts)])
         out.uses("run", dataset, ["config.json", "train/model_inventory.json", "train/manifest.json",
                                   "train/entry_initial.json"])
     arxiv_view = ctx.require_run("ogbn-arxiv")
@@ -872,14 +873,14 @@ def table_s8(ctx, out):
     periods = {"cheap": "every depth", "spectral": "sensing period P_s", "reach": "every depth; powers at P_s",
                "age": "every depth", "observer": f"every update (observer period r = {observer_period})"}
     rows, mapping = [], []
-    claimed: set[str] = set()
+    kind_of: dict[str, str] = {}
     for key, spec in text.items():
         if spec["kind"] == "observer":
             dim, names = observer_dim, ["observer innovation (external to the sensor)"]
         else:
             names = row_coordinates(spec, widest)
             dim = len(names)
-            claimed.update(names)
+            kind_of.update(dict.fromkeys(names, spec["kind"]))
         transform = spec["transform"]
         if key == "entropy":
             transform = f"{transform} [{minus(clip.group(1))}, {minus(clip.group(2))}]"
@@ -888,11 +889,11 @@ def table_s8(ctx, out):
         mapping.append([key, spec["kind"], dim, " ".join(names)])
         out.compare(S8_GROUP, (key, "dim"), dim)
         out.compare(S8_GROUP, (key, "period"), periods[spec["kind"]])
-    unclaimed = sorted(set(widest) - claimed)
+    unclaimed = sorted(set(widest) - set(kind_of))
     if unclaimed:
         raise DisplayInputError(f"S8 rows do not cover the sensor coordinates {unclaimed}")
-    cheap = len([n for n in widest if n in claimed and text_kind(text, n) == "cheap"])
-    spectral = len([n for n in widest if text_kind(text, n) in ("spectral", "reach")])
+    cheap = sum(kind == "cheap" for kind in kind_of.values())
+    spectral = sum(kind in ("spectral", "reach") for kind in kind_of.values())
     totals = sorted({len(s) for s in schemas.values()})
     out.compare(S8_GROUP, ("coordinates", "cheap"), cheap)
     out.compare(S8_GROUP, ("coordinates", "spectral_and_reach"), spectral)
@@ -911,13 +912,6 @@ def table_s8(ctx, out):
     out.data("coordinates", ["row", "kind", "dim", "coordinates"], mapping)
     out.data("schemas", ["dataset", "sensing_period", "dimension", "coordinates"],
              [[d, cfgs[d]["sensor"]["sensing_period"], len(s), " ".join(s)] for d, s in schemas.items()])
-
-
-def text_kind(text: dict, name: str) -> str | None:
-    for spec in text.values():
-        if spec["kind"] != "observer" and name in row_coordinates(spec, [name]):
-            return spec["kind"]
-    return None
 
 
 # ---------------------------------------------------------------------------
@@ -1074,8 +1068,7 @@ def table_s11(ctx, out):
             fail = labels["comparator"]
         else:
             fail = f"{labels[predecessor]} if {labels[predecessor]} ∈ Q_s, otherwise q_C"
-        passed = "Full" if kind == "full" else spec["route"]
-        rows.append([spec["route"], spec["contrast"], f"{margin:g} {spec['unit']}", passed, fail])
+        rows.append([spec["route"], spec["contrast"], f"{margin:g} {spec['unit']}", spec["pass"], fail])
         source.append([kind, margin, margins[kind]["direction"], spec["unit"], predecessor])
         out.compare(S11_GROUP, (kind, "margin"), margin)
         out.compare(S11_GROUP, (kind, "fail_output"), fail)
@@ -1093,10 +1086,43 @@ def table_s11(ctx, out):
 # Repository linkage shared by S24, S31, S35
 # ---------------------------------------------------------------------------
 
+def record_sets(ctx) -> dict[str, dict]:
+    """Record-set contracts: records/specs.json plus the contracts declared in records/specs.d/."""
+    sets = dict(ctx.record_specs["sets"])
+    for path in sorted((ctx.root / "records" / "specs.d").glob("*.json")):
+        sets.setdefault(path.stem, json.loads(path.read_text(encoding="utf-8")))
+    return sets
+
+
+def covering_contracts(ctx, displays, experiments=()) -> list[str]:
+    """Record sets whose manuscript_tables include one of the displays.
+
+    When both the row and a set declare experiments, they must share one, so that a
+    multi-panel figure links only the contract of the panel's experiment.
+    """
+    labels = {display_id.split(":", 1)[1] for display_id in displays}
+    found = []
+    for name, spec in record_sets(ctx).items():
+        tables = {re.sub(r"^(Supplementary|Main|main) ", "", t) for t in spec.get("manuscript_tables", [])}
+        declared = set(spec.get("experiments") or [])
+        if labels & tables and (not experiments or not declared or declared & set(experiments)):
+            found.append(name)
+    return found
+
+
+def resolved_links(ctx, spec: dict) -> dict:
+    """A linkage row, plus the record contracts that cover the displays of a record the code does not produce."""
+    if not spec.get("absent"):
+        return spec
+    extra = [name for name in covering_contracts(ctx, spec.get("displays", []), spec.get("experiments", []))
+             if name not in spec.get("records", [])]
+    return {**spec, "records": [*spec.get("records", []), *extra]}
+
+
 def check_linkage(ctx, spec: dict, where: str) -> list[str]:
     """Verify every artifact a linkage row names; return the problems found."""
     problems = []
-    sets = ctx.record_specs["sets"]
+    sets = record_sets(ctx)
     displays = {d["id"] for d in ctx.manifest["displays"]}
     for path in spec.get("run", []):
         if not runtime_writes(ctx, path):
@@ -1124,7 +1150,7 @@ def linkage_text(spec: dict) -> str:
     if spec.get("module"):
         parts.append(", ".join(spec["module"]))
     if spec.get("absent"):
-        parts.append("not produced by this repository: " + "; ".join(spec["absent"]))
+        parts.append("not produced by the released code: " + "; ".join(spec["absent"]))
     return "; ".join(parts) if parts else MISSING_TEXT
 
 
@@ -1132,6 +1158,7 @@ def linkage_rows(ctx, rows: dict) -> list[list]:
     """One row per linked artifact: (row, kind, item, verified); absent records are not verifiable."""
     out = []
     for key, spec in rows.items():
+        spec = resolved_links(ctx, spec)
         for kind in ("run", "records", "campaign", "module", "repository", "absent"):
             for item in spec.get(kind, []):
                 verified = None if kind == "absent" else not check_linkage(ctx, {kind: [item]}, key)
@@ -1145,8 +1172,9 @@ def raise_problems(problems: list[str]) -> None:
 
 
 def placeholder_values(ctx) -> dict:
-    cfgs = configs(ctx)
+    """Numbers quoted inside S31/S35 prose, read from configuration, constants and code."""
     from cm_campaigns.contract import HPO_TRIALS
+    cfgs = configs(ctx)
     tolerances = training_tolerances(ctx)
     eps_eq = common([c["selection"]["epsilon_eq"] for c in cfgs.values()], "epsilon_eq")
     alternative = sorted(v for v in ctx.constants["sensitivity_grids_table_S18"]["equivalence_margin_epsilon_eq"]
@@ -1196,13 +1224,10 @@ def table_s24(ctx, out):
     for key, spec in text.items():
         problems += check_linkage(ctx, spec, key)
         problems += [f"{key}: make {c} is not a Makefile target" for c in spec["checks"] if c not in targets]
-        carriers = spec.get("run", []) or spec.get("artifacts", [])
-        if spec.get("artifacts"):
-            problems += check_linkage(ctx, {"run": spec["artifacts"]}, key)
-        located = ", ".join([*carriers, *spec.get("repository", [])])
-        rows.append([spec["object"], f"{spec['identity']} ({located})", spec["ambiguity"],
+        carriers = [*spec.get("run", []), *spec.get("repository", [])]
+        rows.append([spec["object"], f"{spec['identity']} ({', '.join(carriers)})", spec["ambiguity"],
                      f"{spec['test']} ({', '.join('make ' + c for c in spec['checks'])})"])
-        links += [[key, "artifact", a] for a in [*carriers, *spec.get("repository", [])]]
+        links += [[key, "artifact", a] for a in carriers]
         links += [[key, "check", f"make {c}"] for c in spec["checks"]]
     raise_problems(problems)
     out.uses("repository", "linkage", ["paper/protocol/S24.json", "Makefile", *EXAMPLE_RUNS])
@@ -1224,8 +1249,9 @@ def table_s31(ctx, out):
     values = placeholder_values(ctx)
     problems, rows = [], []
     for key, spec in text.items():
-        problems += check_linkage(ctx, spec, key)
-        record = linkage_text(spec)
+        links = resolved_links(ctx, spec)
+        problems += check_linkage(ctx, links, key)
+        record = linkage_text(links)
         rows.append([fill(spec["quantity"], values), fill(spec["estimator"], values), record])
         out.compare(S31_GROUP, (key, "record"), record)
     raise_problems(problems)
@@ -1234,9 +1260,10 @@ def table_s31(ctx, out):
                                        *EXAMPLE_RUNS])
     out.table(["quantity (location)", "estimator", "record"], rows,
               notes=["Records are the artifacts of this repository: run-archive files written by the runtime, "
-                     "measurement-record sets of records/specs.json, campaign exports and analytical modules; every "
-                     "path was checked to exist.",
-                     f"Rows whose record this repository does not produce: {', '.join(absent)}."])
+                     "measurement-record sets (records/specs.json and the contracts of records/specs.d), campaign "
+                     "exports and analytical modules; every path was checked to exist.",
+                     f"Rows whose record the released code does not produce: {', '.join(absent)}; a record contract "
+                     "that covers the row's display is linked where one is declared."])
     out.data("linkage", ["row", "kind", "item", "verified"], linkage_rows(ctx, text))
 
 
@@ -1266,7 +1293,6 @@ def table_s32(ctx, out):
     values = {"tau": format(tau, "g"), "ensemble_grid": braces(ensembles)}
     rows = [[spec["policy"], spec["information"], fill(spec["completion"], values)] for spec in text.values()]
     out.compare(S32_GROUP, ("budget", "tau"), tau)
-    out.compare(S32_GROUP, ("ensemble", "grid"), ensembles)
     out.uses("code", "cm_experiments", ["protocol.py:ARMS", "budget.py:Certificate"])
     out.table(["Policy", "information available at decision time", "completion and budget rule"], rows,
               notes=["τ: the certificate floor of cm_experiments.budget.Certificate; ensemble grid: registry.ensemble_sizes "
@@ -1287,8 +1313,9 @@ def table_s35(ctx, out):
     values = placeholder_values(ctx)
     problems, rows = [], []
     for key, spec in text.items():
-        problems += check_linkage(ctx, spec, key)
-        record = linkage_text(spec)
+        links = resolved_links(ctx, spec)
+        problems += check_linkage(ctx, links, key)
+        record = linkage_text(links)
         rows.append([key, fill(spec["convention"], values), record])
         out.compare(S35_GROUP, (key, "supporting_record"), record)
     raise_problems(problems)
@@ -1297,7 +1324,8 @@ def table_s35(ctx, out):
     out.table(["ID", "convention", "supporting record"], rows,
               notes=["Supporting records are artifacts of this repository (run-archive files written by the runtime, "
                      "record sets, campaign exports, modules and tests); every path was checked to exist.",
-                     f"Conventions whose supporting record this repository does not produce: {', '.join(absent)}."])
+                     f"Conventions whose supporting record the released code does not produce: {', '.join(absent)}; "
+                     "a record contract that covers the convention's display is linked where one is declared."])
     out.data("linkage", ["convention", "kind", "item", "verified"], linkage_rows(ctx, text))
 
 
@@ -1373,9 +1401,8 @@ def evidence_fields(ctx) -> set[str]:
 @display("supplementary:Table S38", stem="S38", title="Results-record schema", scope="protocol")
 def table_s38(ctx, out):
     text = protocol_text(ctx, "S38")["rows"]
-    specs = ctx.record_specs
-    key_columns = {k for s in specs["sets"].values() for k in s["keys"]}
-    summary = specs["summary_columns"]
+    key_columns = {k for spec in record_sets(ctx).values() for k in spec.get("keys", [])}
+    summary = ctx.record_specs["summary_columns"]
     record_roles = {**{k: "key" for k in key_columns}, **{c: "value" for c in summary[:3]},
                     **{c: "provenance" for c in summary[3:]}}
     csv_columns = results_csv_columns(ctx)
@@ -1383,7 +1410,7 @@ def table_s38(ctx, out):
     evidence = evidence_fields(ctx)
     problems, rows, mapping = [], [], []
     for key, spec in text.items():
-        problems += [f"{key}: records column {c} is not in records/specs.json" for c in spec["records"]
+        problems += [f"{key}: records column {c} is not in a record-set schema" for c in spec["records"]
                      if c not in record_roles]
         problems += [f"{key}: results.csv column {c} is not written" for c in spec["results_csv"]
                      if c not in csv_roles]
@@ -1482,7 +1509,8 @@ def lifecycle_content(ctx) -> dict:
     selection = common([{k: c["selection"][k] for k in ("outer_folds", "inner_folds", "epsilon_eq")}
                         for c in cfgs.values()], "selection settings")
     admission = common([{k: c["admission"][k] for k in ("clip", "alpha")} for c in cfgs.values()], "admission")
-    route_names = {route: protocol_text(ctx, "S10")["rows"][route]["route"] for route, _, _ in routes}
+    labels = protocol_text(ctx, "S10")["rows"]
+    route_names = {route: labels[route]["route"] for route, _, _ in routes}
     gates = [row["gate"] for row in protocol_text(ctx, "S3")["rows"].values()]
     contrasts = [row["contrast"] for row in protocol_text(ctx, "S11")["rows"].values()][:3]
     recovery = [a.name.replace("_", " ") for a in actions if a.mode != "transport"]

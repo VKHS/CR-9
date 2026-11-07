@@ -1,108 +1,456 @@
 {
  "display": "supplementary:Table S31",
- "source": {"document": "supplementary", "pages": [29, 30]},
- "scope": "Quantity and estimator text of every row of the reproduction map, the displays each row covers, and the artifacts of THIS repository that hold its record: 'run' lists files relative to a run directory (the generator verifies that the released runtime writes them, using the bundled example runs), 'records' names a measurement-record set of records/specs.json, 'campaign' names a campaign export module, 'module' names an analytical or accounting module, and 'absent' names a record the repository does not produce. Placeholders in braces are filled from configurations, registered constants and code.",
+ "source": {
+  "document": "supplementary",
+  "pages": [
+   29,
+   30
+  ]
+ },
+ "scope": "Quantity and estimator text of every row of the reproduction map, the displays each row covers, and the artifacts of THIS repository that hold its record: 'run' lists files relative to a run directory (the generator verifies that the released runtime writes them, using the bundled example runs), 'records' names a measurement-record set of records/specs.json, 'campaign' names a campaign export module, 'module' names an analytical or accounting module, and 'absent' names a record the released code does not produce (a record contract of records/specs.json or records/specs.d whose manuscript_tables cover the row's displays, and whose experiments match the row's 'experiments' when both declare them, is then linked). Placeholders in braces are filled from configurations, registered constants and code.",
  "rows": {
-  "R01": {"quantity": "main Table 1: admission statistics D̄, U_desc (arxiv, proteins, Roman)",
-          "estimator": "clipped paired effect on D_admit with the cluster-bootstrap (arxiv, proteins) or repeated-split (Roman) upper limit",
-          "displays": ["main:Table 1"], "run": ["admit/decision.json", "admit/paired_units.npz"]},
-  "R02": {"quantity": "main Table 1: U_a (Pascal, COCO, Peptides)",
-          "estimator": "empirical-Bernstein upper limit of main Eq. (27) on the untouched validation graphs",
-          "displays": ["main:Table 1"], "run": ["admit/decision.json", "admit/paired_units.npz", "admit/prediction_execution.json"]},
-  "R03": {"quantity": "Tables S46–S47, S33, main Fig. 6, Fig. S3: budget-matched arms, crossovers, margins, power",
-          "estimator": "paired differences of the frozen arms on D_compare at the common ceiling; crossovers of main Proposition 10; power from the paired SE (Note S24)",
-          "displays": ["supplementary:Table S46", "supplementary:Table S47", "supplementary:Table S33", "main:Figure 6", "supplementary:Figure S3"],
-          "records": ["budget_matched"], "campaign": ["cm_campaigns/arm_campaign.py"]},
-  "R04": {"quantity": "main Table 2, Table S44, main Fig. 6d: C_0.99",
-          "estimator": "tail-model evaluation using the reference resolvent-share scenario of Table S44; the observed maximum is taken separately from the per-input timing traces",
-          "displays": ["main:Table 2", "supplementary:Table S44", "main:Figure 6"],
-          "module": ["cm_theory/budget.py", "cm_campaigns/timing.py"], "absent": ["per-input timing traces (no record set holds them)"]},
-  "R05": {"quantity": "Table S45, Fig. S18a: E13 arms", "estimator": "three-arm comparison at matched expected cost",
-          "displays": ["supplementary:Table S45", "supplementary:Figure S18"], "records": ["inserted_site"]},
-  "R06": {"quantity": "Table S6c, Fig. S10: sensing identity",
-          "estimator": "8r/(1 + r) per sensed site; residual m − 1 − 8r/(1 + r); admissible (k/d)/P_s = (m − 1)(1 + r)/(8r); sketch relative SD ≤ √(2/k)",
-          "displays": ["supplementary:Table S6c", "supplementary:Figure S10"], "records": ["sensor_parameters"]},
-  "R07": {"quantity": "Table S41: qualification components", "estimator": "GPU-hours per component from the scheduler accounting",
-          "displays": ["supplementary:Table S41"],
-          "run": ["stages/explore.json", "stages/fit.json", "stages/select.json", "stages/confirm.json", "stages/admit.json"],
-          "module": ["cm_campaigns/accounting.py"]},
-  "R08": {"quantity": "Table S37: input-fallback counts", "estimator": "input-gate events on the official test graphs",
-          "displays": ["supplementary:Table S37"], "records": ["input_gate"]},
-  "R09": {"quantity": "Table S22: violation rate", "estimator": "1− mode-stable coverage",
-          "displays": ["supplementary:Table S22"], "module": ["cm_theory/stability.py"], "absent": ["tube-audit record"]},
-  "R10": {"quantity": "Table S5c: identity deviations and tolerances",
-          "estimator": "maximum state and loss deviation of E1 per backbone and site; bf16 reduction-order bound {bf16_state_tolerance}, fp32 {fp32_state_tolerance}, loss {loss_tolerance} nats",
-          "displays": ["supplementary:Table S5c"], "run": ["train/entry_initial.json", "member_predictions/"]},
-  "R11": {"quantity": "Fig. S18c: tightness of bound (6.1)",
-          "estimator": "exact one-step displacement over the band-limited bound at the spectral density e^(−λ/λ0) of the state",
-          "displays": ["supplementary:Figure S18"], "module": ["cm_theory/spectral.py"], "absent": ["E18 displacement record"]},
-  "R12": {"quantity": "main Fig. 2a: ratio ledger",
-          "estimator": "each audited quantity of Fig. S17 divided by the bound of its statement (tube, headroom, slack, regret radius, break-even thresholds, admission margin, minimum J, tightness, C_0.99)",
-          "displays": ["main:Figure 2", "supplementary:Figure S17"], "module": ["cm_theory/statements.py"]},
-  "R13": {"quantity": "main Fig. 2c: selection geometry",
-          "estimator": "main Eq. (19) on the candidate ledger; near-best band [U_min, U_min + {epsilon_eq}]; alternative reading ε_eq = {epsilon_eq_alternative} on point estimates",
-          "displays": ["main:Figure 2"], "run": ["select/decision.json", "select/candidates.json", "select/candidate_ledger.csv", "select/unit_scores.npz"]},
-  "R14": {"quantity": "Fig. S20c, Note S24: seed share of the test-stage interval",
-          "estimator": "1 − ϱ^−2 with ϱ = test-stage half-width (main Table 1) / 1.96 (S²/J)^1/2 (Table S13); a lower bound under the two-way model",
-          "displays": ["supplementary:Figure S20"], "run": ["member_predictions/", "final/paired_test_units.npz"]},
-  "R15": {"quantity": "main Fig. 2b, d: evidence margins and Holm ladder",
-          "estimator": "criterion statistic over its threshold at each stage (Tables S12, S13, S14, main Table 1); raw P values ranked against {holm_alpha}/(m − i + 1)",
-          "displays": ["main:Figure 2"], "run": ["select/decision.json", "confirm/decision.json", "admit/decision.json", "final/results_summary.json"],
-          "campaign": ["cm_campaigns/confirmation.py"]},
-  "R16": {"quantity": "Table S12b, nested column", "estimator": "nested family evaluation (Algorithm S4)",
-          "displays": ["supplementary:Table S12b"], "run": ["select/unit_scores.npz", "select/candidates.json", "select/decision.json"]},
-  "R17": {"quantity": "main Table 1 (†), Table S14b, Note S26: Peptides confirmation",
-          "estimator": "direct confirmation contrast on the D_confirm manifest; Holm family re-formed; a failed label returns q_C because one-step ∉ Q_s",
-          "displays": ["main:Table 1", "supplementary:Table S14b"], "run": ["confirm/decision.json", "confirm/paired_contrasts.json"],
-          "campaign": ["cm_campaigns/confirmation.py"], "records": ["budget_matched"]},
-  "R18": {"quantity": "main Table 2, main Fig. 4f, Tables S15b and S23: wall-time overhead",
-          "estimator": "controller-branch and comparator-branch wall times combined at the fallback probability (one rule for both tables)",
-          "displays": ["main:Table 2", "main:Figure 4", "supplementary:Table S15b", "supplementary:Table S23"],
-          "run": ["select/candidates.json"], "records": ["baselines", "input_gate"]},
-  "R19": {"quantity": "main Table 2, main Fig. 5d: t_nom and M⋆",
-          "estimator": "per-input nominal execution time after warm-up; M⋆ of main Definition 2 with the two anchors of Table S23b (throughput fit t = t_0 + κW on Fig. S2a; training time per seed of Table S5)",
-          "displays": ["main:Table 2", "main:Figure 5"], "records": ["nominal_time"]},
-  "R20": {"quantity": "Table S34, Table S46 (q_B column): q_B overhead",
-          "estimator": "acquisition rate and retained gain of the executed q_B; r_B = 1 − skip × switch of Note S25 for the sensitivity range",
-          "displays": ["supplementary:Table S34", "supplementary:Table S46"], "records": ["budget_matched"], "campaign": ["cm_campaigns/arm_campaign.py"]},
-  "R21": {"quantity": "Fig. S17b", "estimator": "realized fraction of the headroom with the oracle bound as denominator",
-          "displays": ["supplementary:Figure S17"], "run": ["select/entry_complete.json"]},
-  "R22": {"quantity": "Table S30: per-input dispersion",
-          "estimator": "per-input oracle enumerated on the admission split after all decisions are fixed",
-          "displays": ["supplementary:Table S30"], "absent": ["admission-split oracle record (the runtime oracle is the D_explore headroom diagnostic of select/entry_complete.json)"]},
-  "R23": {"quantity": "Fig. S17h, Tables S26, S26b, Fig. S3 band: ensemble law",
-          "estimator": "least-squares fit of ℓ∞ + D∞/E on the checkpoint grid; band over κ ∈ [{kappa_low}, {kappa_high}]",
-          "displays": ["supplementary:Figure S17", "supplementary:Table S26", "supplementary:Table S26b", "supplementary:Figure S3"],
-          "records": ["ensemble_grid"]},
-  "R24": {"quantity": "main Prop. 7(ii), Table S28b, Fig. S17g: σ_1",
-          "estimator": "per-cell standard deviation of the logged one-step effects; the grid {0.005, 0.007, 0.010} spans the registered action-gap scale (Table S21); two-sided constant log(4|A|/δ_sup)",
-          "displays": ["supplementary:Table S28b", "supplementary:Figure S17"], "run": ["explore/", "fit/full/audit.json"]},
-  "R25": {"quantity": "Table S6b note, Note S19, Fig. S6c: proteins f_res",
-          "estimator": "FLOP identity m = (1 + r + s + f_res r(T − 1))/(1 + r) at m = 1.20, r = 0.583, s = 0.06, T = {resolvent_order}",
-          "displays": ["supplementary:Table S6b"], "records": ["sensor_parameters"]},
-  "R26": {"quantity": "Table S15: resource ranges; Table S15b: per-rerun entries",
-          "estimator": "declared per-member ranges; per-rerun timing and per-seed scores under the shared {hpo_trials}-trial HPO ceiling",
-          "displays": ["supplementary:Table S15", "supplementary:Table S15b"], "records": ["baselines"]},
-  "R27": {"quantity": "Table S16 note (cell 010)", "estimator": "terminal depth within the 16–32 band of Fig. S14c",
-          "displays": ["supplementary:Table S16"], "records": ["factorials"]},
-  "R28": {"quantity": "Table S16b: Pascal factorial", "estimator": "effect-coded contrasts with the joint resampling covariance",
-          "displays": ["supplementary:Table S16b"], "records": ["factorials"]},
-  "R29": {"quantity": "Table S20: slack with twelve finalists", "estimator": "simultaneous max-t bootstrap radius on the screened family",
-          "displays": ["supplementary:Table S20"], "run": ["select/unit_scores.npz", "select/candidates.json", "select/decision.json"]},
-  "R30": {"quantity": "Tables S23, S15b, main Table 2 (M⋆): qualification GPU-h",
-          "estimator": "qualification ledger (exploration logging, model fitting, nested selection, confirmation, comparison and admission) with its accounting unit",
-          "displays": ["supplementary:Table S23", "supplementary:Table S15b", "main:Table 2"],
-          "run": ["stages/explore.json", "stages/fit.json", "stages/select.json", "stages/confirm.json", "stages/admit.json"],
-          "module": ["cm_campaigns/accounting.py"], "records": ["baselines"]},
-  "R31": {"quantity": "Table S25: Roman substitute backbone", "estimator": "GCNII as listed",
-          "displays": ["supplementary:Table S25"], "records": ["cross_backbone"]},
-  "R32": {"quantity": "Table S27: buffer sensitivity", "estimator": "cluster bootstrap at each buffer",
-          "displays": ["supplementary:Table S27"], "absent": ["admission records at alternative buffers (E11 is not executed by the runtime)"]},
-  "R33": {"quantity": "Table S29, Fig. S5: horizon and beam sweep", "estimator": "selection effect and expected cost per configuration on D_select",
-          "displays": ["supplementary:Table S29", "supplementary:Figure S5"], "run": ["select/candidates.json", "select/unit_scores.npz"],
-          "absent": ["beam-width sweep (the registry fixes the beam width)"]},
-  "R34": {"quantity": "Note S20: search versus model error",
-          "estimator": "exact enumeration at H ≤ 4 (E9): maximum of |Ĵ − J| over the enumerated set; beam objective minus the enumerated minimum",
-          "displays": [], "module": ["cm_theory/control.py"], "absent": ["E9 record"]}
+  "R01": {
+   "quantity": "main Table 1: admission statistics D̄, U_desc (arxiv, proteins, Roman)",
+   "estimator": "clipped paired effect on D_admit with the cluster-bootstrap (arxiv, proteins) or repeated-split (Roman) upper limit",
+   "displays": [
+    "main:Table 1"
+   ],
+   "run": [
+    "admit/decision.json",
+    "admit/paired_units.npz"
+   ]
+  },
+  "R02": {
+   "quantity": "main Table 1: U_a (Pascal, COCO, Peptides)",
+   "estimator": "empirical-Bernstein upper limit of main Eq. (27) on the untouched validation graphs",
+   "displays": [
+    "main:Table 1"
+   ],
+   "run": [
+    "admit/decision.json",
+    "admit/paired_units.npz",
+    "admit/prediction_execution.json"
+   ]
+  },
+  "R03": {
+   "quantity": "Tables S46–S47, S33, main Fig. 6, Fig. S3: budget-matched arms, crossovers, margins, power",
+   "estimator": "paired differences of the frozen arms on D_compare at the common ceiling; crossovers of main Proposition 10; power from the paired SE (Note S24)",
+   "displays": [
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S33",
+    "main:Figure 6",
+    "supplementary:Figure S3"
+   ],
+   "records": [
+    "budget_matched"
+   ],
+   "campaign": [
+    "cm_campaigns/arm_campaign.py"
+   ]
+  },
+  "R04": {
+   "quantity": "main Table 2, Table S44, main Fig. 6d: C_0.99",
+   "estimator": "tail-model evaluation using the reference resolvent-share scenario of Table S44; the observed maximum is taken separately from the per-input timing traces",
+   "displays": [
+    "main:Table 2",
+    "supplementary:Table S44",
+    "main:Figure 6"
+   ],
+   "module": [
+    "cm_theory/budget.py",
+    "cm_campaigns/timing.py"
+   ],
+   "absent": [
+    "per-input timing traces"
+   ],
+   "experiments": [
+    "E17"
+   ]
+  },
+  "R05": {
+   "quantity": "Table S45, Fig. S18a: E13 arms",
+   "estimator": "three-arm comparison at matched expected cost",
+   "displays": [
+    "supplementary:Table S45",
+    "supplementary:Figure S18"
+   ],
+   "records": [
+    "inserted_site"
+   ]
+  },
+  "R06": {
+   "quantity": "Table S6c, Fig. S10: sensing identity",
+   "estimator": "8r/(1 + r) per sensed site; residual m − 1 − 8r/(1 + r); admissible (k/d)/P_s = (m − 1)(1 + r)/(8r); sketch relative SD ≤ √(2/k)",
+   "displays": [
+    "supplementary:Table S6c",
+    "supplementary:Figure S10"
+   ],
+   "records": [
+    "sensor_parameters"
+   ]
+  },
+  "R07": {
+   "quantity": "Table S41: qualification components",
+   "estimator": "GPU-hours per component from the scheduler accounting",
+   "displays": [
+    "supplementary:Table S41"
+   ],
+   "run": [
+    "stages/explore.json",
+    "stages/fit.json",
+    "stages/select.json",
+    "stages/confirm.json",
+    "stages/admit.json"
+   ],
+   "module": [
+    "cm_campaigns/accounting.py"
+   ]
+  },
+  "R08": {
+   "quantity": "Table S37: input-fallback counts",
+   "estimator": "input-gate events on the official test graphs",
+   "displays": [
+    "supplementary:Table S37"
+   ],
+   "records": [
+    "input_gate"
+   ]
+  },
+  "R09": {
+   "quantity": "Table S22: violation rate",
+   "estimator": "1− mode-stable coverage",
+   "displays": [
+    "supplementary:Table S22"
+   ],
+   "module": [
+    "cm_theory/stability.py"
+   ],
+   "absent": [
+    "tube-audit record"
+   ]
+  },
+  "R10": {
+   "quantity": "Table S5c: identity deviations and tolerances",
+   "estimator": "maximum state and loss deviation of E1 per backbone and site; bf16 reduction-order bound {bf16_state_tolerance}, fp32 {fp32_state_tolerance}, loss {loss_tolerance} nats",
+   "displays": [
+    "supplementary:Table S5c"
+   ],
+   "run": [
+    "train/entry_initial.json",
+    "member_predictions/"
+   ]
+  },
+  "R11": {
+   "quantity": "Fig. S18c: tightness of bound (6.1)",
+   "estimator": "exact one-step displacement over the band-limited bound at the spectral density e^(−λ/λ0) of the state",
+   "displays": [
+    "supplementary:Figure S18"
+   ],
+   "module": [
+    "cm_theory/spectral.py"
+   ],
+   "absent": [
+    "E18 displacement record"
+   ],
+   "experiments": [
+    "E18"
+   ]
+  },
+  "R12": {
+   "quantity": "main Fig. 2a: ratio ledger",
+   "estimator": "each audited quantity of Fig. S17 divided by the bound of its statement (tube, headroom, slack, regret radius, break-even thresholds, admission margin, minimum J, tightness, C_0.99)",
+   "displays": [
+    "main:Figure 2",
+    "supplementary:Figure S17"
+   ],
+   "module": [
+    "cm_theory/statements.py"
+   ]
+  },
+  "R13": {
+   "quantity": "main Fig. 2c: selection geometry",
+   "estimator": "main Eq. (19) on the candidate ledger; near-best band [U_min, U_min + {epsilon_eq}]; alternative reading ε_eq = {epsilon_eq_alternative} on point estimates",
+   "displays": [
+    "main:Figure 2"
+   ],
+   "run": [
+    "select/decision.json",
+    "select/candidates.json",
+    "select/candidate_ledger.csv",
+    "select/unit_scores.npz"
+   ]
+  },
+  "R14": {
+   "quantity": "Fig. S20c, Note S24: seed share of the test-stage interval",
+   "estimator": "1 − ϱ^−2 with ϱ = test-stage half-width (main Table 1) / 1.96 (S²/J)^1/2 (Table S13); a lower bound under the two-way model",
+   "displays": [
+    "supplementary:Figure S20"
+   ],
+   "run": [
+    "member_predictions/",
+    "final/paired_test_units.npz"
+   ]
+  },
+  "R15": {
+   "quantity": "main Fig. 2b, d: evidence margins and Holm ladder",
+   "estimator": "criterion statistic over its threshold at each stage (Tables S12, S13, S14, main Table 1); raw P values ranked against {holm_alpha}/(m − i + 1)",
+   "displays": [
+    "main:Figure 2"
+   ],
+   "run": [
+    "select/decision.json",
+    "confirm/decision.json",
+    "admit/decision.json",
+    "final/results_summary.json"
+   ],
+   "campaign": [
+    "cm_campaigns/confirmation.py"
+   ]
+  },
+  "R16": {
+   "quantity": "Table S12b, nested column",
+   "estimator": "nested family evaluation (Algorithm S4)",
+   "displays": [
+    "supplementary:Table S12b"
+   ],
+   "run": [
+    "select/unit_scores.npz",
+    "select/candidates.json",
+    "select/decision.json"
+   ]
+  },
+  "R17": {
+   "quantity": "main Table 1 (†), Table S14b, Note S26: Peptides confirmation",
+   "estimator": "direct confirmation contrast on the D_confirm manifest; Holm family re-formed; a failed label returns q_C because one-step ∉ Q_s",
+   "displays": [
+    "main:Table 1",
+    "supplementary:Table S14b"
+   ],
+   "run": [
+    "confirm/decision.json",
+    "confirm/paired_contrasts.json"
+   ],
+   "campaign": [
+    "cm_campaigns/confirmation.py"
+   ],
+   "records": [
+    "budget_matched"
+   ]
+  },
+  "R18": {
+   "quantity": "main Table 2, main Fig. 4f, Tables S15b and S23: wall-time overhead",
+   "estimator": "controller-branch and comparator-branch wall times combined at the fallback probability (one rule for both tables)",
+   "displays": [
+    "main:Table 2",
+    "main:Figure 4",
+    "supplementary:Table S15b",
+    "supplementary:Table S23"
+   ],
+   "run": [
+    "select/candidates.json"
+   ],
+   "records": [
+    "baselines",
+    "input_gate"
+   ]
+  },
+  "R19": {
+   "quantity": "main Table 2, main Fig. 5d: t_nom and M⋆",
+   "estimator": "per-input nominal execution time after warm-up; M⋆ of main Definition 2 with the two anchors of Table S23b (throughput fit t = t_0 + κW on Fig. S2a; training time per seed of Table S5)",
+   "displays": [
+    "main:Table 2",
+    "main:Figure 5"
+   ],
+   "records": [
+    "nominal_time"
+   ]
+  },
+  "R20": {
+   "quantity": "Table S34, Table S46 (q_B column): q_B overhead",
+   "estimator": "acquisition rate and retained gain of the executed q_B; r_B = 1 − skip × switch of Note S25 for the sensitivity range",
+   "displays": [
+    "supplementary:Table S34",
+    "supplementary:Table S46"
+   ],
+   "records": [
+    "budget_matched"
+   ],
+   "campaign": [
+    "cm_campaigns/arm_campaign.py"
+   ]
+  },
+  "R21": {
+   "quantity": "Fig. S17b",
+   "estimator": "realized fraction of the headroom with the oracle bound as denominator",
+   "displays": [
+    "supplementary:Figure S17"
+   ],
+   "run": [
+    "select/entry_complete.json"
+   ]
+  },
+  "R22": {
+   "quantity": "Table S30: per-input dispersion",
+   "estimator": "per-input oracle enumerated on the admission split after all decisions are fixed",
+   "displays": [
+    "supplementary:Table S30"
+   ],
+   "absent": [
+    "admission-split oracle record (the runtime oracle is the D_explore headroom diagnostic of select/entry_complete.json)"
+   ]
+  },
+  "R23": {
+   "quantity": "Fig. S17h, Tables S26, S26b, Fig. S3 band: ensemble law",
+   "estimator": "least-squares fit of ℓ∞ + D∞/E on the checkpoint grid; band over κ ∈ [{kappa_low}, {kappa_high}]",
+   "displays": [
+    "supplementary:Figure S17",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Figure S3"
+   ],
+   "records": [
+    "ensemble_grid"
+   ]
+  },
+  "R24": {
+   "quantity": "main Prop. 7(ii), Table S28b, Fig. S17g: σ_1",
+   "estimator": "per-cell standard deviation of the logged one-step effects; the grid {0.005, 0.007, 0.010} spans the registered action-gap scale (Table S21); two-sided constant log(4|A|/δ_sup)",
+   "displays": [
+    "supplementary:Table S28b",
+    "supplementary:Figure S17"
+   ],
+   "run": [
+    "explore/",
+    "fit/full/audit.json"
+   ]
+  },
+  "R25": {
+   "quantity": "Table S6b note, Note S19, Fig. S6c: proteins f_res",
+   "estimator": "FLOP identity m = (1 + r + s + f_res r(T − 1))/(1 + r) at m = 1.20, r = 0.583, s = 0.06, T = {resolvent_order}",
+   "displays": [
+    "supplementary:Table S6b"
+   ],
+   "records": [
+    "sensor_parameters"
+   ]
+  },
+  "R26": {
+   "quantity": "Table S15: resource ranges; Table S15b: per-rerun entries",
+   "estimator": "declared per-member ranges; per-rerun timing and per-seed scores under the shared {hpo_trials}-trial HPO ceiling",
+   "displays": [
+    "supplementary:Table S15",
+    "supplementary:Table S15b"
+   ],
+   "records": [
+    "baselines"
+   ]
+  },
+  "R27": {
+   "quantity": "Table S16 note (cell 010)",
+   "estimator": "terminal depth within the 16–32 band of Fig. S14c",
+   "displays": [
+    "supplementary:Table S16"
+   ],
+   "records": [
+    "factorials"
+   ]
+  },
+  "R28": {
+   "quantity": "Table S16b: Pascal factorial",
+   "estimator": "effect-coded contrasts with the joint resampling covariance",
+   "displays": [
+    "supplementary:Table S16b"
+   ],
+   "records": [
+    "factorials"
+   ]
+  },
+  "R29": {
+   "quantity": "Table S20: slack with twelve finalists",
+   "estimator": "simultaneous max-t bootstrap radius on the screened family",
+   "displays": [
+    "supplementary:Table S20"
+   ],
+   "run": [
+    "select/unit_scores.npz",
+    "select/candidates.json",
+    "select/decision.json"
+   ]
+  },
+  "R30": {
+   "quantity": "Tables S23, S15b, main Table 2 (M⋆): qualification GPU-h",
+   "estimator": "qualification ledger (exploration logging, model fitting, nested selection, confirmation, comparison and admission) with its accounting unit",
+   "displays": [
+    "supplementary:Table S23",
+    "supplementary:Table S15b",
+    "main:Table 2"
+   ],
+   "run": [
+    "stages/explore.json",
+    "stages/fit.json",
+    "stages/select.json",
+    "stages/confirm.json",
+    "stages/admit.json"
+   ],
+   "module": [
+    "cm_campaigns/accounting.py"
+   ],
+   "records": [
+    "baselines"
+   ]
+  },
+  "R31": {
+   "quantity": "Table S25: Roman substitute backbone",
+   "estimator": "GCNII as listed",
+   "displays": [
+    "supplementary:Table S25"
+   ],
+   "records": [
+    "cross_backbone"
+   ]
+  },
+  "R32": {
+   "quantity": "Table S27: buffer sensitivity",
+   "estimator": "cluster bootstrap at each buffer",
+   "displays": [
+    "supplementary:Table S27"
+   ],
+   "absent": [
+    "admission records at alternative buffers (E11 is not executed by the runtime)"
+   ],
+   "experiments": [
+    "E11"
+   ]
+  },
+  "R33": {
+   "quantity": "Table S29, Fig. S5: horizon and beam sweep",
+   "estimator": "selection effect and expected cost per configuration on D_select",
+   "displays": [
+    "supplementary:Table S29",
+    "supplementary:Figure S5"
+   ],
+   "run": [
+    "select/candidates.json",
+    "select/unit_scores.npz"
+   ],
+   "absent": [
+    "beam-width sweep (the registry fixes the beam width)"
+   ]
+  },
+  "R34": {
+   "quantity": "Note S20: search versus model error",
+   "estimator": "exact enumeration at H ≤ 4 (E9): maximum of |Ĵ − J| over the enumerated set; beam objective minus the enumerated minimum",
+   "displays": [],
+   "module": [
+    "cm_theory/control.py"
+   ],
+   "absent": [
+    "E9 record"
+   ],
+   "experiments": [
+    "E9"
+   ]
+  }
  }
 }

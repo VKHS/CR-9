@@ -13,8 +13,7 @@ from __future__ import annotations
 
 import math
 
-from .framework import (DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputError, display, integer, num,
-                        pyplot)
+from .framework import DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputError, display, integer, num, pyplot
 
 S5C_TITLE = "Nominal-identity test E1 and site accounting"
 ADMITTED = tuple(d for d in DATASETS if d != "ogbn-products")
@@ -46,7 +45,7 @@ def sci(value: float | None, digits: int = 1) -> str | None:
     if abs(mantissa) >= 10:
         mantissa, exponent = mantissa / 10, exponent + 1
     text = f"{mantissa:.{digits - 1}f}" if digits > 1 else f"{int(mantissa)}"
-    return f"10^{exponent}" if text in ("1", "1.0") else f"{text} × 10^{exponent}"
+    return f"10^{exponent}" if text == "1" else f"{text} × 10^{exponent}"
 
 
 def grid_text(values) -> str:
@@ -554,20 +553,15 @@ S26B_GROUP = "supplementary_table_S26b_ensemble_law_and_break_even"
 S23B_GROUP = "supplementary_table_S23b_nominal_execution_time_and_amortization"
 S30_GROUP = "supplementary_table_S30_oracle_dispersion"
 S16B_GROUP = "supplementary_table_S16b_pascal_factorial"
+S6C_GROUP = "supplementary_table_S6c_sensing_cost_identity"
+MAIN_T2 = "main_table_2_gain_and_cost_ledger"
 S43_NEEDS = ("runs", "records:budget_matched", "records:inserted_site", "records:ensemble_grid",
-             "records:input_gate", "records:nominal_time", "records:factorials")
+             "records:input_gate", "records:nominal_time", "records:baselines", "records:factorials",
+             "records:confirmation_sensitivity", "records:band_bound_tightness", "records:oracle_dispersion")
 ARM_NATIVE_FEEDBACK = "native, feedback"
 ARM_DEPLOYED = "inserted, feedback (deployed)"
 FACTORS = ("spectral_information", "conditioned_observer", "risk_controlled_execution")
-GAPS = {
-    "E10": "the survival probability of the S14b separated-data analysis has no record contract",
-    "E17 tail": "the reference resolvent share f_bar and the sparse-to-dense ratios r of Table S44 are not registered "
-                "constants",
-    "E17 sensing": "the sparse-to-dense ratios r of the sensing-cost identity are not registered constants",
-    "E18": "the E18 displacement record has no record contract",
-    "oracle": "the per-input oracle enumeration of Table S30 has no record contract",
-    "p1": "the late-abort probability p1 of q_B is not a quantity of the budget_matched record set",
-}
+P1_GAP = "the late-abort probability p1 of q_B is not a quantity of the budget_matched record set"
 
 
 def arm_value(rec, quantity: str, dataset: str, arm: str) -> float:
@@ -617,17 +611,70 @@ def admission_statistics(view) -> tuple[float, float, list]:
     return mean, mean + t * sd / math.sqrt(n), per
 
 
+def cost_models(ctx) -> dict:
+    """Per dataset: the Table S44 central tail overhead and the Table S6c admissible (k/d)/P_s.
+
+    The deployment ledger, the sparse-to-dense ratio, the registered truncation order and the
+    tail-model constants are those of paper.build.displays.analytical (Tables S44, S6c), so the
+    two displays and this one share one definition.
+    """
+    from cm_theory import budget as cost
+    from .analytical import (SENSING_SHARE, TAIL_REFERENCE_SHARE, deployment, registered_order, registry_actions,
+                             sparse_ratio)
+    order = registered_order(registry_actions(ctx)[0])
+    models = {}
+    for dataset in ADMITTED:
+        dep = deployment(ctx, dataset)
+        r = sparse_ratio(ctx, dataset)
+        f_bar = min(TAIL_REFERENCE_SHARE, cost.max_resolvent_fraction(dep["m"], r, SENSING_SHARE, order))
+        tail = cost.tail_scenarios(dep["C_qC"], dep["m"] - 1.0, f_bar, r, order)
+        models[dataset] = {"m": dep["m"], "r": r, "f_bar": f_bar, "tail_overhead_pct": tail["overhead_pct"][1],
+                           "admissible_sketch_ratio": cost.admissible_sketch_ratio(dep["m"], r)}
+    return models
+
+
+def amortization(ctx, dataset: str, gate, baselines, t_nom: float) -> dict:
+    """M* of main Definition 2 exactly as Table S23b computes it (paper.build.displays.records_campaigns)."""
+    from cm_theory.economics import amortization_horizon
+    from .records_campaigns import amortization_theta, method_labels, method_value, run_ledger
+    ledger = run_ledger(ctx, dataset, gate)
+    qc_key, qd_key = method_labels(ledger)
+    total = method_value(baselines, "gpu_hours", dataset, qd_key or qc_key)
+    plant = method_value(baselines, "gpu_hours", dataset, qc_key)
+    added = None if ledger["C_exp"] is None else ledger["C_exp"] - ledger["C_qC"]
+    if total is None or plant is None or not added or added <= 0:
+        raise DisplayInputError(f"{dataset}: M* needs the qualification GPU-hours of q_D and q_C and a positive added "
+                                "expected work")
+    theta = amortization_theta(ctx)
+    qualification = float(total) - float(plant)
+    return {"qualification_gpu_h": qualification, "added": added, "theta": theta,
+            "M_star": amortization_horizon(qualification, theta, added, t_nom)}
+
+
+def returns_comparator(view) -> bool:
+    return all(m.evidence["admission"]["deployed_index"] == m.evidence["selection"]["qC_index"]
+               for m in view.members())
+
+
+def scale_text(value: float) -> str:
+    return f"{value:.1f}" if round(value, 1) == value else f"{value:g}"
+
+
 @display("supplementary:Table S43", stem="S43", title="Experiment outcomes, estimators and thresholds",
          needs=S43_NEEDS)
 def table_s43(ctx, out):
-    from cm_theory.economics import amortization_horizon, fit_ensemble_law
+    from cm_theory.economics import fit_ensemble_law
     constants = ctx.constants
     budget = ctx.require_records("budget_matched")
     inserted = ctx.require_records("inserted_site")
     grid = ctx.require_records("ensemble_grid")
     gate = ctx.require_records("input_gate")
     nominal = ctx.require_records("nominal_time")
+    baselines = ctx.require_records("baselines")
     factorials = ctx.require_records("factorials")
+    confirmation = ctx.require_records("confirmation_sensitivity")
+    tightness = ctx.require_records("band_bound_tightness")
+    oracle = ctx.require_records("oracle_dispersion")
     rows, data, gaps = [], [], []
 
     def add(experiment, quantity, value, estimator, threshold, printed, gap=None):
@@ -638,8 +685,7 @@ def table_s43(ctx, out):
     # E1 -------------------------------------------------------------------
     bf16 = []
     for dataset in DATASETS:
-        view = ctx.require_run(dataset)
-        records, _ = identity_records(view)
+        records, _ = identity_records(ctx.require_run(dataset))
         for r in records:
             data.append(["E1", dataset, r["split"], f"seed {r['seed']}", "max_relative_state_error", r["state"],
                          "train/entry_initial.json"])
@@ -671,9 +717,8 @@ def table_s43(ctx, out):
         e4 = arm_value(budget, "effect_vs_qc_nats", dataset, "E4")
         e5 = arm_value(budget, "effect_vs_qc_nats", dataset, "E5")
         e6 = arm_value(budget, "effect_vs_qc_nats", dataset, "E6")
-        e6_feedback = arm_value(budget, "effect_vs_feedback_nats", dataset, "E6")
+        feedback = e6 - arm_value(budget, "effect_vs_feedback_nats", dataset, "E6")
         work = arm_value(budget, "work_ratio", dataset, "E6")
-        feedback = e6 - e6_feedback
         if feedback >= 0:
             raise DisplayInputError(f"budget_matched: the feedback rule has no gain over q_C on {dataset}")
         retained = e6 / feedback
@@ -695,7 +740,7 @@ def table_s43(ctx, out):
     rh_margin = constants["confirmation_eq20_table_S11"]["contrasts"]["MPC-RH"]["practical_margin_nats"]
     add("E3", "feedback minus predictor at the ceiling (mnats)", short_list(margins, lambda v: f"{v:.1f}"),
         "paired difference on D_compare at the common ceiling", "Holm-significant paired margin > 0 retains feedback",
-        "Tables S46–S47")
+        "Tables S46\u2013S47")
     add("E4", "distilled policy vs q_C (mnats)", short_list(distilled, lambda v: f"{v:.1f}"),
         "paired difference on D_compare; student executed open loop",
         f"student within eps_eq = {epsilon_eq:g} of feedback removes the online-feedback claim", "Table S46")
@@ -703,16 +748,28 @@ def table_s43(ctx, out):
         "paired difference at matched search calls",
         f"RH minus no-observation beyond {rh_margin:g} retains the observation-value claim", "Table S46")
     add("E6", "q_B: retained share; overhead; p1",
-        short_list(qb, lambda v: f"{v[0]:.3f}, {v[1]:.0f}%") + "; p1 = —",
+        short_list(qb, lambda v: f"{v[0]:.3f}, {v[1]:.0f}%") + "; p1 = \u2014",
         "acquisition-gated execution of Algorithm S3; retained share = gain of q_B over gain of feedback",
         f"retained gain within eps_eq = {epsilon_eq:g} of feedback at lower overhead qualifies q_B for separate "
-        "admission", "Tables S33–S34, S46", gap=GAPS["p1"])
+        "admission", "Tables S33\u2013S34, S46", gap=P1_GAP)
 
     # E10 ------------------------------------------------------------------
-    add("E10", "mechanism label on the confirmation role", None,
+    survival = []
+    for row in confirmation.select("label_survival_probability"):
+        label = str(row["contrast"]).split("/")[0]
+        dataset = next((d for d in DATASETS if SHORT[d] == label), None)
+        if dataset is None:
+            raise DisplayInputError(f"confirmation_sensitivity: contrast {row['contrast']} names no dataset")
+        survival.append((dataset, float(row["value"])))
+        data.append(["E10", dataset, "", row["contrast"], "label_survival_probability", float(row["value"]),
+                     "confirmation_sensitivity"])
+    if not survival:
+        raise DisplayInputError("confirmation_sensitivity holds no label survival probability")
+    survival.sort(key=lambda item: DATASETS.index(item[0]))
+    add("E10", "mechanism label on the confirmation role", short_list(survival, lambda v: f"{v:.2f}"),
         "probability that the Holm-significant label survives at the D_confirm size under the two-way variance model "
         "(Table S14b)", "Holm-significant contrast beyond the margin retains the label; otherwise the frozen map "
-        "returns q_C", "Table S14b, main Table 1", gap=GAPS["E10"])
+        "returns q_C", "Table S14b, main Table 1")
 
     # E13 ------------------------------------------------------------------
     attribution = []
@@ -723,8 +780,8 @@ def table_s43(ctx, out):
         out.compare(S45_GROUP, (dataset, "retained_share_arm1prime"), native / deployed)
         data.append(["E13", dataset, "", ARM_NATIVE_FEEDBACK, "share_of_deployed_effect", native / deployed,
                      "inserted_site"])
-    add("E13", "native-only feedback arm as a share of the deployed gain", short_list(attribution, lambda v: f"{v:.2f}", group=True),
-        "paired three-arm comparison at matched work",
+    add("E13", "native-only feedback arm as a share of the deployed gain",
+        short_list(attribution, lambda v: f"{v:.2f}", group=True), "paired three-arm comparison at matched work",
         f"native-only arm within eps_eq = {epsilon_eq:g} of the deployed rule removes the insertion mechanism",
         "Table S45")
 
@@ -742,10 +799,16 @@ def table_s43(ctx, out):
         "break-even thresholds of main Prop. 5 evaluated at the fit", "Table S26b")
 
     # E17 tail, E19 ---------------------------------------------------------
-    add("E17", "99th-percentile cost C_0.99/C_qC - 1", None,
+    models = cost_models(ctx)
+    for dataset, model in models.items():
+        out.compare(MAIN_T2, (dataset, "C_099_overhead_pct"), model["tail_overhead_pct"])
+        data.append(["E17", dataset, "", "central tail scenario", "C099_overhead_percent", model["tail_overhead_pct"],
+                     "runs + registered constants (Table S44 model)"])
+    add("E17", "99th-percentile cost C_0.99/C_qC - 1",
+        short_list([(d, m["tail_overhead_pct"]) for d, m in models.items()], lambda v: f"{v:.0f}%"),
         "tail-model quantile calculated under the scenario assumptions of Table S44; the observed maximum is a "
         "separate trace statistic", "an observed maximum above C_assure requires the budget mask for any hard "
-        "per-input bound", "main Table 2", gap=GAPS["E17 tail"])
+        "per-input bound", "main Table 2")
     add("E19", "per-cell support statistics ESS_c, omega_max,c", "Table S7",
         "one logged weight vector per (stratum, action) cell",
         "a changed support mask re-derives Q_feas, the selected route, the qualified fractions and the cost ledger",
@@ -753,24 +816,20 @@ def table_s43(ctx, out):
 
     # E17 wall time, t_nom and M* ------------------------------------------
     wall, timing = [], []
-    theta = 0.1
     for dataset in ADMITTED:
         overhead = require_value(gate, "deployed_wall_overhead_percent", dataset=dataset)
         wall.append((dataset, overhead))
         t_nom = require_value(nominal, "t_nom_seconds", dataset=dataset)
-        cost = ctx.require_run(dataset).evidence["cost"]
-        added = (cost["C_expected"] or 0) - (cost["C_qC"] or 0)
-        hours = (cost["qualification_seconds_total"] or 0) / 3600
-        m_star = amortization_horizon(hours, theta, added, t_nom) if added > 0 and hours > 0 else None
-        timing.append((dataset, (t_nom, m_star)))
+        horizon = amortization(ctx, dataset, gate, baselines, t_nom)
+        timing.append((dataset, (t_nom, horizon["M_star"])))
         field = "t_nom_measured_ms" if dataset in GRAPH_LEVEL else "t_nom_measured_s"
         out.compare(S23B_GROUP, (dataset, field), 1000 * t_nom if dataset in GRAPH_LEVEL else t_nom)
-        out.compare(S23B_GROUP, (dataset, "M_star_inputs"), m_star)
+        out.compare(S23B_GROUP, (dataset, "M_star_inputs"), float(f"{horizon['M_star']:.2g}"))
         data += [["E17", dataset, "", "", "wall_overhead_percent", overhead, "input_gate"],
                  ["E17", dataset, "", "", "t_nom_seconds", t_nom, "nominal_time"],
-                 ["E17", dataset, "", "", "qualification_hours", hours, "run stages/*.json"],
-                 ["E17", dataset, "", "", "added_expected_work", added, "select/candidates.json"],
-                 ["E17", dataset, "", "", "M_star_inputs", m_star, "Definition 2"]]
+                 ["E17", dataset, "", "", "qualification_gpu_hours", horizon["qualification_gpu_h"], "baselines"],
+                 ["E17", dataset, "", "", "added_expected_work", horizon["added"], "select/candidates.json + input_gate"],
+                 ["E17", dataset, "", "", "M_star_inputs", horizon["M_star"], "main Definition 2"]]
     add("E17", "wall-time overhead (deployed)", short_list(wall, lambda v: f"{v:.0f}%"),
         "synchronized wall time after warm-up on one execution object",
         "printed next to the serial cost; the two are not interchangeable", "main Fig. 4f; Tables S15b, S23")
@@ -778,39 +837,72 @@ def table_s43(ctx, out):
     def timing_text(v):
         t_nom, m_star = v
         t = f"{t_nom:.1f} s" if t_nom >= 0.1 else f"{1000 * t_nom:.2f} ms"
-        return f"{t}, {sci(m_star, 2) if m_star is not None else chr(0x2014)}"
+        return f"{t}, {sci(m_star, 2)}"
     add("E17", "per-input nominal execution time t_nom; amortization horizon M*", short_list(timing, timing_text),
         "per-input nominal execution time after warm-up; M* of main Definition 2",
         "a measured t_nom rescales M* inversely; lambda* is unaffected", "main Fig. 5d, Table S23b")
-    add("E17", "sensing implementation on proteins and PascalVOC-SP", None, "sensing-cost identity (Table S6c)",
-        "the identity holds with the recorded (k, P_s, f_res)", "Table S6c", gap=GAPS["E17 sensing"])
-    add("E18", "displacement/bound ratio of (6.1)", None,
+    reduced = [d for d in ADMITTED if ctx.config(d, "full")["sensor"]["sketch_dim"] > 0]
+    for dataset in reduced:
+        out.compare(S6C_GROUP, (dataset, "admissible_k_over_d_per_P_s"), models[dataset]["admissible_sketch_ratio"])
+        data.append(["E17", dataset, "", "reduced sensor", "admissible_k_over_d_per_P_s",
+                     models[dataset]["admissible_sketch_ratio"], "runs + registered constants (Table S6c identity)"])
+    add("E17", f"sensing implementation on {' and '.join(reduced)}",
+        "reduced sensor: (k/d)/P_s \u2264 " + " and \u2264 ".join(f"{models[d]['admissible_sketch_ratio']:.2g}"
+                                                                  for d in reduced),
+        "sensing-cost identity (Table S6c)", "the identity holds with the recorded (k, P_s, f_res)", "Table S6c")
+
+    # E18 ------------------------------------------------------------------
+    ratios = {}
+    for row in tightness.select("displacement_ratio"):
+        ratios.setdefault(float(row["spectral_scale"]), []).append(float(row["value"]))
+        data.append(["E18", "", "", f"{row['action']} at lambda_0 = {row['spectral_scale']}", "displacement_ratio",
+                     float(row["value"]), "band_bound_tightness"])
+    if not ratios:
+        raise DisplayInputError("band_bound_tightness holds no displacement ratio")
+    parts = []
+    for k, scale in enumerate(sorted(ratios)):
+        low, high = min(ratios[scale]), max(ratios[scale])
+        span = f"{low:.2f}" if f"{low:.2f}" == f"{high:.2f}" else f"{low:.2f}\u2013{high:.2f}"
+        prefix = "\u03bb0 = " if k == 0 else ""
+        parts.append(f"{span} at {prefix}{scale_text(scale)}")
+    add("E18", "displacement/bound ratio of (6.1)", "; ".join(parts),
         "exact one-step displacement over the band-limited bound at the spectral energy scale of the state",
-        "a ratio above one falsifies an assumption of Prop. 6 for that plant", "Fig. S18c", gap=GAPS["E18"])
+        "a ratio above one falsifies an assumption of Prop. 6 for that plant", "Fig. S18c")
 
     # admission ------------------------------------------------------------
     admission = []
     for dataset in ("ogbn-arxiv", "ogbn-proteins", "Roman-empire"):
-        view = ctx.require_run(dataset)
-        mean, upper, per = admission_statistics(view)
+        mean, upper, per = admission_statistics(ctx.require_run(dataset))
         admission.append((dataset, (mean, upper)))
         out.compare(MAIN_T1, (dataset, "admission_D_bar"), mean)
         out.compare(MAIN_T1, (dataset, "admission_U_desc"), upper)
         for p in per:
             data.append(["admission", dataset, p["split"], "", "clipped_mean_nats", p["mean"], "admit/decision.json"])
-    epsilon_a = ctx.config("ogbn-arxiv", "full")["admission"]["epsilon_a"]
+    epsilon_ce = ctx.config("ogbn-arxiv", "full")["admission"]["epsilon_a"]
+    epsilon_bce = ctx.config("ogbn-proteins", "full")["admission"]["epsilon_a"]
     add("admission", "descriptive D_bar, U_desc on D_admit",
         short_list(admission, lambda v: f"{v[0]:.4f}, {v[1]:.4f}"),
         "clipped paired effect with the cluster-bootstrap (arxiv, proteins) or repeated-split (Roman) upper limit",
-        f"D_bar <= -eps_a (eps_a = {epsilon_a:g} CE, "
-        f"{ctx.config('ogbn-proteins', 'full')['admission']['epsilon_a']:g} BCE) and U_desc < 0 keep G_admit = 1",
+        f"D_bar <= -eps_a (eps_a = {epsilon_ce:g} CE, {epsilon_bce:g} BCE) and U_desc < 0 keep G_admit = 1",
         "main Table 1")
-    add("oracle", "median oracle depth; fraction != q_C", None,
+
+    # oracle ---------------------------------------------------------------
+    listed = list(GRAPH_LEVEL) + [d for d in NODE_LEVEL if returns_comparator(ctx.require_run(d))]
+    dispersion = []
+    for dataset in listed:
+        depth = require_value(oracle, "median_oracle_depth", dataset=dataset)
+        differs = require_value(oracle, "fraction_differs_from_qc", dataset=dataset)
+        dispersion.append((dataset, (depth, differs)))
+        out.compare(S30_GROUP, (dataset, "median_oracle_depth"), depth)
+        out.compare(S30_GROUP, (dataset, "fraction_oracle_differs_from_qC"), differs)
+        data += [["oracle", dataset, "", "", "median_oracle_depth", depth, "oracle_dispersion"],
+                 ["oracle", dataset, "", "", "fraction_differs_from_qc", differs, "oracle_dispersion"]]
+    add("oracle", "median oracle depth; fraction != q_C", short_list(dispersion, lambda v: f"{v[0]:.0f}, {v[1]:.2f}"),
         "per-input oracle enumerated on the admission split after every decision is fixed",
-        "dispersion is necessary, not sufficient, for feedback value", "Table S30", gap=GAPS["oracle"])
+        "dispersion is necessary, not sufficient, for feedback value", "Table S30")
 
     # factorial ------------------------------------------------------------
-    effects, cells = factorial_effects(factorials)
+    effects, _ = factorial_effects(factorials)
     for name, value in effects.items():
         out.compare(S16B_GROUP, ("effect_coded_main_effects_nats", name), value)
         data.append(["factorial", "PascalVOC-SP", "", name, "main_effect_nats", value, "factorials"])
@@ -819,14 +911,15 @@ def table_s43(ctx, out):
         "interactions beyond one joint half-width falsify first-order additivity", "Table S16b")
 
     notes = ["Values from the sealed runs and the measurement-record sets named in the source data; thresholds from "
-             "configs/*_full.json and paper/registered_constants.json."]
+             "configs/*_full.json and paper/registered_constants.json. The tail and sensing rows share the deployment "
+             "ledger and constants of Tables S44 and S6c, and M* the definition of Table S23b. The oracle row lists the "
+             "independent-graph benchmarks and every benchmark whose comparator is returned."]
     if gaps:
-        notes.append("Not derivable from any artifact (cell left empty): " + "; ".join(gaps) + ".")
+        notes.append("Not derivable from any artifact: " + "; ".join(gaps) + ".")
     out.table(["experiment", "quantity", "value", "estimator", "threshold and consequence", "printed in"], rows,
               notes=notes)
     out.data("values", ["experiment", "dataset", "split", "arm_or_term", "quantity", "value", "source"], data)
     for dataset in DATASETS:
-        out.uses("run", dataset, ["train/entry_initial.json", "admit/decision.json", "select/candidates.json",
-                                  "stages/*.json"])
-    for name in ("budget_matched", "inserted_site", "ensemble_grid", "input_gate", "nominal_time", "factorials"):
-        out.uses("records", name, [])
+        out.uses("run", dataset, ["train/entry_initial.json", "admit/decision.json", "select/candidates.json"])
+    for name in S43_NEEDS[1:]:
+        out.uses("records", name.split(":", 1)[1], [])

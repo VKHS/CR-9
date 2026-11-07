@@ -76,6 +76,7 @@ G_S42 = "supplementary_table_S42_power_of_budget_matched_test"
 G_S44 = "supplementary_table_S44_per_input_cost_model"
 G_S47 = "supplementary_table_S47_decision_boundary_and_power"
 
+ARM_FAMILY = len(ARMS)                    # each dataset's Holm family of the budget-matched arms
 ADMITTED_RUNS = tuple(f"run:{d}" for d in ADMITTED)
 GRAPH_RUNS = tuple(f"run:{d}" for d in GRAPH_LEVEL)
 
@@ -177,7 +178,7 @@ def deployment(ctx, dataset) -> dict:
             "upper": paired.get("upper"), "gain": -float(paired["mean"]), "C_ctrl": c_ctrl, "C_qC": c_qc,
             "m": c_ctrl / c_qc, "E": (admitted.get("deployed") or {}).get("ensemble"),
             "qC_route": (selection.get("qC") or {}).get("route"),
-            "returns_qC": admitted.get("deployed_index") == selection.get("qC_index"),
+            "returns_qC": admitted.get("Gadmit") == 0 or admitted.get("deployed_index") == selection.get("qC_index"),
             "headroom_upper": None if None in headroom else fmean(headroom),
             "l_plant": plant.get("loss_nats"), "members": members}
 
@@ -288,14 +289,12 @@ def seed_range_text(conservative, optimistic):
 
 
 def p_text(p, floor):
-    """P-value text: '< floor' below the floor, three decimals from 0.1, two significant digits otherwise."""
+    """P-value text as Table S14 prints it: '< floor' below the floor, four decimals below 0.01, else three."""
     if p is None:
         return None
     if p < floor:
         return "< 10^-4" if floor == 1e-4 else f"< {floor:g}"
-    if p >= 0.1:
-        return f"{p:.3f}"
-    return f"{p:.{1 - math.floor(math.log10(p))}f}"
+    return f"{p:.4f}" if p < 0.01 else f"{p:.3f}"
 
 
 def p_compared(p, floor):
@@ -316,14 +315,19 @@ def seed_paired_se(se, share, count) -> tuple[float, float]:
 
 
 def require_gain(dep) -> dict:
+    """The displays of the admitted datasets model a deployed controller with a positive gain over q_C."""
     if dep["returns_qC"] or dep["gain"] <= 0:
         raise DisplayInputError(f"{dep['dataset']}: the run deploys no feedback rule with a positive gain over q_C")
     return dep
 
 
+def deployed(ctx, dataset) -> dict:
+    return require_gain(deployment(ctx, dataset))
+
+
 def power_inputs(ctx, dataset) -> dict:
     """Margins, SE and seed design of the E3 contrast (Tables S42 and S47, Figures S12 and S20d), in mnats."""
-    dep = require_gain(deployment(ctx, dataset))
+    dep = deployed(ctx, dataset)
     regime, (low, central, high) = share_grid(ctx, dep)
     g = 1e3 * dep["gain"]
     se = 1e3 * paired_se(ctx, dataset)
@@ -333,8 +337,6 @@ def power_inputs(ctx, dataset) -> dict:
             "margin": (1 - central) * g, "margin_range": ((1 - high) * g, (1 - low) * g),
             "seeds": count, "share": share, "se_cons": cons, "se_opt": opt}
 
-
-FAMILY = len(ARMS)   # the dataset's four-contrast Holm family of the budget-matched arms
 
 
 # ---------------------------------------------------------------------------
@@ -419,6 +421,8 @@ def graph_variance_share(ctx, dataset) -> dict:
         raise DisplayInputError(f"{dataset}: the Table 1 interval is not recorded")
     graph = Z975 * math.sqrt(moments["S2"] / moments["J"])
     test = (dep["upper"] - dep["lower"]) / 2.0
+    if graph <= 0 or test <= 0:
+        raise DisplayInputError(f"{dataset}: a zero-width admission or test interval leaves the two-way shares undefined")
     return {**moments, "hw_graph": graph, "hw_test": test, "ratio": test / graph, "share": (graph / test) ** 2,
             "dep": dep}
 
@@ -439,6 +443,9 @@ def table_s14b(ctx, out):
         j_old = int(j_old)
         if dataset in GRAPH_LEVEL and j_new != confirm_sizes[dataset]["D_confirm"]:
             raise DisplayInputError(f"{key}: the S14 family size {j_new} differs from the registered D_confirm size")
+        if dataset not in GRAPH_LEVEL and j_old != j_new:
+            raise DisplayInputError(f"{key}: {j_old} original units differ from the registered {j_new}; only "
+                                    "graph-unit contrasts are rescaled")
         se_old = (high - low) / (2.0 * Z975)
         rescaled = j_new != j_old
         se = se_old
@@ -479,9 +486,9 @@ def table_s14b(ctx, out):
             rescaled += 1
             out.compare(group, (index, "interval_old"), list(item["old"]))
             out.compare(group, (index, "graph_variance_share"), shares[item["dataset"]]["share"])
-            out.compare(group, (index, "interpretation"), reading)
         else:
             unchanged += 1
+        out.compare(group, (index, "interpretation"), reading)
         printed_interval = item["new"] if item["rescaled"] else item["old"]
         for field, computed in (("J_old", item["j_old"]), ("J_new", item["j_new"]), ("effect", item["effect"]),
                                 ("interval", list(printed_interval)), ("raw_P", p_compared(item["raw"], 1e-4)),
@@ -535,10 +542,12 @@ def regret_inputs(ctx):
          needs=("runs",))
 def table_s28(ctx, out):
     B, actions, inputs = regret_inputs(ctx)
+
+    def two_e(n):   # a cell without logged units leaves the bound vacuous
+        return 2 * admission.hoeffding_radius(n, B=B, actions=actions) if n >= 1 else None
     rows, source = [], []
     for dataset, item in inputs.items():
-        at_count = 2 * admission.hoeffding_radius(item["minimum_count"], B=B, actions=actions)
-        at_ess = 2 * admission.hoeffding_radius(item["reference_ess"], B=B, actions=actions)
+        at_count, at_ess = two_e(item["minimum_count"]), two_e(item["reference_ess"])
         n_effect = None if item["effect"] is None else hoeffding_count(ctx, item["effect"])
         rows.append([dataset, integer(item["minimum_count"]), integer(item["reference_ess"]), num(at_count, 4),
                      num(at_ess, 4), None if n_effect is None else f"{round(n_effect):,}"])
@@ -608,7 +617,7 @@ def table_s33(ctx, out):
     phi_ol = scenario_constant(ctx, "phi_OL")
     rows, source = [], []
     for dataset in ADMITTED:
-        dep = deployment(ctx, dataset)
+        dep = deployed(ctx, dataset)
         regime, grid = share_grid(ctx, dep)
         r_b = gap_model(ctx, dataset)["r_B"]
         o_b = qb_overheads(ctx, dataset)["o_B"]
@@ -647,7 +656,7 @@ def table_s34(ctx, out):
     rows, source = [], []
     for dataset in ADMITTED:
         gap = gap_model(ctx, dataset)
-        o = overheads(ctx, deployment(ctx, dataset))["o"]
+        o = overheads(ctx, deployed(ctx, dataset))["o"]
         qb = qb_overheads(ctx, dataset)
         rows.append([SHORT[dataset], f"{1e3 * gap['median']:.1f} / {1e3 * gap['p5']:.1f}", num(gap["switch"], 3),
                      num(gap["skip"], 2), num(gap["r_B"], 3), pct(o), pct(qb["o_B"]), num(qb["p1"], 3),
@@ -699,10 +708,10 @@ def table_s42(ctx, out):
     for dataset in ADMITTED:
         x = power_inputs(ctx, dataset)
         se, margin, (low, high) = x["se"], x["margin"], x["margin_range"]
-        mde = (inference.minimum_detectable_effect(se), inference.minimum_detectable_effect(se, family_size=FAMILY))
+        mde = (inference.minimum_detectable_effect(se), inference.minimum_detectable_effect(se, family_size=ARM_FAMILY))
         unit = (power(margin, se), power(low, se), power(high, se))
-        holm = power(margin, se, FAMILY)
-        cons, opt = power(margin, x["se_cons"], FAMILY), power(margin, x["se_opt"])
+        holm = power(margin, se, ARM_FAMILY)
+        cons, opt = power(margin, x["se_cons"], ARM_FAMILY), power(margin, x["se_opt"])
         spend, spend_gain = ensemble_spend_power(ctx, dataset, x)
         label = unit_label(ctx, dataset)
         rows.append([SHORT[dataset], label, num(se / 1e3, 5), joined(mde, 2), f"{margin:.2f} [{low:.2f}, {high:.2f}]",
@@ -718,7 +727,7 @@ def table_s42(ctx, out):
             out.compare(G_S42, (dataset, field), computed)
         out.uses("run", dataset, ["final/results_summary.json", "select/decision.json"])
     notes = [f"Paired SE of the E3 contrast from its 95% crossed seed-by-unit interval (budget_matched). MDE = "
-             f"(z_(1-a/2) + z_0.8) SE at a = 0.05 and at the first Holm step a/{FAMILY}. Margin FB-E3 = (1 - phi) g on "
+             f"(z_(1-a/2) + z_0.8) SE at a = 0.05 and at the first Holm step a/{ARM_FAMILY}. Margin FB-E3 = (1 - phi) g on "
              "the registered phi grid. Power of the two-sided paired test at the margin; seed-paired: conservative "
              "(only the pairable share 0.5 of single-graph units, 0 of fixed-ensemble graph units, shrinks with the "
              "seeds; Holm step) to optimistic (SE/sqrt(S), level 0.05) with the configuration's S seeds (Note S24)."]
@@ -766,10 +775,10 @@ def table_s47(ctx, out):
         margin, (m_low, m_high) = x["margin"], x["margin_range"]
         se = x["se"]
         mde = inference.minimum_detectable_effect(se)
-        mde_cons = inference.minimum_detectable_effect(x["se_cons"], family_size=FAMILY)
+        mde_cons = inference.minimum_detectable_effect(x["se_cons"], family_size=ARM_FAMILY)
         mde_opt = inference.minimum_detectable_effect(x["se_opt"])
         unit = (power(margin, se), power(m_low, se), power(m_high, se))
-        cons, opt = power(margin, x["se_cons"], FAMILY), power(margin, x["se_opt"])
+        cons, opt = power(margin, x["se_cons"], ARM_FAMILY), power(margin, x["se_opt"])
         label = unit_label(ctx, dataset).replace(" (fixed ensemble)", "")
         rows.append([SHORT[dataset], f"{low:.2f}–{high:.2f} ({central:.2f})", integer(contract["phi_FB_contract"]),
                      num(contract["phi_B_contract"], 3),
@@ -819,7 +828,7 @@ def table_s44(ctx, out):
     order = registered_order(registry_actions(ctx)[0])
     rows, source = [], []
     for dataset in ADMITTED:
-        dep = deployment(ctx, dataset)
+        dep = deployed(ctx, dataset)
         r = sparse_ratio(ctx, dataset)
         cap = budget.max_resolvent_fraction(dep["m"], r, SENSING_SHARE, order)
         f_bar = min(TAIL_REFERENCE_SHARE, cap)
@@ -863,7 +872,7 @@ def figure_s6(ctx, out):
     data = {}
     curve, bars = [], []
     for dataset in ADMITTED:
-        dep = deployment(ctx, dataset)
+        dep = deployed(ctx, dataset)
         r = sparse_ratio(ctx, dataset)
         data[dataset] = (r, dep["m"])
         values = [budget.per_member_multiplier(r, SENSING_SHARE, RESOLVENT_STEP_SHARES[-1], int(t)) for t in grid]
@@ -898,6 +907,7 @@ def figure_s6(ctx, out):
     ax.axhline(order, color="#888888", ls="--", lw=1)
     ax.text(-0.4, order + 1.5, f"registered T = {order}", fontsize=7, color="#555555")
     ax.set_xticks(range(len(ADMITTED)), [SHORT[d] for d in ADMITTED], rotation=30)
+    ax.set_ylim(0, 1.4 * TRUNCATION_AXIS)
     ax.set_ylabel("admissible T")
     ax.set_title("b  Admissible T by resolvent share")
     ax.legend(frameon=False, loc="upper left")
@@ -1033,7 +1043,7 @@ def figure_s8(ctx, out):
 def figure_s10(ctx, out):
     rows = []
     for dataset in ADMITTED:
-        dep = deployment(ctx, dataset)
+        dep = deployed(ctx, dataset)
         r = sparse_ratio(ctx, dataset)
         share = budget.sensing_share(r)
         rows.append([dataset, r, dep["m"], dep["m"] - 1.0, share, dep["m"] - 1.0 - share, dep["C_ctrl"], dep["C_qC"]])
@@ -1155,7 +1165,7 @@ def figure_s11(ctx, out):
         for x, w in zip(xs, work):
             ax.text(x + 0.05, w + 0.3, f"w = {w:g}", fontsize=7)
         ax.axhline(scenario["W"], color="#d62728", lw=1.5)
-        ax.text(-0.3, scenario["W"] + 0.25, f"budget W = {scenario['W']:g}", color="#d62728", fontsize=7)
+        ax.text(0.02, scenario["W"] + 0.25, f"budget W = {scenario['W']:g}", color="#d62728", fontsize=7)
         ax.axhline(scenario["W"] - scenario["W_C"], color="#1a8f99", ls="--", lw=1)
         ax.text(xs[-1], scenario["W"] - scenario["W_C"] - 0.7,
                 f"W − W_C = {scenario['W'] - scenario['W_C']:g}: restart still fits", ha="right", color="#1a8f99",
@@ -1196,9 +1206,9 @@ def figure_s12(ctx, out):
         x = power_inputs(ctx, dataset)
         color = COLORS[dataset]
         unit = [power(m, x["se"]) for m in margins]
-        cons = [power(m, x["se_cons"], FAMILY) for m in margins]
+        cons = [power(m, x["se_cons"], ARM_FAMILY) for m in margins]
         opt = [power(m, x["se_opt"]) for m in margins]
-        label = f"{SHORT[dataset]} ({unit_label(ctx, dataset)})"
+        label = f"{SHORT[dataset]} ({unit_label(ctx, dataset).replace(' (fixed ensemble)', ', fixed ensemble')})"
         axes[0].plot(margins, unit, color=color, lw=1.6, label=label)
         central = power(x["margin"], x["se"])
         axes[0].plot([x["margin_range"][0], x["margin_range"][1]], [central, central], color=color, lw=6, alpha=0.3,
@@ -1206,7 +1216,7 @@ def figure_s12(ctx, out):
         axes[0].plot(x["margin"], central, "o", color=color, ms=6)
         axes[1].plot(margins, cons, color=color, lw=1.6)
         axes[1].plot(margins, opt, color=color, lw=1.2, ls=":")
-        p_cons, p_opt = power(x["margin"], x["se_cons"], FAMILY), power(x["margin"], x["se_opt"])
+        p_cons, p_opt = power(x["margin"], x["se_cons"], ARM_FAMILY), power(x["margin"], x["se_opt"])
         axes[1].plot(x["margin"], p_cons, "o", color=color, ms=6)
         axes[1].plot(x["margin"], p_opt, "o", mfc="white", color=color, ms=6)
         curves += [[dataset, m, u, c, o] for m, u, c, o in zip(margins, unit, cons, opt)]
@@ -1298,7 +1308,7 @@ def figure_s15(ctx, out):
     ax.bar(xs, ranges, 0.6, color=[ACTION_COLORS[a.id] for a in transport])
     for x, h, c in zip(xs, ranges, identity):
         ax.text(x, h + 0.02, f"{h:.2f}", ha="center", fontsize=7)
-        ax.text(x, 0.05, f"id {c:.2f}", ha="center", rotation=90, fontsize=7, color="white")
+        ax.text(x, 0.2, f"id {c:.2f}", ha="center", rotation=90, fontsize=7, color="white")
     ax.axhline(ranges[0], color="#333333", ls=":", lw=1)
     ax.text(-0.4, 1.15, f"dotted: nominal level h̄_A0 = {ranges[0]:.2f}", fontsize=7, color="#555555")
     ax.set_ylim(0, 1.25)
@@ -1370,7 +1380,7 @@ def figure_s20(ctx, out):
     kappa = ctx.constants[BUDGET]["ensemble_law_kappa_band"]
     plane, design = [], []
     for dataset in ADMITTED:
-        dep = deployment(ctx, dataset)
+        dep = deployed(ctx, dataset)
         cost = overheads(ctx, dep)
         fit = ensemble_fit(ctx, dataset)
         if dep["l_plant"] is None:
@@ -1386,7 +1396,7 @@ def figure_s20(ctx, out):
         x = power_inputs(ctx, dataset)
         for count in range(1, x["seeds"] + 1):
             cons, opt = seed_paired_se(x["se"], x["share"], count)
-            design.append([dataset, count, power(x["margin"], cons, FAMILY), power(x["margin"], opt)])
+            design.append([dataset, count, power(x["margin"], cons, ARM_FAMILY), power(x["margin"], opt)])
         first, last = design[-x["seeds"]], design[-1]
         out.compare(G_S42, (dataset, "power_holm_step_pct"), first[2])
         out.compare(G_S42, (dataset, "power_at_unit_pct"), first[3])
@@ -1447,13 +1457,15 @@ def figure_s20(ctx, out):
         ax.bar(x + 0.2, row[2], 0.38, color=color)
         ax.text(x + 0.2, row[2] + 0.05, f"ϱ = {row[3]:.1f}", ha="center", va="bottom", fontsize=7)
         ax.text(x, -0.6, f"seed share ≥ {100 * row[4]:.1f}%", ha="center", fontsize=7)
-    ax.bar([], [], color="#999999", alpha=0.45, label="graph-unit half-width, fixed deployed ensemble (Table S13)")
-    ax.bar([], [], color="#999999", label="test-stage half-width, seeds and graphs resampled (Table 1)")
+    from matplotlib.patches import Patch
     ax.set_xticks(xs, [SHORT[row[0]] for row in units])
     ax.set_ylim(-1, 1.25 * max(row[2] for row in units) + 0.5)
     ax.set_ylabel("95% half-width of the paired effect (mnats)")
     ax.set_title("c  Two resampling sources in one interval (two-way model, lower bound)")
-    ax.legend(frameon=False, fontsize=6.5, loc="upper right")
+    ax.legend(handles=[Patch(color="#999999", alpha=0.45, label="graph-unit half-width, fixed deployed ensemble "
+                             "(admission split, Table S13)"),
+                       Patch(color="#999999", label="test-stage half-width, seeds and graphs resampled (test split, "
+                             "Table 1)")], frameon=False, fontsize=6.5, loc="upper right")
     ax = axes[1, 1]
     for dataset in ADMITTED:
         rows = [row for row in design if row[0] == dataset]

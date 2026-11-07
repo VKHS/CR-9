@@ -6,8 +6,10 @@ and replace only the published-artifact manifest to exercise each state.
 from __future__ import annotations
 
 import copy
+import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -63,6 +65,17 @@ class StatementCheck(unittest.TestCase):
         manifest = published(self.manifest, contents=dict(CONTENTS, checkpoints=0))
         status = {row["id"]: row["status"] for row in self.evaluate(manifest)["items"]}
         self.assertEqual(status["checkpoints"], sc.MISSING)
+
+    def test_declared_non_executable_parts_make_the_code_item_missing(self):
+        experiments = copy.deepcopy(sc._json(ROOT / sc.EXPERIMENTS))
+        experiments["experiments"][0]["not_executable"] = [{"display": "Table S99", "reason": "no configuration key"}]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "experiment_code.json"
+            path.write_text(json.dumps(experiments), encoding="utf-8")
+            with mock.patch.object(sc, "EXPERIMENTS", str(path)):
+                rows = {row["id"]: row for row in self.evaluate(published(self.manifest))["items"]}
+        self.assertEqual(rows["experiment_code"]["status"], sc.MISSING)
+        self.assertIn("Table S99 (no configuration key)", rows["experiment_code"]["remaining"])
 
     def test_report_names_every_item(self):
         text = sc.render(self.evaluate(self.manifest))

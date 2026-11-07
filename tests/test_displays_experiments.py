@@ -353,28 +353,49 @@ D_INF = {"ogbn-arxiv": 0.0305, "ogbn-proteins": 0.0088, "Roman-empire": 0.0088, 
          "COCO-SP": 0.0700, "Peptides-func": 0.0077}
 CELLS = {"000": 1.3230, "001": 1.3183, "010": 1.3174, "011": 1.3124, "100": 1.3170, "101": 1.3121, "110": 1.3110,
          "111": 1.3061}
+QC_ROUTE = {"ogbn-arxiv": "fixed_sequence", "ogbn-proteins": "fixed_sequence", "ogbn-products": "phase",
+            "Roman-empire": "mpc_ol", "PascalVOC-SP": "mpc_ol", "COCO-SP": "mpc_ol", "Peptides-func": "fixed_sequence"}
+C_QC, C_QD, FALLBACK, GPU_TOTAL, GPU_PLANT = 4.0, 4.6, 0.1, 3.0, 1.2
+
+
+def evidence_for(dataset):
+    returned = dataset == "ogbn-products"
+    deployed = "mpc_rh" if QC_ROUTE[dataset] == "mpc_ol" else "radius"
+    final = {"paired_loss": {"mean": FEEDBACK.get(dataset, 0.0), "lower": -0.008, "upper": -0.001},
+             "paired_metric_pp": {"mean": 0.1, "lower": 0.0, "upper": 0.2},
+             "models": {name: {"loss_nats": 0.9, "metric": 0.7, "metric_percent": 70.0, "test_units": 10}
+                        for name in ("q0", "qN", "qC", "qD")}}
+    evidence = {"selection": {"qC": {"route": QC_ROUTE[dataset], "ensemble": 4}, "qC_index": 0},
+                "admission": {"deployed_index": 0 if returned else 1, "Gadmit": int(not returned),
+                              "deployed": {"route": QC_ROUTE[dataset] if returned else deployed, "ensemble": 4}},
+                "final": final, "task": {"metric": "accuracy", "loss_name": "ce"},
+                "cost": {"C_qC": C_QC, "C_qD": C_QC if returned else C_QD}, "entry": {"headroom": {"upper": -0.02}}}
+    candidates = [{"route": QC_ROUTE[dataset], "cost": C_QC, "ensemble": 4},
+                  {"route": deployed, "cost": C_QD, "ensemble": 4}]
+    return evidence, candidates
 
 
 def s43_inputs(tmp: Path):
+    from paper.build.displays.records_campaigns import ROUTE_METHOD
     runs = {}
     for dataset in DATASETS:
         precision = "fp32" if dataset == "Roman-empire" else "bf16"
         entry = identity_entry([0.0021 if dataset != "COCO-SP" else 0.0044], [1e-5], precision=precision)
-        evidence = {"selection": {"qC": {"route": "mpc_ol" if dataset in ("Roman-empire", "PascalVOC-SP", "COCO-SP")
-                                          else "fixed_sequence"}},
-                    "cost": {"C_qC": 4.0, "C_expected": 4.6, "qualification_seconds_total": 3600.0 * 1.8}}
-        files = {"train/entry_initial.json": entry, "config.json": {"model": {"precision": precision}}}
+        evidence, candidates = evidence_for(dataset)
+        files = {"train/entry_initial.json": entry, "config.json": {"model": {"precision": precision}},
+                 "select/candidates.json": candidates}
         if dataset == "Roman-empire":
             splits = []
             for k, mean in enumerate((-0.006, -0.007, -0.0065)):
                 splits.append(fake_run(tmp / "roman" / f"split_{k:02d}", dataset,
-                                       {**files, "admit/decision.json": {"loss": {"mean": mean, "upper": mean + 0.002}}}))
+                                       {**files, "admit/decision.json": {"loss": {"mean": mean, "upper": mean + 0.002}}},
+                                       evidence=evidence))
             runs[dataset] = RunView(dataset, tmp / "roman", splits=splits, evidence=evidence)
             continue
         if dataset in ("ogbn-arxiv", "ogbn-proteins"):
             files["admit/decision.json"] = {"loss": {"mean": -0.0046, "upper": -0.0008}}
         runs[dataset] = fake_run(tmp / dataset, dataset, files, evidence=evidence)
-    budget, inserted, grid, gate, nominal = [], [], [], [], []
+    budget, inserted, grid, gate, nominal, baselines = [], [], [], [], [], []
     for k, dataset in enumerate(ADMITTED):
         arms = {"E3": -0.0016, "E4": -0.0014, "E5": -0.0013, "E6": FEEDBACK[dataset] * 0.97}
         for arm, effect in arms.items():
@@ -384,36 +405,68 @@ def s43_inputs(tmp: Path):
                        dict(keys, quantity="work_ratio", value=1.06 if arm == "E6" else 1.1)]
         for e in (1, 2, 4, 8, 12, 16, 20):
             grid.append({"dataset": dataset, "ensemble": str(e), "quantity": "loss_nats", "value": 0.8 + D_INF[dataset] / e})
-        gate.append({"dataset": dataset, "quantity": "deployed_wall_overhead_percent", "value": 13.0 + k})
+        gate += [{"dataset": dataset, "quantity": "deployed_wall_overhead_percent", "value": 13.0 + k},
+                 {"dataset": dataset, "quantity": "fallback_probability", "value": FALLBACK}]
         nominal.append({"dataset": dataset, "quantity": "t_nom_seconds",
                         "value": 0.00073 if dataset in GRAPH_LEVEL else 9.54})
+        deployed = "mpc_rh" if QC_ROUTE[dataset] == "mpc_ol" else "radius"
+        baselines += [{"dataset": dataset, "method": f"{ROUTE_METHOD[QC_ROUTE[dataset]]} (qC)", "seed": "",
+                       "quantity": "gpu_hours", "value": GPU_PLANT},
+                      {"dataset": dataset, "method": f"{ROUTE_METHOD[deployed]} (deployed)", "seed": "",
+                       "quantity": "gpu_hours", "value": GPU_TOTAL}]
     for dataset, native in (("PascalVOC-SP", -0.0018), ("COCO-SP", -0.0020), ("Peptides-func", -0.00105)):
         inserted += [{"dataset": dataset, "arm": "native, feedback", "quantity": "effect_nats", "value": native},
                      {"dataset": dataset, "arm": "inserted, feedback (deployed)", "quantity": "effect_nats",
                       "value": FEEDBACK[dataset]}]
     factorials = [{"dataset": "PascalVOC-SP", "cell": cell, "quantity": "ld_integrated_loss", "value": value}
                   for cell, value in CELLS.items()]
+    survival = [{"contrast": c, "quantity": "label_survival_probability", "value": v}
+                for c, v in (("COCO/RH", 0.97), ("Pascal/RH", 0.85), ("Peptides/radius", 0.45))]
+    tightness = [{"action": f"A{a}", "spectral_scale": scale, "quantity": "displacement_ratio", "value": value}
+                 for scale, values in (("0.1", (0.35, 0.63, 0.5)), ("0.3", (0.73, 0.731)), ("1.0", (0.82, 0.86)))
+                 for a, value in enumerate(values, start=1)]
+    oracle = []
+    for dataset, depth, differs in (("PascalVOC-SP", 40, 0.71), ("COCO-SP", 36, 0.69), ("Peptides-func", 30, 0.45),
+                                    ("ogbn-products", 16, 0.20), ("ogbn-arxiv", 24, 0.38)):
+        oracle += [{"dataset": dataset, "quantity": "median_oracle_depth", "value": depth},
+                   {"dataset": dataset, "quantity": "fraction_differs_from_qc", "value": differs}]
     records = {"budget_matched": fake_records("budget_matched", budget),
                "inserted_site": fake_records("inserted_site", inserted),
                "ensemble_grid": fake_records("ensemble_grid", grid),
                "input_gate": fake_records("input_gate", gate),
                "nominal_time": fake_records("nominal_time", nominal),
-               "factorials": fake_records("factorials", factorials)}
+               "baselines": fake_records("baselines", baselines),
+               "factorials": fake_records("factorials", factorials),
+               "confirmation_sensitivity": fake_records("confirmation_sensitivity", survival),
+               "band_bound_tightness": fake_records("band_bound_tightness", tightness),
+               "oracle_dispersion": fake_records("oracle_dispersion", oracle)}
     return runs, records
+
+
+def expected_cost_models(ctx, dataset):
+    """Independent restatement of the Table S44 tail model and the Table S6c identity for the fixture."""
+    stats = ctx.constants["dataset_statistics_table_S6c_S23b"][dataset]
+    width = ctx.constants["backbones_table_S5"][dataset]["hidden"]
+    r = stats.get("reported_edges", stats.get("mean_reported_edges_per_graph")) / (
+        stats.get("nodes", stats.get("mean_nodes_per_graph")) * width)
+    m, order, s = C_QD / C_QC, 8, 0.06
+    v = r * (order - 1) / (1 + r)
+    f_bar = min(0.25, (m * (1 + r) - (1 + r + s)) / (r * (order - 1)))
+    tail = 100 * ((m - 1) - f_bar * v + (f_bar + 0.20) * v)
+    return tail, min(1.0, (m - 1) * (1 + r) / (8 * r))
 
 
 class TableS43(Workspace):
     def test_layout_values_and_comparisons(self):
         runs, records = s43_inputs(self.tmp)
-        writer, rows = build_one("supplementary:Table S43", context(runs=runs, records=records), self.out,
-                                 registry=REGISTRY)
+        ctx = context(runs=runs, records=records)
+        writer, rows = build_one("supplementary:Table S43", ctx, self.out, registry=REGISTRY)
         table = read_table(self.out, "S43")
         self.assertEqual(len(table), 18)
         self.assertEqual(len(table[0]), 6)
         self.assertEqual([r["experiment"] for r in table],
                          ["E1", "E2", "E3", "E4", "E5", "E6", "E10", "E13", "E14", "E17", "E19", "E17", "E17", "E17",
                           "E18", "admission", "oracle", "factorial"])
-        value = {(r["experiment"], r["quantity"]): r["value"] for r in table}
         self.assertEqual(table[0]["value"], "4 × 10^-3")                  # COCO bf16 0.0044; Roman fp32 excluded
         self.assertEqual(table[0]["threshold and consequence"], "within 8 × 10^-3")
         self.assertEqual(table[1]["value"], "0.35 [0.20, 0.55] / 0.25 [0.10, 0.45]")
@@ -421,25 +474,34 @@ class TableS43(Workspace):
         self.assertTrue(table[3]["value"].startswith("arxiv -1.4; proteins -1.4"))
         self.assertTrue(table[5]["value"].startswith("arxiv 0.970, 6%"))
         self.assertTrue(table[5]["value"].endswith("p1 = —"))
-        self.assertEqual(table[6]["value"], "")                            # E10: no record contract
+        self.assertEqual(table[6]["value"], "Pascal 0.85; COCO 0.97; Peptides 0.45")
         self.assertEqual(table[7]["value"], "Pascal 0.21; COCO 0.22; Peptides 0.35")
         self.assertEqual(table[8]["value"], "arxiv 0.0305; proteins 0.0088; Roman 0.0088; Pascal 0.0455; "
                                             "COCO 0.0700; Peptides 0.0077")
+        tail = {d: expected_cost_models(ctx, d) for d in ADMITTED}
+        self.assertEqual(table[9]["value"], "; ".join(f"{experiments.SHORT[d]} {tail[d][0]:.0f}%" for d in ADMITTED))
         self.assertEqual(table[10]["value"], "Table S7")
         self.assertTrue(table[11]["value"].startswith("arxiv 13%; proteins 14%"))
-        # M* = 3600 * 1.8 h / (0.1 * 0.6 * 9.54 s) = 11,321 inputs
-        m_star = 3600 * 1.8 / (0.1 * 0.6 * 9.54)
+        # M* = 3600 C_qual / (theta (C_exp - C_qC) t_nom), C_exp = (1 - p) C_qD + p C_qC (Table S23b definition)
+        added = (1 - FALLBACK) * C_QD + FALLBACK * C_QC - C_QC
+        m_star = 3600 * (GPU_TOTAL - GPU_PLANT) / (0.1 * added * 9.54)
         self.assertTrue(table[12]["value"].startswith(f"arxiv 9.5 s, {experiments.sci(m_star, 2)}"))
         self.assertIn("Pascal 0.73 ms", table[12]["value"])
+        self.assertEqual(table[13]["quantity"], "sensing implementation on ogbn-proteins and PascalVOC-SP")
+        self.assertEqual(table[13]["value"], f"reduced sensor: (k/d)/P_s ≤ {tail['ogbn-proteins'][1]:.2g} and ≤ "
+                                             f"{tail['PascalVOC-SP'][1]:.2g}")
+        self.assertEqual(table[14]["value"], "0.35–0.63 at λ0 = 0.1; 0.73 at 0.3; 0.82–0.86 at 1.0")
         roman = [-0.006, -0.007, -0.0065]
         mean = sum(roman) / 3
         sd = math.sqrt(sum((x - mean) ** 2 for x in roman) / 2)
         self.assertEqual(table[15]["value"], f"arxiv -0.0046, -0.0008; proteins -0.0046, -0.0008; "
                                              f"Roman {mean:.4f}, {mean + 4.303 * sd / math.sqrt(3):.4f}")
+        self.assertEqual(table[16]["value"], "Pascal 40, 0.71; COCO 36, 0.69; Peptides 30, 0.45; products 16, 0.20")
         self.assertEqual(table[17]["value"], "-0.0062, -0.0059, -0.0049")
-        for gap in ("E10", "E18", "oracle"):
-            self.assertEqual(value[next(k for k in value if k[0] == gap)], "")
+        self.assertIn("p1 of q_B is not a quantity", (self.out / "tables/S43.md").read_text())
+        self.assertEqual(sum(1 for r in table if not r["value"]), 0)
         checked = resolved(rows)
+        self.assertEqual(len(checked), len(rows))                          # every declared cell is transcribed
         groups = {r["group"] for r in checked}
         self.assertTrue({"supplementary_table_S42_power_of_budget_matched_test",
                          "supplementary_table_S46_budget_matched_frontier",
@@ -447,12 +509,14 @@ class TableS43(Workspace):
                          "supplementary_table_S26b_ensemble_law_and_break_even",
                          "supplementary_table_S23b_nominal_execution_time_and_amortization",
                          "supplementary_table_S30_oracle_dispersion", "supplementary_table_S16b_pascal_factorial",
+                         "supplementary_table_S6c_sensing_cost_identity", "main_table_2_gain_and_cost_ledger",
                          "main_table_1_policy_and_deployment_ledger"} <= groups)
         exact = {(r["group"], r["path"]) for r in checked if r["status"] == "exact"}
         self.assertIn(("supplementary_table_S26b_ensemble_law_and_break_even", "ogbn-arxiv/D_inf_hat"), exact)
         self.assertIn(("supplementary_table_S16b_pascal_factorial",
                        "effect_coded_main_effects_nats/spectral_information"), exact)
         self.assertIn(("supplementary_table_S30_oracle_dispersion", "Roman-empire/phi_x_central"), exact)
+        self.assertIn(("supplementary_table_S30_oracle_dispersion", "COCO-SP/median_oracle_depth"), exact)
         self.assertIn("data/S43/values.csv", writer.files)
 
     def test_missing_record_set(self):

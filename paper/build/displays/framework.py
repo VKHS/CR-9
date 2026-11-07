@@ -304,12 +304,14 @@ class Comparison:
 class DisplayWriter:
     """Collects the files and declared comparisons of one display."""
 
-    def __init__(self, display_id: str, stem: str, out_dir: Path, *, title: str, synthetic: bool):
+    def __init__(self, display_id: str, stem: str, out_dir: Path, *, title: str, synthetic: bool,
+                 scope: str = "measurement"):
         self.display_id = display_id
         self.stem = stem
         self.out_dir = Path(out_dir)
         self.title = title
         self.synthetic = synthetic
+        self.scope = scope
         self.files: list[str] = []
         self.comparisons: list[Comparison] = []
         self.notes: list[str] = []
@@ -324,8 +326,16 @@ class DisplayWriter:
         return relative
 
     def _banner(self) -> str:
-        scope = ("synthetic software example; not the paper's benchmark observations"
-                 if self.synthetic else "computed from the supplied experiment artifacts")
+        if self.scope == "protocol":
+            scope = "generated from the repository's configuration, code and registered protocol"
+        elif self.scope == "analytical":
+            scope = "computed from the stated formulas and registered inputs"
+        elif self.scope == "illustration":
+            scope = "illustration generated from the repository's code and configuration"
+        elif self.synthetic:
+            scope = "synthetic software example; not the paper's benchmark observations"
+        else:
+            scope = "computed from the supplied experiment artifacts"
         return f"{self.display_id} — {self.title} ({scope})"
 
     def table(self, columns: list[str], rows: list[list], *, name: str | None = None,
@@ -557,7 +567,7 @@ def build_displays(ctx: DisplayContext, out_dir: Path, *, registry: dict | None 
             results.append({**entry, "status": "awaiting_inputs", "missing": missing})
             continue
         writer = DisplayWriter(display_id, generator.stem, out_dir, title=generator.title,
-                               synthetic=ctx.synthetic)
+                               synthetic=ctx.synthetic, scope=generator.scope)
         try:
             generator.function(ctx, writer)
         except DisplayInputError as exc:

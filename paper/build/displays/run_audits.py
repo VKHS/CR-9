@@ -102,26 +102,31 @@ RECORD_CONTRACTS = {
     },
     "tube_audit": {
         "title": "Plug-in trajectory-tube audit of main Proposition 2",
-        "manuscript_tables": ["Supplementary Table S22", "Supplementary Figure S17"],
+        "manuscript_tables": ["Supplementary Table S22", "Supplementary Figure S17", "main Figure 2a"],
         "experiments": [],
         "keys": ["dataset"],
         "quantities": {
-            "beta_median": "median over depths of the plug-in contraction factor beta_l",
-            "beta_p95": "95th percentile over depths of beta_l",
-            "m_eps_op": "plug-in operator term M_l eps_l^op of the product-sum tube (nats-equivalent state units)",
-            "reference_term": "plug-in reference term R_l e_l^ref",
-            "tube_coverage": "fraction of audited trajectories whose realized error stays inside the tube",
-            "mode_stable_coverage": "fraction of audited trajectories that keep action, recovery mode and last-safe "
-                                    "index under the perturbation (the fixed-mode condition of Proposition 2)",
-            "final_bound_nats": "loss bound sqrt(2) ||W_head||_2 e_L of the unrolled product-sum tube "
-                                "(cm_theory.stability.unrolled_bound, logit_loss_bound; nats)",
-            "observed_error_median_nats": "median absolute observed loss error of the perturbed trajectories (nats)",
-            "observed_error_p95_nats": "95th percentile of the same observed loss errors (nats)",
+            "beta_median": "median over depths and audited trajectories of the plug-in factor beta_l",
+            "beta_p95": "95th percentile over depths and audited trajectories of beta_l",
+            "m_eps_op": "median over depths of the plug-in operator term M_l eps_l^op",
+            "reference_term": "median over depths of the plug-in reference term R_l e_l^ref",
+            "tube_coverage": "fraction of audited trajectories whose realized state error stays inside the tube at "
+                             "every depth",
+            "mode_stable_coverage": "fraction of audited trajectories whose realized and predicted runs keep the same "
+                                    "action, recovery mode and last-safe index at every depth (the fixed-mode "
+                                    "condition of Proposition 2)",
+            "final_bound_nats": "product-sum tube bound of Proposition 2 at the final depth with the empirical "
+                                "per-depth constants, sqrt(2) ||W_head||_2 e_L (cm_theory.stability.unrolled_bound "
+                                "and logit_loss_bound; nats)",
+            "observed_error_median_nats": "median over audited D_explore trajectories of |predicted minus realized "
+                                          "loss| at the final depth (nats)",
+            "observed_error_p95_nats": "95th percentile of the same observed loss error (nats)",
         },
         "table": "list",
-        "notes": "The runtime stores no per-depth beta_l, M_l, eps_l^op, R_l or perturbed trajectories. The exporter "
-                 "keeps the per-depth constants as raw arrays and evaluates the tube with cm_theory.stability; the "
-                 "violation rate of Table S22 is 1 - mode_stable_coverage (convention C22).",
+        "notes": "Computed from the exploration trajectories and the frozen consequence models of the run; the "
+                 "per-depth constants beta_l, M_l, eps_l^op, R_l and e_l^ref are kept as raw arrays. The runtime "
+                 "records none of them. The violation rate of Table S22 is 1 - mode_stable_coverage (convention C22). "
+                 "main_paper.py reads final_bound_nats and the two observed-error quantities of the same rows.",
     },
     "oracle_dispersion": {
         "title": "Per-input oracle enumerated on the admission split",
@@ -141,21 +146,6 @@ RECORD_CONTRACTS = {
                  "records only the D_explore global-candidate headroom (select/entry_complete.json), not a per-input "
                  "oracle on the admission split.",
     },
-    "confirmation_size_sensitivity": {
-        "title": "Mechanism contrasts at their original sizes",
-        "manuscript_tables": ["Supplementary Table S14b", "Supplementary Figure S9"],
-        "experiments": ["E10"],
-        "keys": ["contrast"],
-        "quantities": {
-            "units_old": "units of the contrast at its original size J_old (validation graphs)",
-            "effect_old_nats": "paired effect at J_old (nats)",
-            "interval_old_low_nats": "lower end of the 95% interval at J_old (nats)",
-            "interval_old_high_nats": "upper end of the 95% interval at J_old (nats)",
-        },
-        "table": "list",
-        "notes": "One row per S14 contrast whose statistical unit count changed between the original test and "
-                 "D_confirm (the three multigraph contrasts). The D_confirm side is the joint confirmation campaign.",
-    },
     "depth_diagnostics": {
         "title": "Depth diagnostics of the plants and deployed rules",
         "manuscript_tables": ["Supplementary Figure S14"],
@@ -169,9 +159,8 @@ RECORD_CONTRACTS = {
             "first_intervention_depth_q25": "25th percentile over inputs of the first depth with a non-A0 action",
             "first_intervention_depth_median": "median over inputs of the first depth with a non-A0 action",
             "first_intervention_depth_q75": "75th percentile over inputs of the first depth with a non-A0 action",
-            "supported_deterioration_depth": "depth at which the plant's validation loss starts its supported "
-                                             "deterioration (first depth after the best-loss depth with a "
-                                             "significant paired increase)",
+            "supported_deterioration_depth": "first depth after the plant's best-validation-loss depth whose "
+                                             "paired loss increase over that depth has a 95% interval above zero",
             "transport_fraction": "fraction of executed sites of a depth phase (early, middle, late thirds) that "
                                   "carry a non-A0 transport action",
         },
@@ -258,6 +247,12 @@ def task_labels(dataset: str) -> tuple[str, str]:
 def mean(values):
     values = [v for v in values if v is not None]
     return float(np.mean(values)) if values else None
+
+
+def least_favourable(values, pick):
+    """Gate statistic of a campaign: its least favourable split; missing when any split lacks it."""
+    values = list(values)
+    return None if any(v is None for v in values) else pick(values)
 
 
 def common(values, fmt=str):
@@ -452,7 +447,7 @@ def merge_s12(split_rows: list[list[dict]]) -> list[dict]:
     return merged
 
 
-def nested_family_effects(rec: RunRecord) -> dict:
+def nested_family_effects(rec: RunRecord) -> tuple[dict, list]:
     """Algorithm S4, step 10: every open-loop family re-selected inside the nested comparator loop.
 
     In each outer fold the family's own representative is the configuration with
@@ -576,7 +571,7 @@ def entry_statistics(view) -> dict:
         "identity": bool(initial["identity_pass"]),
         "nominal graph value": plant["upper"] is not None and plant["upper"] < -entry["plant_margin"],
         "peak-depth deterioration": pdd is not None and pdd <= entry["pdd_max"],
-        "depth-integrated gap": initial["dil_gap"] <= entry["dil_gap_max"],
+        "depth-integrated gap": initial["dil_gap"] is not None and initial["dil_gap"] <= entry["dil_gap_max"],
         "registry support": complete["registry_support_fraction"] >= entry["registry_fraction_min"],
         "selected strata": selected == 1.0,
         "residual headroom": headroom["upper"] is not None and headroom["upper"] < -entry["headroom_margin"],
@@ -592,10 +587,10 @@ def table_s4(ctx, out):
         view = ctx.require_run(dataset)
         split = [entry_statistics(m) for m in view.members()]
         # Campaign: mean plant effect; each gate statistic at its least favourable split.
-        worst = {"delta_plant": mean(s["delta_plant"] for s in split),
-                 "U_plant": max(s["U_plant"] for s in split), "PDD_pp": max(s["PDD_pp"] for s in split),
-                 "DIL_gap": max(s["DIL_gap"] for s in split), "phi_registry": min(s["phi_registry"] for s in split),
-                 "phi_selected": min(s["phi_selected"] for s in split), "U_oracle": max(s["U_oracle"] for s in split)}
+        worst = {"delta_plant": mean(s["delta_plant"] for s in split)}
+        for key, pick in (("U_plant", max), ("PDD_pp", max), ("DIL_gap", max), ("phi_registry", min),
+                          ("phi_selected", min), ("U_oracle", max)):
+            worst[key] = least_favourable((s[key] for s in split), pick)
         decision = "pass" if all(s["passed"] for s in split) else "fail"
         rows.append([dataset, num(worst["delta_plant"], 4), num(worst["U_plant"], 4), num(worst["PDD_pp"], 2),
                      num(worst["DIL_gap"], 3), num(worst["phi_registry"], 2), num(worst["phi_selected"], 2),
@@ -676,9 +671,10 @@ def table_s7(ctx, out):
     out.table(["Dataset", "trajectories", "minimum count", "minimum propensity", "ESS (per-cell minimum)",
                "max. normalized weight (per cell)", "qualified fraction", "failure/remediation"], rows,
               notes=["Per (stratum, action) cell of fit/full/audit.json: trajectory units, minimum logged propensity, "
-                     "ESS and maximum normalized weight of the one weight vector of the cell. Extrema run over the cells "
-                     "with logged rows (empty registered cells are counted in the source data); with ESS >= n_min the "
-                     "maximum weight is at most n_min^-1/2, so the extrema are those of cells that fail the thresholds. "
+                     "ESS and maximum normalized weight of the one weight vector of the cell. Extrema run over the "
+                     "cells with logged rows (empty registered cells are counted in the source data); since "
+                     "ESS >= n_min bounds the maximum weight by n_min^-1/2, an ESS below n_min or a weight above "
+                     "it belongs to a cell that fails the thresholds. "
                      "qualified fraction: passing cells over all registered cells.",
                      "Roman-empire: trajectories per split run; extrema over the cells of all ten splits; qualified "
                      "fraction pooled over the splits. failure/remediation: registered rule "
@@ -939,7 +935,7 @@ KIND_TEXT = {"state": "conditional destruction minus intact", "radius": "radius 
 UNIT_TEXT = {"buffered_cluster": "clusters", "official_split": "splits", "graph": "confirmation graphs"}
 
 
-def interpretation(row, decisions, alpha) -> str:
+def interpretation(row, kind, decisions, alpha) -> str:
     """Reading of one joint-family test under the frozen confirmation map (Table S11)."""
     direction, margin = row["beneficial_direction"], row["practical_margin_nats"]
     low, high = row["interval_nats"]
@@ -947,8 +943,8 @@ def interpretation(row, decisions, alpha) -> str:
     if row["retained"]:
         if far > margin:
             return {"state": "useful state dependence", "radius": "radius retained",
-                    "mpc": "replanning retained"}[row["kind"]]
-        subject = {"state": "state dependence", "radius": "radius", "mpc": "replanning"}[row["kind"]]
+                    "mpc": "replanning retained"}[kind]
+        subject = {"state": "state dependence", "radius": "radius", "mpc": "replanning"}[kind]
         return f"{subject} retained on the point estimate; interval does not exclude the margin"
     if not row["tested_policy_selected"]:
         return "no feedback label; equivalence not established"
@@ -965,19 +961,18 @@ def table_s14(ctx, out):
     by_id = {row["contrast_id"]: row for row in checked["rows"]}
     rows, source = [], []
     for i, key in enumerate(FAMILY):
-        row = by_id[key]
-        row["kind"] = FAMILY[key][1]
+        row, kind = by_id[key], FAMILY[key][1]
         loss = LOSS_LABELS["bce" if "BCE" in row["loss"] else "ce"]
         margin_p = results[key].get("p_value_margin", ...)      # optional field of the original test record
-        reading = interpretation(row, checked["policy_decisions"], checked["alpha"])
+        reading = interpretation(row, kind, checked["policy_decisions"], checked["alpha"])
         effect = row["effect_nats"]
-        rows.append([key, KIND_TEXT[row["kind"]], f"{num(effect, 5, signed=True)} {loss}",
+        rows.append([key, KIND_TEXT[kind], f"{num(effect, 5, signed=True)} {loss}",
                      interval(*row["interval_nats"], 5), f"{row['unit_count']} {UNIT_TEXT[row['statistical_unit']]}",
                      row["method_name"], p_text(row["p_value_zero"], 1e-4), p_text(row["holm_p_value_zero"], 1e-3),
                      f"{row['practical_margin_nats']:g}",
                      None if margin_p is ... else ("not tested" if margin_p is None else p_text(margin_p, 1e-3)),
                      reading])
-        source.append([key, row["dataset"], row["kind"], effect, *row["interval_nats"], row["statistical_unit"],
+        source.append([key, row["dataset"], kind, effect, *row["interval_nats"], row["statistical_unit"],
                        row["unit_count"], row["seed_count"], row["method_name"], row["p_value_zero"],
                        row["holm_p_value_zero"], row["practical_margin_nats"], row["beneficial_direction"],
                        None if margin_p is ... else margin_p, row["retained"], row["tested_policy_selected"]])
@@ -992,8 +987,8 @@ def table_s14(ctx, out):
     out.table(["Dataset/claim", "contrast", "effect", "95% interval", "unit/n", "test", "raw P", "Holm P", "margin",
                "P vs margin", "interpretation"], rows,
               notes=["Joint nine-test family of the validated confirmation campaign (cm_campaigns.confirmation): "
-                     "original effects, intervals and raw P against zero; Holm over the nine raw P values; retained when "
-                     "Holm P < alpha and the point effect lies beyond the signed practical margin.",
+                     "original effects, intervals and raw P against zero; Holm over the nine raw P values; retained "
+                     "when Holm P < alpha and the point effect lies beyond the signed practical margin.",
                      "P vs margin: the one-sided test against the margin, read from the optional p_value_margin field "
                      "of each original test record (null = not performed); '—' when the record does not carry it."])
     out.data("joint_family", ["contrast", "dataset", "kind", "effect_nats", "interval_low_nats", "interval_high_nats",
@@ -1024,9 +1019,9 @@ def table_s20(ctx, out):
         qs_sizes = [len(d["Q_s"]) for d in decisions]
         resamples = [d["bootstrap_replicates"] for d in decisions]
         reference = max(decisions, key=lambda d: (len(d["Q_s"]), d["max_radius"]))
-        interpretation = selection_interpretation(dataset, reference, campaign=view.is_campaign)
+        reading = selection_interpretation(dataset, reference, campaign=view.is_campaign)
         rows.append([SHORT[dataset], common(q_sizes), common(qs_sizes), num(r_max, 4), num(eps_eq + 2 * r_max, 4),
-                     num(eps_eq + 2 * r12, 4), common(resamples), interpretation])
+                     num(eps_eq + 2 * r12, 4), common(resamples), reading])
         for index, (d, s) in enumerate(zip(decisions, screened)):
             source.append([dataset, index if view.is_campaign else "", d["candidate_count"], len(d["Q_s"]),
                            d["max_radius"], d["epsilon_eq"], d["epsilon_eq"] + 2 * d["max_radius"], s["radius"],
@@ -1035,7 +1030,7 @@ def table_s20(ctx, out):
         single = lambda values: values[0] if len(set(values)) == 1 else None
         for key, value in (("Q_size", single(q_sizes)), ("Q_s_size", single(qs_sizes)), ("r_max", r_max),
                            ("eps_eq_plus_2r_max", eps_eq + 2 * r_max), ("slack_with_12_finalists", eps_eq + 2 * r12),
-                           ("resamples", single(resamples)), ("interpretation", interpretation)):
+                           ("resamples", single(resamples)), ("interpretation", reading)):
             out.compare(S20_GROUP, (dataset, key), value)
         out.uses("run", dataset, ["select/decision.json", "select/unit_scores.npz", "select/candidates.json",
                                   "select/metric_observations.npz", "config.json"])
@@ -1044,7 +1039,8 @@ def table_s20(ctx, out):
               notes=["Twelve finalists: the feasible candidates with the smallest simultaneous upper bounds U; the "
                      "slack replays Algorithm S4 (cross_morse.statistics.nested_selection with the stage's arrays, "
                      "folds, weights and seed) with the max-t maximum over those finalists.",
-                     "Roman-empire: the largest radius over the ten splits; |Q| and |Qs| as a range when splits differ."])
+                     "Roman-empire: the largest radius over the ten splits; |Q| and |Qs| as a range when splits "
+                     "differ."])
     out.data("selection_radii", ["dataset", "split", "Q_size", "Q_s_size", "r_max", "epsilon_eq",
                                  "eps_eq_plus_2r_max", "r_max_12_finalists", "slack_12_finalists",
                                  "max_t_critical_12_finalists", "resamples", "bootstrap_seed", "finalist_indices"],
@@ -1055,7 +1051,7 @@ def table_s20(ctx, out):
 # Supplementary Tables S21 and S22: action gaps and the trajectory tube
 # ---------------------------------------------------------------------------
 
-def record_rows(rec, quantities, keys=("dataset",)) -> dict:
+def record_rows(rec, quantities) -> dict:
     """{dataset: {quantity: value}} for every dataset present in a per-dataset record set."""
     out = {}
     for dataset in DATASETS:
@@ -1170,8 +1166,8 @@ def table_s30(ctx, out):
                      None if o is None else f"{integer(o['oracle_depth_q25'])}–{integer(o['oracle_depth_q75'])}",
                      num(o and o["fraction_differs_from_qc"], 2), num(sd, 4),
                      None if grid is None else f"{grid[0]:.2f}–{grid[-1]:.2f} ({grid[1]:.2f})"])
-        source.append([dataset, *(None if o is None else o[q] for q in ("median_oracle_depth", "oracle_depth_q25",
-                                                                        "oracle_depth_q75", "fraction_differs_from_qc")),
+        quantities = ("median_oracle_depth", "oracle_depth_q25", "oracle_depth_q75", "fraction_differs_from_qc")
+        source.append([dataset, *(None if o is None else o[q] for q in quantities),
                        sd, recs[0].candidates[recs[0].qc]["route"], None if grid is None else " ".join(map(str, grid))])
         if o is not None:
             for key, value in (("median_oracle_depth", o["median_oracle_depth"]),
@@ -1186,11 +1182,11 @@ def table_s30(ctx, out):
     out.uses("records", "oracle_dispersion", [])
     out.table(["Dataset", "median oracle depth", "IQR", "fraction with oracle != qC",
                "per-input SD of clipped effect (nats)", "phi_x grid (central)"], rows,
-              notes=["Oracle depth and disagreement with q_C: oracle_dispersion record set (admission split, after every "
-                     "decision is fixed). Per-input SD: square root of the clipped admission moment S^2 at the "
-                     "registered B (Table S13); single-graph benchmarks have no per-input admission unit. phi_x grid: the "
-                     "registered retained-share grid of the comparator family (fixed-sequence or MPC-OL regime, Note "
-                     "S25); none when the comparator is returned."])
+              notes=["Oracle depth and disagreement with q_C: oracle_dispersion record set (admission split, after "
+                     "every decision is fixed). Per-input SD: square root of the clipped admission moment S^2 at the "
+                     "registered B (Table S13); single-graph benchmarks have no per-input admission unit. phi_x grid: "
+                     "the registered retained-share grid of the comparator family (fixed-sequence or MPC-OL regime, "
+                     "Note S25); none when the comparator is returned."])
     out.data("oracle_dispersion", ["dataset", "median_oracle_depth", "oracle_depth_q25", "oracle_depth_q75",
                                    "fraction_differs_from_qC", "per_input_SD_clipped_effect", "qC_route",
                                    "phi_x_grid"], source)
@@ -1201,17 +1197,26 @@ def table_s30(ctx, out):
 # ---------------------------------------------------------------------------
 
 def stage_hours(view) -> dict:
-    """Wall-clock hours of the qualification stages and of one backbone checkpoint on the run's device."""
+    """Wall-clock hours of the qualification stages and of the backbone checkpoints on the run's device.
+
+    A completion marker rewritten after an interruption carries no timing; its stage is None.
+    """
     hours = {}
     for stage, _, _ in QUALIFICATION_STAGES:
-        marker = view.json(f"stages/{stage}.json")
-        hours[stage] = marker["seconds_this_attempt"] / 3600.0
+        seconds = view.json(f"stages/{stage}.json").get("seconds_this_attempt")
+        hours[stage] = None if seconds is None else seconds / 3600.0
+    hours["total"] = total(hours[stage] for stage, _, _ in QUALIFICATION_STAGES)
     checkpoints = [c for c in view.json("train/manifest.json")["checkpoints"] if not c["baseline"]]
-    hours["seed"] = [c["seconds_this_attempt"] / 3600.0 for c in checkpoints]
+    hours["seed"] = [c["seconds_this_attempt"] / 3600.0 for c in checkpoints if c.get("seconds_this_attempt")]
     environment = view.json("environment.json")
     hours["device"] = environment.get("gpu") or environment.get("device")
     hours["gpu"] = str(environment.get("device", "")).startswith("cuda")
     return hours
+
+
+def total(values):
+    values = list(values)
+    return None if any(v is None for v in values) else float(sum(values))
 
 
 @display("supplementary:Table S41", stem="S41", title="Qualification accounting", needs=("runs",))
@@ -1222,16 +1227,15 @@ def table_s41(ctx, out):
         split = [stage_hours(m) for m in view.members()]
         deployed = any(rec.deployed != rec.qc for rec in records(view))
         # The ten split runs together qualify the Roman-empire deployment.
-        total = {stage: sum(s[stage] for s in split) for stage, _, _ in QUALIFICATION_STAGES}
-        total["total"] = sum(total[stage] for stage, _, _ in QUALIFICATION_STAGES)
-        total["seed"] = float(np.mean([h for s in split for h in s["seed"]]))
+        summed = {stage: total(s[stage] for s in split) for stage, _, _ in QUALIFICATION_STAGES}
+        summed["total"] = total(summed[stage] for stage, _, _ in QUALIFICATION_STAGES)
+        summed["seed"] = mean(h for s in split for h in s["seed"])
         devices.update(s["gpu"] for s in split)
         if deployed:
-            measured[dataset] = total
+            measured[dataset] = summed
         for index, s in enumerate(split):
             source.append([dataset, index if view.is_campaign else "", deployed, s["device"],
-                           *(s[stage] for stage, _, _ in QUALIFICATION_STAGES),
-                           sum(s[stage] for stage, _, _ in QUALIFICATION_STAGES), float(np.mean(s["seed"])),
+                           *(s[stage] for stage, _, _ in QUALIFICATION_STAGES), s["total"], mean(s["seed"]),
                            len(s["seed"])])
         out.uses("run", dataset, ["stages/*.json", "train/manifest.json", "environment.json", "select/decision.json",
                                   "admit/decision.json"])
@@ -1239,21 +1243,23 @@ def table_s41(ctx, out):
     unit = "GPU-hours" if devices == {True} else "device-hours"
 
     def per_dataset(key, prefix=""):
-        text = "; ".join(f"{SHORT[d]} {measured[d][key]:.2f}" for d in listed)
+        text = "; ".join(f"{SHORT[d]} {num(measured[d][key], 2) or '—'}" for d in listed)
         return (prefix + text) if text else None
 
-    totals = sum(measured[d]["total"] for d in listed)
+    def record(stage):
+        timed = [d for d in listed if measured[d][stage] is not None and measured[d]["total"]]
+        if not timed:
+            return "stage timing"
+        share = sum(measured[d][stage] for d in timed) / sum(measured[d]["total"] for d in timed)
+        return f"stage timing; share {share:.2f}"
+
     rows = [["backbone training (shared by every route)", "per checkpoint; per ensemble of E",
              per_dataset("seed", "per seed: "), "training logs (train/manifest.json)"]]
     for stage, label, _ in QUALIFICATION_STAGES[:4]:
-        share = sum(measured[d][stage] for d in listed) / totals if totals else None
-        rows.append([label, "entire search per dataset", per_dataset(stage),
-                     f"stage timing; share {share:.2f}" if share is not None else "stage timing"])
+        rows.append([label, "entire search per dataset", per_dataset(stage), record(stage)])
     rows.append(["independent E3–E6 comparison", "entire comparison per dataset", None,
                  "comparison trace on D_compare"])
-    share = sum(measured[d]["admit"] for d in listed) / totals if totals else None
-    rows.append(["admission evaluation", "entire search per dataset", per_dataset("admit"),
-                 f"stage timing; share {share:.2f}" if share is not None else "stage timing"])
+    rows.append(["admission evaluation", "entire search per dataset", per_dataset("admit"), record("admit")])
     rows.append(["search (horizon and beam)", "per deployment, per input",
                  "charged in the serial-cost ledger (Table S23), not in qualification", "timing traces"])
     rows.append(["total qualification increment of the deployed rule (the E3–E6 comparison is a separate campaign "
@@ -1265,9 +1271,10 @@ def table_s41(ctx, out):
         out.compare(GROUP["S41"], (d, "total_qualification_increment_GPU_h"), measured[d]["total"])
     out.table(["component", "unit", unit, "record"], rows,
               notes=[f"{unit}: measured stage wall time (stages/<stage>.json, seconds_this_attempt) on the run's one "
-                     "device; backbone training: mean per plant checkpoint (train/manifest.json). Listed datasets deploy "
-                     "a rule other than q_C; a comparator deployment has no qualification increment and stays in the "
-                     "source data. The E3–E6 comparison is outside the lifecycle runs and has no measurement here.",
+                     "device; backbone training: mean per plant checkpoint (train/manifest.json). Listed datasets "
+                     "deploy a rule other than q_C; a comparator deployment has no qualification increment and stays "
+                     "in the source data. The E3–E6 comparison is outside the lifecycle runs and has no measurement "
+                     "here.",
                      "Roman-empire: the ten split runs summed; per-checkpoint training averaged over all splits."])
     out.data("stage_hours", ["dataset", "split", "deployed_rule_differs_from_qC", "device",
                              *(f"{stage}_hours" for stage, _, _ in QUALIFICATION_STAGES), "total_hours",
@@ -1383,68 +1390,79 @@ def table_s48(ctx, out):
 # ---------------------------------------------------------------------------
 
 @display("supplementary:Figure S9", stem="FigS9", title="Mechanism contrasts and confirmation-size sensitivity",
-         needs=("campaign:confirmation", "records:confirmation_size_sensitivity"))
+         needs=("campaign:confirmation", "records:confirmation_sensitivity"))
 def figure_s9(ctx, out):
+    """Grey: the nine contrasts at their original sizes; blue: the multigraph contrasts rescaled to D_confirm.
+
+    The rescaling is the two-way variance model of Note S24 (Table S14b): only the graph
+    share g of the variance scales with the graph count, so each side of the J_old
+    interval widens by [(1 - g) + g J_old/J_new]^(1/2) about the fixed point estimate.
+    """
     from cm_campaigns.confirmation import FAMILY
     checked, _ = joint_confirmation(ctx)
-    sizes = ctx.require_records("confirmation_size_sensitivity")
+    sizes = ctx.require_records("confirmation_sensitivity")
     by_id = {row["contrast_id"]: row for row in checked["rows"]}
     data, changed, unchanged = [], 0, 0
     for key in FAMILY:
         row = by_id[key]
-        new = (row["effect_nats"], *row["interval_nats"])
+        j_new, observed = row["unit_count"], (row["effect_nats"], *row["interval_nats"])
         if sizes.select(contrast=key):
-            old_units = int(sizes.require("units_old", contrast=key))
-            old = tuple(sizes.require(q, contrast=key) for q in ("effect_old_nats", "interval_old_low_nats",
-                                                                 "interval_old_high_nats"))
+            j_old = int(sizes.require("units_old", contrast=key))
+            effect = sizes.require("effect_nats", contrast=key)
+            low, high = sizes.require("ci_low_nats", contrast=key), sizes.require("ci_high_nats", contrast=key)
+            share = sizes.require("graph_variance_share", contrast=key)
+            factor = math.sqrt((1.0 - share) + share * j_old / j_new)
+            old = (effect, low, high)
+            new = (effect, effect - (effect - low) * factor, effect + (high - effect) * factor)
         else:
-            old_units, old = row["unit_count"], new
-        moved = old_units != row["unit_count"]
-        note = (f"J: {old_units} → {row['unit_count']}; Holm P {p_text(row['holm_p_value_zero'], 1e-3)}" if moved
-                else f"unit unchanged (n={row['unit_count']})")
-        signed_margin = row["beneficial_direction"] * row["practical_margin_nats"]
-        data.append([key, row["dataset"], old_units, row["unit_count"], *old, *new, signed_margin,
-                     row["holm_p_value_zero"], note])
+            j_old, share, old, new = j_new, None, observed, observed
+        moved = j_old != j_new
+        holm = row["holm_p_value_zero"]
+        note = (f"J: {j_old} → {j_new}; Holm P {p_text(holm, 1e-3)}" if moved else f"unit unchanged (n={j_new})")
+        data.append([key, row["dataset"], j_old, j_new, *old, *new, share, *observed,
+                     row["beneficial_direction"] * row["practical_margin_nats"], holm, note])
         if moved:
-            out.compare(GROUP["S14b"], (changed, "J_old"), old_units)
-            out.compare(GROUP["S14b"], (changed, "J_new"), row["unit_count"])
-            out.compare(GROUP["S14b"], (changed, "interval_old"), list(old[1:]))
-            out.compare(GROUP["S14b"], (changed, "interval"), list(new[1:]))
-            out.compare(GROUP["S14b"], (changed, "holm_P"), p_compare(row["holm_p_value_zero"], 1e-3))
+            for field, value in (("J_old", j_old), ("J_new", j_new), ("effect", old[0]),
+                                 ("interval_old", list(old[1:])), ("interval", list(new[1:])),
+                                 ("graph_variance_share", share), ("holm_P", p_compare(holm, 1e-3))):
+                out.compare(GROUP["S14b"], (changed, field), value)
             changed += 1
         else:
-            out.compare(GROUP["S14b_unchanged"], (unchanged, "J_old"), old_units)
-            out.compare(GROUP["S14b_unchanged"], (unchanged, "interval"), list(new[1:]))
+            for field, value in (("J_old", j_old), ("J_new", j_new), ("effect", old[0]), ("interval", list(old[1:]))):
+                out.compare(GROUP["S14b_unchanged"], (unchanged, field), value)
             unchanged += 1
     out.data("panel_a", ["contrast", "dataset", "units_old", "units_new", "effect_old_nats", "low_old_nats",
-                         "high_old_nats", "effect_new_nats", "low_new_nats", "high_new_nats", "signed_margin_nats",
-                         "holm_P_new", "annotation"], data)
+                         "high_old_nats", "effect_new_nats", "low_new_nats", "high_new_nats", "graph_variance_share",
+                         "campaign_effect_nats", "campaign_low_nats", "campaign_high_nats", "signed_margin_nats",
+                         "joint_holm_P", "annotation"], data)
     out.uses("campaign", "confirmation", ["campaign.json", "raw/*/test.json"])
-    out.uses("records", "confirmation_size_sensitivity", sorted({r["source_file"] for r in sizes.rows}))
+    out.uses("records", "confirmation_sensitivity", sorted({r["source_file"] for r in sizes.rows}))
     plt = pyplot()
     fig, ax = plt.subplots(figsize=(7.2, 4.6))
     for y, row in enumerate(data):
+        moved = row[2] != row[3]
         ax.plot(row[5:7], [y, y], color="0.35", lw=1.2)
         ax.plot(row[4], y, "o", color="0.25", ms=4.5)
-        if row[2] != row[3]:
+        if moved:
             ax.plot(row[8:10], [y + 0.22, y + 0.22], color="#2864a5", lw=1.6)
             ax.plot(row[7], y + 0.22, "o", color="#2864a5", ms=4.5)
-        ax.plot(row[10], y, "|", color="#2a9d6a", ms=11, mew=1.6)
-        ax.text(1.02, y, row[12], transform=ax.get_yaxis_transform(), va="center", fontsize=7,
-                color="#2864a5" if row[2] != row[3] else "0.3")
+        ax.plot(row[14], y, "|", color="#2a9d6a", ms=11, mew=1.6)
+        ax.text(1.02, y, row[16], transform=ax.get_yaxis_transform(), va="center", fontsize=7,
+                color="#2864a5" if moved else "0.3")
     ax.axvline(0, color="0.2", lw=0.8)
     ax.set_yticks(range(len(data)), [row[0] for row in data])
     ax.invert_yaxis()
     ax.set_xlabel("contrast (nats); green tick: practical margin of Table S11")
     ax.set_title("Held-out mechanism contrasts and confirmation-size sensitivity")
     ax.plot([], [], "o-", color="0.25", label="contrasts at J_old (95% intervals)")
-    ax.plot([], [], "o-", color="#2864a5", label="D_confirm sizes (joint confirmation campaign)")
+    ax.plot([], [], "o-", color="#2864a5", label="rescaled to the D_confirm sizes (Table S14b)")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.14), frameon=False, ncol=2)
     ax.grid(axis="x", alpha=0.2)
     fig.subplots_adjust(right=0.72)
     out.figure(fig)
-    out.note("Grey: each contrast at its original size (the original-size record for the contrasts whose unit count "
-             "changed, otherwise the campaign test). Blue: the D_confirm test of the joint confirmation campaign.")
+    out.note("J_old side and graph-variance share: confirmation_sensitivity record set (multigraph contrasts); the "
+             "other contrasts keep their unit and are drawn from the joint confirmation campaign, whose joint Holm P "
+             "labels the rescaled rows. The campaign's own D_confirm intervals are kept in the source data.")
 
 
 # ---------------------------------------------------------------------------
@@ -1896,8 +1914,8 @@ def figure_s17(ctx, out):
     out.figure(fig)
     out.note("a: cm_theory.admission bound with the S^2, J and D_bar of each multigraph admission; squares at the "
              "single-graph unit counts on the variance-free floor. b: |Delta_sel(q_D)| / |U(Delta_oracle)| from the "
-             "selection record and select/entry_complete.json. h: D_inf = kappa x l_plant with l_plant the q_N test loss "
-             "and the registered kappa band; overheads from main Eq. (32) and C_assure = C(q_D) + C(q_C).")
+             "selection record and select/entry_complete.json. h: D_inf = kappa x l_plant with l_plant the q_N test "
+             "loss and the registered kappa band; overheads from main Eq. (32) and C_assure = C(q_D) + C(q_C).")
 
 
 # ---------------------------------------------------------------------------
