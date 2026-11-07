@@ -308,5 +308,98 @@
   },
   "live_zenodo_operations": "not performed",
   "local_container_execution": "not performed; inspect the hosted container workflow for the published commit",
-  "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml"
+  "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
+  "validation_record_updated": "2026-11-07",
+  "availability_reconstruction_validation": {
+    "date": "2026-11-07",
+    "base_commit": "5c1399eabb64f58926e7a28d171c4c2cfb771b38",
+    "scope": "Integrated local validation of the artifact catalog, reconstruction workspace, supplementary builders, source verification, resume and report failure handling. Software fixtures and a fresh synthetic CPU lifecycle; no new official benchmark measurements or original historical artifacts.",
+    "runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+    "runtime_unchanged": true,
+    "reported_numerical_registries_unchanged": true,
+    "checks": {
+      "full": {
+        "command": "make test (recorded CPU environment)",
+        "status": "PASS",
+        "tests_run": 1132,
+        "passed": 1131,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 189.03
+      },
+      "numeric": {
+        "command": "make test-no-torch (interpreter without PyTorch)",
+        "status": "PASS",
+        "tests_run": 839,
+        "passed": 823,
+        "skipped": 16,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 157.137
+      },
+      "verify": {
+        "command": "make verify",
+        "status": "PASS",
+        "seconds": 10.852
+      },
+      "review": {
+        "command": "make review REVIEW_OFFLINE=1",
+        "status": "PASS",
+        "seconds": 6.467,
+        "verdict": "SOFTWARE-ONLY",
+        "steps": 17
+      }
+    },
+    "reproduction_launcher": {
+      "tests": 35,
+      "passed": 35,
+      "seconds": 57.991,
+      "includes_fresh_current_source_cpu_lifecycle_and_actual_report": true,
+      "slurm_execution": "simulated scheduler, no live cluster submission"
+    },
+    "supplementary_builders": {
+      "focused_tests": 14,
+      "passed": 14,
+      "output_groups": 12,
+      "related_displays": 10,
+      "coverage": "documented columns and partial panels",
+      "independent_scientific_scope_review": true,
+      "representative_plots_visually_checked": 5
+    },
+    "artifact_catalog": {
+      "availability_categories": 10,
+      "producer_and_check_commands": 21,
+      "commands_executed_by_catalog": false
+    },
+    "reconstruction_workspace": {
+      "numbered_displays": 90,
+      "input_bytes_and_registered_identities_verified": true,
+      "output_file_hashes_verified": true,
+      "strict_all_display_gate_tested": true,
+      "atomic_failed_rebuild_preserves_previous_output": true
+    },
+    "tooling_sha256": {
+      "run_cross_morse.sh": "05b273c242b0fb7c8593749b0583712c4de8bca5ed944c993c7efe32fbfa4ce0",
+      "scripts/reproduction.py": "3989fe9cf0d80912b2f5c2391888ed0758d6e6dbec38b99707cabf77a5133370",
+      "scripts/reconstruct.py": "f240d3f21b95bbc12a34ea65a029b55d9649c0352523c6fc5390f5bc64fb788d",
+      "scripts/artifact_catalog.py": "55cbcc885e0e4cbc7a41de9e33bc7e0ec956e608624f954b4ddd55a4a10d0483",
+      "scripts/build_supplement.py": "35684bbb1b5b9659fff750af3f30623896a5ed9c5ebc81daf5892844bf0bd587",
+      "paper/build/supplement.py": "6a2b44807fa3d9bcc1632ce9707fdcf00cbf512c8528f550ff97b24f23c2669f",
+      "scripts/availability.py": "b8ccedaabd4b1679738f041ac5882bcf10d7eec86ea985e03131f023820d8418",
+      "scripts/manuscript_availability.py": "c68ee9bc2b93551497d7cbecffe4661da0f6547156a6898d153c69b1856bbbd6",
+      "scripts/claims_ledger.py": "b63973296fec0b5923a630416862ada8ace7e294288eb73739951f8178360b37",
+      "scripts/paper_support_report.py": "855362bbbede98d7686bd4079e3d583eb8f0ae29dfc53d018e17a18903373a8d"
+    },
+    "skip_scope": {
+      "full": "Private cluster profile excluded from the public package",
+      "no_torch": "PyTorch-dependent cases, including the new current-source report integration; exercised by the full CPU suite"
+    },
+    "thread_limits": {
+      "OMP_NUM_THREADS": 2,
+      "OPENBLAS_NUM_THREADS": 2,
+      "MKL_NUM_THREADS": 2
+    },
+    "publication_validation": "GitHub Actions validates the published commit independently; consult its workflow runs."
+  }
 }

@@ -2,14 +2,20 @@
 
 [Documentation](README.md) · [Getting started](GETTING_STARTED.md) · [Arrhenius walkthrough](ARRHENIUS_SESSION.md) · [Run archives](RUN_ARCHIVES.md) · [Reviewer guide](REVIEWER_GUIDE.md)
 
-`run_cross_morse.sh` regenerates every benchmark result of the paper on a Slurm
-GPU cluster. One command submits the whole study: an environment job, the
+`run_cross_morse.sh` executes the registered dataset lifecycles on a Slurm
+GPU cluster. One command submits an environment job, the
 sealed eight-stage lifecycle of all seven datasets (Roman-empire on its ten
 official splits) and a report job that rebuilds the paper's run-derived tables
 from the regenerated runs and places every regenerated value beside the value
 printed in the paper. The launcher is the only file that knows about the
 cluster; everything it runs is the released Python code, whose fingerprint it
 checks before submitting and which every run seals.
+
+Auxiliary experiments use the separate drivers in [Experiments](EXPERIMENTS.md).
+After their records are registered, [the reconstruction command](RECONSTRUCTION.md)
+combines available run outputs and supplementary analyses into one workspace.
+Its per-display report identifies columns and partial panels; completing the
+dataset lifecycles does not by itself reconstruct every printed display.
 
 ```bash
 git clone https://github.com/VKHS/CR-9.git && cd CR-9
@@ -175,6 +181,18 @@ every quantity it can read from a run (Tables 1, S12c, S13, S14, S15 and S20) at
 three levels: exact at the printed precision, inside the printed 95% interval,
 or outside. The per-dataset comparisons are in `999_REPORT/comparisons/`.
 
+Before analysis, the report verifies the frozen report tools and run-source
+snapshots against their inventories. A moved suite reads its own copied source
+and runs. Completed-run identities must agree with the suite and sealed stage
+records; historical example outputs cannot be relabeled as a new execution.
+
+`SUITE_STATUS.json` records `report_status`, `report_errors` and the explicit
+`report_scope`. The Python report command exits `0` for `PASS`, `1` for an
+unfinished suite (`INCOMPLETE`) and `2` for failed analysis or verification
+(`FAIL`). A valid numerical disagreement with the paper remains visible in the
+comparison and is distinct from a failed analysis command. Successful report
+construction covers the requested lifecycles and their supported outputs.
+
 The report job also rebuilds the paper's run-derived tables (and figures)
 from the regenerated runs with `scripts/build_paper.py`, embeds Tables 1 and 2,
 and extracts each run's data-role membership, seeds and environment with
@@ -183,6 +201,12 @@ manifests, the comparisons, the accounting and every run's decision records,
 without checkpoints or prediction arrays; with `CM_PACK_ARCHIVES=1` each run is
 also packed as a sealed archive (`scripts/archive_run.py`) that
 `scripts/archive_run.py --verify` and `scripts/ingest_run.py` accept.
+
+On `reproduce resume`, the launcher restores the saved suite settings while
+preserving explicit environment overrides. It queries the scheduler before
+resubmission, leaves active jobs alone and submits only unfinished Roman split
+indices. An unavailable scheduler query stops resubmission so active work is not
+duplicated. These recovery paths are covered by the simulated-Slurm tests.
 
 ## Single runs and Roman-empire campaigns
 

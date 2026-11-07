@@ -3,11 +3,14 @@
 Mock sbatch/squeue/scontrol/sacct/sinfo/srun record what the launcher asks for;
 recorded jobs are then executed as Slurm would, with a fake GPU interpreter
 (real python3 plus a stub torch) and a fake runtime that writes the sealed
-records of a completed example run. No cluster, GPU or PyTorch is contacted.
+records of a completed example run. One optional CPU integration test executes
+the actual synthetic lifecycle to validate a successful report at today's source
+identity. No cluster, GPU or official benchmark download is contacted.
 """
 from __future__ import annotations
 
 import json
+import importlib.util
 import os
 from pathlib import Path
 import shutil
@@ -26,7 +29,7 @@ n_file="$MOCK_ROOT/next_id"; n=$(( $(cat "$n_file" 2>/dev/null || echo 1000) + 1
 python3 -c 'import json,sys,os; open(os.environ["MOCK_ROOT"]+"/sbatch.jsonl","a").write(json.dumps({"id":sys.argv[1],"args":sys.argv[2:],"env":{k:v for k,v in os.environ.items() if k.startswith("CM_")}})+"\n")' "$n" "$@"
 if [[ " $* " == *" --parsable "* ]]; then echo "$n"; else echo "Submitted batch job $n"; fi
 ''',
-    "squeue": '#!/bin/bash\ncat "$MOCK_ROOT/squeue.txt" 2>/dev/null || true\n',
+    "squeue": '#!/bin/bash\n[[ "${MOCK_SQUEUE_FAIL:-0}" == 1 ]] && exit 1\ncat "$MOCK_ROOT/squeue.txt" 2>/dev/null || true\n',
     "scontrol": '#!/bin/bash\necho "$*" >> "$MOCK_ROOT/scontrol.log"\n'
                 '[[ "${MOCK_REQUEUE_FAILS:-0}" == 1 && "$1" == requeue ]] && exit 1\nexit 0\n',
     "sacct": '#!/bin/bash\ncat "$MOCK_ROOT/sacct.psv" 2>/dev/null || true\n',
@@ -34,14 +37,17 @@ if [[ " $* " == *" --parsable "* ]]; then echo "$n"; else echo "Submitted batch 
     "srun": '#!/bin/bash\nwhile [[ "$1" == --* ]]; do shift; done\nexec "$@"\n',
     "nvidia-smi": '#!/bin/bash\necho MOCK GPU\n',
 }
-FAKE_TORCH = '''__version__ = "2.12.1+cu130"
+FAKE_TORCH = '''import os
+__version__ = "2.12.1+cu130"
 class _V: cuda = "13.0"
 version = _V()
 class _C:
     @staticmethod
-    def is_available(): return True
+    def is_available(): return os.environ.get("MOCK_CUDA_UNAVAILABLE") != "1"
     @staticmethod
-    def get_device_name(i=0): return "MOCK GH200"
+    def get_device_name(i=0):
+        if not _C.is_available(): raise RuntimeError("CUDA unavailable")
+        return "MOCK GH200"
 cuda = _C()
 '''
 FAKE_PYTHON = r'''#!/bin/bash
@@ -53,7 +59,7 @@ fi
 for a in "$@"; do
   if [[ "$a" == *run_cross_morse.py ]]; then
     if [[ " $* " == *" --gpu-health-check "* ]]; then
-      [[ "${MOCK_GPU_FAIL:-0}" == 1 ]] && { echo "CUDA error: device is lost" >&2; exit 1; }
+      [[ "${MOCK_GPU_FAIL:-0}" == 1 || "${MOCK_CUDA_UNAVAILABLE:-0}" == 1 ]] && { echo "CUDA error: device is lost" >&2; exit 1; }
       echo '{"status": "PASS", "gpu": "MOCK GH200"}'; exit 0
     fi
     exec python3 "${MOCK_ROOT}/fake_runner.py" "$@"
@@ -219,12 +225,17 @@ class ReproductionLauncherTests(unittest.TestCase):
         self.assertEqual(manifest["datasets"], ["Peptides-func"])
         self.assertEqual(len(self.cluster.submissions()), 3)
 
-    def test_complete_suite_runs_and_reports(self):
+    def test_complete_processes_do_not_hide_invalid_report_inputs(self):
         suite, _ = self.reproduce("ogbn-proteins", "Roman-empire")
         (self.cluster.mock / "sacct.psv").write_text(
             "JobIDRaw|JobID|JobName|Partition|State|ExitCode|ElapsedRaw|Elapsed|Timelimit|AllocTRES|Submit|Start|End\n"
             "1002|1002|cmr0001_02_proteins|gpu|COMPLETED|0:0|7200|02:00:00|01:00:00|cpu=16,gres/gpu:gh200=1|x|x|x\n")
-        self.cluster.execute_all(self.cluster.submissions())
+        jobs = self.cluster.submissions()
+        self.cluster.execute_all(jobs[:-1])
+        result = self.cluster.execute(jobs[-1])
+        # This orchestration fixture copies only part of an example, with the
+        # same dataset/split in every fake process. It cannot be paper evidence.
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         status = self.cluster.launcher("status", str(suite))
         self.assertEqual(status.returncode, 0, status.stderr)
         self.assertIn("2/2 runs complete", status.stdout)
@@ -235,6 +246,8 @@ class ReproductionLauncherTests(unittest.TestCase):
         self.assertIn("GPU-hours (Slurm accounting) | 2.0", report)
         machine = json.loads((suite / "SUITE_STATUS.json").read_text())
         self.assertEqual(machine["complete_runs"], 2)
+        self.assertEqual(machine["report_status"], "FAIL")
+        self.assertTrue(machine["report_errors"])
         with zipfile.ZipFile(suite / "CMR_0001_RESULTS.zip") as archive:
             names = archive.namelist()
             self.assertIn("REPRODUCTION_REPORT.md", names)
@@ -248,6 +261,37 @@ class ReproductionLauncherTests(unittest.TestCase):
         live = (self.cluster.base / "logs/CROSS_MORSE_LIVE.out").read_text()
         self.assertIn("RUN 02_proteins (ogbn-proteins)", live)
         self.assertIn("[REPORT]", live)
+
+    @unittest.skipUnless(importlib.util.find_spec("torch"), "PyTorch is needed for the actual CPU smoke lifecycle")
+    def test_current_cpu_smoke_lifecycle_can_build_report_successfully(self):
+        suite, _ = self.reproduce("Peptides-func")
+        _, _, report = self.cluster.submissions()
+        destination = suite / "runs/07_peptides_func"
+        completed = subprocess.run([sys.executable, "-B", str(destination / "source/run_cross_morse.py"),
+                                    "--dataset", "Peptides-func", "--config", str(destination / "source/configs/resolved.json"),
+                                    "--data-root", str(self.cluster.base / "datasets/ogb_cache"),
+                                    "--output-dir", str(destination), "--device", "cpu", "--threads", "1", "--resume"],
+                                   capture_output=True, text=True, timeout=180)
+        self.assertEqual(completed.returncode, 0, completed.stdout[-3000:] + completed.stderr[-3000:])
+        result = self.cluster.execute(report)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        status = json.loads((suite / "SUITE_STATUS.json").read_text())
+        self.assertEqual(status["report_status"], "PASS")
+        self.assertEqual(status["report_errors"], [])
+        self.assertIn("T1", status["paper_tables"]["tables"])
+        self.assertTrue(status["paper_tables"]["figures"])
+
+    def test_unavailable_cuda_reaches_recorded_retry_and_requeue(self):
+        suite, _ = self.reproduce("ogbn-arxiv")
+        _, run, _ = self.cluster.submissions()
+        result = self.cluster.execute(run, MOCK_CUDA_UNAVAILABLE=1)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        root = suite / "runs/01_arxiv"
+        terminal = json.loads((root / "launcher/terminal.json").read_text())
+        self.assertEqual((terminal["status"], terminal["failure_class"]), ("REQUEUED", "INFRASTRUCTURE"))
+        self.assertEqual((root / "launcher/infrastructure_count").read_text().strip(), "1")
+        self.assertIn(f"requeue {run['id']}", (self.cluster.mock / "scontrol.log").read_text())
+        self.assertIn("INFRASTRUCTURE_HEALTH_FAILURE", (suite / "000_MANIFEST/run_registry.tsv").read_text())
 
     def test_failure_classes_requeue_and_continuation(self):
         suite, _ = self.reproduce("ogbn-arxiv", "ogbn-proteins", "COCO-SP", "Peptides-func")
@@ -314,6 +358,74 @@ class ReproductionLauncherTests(unittest.TestCase):
         (self.cluster.mock / "squeue.txt").write_text("")
         resumed = self.cluster.launcher("reproduce", "resume", str(suite))
         self.assertIn("[RUN] 07_peptides_func", resumed.stdout)
+
+    def test_roman_resume_skips_active_campaign_and_only_resubmits_incomplete_splits(self):
+        from run_cross_morse import create_launcher_snapshot
+        suite, _ = self.reproduce("Roman-empire")
+        _, array, _ = self.cluster.submissions()
+        campaign = suite / "runs/04_roman_empire"
+        for index in range(10):
+            split = campaign / f"split_{index:02d}"
+            create_launcher_snapshot(PROJECT, split, PROJECT / "configs/roman_empire_smoke.json", "smoke",
+                                     self.cluster.base / "datasets/ogb_cache", PROJECT / "run_cross_morse.sh",
+                                     dataset="Roman-empire", split_index=index)
+            (split / "run_state.json").write_text(json.dumps({"status": "RUNNING" if index == 9 else "COMPLETE"}))
+        (campaign / "split_09/launcher/terminal.json").write_text(json.dumps({"status": "FAILED", "reason": "prior attempt"}))
+        before = len(self.cluster.submissions())
+        (self.cluster.mock / "squeue.txt").write_text(f"{array['id']}_9 RUNNING\n")
+        active = self.cluster.launcher("reproduce", "resume", str(suite))
+        self.assertEqual(active.returncode, 0, active.stderr)
+        self.assertIn("[SKIP] 04_roman_empire already running", active.stdout)
+        self.assertEqual(len(self.cluster.submissions()), before)
+        # A standalone continuation belongs to its campaign as well.
+        with (suite / "000_MANIFEST/job_ids.tsv").open("a") as stream:
+            stream.write("continuation\t04_roman_empire/split_09\t7777\tx\n")
+        (self.cluster.mock / "squeue.txt").write_text("7777 CONFIGURING\n")
+        active = self.cluster.launcher("reproduce", "resume", str(suite))
+        self.assertEqual(active.returncode, 0, active.stderr)
+        self.assertEqual(len(self.cluster.submissions()), before)
+        (self.cluster.mock / "squeue.txt").write_text("")
+        resumed = self.cluster.launcher("reproduce", "resume", str(suite))
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        submitted = self.cluster.submissions()[before:]
+        self.assertEqual(len(submitted), 3)  # setup, just split 9, report
+        self.assertIn("--array=9", submitted[1]["args"])
+        self.assertNotIn("--array=0-9", submitted[1]["args"])
+
+    def test_resume_refuses_unknown_scheduler_state_before_submitting(self):
+        suite, _ = self.reproduce("ogbn-arxiv")
+        before = len(self.cluster.submissions())
+        result = self.cluster.launcher("reproduce", "resume", str(suite), env={"MOCK_SQUEUE_FAIL": "1"})
+        self.assertEqual(result.returncode, 70)
+        self.assertIn("Cannot determine active suite jobs", result.stderr)
+        self.assertEqual(len(self.cluster.submissions()), before)
+
+    def test_resume_and_report_refuse_changed_frozen_analysis(self):
+        suite, _ = self.reproduce("ogbn-arxiv")
+        before = len(self.cluster.submissions())
+        path = suite / "source/paper/build/figures.py"
+        path.write_text(path.read_text() + "\n# altered plotting code\n")
+        for args in (("reproduce", "resume", str(suite)), ("report", str(suite))):
+            result = self.cluster.launcher(*args)
+            self.assertEqual(result.returncode, 70, result.stdout + result.stderr)
+            self.assertIn("Frozen source changed", result.stderr)
+        self.assertEqual(len(self.cluster.submissions()), before)
+
+    def test_resume_restores_saved_settings_and_preserves_explicit_overrides(self):
+        result = self.cluster.launcher("reproduce", "full", env={"CM_REPRODUCE_DATASETS": "Peptides-func",
+                                                               "CM_PARTITION": "saved-gpu", "CM_TIME_FULL": "07:23:00"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        suite = next((self.cluster.base / "outputs").glob("CROSS_MORSE_REPRODUCTION_0*"))
+        before = len(self.cluster.submissions())
+        resumed = self.cluster.launcher("reproduce", "resume", str(suite))
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        run = self.cluster.submissions()[before + 1]
+        self.assertIn("--partition=saved-gpu", run["args"])
+        self.assertIn("--time=07:23:00", run["args"])
+        before = len(self.cluster.submissions())
+        resumed = self.cluster.launcher("reproduce", "resume", str(suite), env={"CM_TIME_FULL": "02:34:00"})
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        self.assertIn("--time=02:34:00", self.cluster.submissions()[before + 1]["args"])
 
     def test_site_env_prints_effective_settings_for_the_auxiliary_scripts(self):
         result = self.cluster.launcher("site-env", env={"CM_PARTITION": "gpu-a100", "CM_BUILD_MODULE": ""})

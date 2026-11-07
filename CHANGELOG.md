@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-07 — Availability catalog and traced reconstruction
+
+- Added a typed artifact catalog that maps code, configurations, dataset sources,
+  split and seed manifests, environments, checkpoints, predictions, propensity
+  logs, statistical outputs and generators to their files or producing commands.
+  Bundled examples, new executions and original experiment artifacts retain
+  separate identities. Availability prose now matches those distinctions.
+- Added `make reconstruct`: sealed input-byte verification, run and auxiliary
+  builders in one staged workspace, a report covering all 90 manuscript displays,
+  source and output hashes, preserved workspaces on failure, and an optional
+  strict full-display completeness check. `make reconstruction-example` verifies
+  the complete workflow on the bundled examples; CI retains its output bundle.
+- Added supplementary numerical builders for the original S14 confirmation
+  family, factorial cell records, ensemble-law fits and certified budget
+  campaigns. Generated plots include their numeric CSV sources; partial panels
+  and analytical fits retain their stated scope.
+- Corrected launcher resume and report behavior: frozen source verification,
+  active-job awareness, unfinished Roman split selection, restored suite
+  settings, and explicit failure/incomplete statuses for report construction.
+  GPU availability follows the infrastructure recovery path.
+- Kept the public overview free of deficit counters and removed universal
+  reconstruction wording where the workflow supports only specified outputs.
+  The frozen prediction runtime and manuscript numerical registries are unchanged.
+
 ## 2026-11-06 — Reproduction launcher and code-release scope
 
 - `run_cross_morse.sh` is now the reproduction launcher of the paper. A SITE

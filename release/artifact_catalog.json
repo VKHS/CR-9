@@ -1,0 +1,2996 @@
+{
+  "all_paper_displays_reproduced": false,
+  "commands": {
+    "archive": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/archive_run.py",
+        "<run>",
+        "--output",
+        "<archive.tar.gz>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 11502,
+          "path": "scripts/archive_run.py",
+          "sha256": "0300e308a5ed4cf20aec5fe807efd2eacdd3000a006e9e614aed9952facf9b7f"
+        }
+      ],
+      "entrypoints": [
+        "scripts/archive_run.py"
+      ],
+      "mode": "register",
+      "requires": [
+        "Complete run directory"
+      ],
+      "scope": "Pack a complete sealed run with its byte inventory and identities."
+    },
+    "arm_campaign": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/arm_campaign.py",
+        "execute",
+        "--manifest",
+        "<campaign.json>",
+        "--trust-local-checkpoints"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 5943,
+          "path": "scripts/arm_campaign.py",
+          "sha256": "ab7ec1ff9937fd386c792b33dcd24aefc32e5b3648d6ab129d04b12cac657967"
+        }
+      ],
+      "entrypoints": [
+        "scripts/arm_campaign.py"
+      ],
+      "mode": "execute",
+      "requires": [
+        "Completed parent runs",
+        "Prespecified campaign",
+        "Reviewed local checkpoints",
+        "Compute allocation"
+      ],
+      "scope": "Execute the declared E3\u2013E6 controller-seed studies; the supplied plan identifies paid work and parent runs."
+    },
+    "environment": {
+      "argv": [
+        "python",
+        "-B",
+        "environment/check_environment.py"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 4103,
+          "path": "environment/check_environment.py",
+          "sha256": "79361c0242fda1570cef4f2afa2dba080c64158f8f0c8267604a5c68d7ddb7b4"
+        }
+      ],
+      "entrypoints": [
+        "environment/check_environment.py"
+      ],
+      "mode": "check",
+      "requires": [],
+      "scope": "Inspect the installed execution environment."
+    },
+    "executed_manifest": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/run_manifests.py",
+        "runs",
+        "--index",
+        "runs/index.json",
+        "--label",
+        "official",
+        "--with-indices"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 24034,
+          "path": "scripts/run_manifests.py",
+          "sha256": "1f02f2f27c43b306dc413e3b4fc37f02dbb965456ab1a2ae15536a2ce2fb9bcd"
+        }
+      ],
+      "entrypoints": [
+        "scripts/run_manifests.py"
+      ],
+      "mode": "build",
+      "requires": [
+        "Validated run archives"
+      ],
+      "scope": "Extract actual roles, seeds, environment and membership arrays from registered runs."
+    },
+    "export_records": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/export_records.py",
+        "from-mapping",
+        "--mapping",
+        "<measurement-mapping.json>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 41329,
+          "path": "scripts/export_records.py",
+          "sha256": "783a9e4a15450c96be2aa8011289f47eb84001518eaa91c267c66c33e92b1c00"
+        },
+        {
+          "bytes": 28237,
+          "path": "scripts/record_mapping.py",
+          "sha256": "bc80d8eeac5f491f935799326c013508b81e883e0b4cca9627338bc43236c4d7"
+        }
+      ],
+      "entrypoints": [
+        "scripts/export_records.py",
+        "scripts/record_mapping.py"
+      ],
+      "mode": "register",
+      "requires": [
+        "Actual original or reproduced outputs",
+        "Explicit mapping and provenance"
+      ],
+      "scope": "Import existing measurements and declared calculations with raw-file locators; never fill them from manuscript targets."
+    },
+    "fetch": {
+      "argv": [
+        "make",
+        "fetch-deposits",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 14267,
+          "path": "scripts/fetch_deposits.py",
+          "sha256": "42961d4c632272a353e8a2637dc0cb862ec7805042197618646c3f86ad4ab535"
+        }
+      ],
+      "entrypoints": [
+        "scripts/fetch_deposits.py"
+      ],
+      "mode": "fetch",
+      "requires": [
+        "Complete run-index registration",
+        "Network access"
+      ],
+      "scope": "Retrieve registered public run deposits and verify their pinned archive bytes."
+    },
+    "ingest": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/ingest_run.py",
+        "<archive.tar.gz>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 22603,
+          "path": "scripts/ingest_run.py",
+          "sha256": "95a7844cf923c4310258e21004c67a6d8ae0163377e8880b62b7614268977456"
+        }
+      ],
+      "entrypoints": [
+        "scripts/ingest_run.py"
+      ],
+      "mode": "register",
+      "requires": [
+        "Archive with sealed outputs"
+      ],
+      "scope": "Verify and register a supplied archive; manuscript relationship remains a separate author declaration."
+    },
+    "lifecycle": {
+      "argv": [
+        "bash",
+        "run_cross_morse.sh",
+        "reproduce"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 74501,
+          "path": "run_cross_morse.sh",
+          "sha256": "05b273c242b0fb7c8593749b0583712c4de8bca5ed944c993c7efe32fbfa4ce0"
+        },
+        {
+          "bytes": 57796,
+          "path": "scripts/reproduction.py",
+          "sha256": "3989fe9cf0d80912b2f5c2391888ed0758d6e6dbec38b99707cabf77a5133370"
+        }
+      ],
+      "entrypoints": [
+        "run_cross_morse.sh",
+        "scripts/reproduction.py"
+      ],
+      "mode": "execute",
+      "requires": [
+        "Reviewed cluster/site settings",
+        "Provider datasets or permitted downloads",
+        "Execution environment and compute allocation"
+      ],
+      "scope": "Execute the registered seven-dataset lifecycle suite and compare supported run outputs with the paper."
+    },
+    "model_inventory": {
+      "argv": [
+        "make",
+        "model-inventory"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 22305,
+          "path": "scripts/model_inventory.py",
+          "sha256": "bc123217f31f5eb694442749292f7f2c6a2f850edffae952f53d4b5561fbb87d"
+        }
+      ],
+      "entrypoints": [
+        "scripts/model_inventory.py"
+      ],
+      "mode": "check",
+      "requires": [
+        "CPU PyTorch environment"
+      ],
+      "scope": "Instantiate the released model configurations and count their named parameters."
+    },
+    "reconstruct": {
+      "argv": [
+        "make",
+        "reconstruct",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 26194,
+          "path": "scripts/reconstruct.py",
+          "sha256": "f240d3f21b95bbc12a34ea65a029b55d9649c0352523c6fc5390f5bc64fb788d"
+        }
+      ],
+      "entrypoints": [
+        "scripts/reconstruct.py"
+      ],
+      "mode": "build",
+      "requires": [
+        "Registered original or reproduced run archives",
+        "Applicable measurement sets/campaigns"
+      ],
+      "scope": "Build supported numerical outputs and enumerate the scope of every numbered display."
+    },
+    "reconstruction_example": {
+      "argv": [
+        "make",
+        "reconstruction-example",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 26194,
+          "path": "scripts/reconstruct.py",
+          "sha256": "f240d3f21b95bbc12a34ea65a029b55d9649c0352523c6fc5390f5bc64fb788d"
+        }
+      ],
+      "entrypoints": [
+        "scripts/reconstruct.py"
+      ],
+      "mode": "build",
+      "requires": [],
+      "scope": "Build the unified report using bundled synthetic observations; no benchmark measurements are implied."
+    },
+    "record_check": {
+      "argv": [
+        "make",
+        "records-check"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 23455,
+          "path": "scripts/records.py",
+          "sha256": "ff08de6b8e058307c03a7ba35948b74e9c1611e37ac4654797fab3fb6cf5100b"
+        }
+      ],
+      "entrypoints": [
+        "scripts/records.py"
+      ],
+      "mode": "check",
+      "requires": [
+        "Indexed measurement sets"
+      ],
+      "scope": "Recheck record-set file hashes and trace each summary value to its source."
+    },
+    "registered_design": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/run_manifests.py",
+        "registered"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 24034,
+          "path": "scripts/run_manifests.py",
+          "sha256": "1f02f2f27c43b306dc413e3b4fc37f02dbb965456ab1a2ae15536a2ce2fb9bcd"
+        }
+      ],
+      "entrypoints": [
+        "scripts/run_manifests.py"
+      ],
+      "mode": "build",
+      "requires": [
+        "Dataset configurations"
+      ],
+      "scope": "Write prescribed split/seed/configuration manifests; these describe the design."
+    },
+    "registry_check": {
+      "argv": [
+        "make",
+        "registry-check"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 40921,
+          "path": "scripts/check_paper_constants.py",
+          "sha256": "071cc8be2feb729b4461a45223e369f5a8fa1a577cc602ca9b35794999ae08c9"
+        },
+        {
+          "bytes": 3412,
+          "path": "scripts/check_manuscript_sources.py",
+          "sha256": "c90b893a3f3fc5cfe171508602838c042e1b175b8715d64e9f79d5b13df92cc0"
+        }
+      ],
+      "entrypoints": [
+        "scripts/check_paper_constants.py",
+        "scripts/check_manuscript_sources.py"
+      ],
+      "mode": "check",
+      "requires": [],
+      "scope": "Check reported reference values, protocol constants and recorded PDF identities within their stated scope."
+    },
+    "scientific_audit": {
+      "argv": [
+        "make",
+        "scientific-audit",
+        "BUDGET_CAMPAIGN=<e3-e6>",
+        "CONFIRMATION_CAMPAIGN=<s14>",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 43652,
+          "path": "scripts/scientific_evidence_audit.py",
+          "sha256": "a166c260ba1d1b501c4bc2e1d37547f70d68cae23e1ad0c913ac829899c45f5c"
+        }
+      ],
+      "entrypoints": [
+        "scripts/scientific_evidence_audit.py"
+      ],
+      "mode": "check",
+      "requires": [
+        "Registered runs and records",
+        "Original S14 family",
+        "Complete E3\u2013E6 campaign"
+      ],
+      "scope": "Check original experiment bindings, joint confirmation, budget and auxiliary evidence within the enumerated audit scope."
+    },
+    "si": {
+      "argv": [
+        "make",
+        "si-report",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 70394,
+          "path": "scripts/check_si_identities.py",
+          "sha256": "7085b03ec490b613a3e24615e193ef336d0ffbd86bc73930df82250ff5b8bbdd"
+        }
+      ],
+      "entrypoints": [
+        "scripts/check_si_identities.py"
+      ],
+      "mode": "check",
+      "requires": [],
+      "scope": "Recompute supplementary relationships from printed inputs with precision and interpretation notes."
+    },
+    "supplement": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/build_supplement.py",
+        "--records-index",
+        "records/index.json",
+        "--confirmation-campaign",
+        "<s14>",
+        "--budget-campaign",
+        "<e3-e6>",
+        "--output-dir",
+        "<supplement-output>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 1621,
+          "path": "scripts/build_supplement.py",
+          "sha256": "35684bbb1b5b9659fff750af3f30623896a5ed9c5ebc81daf5892844bf0bd587"
+        },
+        {
+          "bytes": 38329,
+          "path": "paper/build/supplement.py",
+          "sha256": "6a2b44807fa3d9bcc1632ce9707fdcf00cbf512c8528f550ff97b24f23c2669f"
+        }
+      ],
+      "entrypoints": [
+        "scripts/build_supplement.py",
+        "paper/build/supplement.py"
+      ],
+      "mode": "build",
+      "requires": [
+        "Applicable measurement sets",
+        "Original S14 family for confirmation outputs",
+        "E3\u2013E6 campaign for arm outputs"
+      ],
+      "scope": "Build supported factorial, joint-confirmation, ensemble-fit and arm-comparison outputs from validated inputs."
+    },
+    "synthetic_suite": {
+      "argv": [
+        "bash",
+        "run_cross_morse.sh",
+        "reproduce",
+        "smoke"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 74501,
+          "path": "run_cross_morse.sh",
+          "sha256": "05b273c242b0fb7c8593749b0583712c4de8bca5ed944c993c7efe32fbfa4ce0"
+        },
+        {
+          "bytes": 57796,
+          "path": "scripts/reproduction.py",
+          "sha256": "3989fe9cf0d80912b2f5c2391888ed0758d6e6dbec38b99707cabf77a5133370"
+        }
+      ],
+      "entrypoints": [
+        "run_cross_morse.sh",
+        "scripts/reproduction.py"
+      ],
+      "mode": "execute",
+      "requires": [
+        "Cluster/site settings",
+        "Execution environment"
+      ],
+      "scope": "Exercise the launcher on synthetic data; outputs remain synthetic."
+    },
+    "theory": {
+      "argv": [
+        "make",
+        "theory-full",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 12388,
+          "path": "scripts/verify_theory.py",
+          "sha256": "450c626bd2eb8eb898fd530fc2acfe69e0e07eccca65ae6a7d8502c210318140"
+        }
+      ],
+      "entrypoints": [
+        "scripts/verify_theory.py"
+      ],
+      "mode": "check",
+      "requires": [],
+      "scope": "Run numerical checks of the stated analytical implications; these are not experimental observations."
+    },
+    "upstream_baseline": {
+      "argv": [
+        "python",
+        "-B",
+        "scripts/run_upstream_baseline.py",
+        "--plan",
+        "<baseline-plan.json>",
+        "--output",
+        "<study>",
+        "--phase",
+        "hpo",
+        "--index",
+        "<trial-index>",
+        "--trust-upstream-code"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 1201,
+          "path": "scripts/run_upstream_baseline.py",
+          "sha256": "4b319fdd737566021a323eb23439d6497c6b8125c1e7a60cdd2ba0b632c88f0b"
+        }
+      ],
+      "entrypoints": [
+        "scripts/run_upstream_baseline.py"
+      ],
+      "mode": "execute",
+      "requires": [
+        "Reviewed pinned upstream code and plan",
+        "Training/validation data",
+        "Compute allocation"
+      ],
+      "scope": "Execute one declared pinned-upstream HPO attempt; selection and final-seed phases follow the baseline guide."
+    },
+    "verify": {
+      "argv": [
+        "make",
+        "verify"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 35565,
+          "path": "Makefile",
+          "sha256": "c6c3d29e2d694ec375f9ba10e364b17a45b76a064c48a635053f7280bc9289ce"
+        }
+      ],
+      "entrypoints": [
+        "Makefile"
+      ],
+      "mode": "check",
+      "requires": [
+        "Recorded CPU or NumPy environment"
+      ],
+      "scope": "Check implementation, sealed examples, source references and generated artifacts."
+    }
+  },
+  "entries": [
+    {
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "implementation",
+          "files": [
+            {
+              "bytes": 150,
+              "path": "cm_campaigns/__init__.py",
+              "sha256": "71340eb5caf37a110f584ecedb58ea5889ea3f5e860782388ebec5a1dcd93f5c"
+            },
+            {
+              "bytes": 8387,
+              "path": "cm_campaigns/accounting.py",
+              "sha256": "48a822b857c3d937496340fc99705788f525a859f0199cd4ad24b564d95f8035"
+            },
+            {
+              "bytes": 14231,
+              "path": "cm_campaigns/archives.py",
+              "sha256": "a241440c05ab4865e6fa26e74804befbdf3cfe62e993b823bd9be228a66cc901"
+            },
+            {
+              "bytes": 19464,
+              "path": "cm_campaigns/arm_campaign.py",
+              "sha256": "1eede7853015945bea00d93944c4552793b93e466f8a0fea19c0b812c236c23b"
+            },
+            {
+              "bytes": 5471,
+              "path": "cm_campaigns/common.py",
+              "sha256": "d2fc02da5a0d48f38a3e3272b27eb260ab0278916029d4da72233b9a14e5203b"
+            },
+            {
+              "bytes": 41758,
+              "path": "cm_campaigns/confirmation.py",
+              "sha256": "5e31956fa2b6b7365b73988f50df64f6d15658dc4d365eeeb89f95a66a8b1fcb"
+            },
+            {
+              "bytes": 5032,
+              "path": "cm_campaigns/contract.py",
+              "sha256": "f2309a822f936c246c259d59d53841251959e2fa8a41db810566f032f63694e1"
+            },
+            {
+              "bytes": 6480,
+              "path": "cm_campaigns/numeric.py",
+              "sha256": "3fc34aaf6affd594cb0395efd29cc7432aae755f93da6320da09be69ba617bca"
+            },
+            {
+              "bytes": 4877,
+              "path": "cm_campaigns/timing.py",
+              "sha256": "47d3b19bbc7c79b195dd6108c42c70316fe0be8290b6f0f67728846e54067a1e"
+            },
+            {
+              "bytes": 221,
+              "path": "cm_experiments/__init__.py",
+              "sha256": "5d0d4dda3f40af6859256d980cd4b0e1db50a57e07db1dca22b14bc23004ccf5"
+            },
+            {
+              "bytes": 5191,
+              "path": "cm_experiments/accounting.py",
+              "sha256": "f4c1e9cb5099fb29a35e7626832af92a66cf958ae2b36eb826c08d4c81d91fc2"
+            },
+            {
+              "bytes": 3390,
+              "path": "cm_experiments/artifacts.py",
+              "sha256": "01015491d5cc3ad98d2c719149c2154c0515fc1c283be2621379bd6c8b1e669a"
+            },
+            {
+              "bytes": 12209,
+              "path": "cm_experiments/budget.py",
+              "sha256": "3d6a45bc1a13bc07a0d1bf69bf5f528faf6372b0e28d69629be1bd1ede026d34"
+            },
+            {
+              "bytes": 12620,
+              "path": "cm_experiments/campaign.py",
+              "sha256": "cba8b62496198f29d4765cabd9fa5d7a42ee00e89f47c309c31d77286a41623e"
+            },
+            {
+              "bytes": 5249,
+              "path": "cm_experiments/development.py",
+              "sha256": "6c3caf1383220529e883d3627d8c29e5276cca724245f302f52fecf34787bfa3"
+            },
+            {
+              "bytes": 23882,
+              "path": "cm_experiments/execution.py",
+              "sha256": "06a781d8cf750da0fa0887c72f7df6b9417029c336db4e79e6f1943341cd022d"
+            },
+            {
+              "bytes": 3506,
+              "path": "cm_experiments/holdout.py",
+              "sha256": "02009417b030a6f190c9f3697f7d80181b98368bb8c3684e6d38bcbbf149f8b0"
+            },
+            {
+              "bytes": 6074,
+              "path": "cm_experiments/protocol.py",
+              "sha256": "849b8be78abb8cdf677c0e4292dd0abff31dbf1f4f478e68a025d65f39654d60"
+            },
+            {
+              "bytes": 10260,
+              "path": "cm_experiments/replay.py",
+              "sha256": "be29299e09f09b671230f831747646c711fd6996f3a72cbe708423fab576804b"
+            },
+            {
+              "bytes": 27726,
+              "path": "cm_experiments/runner.py",
+              "sha256": "bb1722061cb3d0d9870ea80fa8a145703b4737f105e911154be79fe111d57f76"
+            },
+            {
+              "bytes": 15363,
+              "path": "cm_experiments/schedules.py",
+              "sha256": "7cc0624d27cb0aa6ac581caa5e1b39f9fd1d0f662f842ea266e1380273e01bc8"
+            },
+            {
+              "bytes": 4182,
+              "path": "cm_experiments/selection_replay.py",
+              "sha256": "5cf6ff98ffb9bc04254d4735f7e4193162b3d73b3cccf6049187013d581d9111"
+            },
+            {
+              "bytes": 6850,
+              "path": "cm_experiments/study_execution.py",
+              "sha256": "07b434c60bbf0e62a38ea9d14ec68e791f90279e8fa93202582123b50bcb9cee"
+            },
+            {
+              "bytes": 9109,
+              "path": "cm_experiments/upstream.py",
+              "sha256": "28382ca60977968562ba4dfd5005ae4e2c24441bcd8c02826e6bca377412d625"
+            },
+            {
+              "bytes": 100,
+              "path": "cross_morse/__init__.py",
+              "sha256": "878a21835a174d310b9ccbc8af8f70d654f155822d14a932cb44d64a3b2039b6"
+            },
+            {
+              "bytes": 4157,
+              "path": "cross_morse/common.py",
+              "sha256": "751a39c94e5509caf5c64704f194e55b0ca0ab3ee3d97b4a0dd77614778fa5ec"
+            },
+            {
+              "bytes": 58862,
+              "path": "cross_morse/core.py",
+              "sha256": "a457bed557619cc584132c99330da16edf47f8baf69a1b62534e796a7f1eedf3"
+            },
+            {
+              "bytes": 53618,
+              "path": "cross_morse/data.py",
+              "sha256": "b0518bc8dd6631ed59b81e5386fd5a244b1d7737296d6f3eb50e2e27d6efa45b"
+            },
+            {
+              "bytes": 26663,
+              "path": "cross_morse/datasets.py",
+              "sha256": "e06b6a72fce120bad7eee6b4515aeb40eddc19f2d141565ced0a29699790bfe8"
+            },
+            {
+              "bytes": 7579,
+              "path": "cross_morse/evaluation.py",
+              "sha256": "533162fa6d8327d2f16b8d816855a36da5f5a1fcb0f51da82ac24fa2962006fc"
+            },
+            {
+              "bytes": 13380,
+              "path": "cross_morse/exploration.py",
+              "sha256": "4d0138187adf2fe598d60383e50244f95b1414956a1309966ddd9fe9696fbba4"
+            },
+            {
+              "bytes": 54784,
+              "path": "cross_morse/learning.py",
+              "sha256": "b806e39498f8a8dae7483c6c028bcccd4c6367366b811037f398952ce1798f71"
+            },
+            {
+              "bytes": 65172,
+              "path": "cross_morse/pipeline.py",
+              "sha256": "8fd96210cb50f6415e43bdabcdf2f3a590d9dfae079f6f63a4cbdd513ac1754d"
+            },
+            {
+              "bytes": 34285,
+              "path": "cross_morse/policies.py",
+              "sha256": "72d008072ebdce4bb9825a707ae350802489cb66c1f666b7e79366953bbe3430"
+            },
+            {
+              "bytes": 29708,
+              "path": "cross_morse/provenance.py",
+              "sha256": "576bc714a7cbe40aef2bff1c9918354b0aeda01e840e88fdbd7997dea9c37d31"
+            },
+            {
+              "bytes": 606,
+              "path": "cross_morse/recovery.py",
+              "sha256": "d795234aef2ca7ec5245fdb08b8d7507b34a11c611eca4f5f383cd8071bee0f9"
+            },
+            {
+              "bytes": 7141,
+              "path": "cross_morse/reexecution.py",
+              "sha256": "bff4f57e8fdf62cdeeabe7dfa245229d30369dc6f32ac7905d6f37f03dac9163"
+            },
+            {
+              "bytes": 20654,
+              "path": "cross_morse/review.py",
+              "sha256": "35b3e48b1cd39e65aeb90dae32cb7dbfb4daf619d58e7e1f10c4dd66f3491fd8"
+            },
+            {
+              "bytes": 11804,
+              "path": "cross_morse/role_evidence.py",
+              "sha256": "1a832a39fef4718e85d11519052d7662c6a3d47697df81359b564b117650471b"
+            },
+            {
+              "bytes": 9765,
+              "path": "cross_morse/runtime.py",
+              "sha256": "c4380f61a8b40f6a99d56834ab2e8983abcf5f7af5806ba05d2831f068919f61"
+            },
+            {
+              "bytes": 1697,
+              "path": "cross_morse/scoring.py",
+              "sha256": "fc1fd0bf9e65cf3e963a500f0bf8b88f0b9620654a1a716f069cbbb02411906d"
+            },
+            {
+              "bytes": 3038,
+              "path": "cross_morse/split_contract.py",
+              "sha256": "f67b095d944c8ff7f2f3399c2410d297563facf77d79c1043822eea6f35a972c"
+            },
+            {
+              "bytes": 35860,
+              "path": "cross_morse/statistics.py",
+              "sha256": "c72a400e3a7512e63650d2882a08c847e7d4020e3ab2333be4cf903e2e3e951b"
+            },
+            {
+              "bytes": 16915,
+              "path": "cross_morse/tasks.py",
+              "sha256": "d2f5166139294041c4756551a708600bbaaf728ad27c21682c3f098a02b94e32"
+            },
+            {
+              "bytes": 22782,
+              "path": "cross_morse/training.py",
+              "sha256": "706c78c42adc4b0b4d73a0efdc8c5fe3e16a6a6e954c44134bd79f0964b8abb2"
+            },
+            {
+              "bytes": 19622,
+              "path": "run_cross_morse.py",
+              "sha256": "bcffbdc9c944c2455ce972f724abc586283797c5997a671baf67e027f7a401c9"
+            },
+            {
+              "bytes": 188,
+              "path": "run_cross_morse_arxiv.py",
+              "sha256": "9433b963728c972eaaf4aa8639c41c2b3385c77721bf596e691c8459eb634779"
+            },
+            {
+              "bytes": 182,
+              "path": "run_cross_morse_coco_sp.py",
+              "sha256": "6cf7e7477e518fcddf1f60eeb3493b43b10e2186885a176221afcaace75e9a0d"
+            },
+            {
+              "bytes": 192,
+              "path": "run_cross_morse_pascalvoc_sp.py",
+              "sha256": "33d8027d47b5af4709475885c17952b629f563305e3748d1002941b7a33138fd"
+            },
+            {
+              "bytes": 194,
+              "path": "run_cross_morse_peptides_func.py",
+              "sha256": "4b47705d247bb4dd0fb46b9c8d5e9115b00c0e218b39be9b7649b8778ba4bb8e"
+            },
+            {
+              "bytes": 194,
+              "path": "run_cross_morse_products.py",
+              "sha256": "4010297e98e2ce5b51f604e9bd1f14ae03d0bdae8931a43941798c7dc872412e"
+            },
+            {
+              "bytes": 194,
+              "path": "run_cross_morse_proteins.py",
+              "sha256": "0ebfbc930d7d015f425d74d0707b86d127ec378d1e95a605d273216fe557d132"
+            },
+            {
+              "bytes": 192,
+              "path": "run_cross_morse_roman_empire.py",
+              "sha256": "d87999c2b86af4687b91ff7c520ae7d5d31281d3dcb1f81bde3fd955b45e3686"
+            }
+          ],
+          "patterns": [
+            "cross_morse/*.py",
+            "run_cross_morse*.py",
+            "cm_experiments/*.py",
+            "cm_campaigns/*.py"
+          ]
+        },
+        {
+          "artifact_class": "implementation",
+          "files": [
+            {
+              "bytes": 74501,
+              "path": "run_cross_morse.sh",
+              "sha256": "05b273c242b0fb7c8593749b0583712c4de8bca5ed944c993c7efe32fbfa4ce0"
+            },
+            {
+              "bytes": 57796,
+              "path": "scripts/reproduction.py",
+              "sha256": "3989fe9cf0d80912b2f5c2391888ed0758d6e6dbec38b99707cabf77a5133370"
+            }
+          ],
+          "patterns": [
+            "run_cross_morse.sh",
+            "scripts/reproduction.py"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "synthetic_suite",
+        "arm_campaign",
+        "upstream_baseline",
+        "verify"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 9864,
+          "path": "docs/METHOD.md",
+          "sha256": "a77ba64cd56c094588819717e9102d882b1bf1a56de552da58b83c182a7ee661"
+        },
+        {
+          "bytes": 8880,
+          "path": "docs/EXPERIMENTS.md",
+          "sha256": "1ea6ba1f4d8ed014ee6a50aef8a1d53a68201867682d01bea841d45a10c04292"
+        },
+        {
+          "bytes": 18523,
+          "path": "docs/PAPER_SUPPORT.md",
+          "sha256": "278e230dd07eb80840921fba467bde844579d1cf885eea8149eb9b8603bbb61e"
+        },
+        {
+          "bytes": 29708,
+          "path": "cross_morse/provenance.py",
+          "sha256": "576bc714a7cbe40aef2bff1c9918354b0aeda01e840e88fdbd7997dea9c37d31"
+        }
+      ],
+      "contracts": [
+        "docs/METHOD.md",
+        "docs/EXPERIMENTS.md",
+        "docs/PAPER_SUPPORT.md",
+        "cross_morse/provenance.py"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "000_MANIFEST/suite.json",
+            "000_MANIFEST/source_sha256.json",
+            "runs/**/run_state.json",
+            "REPRODUCTION_REPORT.md",
+            "SUITE_STATUS.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "suite",
+          "scope": "A new suite records its executed lifecycles; separate auxiliary drivers have their own inputs and outputs."
+        }
+      ],
+      "id": "experiment_code",
+      "provider_data": false,
+      "scope": "Core and auxiliary experiment implementations are included. Executing the dataset lifecycles does not by itself execute every auxiliary campaign.",
+      "title": "Experimental implementation"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "configuration",
+          "files": [
+            {
+              "bytes": 1568,
+              "path": "configs/arrhenius-site.env.example",
+              "sha256": "db581550e6299607c92a5f59f3fff7a1ce65f27f00f814c5c45bc433a456cdf9"
+            },
+            {
+              "bytes": 3181,
+              "path": "configs/arxiv_full.json",
+              "sha256": "fde4027bc8c3a56bfc6e1eeea95903edb0d6aba50b39f33ec09a0a3795e52bb9"
+            },
+            {
+              "bytes": 2870,
+              "path": "configs/arxiv_pilot.json",
+              "sha256": "2c3447e8bd2f5079112608fb5f8bfe3a8a080438d06e609bf7195af39cb57edd"
+            },
+            {
+              "bytes": 2986,
+              "path": "configs/arxiv_smoke.json",
+              "sha256": "ba31b0555a6c5abb166bd1dcc9add839af4cb2e99319cf8578de26e5aa8293c3"
+            },
+            {
+              "bytes": 3229,
+              "path": "configs/coco_sp_full.json",
+              "sha256": "505730be6815ed80a7b0904d8dc802ee0b40ab39765169323215f527e2e4bcf4"
+            },
+            {
+              "bytes": 2888,
+              "path": "configs/coco_sp_pilot.json",
+              "sha256": "f68c055b9118feff7d35f2d98249dffb025a873d494829bfbdefc0e217e0d700"
+            },
+            {
+              "bytes": 3068,
+              "path": "configs/coco_sp_smoke.json",
+              "sha256": "fd245bb113a65c9b4047a39fabc7ae42d1768e4e22a0f72644fea9d748caf319"
+            },
+            {
+              "bytes": 3235,
+              "path": "configs/pascalvoc_sp_full.json",
+              "sha256": "279639c50c166c950e5533efca2337f4034db38e3a8aa1e080e82c48f0adcacd"
+            },
+            {
+              "bytes": 2894,
+              "path": "configs/pascalvoc_sp_pilot.json",
+              "sha256": "32b3f3de1a4c66f344edcf47361927254086aa51350140a9d29e61019a90b8f4"
+            },
+            {
+              "bytes": 3073,
+              "path": "configs/pascalvoc_sp_smoke.json",
+              "sha256": "6692b7f2511014786343e75107b391bbe4ce56dd36d320885fcb82253c21693d"
+            },
+            {
+              "bytes": 3253,
+              "path": "configs/peptides_func_full.json",
+              "sha256": "83a02601b11d747269a7fa76b44c2e298297866200404df7523c144acae56e46"
+            },
+            {
+              "bytes": 2888,
+              "path": "configs/peptides_func_pilot.json",
+              "sha256": "253099922835dced32edc4f988a599f78dbc09c5895cb727e5f33f1ebdc9fcc5"
+            },
+            {
+              "bytes": 3067,
+              "path": "configs/peptides_func_smoke.json",
+              "sha256": "b908664ec5446378284b1920ce11a9d26cdd89b80ab9f14758d3050750313464"
+            },
+            {
+              "bytes": 3237,
+              "path": "configs/products_full.json",
+              "sha256": "fc9ab7c2a38e24ff568d283119dc85f7d7373bd74b1e3a8902a2853d410778f1"
+            },
+            {
+              "bytes": 2902,
+              "path": "configs/products_pilot.json",
+              "sha256": "9a71e9092a87bb1a2ddb16d134f61e2ad95d60b576a2bda97885846ea9bbb4f8"
+            },
+            {
+              "bytes": 3017,
+              "path": "configs/products_smoke.json",
+              "sha256": "61c2f299046e7be5425d989c2e13837f918ec06764344e483484f021c7dc25d4"
+            },
+            {
+              "bytes": 3205,
+              "path": "configs/proteins_full.json",
+              "sha256": "1574ed8c172e4b137a9e42cdb0641d3382aceb50dc23d9b514474364c6e184f2"
+            },
+            {
+              "bytes": 2894,
+              "path": "configs/proteins_pilot.json",
+              "sha256": "85d8781e46ae15e2509860c56bb5fe6b02c7ceae71fa1f07bb59d52c22ce7192"
+            },
+            {
+              "bytes": 2996,
+              "path": "configs/proteins_smoke.json",
+              "sha256": "6dc699bb5316c04d7b66c927572e3f9bcffe7a2d6be592f58431e5b5699cc98d"
+            },
+            {
+              "bytes": 2506,
+              "path": "configs/public.env.example",
+              "sha256": "d199e308643a95a9de0e48365e435d16f2dccab1795e942679c4e20e9923012f"
+            },
+            {
+              "bytes": 3200,
+              "path": "configs/roman_empire_full.json",
+              "sha256": "ebcb3bec16e1392aaf1a39d92d44fb390f29e4e106459201184e56a71f78cb1b"
+            },
+            {
+              "bytes": 2890,
+              "path": "configs/roman_empire_pilot.json",
+              "sha256": "cf2af99ccb2d60611324ebbe49c1dd1987e6c61e0654733405b798bd24b64269"
+            },
+            {
+              "bytes": 3007,
+              "path": "configs/roman_empire_smoke.json",
+              "sha256": "6cbea83de4a69b206490b4a48a5b724ca0d018f3f7ca38e203eec8f590993065"
+            }
+          ],
+          "patterns": [
+            "configs/*_smoke.json",
+            "configs/*_pilot.json",
+            "configs/*_full.json",
+            "configs/public.env.example",
+            "configs/arrhenius-site.env.example"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "model_inventory"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 19622,
+          "path": "run_cross_morse.py",
+          "sha256": "bcffbdc9c944c2455ce972f724abc586283797c5997a671baf67e027f7a401c9"
+        },
+        {
+          "bytes": 8921,
+          "path": "docs/DATASETS.md",
+          "sha256": "7ebdc3a0006ab8b2176bdd380822b77d20e218db677f10bcf631b0bc488aba2d"
+        },
+        {
+          "bytes": 22305,
+          "path": "scripts/model_inventory.py",
+          "sha256": "bc123217f31f5eb694442749292f7f2c6a2f850edffae952f53d4b5561fbb87d"
+        }
+      ],
+      "contracts": [
+        "run_cross_morse.py",
+        "docs/DATASETS.md",
+        "scripts/model_inventory.py"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "config.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Each executed run, including each Roman-empire split, records its resolved runtime configuration."
+        },
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "runs/*/launcher/run_manifest.json",
+            "runs/*/launcher/source_sha256.json",
+            "runs/*/source/configs/submitted.json",
+            "runs/*/source/configs/resolved.json",
+            "runs/*/source/configs/active.env.example"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "suite",
+          "scope": "The Slurm launcher freezes submitted/resolved configuration, environment settings and source hashes once per dataset run or Roman-empire campaign; the ten Roman split runs use that shared campaign snapshot."
+        }
+      ],
+      "id": "configurations",
+      "provider_data": false,
+      "scope": "Smoke, pilot and full profiles plus portable site templates. Model counts identify released configurations; original checkpoint identity requires the associated run.",
+      "title": "Configurations"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "reported_reference",
+          "files": [
+            {
+              "bytes": 44633,
+              "path": "paper/registered_constants.json",
+              "sha256": "d783497b4d129a3268fe223e07459fb001d31f2b3e9ce78c61db8d8499427dbe"
+            },
+            {
+              "bytes": 130692,
+              "path": "paper/reported_results.json",
+              "sha256": "042c01a5c8b514ef49de983869b7fae986d60e82fb0c76c86aa3d8f79e678cf5"
+            },
+            {
+              "bytes": 12980,
+              "path": "paper/sources.json",
+              "sha256": "6cd0f44e2894ef96e0db5752dde442fbcee7af14524167de618b74ab3920dbb7"
+            }
+          ],
+          "patterns": [
+            "paper/reported_results.json",
+            "paper/registered_constants.json",
+            "paper/sources.json"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "files": [
+            {
+              "bytes": 28966,
+              "path": "examples/runs/arxiv/prepared/graph.npz",
+              "sha256": "22f3ff1849e795d65b78c5499ec2110ca33e5f77cffe688aee334bfc67ea30b6"
+            },
+            {
+              "bytes": 5994,
+              "path": "examples/runs/arxiv/prepared/metadata.json",
+              "sha256": "847736a6c7375b08bbce1173c0033e3f1ca30a1cd28d1abd5c6c13185569f609"
+            },
+            {
+              "bytes": 76000,
+              "path": "examples/runs/peptides_func/prepared/graph.npz",
+              "sha256": "e94969b8753e50e25568bdcafdfee6c65648383dea06a6223e03a092b46e6083"
+            },
+            {
+              "bytes": 13294,
+              "path": "examples/runs/peptides_func/prepared/metadata.json",
+              "sha256": "0c596d7fa7547256aa709de6f38f06d781d1ab8f73f5f0d25a14b369c93256f6"
+            }
+          ],
+          "patterns": [
+            "examples/runs/*/prepared/graph.npz",
+            "examples/runs/*/prepared/metadata.json"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "registry_check",
+        "fetch"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 6510,
+          "path": "data/sources.json",
+          "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
+        },
+        {
+          "bytes": 8921,
+          "path": "docs/DATASETS.md",
+          "sha256": "7ebdc3a0006ab8b2176bdd380822b77d20e218db677f10bcf631b0bc488aba2d"
+        },
+        {
+          "bytes": 29016,
+          "path": "paper/transcription_check.json",
+          "sha256": "dd2895576e08e3598eca0a698f9674e1df971897c96d6221cf779becf762d7e6"
+        }
+      ],
+      "contracts": [
+        "data/sources.json",
+        "docs/DATASETS.md",
+        "paper/transcription_check.json"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "prepared/graph.npz",
+            "prepared/metadata.json",
+            "prepared/official_splits.npz",
+            "prepared/splits.npz"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Prepared arrays are produced from provider data or explicitly synthetic input; source hashes and raw-data policy accompany the run."
+        }
+      ],
+      "id": "source_data",
+      "provider_data": true,
+      "scope": "Official provider data, reported numerical references and experimental observations have separate identities. Transcribed values never become reconstructed measurements.",
+      "title": "Source data and reported values"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "design_manifest",
+          "files": [
+            {
+              "bytes": 537,
+              "path": "manifests/registered/INDEX.json",
+              "sha256": "1684d9f7776c1fa5ca0923d036942e869d5784e968cca8284961ddaf8d04631e"
+            },
+            {
+              "bytes": 1770,
+              "path": "manifests/registered/arxiv_full.json",
+              "sha256": "5927f065431813c897215ff3b26c794a37cdac02a316a1a174833d64b619cb60"
+            },
+            {
+              "bytes": 1608,
+              "path": "manifests/registered/arxiv_pilot.json",
+              "sha256": "85bd0cc17da78140624c6791ff29efdbc273fc3aef032aa5976cb78511797d42"
+            },
+            {
+              "bytes": 1777,
+              "path": "manifests/registered/coco_sp_full.json",
+              "sha256": "187749bdf06ea8e6266c4dff21c70928374cb250dd7916a14c00c1866c29fe8f"
+            },
+            {
+              "bytes": 1615,
+              "path": "manifests/registered/coco_sp_pilot.json",
+              "sha256": "3e5a0bbd85572957ed004bf1a66fde1bf78304054038ecc9b3bce3764cc015e0"
+            },
+            {
+              "bytes": 1787,
+              "path": "manifests/registered/pascalvoc_sp_full.json",
+              "sha256": "7368cb6af10ab672d6191aded2abca5a3b1d1d6c9126d7949cde4619fd116da8"
+            },
+            {
+              "bytes": 1625,
+              "path": "manifests/registered/pascalvoc_sp_pilot.json",
+              "sha256": "35ef5bd59bb724be060225b8e7770a500d955753fe44cf2bb25a78eb5ec350ab"
+            },
+            {
+              "bytes": 1802,
+              "path": "manifests/registered/peptides_func_full.json",
+              "sha256": "262d8905ab45b5889d8b8d9e253d60b27bd21ad442b6cff4befad24f840bb88b"
+            },
+            {
+              "bytes": 1640,
+              "path": "manifests/registered/peptides_func_pilot.json",
+              "sha256": "5950fdc1d959a425979309b5522ccfbd03ed6063b5454ca351be609a02367706"
+            },
+            {
+              "bytes": 1776,
+              "path": "manifests/registered/products_full.json",
+              "sha256": "e6c37c69608e106c48bb4e9a39ef3acf44b64a355335ecf91beffe18617cdea0"
+            },
+            {
+              "bytes": 1614,
+              "path": "manifests/registered/products_pilot.json",
+              "sha256": "f89eb377a43ed19ed5db692a921297b2a826bd1050d0489ea20789fd0c1ca1c5"
+            },
+            {
+              "bytes": 1790,
+              "path": "manifests/registered/proteins_full.json",
+              "sha256": "42fcde86ae1bab490b968e4c2b89b0f88744eb1db76b001270e687700ed1bbe0"
+            },
+            {
+              "bytes": 1628,
+              "path": "manifests/registered/proteins_pilot.json",
+              "sha256": "716995a442bb6a02a6e866232d3974ed1798955d7f9f8e275128a475bf475bd8"
+            },
+            {
+              "bytes": 1775,
+              "path": "manifests/registered/roman_empire_full.json",
+              "sha256": "31613ca6ac659627d915d87be70e187abfaa2c1e03d2fc20515cab7a816735e9"
+            },
+            {
+              "bytes": 1614,
+              "path": "manifests/registered/roman_empire_pilot.json",
+              "sha256": "d7748d4836992f86cd3468dfbd7608cbdc6fe2eb406d4f2c27adbc11e2973ccc"
+            }
+          ],
+          "patterns": [
+            "manifests/registered/*.json"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "files": [
+            {
+              "bytes": 2986,
+              "path": "examples/runs/arxiv/config.json",
+              "sha256": "a1fd493604e19f78b6fbb1b0a7f09d287f14354ada4054e777b677b6ac7d08cc"
+            },
+            {
+              "bytes": 2026,
+              "path": "examples/runs/arxiv/prepared/official_splits.npz",
+              "sha256": "ac5f5014c191ca39be874bc8161ac89cc27923f7cebea39177456bb29c84d72f"
+            },
+            {
+              "bytes": 3956,
+              "path": "examples/runs/arxiv/prepared/splits.npz",
+              "sha256": "102f5f005748224879d337ba8c8fb33cdbf830615e628f06578fecb639262641"
+            },
+            {
+              "bytes": 3067,
+              "path": "examples/runs/peptides_func/config.json",
+              "sha256": "bed1ae3f8e9467c5d32e5a0ede9e3577eb412dab4ccd3ffd300f3262602970ca"
+            },
+            {
+              "bytes": 1386,
+              "path": "examples/runs/peptides_func/prepared/official_splits.npz",
+              "sha256": "5db94f5ea4d43b99d136d0e7372b9e67525d00c1cad25124dfb6c434e54f0198"
+            },
+            {
+              "bytes": 3084,
+              "path": "examples/runs/peptides_func/prepared/splits.npz",
+              "sha256": "2129ea766109b668a30aacd01f41c824b599c7048a77824e5f1739e32b3f25ad"
+            }
+          ],
+          "patterns": [
+            "examples/runs/*/prepared/splits.npz",
+            "examples/runs/*/prepared/official_splits.npz",
+            "examples/runs/*/config.json"
+          ]
+        }
+      ],
+      "commands": [
+        "registered_design",
+        "executed_manifest"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 3038,
+          "path": "cross_morse/split_contract.py",
+          "sha256": "f67b095d944c8ff7f2f3399c2410d297563facf77d79c1043822eea6f35a972c"
+        },
+        {
+          "bytes": 11804,
+          "path": "cross_morse/role_evidence.py",
+          "sha256": "1a832a39fef4718e85d11519052d7662c6a3d47697df81359b564b117650471b"
+        },
+        {
+          "bytes": 24034,
+          "path": "scripts/run_manifests.py",
+          "sha256": "1f02f2f27c43b306dc413e3b4fc37f02dbb965456ab1a2ae15536a2ce2fb9bcd"
+        },
+        {
+          "bytes": 6510,
+          "path": "data/sources.json",
+          "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
+        }
+      ],
+      "contracts": [
+        "cross_morse/split_contract.py",
+        "cross_morse/role_evidence.py",
+        "scripts/run_manifests.py",
+        "data/sources.json"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "prepared/splits.npz",
+            "prepared/official_splits.npz",
+            "prepared/graph_splits.npz",
+            "prepared/clusters.npz"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Role membership and graph/core units are recorded where applicable."
+        },
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "manifests/official/*.json",
+            "manifests/official/*.npz"
+          ],
+          "producers": [
+            "executed_manifest"
+          ],
+          "root": "checkout",
+          "scope": "Executed manifests contain actual memberships and seed identities; these differ from prescribed design manifests."
+        }
+      ],
+      "id": "split_seed_manifests",
+      "provider_data": false,
+      "scope": "Registered manifests prescribe splits/seeds; extracted run manifests record what was used. Membership and optimization-seed evidence stay separate.",
+      "title": "Split and seed manifests"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "environment_specification",
+          "files": [
+            {
+              "bytes": 1575,
+              "path": "Dockerfile",
+              "sha256": "22eaf3de958abb9bd5246c6660a17c9c4cc8526aed03f46c85d2af663d1ad71a"
+            },
+            {
+              "bytes": 1574,
+              "path": "environment/apptainer.def",
+              "sha256": "5b98ef3e996453ad3b9d3447cad2fb8b7e330046f511c6c903c53c7c17ff28b4"
+            },
+            {
+              "bytes": 2547,
+              "path": "environment/observed_environment.json",
+              "sha256": "1281ca6e6fe3905b4ffc3e3d33517839273a7563c23421dc0e73feba91f36fab"
+            },
+            {
+              "bytes": 912,
+              "path": "environment/requirements-cpu.lock",
+              "sha256": "5298e6015bce61b907710dac4476ebcc574a80798b2f434dd25ca1d1fbaf2289"
+            }
+          ],
+          "patterns": [
+            "environment/requirements-*.lock",
+            "environment/observed_environment.json",
+            "environment/apptainer.def",
+            "Dockerfile"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "files": [
+            {
+              "bytes": 4578,
+              "path": "examples/runs/arxiv/environment.json",
+              "sha256": "9da181c594d89b682adeec336c27423e425c68622512b89428c93003bf72d51e"
+            },
+            {
+              "bytes": 4578,
+              "path": "examples/runs/peptides_func/environment.json",
+              "sha256": "9da181c594d89b682adeec336c27423e425c68622512b89428c93003bf72d51e"
+            }
+          ],
+          "patterns": [
+            "examples/runs/*/environment.json"
+          ]
+        }
+      ],
+      "commands": [
+        "environment",
+        "lifecycle"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 4043,
+          "path": "environment/README.md",
+          "sha256": "5992486a843aa19a6aa7aef0a0a42aea70bba2a3f184e2d4902a8a694d076720"
+        },
+        {
+          "bytes": 4103,
+          "path": "environment/check_environment.py",
+          "sha256": "79361c0242fda1570cef4f2afa2dba080c64158f8f0c8267604a5c68d7ddb7b4"
+        },
+        {
+          "bytes": 16043,
+          "path": "docs/HPC.md",
+          "sha256": "e658cfc846353e7e55d8a3f35d52cbb7499475fd9a7779b4bbe828e4d8dae1c2"
+        }
+      ],
+      "contracts": [
+        "environment/README.md",
+        "environment/check_environment.py",
+        "docs/HPC.md"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "packages",
+            "python",
+            "device",
+            "hardware"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "environment.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Package, device and runtime observations are recorded for each execution."
+        }
+      ],
+      "id": "environments",
+      "provider_data": false,
+      "scope": "Released lock files and containers specify environments; each run carries its actual execution environment.",
+      "title": "Environment specifications"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "implementation",
+          "files": [
+            {
+              "bytes": 58862,
+              "path": "cross_morse/core.py",
+              "sha256": "a457bed557619cc584132c99330da16edf47f8baf69a1b62534e796a7f1eedf3"
+            },
+            {
+              "bytes": 22305,
+              "path": "scripts/model_inventory.py",
+              "sha256": "bc123217f31f5eb694442749292f7f2c6a2f850edffae952f53d4b5561fbb87d"
+            }
+          ],
+          "patterns": [
+            "cross_morse/core.py",
+            "scripts/model_inventory.py"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "files": [
+            {
+              "bytes": 11272,
+              "path": "examples/runs/arxiv/train/model_inventory.json",
+              "sha256": "a458d05a21b15a6e3ce07ffc8c21a628014fb28030c383dd937e9c57e2381ab4"
+            },
+            {
+              "bytes": 12105,
+              "path": "examples/runs/arxiv/train/plant_seed1_best.pt",
+              "sha256": "d4a17ff736ec730e250835756a3434530543613e8c4da003150734f5095b0476"
+            },
+            {
+              "bytes": 12105,
+              "path": "examples/runs/arxiv/train/plant_seed2_best.pt",
+              "sha256": "621c2f0cb2eb79962166598b12d7fe6a603b27a1c40fb76a619aaca450a535c7"
+            },
+            {
+              "bytes": 12105,
+              "path": "examples/runs/arxiv/train/q0_seed1_best.pt",
+              "sha256": "3e8c5eec06e6197abf9835e3ae03f0f6b17a0e3f7d77fc2aa64cc6eed56ba9a4"
+            },
+            {
+              "bytes": 12105,
+              "path": "examples/runs/arxiv/train/q0_seed2_best.pt",
+              "sha256": "d9b41cc94550e0f4649bfb93d2542bf5b7d4c1dd0bb2bb846827f1ec91f062af"
+            },
+            {
+              "bytes": 14071,
+              "path": "examples/runs/peptides_func/train/model_inventory.json",
+              "sha256": "2177fb65132e0a861fab7f31eb202cefe443ea93aebe2022c1f9b4a14c906bb3"
+            },
+            {
+              "bytes": 13837,
+              "path": "examples/runs/peptides_func/train/plant_seed1_best.pt",
+              "sha256": "39f22b60efc67c18b2225bf01181c61e3f26948244196ce4a119ba276ac9de8b"
+            },
+            {
+              "bytes": 13837,
+              "path": "examples/runs/peptides_func/train/plant_seed2_best.pt",
+              "sha256": "03ca90406450e5e8273e6063615a57d4ce251b5afc88a6d27071ea28c9083131"
+            },
+            {
+              "bytes": 13837,
+              "path": "examples/runs/peptides_func/train/q0_seed1_best.pt",
+              "sha256": "dcf6095dabffaa6af776096859596a24559ad25358e90c6c6ad502015818e9c4"
+            },
+            {
+              "bytes": 13837,
+              "path": "examples/runs/peptides_func/train/q0_seed2_best.pt",
+              "sha256": "a5a2f6778c2626e00ba6d7974b3f37a1f4b4968ec9f791233dd07b7adc7eab08"
+            }
+          ],
+          "patterns": [
+            "examples/runs/*/train/*_best.pt",
+            "examples/runs/*/train/model_inventory.json"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "model_inventory",
+        "archive",
+        "fetch"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 8921,
+          "path": "docs/DATASETS.md",
+          "sha256": "7ebdc3a0006ab8b2176bdd380822b77d20e218db677f10bcf631b0bc488aba2d"
+        },
+        {
+          "bytes": 29708,
+          "path": "cross_morse/provenance.py",
+          "sha256": "576bc714a7cbe40aef2bff1c9918354b0aeda01e840e88fdbd7997dea9c37d31"
+        },
+        {
+          "bytes": 11502,
+          "path": "scripts/archive_run.py",
+          "sha256": "0300e308a5ed4cf20aec5fe807efd2eacdd3000a006e9e614aed9952facf9b7f"
+        }
+      ],
+      "contracts": [
+        "docs/DATASETS.md",
+        "cross_morse/provenance.py",
+        "scripts/archive_run.py"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator",
+            "checkpoint_sha256"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "train/*_best.pt",
+            "train/model_inventory.json",
+            "provenance/frozen_models.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Weights, parameter inventory and freeze audits are products of that run."
+        }
+      ],
+      "id": "checkpoints",
+      "provider_data": false,
+      "scope": "Bundled checkpoint files are synthetic examples. Original benchmark weights and newly trained weights are distinguished through the registered run relationship.",
+      "title": "Trained checkpoints and model inventories"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "synthetic_output",
+          "files": [
+            {
+              "bytes": 2510,
+              "path": "examples/runs/arxiv/final/paired_test_units.npz",
+              "sha256": "af59fd3295811632da29794be21d21e879409309333ce2d0540da7b5098c4bf0"
+            },
+            {
+              "bytes": 2688,
+              "path": "examples/runs/arxiv/final/q0_probabilities.npy",
+              "sha256": "6d9ac46f5e9f42148ff55e6189630a02333b3fffe540b0a33d4c911873c125b4"
+            },
+            {
+              "bytes": 2688,
+              "path": "examples/runs/arxiv/final/qC_probabilities.npy",
+              "sha256": "2ee0af8e08973771f031c2b418747f0450b7be4d757cca8ba47e166c07383146"
+            },
+            {
+              "bytes": 2688,
+              "path": "examples/runs/arxiv/final/qD_probabilities.npy",
+              "sha256": "2ee0af8e08973771f031c2b418747f0450b7be4d757cca8ba47e166c07383146"
+            },
+            {
+              "bytes": 2688,
+              "path": "examples/runs/arxiv/final/qN_probabilities.npy",
+              "sha256": "2878e34bcfc4597c837982fb7e2fb60634d2b91f6220ec42b2caa67b226c62d7"
+            },
+            {
+              "bytes": 5148,
+              "path": "examples/runs/arxiv/final/test_predictions.npz",
+              "sha256": "53c5db1964854eaebda8a046af8785e669a517654068227435f20b66422e34a4"
+            },
+            {
+              "bytes": 1518,
+              "path": "examples/runs/peptides_func/final/paired_test_units.npz",
+              "sha256": "d904dacf9f48a9a5e0e3b32da2c7046c7bd5415c1c7735e35f5de74cd4e38233"
+            },
+            {
+              "bytes": 1408,
+              "path": "examples/runs/peptides_func/final/q0_probabilities.npy",
+              "sha256": "d635b06c99d2e69593c28c4bb223dc375c9125d0420dc0e4e83b895483f9a8e2"
+            },
+            {
+              "bytes": 1408,
+              "path": "examples/runs/peptides_func/final/qC_probabilities.npy",
+              "sha256": "7ef7ac68437698c4ba94c234219dca4c72314131dfe92d716cadf801e92ddec8"
+            },
+            {
+              "bytes": 1408,
+              "path": "examples/runs/peptides_func/final/qD_probabilities.npy",
+              "sha256": "7ef7ac68437698c4ba94c234219dca4c72314131dfe92d716cadf801e92ddec8"
+            },
+            {
+              "bytes": 1408,
+              "path": "examples/runs/peptides_func/final/qN_probabilities.npy",
+              "sha256": "da7a2fee1ca80d71899e42e9ad941e284693348af30944d9558f6656c4a60165"
+            },
+            {
+              "bytes": 3740,
+              "path": "examples/runs/peptides_func/final/test_predictions.npz",
+              "sha256": "a56f59892ffdf222f428c3f16a1ce54c1267b95c081dc957114bbdab46ca9548"
+            }
+          ],
+          "patterns": [
+            "examples/runs/*/final/test_predictions.npz",
+            "examples/runs/*/final/paired_test_units.npz",
+            "examples/runs/*/final/q*_probabilities.npy"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "archive",
+        "fetch"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 16915,
+          "path": "cross_morse/tasks.py",
+          "sha256": "d2f5166139294041c4756551a708600bbaaf728ad27c21682c3f098a02b94e32"
+        },
+        {
+          "bytes": 20654,
+          "path": "cross_morse/review.py",
+          "sha256": "35b3e48b1cd39e65aeb90dae32cb7dbfb4daf619d58e7e1f10c4dd66f3491fd8"
+        },
+        {
+          "bytes": 9819,
+          "path": "docs/RUN_ARCHIVES.md",
+          "sha256": "4419bce2629f484d1a47a75a286bbbf1c9885e023608b2c115320127b3086464"
+        }
+      ],
+      "contracts": [
+        "cross_morse/tasks.py",
+        "cross_morse/review.py",
+        "docs/RUN_ARCHIVES.md"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator",
+            "policy_hash",
+            "ensemble_members"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "final/test_predictions.npz",
+            "final/paired_test_units.npz",
+            "final/q*_probabilities.npy",
+            "select/unit_scores.npz"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Predictions remain bound to the frozen policies, statistical units, membership and evaluator."
+        }
+      ],
+      "id": "predictions",
+      "provider_data": false,
+      "scope": "Saved predictions support paired replay. Numerical agreement with a manuscript value does not establish that a new run produced the original paper.",
+      "title": "Predictions and paired observations"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "synthetic_output",
+          "files": [
+            {
+              "bytes": 246,
+              "path": "examples/runs/arxiv/explore/manifest.json",
+              "sha256": "e1e3374b279cb1fca590c1744ef3873c40356960f992dbce2fb2722b308248ec"
+            },
+            {
+              "bytes": 6330,
+              "path": "examples/runs/arxiv/explore/trajectory_000000.json",
+              "sha256": "0c968192e9257d7cdff3cc69e749ff50586386534a3bfa706babb2825ef1f07d"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000000.npz",
+              "sha256": "c75702b7308bc281117603acdce8f1bbd1f4035059ed74c582a485b885a37d7c"
+            },
+            {
+              "bytes": 6329,
+              "path": "examples/runs/arxiv/explore/trajectory_000001.json",
+              "sha256": "f47497769343fa450978d571a114ba1bd425fc84b9cdf0e6488db63db7cdd3e3"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000001.npz",
+              "sha256": "51b115ac9bd0477c79469bcb176f0645c98432aa13a12590076d99d80d250853"
+            },
+            {
+              "bytes": 6328,
+              "path": "examples/runs/arxiv/explore/trajectory_000002.json",
+              "sha256": "91165cb71549f453d0bba82bc0d4c2c4e5c09627af8597f80b79f66948520081"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000002.npz",
+              "sha256": "ca6ff037c3db44d2175a1e563964615be2ea5c77c9c7e4ed53f8c3efb85dd45b"
+            },
+            {
+              "bytes": 6330,
+              "path": "examples/runs/arxiv/explore/trajectory_000003.json",
+              "sha256": "dbe51946550daadf82f43cd960489c6902fabac3b530baa3429a6305025f90b3"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000003.npz",
+              "sha256": "1b7eee40175a5a4a4bfc7239909c785a19cef3c3ca93e42b438b8bd36247dbb9"
+            },
+            {
+              "bytes": 6329,
+              "path": "examples/runs/arxiv/explore/trajectory_000004.json",
+              "sha256": "fc1d7f3158c22697a2ffd0199f4f908759bf5077bcc3d61d072cd906e7ad3337"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000004.npz",
+              "sha256": "074b3f7289a2dad5609e17fac804c17fc611c85cd60f0a67b77b1202719acfc0"
+            },
+            {
+              "bytes": 6329,
+              "path": "examples/runs/arxiv/explore/trajectory_000005.json",
+              "sha256": "008d6e80459da10f7220830308bfb7bed0dd515caeb1eae56d39be1ba3055f2b"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000005.npz",
+              "sha256": "3011a218b382924436d5b3c40a6c634639174be1d7107f6312221582597d4a5a"
+            },
+            {
+              "bytes": 6329,
+              "path": "examples/runs/arxiv/explore/trajectory_000006.json",
+              "sha256": "d4a24400d05a4cc8eae5d455ed4ef5bc112c640936143d67e776ba29daec6685"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000006.npz",
+              "sha256": "190d1b2250352b33f2a23604fc207430a0e0a9bc0fb76dc42519529f43973596"
+            },
+            {
+              "bytes": 6329,
+              "path": "examples/runs/arxiv/explore/trajectory_000007.json",
+              "sha256": "4b85c58ac9c39bf8259ff3ad9b98c2f363e9ab71e4f16c10f2b6aebfce189d00"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000007.npz",
+              "sha256": "4062c50f678dccd95d056b72a28cec847f9189ea52ef7add7ccc147100092077"
+            },
+            {
+              "bytes": 6329,
+              "path": "examples/runs/arxiv/explore/trajectory_000008.json",
+              "sha256": "81189d8727b01111fda29950c34129c241068cd018516fbb983229e8ff53a814"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000008.npz",
+              "sha256": "f74133e8887414948901a3b7302213ae190dc48788502b10e86dfee55d0e0197"
+            },
+            {
+              "bytes": 6329,
+              "path": "examples/runs/arxiv/explore/trajectory_000009.json",
+              "sha256": "3cdc9c9a205c25dc9c1e5a147e569b1ea26723d40ad69cb689d36b27604ed7d0"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000009.npz",
+              "sha256": "0ccbc5f0d836640e7d97a1f9daff38428474d0d5e310cd1273792c1f6846bb21"
+            },
+            {
+              "bytes": 6330,
+              "path": "examples/runs/arxiv/explore/trajectory_000010.json",
+              "sha256": "78c4c6ab2e17dc650b93fde9bf04c3ce162d1355900b733eec92fce7512d7559"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000010.npz",
+              "sha256": "4fea72e8799ec7ab114a78c4fd18d84540ef31a5f25b8c4bf9c7baabb9c17676"
+            },
+            {
+              "bytes": 6331,
+              "path": "examples/runs/arxiv/explore/trajectory_000011.json",
+              "sha256": "0f715e71048afef8dcb0f17476b6a3c4eb88156b60f97526cb74061c07ff53f8"
+            },
+            {
+              "bytes": 6970,
+              "path": "examples/runs/arxiv/explore/trajectory_000011.npz",
+              "sha256": "04aacc838c6f1dfb01cdfc6d5f2ab08375da6f3e8747559830e695411b12801e"
+            },
+            {
+              "bytes": 240,
+              "path": "examples/runs/peptides_func/explore/manifest.json",
+              "sha256": "fa69be28aacad59565f5a31783246801ec52ff95184614a7ba3b7acd2a2c1f14"
+            },
+            {
+              "bytes": 6582,
+              "path": "examples/runs/peptides_func/explore/trajectory_000000.json",
+              "sha256": "3ecf920c671c24413ec4d2aeb3bcb473fdac1673e6ac00d42d6026a78ef15933"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000000.npz",
+              "sha256": "ce70690ba5c717f345891b851ee58eb560e8984750b0e3eff0982ae9a72995b0"
+            },
+            {
+              "bytes": 6583,
+              "path": "examples/runs/peptides_func/explore/trajectory_000001.json",
+              "sha256": "b4db0a77696057a2b243fb7e956f6e02b6f8290723ef31dc9911d3584823c506"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000001.npz",
+              "sha256": "b37a0dbef4c22fae7fe2df8168ffc02fb4d6448712ce9fae0b5c8ffe39e0044b"
+            },
+            {
+              "bytes": 6583,
+              "path": "examples/runs/peptides_func/explore/trajectory_000002.json",
+              "sha256": "bcb3128a8bff91165c8c73bea1e214eb1cfa222a3606ce3882406337e842b312"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000002.npz",
+              "sha256": "06421d984fcd5b5eea67f3fec5bc94816850a2c3ef8c1dfba9d3a6e1635e6496"
+            },
+            {
+              "bytes": 6582,
+              "path": "examples/runs/peptides_func/explore/trajectory_000003.json",
+              "sha256": "f8fd588760473f0634e83b6b3ee8b5a71bab2e37f96f322eab885f8e8a7dac69"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000003.npz",
+              "sha256": "c81585fd297c558c15c41a1335019cb95ab8298fe912a270462bc960c77a0bd3"
+            },
+            {
+              "bytes": 6582,
+              "path": "examples/runs/peptides_func/explore/trajectory_000004.json",
+              "sha256": "e048349047ef31a3d23972f472512e9cd2495a5504585cb0fee5edfd38eeb0c3"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000004.npz",
+              "sha256": "93a629ce4d985b1716e4e49c41d7bf64b3f6d24d2fd193e5179beffacd2daf7b"
+            },
+            {
+              "bytes": 6583,
+              "path": "examples/runs/peptides_func/explore/trajectory_000005.json",
+              "sha256": "bbfe2732cd28c720bc4e4e682f82455e4d3951b8519b7d98b69d580e0b76c0e0"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000005.npz",
+              "sha256": "9c9f4ee53dc6473adaec800de6d65464d0a1056345f811460674ca648373f9d2"
+            },
+            {
+              "bytes": 6583,
+              "path": "examples/runs/peptides_func/explore/trajectory_000006.json",
+              "sha256": "ae6a8444b28fd08577b998c2d5adf68698b2c04ed355661d6633ee80c01b193f"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000006.npz",
+              "sha256": "b3974478f3db45be8bf0ebc290e935f97e34f2995137d244532d645a9c5b8b76"
+            },
+            {
+              "bytes": 6583,
+              "path": "examples/runs/peptides_func/explore/trajectory_000007.json",
+              "sha256": "6aad31828f141c2edcd437de5a67b92755f9c6c6950c26e5f0dfb0004bf07c73"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000007.npz",
+              "sha256": "ed8f2d4e138e65fb8ea947f176186ad274c8f76c66a6fc3ae9f2c85f7ed51715"
+            },
+            {
+              "bytes": 6583,
+              "path": "examples/runs/peptides_func/explore/trajectory_000008.json",
+              "sha256": "bb32da72918a78c82acd2218555764a3796ebfbba415c99b8fdea00b914ed944"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000008.npz",
+              "sha256": "368c2cc1d194a92d53d17528f451052600a0a0809025f8750b28f459a54114d9"
+            },
+            {
+              "bytes": 6583,
+              "path": "examples/runs/peptides_func/explore/trajectory_000009.json",
+              "sha256": "168d780e61b1a79da5c97eece07103307e82b8eff024a16ec9d295a0f64792d1"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000009.npz",
+              "sha256": "d9c9393bf389d0116153da94116579a94f5bb08007818711a22164058a89645d"
+            },
+            {
+              "bytes": 6584,
+              "path": "examples/runs/peptides_func/explore/trajectory_000010.json",
+              "sha256": "a5bb6300130a679a80b4e49bd14ca561aa1d9dc44915d74a61dfb8e1542a0f1b"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000010.npz",
+              "sha256": "6dda8b04e78c27639be810a2ebd09d41db2ab9c9fd33bf507ac0ad7895d41782"
+            },
+            {
+              "bytes": 6584,
+              "path": "examples/runs/peptides_func/explore/trajectory_000011.json",
+              "sha256": "d2e682b67356aeb405588a38928a63fab9ee527694f9a62b9611752e21982145"
+            },
+            {
+              "bytes": 7726,
+              "path": "examples/runs/peptides_func/explore/trajectory_000011.npz",
+              "sha256": "388289eaf68fe197a75a74536eac2c7fd75917d690a6d6345b4fb7bf263f7a1a"
+            }
+          ],
+          "patterns": [
+            "examples/runs/*/explore/trajectory_*.json",
+            "examples/runs/*/explore/trajectory_*.npz",
+            "examples/runs/*/explore/manifest.json"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "scientific_audit"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 65172,
+          "path": "cross_morse/pipeline.py",
+          "sha256": "8fd96210cb50f6415e43bdabcdf2f3a590d9dfae079f6f63a4cbdd513ac1754d"
+        },
+        {
+          "bytes": 54784,
+          "path": "cross_morse/learning.py",
+          "sha256": "b806e39498f8a8dae7483c6c028bcccd4c6367366b811037f398952ce1798f71"
+        },
+        {
+          "bytes": 18523,
+          "path": "docs/PAPER_SUPPORT.md",
+          "sha256": "278e230dd07eb80840921fba467bde844579d1cf885eea8149eb9b8603bbb61e"
+        }
+      ],
+      "contracts": [
+        "cross_morse/pipeline.py",
+        "cross_morse/learning.py",
+        "docs/PAPER_SUPPORT.md"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator",
+            "trajectory_id",
+            "behavior_policy",
+            "propensity",
+            "action_support"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "explore/trajectory_*.json",
+            "explore/trajectory_*.npz",
+            "explore/manifest.json",
+            "fit/*/audit.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Behavior probabilities, actions, trajectory groups and support diagnostics must remain attached to the same observations."
+        }
+      ],
+      "id": "propensity_logs",
+      "provider_data": false,
+      "scope": "Runtime logging and bundled synthetic examples show the format. Original propensity observations must come from their actual exploration runs.",
+      "title": "Exploration and propensity logs"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "implementation",
+          "files": [
+            {
+              "bytes": 41758,
+              "path": "cm_campaigns/confirmation.py",
+              "sha256": "5e31956fa2b6b7365b73988f50df64f6d15658dc4d365eeeb89f95a66a8b1fcb"
+            },
+            {
+              "bytes": 1827,
+              "path": "cm_theory/__init__.py",
+              "sha256": "51a8c05f4d381cb1cf480b66bafd39c248e6fa997441026b00c6f8678ffdfe19"
+            },
+            {
+              "bytes": 7253,
+              "path": "cm_theory/_util.py",
+              "sha256": "1b3e6dd5e09777d3f1899b57ba5c214c5960aea6aa65e3339ce1f67bffcbdb16"
+            },
+            {
+              "bytes": 6927,
+              "path": "cm_theory/admission.py",
+              "sha256": "0f1ed26260a43143d5101bac02a67fd13eaff238a20b880228d00443d6508248"
+            },
+            {
+              "bytes": 12900,
+              "path": "cm_theory/budget.py",
+              "sha256": "6736b96ddf4fa2e549a9a315de05302e033300dae4f81c76c53d8efe7e4f41ba"
+            },
+            {
+              "bytes": 3012,
+              "path": "cm_theory/contract.py",
+              "sha256": "2cd0a05de25061a6385ce6df4e9b9b0f19491d598464f4770987f8f02979f6b6"
+            },
+            {
+              "bytes": 5554,
+              "path": "cm_theory/control.py",
+              "sha256": "5e8aeacf297e2f3a985054041287d96708b2b0387c9b0080011d8333239c3a58"
+            },
+            {
+              "bytes": 5722,
+              "path": "cm_theory/economics.py",
+              "sha256": "aa860af515ea1624d88c6da858432224f9e35f376d184d739e428c6e82916dd1"
+            },
+            {
+              "bytes": 2754,
+              "path": "cm_theory/factorial.py",
+              "sha256": "d3a809c2be93e159d9c82b56825fed3d04f27949a24a0fa19823938a1be088d7"
+            },
+            {
+              "bytes": 10424,
+              "path": "cm_theory/inference.py",
+              "sha256": "7286894d3c59b142c9d96e210026401334d6f020f0912d490011d31757921104"
+            },
+            {
+              "bytes": 10165,
+              "path": "cm_theory/operators.py",
+              "sha256": "bf8882f46bb94efbc291752db46b0834737ebd5dcf24a0c8cbfbf0a0bb742191"
+            },
+            {
+              "bytes": 6225,
+              "path": "cm_theory/selection.py",
+              "sha256": "9b2061ad6aeafdd9e59fcdec17bf3bc78c5e9a038e603551a511004a9c9eca83"
+            },
+            {
+              "bytes": 11160,
+              "path": "cm_theory/spectral.py",
+              "sha256": "85b7d73c136afa75d3307fa379abaaa4a3212e06fbf815115c3c5b1fe0110d14"
+            },
+            {
+              "bytes": 5047,
+              "path": "cm_theory/stability.py",
+              "sha256": "cc894b23da1d894737e8ce83adc4c5d40d152a80eccfa7089158b9f32d4f2886"
+            },
+            {
+              "bytes": 22339,
+              "path": "cm_theory/statements.py",
+              "sha256": "eac5eb9790d03b88297ebc415f0811d1182c40ce27ad666b8b08a246527131f4"
+            },
+            {
+              "bytes": 65684,
+              "path": "cm_theory/verification.py",
+              "sha256": "e030c22cdbee94743c95a0d05b3ac50be07308781d42a1aaf7086c14563810fe"
+            },
+            {
+              "bytes": 35860,
+              "path": "cross_morse/statistics.py",
+              "sha256": "c72a400e3a7512e63650d2882a08c847e7d4020e3ab2333be4cf903e2e3e951b"
+            },
+            {
+              "bytes": 70394,
+              "path": "scripts/check_si_identities.py",
+              "sha256": "7085b03ec490b613a3e24615e193ef336d0ffbd86bc73930df82250ff5b8bbdd"
+            }
+          ],
+          "patterns": [
+            "cross_morse/statistics.py",
+            "cm_theory/*.py",
+            "scripts/check_si_identities.py",
+            "cm_campaigns/confirmation.py"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "files": [
+            {
+              "bytes": 2291,
+              "path": "examples/runs/arxiv/admit/decision.json",
+              "sha256": "b957f5b0e205d8c45b50d2a91d771392fd5c4edffcde78087306bb6da2e85360"
+            },
+            {
+              "bytes": 1338,
+              "path": "examples/runs/arxiv/admit/pre_admission_lock.json",
+              "sha256": "d29741cf85493316d91af5c411197f66e41498ad2c5954b9dca1307d6e7193ba"
+            },
+            {
+              "bytes": 224,
+              "path": "examples/runs/arxiv/confirm/contrast_registry.json",
+              "sha256": "0f332eb449614ee6d61b77883b9a389adc3cb81b44f90618e16c3fa5e1a7b2ad"
+            },
+            {
+              "bytes": 438,
+              "path": "examples/runs/arxiv/confirm/decision.json",
+              "sha256": "5ef0b06856a4410046248a41e5e05961ad0dd3653f21a62eed0f6da9c968ea82"
+            },
+            {
+              "bytes": 3,
+              "path": "examples/runs/arxiv/confirm/paired_contrasts.json",
+              "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+            },
+            {
+              "bytes": 6570,
+              "path": "examples/runs/arxiv/final/results_summary.json",
+              "sha256": "50c86db4512943aa786beb2922c1204543bec119423bea468cc2f7c0a871750e"
+            },
+            {
+              "bytes": 18032,
+              "path": "examples/runs/arxiv/select/decision.json",
+              "sha256": "d04820e0ab2f084f27d6c49b68a2c97897ceb29b6000a385535fb302079297f9"
+            },
+            {
+              "bytes": 2640,
+              "path": "examples/runs/peptides_func/admit/decision.json",
+              "sha256": "bbd9ba3d5b54e6a607e0de19e4da913abad176fbf6a99df6a4de569cac37dd67"
+            },
+            {
+              "bytes": 1340,
+              "path": "examples/runs/peptides_func/admit/pre_admission_lock.json",
+              "sha256": "2bdd74b53865e4fd505e3a27023545b030622c7f5cbd4478e3139da6632d38ca"
+            },
+            {
+              "bytes": 224,
+              "path": "examples/runs/peptides_func/confirm/contrast_registry.json",
+              "sha256": "0f332eb449614ee6d61b77883b9a389adc3cb81b44f90618e16c3fa5e1a7b2ad"
+            },
+            {
+              "bytes": 442,
+              "path": "examples/runs/peptides_func/confirm/decision.json",
+              "sha256": "a0ca249d2fe47d248f07c187c210e4367750e3a0cec94b39a7744a607888e518"
+            },
+            {
+              "bytes": 3,
+              "path": "examples/runs/peptides_func/confirm/paired_contrasts.json",
+              "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+            },
+            {
+              "bytes": 6241,
+              "path": "examples/runs/peptides_func/final/results_summary.json",
+              "sha256": "e972cd01748bc08b278903abec0024f8284d76ecd9f04a801b5ee90f90ea4d43"
+            },
+            {
+              "bytes": 18288,
+              "path": "examples/runs/peptides_func/select/decision.json",
+              "sha256": "7558c8947e8e2a338461fa90f0c71157828ea1f8cca9e6bb815d930b673fe05d"
+            }
+          ],
+          "patterns": [
+            "examples/runs/*/select/decision.json",
+            "examples/runs/*/confirm/*.json",
+            "examples/runs/*/admit/*.json",
+            "examples/runs/*/final/results_summary.json"
+          ]
+        }
+      ],
+      "commands": [
+        "theory",
+        "si",
+        "export_records",
+        "record_check",
+        "scientific_audit",
+        "supplement"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 13328,
+          "path": "docs/S14_CONFIRMATION.md",
+          "sha256": "f26a847c8334609929832d9545deca6825c4116ff439916936a50f5ee593d809"
+        },
+        {
+          "bytes": 13407,
+          "path": "docs/SUPPLEMENT_BUILD.md",
+          "sha256": "ee9c8a622a0dc051f499a0987c77de9f66e2d8c357d7469459b603c5e7ef433c"
+        },
+        {
+          "bytes": 8413,
+          "path": "records/specs.json",
+          "sha256": "0b8477001626908bfb716e7ec24fb9c1c742d26dba893242c9afb3d93ba6a3bb"
+        },
+        {
+          "bytes": 3941,
+          "path": "scripts/check_result_binding.py",
+          "sha256": "73622e8f4a27a281d8b4f1f738ba46279556151b431448fe89c4cfc35aec46c4"
+        }
+      ],
+      "contracts": [
+        "docs/S14_CONFIRMATION.md",
+        "docs/SUPPLEMENT_BUILD.md",
+        "records/specs.json",
+        "scripts/check_result_binding.py"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "select/decision.json",
+            "confirm/decision.json",
+            "confirm/contrast_registry.json",
+            "admit/pre_admission_lock.json",
+            "admit/decision.json",
+            "final/results_summary.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "root": "run",
+          "scope": "Local per-run inference is distinct from the original cross-dataset nine-test S14 family."
+        },
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "summary.csv",
+            "raw/*",
+            "code/*",
+            "provenance.json",
+            "MANIFEST.json"
+          ],
+          "producers": [
+            "export_records"
+          ],
+          "root": "record_set",
+          "scope": "Measurement records are imported from supplied original or reproduced observations and retain their provenance."
+        },
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "scientific-evidence-audit.json"
+          ],
+          "producers": [
+            "scientific_audit"
+          ],
+          "root": "report",
+          "scope": "The evidence audit writes its enumerated checks and limitations for the registered inputs."
+        },
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "tables/S14_joint.csv",
+            "tables/S16.csv",
+            "tables/S16b.csv",
+            "tables/factorial_point_contrasts.csv",
+            "tables/S26b_fit.csv",
+            "tables/S46b_comparison.csv"
+          ],
+          "producers": [
+            "supplement"
+          ],
+          "root": "report",
+          "scope": "Only outputs supported by the supplied evidence are emitted; statistical import does not invent original unrounded test outputs."
+        }
+      ],
+      "id": "statistical_analysis",
+      "provider_data": false,
+      "scope": "Statistical code and arithmetic checks are included. Original joint tests, raw paired data and new reproduction outputs remain separately identified.",
+      "title": "Statistical analyses"
+    },
+    {
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ],
+      "bundled": [
+        {
+          "artifact_class": "analysis_builder",
+          "files": [
+            {
+              "bytes": 437,
+              "path": "paper/build/__init__.py",
+              "sha256": "a023203fdb58baf39c137716ffb5a0f64ae96581b9e6a2faf4e6619e31682533"
+            },
+            {
+              "bytes": 25202,
+              "path": "paper/build/evidence.py",
+              "sha256": "a6adb112fd48325fa35f01ec1100de6bd899eed1fb8afd47369b39463d706798"
+            },
+            {
+              "bytes": 10703,
+              "path": "paper/build/figures.py",
+              "sha256": "a74cc9af0e43dc92e34bc130b5d11ba7b172738c2cd8cf66d619cc8dbf0af556"
+            },
+            {
+              "bytes": 6163,
+              "path": "paper/build/selection.py",
+              "sha256": "d04a861678235474598964a7a6c206f79e74c21375a9434983ef961fd0a43969"
+            },
+            {
+              "bytes": 38329,
+              "path": "paper/build/supplement.py",
+              "sha256": "6a2b44807fa3d9bcc1632ce9707fdcf00cbf512c8528f550ff97b24f23c2669f"
+            },
+            {
+              "bytes": 28920,
+              "path": "paper/build/tables.py",
+              "sha256": "176fad302e1bc0d8ef8cfd80f6122dcf0ec966e6a9c0237163d473e7881ce669"
+            },
+            {
+              "bytes": 8830,
+              "path": "scripts/build_paper.py",
+              "sha256": "1f5a00611b469637879f1bb6240fb8ce316895aa2411fdda7a5d87a6eae9feed"
+            },
+            {
+              "bytes": 1621,
+              "path": "scripts/build_supplement.py",
+              "sha256": "35684bbb1b5b9659fff750af3f30623896a5ed9c5ebc81daf5892844bf0bd587"
+            },
+            {
+              "bytes": 73575,
+              "path": "scripts/draw_diagrams.py",
+              "sha256": "87be7d9112b4080c5ede4a0ac7568fed38ff525c7d655eb94dcebda25f6c98c2"
+            },
+            {
+              "bytes": 22010,
+              "path": "scripts/plot_registry_figures.py",
+              "sha256": "91f51168e4557974dc7fcc6ec0e88669230ad403e259bb9c3f20acc9531fa91c"
+            },
+            {
+              "bytes": 26194,
+              "path": "scripts/reconstruct.py",
+              "sha256": "f240d3f21b95bbc12a34ea65a029b55d9649c0352523c6fc5390f5bc64fb788d"
+            }
+          ],
+          "patterns": [
+            "paper/build/*.py",
+            "scripts/build_paper.py",
+            "scripts/plot_registry_figures.py",
+            "scripts/draw_diagrams.py",
+            "scripts/reconstruct.py",
+            "scripts/build_supplement.py"
+          ]
+        },
+        {
+          "artifact_class": "reported_reference",
+          "files": [
+            {
+              "bytes": 83392,
+              "path": "paper/display_manifest.json",
+              "sha256": "8bfdf4639518c9c76056c6707fae923d30923492c198cc93ce0e3ab667741cbf"
+            }
+          ],
+          "patterns": [
+            "paper/display_manifest.json"
+          ]
+        }
+      ],
+      "commands": [
+        "reconstruct",
+        "reconstruction_example",
+        "supplement"
+      ],
+      "contract_identities": [
+        {
+          "bytes": 6641,
+          "path": "docs/RECONSTRUCTION.md",
+          "sha256": "61d6964bfb97db6547f252091c46885f4438f03a5a0c377553b352cd5b90a0cb"
+        },
+        {
+          "bytes": 13407,
+          "path": "docs/SUPPLEMENT_BUILD.md",
+          "sha256": "ee9c8a622a0dc051f499a0987c77de9f66e2d8c357d7469459b603c5e7ef433c"
+        },
+        {
+          "bytes": 83392,
+          "path": "paper/display_manifest.json",
+          "sha256": "8bfdf4639518c9c76056c6707fae923d30923492c198cc93ce0e3ab667741cbf"
+        },
+        {
+          "bytes": 33232,
+          "path": "paper/PAPER_SUPPORT.md",
+          "sha256": "114be26be2ed2049c58134ed0875638775ee307b9640576d7cc4e5708fa7c4a3"
+        }
+      ],
+      "contracts": [
+        "docs/RECONSTRUCTION.md",
+        "docs/SUPPLEMENT_BUILD.md",
+        "paper/display_manifest.json",
+        "paper/PAPER_SUPPORT.md"
+      ],
+      "generated": [
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "RECONSTRUCTION_REPORT.md",
+            "reconstruction.json",
+            "FILES.json"
+          ],
+          "producers": [
+            "reconstruct",
+            "reconstruction_example"
+          ],
+          "root": "report",
+          "scope": "The unified report enumerates every display and states which outputs were built, partially built or only checked."
+        },
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "runs/tables/*",
+            "runs/figures/*",
+            "runs/evidence/*",
+            "records/*",
+            "supplement/tables/*",
+            "supplement/figures/*",
+            "supplement/data/*",
+            "supplement/BUILD.json"
+          ],
+          "producers": [
+            "reconstruct",
+            "reconstruction_example"
+          ],
+          "root": "report",
+          "scope": "Generated numerical outputs follow their declared input and coverage contracts; a related plot is not automatically the exact manuscript panel."
+        },
+        {
+          "artifact_class": "new_execution_contract",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ],
+          "materialized_by_catalog": false,
+          "patterns": [
+            "tables/*",
+            "figures/*",
+            "data/*",
+            "BUILD.json"
+          ],
+          "producers": [
+            "supplement"
+          ],
+          "root": "report",
+          "scope": "Generated numerical outputs follow their declared input and coverage contracts; a related plot is not automatically the exact manuscript panel."
+        }
+      ],
+      "id": "table_figure_generators",
+      "provider_data": false,
+      "scope": "Display-level coverage is explicit. The inventory of all numbered displays does not claim that every printed table or figure has an exact standalone generator.",
+      "title": "Table and figure generators"
+    }
+  ],
+  "execution_contract": {
+    "identity_fields": [
+      "source_sha256",
+      "config_sha256",
+      "unit_sha256"
+    ],
+    "roles": [
+      "fit",
+      "explore",
+      "select",
+      "confirm",
+      "compare",
+      "admit",
+      "test"
+    ],
+    "rule": {
+      "admit": "official validation",
+      "comparison_reserved_at": "prepare",
+      "cumulative_floor_fractions": [
+        0.6,
+        0.8,
+        0.9,
+        0.95
+      ],
+      "development_source": "official training units",
+      "internal_fit_validation": "default_rng(SeedSequence([seed,137])); max(1,floor(internal_val_fraction*fit units))",
+      "permutation": "NumPy default_rng(config.seed).permutation(sorted official train IDs)",
+      "roles_in_order": [
+        "fit",
+        "explore",
+        "select",
+        "confirm",
+        "compare"
+      ],
+      "scope": "executable separated-role protocol",
+      "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+      "test": "official test",
+      "unit": "complete graph for LRGB; node for the four transductive datasets"
+    },
+    "source_checksums": "Each run records source-array and prepared-file hashes. Roman and LRGB loaders also record raw input-file hashes; OGB records its version/split and array hashes, not a provider ZIP checksum."
+  },
+  "inputs": [
+    {
+      "bytes": 32636,
+      "path": "release/artifact_catalog_spec.json",
+      "sha256": "fcc0701592392b479333228573482ef257591fbd6645a709b443554eafbcfc68"
+    },
+    {
+      "bytes": 30237,
+      "path": "scripts/artifact_catalog.py",
+      "sha256": "55cbcc885e0e4cbc7a41de9e33bc7e0ec956e608624f954b4ddd55a4a10d0483"
+    },
+    {
+      "bytes": 5054,
+      "path": "release/release_scope.json",
+      "sha256": "bed1c05226cc16d273e80c46cbd5a090b3e9f8fdf49cb991216f907b8c628fe4"
+    },
+    {
+      "bytes": 57,
+      "path": "runs/index.json",
+      "sha256": "d101b237d3a306ded980f6fa12be458ac7c8ba30756937e53e24477b54f8083c"
+    },
+    {
+      "bytes": 269,
+      "path": "records/index.json",
+      "sha256": "0e3056c20dfc46d1f2677e4fc379fc15ffc1c3fb5d5fb1144a0774559a5ad483"
+    },
+    {
+      "bytes": 8413,
+      "path": "records/specs.json",
+      "sha256": "0b8477001626908bfb716e7ec24fb9c1c742d26dba893242c9afb3d93ba6a3bb"
+    },
+    {
+      "bytes": 6510,
+      "path": "data/sources.json",
+      "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
+    },
+    {
+      "bytes": 12980,
+      "path": "paper/sources.json",
+      "sha256": "6cd0f44e2894ef96e0db5752dde442fbcee7af14524167de618b74ab3920dbb7"
+    },
+    {
+      "bytes": 83392,
+      "path": "paper/display_manifest.json",
+      "sha256": "8bfdf4639518c9c76056c6707fae923d30923492c198cc93ce0e3ab667741cbf"
+    }
+  ],
+  "provider_datasets": [
+    {
+      "adapter_reference": "cross_morse/datasets.py",
+      "artifact_class": "external_provider_dataset",
+      "dataset": "ogbn-arxiv",
+      "download_resolution": "OGB package metadata for the named dataset/version",
+      "download_url": null,
+      "expected_raw_cache": "ogbn_arxiv/raw/",
+      "metric": "accuracy",
+      "network_checked": false,
+      "official_outputs": 40,
+      "official_split": "time",
+      "prediction_axis": "node",
+      "provider_raw_data_bundled": false,
+      "source_documentation": "https://ogb.stanford.edu/docs/nodeprop/",
+      "split_indices": null,
+      "statistical_unit": "METIS core",
+      "task_type": "multiclass"
+    },
+    {
+      "adapter_reference": "cross_morse/datasets.py",
+      "artifact_class": "external_provider_dataset",
+      "dataset": "ogbn-products",
+      "download_resolution": "OGB package metadata for the named dataset/version",
+      "download_url": null,
+      "expected_raw_cache": "ogbn_products/raw/",
+      "metric": "accuracy",
+      "network_checked": false,
+      "official_outputs": 47,
+      "official_split": "sales_ranking",
+      "prediction_axis": "node",
+      "provider_raw_data_bundled": false,
+      "source_documentation": "https://ogb.stanford.edu/docs/nodeprop/",
+      "split_indices": null,
+      "statistical_unit": "METIS core",
+      "task_type": "multiclass"
+    },
+    {
+      "adapter_reference": "cross_morse/datasets.py",
+      "artifact_class": "external_provider_dataset",
+      "dataset": "ogbn-proteins",
+      "download_resolution": "OGB package metadata for the named dataset/version",
+      "download_url": null,
+      "expected_raw_cache": "ogbn_proteins/raw/",
+      "metric": "rocauc",
+      "network_checked": false,
+      "official_outputs": 112,
+      "official_split": "species",
+      "prediction_axis": "node",
+      "provider_raw_data_bundled": false,
+      "source_documentation": "https://ogb.stanford.edu/docs/nodeprop/",
+      "split_indices": null,
+      "statistical_unit": "degree-stratified core",
+      "task_type": "multilabel"
+    },
+    {
+      "adapter_reference": "cross_morse/datasets.py",
+      "artifact_class": "external_provider_dataset",
+      "dataset": "Roman-empire",
+      "download_resolution": "literal adapter URL; download requires authorization flag",
+      "download_url": "https://github.com/yandex-research/heterophilous-graphs/raw/main/data/roman_empire.npz",
+      "expected_raw_cache": "roman_empire/raw/roman_empire.npz",
+      "metric": "accuracy",
+      "network_checked": false,
+      "official_outputs": 18,
+      "official_split": "ten official train/validation/test masks",
+      "prediction_axis": "node",
+      "provider_raw_data_bundled": false,
+      "source_documentation": "https://github.com/yandex-research/heterophilous-graphs",
+      "split_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "statistical_unit": "METIS core",
+      "task_type": "multiclass"
+    },
+    {
+      "adapter_reference": "cross_morse/datasets.py",
+      "artifact_class": "external_provider_dataset",
+      "dataset": "PascalVOC-SP",
+      "download_resolution": "literal adapter URL; download requires authorization flag",
+      "download_url": "https://www.dropbox.com/s/8x722ai272wqwl4/pascalvocsp.zip?dl=1",
+      "expected_raw_cache": "pascalvoc-sp/raw/{train,val,test}.pickle",
+      "metric": "macro_f1",
+      "network_checked": false,
+      "official_outputs": 21,
+      "official_split": "official train/val/test graph files",
+      "prediction_axis": "node",
+      "provider_raw_data_bundled": false,
+      "source_documentation": "https://github.com/vijaydwivedi75/lrgb",
+      "split_indices": null,
+      "statistical_unit": "complete graph",
+      "task_type": "multiclass"
+    },
+    {
+      "adapter_reference": "cross_morse/datasets.py",
+      "artifact_class": "external_provider_dataset",
+      "dataset": "COCO-SP",
+      "download_resolution": "literal adapter URL; download requires authorization flag",
+      "download_url": "https://www.dropbox.com/s/r6ihg1f4pmyjjy0/cocosp.zip?dl=1",
+      "expected_raw_cache": "coco-sp/raw/{train,val,test}.pickle",
+      "metric": "macro_f1",
+      "network_checked": false,
+      "official_outputs": 81,
+      "official_split": "official train/val/test graph files",
+      "prediction_axis": "node",
+      "provider_raw_data_bundled": false,
+      "source_documentation": "https://github.com/vijaydwivedi75/lrgb",
+      "split_indices": null,
+      "statistical_unit": "complete graph",
+      "task_type": "multiclass"
+    },
+    {
+      "adapter_reference": "cross_morse/datasets.py",
+      "artifact_class": "external_provider_dataset",
+      "dataset": "Peptides-func",
+      "download_resolution": "literal adapter URL; download requires authorization flag",
+      "download_url": "https://www.dropbox.com/s/ycsq37q8sxs1ou8/peptidesfunc.zip?dl=1",
+      "expected_raw_cache": "peptides-func/raw/{train,val,test}.pt",
+      "metric": "ap",
+      "network_checked": false,
+      "official_outputs": 10,
+      "official_split": "official train/val/test graph files",
+      "prediction_axis": "graph",
+      "provider_raw_data_bundled": false,
+      "source_documentation": "https://github.com/vijaydwivedi75/lrgb",
+      "split_indices": null,
+      "statistical_unit": "complete graph",
+      "task_type": "multilabel"
+    }
+  ],
+  "registered_measurement_sets": [],
+  "registered_runs": [],
+  "runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+  "schema": "cross-morse-artifact-catalog-1",
+  "scientific_evidence_verified": false,
+  "scope": "File availability, generating contracts, registered identities and local byte/trace checks; no execution, public-download check or scientific certification",
+  "synthetic_examples": [
+    {
+      "artifact_class": "synthetic_example",
+      "dataset_adapter": "ogbn-arxiv",
+      "identities": {
+        "config_sha256": "ffdcdec3ad6544029cad37b68a4e0a4bf18cdae4edced64ab985247777ebb9f4",
+        "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+        "unit_sha256": "102f5f005748224879d337ba8c8fb33cdbf830615e628f06578fecb639262641"
+      },
+      "path": "examples/runs/arxiv",
+      "profile": "smoke",
+      "sealed_artifacts": 292,
+      "sealed_stage_count": 8,
+      "verification": "sealed output hashes and stage links checked; no numerical or checkpoint execution"
+    },
+    {
+      "artifact_class": "synthetic_example",
+      "dataset_adapter": "Peptides-func",
+      "identities": {
+        "config_sha256": "0c0875b4f7e8cd925798cea3096169894bc619e8af63dff40217e1076210784e",
+        "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+        "unit_sha256": "2129ea766109b668a30aacd01f41c824b599c7048a77824e5f1739e32b3f25ad"
+      },
+      "path": "examples/runs/peptides_func",
+      "profile": "smoke",
+      "sealed_artifacts": 294,
+      "sealed_stage_count": 8,
+      "verification": "sealed output hashes and stage links checked; no numerical or checkpoint execution"
+    }
+  ]
+}

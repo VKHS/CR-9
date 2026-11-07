@@ -12,15 +12,15 @@
 #  CROSS-MORSE: Cross-Spectral Control of Message Passing in Frozen Graph
 #  Neural Networks -- Khalili Sadaghiani and Nunez-Yanez, Linkoping University
 # -----------------------------------------------------------------------------
-#  Regenerates every benchmark result of the paper on a Slurm GPU cluster: the
-#  sealed eight-stage lifecycle on all seven datasets (Roman-empire on its ten
-#  official splits), followed by one report that places each regenerated value
-#  beside the value printed in the paper.
+#  Executes the registered dataset lifecycles on a Slurm GPU cluster and builds
+#  their supported numerical outputs: all seven datasets (Roman-empire on its
+#  ten official splits), with preserved source and outputs for comparison with
+#  the paper. Auxiliary campaigns and other manuscript displays are separate.
 #
 #    1. Edit the SITE SETTINGS block below for your cluster.
 #    2. bash run_cross_morse.sh check       settings, runtime identity and the
 #                                           complete job plan; submits nothing
-#    3. bash run_cross_morse.sh reproduce   submit the complete study
+#    3. bash run_cross_morse.sh reproduce   submit the dataset lifecycles
 #
 #  Follow:  bash run_cross_morse.sh status
 #           tail -F <CM_BASE>/logs/CROSS_MORSE_LIVE.out
@@ -150,6 +150,11 @@ PROFILE_SOURCE=""
 if [[ -n "${CM_ENV_FILE:-}" ]]; then
     PROFILE_SOURCE="$(readlink -f "${CM_ENV_FILE}")" || die "Cannot resolve CM_ENV_FILE: ${CM_ENV_FILE}"
     [[ -f "${PROFILE_SOURCE}" ]] || die "CM_ENV_FILE does not exist: ${CM_ENV_FILE}"
+elif [[ "${POSITIONAL[0]:-}" == reproduce && "${POSITIONAL[1]:-}" == resume &&
+        -f "${POSITIONAL[2]:-/nonexistent}/000_MANIFEST/suite.env" ]]; then
+    PROFILE_SOURCE="$(readlink -f "${POSITIONAL[2]}/000_MANIFEST/suite.env")"
+elif [[ "${POSITIONAL[0]:-}" == report && -f "${POSITIONAL[1]:-/nonexistent}/000_MANIFEST/suite.env" ]]; then
+    PROFILE_SOURCE="$(readlink -f "${POSITIONAL[1]}/000_MANIFEST/suite.env")"
 else
     for cm_candidate in "${CM_PROJECT_DIR:-/nonexistent}" "$(dirname "${RUNTIME_SHELL}")" "${SLURM_SUBMIT_DIR:-/nonexistent}"; do
         for cm_profile in active.env.example arrhenius.env.example; do
@@ -206,7 +211,7 @@ CROSS-MORSE reproduction launcher (Slurm; one GPU per job)
 
 Reproduce the paper (login node; edit the SITE SETTINGS block first):
   bash run_cross_morse.sh check [full|pilot|smoke]     settings, runtime identity, job plan; submits nothing
-  bash run_cross_morse.sh reproduce [full|pilot|smoke] submit the complete study as one numbered suite
+  bash run_cross_morse.sh reproduce [full|pilot|smoke] submit the dataset lifecycles as one numbered suite
   bash run_cross_morse.sh reproduce resume SUITE       resubmit the unfinished runs of a suite
   bash run_cross_morse.sh status [SUITE]               progress of every run (default: the latest suite)
   bash run_cross_morse.sh report [SUITE]               rebuild the report and results ZIP in a short job
@@ -623,18 +628,31 @@ submit_job() {   # submit_job ROLE KEY [sbatch options...] -- SCRIPT ARGS... -> 
 # Submit setup, every unfinished run and the report job of an existing suite.
 submit_suite_jobs() {   # submit_suite_jobs SUITE PROFILE [only-unfinished]
     local suite="$1" profile="$2" only_unfinished="${3:-}" tag key dataset kind path launcher stem source
-    local setup_id run_ids=() id time array source_env label states=""
-    tag="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["tag"])' "${suite}/000_MANIFEST/suite.json")"
+    local setup_id run_ids=() id time array source_env label states="" manifest plan
+    manifest="$(reproduction_tool python3 "${PROJECT_DIR}" verify "${suite}")" \
+        || fail "${EXIT_ORCHESTRATION}" "Frozen suite source verification failed; nothing was submitted."
+    tag="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["tag"])' "${manifest}")"
     label="$(printf '%s' "${tag}" | tr -d '_' | tr '[:upper:]' '[:lower:]')"
-    source="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["report_source"])' "${suite}/000_MANIFEST/suite.json")"
+    source="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["report_source"])' "${manifest}")"
+    plan="$(python3 -c 'import json,sys; m=json.loads(sys.argv[1]); print("\n".join("\t".join(r[k] for k in ("key","dataset","kind","path","launcher")) for r in m["runs"]))' "${manifest}")"
     REPRO_SUITE="${suite}"
     mkdir -p "${LOGS_DIR}"
     if [[ -n "${only_unfinished}" ]]; then
         local squeue_file
         squeue_file="$(mktemp)"
-        if command -v squeue >/dev/null 2>&1; then squeue -h -u "${USER:-$(id -un)}" -o '%i %T' > "${squeue_file}" 2>/dev/null || true; fi
-        states="$(reproduction_tool python3 "${source}" status "${suite}" --json --squeue "${squeue_file}")"
+        command -v squeue >/dev/null 2>&1 || fail "${EXIT_PREREQUISITE}" "squeue is required before resubmitting a suite."
+        if ! squeue -h -u "${USER:-$(id -un)}" -o '%i %T' > "${squeue_file}"; then
+            rm -f "${squeue_file}"
+            fail "${EXIT_ORCHESTRATION}" "Cannot determine active suite jobs; nothing was submitted."
+        fi
+        states="$(reproduction_tool python3 "${PROJECT_DIR}" status "${suite}" --json --squeue "${squeue_file}")"
         rm -f "${squeue_file}"
+        plan="$(python3 -c 'import json,sys; m,s=map(json.loads,sys.argv[1:]); by={r["key"]:r for r in s["runs"]}; print("\n".join("\t".join(r[k] for k in ("key","dataset","kind","path","launcher")) for r in m["runs"] if by[r["key"]]["state"] != "COMPLETE" and not by[r["key"]]["scheduler_active"]))' "${manifest}" "${states}")"
+        python3 -c 'import json,sys; s=json.loads(sys.argv[1]); [print("[SKIP] "+r["key"]+(" complete" if r["state"]=="COMPLETE" else " already "+r["state"].lower())) for r in s["runs"] if r["state"]=="COMPLETE" or r["scheduler_active"]]' "${states}"
+        if [[ -z "${plan}" ]]; then
+            printf '[RESUME] No inactive unfinished runs to submit.\n'
+            return 0
+        fi
     fi
     export_site_settings
     unset CM_DATASET CM_SPLIT_INDEX CM_CONFIG CM_STAGE
@@ -646,20 +664,16 @@ submit_suite_jobs() {   # submit_suite_jobs SUITE PROFILE [only-unfinished]
         "${source}/${SHELL_NAME}" setup)"
     printf '[SETUP] job %s\n' "${setup_id}"
     while IFS=$'\t' read -r key dataset kind path launcher; do
-        [[ "${key}" != key ]] || continue
-        if [[ -n "${only_unfinished}" ]]; then
-            state="$(python3 -c 'import json,sys; print(next(r["state"] for r in json.loads(sys.argv[1])["runs"] if r["key"]==sys.argv[2]))' "${states}" "${key}")"
-            case "${state}" in
-                COMPLETE) printf '[SKIP] %s complete\n' "${key}"; continue ;;
-                QUEUED|RUNNING) printf '[SKIP] %s already %s\n' "${key}" "${state,,}"; continue ;;
-            esac
-        fi
         stem="$(stem_of "${dataset}")"
         time="$(profile_time "${profile}" "${stem}")"
         source_env="${path}/source/configs/active.env.example"
         sbatch_site_args run "${stem}"
         if [[ "${kind}" == campaign ]]; then
-            array="0-9${CM_ARRAY_PARALLEL:+%${CM_ARRAY_PARALLEL}}"
+            array="0-9"
+            if [[ -n "${only_unfinished}" ]]; then
+                array="$(python3 -c 'import json,sys; r=next(r for r in json.loads(sys.argv[1])["runs"] if r["key"]==sys.argv[2]); print(",".join(str(i) for i,s in enumerate(r["splits"]) if s["state"] != "COMPLETE"))' "${states}" "${key}")"
+            fi
+            array+="${CM_ARRAY_PARALLEL:+%${CM_ARRAY_PARALLEL}}"
             id="$(CM_PROJECT_DIR="${path}/source" CM_ENV_FILE="${source_env}" CM_RUN_KEY="${key}" submit_job run "${key}" \
                 "${SBATCH_ARGS[@]}" --time="${time}" --job-name="${label}_${key}" --array="${array}" \
                 --dependency="afterok:${setup_id}" --kill-on-invalid-dep=yes \
@@ -674,7 +688,7 @@ submit_suite_jobs() {   # submit_suite_jobs SUITE PROFILE [only-unfinished]
         fi
         run_ids+=("${id}")
         printf '[RUN] %-18s %-14s job %s (limit %s)\n' "${key}" "${dataset}" "${id}" "${time}"
-    done < "${suite}/000_MANIFEST/plan.tsv"
+    done <<< "${plan}"
     local dependency="afterany:${setup_id}"
     (( ${#run_ids[@]} == 0 )) || dependency="afterany:$(IFS=:; printf '%s' "${run_ids[*]}")"
     sbatch_site_args report
@@ -749,21 +763,22 @@ mode_status() {
         squeue_file="$(mktemp)"
         squeue -h -u "${USER:-$(id -un)}" -o '%i %T' > "${squeue_file}" 2>/dev/null || true
     fi
-    reproduction_tool python3 "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["report_source"])' "${suite}/000_MANIFEST/suite.json")" \
-        status "${suite}" ${squeue_file:+--squeue "${squeue_file}"}
+    reproduction_tool python3 "${PROJECT_DIR}" status "${suite}" ${squeue_file:+--squeue "${squeue_file}"}
     [[ -z "${squeue_file}" ]] || rm -f "${squeue_file}"
     [[ ! -f "${suite}/REPRODUCTION_REPORT.md" ]] || printf '\nreport: %s\n' "${suite}/REPRODUCTION_REPORT.md"
 }
 
 mode_report() {
-    local suite="${1:-}" source tag label id
+    local suite="${1:-}" source tag label id manifest
     [[ -z "${SLURM_JOB_ID:-}" ]] || { job_finalize "${suite}"; return; }
     [[ -n "${suite}" ]] || suite="$(latest_suite)" || die "No reproduction suite found under ${OUTPUTS_DIR}; pass its path."
     [[ -f "${suite}/000_MANIFEST/suite.json" ]] || die "Not a reproduction suite: ${suite}"
     command -v sbatch >/dev/null 2>&1 || die "sbatch is not available in this shell."
     [[ -n "${CM_ACCOUNT:-}" ]] || die "Set CM_ACCOUNT before submitting."
-    source="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["report_source"])' "${suite}/000_MANIFEST/suite.json")"
-    tag="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["tag"])' "${suite}/000_MANIFEST/suite.json")"
+    manifest="$(reproduction_tool python3 "${PROJECT_DIR}" verify "${suite}")" \
+        || fail "${EXIT_ORCHESTRATION}" "Frozen suite source verification failed; nothing was submitted."
+    source="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["report_source"])' "${manifest}")"
+    tag="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["tag"])' "${manifest}")"
     label="$(printf '%s' "${tag}" | tr -d '_' | tr '[:upper:]' '[:lower:]')"
     REPRO_SUITE="${suite}"
     mkdir -p "${LOGS_DIR}"
@@ -981,12 +996,14 @@ job_setup() {
 }
 
 job_finalize() {   # the report job of a reproduction suite
-    local suite="${1:?finalize needs the suite path}" source tag squeue_file active sacct_file ids deferrals
+    local suite="${1:?finalize needs the suite path}" source tag squeue_file active sacct_file ids deferrals manifest rc
     suite="$(readlink -f "${suite}")"
     [[ -f "${suite}/000_MANIFEST/suite.json" ]] || die "Not a reproduction suite: ${suite}"
     REPRO_SUITE="${suite}" RUN_KEY="99_report"
-    source="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["report_source"])' "${suite}/000_MANIFEST/suite.json")"
-    tag="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["tag"])' "${suite}/000_MANIFEST/suite.json")"
+    manifest="$(reproduction_tool python3 "${PROJECT_DIR}" verify "${suite}")" \
+        || fail "${EXIT_ORCHESTRATION}" "Frozen suite source verification failed; analysis was not executed."
+    source="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["report_source"])' "${manifest}")"
+    tag="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["tag"])' "${manifest}")"
     mkdir -p "${suite}/999_REPORT/logs"
     attach_logs "REPORT_${tag}" "${suite}/999_REPORT/logs/report_${SLURM_JOB_ID:-local}.out" "${suite}/999_REPORT/logs/report_${SLURM_JOB_ID:-local}.err"
     load_site_modules
@@ -996,7 +1013,10 @@ job_finalize() {   # the report job of a reproduction suite
     # Runs that were requeued or continued are still on the scheduler: wait for them.
     if command -v squeue >/dev/null 2>&1; then
         squeue_file="$(mktemp)"
-        squeue -h -u "${USER:-$(id -un)}" -o '%i %T' > "${squeue_file}" 2>/dev/null || true
+        if ! squeue -h -u "${USER:-$(id -un)}" -o '%i %T' > "${squeue_file}"; then
+            rm -f "${squeue_file}"
+            fail "${EXIT_ORCHESTRATION}" "Cannot determine active suite jobs; report was not rebuilt."
+        fi
         active="$(reproduction_tool "${PYTHON}" "${source}" active "${suite}" --squeue "${squeue_file}" --exclude "${SLURM_JOB_ID:-0}")"
         rm -f "${squeue_file}"
         if [[ -n "${active}" ]]; then
@@ -1027,8 +1047,14 @@ job_finalize() {   # the report job of a reproduction suite
     while IFS= read -r log; do
         n=$((n + 1)); cp -f "${log}" "${suite}/999_REPORT/logs/$(printf '%04d' "${n}")_$(basename "${log}")" 2>/dev/null || true
     done < <(find "${LOGS_DIR}" -maxdepth 1 -type f \( -name "${tag}_*.out" -o -name "${tag}_*.err" \) | sort -V)
-    reproduction_tool "${PYTHON}" "${source}" report "${suite}" ${sacct_file:+--sacct "${sacct_file}"} \
-        $([[ "${CM_PACK_ARCHIVES}" != 1 ]] || printf '%s' --pack-archives)
+    if reproduction_tool "${PYTHON}" "${source}" report "${suite}" ${sacct_file:+--sacct "${sacct_file}"} \
+        $([[ "${CM_PACK_ARCHIVES}" != 1 ]] || printf '%s' --pack-archives); then
+        rc=0
+    else
+        rc=$?
+        registry REPORT_UNSUCCESSFUL "exit ${rc}; inspect ${suite}/REPRODUCTION_REPORT.md"
+        return "${rc}"
+    fi
     registry REPORT_WRITTEN "${suite}/REPRODUCTION_REPORT.md"
     ln -sfn "${suite}/${tag}_RESULTS.zip" "${OUTPUTS_DIR}/CROSS_MORSE_LATEST_RESULTS.zip" 2>/dev/null || true
     printf '[REPORT] %s\n[RESULTS] %s\n' "${suite}/REPRODUCTION_REPORT.md" "${suite}/${tag}_RESULTS.zip"
@@ -1072,10 +1098,10 @@ import numpy, scipy, torch
 expected = os.environ.get('CM_EXPECT_ARCH', '')
 if expected and platform.machine() != expected:
     raise SystemExit('Wrong Python interpreter architecture.')
-if not torch.cuda.is_available():
-    raise SystemExit('CUDA unavailable; check the GPU allocation, modules and PyTorch build.')
-print('[ENV]', platform.machine(), 'torch', torch.__version__, 'CUDA', torch.version.cuda,
-      'GPU', torch.cuda.get_device_name(0), 'NumPy', numpy.__version__, 'SciPy', scipy.__version__)
+print('[ENV IMPORTS]', platform.machine(), 'torch', torch.__version__, 'CUDA build', torch.version.cuda,
+      'NumPy', numpy.__version__, 'SciPy', scipy.__version__)
+# CUDA initialization belongs to gpu_health, after the run has a lock and
+# failure records. Device/driver outages must reach its retry/requeue budget.
 PYENV
 
     JOB_KEY="${SLURM_JOB_ID}${SLURM_ARRAY_TASK_ID:+_${SLURM_ARRAY_TASK_ID}}"

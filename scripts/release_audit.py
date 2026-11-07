@@ -97,6 +97,12 @@ REQUIRED = (
     "scripts/paper_support_report.py", "tests/test_paper_support_report.py",
     # Reproduction launcher: suite identity, status and report; simulated-cluster tests.
     "scripts/reproduction.py", "tests/test_reproduction.py", "tests/test_reproduction_launcher.py",
+    # Typed availability catalog and input-driven reconstruction workspace.
+    "scripts/artifact_catalog.py", "release/artifact_catalog_spec.json", "release/artifact_catalog.json",
+    "docs/ARTIFACT_CATALOG.md", "tests/test_artifact_catalog.py",
+    "scripts/reconstruct.py", "docs/RECONSTRUCTION.md", "tests/test_reconstruction.py",
+    "paper/build/supplement.py", "scripts/build_supplement.py", "tests/test_supplement_build.py",
+    "docs/SUPPLEMENT_BUILD.md",
     *(f"paper/bindings/{stem}_full.json" for stem in DATASETS.values()),
     *(f"cross_morse/{name}.py" for name in (
         "__init__", "core", "data", "training", "exploration", "learning", "policies", "statistics", "pipeline", "common", "provenance", "recovery", "scoring", "review", "reexecution", "datasets", "tasks", "evaluation", "runtime")),

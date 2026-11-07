@@ -43,15 +43,15 @@ def minimal_tree(root: Path, *, official: list[str]) -> None:
 
 
 class AvailabilityTests(unittest.TestCase):
-    def test_statement_reports_missing_archives_when_none_are_registered(self):
+    def test_statement_describes_code_scope_when_no_archives_are_registered(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             minimal_tree(root, official=[])
             st = state(root)
             text = render(st)
-            self.assertIn("0 of 7", text)
-            self.assertIn("Missing official archives:", text)
-            self.assertIn("Reconstruction of the manuscript\'s benchmark results is not established", text)
+            self.assertNotIn("0 of 7", text)
+            self.assertNotIn("Missing official archives:", text)
+            self.assertIn("original benchmark archives can be supplied through the separate registration workflow", text)
             self.assertNotIn("every table and figure", text)
             self.assertIn(st["source_sha256"], text)
             self.assertIn("Runtime source identity:", text)
@@ -62,9 +62,11 @@ class AvailabilityTests(unittest.TestCase):
             root = Path(tmp)
             minimal_tree(root, official=list(DATASETS))
             text = render(state(root))
-            self.assertIn("Registered DOI references: 7 of 7 registered datasets", text)
+            self.assertIn("Registered DOI references: COCO-SP:", text)
             self.assertIn("https://doi.org/10.5281/zenodo.1", text)
-            self.assertIn("7 of 7", text)
+            self.assertNotIn("7 of 7", text)
+            for dataset in DATASETS:
+                self.assertIn(dataset, text)
             # even with every archive present, only the displays that paper/build produces are claimed
             self.assertNotIn("every table and figure", text)
             self.assertIn(BUILT_DISPLAYS, text)
@@ -115,7 +117,8 @@ class AvailabilityTests(unittest.TestCase):
             self.assertTrue(update_readme(root, st))
             self.assertEqual(check(root, st), 0)
             readme = (root / "README.md").read_text()
-            self.assertIn("2 of 7", readme)
+            self.assertNotIn("2 of 7", readme)
+            self.assertIn("Registered dataset archives and measurement sets are named", readme)
             self.assertTrue(readme.endswith("tail\n"))
             (root / "AVAILABILITY.md").write_text("edited\n")
             self.assertEqual(check(root, st), 1)

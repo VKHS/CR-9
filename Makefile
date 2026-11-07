@@ -28,6 +28,11 @@ DATASET_STEMS := arxiv products proteins roman_empire pascalvoc_sp coco_sp pepti
 EXAMPLE_STEMS := arxiv peptides_func
 RUNS_INDEX ?= runs/index.json
 RECORDS_ROOT ?= records
+RECORDS_INDEX ?= $(RECORDS_ROOT)/index.json
+RECONSTRUCTION_ROOT ?= $(REPORT_ROOT)/reconstruction
+RECONSTRUCTION_EXAMPLES_ROOT ?= $(REPORT_ROOT)/reconstruction-examples
+SUPPLEMENT_ROOT ?= $(REPORT_ROOT)/supplement
+REQUIRE_ALL_DISPLAYS ?= 0
 EXAMPLE_RECORDS_ROOT ?= examples/records
 RECORDS_SPECS ?= records/specs.json
 # Out-of-lifecycle experiments (E3-E6); see docs/EXPERIMENTS.md.
@@ -114,7 +119,8 @@ endef
  evidence-bind evidence-records evidence-status campaign-binding record-mapping-template record-from-mapping \
  manuscript-sources register-manuscript-sources readiness \
  theory theory-full theory-doc si-check si-report \
- faq-check paper-report paper-report-check confirmation-audit
+ faq-check paper-report paper-report-check confirmation-audit \
+ artifact-catalog artifact-catalog-check reconstruct reconstruction-example reconstruction-check supplement
 
 help:
 	@printf '%s\n' \
@@ -130,6 +136,7 @@ help:
 	  '  make si-check            recompute the derived entries of the supplementary tables' \
 	  '  make paper-report        render the paper results and all table/figure support mappings' \
 	  '  make paper-report-check  check current manuscript, display inventory and report freshness' \
+	  '  make artifact-catalog-check  verify the typed artifact catalog and source identities' \
 	  '  make faq-check           check that docs/REVIEWER_FAQ.md names only existing files and targets' \
 	  '' \
 	  'Reproduce the paper on a Slurm GPU cluster (docs/HPC.md; edit SITE SETTINGS in run_cross_morse.sh):' \
@@ -141,12 +148,16 @@ help:
 	  'Run and replay locally:' \
 	  '  make reproduce            replay the two bundled synthetic examples into REPORT_ROOT' \
 	  '  make example-paper        rebuild tables and figures from those examples' \
+	  '  make reconstruction-example  build one hashed workspace with coverage of every display' \
 	  '  make train-sample DATASET=Peptides-func   execute a fresh synthetic CPU lifecycle' \
 	  '  make prepare-data DATASET=ogbn-arxiv PROFILE=pilot   prepare official data; may download' \
 	  '  make replay / reexecute   replay statistics or checkpoints from RUN_ROOT' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
 	  '  make paper                build supported tables/figures from official archives and records' \
+	  '  make reconstruct          build a traced workspace from registered runs, records and optional campaigns' \
+	  '  make reconstruction-check verify the exported workspace file hashes' \
+	  '  make supplement           build factorial, ensemble, confirmation and budget outputs from supplied records' \
 	  '  make compare-runs         compare official model inventories and results with the manuscript' \
 	  '  make scientific-audit     report missing evidence and model/decision mismatches; fails if incomplete' \
 	  '  make confirmation-audit CONFIRMATION_CAMPAIGN=...  verify the original joint S14 family' \
@@ -185,6 +196,35 @@ paper-from-runs:
 	"$(PYTHON)" -B scripts/build_paper.py all --index "$(RUNS_INDEX)" --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
 
 paper: paper-from-runs records-tables
+
+# A single workspace of the supported outputs, with every manuscript display accounted for.
+reconstruct:
+	$(call check-boolean,REQUIRE_ALL_DISPLAYS)
+	"$(PYTHON)" -B scripts/reconstruct.py --index "$(RUNS_INDEX)" --records-index "$(RECORDS_INDEX)" \
+	  --output-dir "$(RECONSTRUCTION_ROOT)" --label registered-inputs \
+	  $(if $(CONFIRMATION_CAMPAIGN),--confirmation-campaign "$(CONFIRMATION_CAMPAIGN)",) \
+	  $(if $(BUDGET_CAMPAIGN),--budget-campaign "$(BUDGET_CAMPAIGN)",) \
+	  $(if $(filter 1,$(REQUIRE_ALL_DISPLAYS)),--require-all-displays,)
+
+reconstruction-example:
+	"$(PYTHON)" -B scripts/reconstruct.py --runs-root "$(EXAMPLE_RUNS_ROOT)" \
+	  --records-index "$(EXAMPLE_RECORDS_ROOT)/index.json" --label synthetic-examples \
+	  --output-dir "$(RECONSTRUCTION_EXAMPLES_ROOT)"
+
+reconstruction-check:
+	"$(PYTHON)" -B scripts/reconstruct.py --verify "$(RECONSTRUCTION_ROOT)"
+
+supplement:
+	"$(PYTHON)" -B scripts/build_supplement.py --records-index "$(RECORDS_INDEX)" \
+	  --output-dir "$(SUPPLEMENT_ROOT)" \
+	  $(if $(CONFIRMATION_CAMPAIGN),--confirmation-campaign "$(CONFIRMATION_CAMPAIGN)",) \
+	  $(if $(BUDGET_CAMPAIGN),--budget-campaign "$(BUDGET_CAMPAIGN)",)
+
+artifact-catalog:
+	"$(PYTHON)" -B scripts/artifact_catalog.py
+
+artifact-catalog-check:
+	"$(PYTHON)" -B scripts/artifact_catalog.py --check
 
 example-paper:
 	"$(PYTHON)" -B scripts/build_paper.py all --runs-root "$(EXAMPLE_RUNS_ROOT)" --label examples --output-dir "$(PAPER_EXAMPLES_ROOT)"
@@ -364,7 +404,7 @@ si-report:
 	"$(PYTHON)" -B scripts/check_si_identities.py --json-output "$(REPORT_ROOT)/si-identities.json" --markdown "$(REPORT_ROOT)/si-identities.md"
 
 # ---------------------------------------------------------------- whole-tree checks
-verify: registry-check theory si-check paper-report-check faq-check fingerprint audit-artifacts example-views-check example-paper-check manifests-check records-check example-records-check availability-check claims-check availability-statement-check runs-check-if-present audit
+verify: registry-check theory si-check paper-report-check artifact-catalog-check faq-check fingerprint audit-artifacts example-views-check example-paper-check manifests-check records-check example-records-check availability-check claims-check availability-statement-check runs-check-if-present audit
 check: verify
 
 .PHONY: runs-check-if-present
@@ -395,7 +435,7 @@ NUMPY_TESTS := test_paper_registry test_records test_export_records test_availab
  test_evidence_discovery \
  test_theory_battery test_theory_formulas test_theory_review_regressions test_si_identities \
  test_arrhenius_discovery test_reviewer_faq test_paper_support_report test_review_confirmation test_s14_confirmation test_selection_figure \
- test_reproduction test_reproduction_launcher
+ test_reproduction test_reproduction_launcher test_artifact_catalog test_reconstruction test_supplement_build
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

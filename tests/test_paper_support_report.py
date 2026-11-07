@@ -72,8 +72,10 @@ class PaperSupportTests(unittest.TestCase):
         source = json.loads((ROOT / "paper/sources.json").read_text())
         state = {"official": {}, "records": {"verified": []}}
         text = report.render_support(self.manifest, source, state)
-        self.assertIn("0/7 official benchmark archives", text)
-        self.assertIn("0/10 auxiliary measurement sets", text)
+        self.assertIn("`runs/index.json` and `records/index.json`", text)
+        self.assertIn("supplied files from generated products", text)
+        self.assertNotIn("0/7", text)
+        self.assertNotIn("0/10", text)
         self.assertIn("Original analysis required", text)
         self.assertIn("Related plots / partial panels", text)
 
