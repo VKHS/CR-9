@@ -3,14 +3,17 @@
 [Repository home](../README.md) · [Run archives](../docs/RUN_ARCHIVES.md) · [Availability](../AVAILABILITY.md) ·
 [Implementation notes](../paper/IMPLEMENTATION_NOTES.md)
 
-The eight-stage runner supplies the run-derived columns of main Tables 1–2 and
-Supplementary Tables S4, S12, S12c, S13–S15, S23 and S41 through
-[run archives](../docs/RUN_ARCHIVES.md). External baselines, input-gate timings,
-sensor traces and campaign accounting enter through the measurement sets below.
-Each set carries the raw logs its summary values are read from.
-`scripts/records.py` traces every summary value to its raw file and builds the
-corresponding record table. [AVAILABILITY.md](../AVAILABILITY.md) states the
-supported reconstruction scope and current coverage.
+The eight-stage runner supplies the run-derived columns of the paper through
+[run archives](../docs/RUN_ARCHIVES.md). Every other measured quantity a table or
+figure reads enters through the measurement-record sets below: external baselines,
+the E3–E6 arms, the audits, sweeps and ablations computed on the sealed runs, and
+timing and accounting. Each set carries the raw files its summary values are read
+from; `scripts/records.py` traces every summary value to its raw file, and the
+display generators in `paper/build/displays/` read the verified sets. The code that
+produces each set is listed with its command in
+[`release/experiment_code.json`](../release/experiment_code.json), together with any
+part the released runtime cannot execute (`not_executable`); the published sets
+are assets of the release `paper-artifacts` ([publication guide](../docs/PUBLICATION.md)).
 
 ## Record sets
 

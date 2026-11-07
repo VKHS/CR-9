@@ -462,6 +462,24 @@ class AdmissionTests(unittest.TestCase):
         self.assertEqual(next(r for r in source if r["dataset"] == "ogbn-arxiv")["fallback_probability"], "0.118")
         self.assertNotIn("no_reference", statuses(compared))
 
+    @staticmethod
+    def budget_campaign(root: Path) -> Path:
+        """A campaign export whose arm studies carry their Slurm allocations (synthetic values)."""
+        header = "Cluster|JobIDRaw|JobID|Submit|Start|End|State|ElapsedRaw|AllocTRES|ExitCode"
+        studies = []
+        for i, (dataset, seconds) in enumerate((("ogbn-arxiv", 3600), ("ogbn-arxiv", 1800), ("PascalVOC-SP", 7200))):
+            job = 500 + i
+            write_files(root, {f"study_{i}/environment.json": {"slurm": {"SLURM_JOB_ID": str(job)},
+                                                               "device_requested": "cuda"}})
+            (root / f"acct_{i}.psv").write_text(
+                header + "\n" + f"c|{job}|{job}|2026-01-01T00:00:00|2026-01-01T00:00:01|2026-01-01T02:00:00|"
+                f"COMPLETED|{seconds}|cpu=8,gres/gpu=1|0:0\n" + f"c|{job}.0|{job}.0|x|y|z|COMPLETED|10|cpu=8|0:0\n",
+                encoding="utf-8")
+            studies.append({"dataset": dataset, "study": f"study_{i}", "accounting": [f"acct_{i}.psv"],
+                            "job_log": [f"study_{i}/environment.json"]})
+        write_files(root, {"study.json": {"studies": studies}})
+        return root
+
     def test_s41_stage_hours_and_campaign_sums(self):
         fixture = Fixture(self)
         rejected = {"admission_differences": [0.01] * 12}
@@ -469,8 +487,9 @@ class AdmissionTests(unittest.TestCase):
                                "ogbn-proteins": rejected, "ogbn-products": rejected,
                                "PascalVOC-SP": {"admission_differences": [-0.05] * 300},
                                "Roman-empire": {"admission_differences": [-0.05] * 30}})
-        writer, compared = build_one("supplementary:Table S41", context(runs=runs), fixture.out("s41"),
-                                     registry=REGISTRY)
+        campaign = self.budget_campaign(fixture.base / "budget_campaign")
+        ctx = context(runs=runs, campaigns={"budget": campaign})
+        writer, compared = build_one("supplementary:Table S41", ctx, fixture.out("s41"), registry=REGISTRY)
         rows = read_table(fixture.out("s41"), "S41")
         self.assertEqual(len(rows), 9)
         self.assertEqual(list(rows[0]), ["component", "unit", "GPU-hours", "record"])
@@ -481,7 +500,10 @@ class AdmissionTests(unittest.TestCase):
         self.assertEqual(cells["nested comparator and candidate selection"], "arxiv 2.00; Roman 4.00; Pascal 2.00")
         total = next(v for k, v in cells.items() if k.startswith("total qualification"))
         self.assertEqual(total, "arxiv 3.70; Roman 7.40; Pascal 3.70")
-        self.assertEqual(cells["independent E3–E6 comparison"], "")
+        # Allocated GPUs times elapsed seconds of each arm job; job steps are not added.
+        self.assertEqual(cells["independent E3–E6 comparison"], "arxiv 1.50; Pascal 2.00")
+        allocations = data_rows(fixture.out("s41"), "S41", "comparison_allocations")
+        self.assertEqual(sorted(r["job_id"] for r in allocations), ["500", "501", "502"])
         self.assertIn("share 0.27", next(r["record"] for r in rows if r["component"] == "exploration logging"))
         source = data_rows(fixture.out("s41"), "S41", "stage_hours")
         self.assertEqual(len(source), 6 + 2)
@@ -492,7 +514,7 @@ class AdmissionTests(unittest.TestCase):
         # A marker rewritten after an interruption has no timing: that stage and the total are missing, not zero.
         write_files(fixture.base / "roman/split_01", {"stages/admit.json": {
             "stage": "admit", "status": "COMPLETE", "recovered_after_commit": True}})
-        build_one("supplementary:Table S41", context(runs=runs), fixture.out("s41r"))
+        build_one("supplementary:Table S41", ctx, fixture.out("s41r"))
         cells = {r["component"]: r["GPU-hours"] for r in read_table(fixture.out("s41r"), "S41")}
         self.assertEqual(cells["admission evaluation"], "arxiv 0.10; Roman —; Pascal 0.10")
         self.assertEqual(next(v for k, v in cells.items() if k.startswith("total qualification")),

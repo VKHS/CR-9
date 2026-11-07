@@ -22,7 +22,9 @@ configuration are shown once, and every per-split value is kept in the source da
 from __future__ import annotations
 
 import functools
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 
@@ -1115,9 +1117,45 @@ def total(values):
     return None if any(v is None for v in values) else float(sum(values))
 
 
-@display("supplementary:Table S41", stem="S41", title="Qualification accounting", needs=("runs",))
+def comparison_gpu_hours(campaign: Path) -> tuple[dict[str, float], list[list]]:
+    """GPU-hours of the E3-E6 comparison per dataset from the campaign's own Slurm accounting.
+
+    Every arm study of the campaign export names its sacct exports; the allocation whose job ID
+    the study captured (environment.json, SLURM_JOB_ID) is counted once, allocated GPUs times
+    allocation elapsed time (cm_campaigns.accounting.read_sacct), failed attempts included.
+    """
+    from cm_campaigns.accounting import read_sacct
+    from cm_campaigns.common import confined
+    study = json.loads((campaign / "study.json").read_text(encoding="utf-8"))
+    hours, rows, seen = {}, [], set()
+    for item in study.get("studies") or []:
+        environment = json.loads((campaign / item["study"] / "environment.json").read_text(encoding="utf-8"))
+        job = str((environment.get("slurm") or {}).get("SLURM_JOB_ID") or "")
+        if not job:
+            raise DisplayInputError(f"{item['study']}: no captured Slurm job ID")
+        allocations = {}
+        for name in item.get("accounting") or []:
+            allocations.update(read_sacct(confined(campaign, name))["allocations"])
+        matching = [(key, row) for key, row in allocations.items()
+                    if job in {str(row["job_id"]), str(row["job_id_raw"])}]
+        if not matching:
+            raise DisplayInputError(f"{item['study']}: job {job} is absent from its scheduler export")
+        for key, row in matching:
+            if key in seen:
+                continue
+            seen.add(key)
+            hours[item["dataset"]] = hours.get(item["dataset"], 0.0) + row["gpu_hours"]
+            rows.append([item["dataset"], item["study"], row["job_id"], row["allocated_gpus"], row["seconds"],
+                         row["gpu_hours"], row["state"]])
+    if not hours:
+        raise DisplayInputError("the E3-E6 campaign export lists no arm study with scheduler accounting")
+    return hours, rows
+
+
+@display("supplementary:Table S41", stem="S41", title="Qualification accounting", needs=("runs", "campaign:budget"))
 def table_s41(ctx, out):
     measured, source, devices = {}, [], set()
+    comparison, allocations = comparison_gpu_hours(ctx.require_campaign("budget"))
     for dataset in DATASETS:
         view = ctx.require_run(dataset)
         split = [stage_hours(m) for m in view.members()]
@@ -1154,8 +1192,9 @@ def table_s41(ctx, out):
              f"per seed: {seed} h (Table S5); ensembles of E checkpoints" if seed else None, "training logs"]]
     for stage, label, _ in QUALIFICATION_STAGES[:4]:
         rows.append([label, "entire search per dataset", per_dataset(stage), record(stage)])
-    rows.append(["independent E3–E6 comparison", "entire comparison per dataset", None,
-                 "comparison trace on D_compare"])
+    rows.append(["independent E3–E6 comparison", "entire comparison per dataset",
+                 "; ".join(f"{SHORT[d]} {num(comparison[d], 2)}" for d in DATASETS if d in comparison) or None,
+                 "comparison trace on D_compare; scheduler accounting of the arm jobs"])
     rows.append(["admission evaluation", "entire search per dataset", per_dataset("admit"), record("admit")])
     rows.append(["search (horizon and beam)", "per deployment, per input",
                  "charged in the serial-cost ledger (Table S23), not in qualification", "timing traces"])
@@ -1166,15 +1205,21 @@ def table_s41(ctx, out):
         for stage, _, key in QUALIFICATION_STAGES:
             out.compare(GROUP["S41"], (d, key), measured[d][stage])
         out.compare(GROUP["S41"], (d, "total_qualification_increment_GPU_h"), measured[d]["total"])
+    for d, value in comparison.items():
+        out.compare(GROUP["S41"], (d, "independent_E3_E6_comparison_GPU_h"), value)
     out.table(["component", "unit", unit, "record"], rows,
               notes=[f"{unit}: measured stage wall time (stages/<stage>.json, seconds_this_attempt) on the run's one "
                      "device; backbone training: mean per plant checkpoint (train/manifest.json). Listed datasets "
                      "deploy a rule other than q_C; a comparator deployment has no qualification increment and stays "
                      "in the source data. A stage whose completion marker was rewritten after an interruption has no "
                      "timing and prints as —, as does its total. Share: the component's part of the summed totals of "
-                     "the listed datasets. The E3–E6 comparison is outside the lifecycle runs and has no measurement "
-                     "here.",
+                     "the listed datasets. The E3–E6 comparison is a separate campaign: its GPU-hours are the "
+                     "Slurm allocations of its arm jobs (allocated GPUs times elapsed time, failed attempts "
+                     "included).",
                      "Roman-empire: the ten split runs summed; per-checkpoint training averaged over all splits."])
+    out.data("comparison_allocations", ["dataset", "study", "job_id", "allocated_gpus", "elapsed_seconds",
+                                        "gpu_hours", "state"], allocations)
+    out.uses("campaign", "budget", ["study.json", "*/environment.json", "scheduler exports named by study.json"])
     out.data("stage_hours", ["dataset", "split", "deployed_rule_differs_from_qC", "device",
                              *(f"{stage}_hours" for stage, _, _ in QUALIFICATION_STAGES), "total_hours",
                              "backbone_hours_per_checkpoint", "checkpoints"], source)

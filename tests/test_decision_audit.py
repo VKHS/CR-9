@@ -694,7 +694,8 @@ class AuditExecutionTests(unittest.TestCase):
         for dataset in ("ogbn-arxiv", "Peptides-func"):
             _, directory = self.job(dataset)
             observers = json.loads((directory / "observers.json").read_text())
-            self.assertEqual(list(observers["variants"]), list(da.OBSERVER_LEVELS))
+            # Sealed JSON is written with sorted keys; the export reads the variants by name.
+            self.assertEqual(sorted(observers["variants"]), sorted(da.OBSERVER_LEVELS))
             for level in da.OBSERVER_LEVELS:
                 self.assertTrue(math.isfinite(observers["variants"][level]["rmse"]))
             self.assertIsNotNone(observers["conditioned_parity"])
