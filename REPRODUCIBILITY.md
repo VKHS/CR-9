@@ -3,12 +3,17 @@
 This file maps the main topics in the machine-learning reproducibility checklist
 reviewed by [Pineau et al. (JMLR 22(164), 2021)](https://jmlr.org/papers/v22/20-303.html)
 to this repository. A file describing a protocol is distinct from evidence that
-an experiment followed it. This is a code release: `bash run_cross_morse.sh
-reproduce` regenerates the lifecycle results of all seven datasets on a Slurm
-cluster ([HPC guide](docs/HPC.md)), and the right-hand column names the records
-that support each topic. The lifecycle records are written by every regenerated
-run; the auxiliary records come from the drivers in
-[Experiments](docs/EXPERIMENTS.md). [AVAILABILITY.md](AVAILABILITY.md) states the
+an experiment followed it. The measured outputs of the reported experiments are
+assets of the repository's release `paper-artifacts`
+([publication guide](docs/PUBLICATION.md)); `make paper` verifies them and rebuilds
+every table and figure, and `bash run_cross_morse.sh reproduce` regenerates the
+lifecycle results of all seven datasets on a Slurm cluster ([HPC guide](docs/HPC.md)).
+The right-hand column names the records that support each topic. The lifecycle
+records are written by every run; the auxiliary records come from the experiment
+code in [Experiments](docs/EXPERIMENTS.md) and
+[`release/experiment_code.json`](release/experiment_code.json).
+[Statement compliance](STATEMENT_COMPLIANCE.md) evaluates each item of the
+registered availability statement, [AVAILABILITY.md](AVAILABILITY.md) states the
 release scope and [paper/CLAIMS.md](paper/CLAIMS.md) maps every registered
 numerical group to its builder.
 
@@ -31,12 +36,28 @@ documents byte verification, atomic builds and the optional full-display gate.
 | Number of runs, seeds and splits | Registered full profiles, including Roman-empire's ten official splits; `run_cross_morse.sh reproduce` submits every dataset and all ten splits | The complete runs of a reproduction suite and its run registry; the audit checks applicable coverage and identities rather than inferring execution from the protocol |
 | Metrics, uncertainty and decision rules | `cross_morse/statistics.py`, `paper/registered_constants.json`, result builders | Paired units, confirmation contrasts, admission records and locked policy. Builders expose the quantities available in those records; analytical scenarios remain separately identified |
 | Runtime, cost and computing infrastructure | `cm_campaigns/accounting.py`, `hpc/capture_arrhenius_accounting.sh`, E17 timing/export tools; the job table and scheduler accounting of a reproduction suite | Actual timings, scheduler exports and environment details in runs and auxiliary records; the GPU-hours of every run in the suite's report. Repeated ratios are diagnostic patterns, not a substitute for checking these records |
-| Figures, tables and manuscript correspondence | [Display support inventory](paper/PAPER_SUPPORT.md), [Claims ledger](paper/CLAIMS.md), `paper/build/`, `scripts/records.py`, `paper/bindings/`, `scripts/compare_with_manuscript.py` | Displays rebuilt from the regenerated runs and every compared quantity beside the printed value in the suite's `REPRODUCTION_REPORT.md`; summary values traced to raw files and result bindings |
-| Access to artifacts and licensing | This repository (code, configurations, launcher and registry), [Availability](AVAILABILITY.md), [Archive guide](docs/RUN_ARCHIVES.md), [LICENSE](LICENSE), [NOTICE](NOTICE) | A reproduction suite regenerates every run; with `CM_PACK_ARCHIVES=1` it also packs sealed archives whose filename, size and SHA-256 an index can register. Dataset terms apply to the downloaded benchmarks |
+| Figures, tables and manuscript correspondence | [Display support inventory](paper/PAPER_SUPPORT.md), [Claims ledger](paper/CLAIMS.md), one generator per numbered display in `paper/build/displays/`, `scripts/records.py`, `paper/bindings/`, `scripts/compare_with_manuscript.py` | Every display rebuilt by `make paper` from the published outputs with its source data (`paper/source_data/`) and each computed value beside the printed one; the same comparison for regenerated runs in a suite's `REPRODUCTION_REPORT.md`; summary values traced to raw files and result bindings |
+| Access to artifacts and licensing | This repository: code, configurations, launcher, registry, and the release `paper-artifacts` holding the measured outputs ([publication guide](docs/PUBLICATION.md), [`release/paper_artifacts.json`](release/paper_artifacts.json)); [Availability](AVAILABILITY.md), [Statement compliance](STATEMENT_COMPLIANCE.md), [LICENSE](LICENSE), [NOTICE](NOTICE) | Every published run, record set and campaign with the SHA-256 of each part, archive and file; `make paper` verifies them before use. Dataset terms apply to the downloaded benchmarks |
+| One-command reconstruction | `make paper` (`scripts/reconstruct_paper.py`), one generator per numbered display in `paper/build/displays/` | Every table and figure with its source data and a per-cell comparison with the printed value (`displays/compare/`); exit status 0 only when every display is complete and every value agrees |
+
+## ML Code Completeness Checklist
+
+The five items of the [ML Code Completeness Checklist](https://github.com/paperswithcode/releasing-research-code)
+(Papers with Code; part of the NeurIPS 2020 code-submission process):
+
+| Item | In this repository |
+|---|---|
+| Specification of dependencies | `pyproject.toml`, `requirements.txt`, `environment/requirements-cpu.lock`, `Dockerfile`, `environment/apptainer.def`, the GPU modules and PyTorch wheel in the SITE SETTINGS of `run_cross_morse.sh`; the observed environment of every reported run in `environment/observed/` |
+| Training code | `run_cross_morse.py` and the dataset entry points `run_cross_morse_<dataset>.py`, `cross_morse/`; the experiments outside the lifecycle in `cm_experiments/`, `cm_campaigns/` and [`release/experiment_code.json`](release/experiment_code.json) |
+| Evaluation code | `cross_morse/evaluation.py`, `cross_morse/statistics.py`, `scripts/reproduce_results.py`, `scripts/evaluate_checkpoints.py`, the display generators in `paper/build/displays/` |
+| Pre-trained models | The checkpoints of every reported run: complete tier of the release `paper-artifacts` ([`release/paper_artifacts.json`](release/paper_artifacts.json), `make paper-artifacts-status`) |
+| Results: a table of the main results and the command that reproduces them | [README](README.md) (`make paper`, `bash run_cross_morse.sh reproduce`), [paper/RESULTS.md](paper/RESULTS.md), [Reconstruction](docs/RECONSTRUCTION.md) |
 
 ## Executable entry points
 
 ```bash
+make paper                                    # every table and figure from the published outputs
+make statement-check                          # each item of the registered availability statement
 make verify                                   # software, registry, sealed examples; no GPU
 make test
 make review REVIEW_OFFLINE=1 REPORT_ROOT=../cm-reports
@@ -46,7 +67,9 @@ bash run_cross_morse.sh check                 # on a Slurm cluster: settings, ru
 bash run_cross_morse.sh reproduce             # regenerate all seven datasets and the report
 ```
 
-The first three exercise the software and the two bundled synthetic examples.
+`make paper` downloads and verifies the published measured outputs and rebuilds every
+numbered display ([Reconstruction](docs/RECONSTRUCTION.md)). The next three exercise the
+software and the two bundled synthetic examples.
 The launcher regenerates the lifecycle results; the E3–E6 campaign, the external
 baselines and the other auxiliary record sets run from their drivers
 ([Experiments](docs/EXPERIMENTS.md)), and the cross-dataset S14 family is audited

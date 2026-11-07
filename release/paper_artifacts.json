@@ -1,0 +1,170 @@
+{
+  "schema": "cross-morse-paper-artifacts-1",
+  "repository": "VKHS/CR-9",
+  "release_tag": "paper-artifacts",
+  "release_url": "https://github.com/VKHS/CR-9/releases/tag/paper-artifacts",
+  "part_bytes": 1992294400,
+  "statement": "release/availability_statement.json",
+  "status": "awaiting_measured_outputs",
+  "artifacts": [
+    {
+      "id": "run:ogbn-arxiv",
+      "kind": "run",
+      "name": "ogbn-arxiv",
+      "asset_stem": "run-arxiv",
+      "statement_items": [
+        "configurations",
+        "split and seed manifests",
+        "environment specification",
+        "checkpoints",
+        "predictions",
+        "propensity-logged trajectories",
+        "statistical outputs",
+        "source data"
+      ],
+      "displays": [
+        "supplementary:Table S20"
+      ],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    },
+    {
+      "id": "run:ogbn-proteins",
+      "kind": "run",
+      "name": "ogbn-proteins",
+      "asset_stem": "run-proteins",
+      "statement_items": [
+        "configurations",
+        "split and seed manifests",
+        "environment specification",
+        "checkpoints",
+        "predictions",
+        "propensity-logged trajectories",
+        "statistical outputs",
+        "source data"
+      ],
+      "displays": [
+        "supplementary:Table S20"
+      ],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    },
+    {
+      "id": "run:ogbn-products",
+      "kind": "run",
+      "name": "ogbn-products",
+      "asset_stem": "run-products",
+      "statement_items": [
+        "configurations",
+        "split and seed manifests",
+        "environment specification",
+        "checkpoints",
+        "predictions",
+        "propensity-logged trajectories",
+        "statistical outputs",
+        "source data"
+      ],
+      "displays": [
+        "supplementary:Table S20"
+      ],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    },
+    {
+      "id": "run:Roman-empire",
+      "kind": "run",
+      "name": "Roman-empire",
+      "asset_stem": "run-roman_empire",
+      "statement_items": [
+        "configurations",
+        "split and seed manifests",
+        "environment specification",
+        "checkpoints",
+        "predictions",
+        "propensity-logged trajectories",
+        "statistical outputs",
+        "source data"
+      ],
+      "displays": [
+        "supplementary:Table S20"
+      ],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    },
+    {
+      "id": "run:PascalVOC-SP",
+      "kind": "run",
+      "name": "PascalVOC-SP",
+      "asset_stem": "run-pascalvoc_sp",
+      "statement_items": [
+        "configurations",
+        "split and seed manifests",
+        "environment specification",
+        "checkpoints",
+        "predictions",
+        "propensity-logged trajectories",
+        "statistical outputs",
+        "source data"
+      ],
+      "displays": [
+        "supplementary:Table S20"
+      ],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    },
+    {
+      "id": "run:COCO-SP",
+      "kind": "run",
+      "name": "COCO-SP",
+      "asset_stem": "run-coco_sp",
+      "statement_items": [
+        "configurations",
+        "split and seed manifests",
+        "environment specification",
+        "checkpoints",
+        "predictions",
+        "propensity-logged trajectories",
+        "statistical outputs",
+        "source data"
+      ],
+      "displays": [
+        "supplementary:Table S20"
+      ],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    },
+    {
+      "id": "run:Peptides-func",
+      "kind": "run",
+      "name": "Peptides-func",
+      "asset_stem": "run-peptides_func",
+      "statement_items": [
+        "configurations",
+        "split and seed manifests",
+        "environment specification",
+        "checkpoints",
+        "predictions",
+        "propensity-logged trajectories",
+        "statistical outputs",
+        "source data"
+      ],
+      "displays": [
+        "supplementary:Table S20"
+      ],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    },
+    {
+      "id": "environment:gpu",
+      "kind": "environment",
+      "name": "gpu",
+      "asset_stem": "environment-gpu",
+      "statement_items": [
+        "environment specification"
+      ],
+      "displays": [],
+      "status": "awaiting_measured_outputs",
+      "awaiting": "the measured outputs of the reported experiment; publish with hpc/publish_paper_artifacts_arrhenius.sh"
+    }
+  ]
+}

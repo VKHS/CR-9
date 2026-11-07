@@ -232,6 +232,64 @@
       ],
       "scope": "Instantiate the released model configurations and count their named parameters."
     },
+    "paper": {
+      "argv": [
+        "make",
+        "paper"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 36841,
+          "path": "Makefile",
+          "sha256": "9bac8a0748768331a99abb84bd435e40ace236ad7dd618dc1591f2eeebd969ea"
+        },
+        {
+          "bytes": 6627,
+          "path": "scripts/reconstruct_paper.py",
+          "sha256": "71d7021d004c6fc82041364db18cdf9d20b37a59cf50b06e70ccefa982ad90e0"
+        }
+      ],
+      "entrypoints": [
+        "Makefile",
+        "scripts/reconstruct_paper.py"
+      ],
+      "mode": "build",
+      "requires": [
+        "Published release assets (release/paper_artifacts.json)",
+        "Network access",
+        "Recorded CPU or NumPy environment"
+      ],
+      "scope": "Download and verify the measured outputs published with the release paper-artifacts, rebuild every numbered table and figure with its source data, and compare every computed value with the printed one."
+    },
+    "publish": {
+      "argv": [
+        "bash",
+        "hpc/publish_paper_artifacts_arrhenius.sh",
+        "publish"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 5780,
+          "path": "hpc/publish_paper_artifacts_arrhenius.sh",
+          "sha256": "48c60109157680b494fa5fbd90e3a9af77bc62974d6988e8c4b0a98e31b4e431"
+        },
+        {
+          "bytes": 49866,
+          "path": "scripts/paper_artifacts.py",
+          "sha256": "c700cdd806d3a8c1cd8bd07881e3ed711a1e951f4d663748696b93b34c685490"
+        }
+      ],
+      "entrypoints": [
+        "hpc/publish_paper_artifacts_arrhenius.sh",
+        "scripts/paper_artifacts.py"
+      ],
+      "mode": "register",
+      "requires": [
+        "Completed reported runs, record sets and campaigns on the cluster",
+        "GITHUB_TOKEN with contents:write"
+      ],
+      "scope": "Upload the packed outputs of the reported runs, record sets, campaigns and environment to the release paper-artifacts, record their SHA-256 in release/paper_artifacts.json, download them back, verify them, rebuild every display and write the split/seed manifests, observed environments and source data to commit."
+    },
     "reconstruct": {
       "argv": [
         "make",
@@ -240,9 +298,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 26194,
+          "bytes": 33414,
           "path": "scripts/reconstruct.py",
-          "sha256": "f240d3f21b95bbc12a34ea65a029b55d9649c0352523c6fc5390f5bc64fb788d"
+          "sha256": "425914e3f91de060515b1e6e67c25e96a4504812df079ffb01def585428bb5ba"
         }
       ],
       "entrypoints": [
@@ -263,9 +321,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 26194,
+          "bytes": 33414,
           "path": "scripts/reconstruct.py",
-          "sha256": "f240d3f21b95bbc12a34ea65a029b55d9649c0352523c6fc5390f5bc64fb788d"
+          "sha256": "425914e3f91de060515b1e6e67c25e96a4504812df079ffb01def585428bb5ba"
         }
       ],
       "entrypoints": [
@@ -389,6 +447,33 @@
       "mode": "check",
       "requires": [],
       "scope": "Recompute supplementary relationships from printed inputs with precision and interpretation notes."
+    },
+    "statement_check": {
+      "argv": [
+        "make",
+        "statement-check"
+      ],
+      "entrypoint_identities": [
+        {
+          "bytes": 36841,
+          "path": "Makefile",
+          "sha256": "9bac8a0748768331a99abb84bd435e40ace236ad7dd618dc1591f2eeebd969ea"
+        },
+        {
+          "bytes": 14552,
+          "path": "scripts/statement_check.py",
+          "sha256": "82ea7e3ebeeba9982dc0a729d16bed984927e16c81a1500ee41c40b812dfc5c1"
+        }
+      ],
+      "entrypoints": [
+        "Makefile",
+        "scripts/statement_check.py"
+      ],
+      "mode": "check",
+      "requires": [
+        "Checkout"
+      ],
+      "scope": "Evaluate each item of the registered availability statement against the repository and the published manifest."
     },
     "supplement": {
       "argv": [
@@ -518,9 +603,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 35565,
+          "bytes": 36841,
           "path": "Makefile",
-          "sha256": "c6c3d29e2d694ec375f9ba10e364b17a45b76a064c48a635053f7280bc9289ce"
+          "sha256": "9bac8a0748768331a99abb84bd435e40ace236ad7dd618dc1591f2eeebd969ea"
         }
       ],
       "entrypoints": [
@@ -659,6 +744,11 @@
               "sha256": "07b434c60bbf0e62a38ea9d14ec68e791f90279e8fa93202582123b50bcb9cee"
             },
             {
+              "bytes": 41913,
+              "path": "cm_experiments/sweeps.py",
+              "sha256": "2bc7adc5141b397a5d400c0385b1e309fddaec37f544e0dfd977da09155c71f8"
+            },
+            {
               "bytes": 9109,
               "path": "cm_experiments/upstream.py",
               "sha256": "28382ca60977968562ba4dfd5005ae4e2c24441bcd8c02826e6bca377412d625"
@@ -769,6 +859,11 @@
               "sha256": "706c78c42adc4b0b4d73a0efdc8c5fe3e16a6a6e954c44134bd79f0964b8abb2"
             },
             {
+              "bytes": 3538,
+              "path": "release/experiment_code.json",
+              "sha256": "d8bdb177ac6c9fd3d0dfed2dd11a35fc106ee386bbd41aa2d7023866f0951130"
+            },
+            {
               "bytes": 19622,
               "path": "run_cross_morse.py",
               "sha256": "bcffbdc9c944c2455ce972f724abc586283797c5997a671baf67e027f7a401c9"
@@ -813,7 +908,8 @@
             "cross_morse/*.py",
             "run_cross_morse*.py",
             "cm_experiments/*.py",
-            "cm_campaigns/*.py"
+            "cm_campaigns/*.py",
+            "release/experiment_code.json"
           ]
         },
         {
@@ -902,7 +998,7 @@
       ],
       "id": "experiment_code",
       "provider_data": false,
-      "scope": "Core and auxiliary experiment implementations are included. Executing the dataset lifecycles does not by itself execute every auxiliary campaign.",
+      "scope": "Core and auxiliary experiment implementations are included; release/experiment_code.json maps every experiment behind a reported display to its code, command and outputs.",
       "title": "Experimental implementation"
     },
     {
@@ -1124,7 +1220,8 @@
     {
       "artifact_indexes": [
         "runs/index.json",
-        "records/index.json"
+        "records/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -1185,7 +1282,9 @@
       "commands": [
         "lifecycle",
         "registry_check",
-        "fetch"
+        "fetch",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
@@ -1239,12 +1338,13 @@
       ],
       "id": "source_data",
       "provider_data": true,
-      "scope": "Official provider data, reported numerical references and experimental observations have separate identities. Transcribed values never become reconstructed measurements.",
+      "scope": "Official provider data, reported numerical references and experimental observations have separate identities. The source data of every display is generated from the published measured outputs (paper/source_data/, written by the publication step); transcribed values never become reconstructed measurements.",
       "title": "Source data and reported values"
     },
     {
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -1373,7 +1473,9 @@
       ],
       "commands": [
         "registered_design",
-        "executed_manifest"
+        "executed_manifest",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
@@ -1457,12 +1559,13 @@
       ],
       "id": "split_seed_manifests",
       "provider_data": false,
-      "scope": "Registered manifests prescribe splits/seeds; extracted run manifests record what was used. Membership and optimization-seed evidence stay separate.",
+      "scope": "Registered manifests prescribe splits/seeds; manifests/published/ records the memberships and seeds that every published run used. Membership and optimization-seed evidence stay separate.",
       "title": "Split and seed manifests"
     },
     {
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -1517,7 +1620,9 @@
       ],
       "commands": [
         "environment",
-        "lifecycle"
+        "lifecycle",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
@@ -1565,12 +1670,13 @@
       ],
       "id": "environments",
       "provider_data": false,
-      "scope": "Released lock files and containers specify environments; each run carries its actual execution environment.",
+      "scope": "Released lock files and containers specify environments; each run carries its actual execution environment, and environment/observed/ summarizes it for every published run.",
       "title": "Environment specifications"
     },
     {
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -1656,7 +1762,9 @@
         "lifecycle",
         "model_inventory",
         "archive",
-        "fetch"
+        "fetch",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
@@ -1710,12 +1818,13 @@
       ],
       "id": "checkpoints",
       "provider_data": false,
-      "scope": "Bundled checkpoint files are synthetic examples. Original benchmark weights and newly trained weights are distinguished through the registered run relationship.",
+      "scope": "The checkpoints of the reported runs are assets of the release paper-artifacts (complete tier; release/paper_artifacts.json). Bundled checkpoint files are synthetic examples.",
       "title": "Trained checkpoints and model inventories"
     },
     {
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -1792,7 +1901,9 @@
       "commands": [
         "lifecycle",
         "archive",
-        "fetch"
+        "fetch",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
@@ -1848,12 +1959,13 @@
       ],
       "id": "predictions",
       "provider_data": false,
-      "scope": "Saved predictions support paired replay. Numerical agreement with a manuscript value does not establish that a new run produced the original paper.",
+      "scope": "The predictions of the reported runs are assets of the release paper-artifacts (complete tier); paired observations are in the analysis tier. Numerical agreement with a manuscript value does not establish that a new run produced the original paper.",
       "title": "Predictions and paired observations"
     },
     {
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -2119,7 +2231,9 @@
       ],
       "commands": [
         "lifecycle",
-        "scientific_audit"
+        "scientific_audit",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
@@ -2177,13 +2291,14 @@
       ],
       "id": "propensity_logs",
       "provider_data": false,
-      "scope": "Runtime logging and bundled synthetic examples show the format. Original propensity observations must come from their actual exploration runs.",
+      "scope": "The propensity-logged exploration trajectories of the reported runs are assets of the release paper-artifacts (both tiers); bundled synthetic examples show the format.",
       "title": "Exploration and propensity logs"
     },
     {
       "artifact_indexes": [
         "runs/index.json",
-        "records/index.json"
+        "records/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -2375,7 +2490,9 @@
         "export_records",
         "record_check",
         "scientific_audit",
-        "supplement"
+        "supplement",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
@@ -2515,13 +2632,14 @@
       ],
       "id": "statistical_analysis",
       "provider_data": false,
-      "scope": "Statistical code and arithmetic checks are included. Original joint tests, raw paired data and new reproduction outputs remain separately identified.",
+      "scope": "Statistical code and arithmetic checks are included; the selection, confirmation, admission and evaluation records of every reported run and every record set and campaign behind a display are assets of the release paper-artifacts.",
       "title": "Statistical analyses"
     },
     {
       "artifact_indexes": [
         "runs/index.json",
-        "records/index.json"
+        "records/index.json",
+        "release/paper_artifacts.json"
       ],
       "bundled": [
         {
@@ -2531,6 +2649,26 @@
               "bytes": 437,
               "path": "paper/build/__init__.py",
               "sha256": "a023203fdb58baf39c137716ffb5a0f64ae96581b9e6a2faf4e6619e31682533"
+            },
+            {
+              "bytes": 539,
+              "path": "paper/build/displays/__init__.py",
+              "sha256": "bf406b49fe2553b1dec84e4e086cb3166b7178fa981539617d189c0231e8f583"
+            },
+            {
+              "bytes": 25257,
+              "path": "paper/build/displays/framework.py",
+              "sha256": "85ee038bb5e66e14a5021c41ebdba0b1cab98117b86ad1100153108586844a00"
+            },
+            {
+              "bytes": 7416,
+              "path": "paper/build/displays/run_audits.py",
+              "sha256": "c8baef88d2d888c0e20d95f67aad37e35671648d8b02dca366a364df676051d1"
+            },
+            {
+              "bytes": 3557,
+              "path": "paper/build/displays/testing.py",
+              "sha256": "bb3d6dd59d5d3c0cf62f2b7f91a21d3f40725b8af074f240f89215a544e4230e"
             },
             {
               "bytes": 25202,
@@ -2578,9 +2716,14 @@
               "sha256": "91f51168e4557974dc7fcc6ec0e88669230ad403e259bb9c3f20acc9531fa91c"
             },
             {
-              "bytes": 26194,
+              "bytes": 33414,
               "path": "scripts/reconstruct.py",
-              "sha256": "f240d3f21b95bbc12a34ea65a029b55d9649c0352523c6fc5390f5bc64fb788d"
+              "sha256": "425914e3f91de060515b1e6e67c25e96a4504812df079ffb01def585428bb5ba"
+            },
+            {
+              "bytes": 6627,
+              "path": "scripts/reconstruct_paper.py",
+              "sha256": "71d7021d004c6fc82041364db18cdf9d20b37a59cf50b06e70ccefa982ad90e0"
             }
           ],
           "patterns": [
@@ -2589,7 +2732,9 @@
             "scripts/plot_registry_figures.py",
             "scripts/draw_diagrams.py",
             "scripts/reconstruct.py",
-            "scripts/build_supplement.py"
+            "scripts/build_supplement.py",
+            "paper/build/displays/*.py",
+            "scripts/reconstruct_paper.py"
           ]
         },
         {
@@ -2609,13 +2754,15 @@
       "commands": [
         "reconstruct",
         "reconstruction_example",
-        "supplement"
+        "supplement",
+        "paper",
+        "publish"
       ],
       "contract_identities": [
         {
-          "bytes": 6641,
+          "bytes": 4962,
           "path": "docs/RECONSTRUCTION.md",
-          "sha256": "61d6964bfb97db6547f252091c46885f4438f03a5a0c377553b352cd5b90a0cb"
+          "sha256": "716d6850a968ceebdb12b4301985cbcb2ec9c16ed221267ac3bb880e0989343f"
         },
         {
           "bytes": 13407,
@@ -2628,9 +2775,9 @@
           "sha256": "8bfdf4639518c9c76056c6707fae923d30923492c198cc93ce0e3ab667741cbf"
         },
         {
-          "bytes": 33232,
+          "bytes": 33325,
           "path": "paper/PAPER_SUPPORT.md",
-          "sha256": "114be26be2ed2049c58134ed0875638775ee307b9640576d7cc4e5708fa7c4a3"
+          "sha256": "2a6d1376df2c3071cf1faba04ccc07e44386e8e08702ff9decc171ac88349a9f"
         }
       ],
       "contracts": [
@@ -2726,7 +2873,7 @@
       ],
       "id": "table_figure_generators",
       "provider_data": false,
-      "scope": "Display-level coverage is explicit. The inventory of all numbered displays does not claim that every printed table or figure has an exact standalone generator.",
+      "scope": "paper/build/displays/ holds one generator per numbered display; make paper runs them on the published outputs and compares every computed value with the printed one.",
       "title": "Table and figure generators"
     }
   ],
@@ -2773,19 +2920,19 @@
   },
   "inputs": [
     {
-      "bytes": 32636,
+      "bytes": 35593,
       "path": "release/artifact_catalog_spec.json",
-      "sha256": "fcc0701592392b479333228573482ef257591fbd6645a709b443554eafbcfc68"
+      "sha256": "274c9163fb54cc86cf79a6b56eeea5918d1260fb1389140370c198c1fc72cc72"
     },
     {
-      "bytes": 30237,
+      "bytes": 30289,
       "path": "scripts/artifact_catalog.py",
-      "sha256": "55cbcc885e0e4cbc7a41de9e33bc7e0ec956e608624f954b4ddd55a4a10d0483"
+      "sha256": "e7373a3395f69f87edbc6bea6e7bd44a1a93eda93711c1a976c3de3af3921b58"
     },
     {
-      "bytes": 5054,
+      "bytes": 5562,
       "path": "release/release_scope.json",
-      "sha256": "bed1c05226cc16d273e80c46cbd5a090b3e9f8fdf49cb991216f907b8c628fe4"
+      "sha256": "8f63253e3f5eb6a36b32a62e6262e3e7853f7bb88968182802000aff7f48e539"
     },
     {
       "bytes": 57,

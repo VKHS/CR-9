@@ -1,0 +1,165 @@
+{
+ "display": "supplementary:Table S38",
+ "source": {
+  "document": "supplementary",
+  "pages": [
+   23,
+   24
+  ]
+ },
+ "scope": "Field names and value domains of the registered results-record schema. 'records' names the columns of the measurement-record summary schema (records/specs.json: set keys plus summary_columns) that carry the field in this repository, 'results_csv' the columns of the run results table written by cross_morse/pipeline.py (final/results.csv), and 'evidence' the top-level fields of the per-run evidence record of paper/build/evidence.py. The generator checks every listed column against those schemas and derives each field's role from them.",
+ "rows": {
+  "dataset": {
+   "field": "dataset",
+   "values": "one of the seven benchmarks",
+   "records": [
+    "dataset"
+   ],
+   "results_csv": [],
+   "evidence": [
+    "dataset"
+   ]
+  },
+  "backbone": {
+   "field": "backbone",
+   "values": "frozen plant or substituted backbone (Table S5, S25)",
+   "records": [
+    "model"
+   ],
+   "results_csv": [],
+   "evidence": [
+    "entry"
+   ]
+  },
+  "checkpoint": {
+   "field": "checkpoint / ensemble",
+   "values": "checkpoint identifiers and the ensemble they form (E); repeated evaluations are separate records",
+   "records": [
+    "seed",
+    "ensemble"
+   ],
+   "results_csv": [
+    "ensemble"
+   ],
+   "evidence": [
+    "seeds"
+   ]
+  },
+  "policy": {
+   "field": "policy",
+   "values": "q_C (with its family and the selected rule), q̂_s, q_M, q̃_M, q_D, a comparator of Table S15 or an experimental arm (E2–E20)",
+   "records": [
+    "method",
+    "arm"
+   ],
+   "results_csv": [
+    "model"
+   ],
+   "evidence": [
+    "selection",
+    "confirmation",
+    "admission"
+   ]
+  },
+  "profile": {
+   "field": "execution profile",
+   "values": "Lean, Full, inserted-site parameters, truncation order T and resolvent frequency actually executed",
+   "records": [
+    "configuration"
+   ],
+   "results_csv": [],
+   "evidence": [
+    "candidates"
+   ]
+  },
+  "stage": {
+   "field": "data stage",
+   "values": "D_fit, D_explore, D_select, D_confirm, D_compare, D_admit (validation), D_test; graph or cluster identities attached",
+   "records": [],
+   "results_csv": [],
+   "evidence": [
+    "data"
+   ]
+  },
+  "unit": {
+   "field": "statistical unit",
+   "values": "complete graph, buffered cluster (buffer in hops), official split, optimization seed",
+   "records": [],
+   "results_csv": [],
+   "evidence": [
+    "data"
+   ]
+  },
+  "protocol": {
+   "field": "evaluation protocol",
+   "values": "loss (clipped or unclipped, B), official metric, pairing, resampling hierarchy (E16)",
+   "records": [
+    "unit"
+   ],
+   "results_csv": [
+    "metric_name",
+    "loss_name"
+   ],
+   "evidence": [
+    "task",
+    "admission"
+   ]
+  },
+  "score": {
+   "field": "unrounded score and paired effect",
+   "values": "native units; paired to the comparator record",
+   "records": [
+    "quantity",
+    "value"
+   ],
+   "results_csv": [
+    "metric",
+    "metric_percent",
+    "loss_nats"
+   ],
+   "evidence": [
+    "final"
+   ]
+  },
+  "uncertainty": {
+   "field": "uncertainty",
+   "values": "interval with its resampling procedure and level",
+   "records": [
+    "quantity",
+    "value"
+   ],
+   "results_csv": [],
+   "evidence": [
+    "final",
+    "admission"
+   ]
+  },
+  "cost": {
+   "field": "actual cost",
+   "values": "serial work, wall time (protocol of E17), fitting cost with its accounting unit",
+   "records": [
+    "quantity",
+    "value",
+    "unit"
+   ],
+   "results_csv": [],
+   "evidence": [
+    "cost",
+    "stages"
+   ]
+  },
+  "identifier": {
+   "field": "observation identifier",
+   "values": "path to the log or trace that produced the record",
+   "records": [
+    "source_file",
+    "locator"
+   ],
+   "results_csv": [],
+   "evidence": [
+    "run_root",
+    "identities"
+   ]
+  }
+ }
+}

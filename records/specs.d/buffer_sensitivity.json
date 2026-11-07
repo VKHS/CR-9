@@ -1,0 +1,38 @@
+{
+ "title": "Buffer sensitivity of descriptive admission on the single-graph benchmarks",
+ "manuscript_tables": [
+  "Supplementary Table S27"
+ ],
+ "experiments": [
+  "E11"
+ ],
+ "keys": [
+  "dataset",
+  "buffer_hops"
+ ],
+ "quantities": {
+  "clipped_effect_nats": "clipped paired loss effect D_bar of the confirmed rule minus q_C on D_admit with the cores built at this buffer (nats)",
+  "half_width_nats": "U_desc minus D_bar: one-sided half-width of the cluster-bootstrap interval at this buffer (nats)",
+  "upper_nats": "U_desc: one-sided (1 - alpha) cluster-bootstrap upper limit of the clipped effect (nats)",
+  "admitted": "descriptive admission decision at epsilon_a: 1 when D_bar <= -epsilon_a and U_desc < 0, otherwise 0",
+  "resampling_units": "number of resampling units entering the cluster bootstrap at this buffer"
+ },
+ "datasets": [
+  "ogbn-arxiv",
+  "ogbn-proteins"
+ ],
+ "grid": {
+  "buffer_hops": [
+   2,
+   4,
+   8,
+   16,
+   32
+  ]
+ },
+ "registered": {
+  "buffer_hops": 2
+ },
+ "table": "list",
+ "notes": "The released runtime cannot produce this set. cross_morse/data.py records the k-hop buffer as a context diagnostic only (buffer_role context_diagnostic_only; propagation on the full graph), and cross_morse.statistics.admission resamples the METIS or degree-stratified cores of prepared/clusters.npz, so data.buffer_hops changes no admission statistic. The paper states that the intervals widen with the buffer because the effective number of independent clusters falls, but does not define how the buffer enters the resampling units. The producing experiment must define that unit construction (and record resampling_units) before the set can be measured; scripts/run_sweep.py refuses the sweep until it exists. Rows are written by scripts/export_sweep_records.py from a sweep results file with these keys and quantities."
+}

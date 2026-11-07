@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-11-07 — Registered availability statement: published outputs, display generators, one command
+
+- `release/availability_statement.json` holds the paper's registered data- and
+  code-availability statement verbatim and divides it into its twelve items.
+  `make statement-check` (`scripts/statement_check.py`) evaluates each item from
+  the repository's contents and writes `STATEMENT_COMPLIANCE.md`; an item is
+  fulfilled, awaiting the publication of the measured outputs, or missing.
+- The measured outputs of the reported experiments (checkpoints, predictions,
+  propensity-logged trajectories, statistical outputs, executed split and seed
+  memberships, observed environments) are published as assets of this
+  repository's release `paper-artifacts` and listed in
+  `release/paper_artifacts.json` with the SHA-256 of every part, archive and file.
+  `scripts/paper_artifacts.py` plans, packs (deterministic archives, parts below
+  the 2 GiB asset limit), publishes, downloads and verifies them in an analysis
+  tier and a complete tier; `hpc/publish_paper_artifacts_arrhenius.sh` runs the
+  publication on the cluster and writes `manifests/published/`,
+  `environment/observed/` and `paper/source_data/`.
+- `make paper` (`scripts/reconstruct_paper.py`) is the one-command reconstruction:
+  download, verification of every byte, of each run's sealed eight-stage chain and
+  of each record set's trace, one generator per numbered table and figure
+  (`paper/build/displays/`), full-precision source data of every display and a
+  per-cell comparison with the printed values. Exit status 0 only when every
+  display is complete and every value agrees.
+@@DISPLAYS@@
+@@EXPERIMENTS@@
+- `release/experiment_code.json` maps every experiment behind a reported table or
+  figure to its code, command, configurations and published artifacts.
+- Availability views (`AVAILABILITY.md`, `paper/AVAILABILITY_STATEMENT.txt`,
+  `paper/CLAIMS.md`, the paper-support reports, the badge and the artifact
+  catalog) follow the repository-release scope. `make verify` includes
+  `paper-artifacts-check` and `statement-check`.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged: source
+  fingerprint `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+
 ## 2026-11-07 — Availability catalog and traced reconstruction
 
 - Added a typed artifact catalog that maps code, configurations, dataset sources,

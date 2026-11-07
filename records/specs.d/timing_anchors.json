@@ -1,0 +1,19 @@
+{
+ "title": "Timing anchors that bracket the per-input nominal execution time",
+ "manuscript_tables": [
+  "Supplementary Table S23b"
+ ],
+ "experiments": [
+  "E17"
+ ],
+ "keys": [
+  "dataset"
+ ],
+ "quantities": {
+  "throughput_anchor_seconds": "per-input nominal execution time implied by the multiply-add count W_nom of one nominal member execution at the sustained throughput measured for the plant on the deployment device (s); full-batch plants with a native dense layer only",
+  "training_anchor_low_seconds": "lower end of the per-input forward-time bracket derived from the measured training time of one plant seed (s)",
+  "training_anchor_high_seconds": "upper end of that bracket (s)"
+ },
+ "table": "list",
+ "notes": "Anchors are adopted timing references, kept apart from the measured t_nom of the nominal_time set. Each dataset carries its own anchors, also when Table S23b prints another plant's anchor as the reference range (COCO-SP shares the PascalVOC-SP anchor because the two plants have the same backbone, depth and graph size; the generator applies that convention). The throughput and training-time records (scheduler accounting of the plant seeds, epochs and training inputs, and the sustained-throughput measurement) go under raw/; deposit with `python -B scripts/export_records.py from-mapping --mapping <timing_anchors mapping>` once the set is registered for the mapping exporter."
+}

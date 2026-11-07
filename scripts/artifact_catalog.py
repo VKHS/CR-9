@@ -191,7 +191,8 @@ def validate_spec(root: Path, spec: dict) -> None:
             safe_path(root, path)
         require(type(row.get("provider_data")) is bool, f"Invalid provider-data flag: {key}")
         for index in string_list(row.get("artifact_indexes"), f"{key} artifact indexes"):
-            require(index in {"runs/index.json", "records/index.json"}, f"Unknown artifact index: {index}")
+            require(index in {"runs/index.json", "records/index.json", "release/paper_artifacts.json"},
+                    f"Unknown artifact index: {index}")
             safe_path(root, index)
 
 
@@ -430,8 +431,10 @@ def render(catalog: dict) -> str:
             lines.append("| " + " | ".join(_cell(s) for s in (row["dataset"], row["materialization"], relationship,
                          ", ".join(f"`{x}`" for x in row["registration"]["run_source_sha256"]))) + " |")
     else:
-        lines += ["This code release describes the generated benchmark artifacts above. Original completed runs or new "
-                  "reproductions can be registered with their actual source identities and an explicit relationship to the paper."]
+        lines += ["No run archive is registered in runs/index.json. The measured outputs of the reported experiments are "
+                  "listed in [release/paper_artifacts.json](../release/paper_artifacts.json) as assets of the release "
+                  "paper-artifacts; original completed runs or new reproductions can also be registered here with their "
+                  "actual source identities and an explicit relationship to the paper."]
     if catalog["registered_measurement_sets"]:
         lines += ["", "Validated local measurement sets: " + ", ".join(f"`{row['registration']['set']}`" for row in catalog["registered_measurement_sets"]) + "."]
     lines += ["", "An `exact_result_producing_run` declaration identifies an author-declared original run; "

@@ -28,6 +28,7 @@ from scripts import build_paper, records as measurement_records
 from scripts.artifact_inventory import verify_run_bytes
 from scripts.ingest_run import check_present, registered_path, registration_descriptor
 from scripts.paper_support_report import validate_manifest
+from scripts.paper_artifacts import analysis_omissions, verify_analysis_run
 
 SCHEMA = "cross-morse-reconstruction-1"
 FILES_SCHEMA = "cross-morse-reconstruction-files-1"
@@ -43,6 +44,7 @@ FIGURE_RELATIONS = {
     "F5": ["supplementary:Table S41"], "F6": ["supplementary:Figure S9"],
 }
 COVERAGE = {"columns", "partial_panels", "full_numerical_display", "supporting_output"}
+CAMPAIGN_ARGUMENTS = {"confirmation", "budget"}
 
 
 class ReconstructionError(ValueError):
@@ -127,8 +129,20 @@ def _run_inputs(runs_root: Path | None, index: Path | None) -> tuple[list, list,
         children = ([path] if build_paper.is_run(path) else
                     sorted(p for p in path.glob("split_*") if build_paper.is_run(p)))
         datasets, profiles, split_ids = set(), set(), []
+        omissions = analysis_omissions(path)
         for child in children:
-            _, config, identities, _, _, _, _, _ = verify_run_bytes(child)
+            if omissions is None:
+                _, config, identities, _, _, _, _, _ = verify_run_bytes(child)
+                verification = "all sealed bytes and eight-stage chain; no checkpoint deserialization"
+            else:
+                prefix = "" if child == path else child.relative_to(path).as_posix() + "/"
+                local = {rel[len(prefix):]: dict(d, path=rel[len(prefix):])
+                         for rel, d in omissions.items() if rel.startswith(prefix)}
+                identities, info = verify_analysis_run(child, local)
+                config = read_json(child / "config.json")
+                verification = (f"analysis tier: eight-stage chain and every present sealed byte; "
+                                f"{info['omitted']} checkpoint/prediction files omitted with their sealed identities "
+                                f"({info['source_resolution']})")
             state = read_json(child / "run_state.json")
             if (state.get("profile") != config.get("profile")
                     or state.get("scientific_run") != config.get("scientific_run")):
@@ -143,7 +157,7 @@ def _run_inputs(runs_root: Path | None, index: Path | None) -> tuple[list, list,
             inputs.append({"kind": "sealed_run", "path": str(child), "identities": identities,
                            "stage_manifests": {
                                p.name: sha256(p) for p in sorted((child / "provenance/stages").glob("*.json"))},
-                           "verification": "all sealed bytes and eight-stage chain; no checkpoint deserialization",
+                           "verification": verification,
                            "profile": config.get("profile"), "scientific_run": config.get("scientific_run"),
                            "historical_relationship": "not inferred from run completion"})
         if len(datasets) != 1 or len(profiles) != 1:
@@ -178,6 +192,45 @@ def _record_inputs(index: Path | None, specs_path: Path) -> tuple[list, dict]:
         raise ReconstructionError("Measurement-record index differs from the verified deposited sets")
     return entries, {"kind": "measurement_records", "path": str(index), "sha256": sha256(index),
                      "sets": entries, "verification": "manifest hashes and summary-to-raw-value traceability"}
+
+
+def display_context(root: Path, found: list, collected: list, record_entries: list, records_index,
+                    campaigns: dict, synthetic: bool):
+    """Inputs of the display generators: verified runs, verified record sets and campaign exports."""
+    from paper.build.displays.framework import DisplayContext, RecordSetView, RunView
+    runs = {}
+    for (_, path), record in zip(found, collected):
+        splits = [RunView(record["dataset"], p) for p in sorted(path.glob("split_*")) if build_paper.is_run(p)]
+        runs[record["dataset"]] = RunView(record["dataset"], path, splits=splits if not build_paper.is_run(path) else ())
+    records = {}
+    if record_entries:
+        base = Path(records_index).resolve().parent
+        specs = measurement_records.load_specs(base, root / "records/specs.json")
+        for entry in record_entries:
+            spec = specs["sets"][entry["set"]]
+            rows = measurement_records.read_summary(base / entry["set"], spec, specs["summary_columns"])
+            for row in rows:
+                row["value"] = float(row["value"])
+            records[entry["set"]] = RecordSetView(entry["set"], base / entry["set"], spec, rows,
+                                                  synthetic=bool(entry.get("synthetic")))
+    return DisplayContext(root=root, runs=runs, records=records,
+                          campaigns={k: Path(v).resolve() for k, v in campaigns.items() if v is not None},
+                          synthetic=synthetic)
+
+
+def add_display_outputs(outputs: list, stage: Path, result: dict, ids: set, synthetic: bool) -> None:
+    for row in result["displays"]:
+        if row["status"] != "built":
+            continue
+        artifact_inputs = [need for need in row["needs"] if need != "static"]
+        kind = ("repository_sources" if not artifact_inputs else
+                "synthetic_examples" if synthetic else "verified_experiment_artifacts")
+        add_output(outputs, stage, {"id": "display:" + row["id"],
+                   "files": ["displays/" + name for name in row["files"]], "display_ids": [row["id"]],
+                   "coverage": "full_numerical_display", "input_kind": kind, "scope": row["scope"],
+                   "comparison": row["comparison"],
+                   "note": "Complete display generated from the declared inputs; comparison/<stem>.csv "
+                           "places every transcribed printed value beside the computed one."}, ids)
 
 
 def add_output(outputs: list, directory: Path, entry: dict, display_ids: set) -> None:
@@ -233,6 +286,24 @@ def render_report(result: dict) -> str:
     if not result["outputs"]:
         lines += ["| Input materialization | Input-dependent build | See the display inventory | "
                   "Provide sealed run directories or registered measurement records |"]
+    generators = result.get("display_generators")
+    if generators:
+        counts = generators["comparison_with_printed_values"]
+        lines += ["", "## Display generators and comparison with the paper", "",
+                  f"{generators['built']} of {len(result['displays'])} numbered displays were generated in full; "
+                  f"{generators['awaiting_inputs']} await their experiment inputs; "
+                  f"{generators['without_generator']} have no generator; "
+                  f"{len(generators.get('errors') or {})} generator errors.", "",
+                  f"Printed values compared: **{counts['exact']} exact** at the printed precision, "
+                  f"**{counts['differs']} differ**, {counts['not_comparable']} not comparable, "
+                  f"{counts['no_reference']} without a transcribed reference. "
+                  "Each display's `displays/compare/<stem>.csv` lists every comparison.", "",
+                  "| Display | Generator | Exact | Differs | Awaiting |", "|---|---|---|---|---|"]
+        for display in result["displays"]:
+            comp = display.get("comparison") or {}
+            awaiting = "; ".join(display.get("awaiting") or []) or ""
+            lines.append(f"| {display['id']} | {display.get('generator', 'no_generator').replace('_', ' ')} | "
+                         f"{comp.get('exact', '')} | {comp.get('differs', '')} | {awaiting} |")
     lines += ["", "## Display inventory", "",
               "A protocol or arithmetic check remains a support command. It does not count as a regenerated "
               "table or figure. Column and partial-panel builders retain those scopes even when all their "
@@ -284,7 +355,8 @@ def verify_workspace(directory: Path) -> dict:
 
 
 def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=None,
-                confirmation_campaign=None, budget_campaign=None, label="reconstruction", root=ROOT) -> dict:
+                confirmation_campaign=None, budget_campaign=None, campaigns=None,
+                label="reconstruction", root=ROOT) -> dict:
     """Build in a new staging directory, then atomically publish a managed workspace."""
     root, output_dir = Path(root).resolve(), Path(output_dir).absolute()
     if not isinstance(label, str) or not label.strip() or "\n" in label or "|" in label:
@@ -292,15 +364,18 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
     if runs_root is not None and index is not None:
         raise ReconstructionError("Choose a run directory or a registered run index")
     # Never replace source or input directories, even if a forged marker exists.
+    campaigns = {**(campaigns or {}), **{name: path for name, path in
+                                         (("confirmation", confirmation_campaign), ("budget", budget_campaign))
+                                         if path is not None}}
     protected = [root] + [Path(p).resolve() for p in
-                         (runs_root, index, records_index, confirmation_campaign, budget_campaign) if p is not None]
+                         (runs_root, index, records_index, *campaigns.values()) if p is not None]
     if any(p == output_dir.resolve() or p.is_relative_to(output_dir.resolve()) for p in protected):
         raise ReconstructionError("The output directory would replace source or input files")
     if runs_root is not None and output_dir.resolve().is_relative_to(Path(runs_root).resolve()):
         raise ReconstructionError("Keep the reconstruction workspace outside the input run directory")
     if any(path.is_symlink() for path in (output_dir, *output_dir.parents)):
         raise ReconstructionError("Output directory must not traverse a symlink")
-    input_directories = [Path(p).resolve() for p in (confirmation_campaign, budget_campaign) if p is not None]
+    input_directories = [Path(p).resolve() for p in campaigns.values() if p is not None]
     if records_index is not None:
         input_directories.append(Path(records_index).resolve().parent)
     if any(output_dir.resolve().is_relative_to(path) for path in input_directories):
@@ -365,7 +440,19 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
             for entry in supplementary.get("outputs", []):
                 entry = {**entry, "files": ["supplement/" + name for name in entry["files"]]}
                 add_output(outputs, stage, entry, ids)
+        from paper.build.displays.framework import build_displays
+        context = display_context(root, found, collected, record_entries, records_index, campaigns, synthetic)
+        generated = build_displays(context, stage / "displays")
+        add_display_outputs(outputs, stage, generated, ids, synthetic)
         displays = display_status(manifest, outputs)
+        by_id = {row["id"]: row for row in generated["displays"]}
+        for row in displays:
+            built = by_id.get(row["id"], {})
+            row["generator"] = built.get("status", "no_generator")
+            row["comparison"] = built.get("comparison")
+            row["awaiting"] = built.get("missing", [])
+        comparison = {state: sum((row.get("comparison") or {}).get(state, 0) for row in generated["displays"])
+                      for state in ("exact", "differs", "not_comparable", "no_reference")}
         result = {"schema": SCHEMA, "label": label,
                   "build_status": "SUPPORTED_OUTPUTS_BUILT" if outputs else "INPUTS_REQUIRED",
                   "all_displays_numerically_reconstructed": all(row["full_numerical_display"] for row in displays),
@@ -374,7 +461,16 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
                   "documents": manifest["documents"], "software_sources": source_inventory(root),
                   "environment": {"python": platform.python_version(), "platform": platform.system(),
                                   **{name: importlib.metadata.version(name) for name in ("numpy", "matplotlib")}},
-                  "outputs": outputs, "displays": displays, "supplementary_build": supplementary}
+                  "outputs": outputs, "displays": displays, "supplementary_build": supplementary,
+                  "display_generators": {"registered": generated["generators"], "built": generated["built"],
+                                         "awaiting_inputs": sum(1 for r in generated["displays"]
+                                                                if r["status"] == "awaiting_inputs"),
+                                         "without_generator": sum(1 for r in generated["displays"]
+                                                                  if r["status"] == "no_generator"),
+                                         "errors": {r["id"]: r["error"] for r in generated["displays"]
+                                                    if r["status"] == "error"},
+                                         "module_errors": generated.get("module_errors", {}),
+                                         "comparison_with_printed_values": comparison}}
         write_json(stage / "reconstruction.json", result)
         (stage / "RECONSTRUCTION_REPORT.md").write_text(render_report(result), encoding="utf-8")
         write_file_manifest(stage)
@@ -400,6 +496,8 @@ def main(argv=None) -> int:
     parser.add_argument("--records-index", type=Path)
     parser.add_argument("--confirmation-campaign", type=Path)
     parser.add_argument("--budget-campaign", type=Path)
+    parser.add_argument("--campaign", action="append", default=[], metavar="NAME=PATH",
+                        help="an additional campaign export a display declares (repeatable)")
     parser.add_argument("--label", default="reconstruction")
     parser.add_argument("--require-all-displays", action="store_true")
     parser.add_argument("--verify", type=Path, help="verify an existing workspace without rebuilding it")
@@ -414,9 +512,15 @@ def main(argv=None) -> int:
         else:
             if args.output_dir is None:
                 parser.error("--output-dir is required for a build")
+            extra = {}
+            for item in args.campaign:
+                name, _, path = item.partition("=")
+                if not name or not path:
+                    raise ReconstructionError(f"--campaign expects NAME=PATH, got {item!r}")
+                extra[name] = Path(path)
             result = reconstruct(args.output_dir, runs_root=args.runs_root, index=args.index,
                                  records_index=args.records_index, confirmation_campaign=args.confirmation_campaign,
-                                 budget_campaign=args.budget_campaign, label=args.label)
+                                 budget_campaign=args.budget_campaign, campaigns=extra, label=args.label)
             print(f"{result['build_status']}: {args.output_dir / 'RECONSTRUCTION_REPORT.md'}")
         if args.require_all_displays and not result["all_displays_numerically_reconstructed"]:
             print("The workspace does not reconstruct every numerical display; see the per-display coverage.", file=sys.stderr)

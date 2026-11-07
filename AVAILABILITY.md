@@ -2,35 +2,56 @@
 
 ## Availability statement
 
-The CROSS-MORSE reference implementation, the seven dataset adapters with their configurations, the Slurm reproduction launcher, environment specifications, statistical analysis tools and reported-result references are available at [https://github.com/VKHS/CR-9](https://github.com/VKHS/CR-9). The release includes **2 complete synthetic example runs** with checkpoints, predictions and exploration logs for software verification. Official datasets are obtained from their providers by the adapters. Original benchmark execution archives can be supplied through the run/record registration workflow; this code release does not package those archives. `bash run_cross_morse.sh reproduce` executes the registered dataset lifecycles on a Slurm GPU cluster; each run seals the runtime fingerprint, configuration, data-role membership, checkpoints and decision records it was produced with. The suite report rebuilds supported run-derived outputs and compares their quantities with the reported references. [The artifact catalog](docs/ARTIFACT_CATALOG.md) distinguishes included files, provider data, new execution products and registered experimental archives.
+The paper's registered data-availability statement:
 
-## What the release contains
+> The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
-| Component | Location |
-|---|---|
-| Reference implementation and the sealed eight-stage lifecycle | `cross_morse/`, `run_cross_morse*.py` |
-| Reproduction launcher for Slurm GPU clusters and the seven dataset wrappers | `run_cross_morse.sh`, `run_cross_morse_<dataset>.sh`; [HPC guide](docs/HPC.md) |
-| Smoke, pilot and full-profile configurations; split rules, seeds and folds | `configs/`, `manifests/registered/`, `cross_morse/split_contract.py` |
-| Experiments outside the lifecycle: E3–E6 arms, retrained baselines, E17 timing, scheduler accounting | `cm_experiments/`, `cm_campaigns/`, `hpc/`; [Experiments](docs/EXPERIMENTS.md) |
-| Curated paper-reported values and registered protocol constants | `paper/reported_results.json`, `paper/registered_constants.json` |
-| Builders of the run-derived tables and figures; comparison of a run with the paper | `paper/build/`, `scripts/build_paper.py`, `scripts/compare_with_manuscript.py` |
-| Analytical statements and supplementary arithmetic | `cm_theory/`, `scripts/check_si_identities.py` |
-| Environment specifications and containers | `environment/`, `Dockerfile` |
-| Typed artifact catalog: included files, provider data, generated outputs and registered archives | [Artifact catalog](docs/ARTIFACT_CATALOG.md); `release/artifact_catalog.json` |
-| Complete synthetic example runs | 2 under `examples/runs/` |
+**2 of 12 items fulfilled**, 8 awaiting the publication of the measured outputs, 2 missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).
 
-## Execution and reconstruction
+| Statement item | Status | Where in the repository |
+|---|---|---|
+| complete experiment code | Missing | release/experiment_code.json |
+| configurations | Fulfilled | `configs/` and the experiment configurations |
+| source data | Awaiting measured outputs | `paper/source_data/` (written by the publication step) |
+| split and seed manifests | Awaiting measured outputs | `manifests/registered/` (design); `manifests/published/` (executed) |
+| environment specification | Awaiting measured outputs | `environment/`, `Dockerfile`, SITE SETTINGS of `run_cross_morse.sh` |
+| checkpoints | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) |
+| predictions | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) |
+| propensity-logged trajectories | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) |
+| statistical outputs | Awaiting measured outputs | release `paper-artifacts`: runs, measurement-record sets and campaigns |
+| figure/table generators | Missing | `paper/build/displays/` |
+| one-command reconstruction of every reported table and figure | Awaiting measured outputs | `make paper` (scripts/reconstruct_paper.py) |
+| follows established reproducibility guidance | Fulfilled | `REPRODUCIBILITY.md` |
 
-Edit the SITE SETTINGS block of `run_cross_morse.sh` for the cluster (or select a profile with `CM_ENV_FILE`), then `bash run_cross_morse.sh check` verifies the settings and the runtime fingerprint and prints the job plan, and `bash run_cross_morse.sh reproduce` submits the lifecycle suite: one setup job, the eight-stage lifecycle of every dataset (Roman-empire on its ten official splits) and one report job. Runs that reach their time limit checkpoint and requeue themselves; a GPU or driver failure requeues the job on another node.
+## Measured outputs
 
-The report rebuilds the run-derived columns of main Tables 1–2 and Supplementary Tables S4, S12, S12c, S13–S15, S23 and S41; numerical plots related to main Figs. 2c and 4d and Supplementary Fig. S9; a partial internal-method map related to main Fig. 5a; an entry-loss depth diagnostic; and stage-cost bars related to Table S41 with `scripts/build_paper.py`, and `scripts/compare_with_manuscript.py` places every compared quantity of a full-profile run beside the printed value (exact at the printed precision, inside the printed 95% interval, or outside). The experiments outside the lifecycle and their record exporters are run as described in [Experiments](docs/EXPERIMENTS.md); `make records-check` traces a record set to its raw files. Registry plots use transcribed table values and analytical scenarios; they are not a replay of benchmark observations. Auxiliary tables require their corresponding validated measurement-record sets. Numerical plot builders do not reproduce every printed panel or its exact artwork; paper/PAPER_SUPPORT.md states the display-specific scope.
+The checkpoints, predictions, propensity-logged trajectories and statistical outputs of the reported experiments are assets of the release [`paper-artifacts`](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) of [https://github.com/VKHS/CR-9](https://github.com/VKHS/CR-9); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with the SHA-256 of each part, archive and file. Published: **0 of 8** required artifacts.
 
-`make reconstruct REPORT_ROOT=/abs/reports` assembles the supported numerical outputs and a manifest of all numbered displays. `make reconstruction-example REPORT_ROOT=/abs/reports` uses the bundled synthetic examples. Each report distinguishes generated columns, partial or related plots, and check-only references. See [Reconstruction](docs/RECONSTRUCTION.md).
+| Artifact | Status | Files | Size | Checkpoints | Predictions | Trajectories | Statistical outputs |
+|---|---|---|---|---|---|---|---|
+| `run:ogbn-arxiv` | awaiting measured outputs | — | — | — | — | — | — |
+| `run:ogbn-proteins` | awaiting measured outputs | — | — | — | — | — | — |
+| `run:ogbn-products` | awaiting measured outputs | — | — | — | — | — | — |
+| `run:Roman-empire` | awaiting measured outputs | — | — | — | — | — | — |
+| `run:PascalVOC-SP` | awaiting measured outputs | — | — | — | — | — | — |
+| `run:COCO-SP` | awaiting measured outputs | — | — | — | — | — | — |
+| `run:Peptides-func` | awaiting measured outputs | — | — | — | — | — | — |
+| `environment:gpu` | awaiting measured outputs | — | — | — | — | — | — |
 
-`make reproduce` and `make example-paper` replay the bundled synthetic runs without a GPU. The run index (`runs/index.json`) registers sealed archives packed with `scripts/archive_run.py`; the record index (`records/index.json`) registers measurement sets and their raw-file provenance. An original experiment and a new reproduction retain their actual source identities and an explicit relationship to the manuscript.
+## One command
+
+`make paper` downloads the published outputs (analysis tier; `PAPER_TIER=complete` adds checkpoints and prediction arrays), verifies every part, archive and file against the manifest, verifies each run's sealed eight-stage chain and each record set's trace to its raw files, rebuilds every numbered table and figure with its source data (`paper/build/displays/`) and compares every computed value with the value printed in the paper. It exits 0 only when every display is complete and every compared value agrees. See [Reconstruction](docs/RECONSTRUCTION.md).
+
+## Publication of the measured outputs
+
+`bash hpc/publish_paper_artifacts_arrhenius.sh` packs the reported runs, record sets and campaigns on the cluster, uploads them to the release, downloads them back for verification, and writes the commit-sized views: `manifests/published/` (executed role memberships and seeds), `environment/observed/` (execution environments) and `paper/source_data/` (the source data of every display). See [Publishing the measured outputs](docs/PUBLICATION.md).
+
+## Independent regeneration
+
+`bash run_cross_morse.sh reproduce` executes the registered lifecycles on any Slurm GPU cluster after its SITE SETTINGS block is edited; its report compares the new runs with the paper ([HPC guide](docs/HPC.md)). Official datasets are obtained from their providers by the adapters. The release also includes 2 complete synthetic example runs for software verification without a GPU.
 
 ## Source identity
 
-Runtime source identity: `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb` (`make fingerprint`). `run_cross_morse.sh` checks it before a reproduction and every run records it with its environment. Paper PDFs are not distributed here; [paper/sources.json](paper/sources.json) retains their hashes and page references. Numerical comparison targets remain in [paper/reported_results.json](paper/reported_results.json).
+Runtime source identity: `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb` (`make fingerprint`). Every published run records the runtime identity it was produced with; verification resolves it to this tree, a bundled snapshot or the run's own frozen source. Paper PDFs are not distributed here; [paper/sources.json](paper/sources.json) retains their hashes and page references, and [paper/reported_results.json](paper/reported_results.json) holds the printed values used only for comparison.
 
-See [HPC and reproduction](docs/HPC.md) and [Getting started](docs/GETTING_STARTED.md). Generated by `scripts/availability.py`; `make availability-check` verifies freshness and claim consistency.
+Generated by `scripts/availability.py`; `make availability-check` verifies freshness and claim consistency.

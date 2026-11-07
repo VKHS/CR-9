@@ -1,0 +1,37 @@
+{
+ "title": "Reliability, harm and fallback diagnostics",
+ "manuscript_tables": [
+  "Supplementary Figure S16"
+ ],
+ "experiments": [
+  "E7",
+  "E8"
+ ],
+ "keys": [
+  "diagnostic",
+  "level"
+ ],
+ "quantities": {
+  "coverage": "fraction of executed decisions or sequences whose realized consequence lies inside the predicted risk radius at the prediction horizon of the level (fraction)",
+  "coverage_ci_low": "lower end of the 95% interval of that coverage (fraction)",
+  "coverage_ci_high": "upper end of that interval (fraction)",
+  "risk_rmse": "held-out RMSE of the one-step risk prediction made through the observer variant of the level (nats)",
+  "nis_coverage": "fraction of held-out innovations of the observer variant whose normalized innovation squared lies inside the registered chi-square acceptance region (fraction)",
+  "false_safe_rate": "executed decisions predicted safe whose paired loss increased, over executed decisions (fraction)",
+  "false_safe_ci_low": "lower end of the 95% interval of the false-safe rate (fraction)",
+  "false_safe_ci_high": "upper end of that interval (fraction)",
+  "harm_miss_rate": "executed decisions with a paired loss increase that the risk model did not flag, over harmful executed decisions (fraction)",
+  "harm_miss_ci_low": "lower end of the 95% interval of the harm-miss rate (fraction)",
+  "harm_miss_ci_high": "upper end of that interval (fraction)",
+  "input_fallback": "fraction of deployment graphs or episodes returned to q_C by g_input (fraction)",
+  "residual_activity": "fraction of deployment graphs or episodes with residual action activity (fraction)"
+ },
+ "diagnostics": {
+  "coverage": "level = prediction horizon in control depths (1, 4, 8, 16, 32); quantities coverage, coverage_ci_low, coverage_ci_high",
+  "observer": "level = observer variant (raw, EMA, global KF, conditioned KF); quantities risk_rmse, nis_coverage",
+  "harm": "level = dataset (the seven benchmark names); quantities false_safe_rate, false_safe_ci_low, false_safe_ci_high, harm_miss_rate, harm_miss_ci_low, harm_miss_ci_high, with the units of Supplementary Table S37",
+  "stress": "level = clean (supported deployment inputs, the reference of the four negative_controls constructions); quantities input_fallback, residual_activity"
+ },
+ "table": "list",
+ "notes": "Coverage, observer consistency and harm accounting of the deployed rules, from the decision logs and held-out trajectories of the lifecycle runs and the observer-variant comparison of Supplementary Table S17 (the observer risk RMSE is the same measurement as module_ablations/innovation_rmse; both summaries may trace to one raw file). The runtime records sequence coverage as NOT_MEASURED (fit/<profile>/calibration_assessment.json), so these values come from the separate reliability evaluation; deposit with `python -B scripts/export_records.py from-mapping --mapping <reliability_diagnostics mapping>` once the set is registered for the mapping exporter."
+}

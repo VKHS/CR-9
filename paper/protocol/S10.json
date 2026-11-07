@@ -1,0 +1,27 @@
+{
+ "display": "supplementary:Table S10",
+ "source": {"document": "supplementary", "pages": [6]},
+ "scope": "Information, decision time, objective, constraints and output of each route. The route set, its order (registered complexity) and the feedback flag are read from make_registry in cross_morse/policies.py.",
+ "rows": {
+  "nominal": {"route": "nominal", "input": "none", "decision_time": "all depths", "objective": "nominal action",
+              "constraints": "model-valid execution", "output": "frozen nominal output"},
+  "best_depth": {"route": "best depth", "input": "initial input", "decision_time": "once",
+                 "objective": "cross-fitted risk over registered depths", "constraints": "depth/resource", "output": "terminal depth"},
+  "learned_stop": {"route": "learned stop", "input": "initial input only", "decision_time": "once",
+                   "objective": "predict complete stopping depth", "constraints": "depth/resource", "output": "terminal depth"},
+  "phase": {"route": "phase", "input": "depth index", "decision_time": "before execution",
+            "objective": "joint boundaries and phase actions", "constraints": "support/resource", "output": "fixed schedule"},
+  "fixed_sequence": {"route": "fixed sequence", "input": "initial input", "decision_time": "once",
+                     "objective": "best complete supported sequence", "constraints": "support/search/resource", "output": "fixed sequence"},
+  "mpc_ol": {"route": "MPC-OL", "input": "initial estimated state", "decision_time": "once at ℓ = 0",
+             "objective": "finite-horizon risk, uncertainty, cost and terminal value",
+             "constraints": "support/barrier/resource; fixed budget", "output": "planned sequence"},
+  "one_step": {"route": "one-step", "input": "current state", "decision_time": "every depth",
+               "objective": "minimum predicted one-action loss effect", "constraints": "dynamic support/barrier", "output": "one action"},
+  "radius": {"route": "radius", "input": "current state", "decision_time": "every depth",
+             "objective": "one-action mean plus uncertainty and cost", "constraints": "dynamic support/barrier", "output": "one action"},
+  "mpc_rh": {"route": "MPC-RH", "input": "current state/history", "decision_time": "every depth",
+             "objective": "finite-horizon risk plus uncertainty, transport and terminal cost",
+             "constraints": "dynamic support/barrier/resource", "output": "first action of replanned sequence"}
+ }
+}

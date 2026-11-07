@@ -42,14 +42,13 @@ class ClaimsLedgerTests(unittest.TestCase):
         self.assertEqual(claims_ledger.check(ledger, ledger_path=claims_ledger.LEDGER, badge_path=claims_ledger.BADGE), [])
         badge = claims_ledger.badge(ledger)
         self.assertEqual(badge["schemaVersion"], 1)
-        # This release declares regenerated results (release_scope.json result_distribution);
-        # a registration release reports archive coverage instead.
-        self.assertEqual(ledger["result_distribution"], "regenerate")
-        self.assertIn("run_cross_morse.sh", badge["message"])
+        # This release publishes the measured outputs as assets of the repository's release
+        # (release_scope.json result_distribution); a registration release reports archive coverage.
+        self.assertEqual(ledger["result_distribution"], "repository_release")
         self.assertIn("archives", claims_ledger.badge(dict(ledger, result_distribution="registered_archives"))["message"])
         text = claims_ledger.render(ledger)
         self.assertIn("| Table S15b (SI) |", text)
-        self.assertIn("record set `baselines`", text)
+        self.assertIn("make paper", text)
 
     def test_status_reflects_registered_archives_and_record_sets(self):
         with tempfile.TemporaryDirectory(prefix="cm-claims-") as tmp:
@@ -59,6 +58,11 @@ class ClaimsLedgerTests(unittest.TestCase):
                         "scripts/run_upstream_baseline.py", "scripts/export_records.py"):
                 (root / rel).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(PROJECT / rel, root / rel)
+            # A registration release: archives registered in runs/index.json carry the results.
+            scope_path = root / "release/release_scope.json"
+            scope = json.loads(scope_path.read_text())
+            scope["result_distribution"] = "registered_archives"
+            scope_path.write_text(json.dumps(scope))
             (root / "cross_morse").mkdir()
             (root / "runs").mkdir()
             entry = {"stem": "arxiv", "dataset": "ogbn-arxiv", "path": "arxiv", "kind": "run", "profile": "full",

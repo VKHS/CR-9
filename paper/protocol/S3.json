@@ -1,0 +1,11 @@
+{
+ "display": "supplementary:Table S3",
+ "source": {"document": "supplementary", "pages": [2]},
+ "scope": "Names of the four target-regime gates and the operational quantity each one measures. Thresholds and the failure action are read from the configuration and from cross_morse/pipeline.py and cross_morse/training.py.",
+ "rows": {
+  "nominal_graph_value": {"gate": "nominal graph value", "quantity": "paired loss of q_N^ctrl − q_0"},
+  "depth_qualification": {"gate": "depth qualification", "quantity": "PDD and log-depth-integrated loss gap"},
+  "registry_support": {"gate": "registry support", "quantity": "passing action/stratum fraction"},
+  "residual_headroom": {"gate": "residual headroom", "quantity": "supported training-only oracle"}
+ }
+}

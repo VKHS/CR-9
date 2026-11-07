@@ -1,0 +1,158 @@
+{
+ "title": "Module-specific ablations and their observed signatures",
+ "manuscript_tables": [
+  "Supplementary Table S17"
+ ],
+ "experiments": [
+  "E7",
+  "E8"
+ ],
+ "keys": [
+  "module",
+  "arm",
+  "dataset"
+ ],
+ "quantities": {
+  "loss_change_nats": "paired loss of the ablated arm minus the complete module on the held-out contrast (nats; positive means the module lowers the loss)",
+  "warning_lead_change_depths": "change of the warning lead (controlled depths between the first warning and the onset of deterioration), ablated minus complete",
+  "false_safe_rate_change": "change of the false-safe rate (executed decisions marked safe whose paired loss increased), ablated minus complete",
+  "risk_rmse_change": "change of the held-out RMSE of the one-step risk model (nats), ablated minus complete",
+  "action_entropy_change": "change of the entropy of the executed action mix (nats), ablated minus complete",
+  "innovation_rmse": "held-out innovation RMSE of the observer variant",
+  "clean_score_change": "change of the official score on supported inputs, ablated minus complete",
+  "worst_harm_change_nats": "change of the worst per-unit paired loss harm, ablated minus complete (nats)",
+  "retained_effect_fraction": "effect of the ablated arm as a fraction of the complete module's effect against q_C",
+  "cost_fraction": "added cost of the ablated arm over q_C as a fraction of the complete module's added cost over q_C"
+ },
+ "modules": [
+  {
+   "module": "spectral_bands",
+   "label": "spectral bands",
+   "failure_targeted": "predictive deterioration not visible in confidence",
+   "comparison": "full sensors vs no bands/scrambled bands",
+   "removal_rule": "remove if no incremental warning or policy value",
+   "arms": ["deleted", "scrambled"],
+   "signature": [
+    {"quantity": "loss_change_nats", "arm": "deleted", "label": "CE", "signed": true, "decimals": 4},
+    {"quantity": "warning_lead_change_depths", "arm": "deleted", "label": "warning lead", "signed": true, "decimals": 1, "suffix": " depths"}
+   ],
+   "runtime": "unsupported: cross_morse.core.MeasurementBank requires exactly three distinct bands of the six-window bank (sensor.bands), and the Lean profile zeros the band-power, source-alignment and reachability coordinates together, so neither a band-only deletion nor a band scramble at matched capacity is configurable"
+  },
+  {
+   "module": "source_alignment",
+   "label": "source alignment",
+   "failure_targeted": "source-informative mode loss",
+   "comparison": "no alignment vs full sensors",
+   "removal_rule": "remove if practically equivalent",
+   "arms": ["no_alignment"],
+   "signature": [
+    {"quantity": "loss_change_nats", "arm": "no_alignment", "label": "CE", "signed": true, "decimals": 4},
+    {"quantity": "warning_lead_change_depths", "arm": "no_alignment", "label": "warning lead", "signed": true, "decimals": 1, "suffix": " depths"}
+   ],
+   "runtime": "unsupported: no configuration key removes the three source-alignment coordinates of the measurement vector alone"
+  },
+  {
+   "module": "confidence_sensors",
+   "label": "confidence sensors",
+   "failure_targeted": "uncertain predictions",
+   "comparison": "no entropy/margin",
+   "removal_rule": "remove if no deterioration",
+   "arms": ["no_confidence"],
+   "signature": [
+    {"quantity": "loss_change_nats", "arm": "no_confidence", "label": "CE", "signed": true, "decimals": 4},
+    {"quantity": "false_safe_rate_change", "arm": "no_confidence", "label": "false-safe", "signed": true, "decimals": 4}
+   ],
+   "runtime": "unsupported: entropy and margin are fixed coordinates of the measurement vector and also define the support strata"
+  },
+  {
+   "module": "transport_history",
+   "label": "transport history",
+   "failure_targeted": "exposure ambiguity",
+   "comparison": "no mass/range vs full",
+   "removal_rule": "remove if redundant with depth",
+   "arms": ["no_history"],
+   "signature": [
+    {"quantity": "risk_rmse_change", "arm": "no_history", "label": "risk RMSE", "signed": true, "decimals": 4},
+    {"quantity": "action_entropy_change", "arm": "no_history", "label": "entropy", "signed": true, "decimals": 3}
+   ],
+   "runtime": "unsupported: accumulated mass and expected range are fixed measurement and observer-design coordinates"
+  },
+  {
+   "module": "observer",
+   "label": "observer",
+   "failure_targeted": "noisy/delayed sensors",
+   "comparison": "raw, EMA, global, conditioned",
+   "removal_rule": "retain simplest calibrated observer",
+   "arms": ["raw", "ema", "global", "conditioned"],
+   "signature": [
+    {"quantity": "innovation_rmse", "arms": ["raw", "ema", "global", "conditioned"], "label": "RMSE", "join": "/", "decimals": 4}
+   ],
+   "runtime": "unsupported: the runtime fits only the conditioned observer (cross_morse.learning.ConditionedObserver); raw, EMA and global observers have no configuration key"
+  },
+  {
+   "module": "radius_uncertainty",
+   "label": "radius uncertainty",
+   "failure_targeted": "one-step risk dispersion",
+   "comparison": "one-step vs radius",
+   "removal_rule": "classify as one-step if radius fails",
+   "arms": ["one_step"],
+   "signature": [
+    {"quantity": "loss_change_nats", "arm": "one_step", "label": "loss", "signed": true, "decimals": 4, "aggregate": "range", "suffix": " without radius"}
+   ],
+   "runtime": "post-hoc: radius-minus-one-step contrasts on D_confirm (confirm/decision.json); loss change = minus the contrast mean"
+  },
+  {
+   "module": "sequence_risk",
+   "label": "sequence risk",
+   "failure_targeted": "cumulative consequence",
+   "comparison": "sequence model deletion",
+   "removal_rule": "remove replanning label if no value",
+   "arms": ["sequence_deleted"],
+   "signature": [
+    {"quantity": "loss_change_nats", "arm": "sequence_deleted", "label": "CE", "signed": true, "decimals": 4, "aggregate": "range", "suffix": " on RH regimes"}
+   ],
+   "runtime": "post-hoc: on runs whose deployed rule is MPC-RH, the nested D_select effect of the one-step route (critic only, no transition, stage or terminal model) minus that of the deployed MPC-RH configuration at the same profile and ensemble size (select/decision.json)"
+  },
+  {
+   "module": "recovery_type",
+   "label": "recovery type",
+   "failure_targeted": "accumulated damage",
+   "comparison": "source-only, last-safe-only, both",
+   "removal_rule": "remove unused recovery",
+   "arms": ["source_only", "last_safe_only"],
+   "signature": [
+    {"quantity": "loss_change_nats", "arm": "last_safe_only", "label": "last-safe", "signed": true, "decimals": 4, "suffix": " CE"},
+    {"quantity": "false_safe_rate_change", "arm": "last_safe_only", "label": "false-safe", "signed": true, "decimals": 4}
+   ],
+   "runtime": "unsupported: the source reset A8 and last-safe recovery A9 are fixed registry actions and cross_morse.policies.recovery_action has no configuration key"
+  },
+  {
+   "module": "comparator_branch",
+   "label": "comparator branch",
+   "failure_targeted": "unsupported input/deployment",
+   "comparison": "branch on/off",
+   "removal_rule": "mandatory for fallback claim",
+   "arms": ["branch_off"],
+   "signature": [
+    {"quantity": "clean_score_change", "arm": "branch_off", "label": "clean score", "decimals": 4, "zero_text": "unchanged"},
+    {"quantity": "worst_harm_change_nats", "arm": "branch_off", "label": "worst harm", "signed": true, "decimals": 4, "suffix": " without branch"}
+   ],
+   "runtime": "unsupported: the released runner has no serving-time input gate, so the comparator branch cannot be switched"
+  },
+  {
+   "module": "full_lean_profile",
+   "label": "Full/Lean profile",
+   "failure_targeted": "computational multiplicity",
+   "comparison": "top-k, update rate and E",
+   "removal_rule": "choose smallest near-best",
+   "arms": ["lean"],
+   "signature": [
+    {"quantity": "retained_effect_fraction", "arm": "lean", "format": "percent", "decimals": 0, "aggregate": "range", "suffix": " effect"},
+    {"quantity": "cost_fraction", "arm": "lean", "format": "percent", "decimals": 0, "aggregate": "range", "label": "at", "suffix": " cost", "separator": " "}
+   ],
+   "runtime": "post-hoc: Full-minus-Lean retained-fraction contrasts on D_confirm (confirm/decision.json; Lean retains one minus the contrast mean) and the added cost of the Lean predecessor over q_C as a fraction of the Full rule's (select/candidates.json)"
+  }
+ ],
+ "table": "list",
+ "notes": "Rows with dataset 'pooled' hold a pooled value; per-dataset rows are summarised as a range. Produced by `python -B scripts/run_sweep.py collect --sweep module_ablations --parent <run> ... --output <sweep>` for the three modules the released runtime supports (radius uncertainty, sequence risk, Full/Lean profile), then `python -B scripts/export_sweep_records.py --results <sweep>/results.json --hardware ... --period ...`. The other seven modules need runtime support that the release does not have; each module's 'runtime' field states what is missing."
+}

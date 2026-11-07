@@ -1,0 +1,18 @@
+{
+ "title": "Official scores on the comparator ensemble grid",
+ "manuscript_tables": [
+  "Supplementary Table S26"
+ ],
+ "experiments": [
+  "E14"
+ ],
+ "keys": [
+  "dataset",
+  "ensemble"
+ ],
+ "quantities": {
+  "official_score": "official test metric of the comparator's E-member ensemble with the paired seed structure of the ensemble_grid set (percent or F1 points; AP in native units)"
+ },
+ "table": "list",
+ "notes": "Companion of the ensemble_grid set (same checkpoints, same E grid 1, 2, 4, 8, 12, 16, 20 and the same test inputs): ensemble_grid holds the comparator loss, this set the official score of the same ensembles. Scores are recomputed from each ensemble's saved test predictions with the official metric (cross_morse.evaluation.score_observations) and written with the SHA-256 of the predictions under raw/; deposit with `python -B scripts/export_records.py from-mapping --mapping <ensemble_grid_scores mapping>` once the set is registered for the mapping exporter."
+}
