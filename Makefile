@@ -471,7 +471,8 @@ NUMPY_TESTS := test_paper_registry test_records test_export_records test_availab
  test_reproduction test_reproduction_launcher test_artifact_catalog test_reconstruction test_supplement_build \
  test_paper_artifacts test_reconstruct_paper test_statement_check \
  test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
- test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b
+ test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
+ test_timing_records test_confirmation_analysis
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

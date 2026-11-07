@@ -386,7 +386,7 @@ def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: d
     from scripts.record_mapping import _private_scan, install_verified_set
     generated = dict(generated or {})
     from scripts.scientific_evidence_audit import validate_record_coverage
-    from cm_campaigns.contract import RECORD_SETS
+    from scripts.record_mapping import _contract, _declared_coverage
     specs = load_specs(OFFICIAL, SPECS_PATH)
     if set_name not in specs["sets"]:
         raise RunnerError(f"{set_name} is not a record set of records/specs.json")
@@ -419,7 +419,12 @@ def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: d
     if not rows:
         raise RunnerError(f"{set_name}: no values to export")
     try:
-        validate_record_coverage(set_name, rows, spec, RECORD_SETS[set_name])
+        # cm_campaigns.contract for the audited sets; the set's own declared rows otherwise.
+        contract = _contract(set_name)
+        if contract.get("coverage") == "declared_rows":
+            _declared_coverage(set_name, rows, spec, contract)
+        else:
+            validate_record_coverage(set_name, rows, spec, contract)
         complete = True
     except ValueError as exc:
         if not allow_partial:
@@ -460,7 +465,9 @@ def write_record_set(set_name: str, rows: list[dict], files: dict, provenance: d
                 writer.writerow([row[k] for k in keys] + [row["quantity"], fmt(row["value"]), row["unit"],
                                                           row["source_file"], row["locator"]])
         (target / "code" / "SOURCE.json").write_text(json.dumps({
-            "schema": "cross-morse-record-source-1", "exporter": "scripts/run_experiment.py",
+            "schema": "cross-morse-record-source-1",
+            "exporter": next((Path(a).name if Path(a).is_absolute() else a for a in (command or [])
+                              if str(a).endswith(".py")), "scripts/run_experiment.py"),
             "command": [Path(a).name if Path(a).is_absolute() else a for a in (command or [])],
             "runtime_source_sha256": runtime_source_sha256(), "runner_source_sha256": runner_source_identity(),
             "repository_commit": _git_head(), "inputs": list(inputs), "deposited_files": copied},
@@ -554,12 +561,25 @@ class ParentContext:
         return self._labels[role]
 
     def predict(self, model, candidate: dict, controller, role: str):
-        """Role rows of one member's predictions and the runtime's summed execution trace."""
+        """Role rows of one member's predictions and the runtime's summed execution trace.
+
+        A graph collection streams its corpus-sized prediction matrix into a temporary
+        memory-mapped file (the runtime's ``output_path``), so only the role's rows are held
+        in memory (the full COCO-SP corpus matrix would need about 19 GB).
+        """
         from cross_morse.runtime import predict_dataset
-        probabilities, totals = predict_dataset(model, self.data, self.graph, self.config, candidate, controller,
-                                                self.reference, device=self.device,
-                                                role=role if self.collection else None)
-        rows = np.asarray(probabilities[self.role_ids(role)], dtype=np.float32)
+        if not self.collection:
+            probabilities, totals = predict_dataset(model, self.data, self.graph, self.config, candidate, controller,
+                                                    self.reference, device=self.device)
+            rows = np.asarray(probabilities[self.role_ids(role)], dtype=np.float32)
+        else:
+            scratch = os.environ.get("CM_EXPERIMENT_SCRATCH") or None
+            with tempfile.TemporaryDirectory(prefix="cm-predict-", dir=scratch) as tmp:
+                probabilities, totals = predict_dataset(model, self.data, self.graph, self.config, candidate,
+                                                        controller, self.reference, device=self.device,
+                                                        output_path=Path(tmp) / "predictions.npy", role=role)
+                rows = np.array(probabilities[self.role_ids(role)], dtype=np.float32)
+                del probabilities
         if not np.isfinite(rows).all():
             raise RunnerError(f"nonfinite predictions on the {role} role")
         return rows, totals

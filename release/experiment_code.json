@@ -398,6 +398,136 @@
           "reason": "policy value over matched confidence/history controls needs a controller fitted without the spectral coordinates; the released runtime has no switch for it (as for E7, E8)"
         }
       ]
+    },
+    {
+      "experiment": "E17 runtime scaling",
+      "title": "Runtime and peak memory of the deployed rule against processed graph size: full benchmark graphs, breadth-first subgraphs and collection test graphs timed with the E17 TimingSession inside completed GPU allocations",
+      "code": [
+        "cm_experiments/timing_records.py",
+        "scripts/run_timing_records.py",
+        "cm_campaigns/timing.py",
+        "cm_campaigns/accounting.py",
+        "cm_experiments/ensemble_grid.py",
+        "hpc/capture_arrhenius_accounting.sh"
+      ],
+      "command": "python -B scripts/run_timing_records.py scaling plan --parent <run or Roman campaign> (each dataset) --output <dir>; ... scaling run --output <dir> [--job K] --device cuda --trust-local-checkpoints; bash hpc/capture_arrhenius_accounting.sh <job ids> <acct>; ... scaling export --output <dir> --accounting <acct>/sacct_original.psv",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:runtime_scaling"
+      ],
+      "displays": [
+        "supplementary:Figure S2"
+      ]
+    },
+    {
+      "experiment": "E17 timing anchors",
+      "title": "Throughput and training-time anchors that bracket the per-input nominal execution time of Definition 2",
+      "code": [
+        "cm_experiments/timing_records.py",
+        "scripts/run_timing_records.py",
+        "cm_campaigns/timing.py",
+        "cm_campaigns/accounting.py"
+      ],
+      "command": "python -B scripts/run_timing_records.py anchors plan --parent <run or Roman campaign> (each admitted dataset) --output <dir> --scaling-output <E17 scaling dir> [--accounting <sacct export> --job-map <job map>]; ... anchors run --output <dir>; ... anchors export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:timing_anchors"
+      ],
+      "displays": [
+        "supplementary:Table S23b"
+      ]
+    },
+    {
+      "experiment": "E14 official scores",
+      "title": "Official test scores of the comparator ensemble grid recomputed from the saved member predictions",
+      "code": [
+        "cm_experiments/timing_records.py",
+        "scripts/run_timing_records.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_experiment.py"
+      ],
+      "command": "python -B scripts/run_timing_records.py grid-scores export --grid-output <scripts/run_experiment.py ensemble-grid output>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:ensemble_grid_scores"
+      ],
+      "displays": [
+        "supplementary:Table S26"
+      ]
+    },
+    {
+      "experiment": "Figure 3 held-out mechanism contrasts",
+      "title": "Paired D_confirm contrasts (conditional state destruction minus intact; MPC-RH minus MPC-OL) of each dataset's strongest feedback configuration for the Figure 3a-b cells that neither the joint S14 family nor the deployed rule's confirmation record supplies",
+      "code": [
+        "cm_experiments/confirmation_analysis.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_confirmation_analysis.py"
+      ],
+      "command": "python -B scripts/run_confirmation_analysis.py mechanism plan --parent <run|Roman campaign> ... --output <dir>; ... mechanism run --output <dir> --job K --device cuda --trust-local-checkpoints; ... mechanism export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:mechanism_contrasts"
+      ],
+      "displays": [
+        "main:Figure 3"
+      ]
+    },
+    {
+      "experiment": "Admission-split oracle (C12)",
+      "title": "Per-input oracle enumerated on D_admit after every decision is fixed: depth prefixes of the executed sequences of the registered resource-feasible configurations at the comparator's ensemble size; oracle-depth quartiles and disagreement with q_C",
+      "code": [
+        "cm_experiments/admission_oracle.py",
+        "cm_experiments/confirmation_analysis.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_confirmation_analysis.py"
+      ],
+      "command": "python -B scripts/run_confirmation_analysis.py oracle plan --parent <run|Roman campaign> ... --output <dir>; ... oracle run --output <dir> --job K --device cuda --trust-local-checkpoints; ... oracle export --output <dir>",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:oracle_dispersion"
+      ],
+      "displays": [
+        "supplementary:Table S30",
+        "supplementary:Table S43"
+      ]
     }
   ]
 }
