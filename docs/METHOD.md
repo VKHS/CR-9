@@ -114,7 +114,7 @@ summing action-critic outputs does not itself prove a complete-policy effect.
 | Learned stop | Initial measurements choose a stopping depth once |
 | Phase schedule / fixed sequence | Complete action schedule fixed before execution |
 | MPC-OL | Plan from the initial state; execute the fixed plan |
-| One-step / radius | Choose using the current estimated state |
+| One-step / radius | Choose using the current observer state |
 | MPC-RH | Replan from the current state and execute the first action |
 
 Candidate profiles, horizons, coefficients and ensemble sizes form a finite

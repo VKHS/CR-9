@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Suites, progress and the report of the reproduction launcher (run_cross_morse.sh).
 
-`run_cross_morse.sh reproduce` regenerates the paper's benchmark results as one
+`run_cross_morse.sh reproduce` executes the registered dataset lifecycles as one
 numbered *reproduction suite*: the eight-stage lifecycle of every dataset
 (Roman-empire on its ten official splits) followed by one report. The shell
 script owns the Slurm side (submission, requeue, logs); this module owns the
@@ -229,7 +229,7 @@ def create_suite(*, outputs: Path, state_dir: Path, source: Path, profile: str, 
     campaign for its ten split runs (create_roman_campaign). All snapshots come
     from the same source tree within one call.
     """
-    source, outputs, state_dir = Path(source).resolve(), Path(outputs).absolute(), Path(state_dir).absolute()
+    source, outputs, state_dir = Path(source).resolve(), Path(outputs).resolve(), Path(state_dir).resolve()
     datasets = validate_datasets(datasets)
     ident = identity(source)
     if not ident["matches_release"] and not allow_source_change:
@@ -300,9 +300,98 @@ def load_suite(suite: Path) -> dict:
     manifest = read_json(suite / "000_MANIFEST" / "suite.json")
     if not isinstance(manifest, dict) or manifest.get("schema") != SCHEMA:
         raise SuiteError(f"Not a CROSS-MORSE reproduction suite: {suite}")
-    if Path(manifest["suite"]).resolve() != suite:
-        manifest = dict(manifest, suite=str(suite))
+    original = Path(manifest["suite"])
+    if not original.is_absolute() or manifest.get("profile") not in PROFILES:
+        raise SuiteError("Invalid reproduction suite location or profile")
+    if Path(manifest["report_source"]) != original / "source":
+        raise SuiteError("The report source must be the suite's frozen source directory")
+    datasets = validate_datasets(manifest["datasets"])
+    if not manifest["datasets"] or [r.get("dataset") for r in manifest["runs"]] != datasets:
+        raise SuiteError("Suite run entries must match the declared datasets exactly")
+    runs = []
+    for run in manifest["runs"]:
+        dataset = run["dataset"]
+        key = f"{DATASETS.index(dataset) + 1:02d}_{STEMS[dataset]}"
+        path = original / "runs" / key
+        if (run.get("key") != key or Path(run["path"]) != path
+                or Path(run["launcher"]) != path / "source/run_cross_morse.sh"
+                or run.get("kind") != ("campaign" if dataset == "Roman-empire" else "single")):
+            raise SuiteError(f"Invalid or external run path in suite: {key}")
+        # A copied suite must read its own runs and tools, never the old paths.
+        path = suite / "runs" / key
+        runs.append(dict(run, path=str(path), launcher=str(path / "source/run_cross_morse.sh")))
+    manifest = dict(manifest, suite=str(suite), report_source=str(suite / "source"), runs=runs)
     return manifest
+
+
+def verify_frozen_tree(source: Path, inventory_path: Path) -> int:
+    """Verify a frozen tree before using its executable analysis tools."""
+    source, inventory_path = Path(source), Path(inventory_path)
+    inventory = read_json(inventory_path)
+    if source.is_symlink() or not source.is_dir() or not isinstance(inventory, dict) or not inventory:
+        raise SuiteError(f"Missing or invalid frozen source inventory: {inventory_path}")
+    bad, current = [], set()
+    for name, expected in inventory.items():
+        relative = Path(name)
+        if (relative.is_absolute() or ".." in relative.parts or relative.as_posix() != name
+                or not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected)):
+            raise SuiteError(f"Unsafe frozen source inventory entry: {name!r}")
+        path = source / relative
+        if (path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(source.resolve())
+                or sha256_file(path) != expected):
+            bad.append(name)
+    for path in source.rglob("*"):
+        if path.is_symlink():
+            bad.append(path.relative_to(source).as_posix())
+        elif path.is_file() and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"}:
+            current.add(path.relative_to(source).as_posix())
+    bad.extend(sorted(current - set(inventory)))
+    if bad:
+        raise SuiteError("Frozen source changed; refusing mixed-code analysis: " + ", ".join(sorted(set(bad))))
+    return len(inventory)
+
+
+def verify_suite_sources(suite: Path) -> dict:
+    """Check report tools and every available run snapshot against their inventories.
+
+    These byte checks establish source consistency, not experimental validity.
+    Numerical checks are performed by the report's existing evidence builders.
+    """
+    manifest = load_suite(suite)
+    suite = Path(manifest["suite"])
+    source = Path(manifest["report_source"])
+    checked = verify_frozen_tree(source, suite / "000_MANIFEST/source_sha256.json")
+    expected = manifest["source"]["runtime_sha256"]
+    observed = identity(source)
+    if observed["runtime_sha256"] != expected:
+        raise SuiteError("The report source runtime differs from the frozen suite identity")
+    snapshots = 0
+    for run in manifest["runs"]:
+        root = Path(run["path"])
+        roots = [root]
+        if run["kind"] == "campaign":
+            roots += [root / f"split_{i:02d}" for i in range(10) if (root / f"split_{i:02d}").exists()]
+        for path in roots:
+            checked += verify_frozen_tree(path / "source", path / "launcher/source_sha256.json")
+            if runtime_fingerprint(path / "source") != expected:
+                raise SuiteError(f"Run snapshot runtime differs from its suite: {path}")
+            snapshots += 1
+    return {"status": "PASS", "report_source": str(source), "run_snapshots": snapshots,
+            "verified_files": checked, **observed}
+
+
+def verify_completed_run_source(root: Path, expected: str) -> None:
+    """Bind completion to sealed stage identities, not only a progress label."""
+    state = read_json(Path(root) / "run_state.json", {})
+    if not isinstance(state, dict) or state.get("source_sha256") != expected:
+        raise SuiteError(f"Completed run has no matching sealed runtime fingerprint: {Path(root).name}")
+    source = str(Path(__file__).resolve().parents[1])
+    if source not in sys.path:
+        sys.path.insert(0, source)
+    from cross_morse.review import sealed_inventory
+    _, identities = sealed_inventory(root)
+    if identities["source_sha256"] != expected:
+        raise SuiteError(f"Completed run sealed stage source differs from its suite: {Path(root).name}")
 
 
 # --------------------------------------------------------------------------- progress
@@ -400,16 +489,25 @@ def suite_status(suite: Path, squeue_text: str = "") -> dict:
     runs = []
     for run in manifest["runs"]:
         record = campaign_state(Path(run["path"])) if run["kind"] == "campaign" else run_state(Path(run["path"]))
-        own = [row for row in jobs if row["key"] == run["key"]]
+        own = [row for row in jobs if row["key"] == run["key"] or
+               (run["kind"] == "campaign" and row["key"].startswith(run["key"] + "/split_"))]
         scheduler = ""
+        active = []
         for row in own:
-            state = states.get(row["job_id"].split("_", 1)[0])
+            base = row["job_id"].split("_", 1)[0].split(";", 1)[0]
+            state = states.get(base)
             if state:
                 scheduler = state
+            if state in SCHEDULER_ACTIVE:
+                active.append(base)
         record.update({"key": run["key"], "dataset": run["dataset"], "kind": run["kind"],
-                       "jobs": [row["job_id"] for row in own], "scheduler_state": scheduler})
-        if record["state"] not in {"COMPLETE", "FAILED", "INCOMPLETE"} and scheduler:
-            record["state"] = "QUEUED" if scheduler == "PENDING" else "RUNNING" if scheduler == "RUNNING" else record["state"]
+                       "jobs": [row["job_id"] for row in own], "scheduler_state": scheduler,
+                       "scheduler_active": bool(active), "active_jobs": sorted(set(active))})
+        if record["state"] != "COMPLETE" and active:
+            # A previous failure or one failed Roman split must not hide other
+            # allocations that are still writing to this run/campaign.
+            record["recorded_state"] = record["state"]
+            record["state"] = "QUEUED" if scheduler == "PENDING" else "RUNNING" if scheduler == "RUNNING" else "ACTIVE"
         runs.append(record)
     complete = sum(run["state"] == "COMPLETE" for run in runs)
     return {"suite": manifest["suite"], "tag": manifest["tag"], "profile": manifest["profile"],
@@ -493,6 +591,16 @@ def run_summary(run: dict) -> dict:
             "environment": {key: environment.get(key) for key in ("torch", "cuda_runtime", "gpu", "python", "machine", "precision")}}
 
 
+def _report_process(command, report_dir: Path, *, timeout=3600):
+    """Keep builder failures in the diagnostic report, including timeouts."""
+    try:
+        return subprocess.run(command, capture_output=True, text=True, timeout=timeout, cwd=str(report_dir))
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(command, 124, "", f"Report command timed out after {timeout}s: {Path(command[2]).name}")
+    except OSError as exc:
+        return subprocess.CompletedProcess(command, 127, "", str(exc))
+
+
 def compare_with_paper(run: dict, report_dir: Path, python: str) -> dict:
     """Run scripts/compare_with_manuscript.py from the run's own frozen source."""
     path = Path(run["path"])
@@ -504,8 +612,10 @@ def compare_with_paper(run: dict, report_dir: Path, python: str) -> dict:
     command = [python, "-B", str(script), str(path), "--output", str(output)]
     if run["kind"] == "campaign":
         command.append("--roman-campaign")
-    result = subprocess.run(command, capture_output=True, text=True, timeout=3600, cwd=str(report_dir))
+    result = _report_process(command, report_dir)
     comparison = read_json(output) if output.is_file() else None
+    if not isinstance(comparison, dict):
+        comparison = None
     outcome = {"exit_code": result.returncode, "json": str(output) if comparison else None,
                "markdown": str(output.with_suffix(".md")) if comparison else None}
     if comparison is None:
@@ -516,6 +626,10 @@ def compare_with_paper(run: dict, report_dir: Path, python: str) -> dict:
             pass
         outcome["error"] = "comparison refused: " + str(message)[-1200:]
         return outcome
+    if result.returncode not in (0, 1):
+        outcome["error"] = f"comparison incomplete or invalid (exit {result.returncode})"
+    elif comparison.get("dataset") != run["dataset"]:
+        outcome["error"] = "comparison dataset differs from the planned run"
     outcome["levels"] = comparison.get("levels", {})
     rows = [row for row in comparison.get("rows", []) if row.get("section") == "Table 1"]
     outcome["table1"] = [{"quantity": row.get("quantity"), "run_value": row.get("run_value"),
@@ -535,9 +649,9 @@ def summarize_campaign(run: dict, report_dir: Path, python: str) -> dict:
     output.parent.mkdir(parents=True, exist_ok=True)
     output.unlink(missing_ok=True)
     command = [python, "-B", str(path / "source" / "scripts" / "summarize_roman_splits.py"), str(path), "--output", str(output)]
-    result = subprocess.run(command, capture_output=True, text=True, timeout=3600, cwd=str(report_dir))
+    result = _report_process(command, report_dir)
     summary = read_json(output) if output.is_file() else None
-    if not isinstance(summary, dict):
+    if not isinstance(summary, dict) or result.returncode != 0:
         return {"error": (result.stderr or result.stdout).strip()[-600:], "exit_code": result.returncode}
     return {"json": str(output), "loss": summary.get("paired_qD_minus_qC_loss"),
             "metric": summary.get("paired_qD_minus_qC_accuracy_pp"), "admitted_split_count": summary.get("admitted_split_count")}
@@ -551,22 +665,24 @@ def build_tables(suite: Path, report_dir: Path, python: str, source: Path, tag: 
     for what in ("tables", "figures"):
         command = [python, "-B", str(source / "scripts" / "build_paper.py"), what, "--runs-root", str(suite / "runs"),
                    "--label", f"reproduction {tag}", "--output-dir", str(output)]
-        result = subprocess.run(command, capture_output=True, text=True, timeout=3600, cwd=str(report_dir))
+        result = _report_process(command, report_dir)
         produced = sorted(path.stem for path in (output / what).glob("*.md" if what == "tables" else "*.png")) \
             if (output / what).is_dir() else []
         outcome[what] = produced
-        if result.returncode != 0:
-            outcome[f"{what}_error"] = (result.stderr or result.stdout).strip()[-600:]
+        if result.returncode != 0 or not produced:
+            outcome[f"{what}_error"] = ((result.stderr or result.stdout).strip()[-600:]
+                                       or f"{what} builder produced no outputs (exit {result.returncode})")
     # The data-role membership, seeds and environment each run actually used.
     manifests = report_dir / "manifests"
     shutil.rmtree(manifests, ignore_errors=True)
     command = [python, "-B", str(source / "scripts" / "run_manifests.py"), "runs", "--runs-root", str(suite / "runs"),
                "--label", "reproduction", "--output-root", str(manifests), "--with-indices"]
-    result = subprocess.run(command, capture_output=True, text=True, timeout=3600, cwd=str(report_dir))
+    result = _report_process(command, report_dir)
     outcome["manifests"] = sorted(path.name for path in (manifests / "reproduction").glob("*.json")) \
         if (manifests / "reproduction").is_dir() else []
-    if result.returncode != 0:
-        outcome["manifests_error"] = (result.stderr or result.stdout).strip()[-600:]
+    if result.returncode != 0 or not outcome["manifests"]:
+        outcome["manifests_error"] = ((result.stderr or result.stdout).strip()[-600:]
+                                      or f"Manifest builder produced no outputs (exit {result.returncode})")
     return outcome
 
 
@@ -609,7 +725,7 @@ def pack_results(suite: Path, manifest: dict, destination: Path) -> int:
             for root in roots:
                 for relative in SMALL_RECORDS:
                     add(root / relative)
-                for pattern in ("stages/*.json", "launcher/status_*.json", "launcher/terminal.json",
+                for pattern in ("stages/*.json", "provenance/stages/*.json", "launcher/status_*.json", "launcher/terminal.json",
                                 "launcher/gpu_health_*.json", "launcher/job_*.json", "launcher/source_sha256.json"):
                     for path in sorted(root.glob(pattern)):
                         add(path)
@@ -620,13 +736,15 @@ def pack_results(suite: Path, manifest: dict, destination: Path) -> int:
 def build_report(suite: Path, *, sacct_text: str = "", pack_archives: bool = False, python: str | None = None) -> dict:
     manifest = load_suite(suite)
     suite = Path(manifest["suite"])
+    source_verification = verify_suite_sources(suite)
     python = python or sys.executable
     report_dir = suite / "999_REPORT"
     report_dir.mkdir(exist_ok=True)
     status = suite_status(suite)
     reported = read_json(Path(manifest["report_source"]) / "paper" / "reported_results.json", {}) or {}
     gpu_hours = gpu_hours_from_sacct(sacct_text, manifest["tag"]) if sacct_text else {}
-    rows, environments, fingerprints = [], {}, set()
+    rows, environments, fingerprints, errors = [], {}, set(), []
+    completed_sources_ok = True
     for run, state in zip(manifest["runs"], status["runs"]):
         entry = {"key": run["key"], "dataset": run["dataset"], "kind": run["kind"], "state": state["state"],
                  "detail": state.get("detail", ""), "summary": run_summary(run) if state["state"] == "COMPLETE" else None,
@@ -639,10 +757,22 @@ def build_report(suite: Path, *, sacct_text: str = "", pack_archives: bool = Fal
             state_record = read_json(root / "run_state.json")
             if isinstance(state_record, dict) and state_record.get("source_sha256"):
                 fingerprints.add(state_record["source_sha256"])
+            if run_state(root)["state"] == "COMPLETE":
+                try:
+                    verify_completed_run_source(root, manifest["source"]["runtime_sha256"])
+                except (OSError, ValueError, KeyError, TypeError, ImportError) as exc:
+                    completed_sources_ok = False
+                    errors.append({"component": f"source/{run['key']}", "error": str(exc)})
+        if state["state"] in {"FAILED", "INCOMPLETE"}:
+            errors.append({"component": run["key"], "error": f"Run {state['state']}: {state.get('detail', '')}"})
         if state["state"] == "COMPLETE" and manifest.get("paper_comparison"):
             entry["comparison"] = compare_with_paper(run, report_dir, python)
+            if entry["comparison"].get("error"):
+                errors.append({"component": f"comparison/{run['key']}", "error": entry["comparison"]["error"]})
         elif state["state"] == "COMPLETE" and run["kind"] == "campaign":
             entry["campaign"] = summarize_campaign(run, report_dir, python)
+            if entry["campaign"].get("error"):
+                errors.append({"component": f"campaign/{run['key']}", "error": entry["campaign"]["error"]})
         rows.append(entry)
         if pack_archives and state["state"] == "COMPLETE":
             archive = report_dir / "archives" / f"{run['key']}.tar.gz"
@@ -650,18 +780,26 @@ def build_report(suite: Path, *, sacct_text: str = "", pack_archives: bool = Fal
             archive.unlink(missing_ok=True)
             command = [python, "-B", str(Path(run["path"]) / "source" / "scripts" / "archive_run.py"), run["path"],
                        "--output", str(archive)] + (["--campaign"] if run["kind"] == "campaign" else [])
-            result = subprocess.run(command, capture_output=True, text=True, timeout=6 * 3600, cwd=str(report_dir))
+            result = _report_process(command, report_dir, timeout=6 * 3600)
             entry["archive"] = str(archive) if result.returncode == 0 and archive.is_file() else None
             if entry["archive"] is None:
                 entry["archive_error"] = (result.stderr or result.stdout).strip()[-600:]
+                errors.append({"component": f"archive/{run['key']}", "error": entry["archive_error"] or "Archive was not produced"})
     tables = (build_tables(suite, report_dir, python, Path(manifest["report_source"]), manifest["tag"])
               if status["complete"] else {"tables": [], "figures": []})
-    released = manifest["source"].get("registered_sha256")
-    sealed_ok = bool(fingerprints) and fingerprints == {manifest["source"]["runtime_sha256"]}
+    errors += [{"component": key.removesuffix("_error"), "error": value}
+               for key, value in tables.items() if key.endswith("_error")]
+    released = source_verification["registered_sha256"]
+    sealed_ok = (status["complete"] == status["planned"] and bool(fingerprints)
+                 and fingerprints == {manifest["source"]["runtime_sha256"]}
+                 and completed_sources_ok)
+    report_status = "FAIL" if errors else "PASS" if status["complete"] == status["planned"] else "INCOMPLETE"
     result = {"schema": "cross-morse-reproduction-report-1", "tag": manifest["tag"], "suite": str(suite),
+              "report_status": report_status, "report_errors": errors, "source_verification": source_verification,
+              "report_scope": "Requested dataset lifecycles and their supported report outputs; auxiliary experiments and all numbered manuscript displays are separate checks. Numerical differences remain visible and are not tool failures.",
               "profile": manifest["profile"], "created_utc": manifest["created_utc"], "reported_utc": utc_now(),
               "runtime_sha256": manifest["source"]["runtime_sha256"], "released_runtime_sha256": released,
-              "runtime_matches_release": manifest["source"].get("matches_release"),
+              "runtime_matches_release": source_verification["matches_release"],
               "sealed_runtime_fingerprints": sorted(fingerprints), "sealed_fingerprints_match_suite": sealed_ok,
               "complete_runs": status["complete"], "planned_runs": status["planned"],
               "gpu_hours_total": round(sum(gpu_hours.values()), 3) if gpu_hours else None,
@@ -691,6 +829,7 @@ def render_report(result: dict, manifest: dict, reported: dict) -> str:
     envs = "; ".join(" · ".join(f"{k} {v}" for k, v in env.items() if v) for env in result["environments"]) or "—"
     lines = [f"# CROSS-MORSE reproduction {result['tag']}", "",
              "| | |", "|---|---|",
+             f"| Report build | {result['report_status']} |",
              f"| Profile | {profile} ({'official data, registered full budget' if profile == 'full' else 'official data, reduced budget' if profile == 'pilot' else 'synthetic data; checks the complete orchestration'}) |",
              f"| Created / reported (UTC) | {result['created_utc']} / {result['reported_utc']} |",
              f"| Runtime fingerprint | {identity_text}; {sealed} |",
@@ -698,7 +837,13 @@ def render_report(result: dict, manifest: dict, reported: dict) -> str:
              f"| Execution environment | {envs} |"]
     if result.get("gpu_hours_total") is not None:
         lines.append(f"| GPU-hours (Slurm accounting) | {result['gpu_hours_total']:.1f} |")
-    lines += ["", f"Suite directory: `{result['suite']}`", ""]
+    lines += ["", f"Suite directory: `{result['suite']}`", "", result["report_scope"], ""]
+    if result["report_errors"]:
+        lines += ["## Unsuccessful report steps", "", "| Step | Detail |", "|---|---|"]
+        for error in result["report_errors"]:
+            lines.append("| " + " | ".join(str(error[key]).replace("|", "/").replace("\n", " ")
+                                           for key in ("component", "error")) + " |")
+        lines.append("")
     if profile == "full":
         lines += ["## Regenerated results beside the paper (main Table 1)", "",
                   "Paired loss effect of the deployed policy against the open-loop comparator q_C on the test split "
@@ -820,6 +965,8 @@ def main(argv=None) -> int:
     p.add_argument("suite", type=Path)
     p.add_argument("--squeue", type=Path)
     p.add_argument("--json", action="store_true")
+    p = sub.add_parser("verify")
+    p.add_argument("suite", type=Path)
     p = sub.add_parser("active")
     p.add_argument("suite", type=Path)
     p.add_argument("--squeue", type=Path, required=True)
@@ -847,6 +994,9 @@ def main(argv=None) -> int:
             text = args.squeue.read_text(encoding="utf-8") if args.squeue and args.squeue.is_file() else ""
             status = suite_status(args.suite, text)
             print(json.dumps(status, indent=1) if args.json else render_status(status), end="" if not args.json else "\n")
+        elif args.command == "verify":
+            verification = verify_suite_sources(args.suite)
+            print(json.dumps(dict(load_suite(args.suite), source_verification=verification)))
         elif args.command == "active":
             text = args.squeue.read_text(encoding="utf-8") if args.squeue.is_file() else ""
             print(" ".join(active_jobs(args.suite, text, exclude_ids=tuple(args.exclude))))
@@ -856,6 +1006,8 @@ def main(argv=None) -> int:
             print(f"[REPORT] {Path(result['suite']) / 'REPRODUCTION_REPORT.md'}")
             print(f"[RESULTS] {result['results_zip']} ({result['results_zip_files']} files)")
             print(f"[STATUS] {result['complete_runs']}/{result['planned_runs']} runs complete")
+            print(f"[REPORT STATUS] {result['report_status']}")
+            return {"PASS": 0, "INCOMPLETE": 1, "FAIL": 2}[result["report_status"]]
         return 0
     except (SuiteError, OSError, ValueError, KeyError, TypeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

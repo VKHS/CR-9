@@ -69,7 +69,7 @@ class ClaimsLedgerTests(unittest.TestCase):
             self.assertEqual(ledger["official_archives"], 1)
             self.assertEqual(ledger["dois"]["ogbn-arxiv"], "10.5281/zenodo.1")
             table1 = next(r for r in ledger["rows"] if r["label"].startswith("Table 1"))
-            self.assertIn("1/7 official archives registered; 1 DOI references", table1["status"][0])
+            self.assertIn("Registered archives: ogbn-arxiv; DOI references: 1", table1["status"][0])
             self.assertFalse(ledger["registered_coverage_complete"])
             self.assertFalse(ledger["scientific_evidence_verified"])
             self.assertNotIn("ingested and verified", claims_ledger.render(ledger))
@@ -247,7 +247,8 @@ class ReviewAndStatementTests(unittest.TestCase):
         empty = {"scope": scope, "official": {}, "records": {"verified": [], "defined": ["baselines"]}}
         text = manuscript_availability.render(empty)
         self.assertNotIn("deposited at", text)
-        self.assertIn("No official run archive is registered", text)
+        self.assertIn("original benchmark archives can be supplied through the separate registration workflow", text)
+        self.assertNotIn("0 of 7", text)
         full = {"scope": {**scope, "code_archive_doi": "10.5281/zenodo.9"},
                 "official": {"ogbn-arxiv": {"deposit_doi": "10.5281/zenodo.1"}, "COCO-SP": {"deposit_doi": None}},
                 "records": {"verified": ["baselines"], "defined": ["baselines"]}}

@@ -18,11 +18,12 @@ selection, confirmation, and admission protocol.
 
 ## Reproduce the paper
 
-One launcher regenerates every benchmark result of the paper on a Slurm GPU
-cluster: the sealed eight-stage lifecycle on all seven datasets (Roman-empire on
-its ten official splits) and a report that rebuilds the paper's run-derived
-tables from the regenerated runs and places every regenerated value beside the
-printed one.
+The Slurm launcher executes the registered eight-stage lifecycle on all seven
+datasets, including Roman-empire's ten official splits. Its report rebuilds
+supported run-derived tables and compares the available quantities with the
+paper. Auxiliary experiments use the drivers in [Experiments](docs/EXPERIMENTS.md).
+The [artifact catalog](docs/ARTIFACT_CATALOG.md) identifies the code, data sources,
+split and seed specifications, execution artifacts and their producing commands.
 
 ```bash
 git clone https://github.com/VKHS/CR-9.git && cd CR-9
@@ -67,7 +68,8 @@ all 34 manuscript table groups with their builders.
 This repository supports the completed experimental study **CROSS-MORSE:
 Cross-Spectral Control of Message Passing in Frozen Graph Neural Networks**.
 The exact identities of the 16-page paper and 38-page supplement, the protocol
-constants and every reported numerical value are recorded in `paper/`.
+constants, registered numerical results and complete numbered-display inventory
+are recorded in `paper/`.
 
 - [Reported results](paper/RESULTS.md) presents the seven-dataset loss, official-metric
   and cost results, including the distinction between an evaluated arm and the
@@ -83,6 +85,24 @@ make paper-report-check    # document identities, complete display map and curre
 make verify                # implementation, reference arithmetic and sealed example checks
 make compare RUN_ROOT=/abs/run REPORT_ROOT=/abs/reports   # one regenerated run beside the paper
 ```
+
+### Build a traceable reconstruction workspace
+
+```bash
+make reconstruction-example REPORT_ROOT=../cm-reports
+# With registered benchmark runs and auxiliary records:
+make reconstruct RUNS_INDEX=/abs/runs/index.json RECORDS_INDEX=/abs/records/index.json \
+  RECONSTRUCTION_ROOT=/abs/paper-build
+```
+
+One workspace contains the supported tables and plots, machine-readable source
+data, input and software identities, an inventory of all 90 displays and hashes
+for every output file. The report distinguishes full numerical tables, available
+columns and partial figure panels. Optional confirmation and budget campaigns
+add their validated supplementary analyses. See [Reconstruction](docs/RECONSTRUCTION.md)
+and [Supplementary builders](docs/SUPPLEMENT_BUILD.md) for the input contracts and
+the strict completeness check. Original benchmark artifacts and new executions
+retain their own identities throughout this workflow.
 
 Mathematical bounds, resampled uncertainty, fitted cost laws and analytical
 sensitivities retain their scientific meaning in the paper; the registry
@@ -155,7 +175,7 @@ assumptions, and the exact implemented variants are explained in the
 ## Release scope
 
 <!-- availability:start -->
-**Release:** the complete code, configurations, reproduction launcher and the registry of the paper's reported values. Run outputs are regenerated with `bash run_cross_morse.sh reproduce` ([guide](docs/HPC.md)); 2 complete synthetic example runs replay without a GPU. See [availability](AVAILABILITY.md).
+**Release:** implementation, configurations, reproduction launcher and reported-result references. `bash run_cross_morse.sh reproduce` executes the dataset lifecycles ([guide](docs/HPC.md)); 2 complete synthetic example runs replay without a GPU. See [availability](AVAILABILITY.md) and the [artifact catalog](docs/ARTIFACT_CATALOG.md).
 <!-- availability:end -->
 
 `make verify` checks the software package and bundled examples. A regenerated

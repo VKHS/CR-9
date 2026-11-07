@@ -1,7 +1,7 @@
 {
   "schema": "cross-morse-display-manifest-1",
-  "review_date": "2026-11-06",
-  "review_scope": "AI-assisted contextual inventory of every numbered table and figure in both supplied PDFs. Presence in this inventory records a support path, not deposited experimental evidence or an exact-artwork reproduction.",
+  "review_date": "2026-11-07",
+  "review_scope": "AI-assisted contextual inventory of every numbered table and figure in both supplied PDFs. Presence in this inventory records a support path, not deposited experimental evidence or an exact-artwork reproduction. Numerical supplementary builder coverage reviewed on 2026-11-07; related columns/panels remain distinct from complete historical display reconstruction.",
   "documents": {
     "main": {
       "sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
@@ -102,15 +102,21 @@
       ],
       "implementation": [
         "cross_morse/statistics.py",
-        "scripts/check_si_identities.py"
+        "scripts/check_si_identities.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [],
       "commands": [
-        "make scientific-audit"
+        "make scientific-audit",
+        "make reconstruct"
       ],
-      "coverage": "original_analysis_required",
+      "coverage": "partial_panels",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "The supplementary builder validates the complete original joint S14 campaign and plots the state/RH effects and original intervals for quantities in panels 3a–b. It preserves original heterogeneous test P values. Action entropy and action-origin panels 3c–d require their original traces; the forest is not the complete printed figure."
+      ],
       "related_tables": [
         "supplementary:Table S14",
         "supplementary:Table S14b"
@@ -137,19 +143,24 @@
         "cm_theory/economics.py",
         "cm_theory/factorial.py",
         "records/specs.json",
-        "paper/build/figures.py"
+        "paper/build/figures.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [
         "ensemble_grid",
         "factorials"
       ],
       "commands": [
-        "make paper"
+        "make paper",
+        "make reconstruct"
       ],
       "coverage": "partial_panels",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
       "notes": [
-        "F1 reconstructs effect versus overhead for panel 4d; other factorial and ensemble panels require their original analyses."
+        "F1 reconstructs effect versus overhead for panel 4d; other factorial and ensemble panels require their original analyses.",
+        "The supplementary builder also produces panel-4a-related arxiv eight-cell factorial means and original intervals from the complete verified factorial record set. Comparator ensemble fit diagnostics do not replace panel 4b feedback-by-E effects/work; other existing partial-panel limits remain."
       ],
       "related_tables": [
         "supplementary:Table S16",
@@ -221,17 +232,23 @@
         "cm_campaigns/arm_campaign.py",
         "cm_experiments/execution.py",
         "cm_theory/economics.py",
-        "cm_theory/inference.py"
+        "cm_theory/inference.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [
         "budget_matched"
       ],
       "commands": [
-        "make scientific-audit"
+        "make scientific-audit",
+        "make reconstruct"
       ],
-      "coverage": "original_analysis_required",
+      "coverage": "partial_panels",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "A strictly replayed 24-arm budget campaign can produce related panel-6a D_compare point frontiers and effect/work diagnostics. This is a new conditional experiment, not historical D_test reconstruction; original teacher intervals, configuration ranges, decision boundaries, power and tail panels remain required."
+      ],
       "related_tables": [
         "supplementary:Table S46",
         "supplementary:Table S46b",
@@ -373,17 +390,23 @@
       ],
       "implementation": [
         "cm_campaigns/arm_campaign.py",
-        "cm_experiments/execution.py"
+        "cm_experiments/execution.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [
         "budget_matched"
       ],
       "commands": [
-        "make scientific-audit"
+        "make scientific-audit",
+        "make reconstruct"
       ],
-      "coverage": "original_analysis_required",
+      "coverage": "partial_panels",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "The supplementary builder can plot related executed-work D_compare point frontiers from a strict 24-arm campaign. The original D_test teacher intervals, arm configuration ranges and ensemble sensitivity band are absent, so this is partial quantitative support rather than the complete printed figure."
+      ],
       "related_tables": [
         "supplementary:Table S46",
         "supplementary:Table S46b"
@@ -558,16 +581,21 @@
       "implementation": [
         "cross_morse/statistics.py",
         "scripts/check_si_identities.py",
-        "paper/build/figures.py"
+        "paper/build/figures.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [],
       "commands": [
-        "make paper"
+        "make paper",
+        "make reconstruct"
       ],
       "coverage": "partial_panels",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
       "notes": [
-        "F6 reconstructs available local mechanism contrasts; joint-family and sensitivity panels require the complete S14 sources."
+        "F6 reconstructs available local mechanism contrasts; joint-family and sensitivity panels require the complete S14 sources.",
+        "The supplementary builder adds a validated original joint-S14 forest. It does not reconstruct the original-versus-rescaled J_old/J_new sensitivity intervals or replace the complete Supplementary Figure S9 design."
       ],
       "related_tables": [
         "supplementary:Table S14",
@@ -1441,18 +1469,23 @@
       "implementation": [
         "cross_morse/statistics.py",
         "cm_campaigns/confirmation.py",
-        "scripts/audit_s14_confirmation.py"
+        "scripts/audit_s14_confirmation.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [],
       "commands": [
         "make paper",
         "make compare-runs",
-        "make confirmation-audit"
+        "make confirmation-audit",
+        "make reconstruct"
       ],
       "coverage": "run_columns",
       "required_evidence": "Original full-profile run archives, complete candidate and decision records, sealed predictions, unit membership and matching result bindings.",
       "notes": [
-        "The run builder emits local-family contrasts. The separate joint S14 campaign must preserve all nine original unrounded tests and decisions fixed before admission."
+        "The run builder emits local-family contrasts. The separate joint S14 campaign must preserve all nine original unrounded tests and decisions fixed before admission.",
+        "The supplementary builder emits the original joint nine-test family: signed effects, original intervals/raw P, recomputed pooled Holm P, statistical units and strict point-margin decisions. Tests against the practical margin and equivalence tests remain separate. Native official-run linkage is established by scientific-audit, not by plotting alone."
       ],
       "evidence_kind": "reported_measurements"
     },
@@ -1556,18 +1589,24 @@
         "supplementary_table_S16_arxiv_factorial"
       ],
       "implementation": [
-        "cm_theory/factorial.py"
+        "cm_theory/factorial.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [
         "factorials"
       ],
       "commands": [
         "make records-check",
-        "make records-tables"
+        "make records-tables",
+        "make reconstruct"
       ],
       "coverage": "record_outputs",
       "required_evidence": "Original raw files and traceable summaries in factorials; record builders emit set-level tables, not the exact manuscript layout.",
-      "notes": [],
+      "notes": [
+        "The supplementary builder requires all eight arxiv cells and all six measured quantities, preserves original cell intervals and time units, and derives both effect-coded and baseline-anchored point contrasts. It does not infer interaction intervals from marginal cell intervals."
+      ],
       "evidence_kind": "mixed"
     },
     {
@@ -1584,18 +1623,24 @@
         "supplementary_table_S16b_pascal_factorial"
       ],
       "implementation": [
-        "cm_theory/factorial.py"
+        "cm_theory/factorial.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [
         "factorials"
       ],
       "commands": [
         "make records-check",
-        "make records-tables"
+        "make records-tables",
+        "make reconstruct"
       ],
       "coverage": "record_outputs",
       "required_evidence": "Original raw files and traceable summaries in factorials; record builders emit set-level tables, not the exact manuscript layout.",
-      "notes": [],
+      "notes": [
+        "The supplementary builder requires all eight Pascal cells and all six measured quantities, preserves original cell intervals/time denominator, and derives both point-contrast conventions. Joint-covariance main-effect/interaction intervals require the original resampling covariance and are not manufactured."
+      ],
       "evidence_kind": "mixed"
     },
     {
@@ -1887,18 +1932,24 @@
         "supplementary_table_S26b_ensemble_law_and_break_even"
       ],
       "implementation": [
-        "cm_theory/economics.py"
+        "cm_theory/economics.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [
         "ensemble_grid"
       ],
       "commands": [
         "make records-check",
-        "make records-tables"
+        "make records-tables",
+        "make reconstruct"
       ],
       "coverage": "record_outputs",
       "required_evidence": "Original raw files and traceable summaries in ensemble_grid; record builders emit set-level tables, not the exact manuscript layout.",
-      "notes": [],
+      "notes": [
+        "The supplementary builder fits the actual seven-point E={1,2,4,8,12,16,20} comparator grid and emits coefficients, points and residual diagnostics. Loss-only records do not supply the printed D_inf band, kappa, break-even cost inputs, feedback-by-E response or additional-checkpoint GPU-hours."
+      ],
       "evidence_kind": "mixed"
     },
     {
@@ -2425,19 +2476,24 @@
       ],
       "implementation": [
         "cm_experiments/execution.py",
-        "cm_campaigns/arm_campaign.py"
+        "cm_campaigns/arm_campaign.py",
+        "paper/build/supplement.py",
+        "scripts/build_supplement.py",
+        "docs/SUPPLEMENT_BUILD.md"
       ],
       "record_sets": [
         "budget_matched"
       ],
       "commands": [
         "make records-check",
-        "make records-tables"
+        "make records-tables",
+        "make reconstruct"
       ],
       "coverage": "record_outputs",
       "required_evidence": "Original raw files and traceable summaries in budget_matched; record builders emit set-level tables, not the exact manuscript layout.",
       "notes": [
-        "Record the executed E6 variant and paid-operation ledger; the S46b retained-share range is not a confidence interval."
+        "Record the executed E6 variant and paid-operation ledger; the S46b retained-share range is not a confidence interval.",
+        "The supplementary builder requires strict replay of all 24 D_compare arm contrasts and emits paired effects/intervals, within-dataset Holm P and executed work/ceiling. The campaign remains a new conditional experiment with historical_table_reproduction=false; retained-share configuration ranges are not reconstructed."
       ],
       "evidence_kind": "reported_measurements"
     },

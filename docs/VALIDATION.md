@@ -72,3 +72,30 @@ and by `make compare RUN_ROOT=...` for a single run.
 
 The repository's GitHub Actions workflow validates the published checkout. Check
 its result for the commit you use.
+
+## Availability and reconstruction validation — 7 November 2026
+
+The `availability_reconstruction_validation` section of [VALIDATION.json](VALIDATION.json)
+records the integrated checks on the upgrade based on commit `5c1399e`:
+
+| Check | Executed result |
+|---|---|
+| Full suite in the recorded CPU environment | 1,132 tests: 1,131 passed, one private-profile test skipped |
+| Suite in an interpreter without PyTorch | 839 tests: 823 passed, 16 PyTorch-dependent tests skipped |
+| Repository verification | Passed, including generated views, artifact catalog, source integrity and sealed examples |
+| Offline reviewer workflow | Passed, 17 steps, verdict `SOFTWARE-ONLY` |
+| Launcher and reproduction regressions | 35 passed, including a fresh current-source synthetic CPU lifecycle and actual report build |
+| Supplementary builders | 14 focused tests passed; five representative plots visually checked |
+
+The reconstruction checks cover input tampering, indexed-archive identity,
+Roman split membership, synthetic labeling, duplicate datasets, failed-build
+preservation, output tampering and the strict all-display gate. The launcher
+tests cover frozen-source consistency, report failures, saved settings, active
+jobs, unfinished Roman splits and GPU-health requeue using a simulated scheduler.
+
+The twelve supplementary output groups retain their ten related displays'
+column or partial-panel scope. Their tests use temporary validator fixtures.
+The fresh CPU integration also uses synthetic data. Original benchmark artifacts
+and live cluster execution remain separate evidence inputs. Runtime source and
+the manuscript numerical registries retain their existing identities; the
+validation record hashes the changed analysis and orchestration tools.

@@ -12,6 +12,13 @@ run; the auxiliary records come from the drivers in
 release scope and [paper/CLAIMS.md](paper/CLAIMS.md) maps every registered
 numerical group to its builder.
 
+The [artifact catalog](docs/ARTIFACT_CATALOG.md) maps each availability category
+to actual bundled files, external dataset sources or a producing command.
+`make reconstruct` combines supplied run and auxiliary artifacts into a
+workspace whose report accounts for every numbered display and records the
+coverage of each generated output. The [reconstruction guide](docs/RECONSTRUCTION.md)
+documents byte verification, atomic builds and the optional full-display gate.
+
 | Topic | Implementation or declared protocol | Records that support the manuscript results |
 |---|---|---|
 | Models, algorithms and supported operators | [Method](docs/METHOD.md), `cross_morse/core.py`, `cross_morse/policies.py`, [implementation notes](paper/IMPLEMENTATION_NOTES.md) | Each run's resolved configuration, checkpoint tensor inventory and nominal-identity check; auxiliary `cross_backbone` and `inserted_site` records for those comparisons |
@@ -33,6 +40,8 @@ numerical group to its builder.
 make verify                                   # software, registry, sealed examples; no GPU
 make test
 make review REVIEW_OFFLINE=1 REPORT_ROOT=../cm-reports
+make reconstruction-example REPORT_ROOT=../cm-reports
+make artifact-catalog-check
 bash run_cross_morse.sh check                 # on a Slurm cluster: settings, runtime identity, plan
 bash run_cross_morse.sh reproduce             # regenerate all seven datasets and the report
 ```

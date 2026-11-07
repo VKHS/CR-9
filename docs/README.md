@@ -11,6 +11,9 @@
 | [Getting started](GETTING_STARTED.md) | Install, replay examples, execute a smoke or benchmark profile without Slurm |
 | [Experiments](EXPERIMENTS.md) | E3–E6 budget-matched arms, upstream baselines and measurement capture |
 | [Run archives](RUN_ARCHIVES.md) | Archive schemas, checksums, provenance, ingestion and the table builders |
+| [Reconstruction](RECONSTRUCTION.md) | One workspace, verified input/output identities and per-display build coverage |
+| [Supplementary builders](SUPPLEMENT_BUILD.md) | Confirmation, factorial, ensemble and budget analyses from their actual inputs |
+| [Artifact catalog](ARTIFACT_CATALOG.md) | Every availability category, bundled files, data providers and producing commands |
 
 ## Read and review the paper
 

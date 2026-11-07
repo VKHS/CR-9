@@ -180,9 +180,9 @@ def render_support(manifest: dict, sources: dict, state: dict) -> str:
              "the completed measured study. The inventory names the available implementation and reconstruction "
              "path for every display, including those outside the 34 curated numerical registry groups.", "",
              (_regeneration_note(state) or
-              f"**Currently registered:** {len(state['official'])}/7 official benchmark archives and "
-              f"{len(state['records']['verified'])}/10 auxiliary measurement sets. "
-              "These are artifact-registration counts, not a judgment about whether the authors ran the experiments. "
+              "Registered experiment artifacts are identified in `runs/index.json` and `records/index.json`. "
+              "The artifact catalog distinguishes supplied files from generated products and original experiments "
+              "from subsequent reproductions. "
               "Fresh verification of the registered files is performed by `make review` and `make scientific-audit`."), "",
              "## What the checking paths cover", "",
              "A command in the tables below is a relevant check or builder. It does not imply that the command "
@@ -294,15 +294,16 @@ def render_results(reported: dict, registered: dict, sources: dict, state: dict)
              "joint nine-test family; local per-run tests have a different scope. See [the source review](MANUSCRIPT_REVIEW.md) "
              "and [implementation notes](IMPLEMENTATION_NOTES.md).", ""] + (
              ["## Regenerating these results", "",
-              "This release distributes no run outputs. `bash run_cross_morse.sh reproduce` regenerates them on a "
-              "Slurm GPU cluster and writes `REPRODUCTION_REPORT.md`, which rebuilds Tables 1–2 from the regenerated "
+              "This release includes synthetic example outputs. `bash run_cross_morse.sh reproduce` executes the "
+              "registered dataset lifecycles on a Slurm GPU cluster and writes `REPRODUCTION_REPORT.md`, which rebuilds supported columns of Tables 1–2 from the regenerated "
               "runs and places each value of the tables above beside the regenerated one; `make compare RUN_ROOT=...` "
               "compares a single run. The [HPC guide](../docs/HPC.md) covers the site settings, the compute and the "
-              "outputs.", ""] if _code_release(state) else
+              "outputs. `make reconstruct` combines registered runs and auxiliary records in a hashed workspace; "
+              "its report states the coverage of each numbered display. See the "
+              "[reconstruction guide](../docs/RECONSTRUCTION.md) and [artifact catalog](../docs/ARTIFACT_CATALOG.md).", ""] if _code_release(state) else
              ["## Reproduction inputs", "",
-              f"The indexes currently register **{len(state['official'])}/7** official archives and "
-              f"**{len(state['records']['verified'])}/10** auxiliary measurement sets. The source registry "
-              "records what the paper reports; `make paper` reconstructs supported outputs from original "
+              "The run and measurement-record indexes identify registered experiment artifacts. The source registry "
+              "records what the paper reports; `make reconstruct` builds supported outputs from original "
               "observations after registration. `make scientific-audit` checks their evidence and decision records. "
               "The [registration guide](../docs/EVIDENCE_REGISTRATION.md) covers the already completed runs.", ""]) + [
              "## Source identities", "", _source_table(sources), "",

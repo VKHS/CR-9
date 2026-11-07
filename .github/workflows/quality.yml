@@ -46,6 +46,11 @@ jobs:
           make example-paper PYTHON=python PAPER_EXAMPLES_ROOT="$RUNNER_TEMP/example-paper"
           test -f "$RUNNER_TEMP/example-paper/tables/T1.tex"
           test -f "$RUNNER_TEMP/example-paper/figures/F1.png"
+      - name: Build and verify one complete reconstruction workspace inventory
+        run: |
+          make reconstruction-example PYTHON=python RECONSTRUCTION_EXAMPLES_ROOT="$RUNNER_TEMP/reconstruction-examples"
+          python -B scripts/reconstruct.py --verify "$RUNNER_TEMP/reconstruction-examples"
+          python -c 'import json, os; p=json.load(open(os.environ["RUNNER_TEMP"]+"/reconstruction-examples/reconstruction.json")); assert len(p["displays"]) == 90; assert p["outputs"]; assert p["synthetic_examples"]; assert not p["all_displays_numerically_reconstructed"]'
       - name: Archive, ingest and build tables from an ingested archive
         run: |
           python -B scripts/archive_run.py examples/runs/peptides_func --output "$RUNNER_TEMP/deposit/peptides.tar.gz"
@@ -94,6 +99,7 @@ jobs:
             ${{ runner.temp }}/review/review-*/compare/comparison-*/*.json
             ${{ runner.temp }}/guards
             ${{ runner.temp }}/theory
+            ${{ runner.temp }}/reconstruction-examples
 
   pytorch:
     name: Full test suite and one synthetic end-to-end run (CPU PyTorch)

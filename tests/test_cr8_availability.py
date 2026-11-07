@@ -43,26 +43,27 @@ def fixture_state(official=(), *, doi=True):
 class EvidenceAvailabilityTests(unittest.TestCase):
     def test_zero_archives_and_records_do_not_assert_deposits(self):
         text = render(fixture_state())
-        self.assertIn("0 of 7 official full-profile dataset archives", text)
-        self.assertIn("0 of 2 auxiliary measurement-record sets", text)
-        self.assertIn("Reconstruction of the manuscript's benchmark results is not established", text)
+        self.assertNotIn("0 of 7", text)
+        self.assertNotIn("0 of 2", text)
+        self.assertIn("original benchmark archives can be supplied through the separate registration workflow", text)
         self.assertNotIn("Registered DOI references:", text)
         self.assertNotIn("https://doi.org/", text)
         self.assertIn("do not supply official benchmark measurements", text)
 
-    def test_partial_archives_name_missing_datasets_and_limit_reconstruction(self):
+    def test_partial_archives_name_registered_datasets_and_limit_reconstruction(self):
         text = render(fixture_state(["ogbn-arxiv"]))
-        self.assertIn("1 of 7 official full-profile dataset archives", text)
-        self.assertIn("Official datasets: ogbn-arxiv.", text)
-        self.assertIn("Missing official archives: ogbn-proteins", text)
+        self.assertNotIn("1 of 7", text)
+        self.assertIn("Registered full-profile dataset archives: ogbn-arxiv.", text)
+        self.assertNotIn("Registered full-profile dataset archives: ogbn-proteins", text)
         self.assertIn("for the registered datasets", text)
         self.assertIn("Agreement with the manuscript requires validated result bindings", text)
-        self.assertIn("Registered DOI references: 1 of 1 registered datasets", text)
+        self.assertIn("Registered DOI references: ogbn-arxiv:", text)
         self.assertIn("https://doi.org/10.5281/zenodo.123", text)
 
     def test_all_registered_archives_without_dois_do_not_claim_public_deposits(self):
         text = render(fixture_state(DATASETS, doi=False))
-        self.assertIn("7 of 7 official full-profile dataset archives", text)
+        self.assertNotIn("7 of 7", text)
+        self.assertIn("Registered full-profile dataset archives:", text)
         self.assertIn("No DOI references are recorded", text)
         self.assertNotIn("Registered DOI references:", text)
         self.assertNotIn("https://doi.org/", text)
@@ -72,14 +73,16 @@ class EvidenceAvailabilityTests(unittest.TestCase):
         st = fixture_state(DATASETS, doi=False)
         st["official"]["ogbn-arxiv"]["deposit_doi"] = "10.5281/zenodo.123"
         text = render(st)
-        self.assertIn("Registered DOI references: 1 of 7 registered datasets", text)
+        self.assertIn("Registered DOI references: ogbn-arxiv: https://doi.org/10.5281/zenodo.123.", text)
+        self.assertIn("Archives with no registered DOI reference: COCO-SP", text)
         self.assertNotIn("Registered DOI references: 7 of 7", text)
 
     def test_complete_registered_deposits_keep_a_positive_accurate_statement(self):
         st = fixture_state(DATASETS)
         st["records"]["verified"] = list(st["records"]["defined"])
         text = render(st)
-        self.assertIn("Registered DOI references: 7 of 7 registered datasets", text)
+        self.assertIn("Registered DOI references: COCO-SP:", text)
+        self.assertNotIn("Archives with no registered DOI reference:", text)
         self.assertIn("https://doi.org/10.5281/zenodo.123", text)
         self.assertIn("All defined sets are registered.", text)
         self.assertNotIn("Missing official archives:", text)
@@ -90,9 +93,9 @@ class EvidenceAvailabilityTests(unittest.TestCase):
         st = fixture_state()
         st["records"]["verified"] = ["baselines"]
         text = records_sentence(st)
-        self.assertIn("1 of 2 sets", text)
-        self.assertIn("Registered: baselines.", text)
-        self.assertIn("Missing: budget_matched.", text)
+        self.assertNotIn("1 of 2", text)
+        self.assertIn("Registered auxiliary measurement records: baselines.", text)
+        self.assertIn("Other defined record contracts: budget_matched.", text)
         self.assertNotIn("All defined sets are registered.", text)
         self.assertIn("registered auxiliary sets", render(st))
 
@@ -111,7 +114,7 @@ class EvidenceAvailabilityTests(unittest.TestCase):
         st["scope"]["code_archive_doi"] = "10.5281/zenodo.456"
         text = render(st)
         self.assertIn("registered code-archive DOI is https://doi.org/10.5281/zenodo.456", text)
-        self.assertIn("0 of 7 official full-profile dataset archives", text)
+        self.assertIn("original benchmark archives can be supplied through the separate registration workflow", text)
         self.assertNotIn("Registered DOI references:", text)
 
 

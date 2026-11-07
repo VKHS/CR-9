@@ -102,6 +102,31 @@ class MakeWorkflowTests(unittest.TestCase):
                                   "--label", "examples", "--output-dir", str(out), "--check"]])
         self.assertFalse(any("render_reported_results" in arg or "reported_results" in arg for call in calls for arg in call))
 
+    def test_reconstruction_preserves_input_paths_and_explicit_completeness(self):
+        index = self.root / "original runs" / "index.json"
+        records = self.root / "auxiliary records" / "index.json"
+        campaign = self.root / "joint confirmation"
+        budget = self.root / "budget campaign"
+        output = self.root / "paper workspace"
+        calls = self.invoke("reconstruct", RUNS_INDEX=index, RECORDS_INDEX=records,
+                            CONFIRMATION_CAMPAIGN=campaign, BUDGET_CAMPAIGN=budget,
+                            RECONSTRUCTION_ROOT=output, REQUIRE_ALL_DISPLAYS=1)
+        self.assertEqual(calls, [["-B", "scripts/reconstruct.py", "--index", str(index),
+                                 "--records-index", str(records), "--output-dir", str(output),
+                                 "--label", "registered-inputs", "--confirmation-campaign", str(campaign),
+                                 "--budget-campaign", str(budget), "--require-all-displays"]])
+        self.assertFalse(output.exists())
+
+    def test_example_reconstruction_and_verification_use_separate_workspaces(self):
+        examples = self.root / "example build"
+        calls = self.invoke("reconstruction-example", RECONSTRUCTION_EXAMPLES_ROOT=examples)
+        self.assertEqual(calls, [["-B", "scripts/reconstruct.py", "--runs-root", "examples/runs",
+                                 "--records-index", "examples/records/index.json", "--label", "synthetic-examples",
+                                 "--output-dir", str(examples)]])
+        self.capture.unlink()
+        calls = self.invoke("reconstruction-check", RECONSTRUCTION_ROOT=examples)
+        self.assertEqual(calls, [["-B", "scripts/reconstruct.py", "--verify", str(examples)]])
+
     def test_ingest_run_verifies_extracts_and_refreshes_manifests_and_availability(self):
         archive = self.root / "deposit archive.tar.gz"
         calls = self.invoke("ingest-run", ARCHIVE=archive, DOI="10.5281/zenodo.1")

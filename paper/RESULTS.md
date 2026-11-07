@@ -52,7 +52,7 @@ On Roman, Pascal and COCO the complete eligible candidate ledger decides between
 
 ## Regenerating these results
 
-This release distributes no run outputs. `bash run_cross_morse.sh reproduce` regenerates them on a Slurm GPU cluster and writes `REPRODUCTION_REPORT.md`, which rebuilds Tables 1–2 from the regenerated runs and places each value of the tables above beside the regenerated one; `make compare RUN_ROOT=...` compares a single run. The [HPC guide](../docs/HPC.md) covers the site settings, the compute and the outputs.
+This release includes synthetic example outputs. `bash run_cross_morse.sh reproduce` executes the registered dataset lifecycles on a Slurm GPU cluster and writes `REPRODUCTION_REPORT.md`, which rebuilds supported columns of Tables 1–2 from the regenerated runs and places each value of the tables above beside the regenerated one; `make compare RUN_ROOT=...` compares a single run. The [HPC guide](../docs/HPC.md) covers the site settings, the compute and the outputs. `make reconstruct` combines registered runs and auxiliary records in a hashed workspace; its report states the coverage of each numbered display. See the [reconstruction guide](../docs/RECONSTRUCTION.md) and [artifact catalog](../docs/ARTIFACT_CATALOG.md).
 
 ## Source identities
 

@@ -1,0 +1,1153 @@
+{
+  "schema": "cross-morse-artifact-catalog-spec-1",
+  "commands": {
+    "verify": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "verify"
+      ],
+      "entrypoints": [
+        "Makefile"
+      ],
+      "scope": "Check implementation, sealed examples, source references and generated artifacts.",
+      "requires": [
+        "Recorded CPU or NumPy environment"
+      ]
+    },
+    "lifecycle": {
+      "mode": "execute",
+      "argv": [
+        "bash",
+        "run_cross_morse.sh",
+        "reproduce"
+      ],
+      "entrypoints": [
+        "run_cross_morse.sh",
+        "scripts/reproduction.py"
+      ],
+      "scope": "Execute the registered seven-dataset lifecycle suite and compare supported run outputs with the paper.",
+      "requires": [
+        "Reviewed cluster/site settings",
+        "Provider datasets or permitted downloads",
+        "Execution environment and compute allocation"
+      ]
+    },
+    "synthetic_suite": {
+      "mode": "execute",
+      "argv": [
+        "bash",
+        "run_cross_morse.sh",
+        "reproduce",
+        "smoke"
+      ],
+      "entrypoints": [
+        "run_cross_morse.sh",
+        "scripts/reproduction.py"
+      ],
+      "scope": "Exercise the launcher on synthetic data; outputs remain synthetic.",
+      "requires": [
+        "Cluster/site settings",
+        "Execution environment"
+      ]
+    },
+    "model_inventory": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "model-inventory"
+      ],
+      "entrypoints": [
+        "scripts/model_inventory.py"
+      ],
+      "scope": "Instantiate the released model configurations and count their named parameters.",
+      "requires": [
+        "CPU PyTorch environment"
+      ]
+    },
+    "registered_design": {
+      "mode": "build",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/run_manifests.py",
+        "registered"
+      ],
+      "entrypoints": [
+        "scripts/run_manifests.py"
+      ],
+      "scope": "Write prescribed split/seed/configuration manifests; these describe the design.",
+      "requires": [
+        "Dataset configurations"
+      ]
+    },
+    "executed_manifest": {
+      "mode": "build",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/run_manifests.py",
+        "runs",
+        "--index",
+        "runs/index.json",
+        "--label",
+        "official",
+        "--with-indices"
+      ],
+      "entrypoints": [
+        "scripts/run_manifests.py"
+      ],
+      "scope": "Extract actual roles, seeds, environment and membership arrays from registered runs.",
+      "requires": [
+        "Validated run archives"
+      ]
+    },
+    "registry_check": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "registry-check"
+      ],
+      "entrypoints": [
+        "scripts/check_paper_constants.py",
+        "scripts/check_manuscript_sources.py"
+      ],
+      "scope": "Check reported reference values, protocol constants and recorded PDF identities within their stated scope.",
+      "requires": []
+    },
+    "environment": {
+      "mode": "check",
+      "argv": [
+        "python",
+        "-B",
+        "environment/check_environment.py"
+      ],
+      "entrypoints": [
+        "environment/check_environment.py"
+      ],
+      "scope": "Inspect the installed execution environment.",
+      "requires": []
+    },
+    "arm_campaign": {
+      "mode": "execute",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/arm_campaign.py",
+        "execute",
+        "--manifest",
+        "<campaign.json>",
+        "--trust-local-checkpoints"
+      ],
+      "entrypoints": [
+        "scripts/arm_campaign.py"
+      ],
+      "scope": "Execute the declared E3–E6 controller-seed studies; the supplied plan identifies paid work and parent runs.",
+      "requires": [
+        "Completed parent runs",
+        "Prespecified campaign",
+        "Reviewed local checkpoints",
+        "Compute allocation"
+      ]
+    },
+    "upstream_baseline": {
+      "mode": "execute",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/run_upstream_baseline.py",
+        "--plan",
+        "<baseline-plan.json>",
+        "--output",
+        "<study>",
+        "--phase",
+        "hpo",
+        "--index",
+        "<trial-index>",
+        "--trust-upstream-code"
+      ],
+      "entrypoints": [
+        "scripts/run_upstream_baseline.py"
+      ],
+      "scope": "Execute one declared pinned-upstream HPO attempt; selection and final-seed phases follow the baseline guide.",
+      "requires": [
+        "Reviewed pinned upstream code and plan",
+        "Training/validation data",
+        "Compute allocation"
+      ]
+    },
+    "export_records": {
+      "mode": "register",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/export_records.py",
+        "from-mapping",
+        "--mapping",
+        "<measurement-mapping.json>"
+      ],
+      "entrypoints": [
+        "scripts/export_records.py",
+        "scripts/record_mapping.py"
+      ],
+      "scope": "Import existing measurements and declared calculations with raw-file locators; never fill them from manuscript targets.",
+      "requires": [
+        "Actual original or reproduced outputs",
+        "Explicit mapping and provenance"
+      ]
+    },
+    "archive": {
+      "mode": "register",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/archive_run.py",
+        "<run>",
+        "--output",
+        "<archive.tar.gz>"
+      ],
+      "entrypoints": [
+        "scripts/archive_run.py"
+      ],
+      "scope": "Pack a complete sealed run with its byte inventory and identities.",
+      "requires": [
+        "Complete run directory"
+      ]
+    },
+    "ingest": {
+      "mode": "register",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/ingest_run.py",
+        "<archive.tar.gz>"
+      ],
+      "entrypoints": [
+        "scripts/ingest_run.py"
+      ],
+      "scope": "Verify and register a supplied archive; manuscript relationship remains a separate author declaration.",
+      "requires": [
+        "Archive with sealed outputs"
+      ]
+    },
+    "fetch": {
+      "mode": "fetch",
+      "argv": [
+        "make",
+        "fetch-deposits",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoints": [
+        "scripts/fetch_deposits.py"
+      ],
+      "scope": "Retrieve registered public run deposits and verify their pinned archive bytes.",
+      "requires": [
+        "Complete run-index registration",
+        "Network access"
+      ]
+    },
+    "record_check": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "records-check"
+      ],
+      "entrypoints": [
+        "scripts/records.py"
+      ],
+      "scope": "Recheck record-set file hashes and trace each summary value to its source.",
+      "requires": [
+        "Indexed measurement sets"
+      ]
+    },
+    "scientific_audit": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "scientific-audit",
+        "BUDGET_CAMPAIGN=<e3-e6>",
+        "CONFIRMATION_CAMPAIGN=<s14>",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoints": [
+        "scripts/scientific_evidence_audit.py"
+      ],
+      "scope": "Check original experiment bindings, joint confirmation, budget and auxiliary evidence within the enumerated audit scope.",
+      "requires": [
+        "Registered runs and records",
+        "Original S14 family",
+        "Complete E3–E6 campaign"
+      ]
+    },
+    "theory": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "theory-full",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoints": [
+        "scripts/verify_theory.py"
+      ],
+      "scope": "Run numerical checks of the stated analytical implications; these are not experimental observations.",
+      "requires": []
+    },
+    "si": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "si-report",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoints": [
+        "scripts/check_si_identities.py"
+      ],
+      "scope": "Recompute supplementary relationships from printed inputs with precision and interpretation notes.",
+      "requires": []
+    },
+    "reconstruct": {
+      "mode": "build",
+      "argv": [
+        "make",
+        "reconstruct",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoints": [
+        "scripts/reconstruct.py"
+      ],
+      "scope": "Build supported numerical outputs and enumerate the scope of every numbered display.",
+      "requires": [
+        "Registered original or reproduced run archives",
+        "Applicable measurement sets/campaigns"
+      ]
+    },
+    "reconstruction_example": {
+      "mode": "build",
+      "argv": [
+        "make",
+        "reconstruction-example",
+        "REPORT_ROOT=<reports>"
+      ],
+      "entrypoints": [
+        "scripts/reconstruct.py"
+      ],
+      "scope": "Build the unified report using bundled synthetic observations; no benchmark measurements are implied.",
+      "requires": []
+    },
+    "supplement": {
+      "mode": "build",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/build_supplement.py",
+        "--records-index",
+        "records/index.json",
+        "--confirmation-campaign",
+        "<s14>",
+        "--budget-campaign",
+        "<e3-e6>",
+        "--output-dir",
+        "<supplement-output>"
+      ],
+      "entrypoints": [
+        "scripts/build_supplement.py",
+        "paper/build/supplement.py"
+      ],
+      "scope": "Build supported factorial, joint-confirmation, ensemble-fit and arm-comparison outputs from validated inputs.",
+      "requires": [
+        "Applicable measurement sets",
+        "Original S14 family for confirmation outputs",
+        "E3–E6 campaign for arm outputs"
+      ]
+    }
+  },
+  "entries": [
+    {
+      "id": "experiment_code",
+      "title": "Experimental implementation",
+      "bundled": [
+        {
+          "artifact_class": "implementation",
+          "patterns": [
+            "cross_morse/*.py",
+            "run_cross_morse*.py",
+            "cm_experiments/*.py",
+            "cm_campaigns/*.py"
+          ]
+        },
+        {
+          "artifact_class": "implementation",
+          "patterns": [
+            "run_cross_morse.sh",
+            "scripts/reproduction.py"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "suite",
+          "patterns": [
+            "000_MANIFEST/suite.json",
+            "000_MANIFEST/source_sha256.json",
+            "runs/**/run_state.json",
+            "REPRODUCTION_REPORT.md",
+            "SUITE_STATUS.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "A new suite records its executed lifecycles; separate auxiliary drivers have their own inputs and outputs.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "synthetic_suite",
+        "arm_campaign",
+        "upstream_baseline",
+        "verify"
+      ],
+      "contracts": [
+        "docs/METHOD.md",
+        "docs/EXPERIMENTS.md",
+        "docs/PAPER_SUPPORT.md",
+        "cross_morse/provenance.py"
+      ],
+      "scope": "Core and auxiliary experiment implementations are included. Executing the dataset lifecycles does not by itself execute every auxiliary campaign.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ]
+    },
+    {
+      "id": "configurations",
+      "title": "Configurations",
+      "bundled": [
+        {
+          "artifact_class": "configuration",
+          "patterns": [
+            "configs/*_smoke.json",
+            "configs/*_pilot.json",
+            "configs/*_full.json",
+            "configs/public.env.example",
+            "configs/arrhenius-site.env.example"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "config.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Each executed run, including each Roman-empire split, records its resolved runtime configuration.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        },
+        {
+          "root": "suite",
+          "patterns": [
+            "runs/*/launcher/run_manifest.json",
+            "runs/*/launcher/source_sha256.json",
+            "runs/*/source/configs/submitted.json",
+            "runs/*/source/configs/resolved.json",
+            "runs/*/source/configs/active.env.example"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "The Slurm launcher freezes submitted/resolved configuration, environment settings and source hashes once per dataset run or Roman-empire campaign; the ten Roman split runs use that shared campaign snapshot.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "model_inventory"
+      ],
+      "contracts": [
+        "run_cross_morse.py",
+        "docs/DATASETS.md",
+        "scripts/model_inventory.py"
+      ],
+      "scope": "Smoke, pilot and full profiles plus portable site templates. Model counts identify released configurations; original checkpoint identity requires the associated run.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json"
+      ]
+    },
+    {
+      "id": "source_data",
+      "title": "Source data and reported values",
+      "bundled": [
+        {
+          "artifact_class": "reported_reference",
+          "patterns": [
+            "paper/reported_results.json",
+            "paper/registered_constants.json",
+            "paper/sources.json"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "patterns": [
+            "examples/runs/*/prepared/graph.npz",
+            "examples/runs/*/prepared/metadata.json"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "prepared/graph.npz",
+            "prepared/metadata.json",
+            "prepared/official_splits.npz",
+            "prepared/splits.npz"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Prepared arrays are produced from provider data or explicitly synthetic input; source hashes and raw-data policy accompany the run.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "registry_check",
+        "fetch"
+      ],
+      "contracts": [
+        "data/sources.json",
+        "docs/DATASETS.md",
+        "paper/transcription_check.json"
+      ],
+      "scope": "Official provider data, reported numerical references and experimental observations have separate identities. Transcribed values never become reconstructed measurements.",
+      "provider_data": true,
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ]
+    },
+    {
+      "id": "split_seed_manifests",
+      "title": "Split and seed manifests",
+      "bundled": [
+        {
+          "artifact_class": "design_manifest",
+          "patterns": [
+            "manifests/registered/*.json"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "patterns": [
+            "examples/runs/*/prepared/splits.npz",
+            "examples/runs/*/prepared/official_splits.npz",
+            "examples/runs/*/config.json"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "prepared/splits.npz",
+            "prepared/official_splits.npz",
+            "prepared/graph_splits.npz",
+            "prepared/clusters.npz"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Role membership and graph/core units are recorded where applicable.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        },
+        {
+          "root": "checkout",
+          "patterns": [
+            "manifests/official/*.json",
+            "manifests/official/*.npz"
+          ],
+          "producers": [
+            "executed_manifest"
+          ],
+          "scope": "Executed manifests contain actual memberships and seed identities; these differ from prescribed design manifests.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        }
+      ],
+      "commands": [
+        "registered_design",
+        "executed_manifest"
+      ],
+      "contracts": [
+        "cross_morse/split_contract.py",
+        "cross_morse/role_evidence.py",
+        "scripts/run_manifests.py",
+        "data/sources.json"
+      ],
+      "scope": "Registered manifests prescribe splits/seeds; extracted run manifests record what was used. Membership and optimization-seed evidence stay separate.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json"
+      ]
+    },
+    {
+      "id": "environments",
+      "title": "Environment specifications",
+      "bundled": [
+        {
+          "artifact_class": "environment_specification",
+          "patterns": [
+            "environment/requirements-*.lock",
+            "environment/observed_environment.json",
+            "environment/apptainer.def",
+            "Dockerfile"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "patterns": [
+            "examples/runs/*/environment.json"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "environment.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Package, device and runtime observations are recorded for each execution.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "packages",
+            "python",
+            "device",
+            "hardware"
+          ]
+        }
+      ],
+      "commands": [
+        "environment",
+        "lifecycle"
+      ],
+      "contracts": [
+        "environment/README.md",
+        "environment/check_environment.py",
+        "docs/HPC.md"
+      ],
+      "scope": "Released lock files and containers specify environments; each run carries its actual execution environment.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json"
+      ]
+    },
+    {
+      "id": "checkpoints",
+      "title": "Trained checkpoints and model inventories",
+      "bundled": [
+        {
+          "artifact_class": "implementation",
+          "patterns": [
+            "cross_morse/core.py",
+            "scripts/model_inventory.py"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "patterns": [
+            "examples/runs/*/train/*_best.pt",
+            "examples/runs/*/train/model_inventory.json"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "train/*_best.pt",
+            "train/model_inventory.json",
+            "provenance/frozen_models.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Weights, parameter inventory and freeze audits are products of that run.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator",
+            "checkpoint_sha256"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "model_inventory",
+        "archive",
+        "fetch"
+      ],
+      "contracts": [
+        "docs/DATASETS.md",
+        "cross_morse/provenance.py",
+        "scripts/archive_run.py"
+      ],
+      "scope": "Bundled checkpoint files are synthetic examples. Original benchmark weights and newly trained weights are distinguished through the registered run relationship.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json"
+      ]
+    },
+    {
+      "id": "predictions",
+      "title": "Predictions and paired observations",
+      "bundled": [
+        {
+          "artifact_class": "synthetic_output",
+          "patterns": [
+            "examples/runs/*/final/test_predictions.npz",
+            "examples/runs/*/final/paired_test_units.npz",
+            "examples/runs/*/final/q*_probabilities.npy"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "final/test_predictions.npz",
+            "final/paired_test_units.npz",
+            "final/q*_probabilities.npy",
+            "select/unit_scores.npz"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Predictions remain bound to the frozen policies, statistical units, membership and evaluator.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator",
+            "policy_hash",
+            "ensemble_members"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "archive",
+        "fetch"
+      ],
+      "contracts": [
+        "cross_morse/tasks.py",
+        "cross_morse/review.py",
+        "docs/RUN_ARCHIVES.md"
+      ],
+      "scope": "Saved predictions support paired replay. Numerical agreement with a manuscript value does not establish that a new run produced the original paper.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json"
+      ]
+    },
+    {
+      "id": "propensity_logs",
+      "title": "Exploration and propensity logs",
+      "bundled": [
+        {
+          "artifact_class": "synthetic_output",
+          "patterns": [
+            "examples/runs/*/explore/trajectory_*.json",
+            "examples/runs/*/explore/trajectory_*.npz",
+            "examples/runs/*/explore/manifest.json"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "explore/trajectory_*.json",
+            "explore/trajectory_*.npz",
+            "explore/manifest.json",
+            "fit/*/audit.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Behavior probabilities, actions, trajectory groups and support diagnostics must remain attached to the same observations.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator",
+            "trajectory_id",
+            "behavior_policy",
+            "propensity",
+            "action_support"
+          ]
+        }
+      ],
+      "commands": [
+        "lifecycle",
+        "scientific_audit"
+      ],
+      "contracts": [
+        "cross_morse/pipeline.py",
+        "cross_morse/learning.py",
+        "docs/PAPER_SUPPORT.md"
+      ],
+      "scope": "Runtime logging and bundled synthetic examples show the format. Original propensity observations must come from their actual exploration runs.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json"
+      ]
+    },
+    {
+      "id": "statistical_analysis",
+      "title": "Statistical analyses",
+      "bundled": [
+        {
+          "artifact_class": "implementation",
+          "patterns": [
+            "cross_morse/statistics.py",
+            "cm_theory/*.py",
+            "scripts/check_si_identities.py",
+            "cm_campaigns/confirmation.py"
+          ]
+        },
+        {
+          "artifact_class": "synthetic_output",
+          "patterns": [
+            "examples/runs/*/select/decision.json",
+            "examples/runs/*/confirm/*.json",
+            "examples/runs/*/admit/*.json",
+            "examples/runs/*/final/results_summary.json"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "run",
+          "patterns": [
+            "select/decision.json",
+            "confirm/decision.json",
+            "confirm/contrast_registry.json",
+            "admit/pre_admission_lock.json",
+            "admit/decision.json",
+            "final/results_summary.json"
+          ],
+          "producers": [
+            "lifecycle"
+          ],
+          "scope": "Local per-run inference is distinct from the original cross-dataset nine-test S14 family.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        },
+        {
+          "root": "record_set",
+          "patterns": [
+            "summary.csv",
+            "raw/*",
+            "code/*",
+            "provenance.json",
+            "MANIFEST.json"
+          ],
+          "producers": [
+            "export_records"
+          ],
+          "scope": "Measurement records are imported from supplied original or reproduced observations and retain their provenance.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        },
+        {
+          "root": "report",
+          "patterns": [
+            "scientific-evidence-audit.json"
+          ],
+          "producers": [
+            "scientific_audit"
+          ],
+          "scope": "The evidence audit writes its enumerated checks and limitations for the registered inputs.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        },
+        {
+          "root": "report",
+          "patterns": [
+            "tables/S14_joint.csv",
+            "tables/S16.csv",
+            "tables/S16b.csv",
+            "tables/factorial_point_contrasts.csv",
+            "tables/S26b_fit.csv",
+            "tables/S46b_comparison.csv"
+          ],
+          "producers": [
+            "supplement"
+          ],
+          "scope": "Only outputs supported by the supplied evidence are emitted; statistical import does not invent original unrounded test outputs.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        }
+      ],
+      "commands": [
+        "theory",
+        "si",
+        "export_records",
+        "record_check",
+        "scientific_audit",
+        "supplement"
+      ],
+      "contracts": [
+        "docs/S14_CONFIRMATION.md",
+        "docs/SUPPLEMENT_BUILD.md",
+        "records/specs.json",
+        "scripts/check_result_binding.py"
+      ],
+      "scope": "Statistical code and arithmetic checks are included. Original joint tests, raw paired data and new reproduction outputs remain separately identified.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ]
+    },
+    {
+      "id": "table_figure_generators",
+      "title": "Table and figure generators",
+      "bundled": [
+        {
+          "artifact_class": "analysis_builder",
+          "patterns": [
+            "paper/build/*.py",
+            "scripts/build_paper.py",
+            "scripts/plot_registry_figures.py",
+            "scripts/draw_diagrams.py",
+            "scripts/reconstruct.py",
+            "scripts/build_supplement.py"
+          ]
+        },
+        {
+          "artifact_class": "reported_reference",
+          "patterns": [
+            "paper/display_manifest.json"
+          ]
+        }
+      ],
+      "generated": [
+        {
+          "root": "report",
+          "patterns": [
+            "RECONSTRUCTION_REPORT.md",
+            "reconstruction.json",
+            "FILES.json"
+          ],
+          "producers": [
+            "reconstruct",
+            "reconstruction_example"
+          ],
+          "scope": "The unified report enumerates every display and states which outputs were built, partially built or only checked.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        },
+        {
+          "root": "report",
+          "patterns": [
+            "runs/tables/*",
+            "runs/figures/*",
+            "runs/evidence/*",
+            "records/*",
+            "supplement/tables/*",
+            "supplement/figures/*",
+            "supplement/data/*",
+            "supplement/BUILD.json"
+          ],
+          "producers": [
+            "reconstruct",
+            "reconstruction_example"
+          ],
+          "scope": "Generated numerical outputs follow their declared input and coverage contracts; a related plot is not automatically the exact manuscript panel.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        },
+        {
+          "root": "report",
+          "patterns": [
+            "tables/*",
+            "figures/*",
+            "data/*",
+            "BUILD.json"
+          ],
+          "producers": [
+            "supplement"
+          ],
+          "scope": "Generated numerical outputs follow their declared input and coverage contracts; a related plot is not automatically the exact manuscript panel.",
+          "identity_fields": [
+            "source_sha256",
+            "config_sha256",
+            "unit_sha256",
+            "dataset",
+            "profile",
+            "optimization_seeds",
+            "data_role",
+            "statistical_unit",
+            "evaluator"
+          ]
+        }
+      ],
+      "commands": [
+        "reconstruct",
+        "reconstruction_example",
+        "supplement"
+      ],
+      "contracts": [
+        "docs/RECONSTRUCTION.md",
+        "docs/SUPPLEMENT_BUILD.md",
+        "paper/display_manifest.json",
+        "paper/PAPER_SUPPORT.md"
+      ],
+      "scope": "Display-level coverage is explicit. The inventory of all numbered displays does not claim that every printed table or figure has an exact standalone generator.",
+      "provider_data": false,
+      "artifact_indexes": [
+        "runs/index.json",
+        "records/index.json"
+      ]
+    }
+  ]
+}

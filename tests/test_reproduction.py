@@ -7,9 +7,11 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -27,6 +29,7 @@ rows = [{"section": "Table 1", "quantity": "paired CE effect qD - qC (nats), mea
 comparison = {"dataset": "ogbn-arxiv", "run": args[0], "rows": rows,
               "levels": {"exact": 1, "interval": 1, "outside": 0, "match": 0, "differs": 0, "missing": 0}}
 if "--roman-campaign" in args:
+    comparison["dataset"] = "Roman-empire"
     comparison["campaign_summary"] = {"paired_qD_minus_qC_loss": {"mean": -0.0057, "lower": -0.009, "upper": -0.0025},
                                       "admitted_split_count": 10}
 out.write_text(json.dumps(comparison))
@@ -144,15 +147,26 @@ class SuiteAndReportTests(unittest.TestCase):
         manifest = rp.load_suite(suite)
         arxiv, roman, peptides = (Path(run["path"]) for run in manifest["runs"])
         self.complete(arxiv)
+        from run_cross_morse import create_launcher_snapshot
         for index in range(10):
             split = roman / f"split_{index:02d}"
-            split.mkdir()
+            create_launcher_snapshot(PROJECT, split, PROJECT / "configs/roman_empire_full.json", "full",
+                                     self.root / "data", PROJECT / "run_cross_morse.sh",
+                                     dataset="Roman-empire", split_index=index)
             self.complete(split)
         (peptides / "launcher").mkdir(exist_ok=True)
         (peptides / "launcher/terminal.json").write_text(json.dumps({"status": "FAILED", "failure_class": "RUNTIME", "reason": "rc 1"}))
-        for run_dir in (arxiv, roman):
-            (run_dir / "source/scripts/compare_with_manuscript.py").write_text(FAKE_COMPARE)
-        result = rp.build_report(suite, sacct_text="JobIDRaw|JobName|ElapsedRaw|AllocTRES\n1|cmr0001_01_arxiv|7200|gres/gpu=1\n")
+        # Substitute a process at the test boundary; never alter a frozen tool
+        # and then allow the report to treat it as the original analysis.
+        fake = self.root / "fake_comparison.py"
+        fake.write_text(FAKE_COMPARE)
+        process = rp._report_process
+        def run_process(command, directory, **kwargs):
+            if Path(command[2]).name == "compare_with_manuscript.py":
+                command = [*command[:2], str(fake), *command[3:]]
+            return process(command, directory, **kwargs)
+        with mock.patch.object(rp, "_report_process", side_effect=run_process):
+            result = rp.build_report(suite, sacct_text="JobIDRaw|JobName|ElapsedRaw|AllocTRES\n1|cmr0001_01_arxiv|7200|gres/gpu=1\n")
         self.assertEqual((result["complete_runs"], result["planned_runs"]), (2, 3))
         report = (suite / "REPRODUCTION_REPORT.md").read_text()
         self.assertIn("Regenerated results beside the paper (main Table 1)", report)
@@ -199,7 +213,116 @@ class SuiteAndReportTests(unittest.TestCase):
         self.assertIsNone(comparison["json"])
         self.assertEqual(comparison["error"], "comparison refused: EvidenceError: Eight distinct sealed lifecycle stages are required")
         self.assertEqual(comparison["exit_code"], 2)
+        self.assertEqual(result["report_status"], "FAIL")
         self.assertIn("comparison refused: EvidenceError", (suite / "REPRODUCTION_REPORT.md").read_text())
+
+    def test_report_rejects_changed_frozen_tools_before_executing_analysis(self):
+        suite = self.create("smoke", ["ogbn-arxiv"])
+        self.assertEqual(rp.verify_suite_sources(suite)["status"], "PASS")
+        tool = suite / "source/paper/build/figures.py"
+        tool.write_text(tool.read_text() + "\n# changed analysis\n")
+        with mock.patch.object(rp, "_report_process") as process:
+            with self.assertRaisesRegex(rp.SuiteError, "Frozen source changed"):
+                rp.build_report(suite)
+        process.assert_not_called()
+
+    def test_report_rejects_changed_run_analysis_and_extra_symlinks(self):
+        suite = self.create("smoke", ["ogbn-arxiv"])
+        root = Path(rp.load_suite(suite)["runs"][0]["path"])
+        tool = root / "source/scripts/compare_with_manuscript.py"
+        original = tool.read_text()
+        tool.write_text(original + "\n# changed analysis\n")
+        with self.assertRaisesRegex(rp.SuiteError, "Frozen source changed"):
+            rp.verify_suite_sources(suite)
+        tool.write_text(original)
+        (suite / "source/extra.py").symlink_to(tool)
+        with self.assertRaisesRegex(rp.SuiteError, "Frozen source changed"):
+            rp.verify_suite_sources(suite)
+
+    def test_moved_suite_uses_its_own_frozen_runs_and_tools(self):
+        old = self.create("smoke", ["ogbn-arxiv"])
+        moved = self.root / "moved suite"
+        old.rename(moved)
+        manifest = rp.load_suite(moved)
+        self.assertEqual(manifest["report_source"], str(moved / "source"))
+        self.assertEqual(manifest["runs"][0]["path"], str(moved / "runs/01_arxiv"))
+        self.assertEqual(rp.verify_suite_sources(moved)["status"], "PASS")
+
+    def test_external_run_path_is_not_a_suite_input(self):
+        suite = self.create("smoke", ["ogbn-arxiv"])
+        path = suite / "000_MANIFEST/suite.json"
+        manifest = json.loads(path.read_text())
+        manifest["runs"][0]["path"] = str(PROJECT / "examples/runs/arxiv")
+        path.write_text(json.dumps(manifest))
+        with self.assertRaisesRegex(rp.SuiteError, "external run path"):
+            rp.load_suite(suite)
+
+    def test_incomplete_report_writes_diagnostics_but_cli_does_not_succeed(self):
+        suite = self.create("smoke", ["ogbn-arxiv"])
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = rp.main(["report", str(suite)])
+        self.assertEqual(code, 1)
+        status = json.loads((suite / "SUITE_STATUS.json").read_text())
+        self.assertEqual(status["report_status"], "INCOMPLETE")
+        self.assertEqual(status["report_errors"], [])
+        self.assertTrue(Path(status["results_zip"]).is_file())
+
+    def test_failed_builder_cannot_return_a_successful_report(self):
+        suite = self.create("smoke", ["ogbn-arxiv"])
+        self.complete(Path(rp.load_suite(suite)["runs"][0]["path"]))
+        with mock.patch.object(rp, "build_tables", return_value={"output": str(suite / "999_REPORT/paper"), "tables": ["T1"], "figures": [],
+                                                               "figures_error": "fixture renderer failed"}), \
+                contextlib.redirect_stdout(io.StringIO()):
+            code = rp.main(["report", str(suite)])
+        self.assertEqual(code, 2)
+        status = json.loads((suite / "SUITE_STATUS.json").read_text())
+        self.assertEqual(status["report_status"], "FAIL")
+        self.assertIn({"component": "figures", "error": "fixture renderer failed"}, status["report_errors"])
+        self.assertIn("fixture renderer failed", (suite / "REPRODUCTION_REPORT.md").read_text())
+
+    def test_valid_numerical_disagreement_is_not_a_tool_failure(self):
+        suite = self.create("full", ["ogbn-arxiv"])
+        def different_comparison(command, report_dir):
+            output = Path(command[command.index("--output") + 1])
+            output.write_text(json.dumps({"dataset": "ogbn-arxiv", "levels": {"outside": 1}, "rows": []}))
+            output.with_suffix(".md").write_text("A numerical difference was observed.\n")
+            return subprocess.CompletedProcess(command, 1, "", "")
+        with mock.patch.object(rp, "_report_process", side_effect=different_comparison):
+            result = rp.compare_with_paper(rp.load_suite(suite)["runs"][0], suite / "999_REPORT", sys.executable)
+        self.assertEqual(result["exit_code"], 1)
+        self.assertEqual(result["levels"], {"outside": 1})
+        self.assertNotIn("error", result)
+
+    def test_builder_timeout_is_a_reported_failure(self):
+        command = [sys.executable, "-B", "build_paper.py", "figures"]
+        with mock.patch.object(rp.subprocess, "run", side_effect=subprocess.TimeoutExpired(command, 12)):
+            result = rp._report_process(command, self.root, timeout=12)
+        self.assertEqual(result.returncode, 124)
+        self.assertIn("timed out after 12s", result.stderr)
+
+    def test_incomplete_fingerprint_set_never_claims_every_run_sealed_it(self):
+        suite = self.create("smoke", ["ogbn-arxiv"])
+        root = Path(rp.load_suite(suite)["runs"][0]["path"])
+        self.complete(root)
+        state = json.loads((root / "run_state.json").read_text())
+        state.pop("source_sha256")
+        (root / "run_state.json").write_text(json.dumps(state))
+        with mock.patch.object(rp, "build_tables", return_value={"output": str(suite / "999_REPORT/paper"), "tables": ["T1"], "figures": ["F1"]}):
+            result = rp.build_report(suite)
+        self.assertEqual(result["report_status"], "FAIL")
+        self.assertFalse(result["sealed_fingerprints_match_suite"])
+
+    def test_progress_source_cannot_override_the_sealed_stage_source(self):
+        run = self.root / "historical example"
+        shutil.copytree(PROJECT / "examples/runs/arxiv", run, ignore=shutil.ignore_patterns("source"))
+        state_path = run / "run_state.json"
+        state = json.loads(state_path.read_text())
+        other_source = "0" * 64
+        self.assertNotEqual(state["source_sha256"], other_source)
+        state["source_sha256"] = other_source
+        state_path.write_text(json.dumps(state))
+        with self.assertRaisesRegex(rp.SuiteError, "sealed stage source differs"):
+            rp.verify_completed_run_source(run, other_source)
 
     def test_status_cli_reads_the_latest_suite(self):
         suite = self.create("pilot", ["COCO-SP"])
