@@ -42,11 +42,19 @@
   substitutions, factorials, negative controls, the serving-time input gate, the
   held-out mechanism contrasts, the admission-split oracle, the Proposition 2 tube
   audit, depth diagnostics, the action-gap, decision-trace and reliability audits,
-  runtime scaling and timing anchors. Every runner reads sealed lifecycle runs
-  without writing them, records the identities of its parents and exports a record
-  set that `scripts/records.py` traces value by value. Thirty record contracts are
-  registered in `records/specs.json`; `scripts/export_records.py from-mapping` accepts
-  every one of them.
+  runtime scaling and timing anchors. Module ablations (E7, E8), the fitted
+  factorial cells and the E18 policy value run as variant lifecycles
+  (`scripts/run_ablation.py`): explore to confirm re-run from the sealed parent's
+  prepare/train outputs with the variant installed in that process only and recorded
+  in the configuration hash. Every runner reads sealed lifecycle runs without
+  writing them, records the identities of its parents and exports a record set that
+  `scripts/records.py` traces value by value. Thirty-one record contracts are
+  registered in `records/specs.json`; `scripts/export_records.py from-mapping`
+  accepts every one of them. Parts of a reported experiment that the released
+  runtime cannot execute are declared in `release/experiment_code.json`
+  (`not_executable`) and reported by `make statement-check`.
+- Table S41's E3–E6 comparison row reads the Slurm allocations of the comparison
+  campaign's arm jobs.
 - `release/experiment_code.json` maps every experiment behind a reported table or
   figure to its code, command, configurations and published artifacts.
 - Availability views (`AVAILABILITY.md`, `paper/AVAILABILITY_STATEMENT.txt`,

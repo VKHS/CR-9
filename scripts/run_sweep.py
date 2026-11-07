@@ -9,8 +9,10 @@
     # S18: support thresholds (variant lifecycle runs), selection margins and clip level (exact replays)
     python -B scripts/run_sweep.py plan --sweep sensitivity_grids --parent /abs/runs/arxiv ... --output /abs/sweeps/grids
 
-    # S17: the module ablations the released runtime supports (sealed outputs only)
-    python -B scripts/run_sweep.py plan --sweep module_ablations --parent /abs/runs/arxiv ... --output /abs/sweeps/modules
+    # S17: three modules from sealed contrasts; the seven others from the collected variant lifecycles of
+    # scripts/run_ablation.py modules (attach their experiment directory; one record set holds all ten)
+    python -B scripts/run_sweep.py plan --sweep module_ablations --parent /abs/runs/arxiv ... --output /abs/sweeps/modules \
+        [--ablations /abs/ablations/modules]
 
 ``plan`` writes plan.json and one configuration per variant (the parent's configuration
 with one registered key changed). ``run`` executes the released lifecycle on every
@@ -56,6 +58,9 @@ def main(argv=None) -> int:
                    help="omit the lifecycle replicate of the unchanged parent configuration")
     p.add_argument("--allow-source-change", action="store_true",
                    help="record, instead of refusing, a runtime source that differs from the parents'")
+    p.add_argument("--ablations", type=Path, action="append", default=[],
+                   help="module_ablations: collected experiment directory of scripts/run_ablation.py modules "
+                        "(repeatable)")
     p = sub.add_parser("run", help="execute the planned variant lifecycles")
     p.add_argument("--plan", type=Path, required=True)
     p.add_argument("--data-root", type=Path, required=True)
@@ -77,7 +82,7 @@ def main(argv=None) -> int:
                               horizons=_numbers(args.horizons, int), beams=_numbers(args.beams, int),
                               profile=args.profile, ensemble=args.ensemble, grids=grids or None,
                               variants=not args.no_variants, replicate=not args.no_replicate,
-                              allow_source_change=args.allow_source_change)
+                              allow_source_change=args.allow_source_change, ablations=args.ablations or None)
             plan = json.loads(path.read_text(encoding="utf-8"))
             print(f"wrote {path} ({len(plan['variants'])} variant lifecycle run(s))")
         elif args.command == "run":

@@ -43,8 +43,12 @@ PROTOCOLS = {
                          "simultaneous upper limits, clip level by the admission replay with the stage's seed, support "
                          "masks by the registered rule on the logged per-cell statistics, support routes by lifecycle "
                          "variant runs through select",
-    "module_ablations": "matched held-out contrasts sealed in confirm/ and nested D_select effects of select/ for the "
-                        "modules the released runtime supports",
+    "module_ablations": "matched held-out contrasts sealed in confirm/ and nested D_select effects of select/ for "
+                        "radius uncertainty, sequence risk and the Full/Lean profile; for the other modules, variant "
+                        "lifecycles of cm_experiments/ablation_lifecycle.py (byte copies of the parent's prepare/train "
+                        "outputs, explore->confirm re-executed with the declared variant installed) executing the "
+                        "audited rule on the held-out role with every arm's controller, paired ablated minus complete; "
+                        "the comparator branch from sealed input_gate and negative_controls runs",
     "buffer_sensitivity": "descriptive admission at each cluster buffer",
 }
 
@@ -102,6 +106,18 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
         destination = target / "raw" / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(base / relative, destination)
+    for item in results.get("deposits") or []:                 # files of attached ablation experiments
+        relative = Path(item["path"])
+        if relative.is_absolute() or ".." in relative.parts or relative.parts[0] in ("computed", "results.json",
+                                                                                     "plan.json"):
+            shutil.rmtree(target)
+            raise ExportError(f"{name}: deposit path {item['path']!r} is not a relative raw/ path of its own")
+        destination = target / "raw" / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(item["from"], destination)
+        if sha256_file(destination) != item["sha256"]:
+            shutil.rmtree(target)
+            raise ExportError(f"{name}: {item['from']} changed after collection")
     shutil.copyfile(results_path, target / "raw" / "results.json")
     shutil.copyfile(base / "plan.json", target / "raw" / "plan.json")
     keys = spec["keys"]
@@ -118,9 +134,12 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
             seen.add(identity)
             writer.writerow([row["keys"][k] for k in keys] + [row["quantity"], fmt(row["value"]), row["unit"],
                                                               f"raw/{row['source_file']}", row["locator"]])
+    experiment_code = ["cm_experiments/sweeps.py", "scripts/run_sweep.py"]
+    if results.get("deposits"):
+        experiment_code += ["cm_experiments/ablation_lifecycle.py", "scripts/run_ablation.py"]
     dump_json(target / "code" / "SOURCE.json", {
         "schema": "cross-morse-record-source-1", "exporter": "scripts/export_sweep_records.py",
-        "experiment_code": ["cm_experiments/sweeps.py", "scripts/run_sweep.py"],
+        "experiment_code": experiment_code,
         "command": [Path(a).name if Path(a).is_absolute() else a for a in argv],
         "runtime_source_sha256": runtime_source_fingerprint(ROOT), "repository_commit": git_head(),
         "sweep_runtime_source_sha256": results.get("runtime_source_sha256"),
@@ -137,7 +156,10 @@ def export(results_path: Path, *, root: Path, hardware: str, period: str, replac
                     for p in results["parents"]],
         "variants": [{"id": v["id"], "patch": v["patch"], "config_sha256": v["config_sha256"]}
                      for v in results["variants"]],
-        "not_measured": results.get("unsupported", []),
+        "not_measured": results.get("not_measured", results.get("unsupported", [])),
+        "ablation_experiments": [{"experiment": Path(a["experiment"]).name, "results_sha256": a["results_sha256"],
+                                  "plan_sha256": a["plan_sha256"], "role": a.get("role")}
+                                 for a in results.get("ablations", [])],
         "lifecycle_replicates": [{k: v for k, v in r.items() if k != "inputs"} for r in results.get("replicates", [])],
         "parent_runtime_source_mismatch": results.get("parent_runtime_source_mismatch", []),
     }

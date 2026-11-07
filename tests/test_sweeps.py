@@ -334,7 +334,10 @@ class Collecting(Workspace):
         self.assertAlmostEqual(values[("full_lean_profile", "PascalVOC-SP", "cost_fraction")], 0.75)     # (5-2)/(6-2)
         self.assertAlmostEqual(values[("radius_uncertainty", "Peptides-func", "loss_change_nats")], 0.0025)
         self.assertEqual(len(values), 4)
-        self.assertEqual(len(results["unsupported"]), 7)
+        lifecycle = {"spectral_bands", "source_alignment", "confidence_sensors", "transport_history", "observer",
+                     "recovery_type", "comparator_branch"}       # scripts/run_ablation.py modules (--ablations)
+        self.assertEqual({m["module"] for m in results["not_measured"]}, lifecycle)
+        self.assertLessEqual({m["module"] for m in results["unsupported"]}, lifecycle)
         self.assertFalse(results["synthetic"])
 
     def test_example_runs_hold_no_module_contrast(self):

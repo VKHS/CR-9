@@ -173,10 +173,12 @@
       "title": "Equal-budget 2^3 component factorials: ogbn-arxiv (A, O, X) and PascalVOC-SP (S, O, X)",
       "code": [
         "cm_experiments/factorial.py",
+        "cm_experiments/ablation_lifecycle.py",
         "cm_experiments/ensemble_grid.py",
+        "scripts/run_ablation.py",
         "scripts/run_experiment.py"
       ],
-      "command": "python -B scripts/run_experiment.py factorial plan --parent <arxiv run> --parent <pascalvoc_sp run> --output <dir> [--switches <table.json>]; ... factorial run --output <dir> --device cuda --trust-local-checkpoints; ... factorial export --output <dir>",
+      "command": "python -B scripts/run_ablation.py factorial-fit plan --parent <arxiv run> --parent <pascalvoc_sp run> --output <dir>; ... factorial-fit run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... factorial-fit export --output <dir> [--hardware <hw> --period <period>]",
       "configurations": [
         "configs/arxiv_full.json",
         "configs/pascalvoc_sp_full.json"
@@ -191,8 +193,8 @@
       ],
       "not_executable": [
         {
-          "display": "Tables S16, S16b",
-          "reason": "a cell controller fitted separately at equal budget (observer factor O) needs a controller fit the released runtime does not provide; the runner applies the factors as run-time switches on the parent's fitted controllers"
+          "display": "Table S16, ogbn-arxiv cells 010 and 011",
+          "reason": "with only A0 admissible every feedback fallback returns A0 or the support-mask reset, the support audit depends only on the exploration log and feedback routes execute all L sites, so the observer factor cannot act: cells 010 and 011 reproduce 000 and 001; the stopping-depth change the paper describes has no counterpart in the released runtime"
         }
       ]
     },
@@ -243,13 +245,16 @@
     },
     {
       "experiment": "E7, E8 module ablations",
-      "title": "Module-specific evaluation and ablation signatures",
+      "title": "Module-specific evaluation and ablation signatures: variant lifecycles (deleted or scrambled sensor coordinates, observer variants, restricted recovery) re-run from the sealed parent's prepare/train outputs, the sealed-contrast modules and the post hoc comparator branch",
       "code": [
+        "cm_experiments/ablation_lifecycle.py",
+        "scripts/run_ablation.py",
         "cm_experiments/sweeps.py",
         "scripts/run_sweep.py",
-        "scripts/export_sweep_records.py"
+        "scripts/export_sweep_records.py",
+        "cm_experiments/ensemble_grid.py"
       ],
-      "command": "python -B scripts/run_sweep.py plan --sweep module_ablations --parent <run> ... --output <dir>; ... collect --plan <dir>/plan.json; python -B scripts/export_sweep_records.py --results <dir>/results.json --hardware ... --period ...",
+      "command": "python -B scripts/run_ablation.py modules plan --parent <run or Roman campaign> ... --output <dir> [--input-gate <input_gate run> --negative-controls <negative_controls run>]; ... modules run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... modules export --output <dir> --sweep <new sweep dir> --hardware <hw> --period <period>",
       "configurations": [
         "configs/arxiv_full.json",
         "configs/proteins_full.json",
@@ -267,8 +272,8 @@
       ],
       "not_executable": [
         {
-          "display": "Table S17",
-          "reason": "seven of the ten module comparisons (spectral bands, source alignment, confidence sensors, transport history, observer variants, recovery type, comparator branch) have no switch in the released runtime; the runner measures the Full/Lean profile, radius-uncertainty and sequence-risk rows from the sealed contrasts"
+          "display": "Table S36, E8 history-MLP arm",
+          "reason": "the manuscript defines no architecture or fitting rule for the history-MLP observer and module_ablations registers no arm for it; the raw, EMA, global and conditioned observers are executed"
         }
       ]
     },
@@ -391,12 +396,6 @@
       "displays": [
         "supplementary:Figure S18",
         "supplementary:Table S43"
-      ],
-      "not_executable": [
-        {
-          "display": "Table S36, E18 policy-value readout",
-          "reason": "policy value over matched confidence/history controls needs a controller fitted without the spectral coordinates; the released runtime has no switch for it (as for E7, E8)"
-        }
       ]
     },
     {
@@ -692,6 +691,29 @@
       "displays": [
         "supplementary:Figure S16"
       ]
+    },
+    {
+      "experiment": "E18 policy value",
+      "title": "Policy value of the spectral coordinates over matched confidence/history controls: a variant lifecycle without the spectral and reachability coordinates at Full sensing work, paired against the complete lifecycle",
+      "code": [
+        "cm_experiments/ablation_lifecycle.py",
+        "scripts/run_ablation.py",
+        "cm_experiments/ensemble_grid.py"
+      ],
+      "command": "python -B scripts/run_ablation.py e18-policy plan --parent <run or Roman campaign> ... --output <dir>; ... e18-policy run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... e18-policy export --output <dir> [--hardware <hw> --period <period>]",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:spectral_policy_value"
+      ],
+      "displays": []
     }
   ]
 }

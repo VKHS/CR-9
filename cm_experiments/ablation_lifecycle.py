@@ -85,7 +85,7 @@ on every input of the held-out role, the arm's variant installed.  Per arm:
                      d = 0..L of the role-row loss (no onset when d* = L); first warning w = first controlled
                      depth at which the arm's observer state is valid and its terminal model predicts a positive
                      remaining nominal loss change (w = L without a warning); lead = d* - w, averaged over the
-                     pairs with an onset;
+                     pairs with an onset (not measured when an arm's controller has no fitted terminal model);
 ``action entropy``   entropy (nats) of the mix of executed actions over all decisions;
 ``risk RMSE``        held-out RMSE of the critic on the sealed assessment partition of D_explore
                      (fit/<profile>/calibration_assessment.npz; the same rows in every arm).
@@ -324,7 +324,7 @@ def validate_spec(spec: dict, config: dict | None = None) -> None:
         raise RunnerError("the variant names another installer source (cm_experiments/ablation_lifecycle.py changed "
                           "since planning); plan the variant again")
     kinds = [op.get("op") for op in spec["operations"]]
-    if len([k for k in kinds if k == "observer"]) > 1 or len(set(kinds)) != len(kinds) and "delete" not in kinds:
+    if len(set(kinds)) != len(kinds):
         raise RunnerError("one operation of each kind per variant")
     for op in spec["operations"]:
         kind = op.get("op")
@@ -477,6 +477,23 @@ def _member_slug(dataset, run) -> str:
     return slug(f"{dataset}__{run.root.name}")
 
 
+def _check_output(output, parents) -> Path:
+    """create_plan's location rules, applied before planning writes any file (donor pools)."""
+    output = Path(output).expanduser().absolute()
+    if any(p.is_symlink() for p in (output, *output.parents)):
+        raise RunnerError("the experiment directory must not traverse symbolic links")
+    output = output.resolve()
+    if output.is_relative_to(ROOT):
+        raise RunnerError("write experiment outputs outside the repository checkout")
+    for parent in parents:
+        parent = Path(parent).resolve()
+        if output == parent or output.is_relative_to(parent) or parent.is_relative_to(output):
+            raise RunnerError("the experiment directory must be separate from every parent run")
+    if (output / "plan.json").exists():
+        raise RunnerError(f"{output}/plan.json exists; use a new experiment directory")
+    return output
+
+
 def _lifecycle_job(output, jobs, configs, run, dataset, spec, *, through, pool_file=None) -> dict:
     member = _member_slug(dataset, run)
     name = slug(spec["id"].replace(":", "__"))
@@ -578,14 +595,16 @@ def plan_modules(parents, output, *, modules=None, role="compare", complete="rep
         raise RunnerError("plan_modules plans the modules and e18 studies")
     if complete not in ("replicate", "parent") or through not in ("fit", "select", "confirm"):
         raise RunnerError("complete is 'replicate' or 'parent'; through is fit, select or confirm")
-    if role not in ("compare", "test") or int(max_graphs) < 0 or int(scramble_units) < 1:
-        raise RunnerError("role is compare or test; max_graphs and the donor pool size are nonnegative/positive")
-    output = Path(output).expanduser().resolve()
-    if (output / "plan.json").exists():
-        raise RunnerError(f"{output}/plan.json exists; use a new experiment directory")
+    if role not in ("compare", "test"):
+        raise RunnerError("the held-out role is compare or test; decision roles are never reused")
+    if int(max_graphs) < 0 or int(scramble_units) < 1:
+        raise RunnerError("max_graphs is nonnegative and the donor pool holds at least one trajectory")
+    if not parents:
+        raise RunnerError("give at least one sealed --parent run")
     selection = _module_selection(modules) if study == "modules" else {E18_MODULE: [E18_ARM]}
     members = _parent_members(parents, role=role, allow_fixture=allow_fixture,
                               allow_source_change=allow_source_change)
+    output = _check_output(output, [run.root for _, _, run in members])
     gates, controls = _gate_runs(input_gate, "input_gate"), _gate_runs(negative_controls, "negative_controls")
     jobs, configs, measures, posthoc, pools = [], {}, [], [], {}
     for parent, dataset, run in members:
@@ -650,10 +669,10 @@ def plan_factorial_fit(parents, output, *, role="test", complete="replicate", th
     from .factorial import CELLS, DESIGNS, plan_factorial
     if complete not in ("replicate", "parent") or through not in ("fit", "select", "confirm"):
         raise RunnerError("complete is 'replicate' or 'parent'; through is fit, select or confirm")
-    output = Path(output).expanduser().resolve()
-    if (output / "plan.json").exists():
-        raise RunnerError(f"{output}/plan.json exists; use a new experiment directory")
+    if not parents:
+        raise RunnerError("give the sealed ogbn-arxiv and/or PascalVOC-SP parent run(s)")
     members = _parent_members(parents, role=role, allow_fixture=allow_fixture, allow_source_change=allow_source_change)
+    output = _check_output(output, [run.root for _, _, run in members])
     jobs, configs, cells = [], {}, []
     for parent, dataset, run in members:
         if dataset not in DESIGNS or len(member_runs(parent)) != 1:
@@ -1394,7 +1413,7 @@ def warning_trace(model, x, graph, config, controller, rows, target, spec, profi
                 state = controller.observe(state, bank.measure(h, logits, d, depth, mass, hops).cpu().numpy(), d, 0)
             values.append(float(controller.terminal_value(state)) if available and state.valid else float("nan"))
             h = model.step(h, h0, graph, 0, None, site=d)
-            accounting = site_transport_accounting(0, d, model)
+            accounting = site_transport_accounting(0, d, model if hasattr(model, "is_native_site") else config)
             mass, hops = mass + accounting["mass"], hops + accounting["hops"]
             logits = model.logits(h)
             losses.append(_role_loss(model, h, rows, target, spec))
@@ -1575,7 +1594,8 @@ def run_measure_job(plan, entry, output, *, device="cuda") -> Path:
             if arm["module"] == "observer" or name == "complete":
                 record["latent_innovation"] = latent_innovation_rms(run_root, controller, profile)
         record["risk"] = assessment_rmse(run_root, profile)
-        record.update(arm=arm, run=Path(run_root).name, controller_sha256=sha256(run_root / "fit" / profile / "controller.pt"))
+        record.update(arm=dict(arm, run=Path(arm["run"]).name), run=Path(run_root).name,
+                      controller_sha256=sha256(Path(run_root) / "fit" / profile / "controller.pt"))
         arrays_sha = _save_npz(path.with_suffix(".npz"), **arrays)
         record["arrays"] = {"file": path.with_suffix(".npz").name, "sha256": arrays_sha}
         _dump(path, record)
@@ -1584,13 +1604,13 @@ def run_measure_job(plan, entry, output, *, device="cuda") -> Path:
         raise RuntimeError("a frozen plant changed during the measurement")
     contrasts = job_contrasts(directory, entry)
     _dump(directory / "contrasts.json", contrasts)
-    return Path(_dump(marker, {"schema": "cm-ablation-measure-1", "job": entry["job"], "dataset": entry["dataset"],
-                               "member": entry["member"], "role": role, "candidate": entry["candidate"],
-                               "candidate_origin": entry["candidate_origin"], "arms": sorted(records),
-                               "parent_identity": entry["parent_identity"], "parent_files_read": parent.inputs(),
-                               "runtime_source_sha256": runtime_source_sha256(), "ablation_code": code_identity(),
-                               "plan_sha256": sha256(output / "plan.json"), "started_utc": started,
-                               "finished_utc": utc_now()}) and marker)
+    _dump(marker, {"schema": "cm-ablation-measure-1", "job": entry["job"], "dataset": entry["dataset"],
+                   "member": entry["member"], "role": role, "candidate": entry["candidate"],
+                   "candidate_origin": entry["candidate_origin"], "arms": sorted(records),
+                   "parent_identity": entry["parent_identity"], "parent_files_read": parent.inputs(),
+                   "runtime_source_sha256": runtime_source_sha256(), "ablation_code": code_identity(),
+                   "plan_sha256": sha256(output / "plan.json"), "started_utc": started, "finished_utc": utc_now()})
+    return marker
 
 
 # ============================================================================= contrasts and statistics (NumPy)
@@ -1619,15 +1639,15 @@ def arm_contrast(complete: tuple, ablated: tuple, *, reps: int, seed: int) -> di
     if c.get("false_safe_rate") is not None and a.get("false_safe_rate") is not None:
         values["false_safe_rate_change"] = a["false_safe_rate"] - c["false_safe_rate"]
     cw, aw = ca["warnings"], aa["warnings"]
-    if len(cw) and np.array_equal(cw[:, :2], aw[:, :2]):
-        if not np.array_equal(cw[:, 2:4], aw[:, 2:4]):
-            raise RunnerError("the nominal onsets differ between arms: the plants are not the same")
-        keep = cw[:, 3] == 1
+    keep, mismatches = np.zeros(len(cw), dtype=bool), None
+    warned = c.get("terminal_model_available", True) and a.get("terminal_model_available", True)
+    if warned and len(cw) and cw.shape == aw.shape and np.array_equal(cw[:, :2], aw[:, :2]):
+        keep = (cw[:, 3] == 1) & (aw[:, 3] == 1)
+        mismatches = int((cw[:, 2] != aw[:, 2]).sum())     # the onset is arm-independent; recorded, not assumed
         if keep.any():
             values["warning_lead_change_depths"] = float(np.mean(aw[keep, 5] - cw[keep, 5]))
-    return {"values": values, "loss_change": effect,
-            "pairs_with_onset": int((cw[:, 3] == 1).sum()) if len(cw) else 0,
-            "work": {"complete": c["work"], "ablated": a["work"]}}
+    return {"values": values, "loss_change": effect, "pairs_with_onset": int(keep.sum()),
+            "onset_mismatches": mismatches, "work": {"complete": c["work"], "ablated": a["work"]}}
 
 
 def job_contrasts(directory, entry) -> dict:
@@ -1753,9 +1773,16 @@ def collect_study(output) -> Path:
             item["files"] += files
     for entry in plan.get("posthoc", []):
         result = comparator_branch(entry)
+        path = output / "posthoc" / f"{slug(entry['dataset'] + '__' + entry['member'])}.json"
+        _dump(path, dict(result, schema="cm-ablation-comparator-branch-1", dataset=entry["dataset"],
+                         member=entry["member"], role=entry["input_gate"]["role"],
+                         sources={k: (None if entry.get(k) is None else {"run": Path(entry[k]["path"]).name,
+                                                                         "manifest_sha256": entry[k]["manifest_sha256"]})
+                                  for k in ("input_gate", "negative_controls")}))
         key = ("comparator_branch", "branch_off", entry["dataset"])
         item = groups.setdefault(key, {"runs": [], "files": []})
-        item["runs"].append({"member": entry["member"], "values": result["values"], "detail": result})
+        item["runs"].append({"member": entry["member"], "values": result["values"]})
+        item["files"].append(deposit(path))
     rows = []
     datasets = sorted({k[2] for k in groups})
     for (module, arm, dataset), item in sorted(groups.items()):
@@ -1776,20 +1803,29 @@ def collect_study(output) -> Path:
         rows.append({"module": module, "arm": arm, "dataset": dataset, "values": values, "detail": detail,
                      "files": sorted({f["file"]: f for f in item["files"]}.values(), key=lambda f: f["file"])})
     if plan["study"] == "modules" and len(datasets) > 1:
-        by_arm = {}
+        # A signature term over several arms (the observer) reads exactly one row per arm: with several datasets
+        # only its pooled rows are exported; the per-dataset values stay in the pooled row's detail.
+        contract = json.loads((ROOT / "records" / "specs.json").read_text(encoding="utf-8"))["sets"]["module_ablations"]
+        arms_terms = {m["module"] for m in contract["modules"] if any("arms" in t for t in m["signature"])}
+        by_arm, kept = {}, []
         for row in rows:
             by_arm.setdefault((row["module"], row["arm"]), []).append(row)
         for (module, arm), members in sorted(by_arm.items()):
             if len(members) < 2:
+                kept += members
                 continue
+            if module not in arms_terms:
+                kept += members
             quantities = sorted(set.intersection(*[set(r["values"]) for r in members]))
-            rows.append({"module": module, "arm": arm, "dataset": "pooled",
+            kept.append({"module": module, "arm": arm, "dataset": "pooled",
                          "values": {q: pool_values(q, [r["values"][q] for r in members]) for q in quantities},
-                         "detail": {"datasets": [r["dataset"] for r in members],
+                         "detail": {"datasets": {r["dataset"]: r["values"] for r in members},
+                                    "per_dataset_rows_exported": module not in arms_terms,
                                     "aggregation": "equal-weight mean over datasets (innovation_rmse: square root of "
                                                    "the mean of the squares)"},
                          "files": sorted({f["file"]: f for r in members for f in r["files"]}.values(),
                                          key=lambda f: f["file"])})
+        rows = kept
     for row in rows:
         for quantity, value in row["values"].items():
             if value is None or not math.isfinite(float(value)):
@@ -1834,14 +1870,22 @@ def run_study(output, *, job=None, data_root=None, device="cuda", threads=16, py
     output = Path(output).resolve()
     plan = load_study(output)
     done = []
+    factorial_jobs = []
+    if plan["study"] == "factorial":
+        from .factorial import load_plan as factorial_plan, run_factorial
+        factorial_jobs = factorial_plan(output / "factorial", "factorials")["jobs"]
+    if job is not None and int(job) >= len(plan["jobs"]):        # factorial measurement jobs follow the lifecycles
+        index = int(job) - len(plan["jobs"])
+        if not 0 <= index < len(factorial_jobs):
+            raise RunnerError(f"job index {job} outside 0..{len(plan['jobs']) + len(factorial_jobs) - 1}")
+        return [str(p) for p in run_factorial(output / "factorial", job=index, device=device, trust=trust)]
     for entry in selected_jobs(plan, job):
         if entry["kind"] == "lifecycle":
             done.append(str(run_lifecycle_job(output, entry, data_root=data_root, device=device, threads=threads,
                                               python=python)))
         else:
             done.append(str(run_measure_job(plan, entry, output, device=device)))
-    if plan["study"] == "factorial" and job is None:
-        from .factorial import run_factorial
+    if factorial_jobs and job is None:
         done += [str(p) for p in run_factorial(output / "factorial", device=device, trust=trust)]
     return done
 
@@ -1902,15 +1946,14 @@ def export_modules(output, sweep, *, root=None, hardware, period, replace=False,
     the seven measured by the variant lifecycles, in one scripts/export_sweep_records.py export."""
     from scripts import export_sweep_records
     from .sweeps import collect, plan_sweep
+    from .ensemble_grid import RECORDS
     output = Path(output).resolve()
     plan = load_study(output, "modules")
-    results = collect_study(output)
+    collect_study(output)
     path = plan_sweep("module_ablations", [Path(p) for p in (parents or plan["parent_runs"])], Path(sweep),
                       ablations=[output])
-    collected = collect(path)
-    from .ensemble_grid import RECORDS
-    return export_sweep_records.export(collected, root=Path(root or RECORDS), hardware=hardware, period=period,
-                                       replace=replace, argv=list(argv or [])) if results else None
+    return export_sweep_records.export(collect(path), root=Path(root or RECORDS), hardware=hardware, period=period,
+                                       replace=replace, argv=list(argv or []))
 
 
 def export_factorial_fit(output, **kwargs) -> Path:

@@ -5,9 +5,22 @@
                          execution (X), in the receding-horizon regime (MPC-RH)
 
 Every cell is the confirmed feedback route q_M of a sealed parent run, executed with the
-parent's frozen plant members and fitted controllers -- one fitting budget shared by all
-cells -- with the cell's components switched on or off.  A switch is executed with the
-released runtime and a thin wrapper of its fitted Controller:
+parent's frozen plant members.  Two modes declare where each cell's controller comes from:
+
+``fitted`` (the paper's equal-budget design)  every cell's controller is FITTED separately with
+          the cell's components: one variant lifecycle per distinct cell variant
+          (cm_experiments/ablation_lifecycle.py: explore -> fit (-> select -> confirm) re-executed
+          from byte copies of the parent's prepare/train outputs, with the same exploration size,
+          folds and epochs, i.e. an equal fitting budget), executed here with the cell's variant
+          installed.  O = 0 fits the critic and consequence models on the memoryless observer's
+          features; A = 0 restricts feedback decisions to A0 (recovery resets kept); X = 0 seals an
+          unrestricted support audit; S = 0 is the registered Lean profile of the same lifecycle.
+          Plan it with ``scripts/run_ablation.py factorial-fit plan``.
+``switch`` (a cheaper reconstruction)  the parent's fitted controllers -- one fitting shared by all
+          cells -- with the cell's components switched on or off at run time.  It cannot reproduce
+          cells that differ only in fitting (the observer factor: a conditioned critic driven by a
+          memoryless state).  A switch is executed with the released runtime and a thin wrapper of
+          its fitted Controller:
 
     profile       S: "full" | "lean"                the runtime's two fitted sensor profiles (the Lean
                                                     profile zeros the spectral and reachability coordinates)
@@ -35,6 +48,7 @@ Cell protocol (the six quantities of the record set):
 """
 from __future__ import annotations
 
+import contextlib
 import copy
 from pathlib import Path
 
@@ -48,6 +62,8 @@ from .ensemble_grid import (FEEDBACK_ROUTES, ParentContext, RunnerError, SealedR
                             slug, utc_now, write_record_set)
 
 CELLS = ("000", "100", "010", "001", "110", "101", "011", "111")
+MODES = ("switch", "fitted")
+ABLATION_FILES = ("cm_experiments/ablation_lifecycle.py", "scripts/run_ablation.py")
 DESIGNS = {"ogbn-arxiv": {"table": "S16", "factors": ("A", "O", "X"), "route": None},
            "PascalVOC-SP": {"table": "S16b", "factors": ("S", "O", "X"), "route": "mpc_rh"}}
 FACTOR_SWITCHES = {"A": ("action_bank", ("nominal", "registered")),
@@ -121,9 +137,15 @@ def base_policy(run: SealedRun, design: dict, *, allow_fixture: bool) -> tuple[d
 
 # ----------------------------------------------------------------------------- planning
 def plan_factorial(parents, output, *, role="test", reps=None, warmup=1, max_graphs=0, allow_fixture=False,
-                   switches=None) -> Path:
+                   switches=None, mode="switch", fitted=None) -> Path:
+    """``mode="fitted"`` takes every cell's controller from the variant lifecycles of the ablation plan
+    ``fitted`` (``scripts/run_ablation.py factorial-fit plan`` writes both plans)."""
     if not parents:
         raise RunnerError("give the sealed ogbn-arxiv and/or PascalVOC-SP parent run(s)")
+    if mode not in MODES or (mode == "fitted") != (fitted is not None):
+        raise RunnerError("mode is 'switch', or 'fitted' with the ablation plan of the separately fitted cells")
+    if mode == "fitted" and switches:
+        raise RunnerError("a fitted factorial takes its components from the cell lifecycles, not a switch table")
     table = dict(FACTOR_SWITCHES)
     for factor, mapping in (switches or {}).items():
         if factor not in table or len(mapping) != 2:
@@ -144,11 +166,21 @@ def plan_factorial(parents, output, *, role="test", reps=None, warmup=1, max_gra
         base, origin = base_policy(run, design, allow_fixture=allow_fixture)
         candidates = run.candidates()
         cells = []
+        fitted_cells = None
+        if mode == "fitted":
+            from .ablation_lifecycle import factorial_cells, factorial_operations
+            fitted_cells = factorial_cells(fitted, run.root.name)
         for cell in CELLS:
             values = cell_switches(cell, design["factors"], base.get("profile", "full"), table)
             candidate = profile_counterpart(candidates, base, values["profile"])
-            cells.append({"cell": cell, "factors": dict(zip(design["factors"], map(int, cell))),
-                          "switches": values, "candidate": candidate})
+            item = {"cell": cell, "factors": dict(zip(design["factors"], map(int, cell))),
+                    "switches": values, "candidate": candidate}
+            if fitted_cells is not None:
+                if cell not in fitted_cells or fitted_cells[cell]["operations"] != factorial_operations(
+                        cell, design["factors"]):
+                    raise RunnerError(f"{run.root.name}: the fitted plan holds no lifecycle with cell {cell}'s components")
+                item["fitted"] = fitted_cells[cell]
+            cells.append(item)
         seeds = [int(s) for s in run.config["training"]["seeds"][:int(base["ensemble"])]]
         jobs.append({"job": len(jobs), "dataset": run.dataset, "slug": slug(run.dataset), "member": run.root.name,
                      "run": str(run.root), "identity": run.identity(), "table": design["table"],
@@ -157,14 +189,26 @@ def plan_factorial(parents, output, *, role="test", reps=None, warmup=1, max_gra
                      "bootstrap": {"reps": int(reps or run.config["admission"]["bootstrap_reps"]),
                                    "seed": int(run.config["seed"]) + 17}})
         datasets.append({"dataset": run.dataset, "slug": slug(run.dataset), "synthetic": run.synthetic})
+    fitted_plan = None
+    if mode == "fitted":
+        fitted_plan = {"path": str(Path(fitted).resolve()), "plan_sha256": sha256(Path(fitted) / "plan.json")}
     return create_plan(output, {
         "experiment": "Equal-budget 2^3 component factorials", "record_set": "factorials", "role": role,
+        "mode": mode, "fitted_plan": fitted_plan,
         "warmup": int(warmup), "max_graphs": int(max_graphs), "datasets": datasets, "jobs": jobs,
         "factor_switches": {k: [v[0], list(v[1])] for k, v in table.items()},
         "cell_definition_status": ("declared reconstruction: the manuscript names the components but not their "
-                                   "executable definitions; confirm the factor-to-switch table before execution"),
-        "fitting_budget": "the parent's fitted controllers and frozen members, shared by all eight cells",
-        "protocol": ("eight cells of the confirmed feedback route with components switched; per-depth head losses by "
+                                   "executable definitions; confirm the factor-to-switch table before execution"
+                                   if mode == "switch" else
+                                   "declared reconstruction: every cell fitted separately with its components "
+                                   "(O: memoryless observer, A: A0-only feedback decisions, X: unrestricted support, "
+                                   "S: Lean profile); confirm the component definitions before execution"),
+        "fitting_budget": ("the parent's fitted controllers and frozen members, shared by all eight cells"
+                           if mode == "switch" else
+                           "one separately fitted controller per cell variant (same exploration size, folds and "
+                           "epochs: equal budget); the parent's frozen members"),
+        "protocol": ("eight cells of the confirmed feedback route with components "
+                     + ("switched" if mode == "switch" else "fitted separately") + "; per-depth head losses by "
                      "exact replay of each cell's action and anchor trace; Eq. (6) log-depth integration per unit; "
                      "one paired bootstrap stream shared by the cells")})
 
@@ -275,6 +319,47 @@ def cell_controller(ctx: ParentContext, candidate: dict, switches: dict, cache: 
     return controller
 
 
+# ----------------------------------------------------------------------------- separately fitted cells (torch)
+def cell_scopes(plan: dict, entry: dict, run: SealedRun):
+    """{cell: (run root, variant)} of a fitted plan (each lifecycle verified); None in switch mode."""
+    if plan.get("mode", "switch") != "fitted":
+        return None
+    from .ablation_lifecycle import open_fitted_cell
+    if sha256(Path(plan["fitted_plan"]["path"]) / "plan.json") != plan["fitted_plan"]["plan_sha256"]:
+        raise RunnerError("the ablation plan of the fitted cells changed after planning")
+    return {c["cell"]: open_fitted_cell(c["fitted"], run) for c in entry["cells"]}
+
+
+def cell_scope(scopes, cell: str):
+    """The cell's variant installed into the runtime (fitted mode) for the duration of a block."""
+    if scopes is None:
+        return contextlib.nullcontext()
+    from .ablation_lifecycle import installed
+    root, variant = scopes[cell]
+    return installed(variant, run_dir=root)
+
+
+def fitted_cell_controller(ctx: ParentContext, cell: dict, root):
+    """The controller fitted by the cell's own lifecycle (the parent's for a cell planned on the parent)."""
+    from cross_morse.learning import Controller
+    candidate = cell["candidate"]
+    if cell["fitted"]["source"] == "parent":
+        return ctx.controller_for(candidate)
+    profile = candidate.get("profile", "full")
+    controller = Controller.load(Path(root) / "fit" / ("full" if profile == "none" else profile), "cpu")
+    if candidate["route"].startswith("mpc") and not controller.sequence_models_available:
+        raise RunnerError("MPC configuration requires fitted transition/stage/terminal models")
+    return controller
+
+
+def _public_fitted(fitted):
+    if fitted is None:
+        return None
+    return {k: (Path(v).name if k == "run" else v) for k, v in fitted.items() if k != "variant"} | (
+        {"variant_id": fitted["variant"]["id"], "operations": fitted["variant"]["operations"]}
+        if fitted.get("variant") else {})
+
+
 # ----------------------------------------------------------------------------- execution (torch)
 def run_factorial(output, *, job=None, device="cuda", trust=False) -> list[Path]:
     if not trust:
@@ -316,11 +401,17 @@ def _run_factorial_job(plan, entry, directory, device):
     directory.mkdir(parents=True, exist_ok=True)
     if not (directory / "environment.json").exists():
         write_json(directory / "environment.json", environment_record(device))
+    scopes = cell_scopes(plan, entry, run)
     ctx = ParentContext(run, device, through="evaluate" if role == "test" else "confirm")
     config, spec, depths = ctx.config, task_spec(ctx.config), entry["depth_grid"]
     models = {seed: ctx.plant(seed) for seed in entry["member_seeds"]}
     cache = {}
-    cells = [(c, c["candidate"], cell_controller(ctx, c["candidate"], c["switches"], cache)) for c in entry["cells"]]
+    cells = []
+    for c in entry["cells"]:
+        with cell_scope(scopes, c["cell"]):
+            controller = (cell_controller(ctx, c["candidate"], c["switches"], cache) if scopes is None
+                          else fitted_cell_controller(ctx, c, scopes[c["cell"]][0]))
+        cells.append((c, c["candidate"], controller))
     labels, units = ctx.labels(role), ctx.units(role)
     unit_ids = np.unique(units)
     unit_index = np.searchsorted(unit_ids, units)
@@ -335,17 +426,19 @@ def _run_factorial_job(plan, entry, directory, device):
             break
         if count == 0:
             for _ in range(plan["warmup"]):          # discarded: lazy initialisation outside the timed cells
-                for _, candidate, controller in cells:
-                    _execute(models[first_seed], x, graph, config, candidate, controller, ctx.reference,
-                             depths[-1:], rows)
+                for cell, candidate, controller in cells:
+                    with cell_scope(scopes, cell["cell"]):
+                        _execute(models[first_seed], x, graph, config, candidate, controller, ctx.reference,
+                                 depths[-1:], rows)
         y, index = labels[positions], unit_index[positions]
         valid = None
         for cell, candidate, controller in cells:
             name = cell["cell"]
             per_member = []
             for seed in entry["member_seeds"]:
-                by_depth, trace = _execute(models[seed], x, graph, config, candidate, controller, ctx.reference,
-                                           depths, rows)
+                with cell_scope(scopes, name):
+                    by_depth, trace = _execute(models[seed], x, graph, config, candidate, controller, ctx.reference,
+                                               depths, rows)
                 per_member.append(by_depth)
                 actions = list(trace["actions"])
                 ledger[name]["wall_seconds"] += float(trace["wall_seconds"])
@@ -406,6 +499,7 @@ def write_factorial_result(directory, plan, entry, *, sums, counts, unit_ids, le
         metric = metric_score(terminal[name][rows_mask], labels[rows_mask], spec)
         item = ledger[name]
         rows.append({"cell": name, "factors": cell["factors"], "switches": cell["switches"],
+                     "fitted": _public_fitted(cell.get("fitted")),
                      "candidate": candidate_identity(cell["candidate"]), **statistics[name],
                      "official_metric": 100.0 * metric, "metric_name": spec.metric,
                      "activity": item["active"] / item["actions"] if item["actions"] else 0.0,
@@ -418,7 +512,8 @@ def write_factorial_result(directory, plan, entry, *, sums, counts, unit_ids, le
     unit_file = save_arrays(directory / "unit_dil.npz", replace=True, **arrays)   # factorial.json: marker
     write_json(directory / "factorial.json", json_safe({
         "schema": "cm-factorial-1", "dataset": entry["dataset"], "table": entry["table"], "member": entry["member"],
-        "factors": entry["factors"], "role": role, "cells": rows, "contrasts": contrasts,
+        "factors": entry["factors"], "role": role, "mode": plan.get("mode", "switch"), "cells": rows,
+        "contrasts": contrasts,
         "member_seeds": entry["member_seeds"], "base": entry["base"], "base_origin": entry["base_origin"],
         "factor_switches": plan["factor_switches"], "truncated": truncated, "max_graphs": plan["max_graphs"],
         "warmup": plan["warmup"], "bootstrap": entry["bootstrap"],
@@ -469,17 +564,37 @@ def export_factorial(output, *, root=None, replace=False, allow_partial=False, h
     synthetic = {d["synthetic"] for d in plan["datasets"]}
     if len(synthetic) != 1:
         raise RunnerError("synthetic and benchmark parents cannot share one record set")
+    mode = plan.get("mode", "switch")
+    generated = {"code/plan.json": public_plan(output)}
+    if mode == "fitted":             # the cell lifecycles: the ablation plan and each lifecycle's completion record
+        from .ensemble_grid import ROOT
+        files.update({f"code/{name}": ROOT / name for name in ABLATION_FILES if (ROOT / name).is_file()})
+        fitted = Path(plan["fitted_plan"]["path"])
+        if sha256(fitted / "plan.json") != plan["fitted_plan"]["plan_sha256"]:
+            raise RunnerError("the ablation plan of the fitted cells changed after planning")
+        generated["code/ablation_plan.json"] = public_plan(fitted)
+        for job in read_json(fitted / "plan.json")["jobs"]:
+            record = fitted / "jobs" / job["slug"] / "lifecycle.json"
+            if not record.is_file():
+                raise RunnerError(f"cell lifecycle {job['slug']} has no completion record (jobs/.../lifecycle.json)")
+            files[f"raw/fitted/{job['slug']}/lifecycle.json"] = record
     provenance = {
         "experiment": "Equal-budget 2^3 component factorials (Supplementary Tables S16, S16b)",
-        "produced_by": "scripts/run_experiment.py factorial plan/run/export (cm_experiments/factorial.py)",
+        "produced_by": ("scripts/run_experiment.py factorial plan/run/export (cm_experiments/factorial.py)"
+                        if mode == "switch" else
+                        "scripts/run_ablation.py factorial-fit plan/run/export (cm_experiments/ablation_lifecycle.py: "
+                        "separately fitted cell lifecycles; cm_experiments/factorial.py: cell execution and export)"),
         "hardware": hardware or provenance_hardware(environments), "period": period or provenance_period(results),
-        "protocol": (f"eight cells of the confirmed feedback route on the {plan['role']} role with the parent's fitted "
-                     "controllers and frozen members; components switched as in factor_switches; Eq. (6) "
-                     "log-depth-integrated CE per unit from exact replays of each cell's action/anchor trace; central 95% "
-                     "paired whole-unit bootstrap; official metric of the ensemble output; activity = non-A0 share; "
-                     "relative time = synchronized wall time over cell 000"),
-        "synthetic": synthetic.pop(), "role": plan["role"], "factor_switches": plan["factor_switches"],
+        "protocol": (f"eight cells of the confirmed feedback route on the {plan['role']} role with "
+                     + ("the parent's fitted controllers and frozen members; components switched as in factor_switches"
+                        if mode == "switch" else
+                        "the parent's frozen members and one separately fitted controller per cell variant (equal "
+                        "fitting budget), executed with the cell's variant installed")
+                     + "; Eq. (6) log-depth-integrated CE per unit from exact replays of each cell's action/anchor "
+                     "trace; central 95% paired whole-unit bootstrap; official metric of the ensemble output; activity = "
+                     "non-A0 share; relative time = synchronized wall time over cell 000"),
+        "synthetic": synthetic.pop(), "role": plan["role"], "mode": mode, "factor_switches": plan["factor_switches"],
+        "fitted_plan": None if mode == "switch" else {"plan_sha256": plan["fitted_plan"]["plan_sha256"]},
         "cell_definition_status": plan["cell_definition_status"], "plan_sha256": sha256(output / "plan.json")}
     return write_record_set("factorials", rows, files, provenance, root=root, replace=replace,
-                            allow_partial=allow_partial, command=command, inputs=inputs,
-                            generated={"code/plan.json": public_plan(output)})
+                            allow_partial=allow_partial, command=command, inputs=inputs, generated=generated)

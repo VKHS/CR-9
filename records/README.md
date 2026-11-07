@@ -34,12 +34,12 @@ Defined in [`specs.json`](specs.json); the directory name of a set is its key.
 | `depth_diagnostics` | Fig. S14 | — | dataset, depth, phase | `source_alignment_change`, `policy_loss_change`, `first_intervention_depth_q25`, `first_intervention_depth_median`, `first_intervention_depth_q75`, `supported_deterioration_depth`, `transport_fraction` | scripts/run_trajectory_audit.py |
 | `ensemble_grid` | S26b | E14 | dataset, ensemble | `loss_nats` | scripts/run_experiment.py |
 | `ensemble_grid_scores` | S26 | E14 | dataset, ensemble | `official_score` | scripts/run_experiment.py; scripts/run_timing_records.py |
-| `factorials` | S16, S16b | — | dataset, cell | `ld_integrated_loss`, `interval_low`, `interval_high`, `official_metric`, `activity`, `relative_time` | scripts/run_experiment.py |
+| `factorials` | S16, S16b | — | dataset, cell | `ld_integrated_loss`, `interval_low`, `interval_high`, `official_metric`, `activity`, `relative_time` | scripts/run_ablation.py; scripts/run_experiment.py |
 | `horizon_beam_sweep` | S29, Fig. S5 | — | dataset, horizon, beam_width | `selection_effect_nats`, `expected_serial_cost`, `oracle_headroom_bound_nats`, `realized_fraction` | scripts/export_sweep_records.py; scripts/run_sweep.py |
 | `input_gate` | S23 | — | dataset | `fallback_probability`, `deployed_wall_overhead_percent`, `gpu_memory_gib`, `cpu_memory_gib` | scripts/run_experiment_b.py |
 | `inserted_site` | S45 | E13 | dataset, arm | `effect_nats`, `standard_error` | scripts/run_experiment.py |
 | `mechanism_contrasts` | Fig. 3a-b | — | dataset, contrast | `effect_nats`, `interval_low_nats`, `interval_high_nats` | scripts/run_confirmation_analysis.py |
-| `module_ablations` | S17 | E7, E8 | module, arm, dataset | `loss_change_nats`, `warning_lead_change_depths`, `false_safe_rate_change`, `risk_rmse_change`, `action_entropy_change`, `innovation_rmse`, `clean_score_change`, `worst_harm_change_nats`, `retained_effect_fraction`, `cost_fraction` | scripts/export_sweep_records.py; scripts/run_sweep.py |
+| `module_ablations` | S17 | E7, E8 | module, arm, dataset | `loss_change_nats`, `warning_lead_change_depths`, `false_safe_rate_change`, `risk_rmse_change`, `action_entropy_change`, `innovation_rmse`, `clean_score_change`, `worst_harm_change_nats`, `retained_effect_fraction`, `cost_fraction` | scripts/export_sweep_records.py; scripts/run_ablation.py; scripts/run_sweep.py |
 | `negative_controls` | S19 | — | control | `residual_activity`, `input_fallback`, `worst_pre_fallback_harm` | scripts/run_experiment_b.py |
 | `nominal_time` | S23b | E17 | dataset | `t_nom_seconds` | scripts/export_records.py |
 | `oracle_dispersion` | S30, Fig. S13 | — | dataset | `median_oracle_depth`, `oracle_depth_q25`, `oracle_depth_q75`, `fraction_differs_from_qc`, `inputs` | scripts/run_confirmation_analysis.py |
@@ -49,6 +49,7 @@ Defined in [`specs.json`](specs.json); the directory name of a set is its key.
 | `search_enumeration` | Supplementary Note S20, E9 record | E9 | dataset, planner, horizon | `two_e_H_nats`, `zeta_H_nats`, `realized_regret_nats`, `bound_coverage`, `beam_optimal_fraction`, `two_e_H_zero_uncertainty_nats`, `mean_family_size`, `planning_instances` | scripts/run_experiment_b.py |
 | `sensitivity_grids` | S18 | E19 | parameter, setting, dataset | `qualified_fraction`, `strata_without_transport`, `eligible_count`, `selected_complexity`, `route_changed`, `route_simpler`, `clipped_fraction`, `clipped_mean_nats`, `admission_upper_nats`, `raw_maximum_harm_nats`, `admitted` | scripts/export_sweep_records.py; scripts/run_sweep.py |
 | `sensor_parameters` | S6c | E17 | dataset | `sketch_dim`, `observer_period`, `residual_fraction`, `sensing_period` | scripts/export_records.py |
+| `spectral_policy_value` | S36 | E18 | dataset | `policy_value_nats`, `interval_low_nats`, `interval_high_nats`, `risk_rmse_change`, `units` | scripts/run_ablation.py |
 | `timing_anchors` | S23b | E17 | dataset | `throughput_anchor_seconds`, `training_anchor_low_seconds`, `training_anchor_high_seconds` | scripts/run_timing_records.py |
 | `tube_audit` | S22, Fig. S17, Fig. 2a | — | dataset | `beta_median`, `beta_p95`, `m_eps_op`, `reference_term`, `tube_coverage`, `mode_stable_coverage`, `final_bound_nats`, `observed_error_median_nats`, `observed_error_p95_nats` | scripts/run_trajectory_audit.py |
 

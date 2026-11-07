@@ -4,7 +4,9 @@ Each sweep fills one record contract of ``records/specs.json``:
 
 ``horizon_beam_sweep``  MPC-RH planning horizon and beam width (Supplementary Table S29, Figure S5)
 ``sensitivity_grids``   support thresholds, selection margins and clip level (Table S18)
-``module_ablations``    matched module ablations (Table S17)
+``module_ablations``    matched module ablations (Table S17): three modules from sealed contrasts, the
+                        other seven from the variant lifecycles of cm_experiments/ablation_lifecycle.py
+                        attached to the plan (``ablations``)
 ``buffer_sensitivity``  cluster-buffer sensitivity of descriptive admission (Table S27)
 
 A quantity is recomputed from the parent run's sealed outputs whenever that is
@@ -56,6 +58,9 @@ UNITS = {
     "clipped_fraction": "fraction", "clipped_mean_nats": "nats", "admission_upper_nats": "nats",
     "raw_maximum_harm_nats": "nats", "admitted": "indicator",
     "loss_change_nats": "nats", "retained_effect_fraction": "fraction", "cost_fraction": "fraction",
+    "warning_lead_change_depths": "depths", "false_safe_rate_change": "fraction", "risk_rmse_change": "nats",
+    "action_entropy_change": "nats", "innovation_rmse": "nats", "clean_score_change": "points",
+    "worst_harm_change_nats": "nats",
 }
 
 
@@ -333,6 +338,7 @@ class Collector:
         self.rows: list[dict] = []
         self.files: list[str] = []
         self.replicates: list[dict] = []
+        self.deposits: list[dict] = []      # files of attached experiments copied under raw/ by the exporter
 
     def add(self, name: str, keys: dict, values: dict, detail: dict, runs: list[SealedRun]) -> None:
         if set(keys) != set(self.spec["keys"]):
@@ -360,13 +366,17 @@ class Collector:
 def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | None = None,
                horizons=None, beams=None, profile: str | None = None, ensemble: int | None = None,
                grids: dict | None = None, variants: bool = True, replicate: bool = True,
-               allow_source_change: bool = False) -> Path:
+               allow_source_change: bool = False, ablations=None) -> Path:
     """Write ``plan.json`` and the variant configurations of one sweep.
 
     ``horizon``, ``horizons`` and ``beams`` replace the registered horizon and the two
     grids of the horizon/beam contract, and ``grids`` the Table S18 grids, for
     example to exercise the sweep on the synthetic smoke runs; ``variants=False``
     plans only the rows that are recomputed from the parents.
+
+    ``ablations`` (module_ablations only) attaches collected experiment directories of
+    ``scripts/run_ablation.py modules`` (results/module_ablations.json): their seven
+    lifecycle-measured modules join the sealed-contrast modules in one record set.
 
     A variant lifecycle run retrains the plants and refits the controllers, so its
     outcome mixes the changed setting with retraining variation. ``replicate`` adds
@@ -377,6 +387,8 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
     spec = load_spec(sweep)
     if sweep == "buffer_sensitivity":
         raise SweepError("buffer_sensitivity cannot be produced by the released runtime: " + spec["notes"])
+    if ablations and sweep != "module_ablations":
+        raise SweepError("only the module_ablations sweep takes ablation experiments")
     output = Path(output).resolve()
     if (output / "plan.json").exists():
         raise SweepError(f"{output}/plan.json exists; use a new sweep directory")
@@ -426,7 +438,7 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
                         planned.append(_variant(output, run, f"{safe_label(run.dataset)}_{run.root.name}_replicate",
                                                 {}, {"parameter": "replicate", "setting": None, "replicate": True}))
     elif sweep == "module_ablations":
-        settings = {"modules": [m["module"] for m in spec["modules"]]}
+        settings = {"modules": [m["module"] for m in spec["modules"]], "ablations": attach_ablations(ablations)}
     current = _runtime_sha256()
     mismatch = sorted({s for e in entries for s in e["runtime_source_sha256"]} - {current})
     if planned and mismatch and not allow_source_change:
@@ -525,14 +537,20 @@ def collect(plan_path: Path) -> Path:
     else:
         raise SweepError(f"{sweep} has no collector")
     synthetic = {p["synthetic"] for p in plan["parents"]}
-    if len(synthetic) != 1:
+    attached = {a["synthetic"] for a in plan["settings"].get("ablations") or []}
+    if len(synthetic | attached) != 1:
         raise SweepError("synthetic examples and benchmark runs cannot share one sweep")
+    measured = {r["keys"].get("module") for r in collector.rows}
     unsupported = [{"module": m["module"], "runtime": m["runtime"]} for m in collector.spec.get("modules", [])
-                   if m["runtime"].startswith("unsupported")]
+                   if m["runtime"].startswith("unsupported") and m["module"] not in measured]
+    not_measured = [{"module": m["module"], "runtime": m["runtime"]} for m in collector.spec.get("modules", [])
+                    if m["module"] not in measured]
     results = {"schema": RESULTS_SCHEMA, "sweep": sweep, "record_set": plan["record_set"],
                "keys": collector.spec["keys"], "rows": collector.rows, "computed": collector.files,
                "plan_sha256": sha256_file(plan_path), "synthetic": synthetic.pop(),
                "parents": plan["parents"], "variants": plan["variants"], "unsupported": unsupported,
+               "not_measured": not_measured if sweep == "module_ablations" else [],
+               "deposits": collector.deposits, "ablations": plan["settings"].get("ablations") or [],
                "replicates": collector.replicates,
                "parent_runtime_source_mismatch": plan.get("parent_runtime_source_mismatch", []),
                "runtime_source_sha256": _runtime_sha256(),
@@ -753,7 +771,58 @@ def _mean_quantities(rows: list[dict]) -> dict:
 
 
 # ----------------------------------------------------------------------------- Table S17 modules
+def attach_ablations(paths) -> list[dict]:
+    """Collected module studies of cm_experiments.ablation_lifecycle, identified by their results' SHA-256."""
+    from .ablation_lifecycle import module_results
+    from .ensemble_grid import RunnerError
+    attached = []
+    for path in paths or ():
+        experiment = Path(path).resolve()
+        results_path = experiment / "results" / "module_ablations.json"
+        try:
+            results = module_results(results_path)
+        except (RunnerError, OSError) as exc:
+            raise SweepError(f"{experiment}: not a collected modules study ({exc}); run "
+                             "scripts/run_ablation.py modules export first") from None
+        if results.get("truncated") and not results["synthetic"]:
+            raise SweepError(f"{experiment}: the modules study was truncated by --max-graphs (a software check), "
+                             "not a measurement of the held-out role")
+        attached.append({"experiment": str(experiment), "results": "results/module_ablations.json",
+                         "results_sha256": sha256_file(results_path), "plan_sha256": results["plan_sha256"],
+                         "synthetic": bool(results["synthetic"]), "role": results["role"],
+                         "truncated": bool(results.get("truncated"))})
+    names = [safe_label(Path(a["experiment"]).name) for a in attached]
+    if len(set(names)) != len(names):
+        raise SweepError("attached ablation experiments need distinct directory names")
+    return attached
+
+
+def collect_ablation_rows(attached: dict, collector: Collector) -> None:
+    """The lifecycle-measured modules of one attached study; its files are deposited under raw/ablations/."""
+    from .ablation_lifecycle import module_results
+    from .ensemble_grid import RunnerError
+    try:
+        results = module_results(Path(attached["experiment"]) / attached["results"], attached["results_sha256"])
+    except (RunnerError, OSError) as exc:
+        raise SweepError(f"{attached['experiment']}: {exc}") from None
+    name, base = safe_label(Path(attached["experiment"]).name), Path(results["base"])
+    deposited = {"plan.json", attached["results"]}
+    for row in results["rows"]:
+        keys = {"module": row["module"], "arm": row["arm"], "dataset": row["dataset"]}
+        detail = {"source": "variant lifecycles of cm_experiments/ablation_lifecycle.py", "experiment": name,
+                  "results": {"file": f"raw/ablations/{name}/{attached['results']}", "sha256": attached["results_sha256"]},
+                  "files": [{"file": f"raw/ablations/{name}/{f['file']}", "sha256": f["sha256"]} for f in row["files"]],
+                  "role": results["role"], "complete_arm": results["complete"], **row["detail"]}
+        collector.add(f"{row['module']}_{row['arm']}_{row['dataset']}", keys, row["values"], detail, [])
+        deposited |= {f["file"] for f in row["files"]}
+    for relative in sorted(deposited):
+        collector.deposits.append({"path": f"ablations/{name}/{relative}", "from": str(base / relative),
+                                   "sha256": sha256_file(base / relative)})
+
+
 def collect_module_ablations(plan: dict, collector: Collector) -> None:
+    for attached in plan["settings"].get("ablations") or []:
+        collect_ablation_rows(attached, collector)
     for entry in plan["parents"]:
         members = [SealedRun(Path(m)) for m in entry["members"]]
         dataset = entry["dataset"]

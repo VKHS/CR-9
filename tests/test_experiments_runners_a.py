@@ -404,7 +404,11 @@ class FactorialTests(Workspace):
         self.assertEqual(cell["111"], {"action_bank": "registered", "observer": "conditioned", "profile": "full",
                                        "support": "registered"})
         self.assertEqual(job["depth_grid"], [1, 2, 4, 6])
+        self.assertEqual((plan["mode"], plan["fitted_plan"]), ("switch", None))      # fitted mode: test_ablation_lifecycle
         self.assertIn("declared reconstruction", plan["cell_definition_status"])
+        with self.assertRaisesRegex(RunnerError, "mode is 'switch'"):
+            factorial.plan_factorial([EXAMPLES / "arxiv"], self.root / "fac-fitted", role="test", mode="fitted",
+                                     allow_fixture=True)
         pascal = factorial.cell_switches("010", ("S", "O", "X"), "full")
         self.assertEqual((pascal["profile"], pascal["observer"], pascal["support"]), ("lean", "conditioned", "unrestricted"))
         with self.assertRaisesRegex(RunnerError, "not executable"):
@@ -622,8 +626,10 @@ class OrchestrationTests(Workspace):
                 patch.object(factorial, "environment_record", return_value=ENVIRONMENT):
             path = factorial.run_factorial(output, trust=True)[0]
         result = json.loads(path.read_text())
+        self.assertEqual(result["mode"], "switch")
         cells = {c["cell"]: c for c in result["cells"]}
         for name, cell in cells.items():
+            self.assertIsNone(cell["fitted"])
             self.assertEqual(cell["activity"], 0.0 if name[0] == "0" else 0.5)
             self.assertEqual(cell["relative_time"], 1.0)
             self.assertEqual(cell["inputs"], 1)

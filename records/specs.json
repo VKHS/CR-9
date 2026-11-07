@@ -64,7 +64,8 @@
         "activity": "action activity fraction",
         "relative_time": "time relative to cell 000"
       },
-      "table": "list"
+      "table": "list",
+      "notes": "The paper's equal-budget design is the fitted mode: `python -B scripts/run_ablation.py factorial-fit` fits one controller per distinct set of cell operations (cm_experiments/ablation_lifecycle.py) and cm_experiments/factorial.py executes each cell with its own controller; the switch mode of `scripts/run_experiment.py factorial` applies the factors to the parent's fitted controllers. provenance.mode names the mode."
     },
     "negative_controls": {
       "title": "Negative controls and unsupported regimes",
@@ -566,7 +567,7 @@
               "suffix": " depths"
             }
           ],
-          "runtime": "unsupported: cross_morse.core.MeasurementBank requires exactly three distinct bands of the six-window bank (sensor.bands), and the Lean profile zeros the band-power, source-alignment and reachability coordinates together, so neither a band-only deletion nor a band scramble at matched capacity is configurable"
+          "runtime": "variant lifecycle (cm_experiments/ablation_lifecycle.py): the 13 band-power, degree-weighted power and reachability coordinates deleted (held at their D_explore fitting median) or scrambled (replaced by a seeded donor D_explore trajectory at the same depth), re-fitted from the parent's prepare/train outputs"
         },
         {
           "module": "source_alignment",
@@ -594,7 +595,7 @@
               "suffix": " depths"
             }
           ],
-          "runtime": "unsupported: no configuration key removes the three source-alignment coordinates of the measurement vector alone"
+          "runtime": "variant lifecycle (cm_experiments/ablation_lifecycle.py): the three source-alignment coordinates deleted"
         },
         {
           "module": "confidence_sensors",
@@ -621,7 +622,7 @@
               "decimals": 4
             }
           ],
-          "runtime": "unsupported: entropy and margin are fixed coordinates of the measurement vector and also define the support strata"
+          "runtime": "variant lifecycle (cm_experiments/ablation_lifecycle.py): entropy and margin deleted from the observer input"
         },
         {
           "module": "transport_history",
@@ -648,7 +649,7 @@
               "decimals": 3
             }
           ],
-          "runtime": "unsupported: accumulated mass and expected range are fixed measurement and observer-design coordinates"
+          "runtime": "variant lifecycle (cm_experiments/ablation_lifecycle.py): normalized transported mass and expected hops deleted, also in the critic's history features"
         },
         {
           "module": "observer",
@@ -676,7 +677,7 @@
               "decimals": 4
             }
           ],
-          "runtime": "unsupported: the runtime fits only the conditioned observer (cross_morse.learning.ConditionedObserver); raw, EMA and global observers have no configuration key"
+          "runtime": "variant lifecycles (cm_experiments/ablation_lifecycle.py): raw (weight 1) and EMA (0.5) latent averages and one global ridge transition against the runtime's conditioned observer"
         },
         {
           "module": "radius_uncertainty",
@@ -749,7 +750,7 @@
               "decimals": 4
             }
           ],
-          "runtime": "unsupported: the source reset A8 and last-safe recovery A9 are fixed registry actions and cross_morse.policies.recovery_action has no configuration key"
+          "runtime": "variant lifecycles (cm_experiments/ablation_lifecycle.py): source-only (no A9) and last-safe-only (no A8) recovery in feedback decisions and MPC-RH planning"
         },
         {
           "module": "comparator_branch",
@@ -777,7 +778,7 @@
               "suffix": " without branch"
             }
           ],
-          "runtime": "unsupported: the released runner has no serving-time input gate, so the comparator branch cannot be switched"
+          "runtime": "post-hoc: sealed input_gate and negative_controls runs of the parent (cm_experiments/input_gate.py, cm_experiments/negative_controls.py)"
         },
         {
           "module": "full_lean_profile",
@@ -812,7 +813,7 @@
         }
       ],
       "table": "list",
-      "notes": "Rows with dataset 'pooled' hold a pooled value; per-dataset rows are summarised as a range. Produced by `python -B scripts/run_sweep.py collect --sweep module_ablations --parent <run> ... --output <sweep>` for the three modules the released runtime supports (radius uncertainty, sequence risk, Full/Lean profile), then `python -B scripts/export_sweep_records.py --results <sweep>/results.json --hardware ... --period ...`. The other seven modules need runtime support that the release does not have; each module's 'runtime' field states what is missing."
+      "notes": "Rows with dataset 'pooled' hold a pooled value; per-dataset rows are summarised as a range. Produced by `python -B scripts/run_ablation.py modules plan|run|export` (cm_experiments/ablation_lifecycle.py: one variant lifecycle per ablated arm and a replicate complete arm, re-run from the sealed parent's prepare/train outputs with the variant installed in that process only and recorded in the configuration hash), which collects all ten modules through `scripts/run_sweep.py --ablations` and `scripts/export_sweep_records.py`; the radius-uncertainty, sequence-risk and Full/Lean rows come from the sealed contrasts and the comparator branch from sealed input_gate and negative_controls runs."
     },
     "oracle_dispersion": {
       "title": "Per-input oracle enumerated on the admission split",
@@ -1084,6 +1085,27 @@
       },
       "table": "list",
       "notes": "One row per audited dataset. Computed from audited D_explore episodes of the deployed rule: a predicted (registered, undisturbed) run and a realized run under the declared input and edge-weight disturbance (provenance.perturbation), replayed jointly step by step; the per-depth constants beta_l, M_l, eps_l^op, R_l and e_l^ref are kept as raw arrays. The runtime records none of them. The violation rate of Table S22 is 1 - mode_stable_coverage (convention C22). main_paper.py reads final_bound_nats and the two observed-error quantities of the same rows. Produced by scripts/run_trajectory_audit.py tube (cm_experiments/trajectory_audit.py)."
+    },
+    "spectral_policy_value": {
+      "title": "E18 policy value of the spectral coordinates over matched confidence/history controls",
+      "manuscript_tables": [
+        "Supplementary Table S36"
+      ],
+      "experiments": [
+        "E18"
+      ],
+      "keys": [
+        "dataset"
+      ],
+      "quantities": {
+        "policy_value_nats": "paired held-out loss of the audited rule under the matched control (controller fitted and executed without the 16 spectral and reachability coordinates and the spectral age, at matched sensing work) minus under the complete controller (nats; positive means the spectral coordinates add policy value)",
+        "interval_low_nats": "lower end of the central 95% interval of that value (paired whole-unit bootstrap; split runs: small-sample t over the per-split values) (nats)",
+        "interval_high_nats": "upper end of that interval (nats)",
+        "risk_rmse_change": "held-out RMSE of the one-step risk model, control minus complete (nats)",
+        "units": "held-out evaluation units of the contrast (units)"
+      },
+      "table": "list",
+      "notes": "Produced by python -B scripts/run_ablation.py e18-policy plan|run|export (cm_experiments/ablation_lifecycle.py)."
     }
   }
 }
