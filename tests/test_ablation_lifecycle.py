@@ -537,25 +537,18 @@ class CollectionAndExportTests(Workspace):
         with self.assertRaisesRegex(sweeps.SweepError, "not a collected modules study"):
             sweeps.plan_sweep("module_ablations", [pascal], self.root / "sweep2", ablations=[self.root])
 
-    def test_e18_export_against_the_proposed_contract(self):
-        from scripts import record_mapping
+    def test_e18_export_against_the_registered_contract(self):
         from scripts.records import verify_set
         path = ablation.plan_modules([ARXIV], self.root / "e18", study="e18", reps=40, **FIXTURE)
         plan = json.loads(path.read_text())
         fake_measurement(self.root / "e18", plan, np.random.default_rng(8))
-        with self.assertRaisesRegex(RunnerError, "registers no spectral_policy_value"):
-            ablation.export_e18(self.root / "e18", root=self.root / "records")
-        proposed = specs()
-        proposed["sets"]["spectral_policy_value"] = ablation.E18_CONTRACT
-        specs_path = self.root / "specs.json"
-        specs_path.write_text(json.dumps(proposed))
-        with patch.object(ensemble_grid, "SPECS_PATH", specs_path), \
-                patch.object(record_mapping, "_specs", return_value=proposed):
-            target = ablation.export_e18(self.root / "e18", root=self.root / "records",
-                                         command=["scripts/run_ablation.py", "e18-policy", "export"])
-            verify_set(target, proposed["sets"]["spectral_policy_value"], proposed)
-            with self.assertRaisesRegex(RunnerError, "complete measured sets"):
-                ablation.export_e18(self.root / "e18", root=ensemble_grid.RECORDS)
+        registered = specs()
+        self.assertEqual(registered["sets"]["spectral_policy_value"], json.loads(json.dumps(ablation.E18_CONTRACT)))
+        target = ablation.export_e18(self.root / "e18", root=self.root / "records",
+                                     command=["scripts/run_ablation.py", "e18-policy", "export"])
+        verify_set(target, registered["sets"]["spectral_policy_value"], registered)
+        with self.assertRaisesRegex(RunnerError, "complete measured sets"):
+            ablation.export_e18(self.root / "e18", root=ensemble_grid.RECORDS)
         with (target / "summary.csv").open(newline="") as handle:
             lines = list(csv.DictReader(handle))
         self.assertEqual({r["quantity"] for r in lines}, set(ablation.E18_CONTRACT["quantities"]))
