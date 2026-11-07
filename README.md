@@ -2,7 +2,7 @@
 
 **Inference-time control of message passing in frozen graph neural networks**
 
-Abdolvahab Khalili Sadaghiani and Jose Nunez-Yanez · Linköping University
+Abdolvahab Khalili Sadaghiani · Linköping University
 
 [![Software checks](https://github.com/VKHS/CR-9/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CR-9/actions/workflows/quality.yml)
 [![Availability statement](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json)](STATEMENT_COMPLIANCE.md)
