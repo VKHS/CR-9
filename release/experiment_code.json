@@ -297,6 +297,82 @@
           "reason": "the released runtime records the k-hop buffer as a context diagnostic and resamples the METIS or degree-stratified cores, so the buffer changes no admission statistic; the paper does not define how the buffer enters the resampling units"
         }
       ]
+    },
+    {
+      "experiment": "E2",
+      "title": "Sequence predictability: initial-input predictor of the feedback policy's executed sequences fitted on D_explore, evaluated on D_compare (phi_seq, phi_gain)",
+      "code": [
+        "cm_experiments/predictability.py",
+        "cm_experiments/schedules.py",
+        "cm_experiments/execution.py",
+        "cm_experiments/study_execution.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py predictability plan --parent <run> --output <dir>; ... predictability run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... predictability export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:predictability"
+      ],
+      "displays": [
+        "supplementary:Table S30",
+        "supplementary:Table S33",
+        "supplementary:Table S47"
+      ]
+    },
+    {
+      "experiment": "E9",
+      "title": "Search versus model error: exact enumeration at H <= 4 against the registered beam (2 e_H and zeta_H of main Proposition 8)",
+      "code": [
+        "cm_experiments/search_enumeration.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py search-enumeration plan --parent <run> --output <dir> [--planner mpc_rh|mpc_ol]; ... search-enumeration run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... search-enumeration export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:search_enumeration"
+      ],
+      "displays": []
+    },
+    {
+      "experiment": "Negative controls",
+      "title": "Graph-irrelevant, misleading-graph, sensor-bias and support-shift constructions behind the static input gate",
+      "code": [
+        "cm_experiments/negative_controls.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py negative-controls plan --parent <run> --output <dir>; ... negative-controls run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... negative-controls export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:negative_controls"
+      ],
+      "displays": [
+        "supplementary:Table S19",
+        "supplementary:Figure S16"
+      ]
+    },
+    {
+      "experiment": "Input gate",
+      "title": "Serving-time input gate g_input: fallback probability, deployed latency and memory, false-safe and harm-miss rates",
+      "code": [
+        "cm_experiments/input_gate.py",
+        "cm_experiments/protocol.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py input-gate plan --parent <run> --output <dir>; ... input-gate run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... input-gate export --results <dir> --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:input_gate"
+      ],
+      "displays": [
+        "supplementary:Table S23",
+        "supplementary:Table S23b",
+        "supplementary:Table S37",
+        "supplementary:Table S47"
+      ]
     }
   ]
 }
