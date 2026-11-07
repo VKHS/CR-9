@@ -74,7 +74,14 @@ def state(root: Path = ROOT) -> dict:
                                                        "scripts/run_upstream_baseline.py", "scripts/export_records.py"))
     example_index = _json(root / "examples" / "records" / "index.json", {"sets": []})
     example_records = [e["set"] for e in example_index.get("sets", []) if e.get("verified") and e.get("synthetic")]
+    release = None
+    if scope.get("result_distribution") == "repository_release":
+        from scripts import paper_artifacts, statement_check
+        release = {"statement": _json(root / "release" / "availability_statement.json"),
+                   "manifest": paper_artifacts.load_manifest(root / "release" / "paper_artifacts.json"),
+                   "compliance": statement_check.evaluate(root)}
     return {"campaigns": campaigns, "example_records": example_records, "scope": scope, "official": official, "examples": examples, "registered_manifests": registered,
+            "release": release,
             "source_sha256": runtime_source_fingerprint(root),
             "registered_pilot_manifests": registered_pilot, "records": records,
             "tables_examples": tables_examples, "tables_official": tables_official,
@@ -114,6 +121,78 @@ def example_records_sentence(st: dict) -> str:
         return ""
     return (f"Synthetic record examples: {len(names)} sets ({', '.join(sorted(names))}); "
             "`make example-records-check` traces their values to the saved files.")
+
+
+def repository_release(st: dict) -> bool:
+    """Measured outputs published with the repository's GitHub release, bound to the registered statement."""
+    return (st.get("scope") or {}).get("result_distribution") == "repository_release" and st.get("release") is not None
+
+
+STATUS_TEXT = {"fulfilled": "Fulfilled", "awaiting_measured_outputs": "Awaiting measured outputs", "missing": "Missing"}
+
+
+def _gib(value: int) -> str:
+    return f"{value / 2**30:.2f} GiB" if value else "—"
+
+
+def render_repository_release(st: dict) -> str:
+    release = st["release"]
+    statement, manifest, compliance = release["statement"], release["manifest"], release["compliance"]
+    counts = compliance["counts"]
+    url = st["scope"].get("repository_url") or "https://github.com/VKHS/CR-9"
+    lines = ["# Data and code availability", "", "## Availability statement", "",
+             "The paper's registered data-availability statement:", "", f"> {statement['registered_text']}", "",
+             f"**{counts['fulfilled']} of {len(compliance['items'])} items fulfilled**, "
+             f"{counts['awaiting_measured_outputs']} awaiting the publication of the measured outputs, "
+             f"{counts['missing']} missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).", "",
+             "| Statement item | Status | Where in the repository |", "|---|---|---|"]
+    lines += [f"| {row['phrase']} | {STATUS_TEXT[row['status']]} | {row['where']} |" for row in compliance["items"]]
+    published = [a for a in manifest["artifacts"] if a.get("status") == "published"]
+    lines += ["", "## Measured outputs", "",
+              f"The checkpoints, predictions, propensity-logged trajectories and statistical outputs of the reported "
+              f"experiments are assets of the release [`{manifest['release_tag']}`]({manifest['release_url']}) of "
+              f"[{url}]({url}); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with "
+              f"the SHA-256 of each part, archive and file. Published: **{len(published)} of "
+              f"{len(manifest['artifacts'])}** required artifacts.", "",
+              "| Artifact | Status | Files | Size | Checkpoints | Predictions | Trajectories | Statistical outputs |",
+              "|---|---|---|---|---|---|---|---|"]
+    for entry in manifest["artifacts"]:
+        contents = entry.get("contents") or {}
+        if entry.get("status") == "published":
+            lines.append(f"| `{entry['id']}` | published | {entry.get('files', '—')} | {_gib(entry.get('bytes', 0))} | "
+                         f"{contents.get('checkpoints', 0)} | {contents.get('predictions', 0)} | "
+                         f"{contents.get('propensity_logged_trajectories', 0)} | {contents.get('statistical_outputs', 0)} |")
+        else:
+            lines.append(f"| `{entry['id']}` | awaiting measured outputs | — | — | — | — | — | — |")
+    lines += ["", "## One command", "",
+              "`make paper` downloads the published outputs (analysis tier; `PAPER_TIER=complete` adds checkpoints "
+              "and prediction arrays), verifies every part, archive and file against the manifest, verifies each run's "
+              "sealed eight-stage chain and each record set's trace to its raw files, rebuilds every numbered table and "
+              "figure with its source data (`paper/build/displays/`) and compares every computed value with the value "
+              "printed in the paper. It exits 0 only when every display is complete and every compared value agrees. "
+              "See [Reconstruction](docs/RECONSTRUCTION.md).", "",
+              "## Publication of the measured outputs", "",
+              "`bash hpc/publish_paper_artifacts_arrhenius.sh` packs the reported runs, record sets and campaigns on the "
+              "cluster, uploads them to the release, downloads them back for verification, and writes the commit-sized "
+              "views: `manifests/published/` (executed role memberships and seeds), `environment/observed/` (execution "
+              "environments) and `paper/source_data/` (the source data of every display). See "
+              "[Publishing the measured outputs](docs/PUBLICATION.md).", "",
+              "## Independent regeneration", "",
+              "`bash run_cross_morse.sh reproduce` executes the registered lifecycles on any Slurm GPU cluster after its "
+              "SITE SETTINGS block is edited; its report compares the new runs with the paper "
+              "([HPC guide](docs/HPC.md)). Official datasets are obtained from their providers by the adapters. "
+              f"The release also includes {len(st['examples'])} complete synthetic example runs for software "
+              "verification without a GPU.", "",
+              "## Source identity", "",
+              f"Runtime source identity: `{st['source_sha256']}` (`make fingerprint`). Every published run records the "
+              "runtime identity it was produced with; verification resolves it to this tree, a bundled snapshot or "
+              "the run's own frozen source. Paper PDFs are not distributed here; [paper/sources.json](paper/sources.json) "
+              "retains their hashes and page references, and "
+              "[paper/reported_results.json](paper/reported_results.json) holds the printed values used only for "
+              "comparison.", "",
+              "Generated by `scripts/availability.py`; `make availability-check` verifies freshness and claim "
+              "consistency.", ""]
+    return "\n".join(lines)
 
 
 def code_release(st: dict) -> bool:
@@ -196,6 +275,8 @@ def render_code_release(st: dict) -> str:
 
 
 def render(st: dict) -> str:
+    if repository_release(st):
+        return render_repository_release(st)
     if code_release(st):
         return render_code_release(st)
     scope = st["scope"]
@@ -260,6 +341,19 @@ def render(st: dict) -> str:
 
 def readme_block(st: dict) -> str:
     """One coverage sentence and one link on the landing page."""
+    if repository_release(st):
+        compliance = st["release"]["compliance"]
+        manifest = st["release"]["manifest"]
+        published = sum(1 for a in manifest["artifacts"] if a.get("status") == "published")
+        return "\n".join([
+            START,
+            f"**Availability statement:** {compliance['counts']['fulfilled']} of {len(compliance['items'])} items "
+            f"fulfilled; measured outputs published: {published} of {len(manifest['artifacts'])} "
+            "([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the "
+            "outputs published with the [release](" + manifest["release_url"] + ") and compares them with the paper; "
+            "see [availability](AVAILABILITY.md).",
+            END,
+        ])
     if code_release(st):
         return "\n".join([
             START,
@@ -291,12 +385,27 @@ def update_readme(root: Path, st: dict) -> bool:
     return True
 
 
+def release_flags(st: dict) -> dict:
+    """In repository_release mode the affirmative scope flags follow the published manifest and statement check."""
+    if not repository_release(st):
+        return {}
+    manifest, compliance = st["release"]["manifest"], st["release"]["compliance"]
+    runs = [a for a in manifest["artifacts"] if a["kind"] == "run"]
+    runs_published = bool(runs) and all(a.get("status") == "published" for a in runs)
+    status = {row["id"]: row["status"] for row in compliance["items"]}
+    return {"original_result_archives_included": runs_published,
+            "original_trained_weights_included": runs_published and status.get("checkpoints") == "fulfilled",
+            "one_command_original_tables_reproduction_claimed": status.get("one_command") == "fulfilled"}
+
+
 def update_registered_scope(root: Path, st: dict) -> None:
     """Keep the derived registration list current without asserting public/scientific validation."""
     expected = sorted(st["official"])
-    if st["scope"].get("full_official_dataset_runs_verified") == expected:
+    flags = release_flags(st)
+    if st["scope"].get("full_official_dataset_runs_verified") == expected and all(
+            st["scope"].get(k) == v for k, v in flags.items()):
         return
-    scope = dict(st["scope"], full_official_dataset_runs_verified=expected)
+    scope = dict(st["scope"], full_official_dataset_runs_verified=expected, **flags)
     write_bytes(root / "release" / "release_scope.json",
                 (json.dumps(scope, indent=2, ensure_ascii=False, allow_nan=False) + "\n").encode("utf-8"), replace=True)
     st["scope"] = scope
@@ -338,6 +447,19 @@ def check(root: Path, st: dict, *, budget_campaign: Path | None = None,
     else:
         problems.append("README.md lacks the availability markers")
     scope = st["scope"]
+    if repository_release(st):
+        for flag, value in release_flags(st).items():
+            if scope.get(flag) is not value:
+                problems.append(f"release_scope.json {flag} must be {str(value).lower()} for the published manifest; "
+                                "run `make availability`")
+        if scope.get("validated_runtime_source_sha256") not in (None, st["source_sha256"]):
+            problems.append("release_scope.json validated_runtime_source_sha256 is not the fingerprint of this tree")
+        for p in problems:
+            print("CHECK FAILED:", p, file=sys.stderr)
+        if problems:
+            return 1
+        print("availability statement matches the registered statement, the published manifest and the release scope")
+        return 0
     all_official = set(st["official"]) == set(DATASETS)
     for flag in ("original_result_archives_included", "one_command_original_tables_reproduction_claimed"):
         if type(scope.get(flag, False)) is not bool:

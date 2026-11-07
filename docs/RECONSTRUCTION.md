@@ -1,135 +1,91 @@
-# Reconstruct supported paper outputs
+# Reconstruct every table and figure
 
-[Documentation](README.md) · [Artifact catalog](ARTIFACT_CATALOG.md) · [Display inventory](../paper/PAPER_SUPPORT.md) · [Supplementary builders](SUPPLEMENT_BUILD.md)
+[Documentation](README.md) · [Statement compliance](../STATEMENT_COMPLIANCE.md) · [Publishing the measured outputs](PUBLICATION.md) · [Display inventory](../paper/PAPER_SUPPORT.md) · [Artifact catalog](ARTIFACT_CATALOG.md)
 
-`make reconstruct` builds one traceable workspace from sealed run artifacts,
-registered measurement records and optional confirmation or budget campaigns.
-The workspace includes a report for every numbered table and figure in the
-registered paper and supplement. Each output states whether it supplies table
-columns, a partial panel, a full numerical display or a supporting artifact.
-Those scopes describe what was actually generated.
-
-The cluster launcher and this command serve different stages of the workflow.
-`bash run_cross_morse.sh reproduce` executes the registered dataset lifecycles.
-`make reconstruct` reads completed inputs and builds their supported numerical
-outputs without training, loading checkpoints into a model or downloading data.
-The [artifact catalog](ARTIFACT_CATALOG.md) identifies the producing command and
-availability of each input category.
-
-## Verify the workflow with bundled examples
-
-In the recorded CPU environment:
+## One command
 
 ```bash
-make reconstruction-example REPORT_ROOT=../cm-reports
-python -B scripts/reconstruct.py --verify ../cm-reports/reconstruction-examples
+make paper                                   # analysis tier: no checkpoints or full prediction arrays
+make paper PAPER_TIER=complete               # every published file
+make paper ARTIFACTS_ROOT=/abs/artifacts PAPER_ROOT=/abs/paper
+make paper-offline                           # reuse artifacts already downloaded
 ```
 
-This uses the two sealed synthetic examples and their example measurement
-records. Tables, plots and the top-level report carry their synthetic scope.
-These values demonstrate software execution and remain distinct from the
-paper's benchmark observations.
+`make paper` (`scripts/reconstruct_paper.py`):
 
-## Build from registered experiment artifacts
+1. reads [`release/paper_artifacts.json`](../release/paper_artifacts.json), the manifest
+   of the measured outputs published with the release `paper-artifacts`;
+2. downloads every published artifact and checks the SHA-256 of each part, of the
+   reassembled archive and of every file inside it;
+3. verifies each run's sealed eight-stage chain (the analysis tier checks every present
+   file and every declared omission against the stage manifests) and each record set's
+   trace from summary values to raw files;
+4. runs the display generators in `paper/build/displays/`, one per numbered table and
+   figure, and the run-derived and supplementary builders;
+5. compares every computed value with the value printed in the paper at the printed
+   precision.
 
-First materialize registered archives using the [run archive workflow](RUN_ARCHIVES.md)
-or point the builder at already completed run directories. Both paths verify
-the sealed input bytes before constructing outputs.
+| Exit status | Meaning |
+|---|---|
+| `0` | every display generated in full from the published outputs and every compared value agrees |
+| `1` | outputs still await publication, a display is incomplete or a value differs; the report names which |
+| `2` | a download, an input verification or a generator failed |
 
-```bash
-make reconstruct \
-  RUNS_INDEX=/absolute/runs/index.json \
-  RECORDS_INDEX=/absolute/records/index.json \
-  RECONSTRUCTION_ROOT=/absolute/paper-build
-```
+The summary is printed and saved beside the workspace as `<workspace>.status.json`.
 
-For completed runs that have not been placed in an archive index:
+## Display generators
 
-```bash
-python -B scripts/reconstruct.py \
-  --runs-root /absolute/completed-runs \
-  --records-index /absolute/records/index.json \
-  --output-dir /absolute/paper-build \
-  --label regenerated-full-profile
-```
+Each numbered display has a generator registered with
+`@display("supplementary:Table S20", stem="S20", needs=(...), scope=...)` in
+`paper/build/displays/`:
 
-`--runs-root` accepts an individual completed run, a directory of completed runs,
-or a Roman-empire campaign. A Roman campaign must contain each of its ten official
-split IDs exactly once. Multiple unrelated runs for the same dataset are rejected
-because they would overwrite the same evidence file; declare their intended
-campaign aggregation first.
+| Module | Displays |
+|---|---|
+| `main_paper.py` | main Tables 1–2 and Figures 2–6 |
+| `run_audits.py` | selection, support, confirmation, admission and qualification displays read from the lifecycle runs |
+| `records_campaigns.py` | displays read from measurement-record sets and campaign exports |
+| `experiments.py` | ablations, sensitivity grids, buffer and horizon/beam sweeps, outcome definitions |
+| `protocol_tables.py` | protocol tables regenerated from the configuration, registered constants and record contracts |
+| `analytical.py` | analytical displays computed from the stated formulas and registered inputs |
 
-The run index identifies the registered artifacts, while actual local bytes
-establish whether the builder can read them. A `verified` registration flag does
-not replace byte verification. Downloadable artifacts whose files have not been
-materialized are listed as input requirements in the report.
-
-## Include supplementary analyses
-
-```bash
-make reconstruct \
-  RUNS_INDEX=/absolute/runs/index.json \
-  RECORDS_INDEX=/absolute/records/index.json \
-  CONFIRMATION_CAMPAIGN=/absolute/original-confirmation-campaign \
-  BUDGET_CAMPAIGN=/absolute/budget-campaign \
-  RECONSTRUCTION_ROOT=/absolute/paper-build
-```
-
-The factorial and ensemble builders read the corresponding traced record sets.
-The S14 builder reads the validated original joint confirmation family; it does
-not combine unrelated per-run tests into a historical nine-test result. The
-budget builder verifies the campaign contract and retains its declared relation
-to the historical table. See [Supplementary builders](SUPPLEMENT_BUILD.md) for
-the exact generated columns, panels, CSV sources and statistical scope.
+`needs` names the inputs: all seven lifecycle runs, one run, a measurement-record set, a
+campaign, or only the repository's sources. A generator reads its inputs and the
+repository's configuration and code; it never reads the printed values. It declares
+which printed value each computed cell should reproduce, and the comparison step looks
+the printed value up in [`paper/reported_results.json`](../paper/reported_results.json)
+afterwards. A generator whose inputs are not yet published is reported as awaiting
+those inputs; nothing is substituted for them.
 
 ## Workspace contents
 
 | File or directory | Purpose |
 |---|---|
-| `RECONSTRUCTION_REPORT.md` | Linked generated outputs and coverage of all 90 numbered displays |
-| `reconstruction.json` | Input and software identities, output-to-display relationships and build status |
+| `RECONSTRUCTION_REPORT.md` | every display with its generator status, its comparison counts and any awaited input |
+| `reconstruction.json` | input and software identities, outputs and their relationship to the 90 displays |
 | `FILES.json` | SHA-256 and byte size of every exported file |
-| `runs/evidence/` | Evidence extracted from sealed runs, retaining runtime, configuration and unit identities |
-| `runs/tables/` | Run-derived tables in CSV, Markdown and LaTeX |
-| `runs/figures/` | Related numerical plots in PNG and SVG |
-| `records/` | Traced measurement-set tables |
-| `supplement/` | Validated supplementary analyses, including the plotted numeric source data |
+| `displays/tables/` | complete tables (CSV, Markdown, LaTeX) |
+| `displays/figures/` | complete figures (PNG, SVG) |
+| `displays/data/<stem>/` | full-precision source data of every table and figure panel |
+| `displays/compare/<stem>.csv` | every printed value beside the computed one, with its status |
+| `runs/`, `records/`, `supplement/` | the run-derived, record-set and supplementary builder outputs |
 
-The builder checks the complete eight-stage chain and its sealed bytes without
-deserializing checkpoints. Record-set checks verify both the manifest and each
-summary value's locator in its raw source. The report records the builder source
-hashes and the interpreter and numerical-library versions used for the build.
+`python -B scripts/reconstruct.py --verify /abs/paper` detects missing, extra or
+changed files. The publication step copies `displays/{tables,data,compare}` into
+[`paper/source_data/`](../paper/source_data) so that the source data of every display
+is also part of the Git tree.
 
-Builds use a fresh staging directory. A failed builder leaves an existing valid
-workspace intact. A successful rebuild replaces the complete managed workspace,
-so obsolete files from an earlier build cannot appear to be current outputs.
-Directories that are not managed workspaces, changed workspaces and input
-directories are preserved rather than overwritten.
+## Other inputs
 
-## Verify or require completeness
+`scripts/reconstruct.py` builds the same workspace from local inputs:
 
 ```bash
-make reconstruction-check RECONSTRUCTION_ROOT=/absolute/paper-build
-python -B scripts/reconstruct.py --verify /absolute/paper-build --require-all-displays
+python -B scripts/reconstruct.py --runs-root /abs/runs --records-index /abs/records/index.json \
+  --confirmation-campaign /abs/s14 --budget-campaign /abs/e3_e6 --campaign NAME=/abs/dir \
+  --output-dir /abs/workspace --label my-runs
+make reconstruction-example REPORT_ROOT=../cm-reports      # the bundled synthetic examples
 ```
 
-The first command verifies the exported bytes and file set. The second also
-requires full numerical coverage of every display from non-synthetic inputs.
-The equivalent build-time option is `make reconstruct REQUIRE_ALL_DISPLAYS=1`.
-
-| Exit status | Meaning |
-|---|---|
-| `0` | Requested supported outputs built, or exported workspace bytes verified; any requested completeness condition also passed |
-| `1` | Inputs need materialization, no numerical outputs were available, or the requested full-display coverage condition was not met |
-| `2` | Invalid input, failed verification, malformed output or a builder error |
-
-`SUPPORTED_OUTPUTS_BUILT` records successful generation within the stated scope.
-The separate `all_displays_numerically_reconstructed` field remains false when
-any display is represented only by a partial output, protocol check or input
-requirement. `historical_experiment_identity_verified` is not set by this builder:
-the [scientific evidence audit](VALIDATION.md#scientific-evidence-gate) checks
-original result bindings, campaign identities and agreement with the paper.
-
-The reported-results registry supplies comparison targets. The builder never
-fills an unmeasured cell with a printed number, converts an analytical scenario
-into an observation, or infers historical identity from a successful new run.
+`--runs-root` accepts a completed run, a directory of completed runs (for example the
+`runs/` of a `run_cross_morse.sh reproduce` suite) or a Roman-empire campaign with its
+ten official splits. Synthetic example inputs are labelled as such in every output and
+never count as a reconstruction of the paper.

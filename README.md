@@ -5,8 +5,8 @@
 Abdolvahab Khalili Sadaghiani and Jose Nunez-Yanez · Linköping University
 
 [![Software checks](https://github.com/VKHS/CR-9/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CR-9/actions/workflows/quality.yml)
-[![Reproduction](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json)](docs/HPC.md)
-[Reproduce the paper](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
+[![Availability statement](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json)](STATEMENT_COMPLIANCE.md)
+[Statement compliance](STATEMENT_COMPLIANCE.md) · [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
 
 CROSS-MORSE attaches an external controller to a frozen graph predictor. At
 inference, intermediate representations guide whether and how propagation
@@ -16,9 +16,34 @@ selection, confirmation, and admission protocol.
 
 ![Frozen predictor and external feedback controller](docs/assets/architecture.svg)
 
-## Reproduce the paper
+## Every table and figure in one command
 
-The Slurm launcher executes the registered eight-stage lifecycle on all seven
+The paper's registered data-availability statement places the complete experiment
+code, configurations, source data, split and seed manifests, environment
+specification, checkpoints, predictions, propensity-logged trajectories,
+statistical outputs and figure/table generators in this repository. The measured
+outputs are assets of the release
+[`paper-artifacts`](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts),
+listed with SHA-256 identities in [`release/paper_artifacts.json`](release/paper_artifacts.json).
+
+```bash
+git clone https://github.com/VKHS/CR-9.git && cd CR-9
+make paper                     # download and verify the published outputs, rebuild all 90 displays, compare
+make paper PAPER_TIER=complete # also checkpoints and full prediction arrays
+make statement-check           # each item of the availability statement and where it is fulfilled
+```
+
+`make paper` verifies every downloaded byte and every run's sealed eight-stage
+chain, writes each table (CSV, Markdown, LaTeX) and figure (PNG, SVG) with its
+source data, and places every computed value beside the value printed in the paper
+(`displays/compare/`). [Statement compliance](STATEMENT_COMPLIANCE.md) states, item by
+item, what is fulfilled and what awaits publication;
+[Publishing the measured outputs](docs/PUBLICATION.md) describes how the outputs of
+the reported runs enter the release.
+
+## Regenerate the results on a Slurm cluster
+
+Independently of the published outputs, the Slurm launcher executes the registered eight-stage lifecycle on all seven
 datasets, including Roman-empire's ten official splits. Its report rebuilds
 supported run-derived tables and compares the available quantities with the
 paper. Auxiliary experiments use the drivers in [Experiments](docs/EXPERIMENTS.md).
@@ -175,7 +200,7 @@ assumptions, and the exact implemented variants are explained in the
 ## Release scope
 
 <!-- availability:start -->
-**Release:** implementation, configurations, reproduction launcher and reported-result references. `bash run_cross_morse.sh reproduce` executes the dataset lifecycles ([guide](docs/HPC.md)); 2 complete synthetic example runs replay without a GPU. See [availability](AVAILABILITY.md) and the [artifact catalog](docs/ARTIFACT_CATALOG.md).
+**Availability statement:** 3 of 12 items fulfilled; measured outputs published: 0 of 37 ([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the outputs published with the [release](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) and compares them with the paper; see [availability](AVAILABILITY.md).
 <!-- availability:end -->
 
 `make verify` checks the software package and bundled examples. A regenerated

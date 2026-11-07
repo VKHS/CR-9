@@ -327,6 +327,21 @@ class RecordMappingTests(unittest.TestCase):
                 validate_record_coverage(name, rows, specs["sets"][name], RECORD_SETS[name])
                 self.assertTrue(all(row["source_file"] is None and row["locator"] is None for row in template["rows"]))
 
+    def test_templates_cover_every_set_declared_only_in_the_specifications(self):
+        from cm_campaigns.contract import RECORD_SETS
+        specs = json.loads((PROJECT / "records" / "specs.json").read_text())
+        declared = [name for name in specs["sets"] if name not in RECORD_SETS]
+        self.assertTrue(declared)
+        for name in declared:
+            with self.subTest(set=name):
+                spec = specs["sets"][name]
+                template = record_mapping.template(name)
+                self.assertEqual({row["quantity"] for row in template["rows"]}, set(spec["quantities"]))
+                for row in template["rows"]:
+                    self.assertEqual(sorted(row["keys"]), sorted(spec["keys"]))
+                if spec.get("datasets") and "dataset" in spec["keys"]:
+                    self.assertEqual({row["keys"]["dataset"] for row in template["rows"]}, set(spec["datasets"]))
+
     def test_build_traces_every_value_and_records_derivations(self):
         from scripts.records import cmd_check
         target = record_mapping.build(self.mapping(), records_root=self.records)

@@ -359,6 +359,55 @@
         "Original S14 family for confirmation outputs",
         "E3–E6 campaign for arm outputs"
       ]
+    },
+    "paper": {
+      "mode": "build",
+      "argv": [
+        "make",
+        "paper"
+      ],
+      "entrypoints": [
+        "Makefile",
+        "scripts/reconstruct_paper.py"
+      ],
+      "scope": "Download and verify the measured outputs published with the release paper-artifacts, rebuild every numbered table and figure with its source data, and compare every computed value with the printed one.",
+      "requires": [
+        "Published release assets (release/paper_artifacts.json)",
+        "Network access",
+        "Recorded CPU or NumPy environment"
+      ]
+    },
+    "publish": {
+      "mode": "register",
+      "argv": [
+        "bash",
+        "hpc/publish_paper_artifacts_arrhenius.sh",
+        "publish"
+      ],
+      "entrypoints": [
+        "hpc/publish_paper_artifacts_arrhenius.sh",
+        "scripts/paper_artifacts.py"
+      ],
+      "scope": "Upload the packed outputs of the reported runs, record sets, campaigns and environment to the release paper-artifacts, record their SHA-256 in release/paper_artifacts.json, download them back, verify them, rebuild every display and write the split/seed manifests, observed environments and source data to commit.",
+      "requires": [
+        "Completed reported runs, record sets and campaigns on the cluster",
+        "GITHUB_TOKEN with contents:write"
+      ]
+    },
+    "statement_check": {
+      "mode": "check",
+      "argv": [
+        "make",
+        "statement-check"
+      ],
+      "entrypoints": [
+        "Makefile",
+        "scripts/statement_check.py"
+      ],
+      "scope": "Evaluate each item of the registered availability statement against the repository and the published manifest.",
+      "requires": [
+        "Checkout"
+      ]
     }
   },
   "entries": [
@@ -372,7 +421,8 @@
             "cross_morse/*.py",
             "run_cross_morse*.py",
             "cm_experiments/*.py",
-            "cm_campaigns/*.py"
+            "cm_campaigns/*.py",
+            "release/experiment_code.json"
           ]
         },
         {
@@ -423,7 +473,7 @@
         "docs/PAPER_SUPPORT.md",
         "cross_morse/provenance.py"
       ],
-      "scope": "Core and auxiliary experiment implementations are included. Executing the dataset lifecycles does not by itself execute every auxiliary campaign.",
+      "scope": "Core and auxiliary experiment implementations are included; release/experiment_code.json maps every experiment behind a reported display to its code, command and outputs.",
       "provider_data": false,
       "artifact_indexes": [
         "runs/index.json",
@@ -557,18 +607,21 @@
       "commands": [
         "lifecycle",
         "registry_check",
-        "fetch"
+        "fetch",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "data/sources.json",
         "docs/DATASETS.md",
         "paper/transcription_check.json"
       ],
-      "scope": "Official provider data, reported numerical references and experimental observations have separate identities. Transcribed values never become reconstructed measurements.",
+      "scope": "Official provider data, reported numerical references and experimental observations have separate identities. The source data of every display is generated from the published measured outputs (paper/source_data/, written by the publication step); transcribed values never become reconstructed measurements.",
       "provider_data": true,
       "artifact_indexes": [
         "runs/index.json",
-        "records/index.json"
+        "records/index.json",
+        "release/paper_artifacts.json"
       ]
     },
     {
@@ -640,7 +693,9 @@
       ],
       "commands": [
         "registered_design",
-        "executed_manifest"
+        "executed_manifest",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "cross_morse/split_contract.py",
@@ -648,10 +703,11 @@
         "scripts/run_manifests.py",
         "data/sources.json"
       ],
-      "scope": "Registered manifests prescribe splits/seeds; extracted run manifests record what was used. Membership and optimization-seed evidence stay separate.",
+      "scope": "Registered manifests prescribe splits/seeds; manifests/published/ records the memberships and seeds that every published run used. Membership and optimization-seed evidence stay separate.",
       "provider_data": false,
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ]
     },
     {
@@ -696,17 +752,20 @@
       ],
       "commands": [
         "environment",
-        "lifecycle"
+        "lifecycle",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "environment/README.md",
         "environment/check_environment.py",
         "docs/HPC.md"
       ],
-      "scope": "Released lock files and containers specify environments; each run carries its actual execution environment.",
+      "scope": "Released lock files and containers specify environments; each run carries its actual execution environment, and environment/observed/ summarizes it for every published run.",
       "provider_data": false,
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ]
     },
     {
@@ -758,17 +817,20 @@
         "lifecycle",
         "model_inventory",
         "archive",
-        "fetch"
+        "fetch",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "docs/DATASETS.md",
         "cross_morse/provenance.py",
         "scripts/archive_run.py"
       ],
-      "scope": "Bundled checkpoint files are synthetic examples. Original benchmark weights and newly trained weights are distinguished through the registered run relationship.",
+      "scope": "The checkpoints of the reported runs are assets of the release paper-artifacts (complete tier; release/paper_artifacts.json). Bundled checkpoint files are synthetic examples.",
       "provider_data": false,
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ]
     },
     {
@@ -815,17 +877,20 @@
       "commands": [
         "lifecycle",
         "archive",
-        "fetch"
+        "fetch",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "cross_morse/tasks.py",
         "cross_morse/review.py",
         "docs/RUN_ARCHIVES.md"
       ],
-      "scope": "Saved predictions support paired replay. Numerical agreement with a manuscript value does not establish that a new run produced the original paper.",
+      "scope": "The predictions of the reported runs are assets of the release paper-artifacts (complete tier); paired observations are in the analysis tier. Numerical agreement with a manuscript value does not establish that a new run produced the original paper.",
       "provider_data": false,
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ]
     },
     {
@@ -873,17 +938,20 @@
       ],
       "commands": [
         "lifecycle",
-        "scientific_audit"
+        "scientific_audit",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "cross_morse/pipeline.py",
         "cross_morse/learning.py",
         "docs/PAPER_SUPPORT.md"
       ],
-      "scope": "Runtime logging and bundled synthetic examples show the format. Original propensity observations must come from their actual exploration runs.",
+      "scope": "The propensity-logged exploration trajectories of the reported runs are assets of the release paper-artifacts (both tiers); bundled synthetic examples show the format.",
       "provider_data": false,
       "artifact_indexes": [
-        "runs/index.json"
+        "runs/index.json",
+        "release/paper_artifacts.json"
       ]
     },
     {
@@ -1015,7 +1083,9 @@
         "export_records",
         "record_check",
         "scientific_audit",
-        "supplement"
+        "supplement",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "docs/S14_CONFIRMATION.md",
@@ -1023,11 +1093,12 @@
         "records/specs.json",
         "scripts/check_result_binding.py"
       ],
-      "scope": "Statistical code and arithmetic checks are included. Original joint tests, raw paired data and new reproduction outputs remain separately identified.",
+      "scope": "Statistical code and arithmetic checks are included; the selection, confirmation, admission and evaluation records of every reported run and every record set and campaign behind a display are assets of the release paper-artifacts.",
       "provider_data": false,
       "artifact_indexes": [
         "runs/index.json",
-        "records/index.json"
+        "records/index.json",
+        "release/paper_artifacts.json"
       ]
     },
     {
@@ -1042,7 +1113,9 @@
             "scripts/plot_registry_figures.py",
             "scripts/draw_diagrams.py",
             "scripts/reconstruct.py",
-            "scripts/build_supplement.py"
+            "scripts/build_supplement.py",
+            "paper/build/displays/*.py",
+            "scripts/reconstruct_paper.py"
           ]
         },
         {
@@ -1134,7 +1207,9 @@
       "commands": [
         "reconstruct",
         "reconstruction_example",
-        "supplement"
+        "supplement",
+        "paper",
+        "publish"
       ],
       "contracts": [
         "docs/RECONSTRUCTION.md",
@@ -1142,11 +1217,12 @@
         "paper/display_manifest.json",
         "paper/PAPER_SUPPORT.md"
       ],
-      "scope": "Display-level coverage is explicit. The inventory of all numbered displays does not claim that every printed table or figure has an exact standalone generator.",
+      "scope": "paper/build/displays/ holds one generator per numbered display; make paper runs them on the published outputs and compares every computed value with the printed one.",
       "provider_data": false,
       "artifact_indexes": [
         "runs/index.json",
-        "records/index.json"
+        "records/index.json",
+        "release/paper_artifacts.json"
       ]
     }
   ]

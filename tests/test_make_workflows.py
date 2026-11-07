@@ -86,10 +86,25 @@ class MakeWorkflowTests(unittest.TestCase):
         self.assertEqual(calls[2][-1], str(figures / "registry"))
         self.assertEqual(calls[3][-1], str(diagrams))
 
+    def test_one_command_reconstruction_reads_the_published_outputs(self):
+        artifacts = self.root / "published artifacts"
+        out = self.root / "paper workspace"
+        calls = self.invoke("paper", ARTIFACTS_ROOT=artifacts, PAPER_ROOT=out, PAPER_TIER="complete")
+        self.assertEqual(calls, [["-B", "scripts/reconstruct_paper.py", "--artifacts", str(artifacts),
+                                  "--output-dir", str(out), "--tier", "complete"]])
+        self.capture.unlink()
+        calls = self.invoke("paper-offline", ARTIFACTS_ROOT=artifacts, PAPER_ROOT=out)
+        self.assertEqual(calls, [["-B", "scripts/reconstruct_paper.py", "--offline", "--artifacts", str(artifacts),
+                                  "--output-dir", str(out)]])
+        self.capture.unlink()
+        calls = self.invoke("statement-check")
+        self.assertEqual(calls, [["-B", "scripts/statement_check.py", "--check"]])
+        self.assertFalse(any("reported_results" in arg for call in calls for arg in call))
+
     def test_paper_targets_build_from_run_archives_not_from_the_registry(self):
         index = self.root / "official runs" / "index.json"
         out = self.root / "paper output"
-        calls = self.invoke("paper", RUNS_INDEX=index, PAPER_OFFICIAL_ROOT=out)
+        calls = self.invoke("paper-from-index", RUNS_INDEX=index, PAPER_OFFICIAL_ROOT=out)
         self.assertEqual(calls, [["-B", "scripts/build_paper.py", "all", "--index", str(index), "--label", "official",
                                   "--output-dir", str(out)],
                                  ["-B", "scripts/records.py", "tables", "--output-dir", str(out / "records")]])

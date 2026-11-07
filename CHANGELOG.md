@@ -1,5 +1,61 @@
 # Changelog
 
+## 2026-11-07 — Registered availability statement: published outputs, display generators, one command
+
+- `release/availability_statement.json` holds the paper's registered data- and
+  code-availability statement verbatim and divides it into its twelve items.
+  `make statement-check` (`scripts/statement_check.py`) evaluates each item from
+  the repository's contents and writes `STATEMENT_COMPLIANCE.md`; an item is
+  fulfilled, awaiting the publication of the measured outputs, or missing.
+- The measured outputs of the reported experiments (checkpoints, predictions,
+  propensity-logged trajectories, statistical outputs, executed split and seed
+  memberships, observed environments) are published as assets of this
+  repository's release `paper-artifacts` and listed in
+  `release/paper_artifacts.json` with the SHA-256 of every part, archive and file.
+  `scripts/paper_artifacts.py` plans, packs (deterministic archives, parts below
+  the 2 GiB asset limit), publishes, downloads and verifies them in an analysis
+  tier and a complete tier; `hpc/publish_paper_artifacts_arrhenius.sh` runs the
+  publication on the cluster and writes `manifests/published/`,
+  `environment/observed/` and `paper/source_data/`.
+- `make paper` (`scripts/reconstruct_paper.py`) is the one-command reconstruction:
+  download, verification of every byte, of each run's sealed eight-stage chain and
+  of each record set's trace, one generator per numbered table and figure
+  (`paper/build/displays/`), full-precision source data of every display and a
+  per-cell comparison with the printed values. Exit status 0 only when every
+  display is complete and every value agrees.
+- One generator per numbered display (`paper/build/displays/`): main Tables 1–2 and
+  Figures 1–6, and every supplementary table and figure — 60 measured displays read
+  from the published runs, record sets and campaigns, 16 protocol tables generated
+  from the configurations, code and registered protocol (`paper/protocol/`), 13
+  analytical displays computed from the stated formulas, and one illustration. Each
+  writes the complete table (CSV, Markdown, LaTeX) or figure (PNG, SVG) with the
+  full-precision source data of every panel and declares the printed value each cell
+  reproduces; a generator never reads the printed values. `paper/display_manifest.json`
+  names each display's generator and the record sets it reads.
+- Experiment code for every measurement-record set a display reads
+  (`cm_experiments/`, `scripts/run_experiment.py`, `run_experiment_b.py`,
+  `run_sweep.py`, `run_timing_records.py`, `run_confirmation_analysis.py`,
+  `run_trajectory_audit.py`, `run_decision_audit.py`): E2 predictability, E9 exact
+  enumeration, E10 confirmation-size sensitivity, E13 inserted-site attribution, E14
+  extended ensemble grid and its official scores, E18 spectral displacement audit
+  and bound tightness, E19 sensitivity grids, the horizon/beam sweep, cross-backbone
+  substitutions, factorials, negative controls, the serving-time input gate, the
+  held-out mechanism contrasts, the admission-split oracle, the Proposition 2 tube
+  audit, depth diagnostics, the action-gap, decision-trace and reliability audits,
+  runtime scaling and timing anchors. Every runner reads sealed lifecycle runs
+  without writing them, records the identities of its parents and exports a record
+  set that `scripts/records.py` traces value by value. Thirty record contracts are
+  registered in `records/specs.json`; `scripts/export_records.py from-mapping` accepts
+  every one of them.
+- `release/experiment_code.json` maps every experiment behind a reported table or
+  figure to its code, command, configurations and published artifacts.
+- Availability views (`AVAILABILITY.md`, `paper/AVAILABILITY_STATEMENT.txt`,
+  `paper/CLAIMS.md`, the paper-support reports, the badge and the artifact
+  catalog) follow the repository-release scope. `make verify` includes
+  `paper-artifacts-check` and `statement-check`.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged: source
+  fingerprint `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+
 ## 2026-11-07 — Availability catalog and traced reconstruction
 
 - Added a typed artifact catalog that maps code, configurations, dataset sources,

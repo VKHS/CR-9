@@ -1,0 +1,23 @@
+{
+ "display": "supplementary:Table S39",
+ "source": {"document": "supplementary", "pages": [24]},
+ "scope": "Stage names and the role descriptions of the separated data-use contract. Percentages are read from TRAIN_CUTS of cross_morse/split_contract.py, the multigraph role sizes are computed with the preparation rule of cross_morse/data.py from the official training counts in paper/registered_constants.json, and the admission split is read from data/sources.json.",
+ "rows": {
+  "gates": {"stage": "target-regime gates (main Eq. (5))", "single": "buffered cores of D_fit/D_explore",
+            "multi": "training graphs of D_fit/D_explore", "reserved": "evaluated before controller selection (Table S4)"},
+  "fitting": {"stage": "fitting of observer and consequence models", "single": "D_explore ({explore_pct} of official training)",
+              "multi": "D_explore", "reserved": "D_explore"},
+  "logging": {"stage": "exploration logging", "single": "D_explore", "multi": "D_explore", "reserved": "D_explore"},
+  "selection": {"stage": "selection (main Eq. (19))", "single": "D_select; buffered clusters", "multi": "D_select; complete graphs",
+                "reserved": "D_select; trace exported (E15)"},
+  "confirmation": {"stage": "confirmation (main Eq. (20))", "single": "D_confirm; buffered clusters",
+                   "multi": "D_confirm ({confirm_counts} graphs)", "reserved": "D_confirm ({confirm_pct}; manifest IDs)"},
+  "admission": {"stage": "admission (Theorem 2 or descriptive)", "single": "descriptive on buffered cores or official splits",
+                "multi": "{admit_split} split ({admit_counts} graphs), read once",
+                "reserved": "D_admit: untouched by every decision that fixed q̃_M (Theorem 2)"},
+  "comparison": {"stage": "independent E3–E6 comparison", "single": "D_compare; buffered clusters",
+                 "multi": "D_compare ({compare_counts} graphs)",
+                 "reserved": "D_compare ({compare_pct}), disjoint from all teacher decisions; no automatic policy replacement"},
+  "test": {"stage": "test", "single": "D_test", "multi": "D_test", "reserved": "D_test, read once"}
+ }
+}

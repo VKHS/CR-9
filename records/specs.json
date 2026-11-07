@@ -217,6 +217,873 @@
         "ceiling": "registered common ceiling (expected work relative to q_C)"
       },
       "notes": "Exported by scripts/export_records.py budget-matched from a complete campaign export (scripts/arm_campaign.py export --complete). Every value is read from the campaign's analysis.json, which cm_campaigns.arm_campaign.check_campaign recomputes from the paired per-unit observations and the input-level work ledgers. The configuration key is 'selected': each controller replicate's development-selected configuration."
+    },
+    "action_gap_audit": {
+      "title": "Action-gap and switching audit of the deployed rules",
+      "manuscript_tables": [
+        "Supplementary Table S21",
+        "Supplementary Figure S17"
+      ],
+      "experiments": [],
+      "keys": [
+        "dataset"
+      ],
+      "quantities": {
+        "median_gap_nats": "median over the executed decision sites of the deployed rule of the gap m_l between the best and second-best supported scores (main Proposition 3; nats)",
+        "p5_gap_nats": "5th percentile of the same site gaps (nats)",
+        "near_zero_threshold_nats": "the near-zero gap threshold the audit applies (nats)",
+        "near_zero_fraction": "fraction of decision sites whose gap is below near_zero_threshold_nats",
+        "switch_fraction": "fraction of decision sites whose executed action changes when the state is perturbed by the registered perturbation (complement of mode-stable coverage)",
+        "recovery_index_stability": "fraction of trajectories whose last-safe (recovery) index is unchanged under the perturbation",
+        "beam_sequence_stability": "fraction of replanning sites whose planned beam sequence is unchanged under the perturbation; 1 for rules that do not plan",
+        "decision_sites": "number of executed decision sites entering the audit"
+      },
+      "table": "list",
+      "notes": "Audited sites are executed decisions of the deployed rule (origin policy) with at least two finite candidates; recovery and single-candidate sites are excluded. One-step and radius gaps are the runtime's score_gap; MPC-RH gaps are the Eq. 17 objective of the best other first action minus that of the executed plan. The perturbation is one draw of the deployed observer's measurement-noise model at one site at a time; the near-zero threshold is the certificate floor 0.002 nats. A rule that neither scores nor plans (an open-loop comparator) has no rows; a declared provisional rule q_s may be audited instead. Produced by scripts/run_decision_audit.py (cm_experiments/decision_audit.py), which re-executes the deployed rule with instrumentation and replays the decision log site by site."
+    },
+    "band_bound_tightness": {
+      "title": "Tightness of the band-limited displacement bound",
+      "manuscript_tables": [
+        "Supplementary Figure S18"
+      ],
+      "experiments": [
+        "E18"
+      ],
+      "keys": [
+        "action",
+        "spectral_scale"
+      ],
+      "quantities": {
+        "displacement_ratio": "exact one-step displacement of the registered action divided by the band-limited bound (6.1), at states whose spectral energy density is proportional to exp(-lambda/lambda_0) on [0, 2] (ratio)"
+      },
+      "table": "list",
+      "notes": "Keys: action = registry identifier A1 .. A7; spectral_scale = lambda_0 of the state's spectral energy density. A ratio above one falsifies an assumption of main Proposition 6 for that plant. The displacement and bound arrays of every evaluated state go under raw/. Produced by scripts/run_experiment_b.py band-audit export-tightness (cm_experiments/band_audit.py); original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
+    },
+    "band_power_audit": {
+      "title": "Spectral displacement audit of main Proposition 6",
+      "manuscript_tables": [
+        "Supplementary Figure S18c",
+        "Supplementary Table S8",
+        "Supplementary Table S22"
+      ],
+      "experiments": [
+        "E18"
+      ],
+      "keys": [
+        "dataset",
+        "baseline",
+        "action",
+        "spectrum"
+      ],
+      "quantities": {
+        "tightness_ratio": "transport displacement over the ideal six-band bound of Proposition 6(i) in the symmetric realization of L_sym: exact at a model density exp(-lambda/lambda0) (spectrum lambda0=...), median over audited states with an exact spectrum (spectrum explore_states) (ratio)",
+        "tightness_ratio_max": "maximum of that ratio over audited states with an exact spectrum; a value above one falsifies a hypothesis of Proposition 6 for the plant (ratio)",
+        "window_bound_ratio": "median over audited states of the transport displacement in the executed row-stochastic realization over the complete computable bound from the six Chebyshev windows with their approximation errors (ratio)",
+        "retained_statistic_ratio": "median over audited states of the symmetric-realization transport displacement over the retained three-window statistic the controller measures (ratio)",
+        "omitted_band_share": "median over audited states with an exact spectrum of the share of the squared ideal bound carried by the three bands outside the registered windows (fraction)",
+        "approximation_error_share": "median over audited states of the share of the squared window bound contributed by the window approximation errors eps_b ||D^1/2 H||^2 (fraction)",
+        "degree_factor": "median over audited states of ||X|| / (d_min^-1/2 ||D^1/2 X||), the used part of the degree weighting of the row-stochastic realization (ratio)",
+        "update_gain_p95": "95th percentile over audited states of the one-step block displacement ||H_l+1(a) - H_l+1(nominal)|| over the transport displacement (ratio)",
+        "logged_statistic_ratio": "median over audited states of the full-state retained statistic over the reachability coordinate logged in the sealed D_explore record; one without sketching (ratio)",
+        "audited_states": "audited (state, action) pairs (pairs)",
+        "exact_spectrum_states": "audited (state, action) pairs on graphs with an exact spectrum (pairs)",
+        "ranking_spearman": "median over audited states of the Spearman correlation across A1-A7 between the retained statistic and the observed block displacement (correlation)",
+        "replay_max_abs_deviation": "maximum absolute difference between a replayed and the logged D_explore measurement (measurement units)",
+        "update_lipschitz_max": "maximum over depths of the per-depth native-update constant: the largest block over transport displacement among actions with the nominal retention (ratio)",
+        "shared_weight_spectral_norm": "spectral norm ||W||_2 of the frozen shared update acting on the message (ratio)",
+        "activation_lipschitz": "Lipschitz constant of the plant's activation (ratio)"
+      },
+      "rows": {
+        "model densities": "baseline x A1-A7 x lambda0: tightness_ratio",
+        "explore states": "baseline x A1-A7 x explore_states: every per-action quantity",
+        "plant": "baseline all, action all, explore_states: ranking_spearman, replay_max_abs_deviation, update_lipschitz_max, shared_weight_spectral_norm (shared-update plants), activation_lipschitz"
+      },
+      "registered": {
+        "lambda0": [
+          0.1,
+          0.3,
+          1.0
+        ],
+        "exact_max_nodes": 4096
+      },
+      "table": "list",
+      "notes": "The lifecycle records only the controller's partial statistic (reachability_A1..A7 of every logged measurement), not the displacement it bounds, the omitted-band and window-approximation terms or the native-update constants. Produced by `python -B scripts/run_experiment_b.py band-audit plan --parent <run sealed through explore> --output <dir>`, `... band-audit run --plan <dir>/plan.json --device cuda --trust-local-checkpoints`, then `... band-audit export --results <dir> --hardware ... --period ...` (cm_experiments/band_audit.py): a label-free replay of sealed D_explore trajectories (recorded actions and last-safe anchors; every replayed measurement is compared with the logged one) and, at each audited state and each registered transport action against the next site's nominal transport (shared A0, native mean aggregation or inserted identity), the displacements through cross_morse.core.apply_transport and the frozen block, the exact spectrum of L_sym on graphs up to exact_max_nodes, and the registry's Chebyshev windows. Band suprema are taken on a fine grid and at the actual eigenvalues. The incremental policy value over matched confidence/history controls belongs to E7 and is not measured here."
+    },
+    "buffer_sensitivity": {
+      "title": "Buffer sensitivity of descriptive admission on the single-graph benchmarks",
+      "manuscript_tables": [
+        "Supplementary Table S27"
+      ],
+      "experiments": [
+        "E11"
+      ],
+      "keys": [
+        "dataset",
+        "buffer_hops"
+      ],
+      "quantities": {
+        "clipped_effect_nats": "clipped paired loss effect D_bar of the confirmed rule minus q_C on D_admit with the cores built at this buffer (nats)",
+        "half_width_nats": "U_desc minus D_bar: one-sided half-width of the cluster-bootstrap interval at this buffer (nats)",
+        "upper_nats": "U_desc: one-sided (1 - alpha) cluster-bootstrap upper limit of the clipped effect (nats)",
+        "admitted": "descriptive admission decision at epsilon_a: 1 when D_bar <= -epsilon_a and U_desc < 0, otherwise 0",
+        "resampling_units": "number of resampling units entering the cluster bootstrap at this buffer"
+      },
+      "datasets": [
+        "ogbn-arxiv",
+        "ogbn-proteins"
+      ],
+      "grid": {
+        "buffer_hops": [
+          2,
+          4,
+          8,
+          16,
+          32
+        ]
+      },
+      "registered": {
+        "buffer_hops": 2
+      },
+      "table": "list",
+      "notes": "The released runtime cannot produce this set. cross_morse/data.py records the k-hop buffer as a context diagnostic only (buffer_role context_diagnostic_only; propagation on the full graph), and cross_morse.statistics.admission resamples the METIS or degree-stratified cores of prepared/clusters.npz, so data.buffer_hops changes no admission statistic. The paper states that the intervals widen with the buffer because the effective number of independent clusters falls, but does not define how the buffer enters the resampling units. The producing experiment must define that unit construction (and record resampling_units) before the set can be measured; scripts/run_sweep.py refuses the sweep until it exists. Rows are written by scripts/export_sweep_records.py from a sweep results file with these keys and quantities."
+    },
+    "confirmation_contrasts": {
+      "title": "Contrasts of the nine-test confirmation family on separated confirmation data",
+      "manuscript_tables": [
+        "Supplementary Table S14b"
+      ],
+      "experiments": [
+        "E10"
+      ],
+      "keys": [
+        "contrast"
+      ],
+      "quantities": {
+        "effect_nats": "paired loss contrast of the original joint-S14 test (nats)",
+        "interval_low_nats": "lower end of the original test's 95% interval (nats)",
+        "interval_high_nats": "upper end of the original test's 95% interval (nats)",
+        "p_value_zero": "P value of the original test against zero, with the tail the test declares",
+        "unit_count": "original size J_old: statistical units of a single-graph test; validation-split graph count of a multigraph row"
+      },
+      "table": "list",
+      "notes": "One row per test of cm_campaigns.confirmation.FAMILY: the original tests of the joint S14 campaign (validated by check_campaign; test.json and paired.csv deposited unchanged), at their original sizes J_old (Table S14b caption). Produced by scripts/run_confirmation_analysis.py confirmation (cm_experiments/confirmation_analysis.py) together with confirmation_sensitivity from one raw computation."
+    },
+    "confirmation_sensitivity": {
+      "title": "Confirmation-size sensitivity of the multigraph mechanism contrasts",
+      "manuscript_tables": [
+        "Supplementary Figure S18"
+      ],
+      "experiments": [
+        "E10"
+      ],
+      "keys": [
+        "contrast"
+      ],
+      "quantities": {
+        "effect_nats": "paired mechanism contrast at the validation-split size J_old (nats)",
+        "ci_low_nats": "lower end of its 95% graph-bootstrap interval at J_old (nats)",
+        "ci_high_nats": "upper end of that interval (nats)",
+        "units_old": "graphs of the validation-split confirmation J_old (graphs)",
+        "graph_variance_share": "graph share g = (hw_graph/hw_test)^2 of Note S24: half-width of the admission statistic's graph-unit interval over the half-width of the main Table 1 test interval, from the sealed run",
+        "holm_p": "Holm-adjusted P value of the contrast in the nine-test family of Supplementary Table S14 at the D_confirm size (probability)",
+        "label_survival_probability": "probability that the Holm-significant label survives at the D_confirm size under the two-way variance model (probability)"
+      },
+      "table": "list",
+      "notes": "Keys are the contrast identifiers of cm_campaigns.confirmation.FAMILY for the three multigraph benchmarks (Pascal/RH, COCO/RH, Peptides/radius); that registry supplies the D_confirm sizes and the practical margins. Effect and interval are the original joint-S14 tests at J_old; the interval at the D_confirm size rescales the standard error by sqrt((1 - g) + g J_old/J_new) with fixed means (analytical sensitivity, not an observed replication); the Holm family is re-formed over the nine tests. The per-graph, per-seed validation-split array and its two-way method-of-moments fit (the E16 direct estimate) are deposited under raw/ as a separate estimate. Produced by scripts/run_confirmation_analysis.py confirmation."
+    },
+    "decision_traces": {
+      "title": "Executed decision origins and within-depth action entropy of the deployed rules",
+      "manuscript_tables": [
+        "main Figure 3c-d"
+      ],
+      "experiments": [],
+      "keys": [
+        "dataset"
+      ],
+      "quantities": {
+        "same_depth_action_entropy": "entropy (nats) of the executed actions among D_test decisions at the same controlled depth, averaged over depths with weights equal to their decision counts",
+        "fraction_schedule_nominal": "fraction of D_test decisions taken from a fixed schedule or the nominal action",
+        "fraction_state_conditioned": "fraction of D_test decisions chosen by a one-step or radius score of the current measurements",
+        "fraction_exclusive_sequence": "fraction of D_test decisions taken from a receding-horizon planned sequence",
+        "fraction_recovery": "fraction of D_test decisions that are registered recovery actions",
+        "fraction_input_fallback": "fraction of D_test decisions on inputs returned to q_C by the input gate or by a global q_C return"
+      },
+      "table": "list",
+      "notes": "The five fractions of a dataset sum to one. Sealed runs keep per-decision origins only for whole-graph executions, so graph-level traces must be exported from the serving-time execution records. Each evaluation unit at each executed depth has weight 1, split 1/E over the serving members; the entropy includes fallback decisions and a numerical failure of the deployed rule counts as input fallback. Produced by scripts/run_decision_audit.py (cm_experiments/decision_audit.py)."
+    },
+    "depth_diagnostics": {
+      "title": "Depth diagnostics of the plants and deployed rules",
+      "manuscript_tables": [
+        "Supplementary Figure S14"
+      ],
+      "experiments": [],
+      "keys": [
+        "dataset",
+        "depth",
+        "phase"
+      ],
+      "quantities": {
+        "source_alignment_change": "mean source alignment c_lb over the retained bands at depth l minus its value at the first plotted depth, on the reference plant (D_fit validation)",
+        "policy_loss_change": "paired CE/BCE of the selected policy truncated at depth l minus its value at the first plotted depth (nats)",
+        "first_intervention_depth_q25": "25th percentile over inputs of the first depth with a non-A0 action",
+        "first_intervention_depth_median": "median over inputs of the first depth with a non-A0 action",
+        "first_intervention_depth_q75": "75th percentile over inputs of the first depth with a non-A0 action",
+        "supported_deterioration_depth": "first depth after the plant's best-validation-loss depth whose paired loss increase over that depth has a 95% interval above zero",
+        "transport_fraction": "fraction of executed sites of a depth phase (early, middle, late thirds) that carry a non-A0 transport action"
+      },
+      "table": "list",
+      "notes": "Rows with a depth carry source_alignment_change (reference plant only) or policy_loss_change; rows with a phase carry transport_fraction; the other quantities carry neither, and the key 'all' stands for an absent depth or phase. First-intervention quartiles are taken over executions (ensemble member x input). The lifecycle records nominal depth losses (train/entry_initial.json) but no per-depth source alignment, no truncated-policy losses and no per-graph action sequences for the multigraph benchmarks. Produced by scripts/run_trajectory_audit.py depth (cm_experiments/trajectory_audit.py).",
+      "sparse_quantities": true
+    },
+    "ensemble_grid_scores": {
+      "title": "Official scores on the comparator ensemble grid",
+      "manuscript_tables": [
+        "Supplementary Table S26"
+      ],
+      "experiments": [
+        "E14"
+      ],
+      "keys": [
+        "dataset",
+        "ensemble"
+      ],
+      "quantities": {
+        "official_score": "official test metric of the comparator's E-member ensemble with the paired seed structure of the ensemble_grid set (percent or F1 points; AP in native units)"
+      },
+      "table": "list",
+      "notes": "Companion of the ensemble_grid set (same checkpoints, same E grid 1, 2, 4, 8, 12, 16, 20 and the same test inputs): ensemble_grid holds the comparator loss, this set the official score of the same ensembles. Scores are recomputed from each ensemble's saved test predictions with the official metric (cross_morse.evaluation.score_observations) and written with the SHA-256 of the predictions under raw/. Produced by scripts/run_timing_records.py grid-scores export (cm_experiments/timing_records.py) from a completed scripts/run_experiment.py ensemble-grid output; original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
+    },
+    "horizon_beam_sweep": {
+      "title": "Planning-horizon and beam-width sweep of MPC-RH",
+      "manuscript_tables": [
+        "Supplementary Table S29",
+        "Supplementary Figure S5"
+      ],
+      "experiments": [],
+      "keys": [
+        "dataset",
+        "horizon",
+        "beam_width"
+      ],
+      "quantities": {
+        "selection_effect_nats": "nested cross-fitted D_select paired loss of the MPC-RH configuration minus the reconstructed comparator q_C (select/decision.json mean of the configuration's candidate; nats)",
+        "expected_serial_cost": "deployed sparse/dense multiply-add work of the configuration on D_select normalized by one nominal E = 1 execution (select/candidates.json cost; nominal executions); equal to the expected cost because the released runner has no serving-time input gate",
+        "oracle_headroom_bound_nats": "U(Delta_oracle) of the registered configuration: upper limit of the training-only D_explore oracle headroom (select/entry_complete.json headroom upper of the parent run; nats)",
+        "realized_fraction": "selection_effect_nats divided by oracle_headroom_bound_nats (fraction of the headroom bound realized; main Proposition 4)"
+      },
+      "dataset": "PascalVOC-SP",
+      "registered": {
+        "horizon": 16,
+        "beam_width": 16
+      },
+      "grid": {
+        "horizon": [
+          8,
+          16,
+          32,
+          64
+        ],
+        "beam_width": [
+          4,
+          8,
+          16,
+          32
+        ]
+      },
+      "configuration": "MPC-RH at the profile and ensemble size of the parent run's deployed MPC-RH rule; the horizon sweep holds the registered beam width, the beam sweep holds the registered horizon",
+      "table": "list",
+      "notes": "Produced by `python -B scripts/run_sweep.py plan --sweep horizon_beam_sweep --parent <sealed PascalVOC-SP run> --output <sweep>`, `run_sweep.py run --plan <sweep>/plan.json --data-root <datasets> --device cuda` (one lifecycle run per configuration outside the parent's registered horizons and beam width: run_cross_morse.py --config <variant> --stage prepare..select --resume), `run_sweep.py collect --plan <sweep>/plan.json`, then `python -B scripts/export_sweep_records.py --results <sweep>/results.json --hardware ... --period ...`. Configurations inside the parent's registry (horizons of controller.horizons at controller.beam_width) are read from the parent run itself; the others come from variant lifecycle runs whose configuration differs from the parent only in controller.horizons or controller.beam_width. The headroom denominator is the parent's for every row."
+    },
+    "mechanism_contrasts": {
+      "title": "Held-out mechanism contrasts outside the nine-test family",
+      "manuscript_tables": [
+        "main Figure 3a-b"
+      ],
+      "experiments": [],
+      "keys": [
+        "dataset",
+        "contrast"
+      ],
+      "quantities": {
+        "effect_nats": "paired D_confirm contrast of the dataset's strongest feedback configuration (nats): state = conditional state destruction minus intact; rh_minus_ol = MPC-RH minus MPC-OL at the registered horizon and ensemble size",
+        "interval_low_nats": "lower end of the 95% interval on the dataset's registered statistical unit (nats)",
+        "interval_high_nats": "upper end of that interval (nats)"
+      },
+      "table": "list",
+      "notes": "Required for every (dataset, contrast) cell of Figure 3a-b that neither the joint S14 family nor the deployed rule's own confirm/decision.json supplies; produced by the confirm-stage contrast code of cross_morse.pipeline on D_confirm."
+    },
+    "module_ablations": {
+      "title": "Module-specific ablations and their observed signatures",
+      "manuscript_tables": [
+        "Supplementary Table S17"
+      ],
+      "experiments": [
+        "E7",
+        "E8"
+      ],
+      "keys": [
+        "module",
+        "arm",
+        "dataset"
+      ],
+      "quantities": {
+        "loss_change_nats": "paired loss of the ablated arm minus the complete module on the held-out contrast (nats; positive means the module lowers the loss)",
+        "warning_lead_change_depths": "change of the warning lead (controlled depths between the first warning and the onset of deterioration), ablated minus complete",
+        "false_safe_rate_change": "change of the false-safe rate (executed decisions marked safe whose paired loss increased), ablated minus complete",
+        "risk_rmse_change": "change of the held-out RMSE of the one-step risk model (nats), ablated minus complete",
+        "action_entropy_change": "change of the entropy of the executed action mix (nats), ablated minus complete",
+        "innovation_rmse": "held-out innovation RMSE of the observer variant",
+        "clean_score_change": "change of the official score on supported inputs, ablated minus complete",
+        "worst_harm_change_nats": "change of the worst per-unit paired loss harm, ablated minus complete (nats)",
+        "retained_effect_fraction": "effect of the ablated arm as a fraction of the complete module's effect against q_C",
+        "cost_fraction": "added cost of the ablated arm over q_C as a fraction of the complete module's added cost over q_C"
+      },
+      "modules": [
+        {
+          "module": "spectral_bands",
+          "label": "spectral bands",
+          "failure_targeted": "predictive deterioration not visible in confidence",
+          "comparison": "full sensors vs no bands/scrambled bands",
+          "removal_rule": "remove if no incremental warning or policy value",
+          "arms": [
+            "deleted",
+            "scrambled"
+          ],
+          "signature": [
+            {
+              "quantity": "loss_change_nats",
+              "arm": "deleted",
+              "label": "CE",
+              "signed": true,
+              "decimals": 4
+            },
+            {
+              "quantity": "warning_lead_change_depths",
+              "arm": "deleted",
+              "label": "warning lead",
+              "signed": true,
+              "decimals": 1,
+              "suffix": " depths"
+            }
+          ],
+          "runtime": "unsupported: cross_morse.core.MeasurementBank requires exactly three distinct bands of the six-window bank (sensor.bands), and the Lean profile zeros the band-power, source-alignment and reachability coordinates together, so neither a band-only deletion nor a band scramble at matched capacity is configurable"
+        },
+        {
+          "module": "source_alignment",
+          "label": "source alignment",
+          "failure_targeted": "source-informative mode loss",
+          "comparison": "no alignment vs full sensors",
+          "removal_rule": "remove if practically equivalent",
+          "arms": [
+            "no_alignment"
+          ],
+          "signature": [
+            {
+              "quantity": "loss_change_nats",
+              "arm": "no_alignment",
+              "label": "CE",
+              "signed": true,
+              "decimals": 4
+            },
+            {
+              "quantity": "warning_lead_change_depths",
+              "arm": "no_alignment",
+              "label": "warning lead",
+              "signed": true,
+              "decimals": 1,
+              "suffix": " depths"
+            }
+          ],
+          "runtime": "unsupported: no configuration key removes the three source-alignment coordinates of the measurement vector alone"
+        },
+        {
+          "module": "confidence_sensors",
+          "label": "confidence sensors",
+          "failure_targeted": "uncertain predictions",
+          "comparison": "no entropy/margin",
+          "removal_rule": "remove if no deterioration",
+          "arms": [
+            "no_confidence"
+          ],
+          "signature": [
+            {
+              "quantity": "loss_change_nats",
+              "arm": "no_confidence",
+              "label": "CE",
+              "signed": true,
+              "decimals": 4
+            },
+            {
+              "quantity": "false_safe_rate_change",
+              "arm": "no_confidence",
+              "label": "false-safe",
+              "signed": true,
+              "decimals": 4
+            }
+          ],
+          "runtime": "unsupported: entropy and margin are fixed coordinates of the measurement vector and also define the support strata"
+        },
+        {
+          "module": "transport_history",
+          "label": "transport history",
+          "failure_targeted": "exposure ambiguity",
+          "comparison": "no mass/range vs full",
+          "removal_rule": "remove if redundant with depth",
+          "arms": [
+            "no_history"
+          ],
+          "signature": [
+            {
+              "quantity": "risk_rmse_change",
+              "arm": "no_history",
+              "label": "risk RMSE",
+              "signed": true,
+              "decimals": 4
+            },
+            {
+              "quantity": "action_entropy_change",
+              "arm": "no_history",
+              "label": "entropy",
+              "signed": true,
+              "decimals": 3
+            }
+          ],
+          "runtime": "unsupported: accumulated mass and expected range are fixed measurement and observer-design coordinates"
+        },
+        {
+          "module": "observer",
+          "label": "observer",
+          "failure_targeted": "noisy/delayed sensors",
+          "comparison": "raw, EMA, global, conditioned",
+          "removal_rule": "retain simplest calibrated observer",
+          "arms": [
+            "raw",
+            "ema",
+            "global",
+            "conditioned"
+          ],
+          "signature": [
+            {
+              "quantity": "innovation_rmse",
+              "arms": [
+                "raw",
+                "ema",
+                "global",
+                "conditioned"
+              ],
+              "label": "RMSE",
+              "join": "/",
+              "decimals": 4
+            }
+          ],
+          "runtime": "unsupported: the runtime fits only the conditioned observer (cross_morse.learning.ConditionedObserver); raw, EMA and global observers have no configuration key"
+        },
+        {
+          "module": "radius_uncertainty",
+          "label": "radius uncertainty",
+          "failure_targeted": "one-step risk dispersion",
+          "comparison": "one-step vs radius",
+          "removal_rule": "classify as one-step if radius fails",
+          "arms": [
+            "one_step"
+          ],
+          "signature": [
+            {
+              "quantity": "loss_change_nats",
+              "arm": "one_step",
+              "label": "loss",
+              "signed": true,
+              "decimals": 4,
+              "aggregate": "range",
+              "suffix": " without radius"
+            }
+          ],
+          "runtime": "post-hoc: radius-minus-one-step contrasts on D_confirm (confirm/decision.json); loss change = minus the contrast mean"
+        },
+        {
+          "module": "sequence_risk",
+          "label": "sequence risk",
+          "failure_targeted": "cumulative consequence",
+          "comparison": "sequence model deletion",
+          "removal_rule": "remove replanning label if no value",
+          "arms": [
+            "sequence_deleted"
+          ],
+          "signature": [
+            {
+              "quantity": "loss_change_nats",
+              "arm": "sequence_deleted",
+              "label": "CE",
+              "signed": true,
+              "decimals": 4,
+              "aggregate": "range",
+              "suffix": " on RH regimes"
+            }
+          ],
+          "runtime": "post-hoc: on runs whose deployed rule is MPC-RH, the nested D_select effect of the one-step route (critic only, no transition, stage or terminal model) minus that of the deployed MPC-RH configuration at the same profile and ensemble size (select/decision.json)"
+        },
+        {
+          "module": "recovery_type",
+          "label": "recovery type",
+          "failure_targeted": "accumulated damage",
+          "comparison": "source-only, last-safe-only, both",
+          "removal_rule": "remove unused recovery",
+          "arms": [
+            "source_only",
+            "last_safe_only"
+          ],
+          "signature": [
+            {
+              "quantity": "loss_change_nats",
+              "arm": "last_safe_only",
+              "label": "last-safe",
+              "signed": true,
+              "decimals": 4,
+              "suffix": " CE"
+            },
+            {
+              "quantity": "false_safe_rate_change",
+              "arm": "last_safe_only",
+              "label": "false-safe",
+              "signed": true,
+              "decimals": 4
+            }
+          ],
+          "runtime": "unsupported: the source reset A8 and last-safe recovery A9 are fixed registry actions and cross_morse.policies.recovery_action has no configuration key"
+        },
+        {
+          "module": "comparator_branch",
+          "label": "comparator branch",
+          "failure_targeted": "unsupported input/deployment",
+          "comparison": "branch on/off",
+          "removal_rule": "mandatory for fallback claim",
+          "arms": [
+            "branch_off"
+          ],
+          "signature": [
+            {
+              "quantity": "clean_score_change",
+              "arm": "branch_off",
+              "label": "clean score",
+              "decimals": 4,
+              "zero_text": "unchanged"
+            },
+            {
+              "quantity": "worst_harm_change_nats",
+              "arm": "branch_off",
+              "label": "worst harm",
+              "signed": true,
+              "decimals": 4,
+              "suffix": " without branch"
+            }
+          ],
+          "runtime": "unsupported: the released runner has no serving-time input gate, so the comparator branch cannot be switched"
+        },
+        {
+          "module": "full_lean_profile",
+          "label": "Full/Lean profile",
+          "failure_targeted": "computational multiplicity",
+          "comparison": "top-k, update rate and E",
+          "removal_rule": "choose smallest near-best",
+          "arms": [
+            "lean"
+          ],
+          "signature": [
+            {
+              "quantity": "retained_effect_fraction",
+              "arm": "lean",
+              "format": "percent",
+              "decimals": 0,
+              "aggregate": "range",
+              "suffix": " effect"
+            },
+            {
+              "quantity": "cost_fraction",
+              "arm": "lean",
+              "format": "percent",
+              "decimals": 0,
+              "aggregate": "range",
+              "label": "at",
+              "suffix": " cost",
+              "separator": " "
+            }
+          ],
+          "runtime": "post-hoc: Full-minus-Lean retained-fraction contrasts on D_confirm (confirm/decision.json; Lean retains one minus the contrast mean) and the added cost of the Lean predecessor over q_C as a fraction of the Full rule's (select/candidates.json)"
+        }
+      ],
+      "table": "list",
+      "notes": "Rows with dataset 'pooled' hold a pooled value; per-dataset rows are summarised as a range. Produced by `python -B scripts/run_sweep.py collect --sweep module_ablations --parent <run> ... --output <sweep>` for the three modules the released runtime supports (radius uncertainty, sequence risk, Full/Lean profile), then `python -B scripts/export_sweep_records.py --results <sweep>/results.json --hardware ... --period ...`. The other seven modules need runtime support that the release does not have; each module's 'runtime' field states what is missing."
+    },
+    "oracle_dispersion": {
+      "title": "Per-input oracle enumerated on the admission split",
+      "manuscript_tables": [
+        "Supplementary Table S30",
+        "Supplementary Figure S13"
+      ],
+      "experiments": [],
+      "keys": [
+        "dataset"
+      ],
+      "quantities": {
+        "median_oracle_depth": "median over admission inputs of the depth of the per-input loss-minimizing sequence in the enumerated family",
+        "oracle_depth_q25": "25th percentile of the per-input oracle depth",
+        "oracle_depth_q75": "75th percentile of the per-input oracle depth",
+        "fraction_differs_from_qc": "fraction of admission inputs whose oracle sequence differs from q_C",
+        "inputs": "number of admission inputs enumerated"
+      },
+      "table": "list",
+      "notes": "Diagnostic enumerated on D_admit after every decision is fixed (convention C12). The lifecycle records only the D_explore global-candidate headroom (select/entry_complete.json), not a per-input oracle on the admission split."
+    },
+    "predictability": {
+      "title": "Predictability of the feedback policy's executed sequences",
+      "manuscript_tables": [
+        "Supplementary Table S30",
+        "Supplementary Table S33",
+        "Supplementary Table S47"
+      ],
+      "experiments": [
+        "E2"
+      ],
+      "keys": [
+        "dataset"
+      ],
+      "quantities": {
+        "phi_seq": "share of the frozen teacher q_M's executed (input, ensemble member) sequences on D_compare that the initial-input predictor reproduces exactly, terminal depth included, against the teacher sequence with dynamic A9 written as source-reset A8 (fraction)",
+        "phi_gain": "paired share of the feedback gain retained by executing the predicted sequences: [R(q_C) - R(q_pred)] / [R(q_C) - R(q_M)] with every risk on the same D_compare units and the same frozen teacher (Note S25); absent when the measured feedback gain is not positive (fraction)",
+        "feedback_gain_nats": "g = R(q_C) - R(q_M): unit-weighted mean D_compare loss of the locked comparator minus the confirmed feedback teacher (nats)",
+        "predictor_gain_nats": "R(q_C) - R(q_pred): unit-weighted mean D_compare loss of the comparator minus the executed predicted sequences (nats)",
+        "compared_sequences": "teacher sequences compared: D_compare inputs times ensemble members (sequences)",
+        "evaluation_units": "statistical units scored on D_compare: complete graphs or graph cores (units)"
+      },
+      "datasets": [
+        "ogbn-arxiv",
+        "ogbn-proteins",
+        "Roman-empire",
+        "PascalVOC-SP",
+        "COCO-SP",
+        "Peptides-func"
+      ],
+      "predictor": "the E4 distillation recipe of cm_experiments.schedules: fit_decoder(arm='E4') on the confirmed teacher's executed D_explore sequences and terminal depths (dynamic A9 rewritten to A8), capacity matched to the teacher's action critic, decoded once from the initial input (pooled H0 and four graph statistics) with the support mask of cm_experiments.execution.execute_arm and executed open loop",
+      "table": "list",
+      "notes": "Produced by `python -B scripts/run_experiment_b.py predictability plan --parent <run sealed through confirm> --output <dir>`, `... predictability run --plan <dir>/plan.json --device cuda --trust-local-checkpoints`, then `... predictability export --results <dir> --hardware ... --period ...` (cm_experiments/predictability.py). The predictor is fitted on D_explore and evaluated on the reserved D_compare against the same frozen q_M and q_C as E3-E6. phi_seq is descriptive; phi_gain is the quantity compared with the crossovers of Table S47 (Proposition 10). On a single transductive graph the predictor is fitted and evaluated on the same input with different label rows, so the readouts do not measure unseen-input generalization. Roman-empire splits are pooled by their mean risks when several sealed runs are exported together. The analytical retained-share grids of Tables S30, S33 and S47 are a separate sensitivity model and are not filled from this set."
+    },
+    "reliability_diagnostics": {
+      "title": "Reliability, harm and fallback diagnostics",
+      "manuscript_tables": [
+        "Supplementary Figure S16"
+      ],
+      "experiments": [
+        "E7",
+        "E8"
+      ],
+      "keys": [
+        "diagnostic",
+        "level"
+      ],
+      "quantities": {
+        "coverage": "fraction of executed decisions or sequences whose realized consequence lies inside the predicted risk radius at the prediction horizon of the level (fraction)",
+        "coverage_ci_low": "lower end of the 95% interval of that coverage (fraction)",
+        "coverage_ci_high": "upper end of that interval (fraction)",
+        "risk_rmse": "held-out RMSE of the one-step risk prediction made through the observer variant of the level (nats)",
+        "nis_coverage": "fraction of held-out innovations of the observer variant whose normalized innovation squared lies inside the registered chi-square acceptance region (fraction)",
+        "false_safe_rate": "executed decisions predicted safe whose paired loss increased, over executed decisions (fraction)",
+        "false_safe_ci_low": "lower end of the 95% interval of the false-safe rate (fraction)",
+        "false_safe_ci_high": "upper end of that interval (fraction)",
+        "harm_miss_rate": "executed decisions with a paired loss increase that the risk model did not flag, over harmful executed decisions (fraction)",
+        "harm_miss_ci_low": "lower end of the 95% interval of the harm-miss rate (fraction)",
+        "harm_miss_ci_high": "upper end of that interval (fraction)",
+        "input_fallback": "fraction of deployment graphs or episodes returned to q_C by g_input (fraction)",
+        "residual_activity": "fraction of deployment graphs or episodes with residual action activity (fraction)"
+      },
+      "diagnostics": {
+        "coverage": "level = prediction horizon in control depths (1, 4, 8, 16, 32); quantities coverage, coverage_ci_low, coverage_ci_high",
+        "observer": "level = observer variant (raw, EMA, global KF, conditioned KF); quantities risk_rmse, nis_coverage",
+        "harm": "level = dataset (the seven benchmark names); quantities false_safe_rate, false_safe_ci_low, false_safe_ci_high, harm_miss_rate, harm_miss_ci_low, harm_miss_ci_high, with the units of Supplementary Table S37",
+        "stress": "level = clean (supported deployment inputs, the reference of the four negative_controls constructions); quantities input_fallback, residual_activity"
+      },
+      "table": "list",
+      "notes": "Coverage, observer consistency and harm accounting of the deployed rules, from the decision logs and held-out trajectories of the lifecycle runs and the observer-variant comparison of Supplementary Table S17 (the observer risk RMSE is the same measurement as module_ablations/innovation_rmse; both summaries may trace to one raw file). The runtime records sequence coverage as NOT_MEASURED (fit/<profile>/calibration_assessment.json), so these values come from the separate reliability evaluation. Level 1 coverage compares the realized one-action consequence with the critic mean plus or minus the registered radius; levels 4 to 32 compare h-step realized loss changes with the consequence-model rollout and an h-step radius calibrated by the runtime's rule on the D_explore radius-fit partition; values are pooled over datasets with unit-bootstrap intervals. Harm rows exist for datasets with a feedback rule. Produced by scripts/run_decision_audit.py (cm_experiments/decision_audit.py)."
+    },
+    "runtime_scaling": {
+      "title": "Runtime and memory of the deployed rule against processed graph size",
+      "manuscript_tables": [
+        "Supplementary Figure S2"
+      ],
+      "experiments": [
+        "E17"
+      ],
+      "keys": [
+        "dataset",
+        "instance"
+      ],
+      "quantities": {
+        "processed_edges_millions": "directed edge entries of the instance's graph operator (GraphOperator.num_edges), the processed graph size (millions)",
+        "wall_time_seconds": "synchronized wall time of that execution after warm-up, mean over the post-warm-up repeats (s)",
+        "peak_memory_gib": "peak accelerator memory of that execution (GiB)"
+      },
+      "table": "list",
+      "notes": "One instance per timed graph: a full benchmark graph or a registered subgraph of the scaling sweep, named by the instance key. Timed with the E17 sessions of cm_campaigns.timing inside completed GPU allocations; the peak memory is read with torch.cuda.max_memory_allocated after a reset before each timed execution, and the processed graph size is the operator's own directed edge count. The scaling sweep of a transductive graph is the full graph and breadth-first node-induced subgraphs of 1/2, 1/4, 1/16 and 1/64 of its nodes; a graph collection uses its test graphs at the edge-count quantiles 0, 0.5 and 1. The timing rows, memory readings and scheduler exports go under raw/. Produced by scripts/run_timing_records.py scaling (cm_experiments/timing_records.py); original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
+    },
+    "search_enumeration": {
+      "title": "Search versus model error by exact enumeration at H <= 4",
+      "manuscript_tables": [
+        "Supplementary Note S20",
+        "E9 record"
+      ],
+      "experiments": [
+        "E9"
+      ],
+      "keys": [
+        "dataset",
+        "planner",
+        "horizon"
+      ],
+      "quantities": {
+        "two_e_H_nats": "2 e_H of main Proposition 8: twice the stated-confidence quantile over planning instances of the maximum over the enumerated supported family of |J_hat(a) - J(a)|, with the critic sigma penalty identical in both objectives (nats)",
+        "zeta_H_nats": "zeta_H of main Proposition 8: stated-confidence quantile over planning instances of J_hat(beam sequence) - min over the enumerated family of J_hat (nats)",
+        "realized_regret_nats": "stated-confidence quantile over planning instances of J(beam sequence) - min over the enumerated family of J (nats)",
+        "bound_coverage": "fraction of planning instances whose realized regret is at most 2 e_H + zeta_H at the pooled values (fraction)",
+        "beam_optimal_fraction": "fraction of planning instances on which the registered beam returns a minimizer of J_hat over the enumerated family (fraction)",
+        "two_e_H_zero_uncertainty_nats": "2 e_H with the critic sigma term set to zero in the true objective J (nats)",
+        "mean_family_size": "mean number of enumerated supported sequences per planning instance (sequences)",
+        "planning_instances": "planning instances (input, member, depth) with a complete enumeration and a returned beam sequence (instances)"
+      },
+      "grid": {
+        "horizon": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "planner": [
+          "mpc_rh",
+          "mpc_ol"
+        ]
+      },
+      "registered": {
+        "confidence": 0.95,
+        "label_role": "D_select for independent-graph benchmarks, D_explore for single-graph benchmarks"
+      },
+      "table": "list",
+      "notes": "Produced by `python -B scripts/run_experiment_b.py search-enumeration plan --parent <run sealed through fit> --output <dir>`, `... search-enumeration run --plan <dir>/plan.json --device cuda --trust-local-checkpoints`, then `... search-enumeration export --results <dir> --hardware ... --period ...` (cm_experiments/search_enumeration.py). Planning states come from the released runtime: the initial measurement (MPC-OL) or the parent's registered MPC-RH policy executed by cross_morse.policies.execute_policy and replayed with its recorded actions and last-safe anchors. The family is every sequence the registered beam could expand without its top-k or beam-width truncation; J_hat uses beam_plan's exact arithmetic (Eq. 17, kappa = 1), J replaces the stage costs and the nominal-suffix terminal value by the frozen plant's measured loss changes on the declared label role. e_H is a supremum over the enumerated family per instance; the record states its stated-confidence quantile over instances (Note S20). The objective of single-graph benchmarks is evaluated on D_explore rows, the targets the consequence models were fitted to estimate."
+    },
+    "sensitivity_grids": {
+      "title": "Registered sensitivity grids of support, selection and admission",
+      "manuscript_tables": [
+        "Supplementary Table S18"
+      ],
+      "experiments": [
+        "E19"
+      ],
+      "keys": [
+        "parameter",
+        "setting",
+        "dataset"
+      ],
+      "quantities": {
+        "qualified_fraction": "fraction of the registered (stratum, action) support cells of the full-profile controller that qualify at this setting (per-cell minimum propensity, ESS and maximum normalized weight of fit/full/audit.json)",
+        "strata_without_transport": "number of registered strata in which no action other than A0 qualifies at this setting",
+        "eligible_count": "|Q_s|: feedback candidates satisfying main Eq. (19) at this setting",
+        "selected_complexity": "registered complexity C(q) of the selected route (the provisional route, or q_C when Q_s is empty)",
+        "route_changed": "1 when the selected route differs from the route selected at the registered setting, otherwise 0",
+        "route_simpler": "1 when the selected route is lexicographically simpler (complexity, ensemble, cost) than the route selected at the registered setting, otherwise 0",
+        "clipped_fraction": "fraction of admission units whose paired loss difference exceeds the clip level in absolute value",
+        "clipped_mean_nats": "clipped paired effect D_bar on D_admit (nats)",
+        "admission_upper_nats": "U_a (empirical-Bernstein upper limit, independent graphs), U_desc (cluster-bootstrap upper limit, buffered cores) or the repeated-split t upper limit (Roman-empire) of the clipped effect (nats)",
+        "raw_maximum_harm_nats": "largest unclipped paired loss difference on D_admit (nats)",
+        "admitted": "admission decision G_admit at this clip level (1 admitted, 0 comparator returned)"
+      },
+      "parameters": {
+        "p_min": {
+          "label": "minimum propensity",
+          "grid": "sensitivity_grids_table_S18/minimum_propensity",
+          "config": "support/p_min",
+          "measurement": "support recomputation from the per-cell statistics (exact) and lifecycle variant runs through select (route)",
+          "required_report": "qualified fraction, coverage, harm, fallback, compute"
+        },
+        "n_min": {
+          "label": "minimum ESS",
+          "grid": "sensitivity_grids_table_S18/minimum_ESS",
+          "config": "support/n_min",
+          "measurement": "support recomputation from the per-cell statistics (exact) and lifecycle variant runs through select (route)",
+          "required_report": "effect, route, interval width, fallback"
+        },
+        "max_normalized_weight": {
+          "label": "maximum normalized weight",
+          "grid": "sensitivity_grids_table_S18/maximum_normalized_weight",
+          "config": "support/max_normalized_weight",
+          "measurement": "support recomputation from the per-cell statistics (exact) and lifecycle variant runs through select (route)",
+          "required_report": "support, FSR, HMR, route per joint cell"
+        },
+        "epsilon_r": {
+          "label": "selection margin εR",
+          "grid": "sensitivity_grids_table_S18/selection_margin_epsilon_R",
+          "config": "selection/epsilon_r",
+          "measurement": "main Eq. (19) re-applied to the sealed simultaneous upper limits of select/decision.json (exact; the limits do not depend on the margins)",
+          "required_report": "eligible family and selected route"
+        },
+        "epsilon_eq": {
+          "label": "equivalence margin εeq",
+          "grid": "sensitivity_grids_table_S18/equivalence_margin_epsilon_eq",
+          "config": "selection/epsilon_eq",
+          "measurement": "main Eq. (19) re-applied to the sealed simultaneous upper limits of select/decision.json (exact)",
+          "required_report": "route/resources and practical effect"
+        },
+        "clip": {
+          "label": "clip B",
+          "grid": "sensitivity_grids_table_S18/clip_B",
+          "config": "admission/clip",
+          "measurement": "cross_morse.statistics.admission replayed on admit/paired_units.npz with the stage's seed and replicates (exact)",
+          "required_report": "clipped fractions, tails, Ua, decision"
+        }
+      },
+      "aggregation": "Roman-empire: every quantity is the mean over the ten official split runs; per-split values are kept in the raw computed file, and the repeated-split admission upper limit is the small-sample t limit over the per-split clipped effects.",
+      "table": "list",
+      "notes": "Produced by `python -B scripts/run_sweep.py plan --sweep sensitivity_grids --parent <run> ... --output <sweep>` (support-threshold variants are lifecycle runs: run_cross_morse.py --config <variant> --stage prepare..select --resume), `run_sweep.py run --plan <sweep>/plan.json --data-root <datasets> --device cuda`, `run_sweep.py collect --plan <sweep>/plan.json` (margins, clip and support masks are recomputed exactly from the sealed parent outputs), then `python -B scripts/export_sweep_records.py --results <sweep>/results.json --hardware ... --period ...`. One parameter varies at a time; the others stay at their registered values."
+    },
+    "timing_anchors": {
+      "title": "Timing anchors that bracket the per-input nominal execution time",
+      "manuscript_tables": [
+        "Supplementary Table S23b"
+      ],
+      "experiments": [
+        "E17"
+      ],
+      "keys": [
+        "dataset"
+      ],
+      "quantities": {
+        "throughput_anchor_seconds": "per-input nominal execution time implied by the multiply-add count W_nom of one nominal member execution at the sustained throughput measured for the plant on the deployment device (s); full-batch plants with a native dense layer only",
+        "training_anchor_low_seconds": "lower end of the per-input forward-time bracket derived from the measured training time of one plant seed (s)",
+        "training_anchor_high_seconds": "upper end of that bracket (s)"
+      },
+      "table": "list",
+      "notes": "Anchors are adopted timing references, kept apart from the measured t_nom of the nominal_time set. Each dataset carries its own anchors, also when Table S23b prints another plant's anchor as the reference range (COCO-SP shares the PascalVOC-SP anchor because the two plants have the same backbone, depth and graph size; the generator applies that convention). The throughput and training-time records (scheduler accounting of the plant seeds, epochs and training inputs, and the sustained-throughput measurement) go under raw/. Produced by scripts/run_timing_records.py anchors (cm_experiments/timing_records.py); original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
+    },
+    "tube_audit": {
+      "title": "Plug-in trajectory-tube audit of main Proposition 2",
+      "manuscript_tables": [
+        "Supplementary Table S22",
+        "Supplementary Figure S17",
+        "main Figure 2a"
+      ],
+      "experiments": [],
+      "keys": [
+        "dataset"
+      ],
+      "quantities": {
+        "beta_median": "median over depths and audited trajectories of the plug-in factor beta_l",
+        "beta_p95": "95th percentile over depths and audited trajectories of beta_l",
+        "m_eps_op": "median over depths of the plug-in operator term M_l eps_l^op",
+        "reference_term": "median over depths of the plug-in reference term R_l e_l^ref",
+        "tube_coverage": "fraction of audited trajectories whose realized state error stays inside the tube at every depth",
+        "mode_stable_coverage": "fraction of audited trajectories whose realized and predicted runs keep the same action, recovery mode and last-safe index at every depth (the fixed-mode condition of Proposition 2)",
+        "final_bound_nats": "product-sum tube bound of Proposition 2 at the final depth with the empirical per-depth constants, sqrt(2) ||W_head||_2 e_L (cm_theory.stability.unrolled_bound and logit_loss_bound; nats)",
+        "observed_error_median_nats": "median over audited D_explore trajectories of |predicted minus realized loss| at the final depth (nats)",
+        "observed_error_p95_nats": "95th percentile of the same observed loss error (nats)"
+      },
+      "table": "list",
+      "notes": "One row per audited dataset. Computed from audited D_explore episodes of the deployed rule: a predicted (registered, undisturbed) run and a realized run under the declared input and edge-weight disturbance (provenance.perturbation), replayed jointly step by step; the per-depth constants beta_l, M_l, eps_l^op, R_l and e_l^ref are kept as raw arrays. The runtime records none of them. The violation rate of Table S22 is 1 - mode_stable_coverage (convention C22). main_paper.py reads final_bound_nats and the two observed-error quantities of the same rows. Produced by scripts/run_trajectory_audit.py tube (cm_experiments/trajectory_audit.py)."
     }
   }
 }

@@ -1,0 +1,33 @@
+{
+  "schema": "cross-morse-availability-statement-1",
+  "registered_text": "The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.",
+  "registered_in": "Data availability section of the CROSS-MORSE manuscript",
+  "repository": "https://github.com/VKHS/CR-9",
+  "check": "scripts/statement_check.py (make statement-check)",
+  "items": [
+    {"id": "experiment_code", "phrase": "complete experiment code",
+     "requirement": "Every experiment behind a reported table or figure has its producing code in the repository: the lifecycle runtime, the auxiliary experiment drivers and the exporters that turn their outputs into traced records."},
+    {"id": "configurations", "phrase": "configurations",
+     "requirement": "Smoke, pilot and full configurations of all seven datasets and the configurations of every auxiliary experiment."},
+    {"id": "source_data", "phrase": "source data",
+     "requirement": "The numerical data behind every reported table and figure, generated from the published measured outputs (paper/source_data/), and the provider datasets through the adapters."},
+    {"id": "split_seed_manifests", "phrase": "split and seed manifests",
+     "requirement": "The registered split rules and seeds of every configuration and the role memberships and seeds actually used by every reported run (manifests/registered/, manifests/published/)."},
+    {"id": "environment", "phrase": "environment specification",
+     "requirement": "Installable environment specifications and the observed execution environment of every reported run."},
+    {"id": "checkpoints", "phrase": "checkpoints",
+     "requirement": "The trained checkpoints of every reported run, published with the repository's release."},
+    {"id": "predictions", "phrase": "predictions",
+     "requirement": "The candidate, member and final predictions of every reported run."},
+    {"id": "trajectories", "phrase": "propensity-logged trajectories",
+     "requirement": "The exploration trajectories of every reported run with their logged propensities."},
+    {"id": "statistical_outputs", "phrase": "statistical outputs",
+     "requirement": "The selection, confirmation, admission and evaluation records of every run, and every measurement-record set and campaign behind a reported display."},
+    {"id": "generators", "phrase": "figure/table generators",
+     "requirement": "A generator for every numbered table and figure of the paper and supplement."},
+    {"id": "one_command", "phrase": "one-command reconstruction of every reported table and figure",
+     "requirement": "`make paper` downloads and verifies the published outputs, rebuilds all numbered displays and compares every computed value with the printed one."},
+    {"id": "guidance", "phrase": "follows established reproducibility guidance",
+     "requirement": "The machine-learning reproducibility checklist (Pineau et al.) mapped item by item to code and records (REPRODUCIBILITY.md)."}
+  ]
+}

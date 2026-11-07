@@ -47,6 +47,12 @@ def render_code_release(st: dict) -> str:
 
 
 def render(st: dict) -> str:
+    if st["scope"].get("result_distribution") == "repository_release":
+        # The statement registered with the journal is the paragraph; the repository is checked against it
+        # (make statement-check), never the other way round.
+        import json
+        statement = json.loads((ROOT / "release" / "availability_statement.json").read_text(encoding="utf-8"))
+        return "Data and code availability. " + statement["registered_text"] + "\n"
     if st["scope"].get("result_distribution") == "regenerate" and not st["official"]:
         return render_code_release(st)
     scope, official = st["scope"], st["official"]

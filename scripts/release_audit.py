@@ -103,6 +103,12 @@ REQUIRED = (
     "scripts/reconstruct.py", "docs/RECONSTRUCTION.md", "tests/test_reconstruction.py",
     "paper/build/supplement.py", "scripts/build_supplement.py", "tests/test_supplement_build.py",
     "docs/SUPPLEMENT_BUILD.md",
+    # Registered availability statement: published measured outputs, display generators, one command.
+    "release/availability_statement.json", "release/experiment_code.json", "release/paper_artifacts.json",
+    "scripts/paper_artifacts.py", "scripts/reconstruct_paper.py", "scripts/statement_check.py",
+    "STATEMENT_COMPLIANCE.md", "docs/PUBLICATION.md", "hpc/publish_paper_artifacts_arrhenius.sh",
+    "paper/build/displays/__init__.py", "paper/build/displays/framework.py", "paper/build/displays/testing.py",
+    "tests/test_paper_artifacts.py", "tests/test_reconstruct_paper.py", "tests/test_statement_check.py",
     *(f"paper/bindings/{stem}_full.json" for stem in DATASETS.values()),
     *(f"cross_morse/{name}.py" for name in (
         "__init__", "core", "data", "training", "exploration", "learning", "policies", "statistics", "pipeline", "common", "provenance", "recovery", "scoring", "review", "reexecution", "datasets", "tasks", "evaluation", "runtime")),

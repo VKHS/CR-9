@@ -1,0 +1,117 @@
+{
+ "display": "supplementary:Table S24",
+ "source": {
+  "document": "supplementary",
+  "pages": [
+   16,
+   17
+  ]
+ },
+ "scope": "Object names, required identities, prohibited ambiguities and reconstruction tests are the registered claim-linkage text. 'run' lists, for this repository, the run-archive files (paths relative to a run directory) that carry the identity ('repository' names repository paths); 'checks' lists the make targets that perform the reconstruction test. The generator verifies that every artifact is written by the released runtime (present in a bundled example run) or exists in the repository, and that every check is a Makefile target.",
+ "rows": {
+  "plant": {
+   "object": "q_0, q_N^ctrl",
+   "identity": "architecture, preprocessing, external-data status, split and hashes",
+   "ambiguity": "unspecified graph-derived preprocessing",
+   "test": "reproduce frozen logits/states",
+   "checks": [
+    "reexecute"
+   ],
+   "run": [
+    "train/model_inventory.json",
+    "train/manifest.json",
+    "prepared/metadata.json",
+    "provenance/frozen_models.json"
+   ]
+  },
+  "models": {
+   "object": "observer/risk models",
+   "identity": "schema, folds, propensities, architecture, calibration and hash",
+   "ambiguity": "validation/test-derived online features",
+   "test": "label-removal invariance and held-out residuals",
+   "checks": [
+    "test",
+    "replay"
+   ],
+   "run": [
+    "fit/full/audit.json",
+    "fit/lean/audit.json",
+    "fit/full/oof_predictions.npz",
+    "fit/frozen_models.json",
+    "fit/exploration_hashes.json"
+   ]
+  },
+  "comparator": {
+   "object": "q_C",
+   "identity": "family, nested selections, frequencies and prediction hash",
+   "ambiguity": "favourable comparator chosen on evaluation units",
+   "test": "repeat comparator reconstruction in every resample",
+   "checks": [
+    "replay"
+   ],
+   "run": [
+    "select/decision.json",
+    "select/candidates.json",
+    "select/unit_scores.npz"
+   ]
+  },
+  "selected": {
+   "object": "q̂_s, q_M",
+   "identity": "candidate ledger, confirmation contrast, resources, origins and hashes",
+   "ambiguity": "post-hoc route or margin changes",
+   "test": "reproduce complete decision trace",
+   "checks": [
+    "replay",
+    "decision-check"
+   ],
+   "run": [
+    "select/candidate_ledger.csv",
+    "confirm/contrast_registry.json",
+    "confirm/decision.json",
+    "confirm/paired_contrasts.json"
+   ]
+  },
+  "executable": {
+   "object": "q̃_M",
+   "identity": "g_input, support strata, recovery priorities and hash",
+   "ambiguity": "implicit input fallback",
+   "test": "reproduce branch and recovery origins",
+   "checks": [
+    "reexecute"
+   ],
+   "run": [
+    "admit/pre_admission_lock.json",
+    "member_predictions/"
+   ]
+  },
+  "deployed": {
+   "object": "q_D",
+   "identity": "admission arithmetic, branch ID and prediction hash",
+   "ambiguity": "hidden replacement after failure",
+   "test": "equality with selected executable branch",
+   "checks": [
+    "replay",
+    "decision-check"
+   ],
+   "run": [
+    "admit/decision.json",
+    "policy_lock.json",
+    "final/test_predictions.npz"
+   ]
+  },
+  "displays": {
+   "object": "figures/tables",
+   "identity": "source data, generator, environment and commit",
+   "ambiguity": "manual edits",
+   "test": "clean regeneration and hash comparison",
+   "repository": [
+    "paper/build/displays/framework.py",
+    "paper/display_manifest.json"
+   ],
+   "checks": [
+    "paper",
+    "diagrams-check"
+   ]
+  }
+ }
+}

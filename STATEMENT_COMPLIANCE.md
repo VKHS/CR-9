@@ -1,0 +1,26 @@
+# Compliance with the data-availability statement
+
+The paper's registered data-availability statement:
+
+> The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
+
+**3 of 12 items fulfilled**; 8 awaiting the publication of the measured outputs; 1 missing. Published artifacts: 0 of 37 (`release/paper_artifacts.json`).
+
+| Statement item | Status | Where | Remaining |
+|---|---|---|---|
+| complete experiment code | Missing | release/experiment_code.json | not executable with the released code: Factorials: Tables S16, S16b (a cell controller fitted separately at equal budget (observer factor O) needs a controller fit the released runtime does not provide; the runner applies the factors as run-time switches on the parent's fitted controllers); E7, E8 module ablations: Table S17 (seven of the ten module comparisons (spectral bands, source alignment, confidence sensors, transport history, observer variants, recovery type, comparator branch) have no switch in the released runtime; the runner measures the Full/Lean profile, radius-uncertainty and sequence-risk rows from the sealed contrasts); E11: Table S27 (the released runtime records the k-hop buffer as a context diagnostic and resamples the METIS or degree-stratified cores, so the buffer changes no admission statistic; the paper does not define how the buffer enters the resampling units); E18: Table S36, E18 policy-value readout (policy value over matched confidence/history controls needs a controller fitted without the spectral coordinates; the released runtime has no switch for it (as for E7, E8)) |
+| configurations | Fulfilled | `configs/` and the experiment configurations | — |
+| source data | Awaiting measured outputs | `paper/source_data/` (written by the publication step) | generated from the published outputs |
+| split and seed manifests | Awaiting measured outputs | `manifests/registered/` (design); `manifests/published/` (executed) | executed memberships of 7 runs |
+| environment specification | Awaiting measured outputs | `environment/`, `Dockerfile`, SITE SETTINGS of `run_cross_morse.sh` | observed environment of the reported runs: environment/observed/arxiv.json, environment/observed/proteins.json, environment/observed/products.json, environment/observed/roman_empire.json, environment/observed/pascalvoc_sp.json, environment/observed/coco_sp.json, environment/observed/peptides_func.json, environment:gpu |
+| checkpoints | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) | checkpoints of 7 reported runs |
+| predictions | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) | prediction arrays of 7 reported runs |
+| propensity-logged trajectories | Awaiting measured outputs | release `paper-artifacts` (`release/paper_artifacts.json`) | exploration trajectories of 7 reported runs |
+| statistical outputs | Awaiting measured outputs | release `paper-artifacts`: runs, measurement-record sets and campaigns | 36 of 36 artifacts: campaign:budget, campaign:confirmation, records:action_gap_audit, records:band_bound_tightness, records:baselines, records:budget_matched, records:buffer_sensitivity, records:confirmation_contrasts, records:confirmation_sensitivity, records:cross_backbone, records:decision_traces, records:depth_diagnostics, records:ensemble_grid, records:ensemble_grid_scores, records:factorials, records:horizon_beam_sweep, records:input_gate, records:inserted_site, records:mechanism_contrasts, records:module_ablations, records:negative_controls, records:nominal_time, records:oracle_dispersion, records:reliability_diagnostics, records:runtime_scaling, records:sensitivity_grids, records:sensor_parameters, records:timing_anchors, records:tube_audit, run:COCO-SP, run:PascalVOC-SP, run:Peptides-func, run:Roman-empire, run:ogbn-arxiv, run:ogbn-products, run:ogbn-proteins |
+| figure/table generators | Fulfilled | `paper/build/displays/`: a generator for each of the 90 numbered displays | — |
+| one-command reconstruction of every reported table and figure | Awaiting measured outputs | `make paper` (scripts/reconstruct_paper.py) | 37 artifacts unpublished; displays needing them cannot be rebuilt yet |
+| follows established reproducibility guidance | Fulfilled | `REPRODUCIBILITY.md` | — |
+
+Items awaiting measured outputs have their code, structure and checks in place; they are fulfilled when `hpc/publish_paper_artifacts_arrhenius.sh` uploads the outputs of the reported runs to the release `paper-artifacts` and the updated manifest is committed. `make paper` then rebuilds every table and figure from those outputs and compares each computed value with the printed one.
+
+Generated by `scripts/statement_check.py --write`; `make statement-check` verifies it is current.

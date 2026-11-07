@@ -5,10 +5,49 @@
 The core lifecycle and additional comparison studies have separate outputs. This
 guide describes their execution and export. The core lifecycle of all seven
 datasets is regenerated on a Slurm cluster by `bash run_cross_morse.sh reproduce`
-([HPC guide](HPC.md)); the studies below run from their own drivers.
-[`runs/`](../runs/index.json) and [`records/`](../records/index.json) index
-archives that a release registers; this release registers none.
+([HPC guide](HPC.md)); the studies below run from their own drivers on completed
+lifecycle runs. [`release/experiment_code.json`](../release/experiment_code.json)
+maps every experiment behind a reported table or figure to its code, command,
+configurations, outputs and displays. The measured outputs of the reported
+experiments are published with the release `paper-artifacts`
+([publication guide](PUBLICATION.md)).
 
+## Every experiment and its code
+
+[`release/experiment_code.json`](../release/experiment_code.json) maps every experiment behind a reported table or figure to its code, its full command, its configurations and the artifacts it produces; `make statement-check` verifies the map. The runners outside the lifecycle read completed (sealed) lifecycle runs, never write them, and follow one pattern: `plan` records the identities of the parent runs, `run` executes the measurement with the released runtime (one job per parent with `--job K`; an interrupted run resumes), `export` writes the measurement-record set that `scripts/records.py` traces value by value. Loading local checkpoints needs `--trust-local-checkpoints`.
+
+| Experiment | Displays | Command | Modules | Outputs | Part the released code cannot execute |
+|---|---|---|---|---|---|
+| Lifecycle (E10, E15, E16, E19, E20) | — | `run_cross_morse.py`, `run_cross_morse.sh` | — | `run:*` | — |
+| E3–E6 | — | `scripts/arm_campaign.py`, `scripts/run_budget_arms.py`, `hpc/run_budget_arms_arrhenius.sh` | `cm_experiments/runner.py`, `cm_experiments/campaign.py`, `cm_campaigns/arm_campaign.py` | `campaign:budget`, `budget_matched` | — |
+| S14 joint confirmation | — | `scripts/audit_s14_confirmation.py` | `cm_campaigns/confirmation.py` | `campaign:confirmation` | — |
+| E12 | — | `scripts/run_upstream_baseline.py`, `hpc/run_upstream_baseline_arrhenius.sh` | `cm_experiments/upstream.py` | `baselines` | — |
+| E17 | — | `hpc/capture_arrhenius_accounting.sh`, `scripts/export_records.py` | `cm_campaigns/timing.py`, `cm_campaigns/accounting.py` | `nominal_time`, `sensor_parameters`, `baselines` | — |
+| Observed environment | — | `environment/arrhenius/capture_environment.sh` | — | `environment:gpu` | — |
+| E13 | S45, Fig. S18 | `scripts/run_experiment.py` | `cm_experiments/attribution.py`, `cm_experiments/ensemble_grid.py` | `inserted_site` | — |
+| E14 | S26, S26b | `scripts/run_experiment.py` | `cm_experiments/ensemble_grid.py` | `ensemble_grid` | — |
+| Cross-backbone substitutions | S25 | `scripts/run_experiment.py`, `run_cross_morse.py` | `cm_experiments/backbones.py`, `cm_experiments/ensemble_grid.py` | `cross_backbone` | — |
+| Factorials | S16, S16b, Fig. 4 | `scripts/run_experiment.py` | `cm_experiments/factorial.py`, `cm_experiments/ensemble_grid.py` | `factorials` | Tables S16, S16b: a cell controller fitted separately at equal budget (observer factor O) needs a controller fit the released runtime does not provide; the runner applies the factors as run-time switches on the parent's fitted controllers |
+| E19 sensitivity grids | S18 | `scripts/run_sweep.py`, `scripts/export_sweep_records.py` | `cm_experiments/sweeps.py` | `sensitivity_grids` | — |
+| Horizon and beam sweep | S29, Fig. S5 | `scripts/run_sweep.py`, `scripts/export_sweep_records.py` | `cm_experiments/sweeps.py` | `horizon_beam_sweep` | — |
+| E7, E8 module ablations | S17 | `scripts/run_sweep.py`, `scripts/export_sweep_records.py` | `cm_experiments/sweeps.py` | `module_ablations` | Table S17: seven of the ten module comparisons (spectral bands, source alignment, confidence sensors, transport history, observer variants, recovery type, comparator branch) have no switch in the released runtime; the runner measures the Full/Lean profile, radius-uncertainty and sequence-risk rows from the sealed contrasts |
+| E11 | S27 | `scripts/run_sweep.py`, `scripts/export_sweep_records.py` | `cm_experiments/sweeps.py` | `buffer_sensitivity` | Table S27: the released runtime records the k-hop buffer as a context diagnostic and resamples the METIS or degree-stratified cores, so the buffer changes no admission statistic; the paper does not define how the buffer enters the resampling units |
+| E2 | S30, S33, S47 | `scripts/run_experiment_b.py` | `cm_experiments/predictability.py`, `cm_experiments/schedules.py`, `cm_experiments/execution.py`, `cm_experiments/study_execution.py` | `predictability` | — |
+| E9 | — | `scripts/run_experiment_b.py` | `cm_experiments/search_enumeration.py`, `cm_experiments/predictability.py` | `search_enumeration` | — |
+| Negative controls | S19, Fig. S16 | `scripts/run_experiment_b.py` | `cm_experiments/negative_controls.py`, `cm_experiments/input_gate.py`, `cm_experiments/predictability.py` | `negative_controls` | — |
+| Input gate | S23, S23b, S37, S47 | `scripts/run_experiment_b.py` | `cm_experiments/input_gate.py`, `cm_experiments/protocol.py`, `cm_experiments/predictability.py` | `input_gate` | — |
+| E18 | Fig. S18, S43 | `scripts/run_experiment_b.py` | `cm_experiments/band_audit.py`, `cm_experiments/predictability.py` | `band_power_audit`, `band_bound_tightness` | Table S36, E18 policy-value readout: policy value over matched confidence/history controls needs a controller fitted without the spectral coordinates; the released runtime has no switch for it (as for E7, E8) |
+| E17 runtime scaling | Fig. S2 | `scripts/run_timing_records.py`, `hpc/capture_arrhenius_accounting.sh` | `cm_experiments/timing_records.py`, `cm_campaigns/timing.py`, `cm_campaigns/accounting.py`, `cm_experiments/ensemble_grid.py` | `runtime_scaling` | — |
+| E17 timing anchors | S23b | `scripts/run_timing_records.py` | `cm_experiments/timing_records.py`, `cm_campaigns/timing.py`, `cm_campaigns/accounting.py` | `timing_anchors` | — |
+| E14 official scores | S26 | `scripts/run_timing_records.py`, `scripts/run_experiment.py` | `cm_experiments/timing_records.py`, `cm_experiments/ensemble_grid.py` | `ensemble_grid_scores` | — |
+| Figure 3 held-out mechanism contrasts | Fig. 3 | `scripts/run_confirmation_analysis.py` | `cm_experiments/confirmation_analysis.py`, `cm_experiments/ensemble_grid.py` | `mechanism_contrasts` | — |
+| Admission-split oracle (C12) | S30, S43 | `scripts/run_confirmation_analysis.py` | `cm_experiments/admission_oracle.py`, `cm_experiments/confirmation_analysis.py`, `cm_experiments/ensemble_grid.py` | `oracle_dispersion` | — |
+| Proposition 2 tube audit | S22, Fig. S17, Fig. 2 | `scripts/run_trajectory_audit.py` | `cm_experiments/trajectory_audit.py`, `cm_experiments/ensemble_grid.py` | `tube_audit` | — |
+| Depth diagnostics | Fig. S14 | `scripts/run_trajectory_audit.py` | `cm_experiments/trajectory_audit.py`, `cm_experiments/ensemble_grid.py` | `depth_diagnostics` | — |
+| E10 | S14b, Fig. S9, Fig. S18, S43 | `scripts/run_confirmation_analysis.py` | `cm_experiments/confirmation_analysis.py`, `cm_experiments/ensemble_grid.py`, `cm_campaigns/confirmation.py` | `confirmation_contrasts`, `confirmation_sensitivity` | — |
+| Action-gap audit (Prop. 3) | S21, Fig. S17, S33, S34, S47, Fig. S7 | `scripts/run_decision_audit.py` | `cm_experiments/decision_audit.py`, `cm_experiments/ensemble_grid.py`, `cm_experiments/input_gate.py`, `cm_experiments/negative_controls.py`, `cm_experiments/budget.py` | `action_gap_audit` | — |
+| Figure 3c-d decision traces | Fig. 3 | `scripts/run_decision_audit.py` | `cm_experiments/decision_audit.py`, `cm_experiments/ensemble_grid.py`, `cm_experiments/input_gate.py`, `cm_experiments/negative_controls.py` | `decision_traces` | — |
+| E7, E8 reliability diagnostics | Fig. S16 | `scripts/run_decision_audit.py` | `cm_experiments/decision_audit.py`, `cm_experiments/ensemble_grid.py`, `cm_experiments/input_gate.py`, `cm_experiments/negative_controls.py` | `reliability_diagnostics` | — |
 ## Core benchmark campaign
 
 Before evaluating outcome labels, freeze the source revision/fingerprint, model

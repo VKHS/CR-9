@@ -250,22 +250,26 @@ Check: `make test`
 
 ## E. Release scope
 
-**E1. Why are no run archives included?**
-The release is the means to regenerate them: the full archives of seven
-datasets hold every checkpoint, trajectory and prediction, and the launcher
-regenerates them from the public datasets with the registered seeds, then
-compares them with the paper. A suite's results ZIP is the shareable summary,
-and `CM_PACK_ARCHIVES=1` packs each run as a sealed archive that
-`scripts/archive_run.py --verify` and `scripts/ingest_run.py` accept.
-Where: `docs/RUN_ARCHIVES.md`, `runs/README.md`.
-Check: `make availability-check`
+**E1. Where are the checkpoints, predictions and propensity-logged trajectories?**
+They are assets of the release `paper-artifacts` of this repository, one archive
+per run, record set and campaign (split into parts below the 2 GiB asset limit).
+`release/paper_artifacts.json` lists each with the SHA-256 of every part, archive
+and file and counts its checkpoints, prediction files, propensity logs and
+statistical outputs. The analysis tier omits the checkpoints and full prediction
+arrays; `PAPER_TIER=complete` downloads everything. The launcher also regenerates
+every run from the public datasets with the registered seeds.
+Where: `docs/PUBLICATION.md`, `release/paper_artifacts.json`, `scripts/paper_artifacts.py`.
+Check: `make paper-artifacts-status`
 
 **E2. Does the availability statement match the repository?**
+`release/availability_statement.json` holds the registered statement verbatim
+and divides it into its twelve items; `scripts/statement_check.py` evaluates each
+item from the repository's contents (files, display generators, experiment code
+map and the published-artifact manifest) and writes `STATEMENT_COMPLIANCE.md`.
 `AVAILABILITY.md` and the manuscript paragraph `paper/AVAILABILITY_STATEMENT.txt`
-are generated from the repository's actual contents and the declared release
-scope (`release/release_scope.json`); the checks fail when either text drifts
-from the tree.
-Check: `make availability-statement-check`
+are generated from the same sources; the checks fail when any text drifts from
+the tree.
+Check: `make statement-check`
 
 **E3. What is the manuscript review in `paper/`?**
 `paper/MANUSCRIPT_REVIEW.md` records the contextual review that compared the
@@ -273,6 +277,15 @@ registry with the PDFs, and `paper/transcription_check.json` binds it to the
 PDF bytes and both registry files. It establishes transcription, not the
 experiments themselves.
 Check: `make paper-report-check`
+
+**E4. How is every table and figure reconstructed with one command?**
+`make paper` downloads the published outputs, verifies every part, archive and
+file, verifies each run's sealed eight-stage chain and each record set's trace,
+runs one generator per numbered display (`paper/build/displays/`) and compares
+every computed value with the printed one. It exits 0 only when every display is
+complete and every value agrees; the report names any difference.
+Where: `scripts/reconstruct_paper.py`, `docs/RECONSTRUCTION.md`.
+Check: `make paper`
 
 ## F. Repository hygiene, licence and citation
 

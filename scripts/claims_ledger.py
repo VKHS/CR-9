@@ -98,6 +98,8 @@ def build(root: Path = ROOT, *, index_path: Path | None = None, records_root: Pa
     dois = {dataset: registered_doi(entry.get("deposit_doi")) for dataset, entry in official.items()}
     n_official = len(official)
     regenerate = (st.get("scope") or {}).get("result_distribution") == "regenerate" and not official
+    if (st.get("scope") or {}).get("result_distribution") == "repository_release":
+        return _repository_release_ledger(root, sources, st)
     rows = []
     for key, group in sources["table_groups"].items():
         label = group.get("label", key)
@@ -153,14 +155,99 @@ def build(root: Path = ROOT, *, index_path: Path | None = None, records_root: Pa
             "scientific_evidence_verified": False, "rows": rows}
 
 
+def _repository_release_ledger(root: Path, sources: dict, st: dict) -> dict:
+    """Each registry group: the generators of its displays, the artifacts they read and their publication state."""
+    from paper.build.displays.framework import GENERATORS, _load_generators
+    from scripts import paper_artifacts
+    _load_generators()
+    manifest = paper_artifacts.load_manifest(root / "release" / "paper_artifacts.json")
+    state = {a["id"]: a.get("status") for a in manifest["artifacts"]}
+    displays = json.loads((root / "paper" / "display_manifest.json").read_text(encoding="utf-8"))["displays"]
+    rows = []
+    for key, group in sources["table_groups"].items():
+        label = group.get("label", key)
+        users = [d for d in displays if key in d.get("registry_groups", [])]
+        producers, required, status = [], [], []
+        for display in users:
+            generator = GENERATORS.get(display["id"])
+            if generator is None:
+                producers.append(f"{display['label']}: no generator")
+                continue
+            module = generator.function.__module__.rsplit(".", 1)[-1]
+            producers.append(f"{display['label']}: `paper/build/displays/{module}.py` ({generator.stem})")
+            for need in generator.needs:
+                if need == "static":
+                    continue
+                kind, _, name = need.partition(":")
+                ids = ([f"run:{d}" for d in DATASETS] if kind == "runs" else [need])
+                for artifact_id in ids:
+                    if artifact_id not in required:
+                        required.append(artifact_id)
+        awaiting = [a for a in required if state.get(a) != "published"]
+        if not producers:
+            status.append("no numbered display reads this group")
+        elif not required:
+            status.append("generated from the repository's configuration and analytical code")
+        elif awaiting:
+            status.append("awaiting publication: " + ", ".join(f"`{a}`" for a in awaiting))
+        else:
+            status.append("inputs published; `make paper` rebuilds and compares every printed value")
+        rows.append({"key": key, "label": label, "pages": group.get("pages", []), "source": group.get("source"),
+                     "evidence_kind": group.get("evidence_kind", "mixed"), "experiments": [],
+                     "producers": producers, "required": [f"`{r}`" for r in required] or ["repository sources"],
+                     "status": status})
+    rows.sort(key=lambda row: (0 if row["source"] == "main" else 1, _label_sort(row["label"])))
+    counts = {row["label"]: sum(other["label"] == row["label"] for other in rows) for row in rows}
+    for row in rows:
+        if counts[row["label"]] > 1:
+            row["label"] = f"{row['label']} (`{row['key']}`)"
+    from scripts import statement_check
+    compliance = statement_check.evaluate(root)
+    return {"schema": "cross-morse-claims-ledger-1", "official_archives": 0, "official_total": len(DATASETS),
+            "dois": {}, "record_sets_registered": [], "record_sets_defined": sorted(st["records"]["defined"]),
+            "source_sha256": st["source_sha256"], "result_distribution": "repository_release",
+            "release_url": manifest["release_url"],
+            "artifacts_published": sum(1 for a in manifest["artifacts"] if a.get("status") == "published"),
+            "artifacts_required": len(manifest["artifacts"]),
+            "statement_fulfilled": compliance["counts"]["fulfilled"], "statement_items": len(compliance["items"]),
+            "registered_coverage_complete": manifest["status"] == "published",
+            "scientific_evidence_verified": False, "rows": rows}
+
+
 def _label_sort(label: str):
     match = re.search(r"(S?)(\d+)([a-z]?)", label)
     return (1 if match.group(1) else 0, int(match.group(2)), match.group(3)) if match else (9, 0, "")
 
 
+def _render_rows(ledger: dict) -> list[str]:
+    lines = ["| Manuscript item | Pages | Evidence kind | Builder or source | Required evidence | Status |",
+             "|---|---|---|---|---|---|"]
+    for row in ledger["rows"]:
+        pages = ", ".join(str(p) for p in row["pages"]) or "—"
+        doc = "main" if row["source"] == "main" else "SI"
+        cells = [f"{row['label']} ({doc})", pages, KIND_TEXT.get(row["evidence_kind"], row["evidence_kind"]),
+                 "; ".join(row["producers"]), "; ".join(row["required"]), "; ".join(row["status"])]
+        lines.append("| " + " | ".join(cell.replace("|", r"\|") for cell in cells) + " |")
+    return lines
+
+
 def render(ledger: dict) -> str:
     n, total = ledger["official_archives"], ledger["official_total"]
     registered, defined = ledger["record_sets_registered"], ledger["record_sets_defined"]
+    if ledger.get("result_distribution") == "repository_release":
+        lines = ["# Claim-to-evidence map", "",
+                 "Generated from `paper/sources.json`, `paper/display_manifest.json`, the display generators and "
+                 "`release/paper_artifacts.json`. `make claims-check` checks freshness.", "",
+                 "## Outputs in this release", "",
+                 f"- The measured outputs of the reported experiments are assets of the [release]({ledger['release_url']}): "
+                 f"{ledger['artifacts_published']} of {ledger['artifacts_required']} required artifacts published.",
+                 "- `make paper` downloads and verifies them, rebuilds every numbered display with "
+                 "`paper/build/displays/` and compares every computed value with the printed one.",
+                 f"- Availability statement: {ledger['statement_fulfilled']} of {ledger['statement_items']} items "
+                 "fulfilled ([compliance](../STATEMENT_COMPLIANCE.md)).",
+                 f"- Runtime source identity: `{ledger['source_sha256']}`.", "",
+                 "## Manuscript groups, generators and inputs", ""]
+        return "\n".join(lines + _render_rows(ledger)) + "\n"
     if ledger.get("result_distribution") == "regenerate":
         lines = ["# Claim-to-evidence map", "",
                  "Generated from `paper/sources.json`, `records/specs.json` and the run/record indexes. "
@@ -221,6 +308,12 @@ def render(ledger: dict) -> str:
 
 
 def badge(ledger: dict) -> dict:
+    if ledger.get("result_distribution") == "repository_release":
+        done = ledger["statement_fulfilled"] == ledger["statement_items"]
+        return {"schemaVersion": 1, "label": "availability statement",
+                "message": f"{ledger['statement_fulfilled']}/{ledger['statement_items']} fulfilled · outputs "
+                           f"{ledger['artifacts_published']}/{ledger['artifacts_required']} published",
+                "color": "brightgreen" if done else "blue"}
     if ledger.get("result_distribution") == "regenerate":
         return {"schemaVersion": 1, "label": "reproduction", "message": "run_cross_morse.sh reproduce", "color": "blue"}
     return {"schemaVersion": 1, "label": "artifact index", "message": "archives and records", "color": "blue"}

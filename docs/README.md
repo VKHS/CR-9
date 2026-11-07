@@ -1,8 +1,16 @@
 # Documentation
 
-[Repository home](../README.md) · [Reported results](../paper/RESULTS.md) · [Availability](../AVAILABILITY.md)
+[Repository home](../README.md) · [Reported results](../paper/RESULTS.md) · [Availability](../AVAILABILITY.md) · [Statement compliance](../STATEMENT_COMPLIANCE.md)
 
-## Reproduce the paper
+## Every table and figure from the published outputs
+
+| Guide | Purpose |
+|---|---|
+| [Reconstruction](RECONSTRUCTION.md) | `make paper`: download and verify the published outputs, rebuild all 90 displays with their source data, compare with the printed values |
+| [Publishing the measured outputs](PUBLICATION.md) | How the reported runs, record sets, campaigns and environment enter the release `paper-artifacts` |
+| [Statement compliance](../STATEMENT_COMPLIANCE.md) | Each item of the registered availability statement, where the repository fulfils it, and what awaits publication |
+
+## Regenerate the results on a cluster
 
 | Guide | Purpose |
 |---|---|
@@ -11,7 +19,6 @@
 | [Getting started](GETTING_STARTED.md) | Install, replay examples, execute a smoke or benchmark profile without Slurm |
 | [Experiments](EXPERIMENTS.md) | E3–E6 budget-matched arms, upstream baselines and measurement capture |
 | [Run archives](RUN_ARCHIVES.md) | Archive schemas, checksums, provenance, ingestion and the table builders |
-| [Reconstruction](RECONSTRUCTION.md) | One workspace, verified input/output identities and per-display build coverage |
 | [Supplementary builders](SUPPLEMENT_BUILD.md) | Confirmation, factorial, ensemble and budget analyses from their actual inputs |
 | [Artifact catalog](ARTIFACT_CATALOG.md) | Every availability category, bundled files, data providers and producing commands |
 
