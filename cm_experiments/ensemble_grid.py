@@ -284,8 +284,8 @@ def create_plan(output, payload: dict) -> Path:
     output = output.resolve()
     if output.is_relative_to(ROOT):
         raise RunnerError("write experiment outputs outside the repository checkout")
-    for job in payload["jobs"]:
-        run = Path(job["run"])
+    for parent in payload.get("parent_runs") or [job["run"] for job in payload["jobs"]]:
+        run = Path(parent).resolve()
         if output == run or output.is_relative_to(run) or run.is_relative_to(output):
             raise RunnerError("the experiment directory must be separate from every parent run")
     if (output / "plan.json").exists():
@@ -538,18 +538,23 @@ class ParentContext:
         return rows, totals
 
     def episodes(self, role: str):
-        """(episode id, x, graph operator, role-row positions, global rows) of every role input."""
+        """Every input of the role, one at a time: (episode id, x, graph operator, local rows, positions).
+
+        ``local rows`` select the role's rows from that execution's prediction matrix (the role's nodes
+        of a transductive graph; every row of an independent graph) and ``positions`` place them in
+        the role's label order.
+        """
         from cross_morse.runtime import graph_operator
         ids = self.role_ids(role)
-        position = {int(g): i for i, g in enumerate(ids)}
         if not self.collection:
-            yield 0, self.data.x.to(self.device), self.graph, np.arange(len(ids)), ids
+            yield 0, self.data.x.to(self.device), self.graph, ids, np.arange(len(ids))
             return
+        position = {int(g): i for i, g in enumerate(ids)}
         for graph_id in sorted(int(g) for g in self.data.graph_splits[role]):
             episode = self.data.graph(graph_id)
             rows = np.asarray(episode.global_sample_ids, dtype=np.int64)
             yield (graph_id, episode.x.to(self.device), graph_operator(episode, self.device),
-                   np.asarray([position[int(r)] for r in rows], dtype=np.int64), rows)
+                   np.arange(len(rows)), np.asarray([position[int(r)] for r in rows], dtype=np.int64))
 
 
 def ensemble_probabilities(members) -> np.ndarray:
@@ -760,7 +765,6 @@ def _run_grid_job(plan, entry, directory, device):
     rows, arrays = grid_statistics(members, labels, units, ctx.config, plan["grid"], entry["seed_order"],
                                    parent_seeds=entry["parent_seeds"], comparator_ensemble=entry["comparator_ensemble"],
                                    deployed=deployed, reps=entry["bootstrap"]["reps"], seed=entry["bootstrap"]["seed"])
-    unit_file = save_arrays(directory / "unit_losses.npz", **arrays)
     reproduction = None
     if role == "test":
         sealed = run.json("final/results_summary.json")["models"]["qC"]["loss_nats"]
@@ -768,18 +772,30 @@ def _run_grid_job(plan, entry, directory, device):
         if row is not None:
             reproduction = {"sealed_qC_loss_nats": sealed, "grid_loss_nats": row["loss_nats"],
                             "abs_difference": abs(sealed - row["loss_nats"])}
+    write_grid_result(directory, entry, role=role, rows=rows, arrays=arrays, checkpoints=parent_checkpoints + trained,
+                      members=files, reproduction=reproduction, parent_files=run.inputs(), started=started)
+
+
+def write_grid_result(directory, entry, *, role, rows, arrays, checkpoints, members, reproduction, parent_files,
+                      started, environment=None) -> Path:
+    """The job's raw outputs: unit_losses.npz and grid.json (written last: the completion marker)."""
+    directory = Path(directory)
+    if environment is not None and not (directory / "environment.json").exists():
+        write_json(directory / "environment.json", json_safe(environment))
+    unit_file = save_arrays(directory / "unit_losses.npz", **arrays)
     write_json(directory / "grid.json", json_safe({
         "schema": "cm-ensemble-grid-member-1", "experiment": "E14", "dataset": entry["dataset"],
         "member": entry["member"], "role": role, "comparator": entry["comparator"],
         "comparator_ensemble": entry["comparator_ensemble"], "ensembles": rows,
-        "checkpoints": parent_checkpoints + trained, "members": files,
+        "checkpoints": checkpoints, "members": members,
         "unit_losses": {"file": "unit_losses.npz", "sha256": unit_file}, "qC_reproduction": reproduction,
         "identities": {"runtime_source_sha256": runtime_source_sha256(), "parent": entry["identity"],
-                       "plan_sha256": sha256(directory.parents[2] / "plan.json"), "parent_files_read": run.inputs()},
+                       "plan_sha256": sha256(directory.parents[2] / "plan.json"), "parent_files_read": parent_files},
         "loss_definition": "unit-weighted mean of per-unit mean CE/BCE (cross_morse.evaluation.score_observations node_ce)",
         "extra_checkpoint_scope": "trained with the parent's configuration and D_fit roles; the E1 adapter audit of "
                                   "cross_morse.training.audit_training is not repeated for them",
         "started_utc": started, "finished_utc": utc_now()}))
+    return directory / "grid.json"
 
 
 # ============================================================================= E14: export (torch-free)

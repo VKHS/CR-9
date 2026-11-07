@@ -932,7 +932,7 @@ def matched_verdict(low: float, high: float) -> str:
 def table_s26(ctx, out):
     gate = ctx.require_records("input_gate")
     scores_set = ctx.require_records("ensemble_grid_scores")
-    fits, losses = ensemble_fits(ctx)
+    _, losses = ensemble_fits(ctx)
     k_low, k_high = kappa_band(ctx)
     rows, source = [], []
     for dataset in ADMITTED:
@@ -1064,7 +1064,7 @@ def inserted_site_arms(ctx) -> dict:
 @display("supplementary:Table S45", stem="S45", title="Inserted-site attribution", needs=("records:inserted_site",))
 def table_s45(ctx, out):
     data = inserted_site_arms(ctx)
-    native_ol, inserted_ol, native_fb, inserted_fb = INSERTED_SITE_ARMS
+    native_ol, _, native_fb, _ = INSERTED_SITE_ARMS
     rows, source = [], []
     for dataset, entry in data.items():
         arms = entry["arms"]
@@ -1205,7 +1205,7 @@ def table_s46(ctx, out):
         out.uses("run", dataset, ["select/candidates.json", "final/results_summary.json"])
     _uses_records(out, gate)
     _uses_records(out, ctx.require_records("budget_matched"))
-    out.uses("campaign", "budget", ["study.json", "analysis.json"])
+    out.uses("campaign", "budget", ["study.json", "<arm studies and parents named by study.json>"])
     out.table(["Dataset", "ceiling", "feedback effect", "E3 predictor", "E4 distilled", "E5 no-observation replanning",
                "E6 qB: effect; overhead [range]", "present overhead"], rows,
               notes=["Millinats. Ceiling: registered common ceiling (expected work relative to q_C); feedback effect: "
@@ -1251,7 +1251,7 @@ def table_s46b(ctx, out):
                 out.compare(G_S46B, base + ("retained_share_grid_range_vs_qC_mnats",),
                             [1000 * v for v in e["effect_range"]])
     _uses_records(out, ctx.require_records("budget_matched"))
-    out.uses("campaign", "budget", ["study.json", "analysis.json"])
+    out.uses("campaign", "budget", ["study.json", "<arm studies and parents named by study.json>"])
     out.table(["Dataset", "arm", "effect vs qC [grid range]", "effect vs qM [95% interval]", "Holm P",
                "work / ceiling"], rows,
               notes=["Millinats on D_compare. Selected configuration of the budget_matched set, checked against the strict "
@@ -1472,7 +1472,7 @@ def figure_s3(ctx, out):
     out.figure(fig)
     for name in ("input_gate", "ensemble_grid", "budget_matched"):
         _uses_records(out, ctx.require_records(name))
-    out.uses("campaign", "budget", ["study.json", "analysis.json"])
+    out.uses("campaign", "budget", ["study.json", "<arm studies and parents named by study.json>"])
 
 
 FIGURE_S4_DATASETS = ("ogbn-arxiv", "Roman-empire", "PascalVOC-SP")     # the three regimes of main Table 2

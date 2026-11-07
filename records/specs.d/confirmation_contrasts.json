@@ -1,0 +1,21 @@
+{
+ "title": "Contrasts of the nine-test confirmation family on separated confirmation data",
+ "manuscript_tables": [
+  "Supplementary Table S14b"
+ ],
+ "experiments": [
+  "E10"
+ ],
+ "keys": [
+  "contrast"
+ ],
+ "quantities": {
+  "effect_nats": "paired loss contrast of the test (nats)",
+  "interval_low_nats": "lower end of its 95% interval (nats)",
+  "interval_high_nats": "upper end of its 95% interval (nats)",
+  "p_value_zero": "two-sided P value against zero",
+  "unit_count": "number of statistical units entering the contrast"
+ },
+ "table": "list",
+ "notes": "One row per test of cm_campaigns.confirmation.FAMILY. Single-graph rows are the D_confirm tests; the multigraph rows are the validation-split contrasts at the original confirmation size J_old."
+}

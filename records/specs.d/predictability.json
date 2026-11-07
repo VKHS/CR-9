@@ -1,0 +1,33 @@
+{
+ "title": "Predictability of the feedback policy's executed sequences",
+ "manuscript_tables": [
+  "Supplementary Table S30",
+  "Supplementary Table S33",
+  "Supplementary Table S47"
+ ],
+ "experiments": [
+  "E2"
+ ],
+ "keys": [
+  "dataset"
+ ],
+ "quantities": {
+  "phi_seq": "share of the frozen teacher q_M's executed (input, ensemble member) sequences on D_compare that the initial-input predictor reproduces exactly, terminal depth included, against the teacher sequence with dynamic A9 written as source-reset A8 (fraction)",
+  "phi_gain": "paired share of the feedback gain retained by executing the predicted sequences: [R(q_C) - R(q_pred)] / [R(q_C) - R(q_M)] with every risk on the same D_compare units and the same frozen teacher (Note S25); absent when the measured feedback gain is not positive (fraction)",
+  "feedback_gain_nats": "g = R(q_C) - R(q_M): unit-weighted mean D_compare loss of the locked comparator minus the confirmed feedback teacher (nats)",
+  "predictor_gain_nats": "R(q_C) - R(q_pred): unit-weighted mean D_compare loss of the comparator minus the executed predicted sequences (nats)",
+  "compared_sequences": "teacher sequences compared: D_compare inputs times ensemble members (sequences)",
+  "evaluation_units": "statistical units scored on D_compare: complete graphs or graph cores (units)"
+ },
+ "datasets": [
+  "ogbn-arxiv",
+  "ogbn-proteins",
+  "Roman-empire",
+  "PascalVOC-SP",
+  "COCO-SP",
+  "Peptides-func"
+ ],
+ "predictor": "the E4 distillation recipe of cm_experiments.schedules: fit_decoder(arm='E4') on the confirmed teacher's executed D_explore sequences and terminal depths (dynamic A9 rewritten to A8), capacity matched to the teacher's action critic, decoded once from the initial input (pooled H0 and four graph statistics) with the support mask of cm_experiments.execution.execute_arm and executed open loop",
+ "table": "list",
+ "notes": "Produced by `python -B scripts/run_experiment_b.py predictability plan --parent <run sealed through confirm> --output <dir>`, `... predictability run --plan <dir>/plan.json --device cuda --trust-local-checkpoints`, then `... predictability export --results <dir> --hardware ... --period ...` (cm_experiments/predictability.py). The predictor is fitted on D_explore and evaluated on the reserved D_compare against the same frozen q_M and q_C as E3-E6. phi_seq is descriptive; phi_gain is the quantity compared with the crossovers of Table S47 (Proposition 10). On a single transductive graph the predictor is fitted and evaluated on the same input with different label rows, so the readouts do not measure unseen-input generalization. Roman-empire splits are pooled by their mean risks when several sealed runs are exported together. The analytical retained-share grids of Tables S30, S33 and S47 are a separate sensitivity model and are not filled from this set."
+}

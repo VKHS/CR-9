@@ -1,0 +1,20 @@
+{
+ "title": "Executed decision origins and within-depth action entropy of the deployed rules",
+ "manuscript_tables": [
+  "main Figure 3c-d"
+ ],
+ "experiments": [],
+ "keys": [
+  "dataset"
+ ],
+ "quantities": {
+  "same_depth_action_entropy": "entropy (nats) of the executed actions among D_test decisions at the same controlled depth, averaged over depths with weights equal to their decision counts",
+  "fraction_schedule_nominal": "fraction of D_test decisions taken from a fixed schedule or the nominal action",
+  "fraction_state_conditioned": "fraction of D_test decisions chosen by a one-step or radius score of the current measurements",
+  "fraction_exclusive_sequence": "fraction of D_test decisions taken from a receding-horizon planned sequence",
+  "fraction_recovery": "fraction of D_test decisions that are registered recovery actions",
+  "fraction_input_fallback": "fraction of D_test decisions on inputs returned to q_C by the input gate or by a global q_C return"
+ },
+ "table": "list",
+ "notes": "The five fractions of a dataset sum to one. Sealed runs keep per-decision origins only for whole-graph executions, so graph-level traces must be exported from the serving-time execution records."
+}

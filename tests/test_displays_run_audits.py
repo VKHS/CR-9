@@ -19,7 +19,7 @@ from cross_morse import statistics
 from paper.build.displays import run_audits
 from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, RunView
 from paper.build.displays.run_audits import RECORD_CONTRACTS
-from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table
+from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table, write_files
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding="utf-8"))
@@ -473,7 +473,7 @@ class AdmissionTests(unittest.TestCase):
         self.assertEqual(list(rows[0]), ["component", "unit", "GPU-hours", "record"])
         cells = {r["component"]: r["GPU-hours"] for r in rows}
         self.assertEqual(cells["backbone training (shared by every route)"],
-                         "per seed: arxiv 1.50; Roman 1.50; Pascal 1.50")
+                         "per seed: arxiv 1.5; Roman 1.5; Pascal 1.5 h (Table S5); ensembles of E checkpoints")
         self.assertEqual(cells["exploration logging"], "arxiv 1.00; Roman 2.00; Pascal 1.00")
         self.assertEqual(cells["nested comparator and candidate selection"], "arxiv 2.00; Roman 4.00; Pascal 2.00")
         total = next(v for k, v in cells.items() if k.startswith("total qualification"))
@@ -485,6 +485,19 @@ class AdmissionTests(unittest.TestCase):
         proteins = next(r for r in source if r["dataset"] == "ogbn-proteins")
         self.assertEqual((proteins["deployed_rule_differs_from_qC"], proteins["total_hours"]), ("False", "3.7"))
         self.assertNotIn("no_reference", statuses(compared))
+
+        # A marker rewritten after an interruption has no timing: that stage and the total are missing, not zero.
+        write_files(fixture.base / "roman/split_01", {"stages/admit.json": {
+            "stage": "admit", "status": "COMPLETE", "recovered_after_commit": True}})
+        build_one("supplementary:Table S41", context(runs=runs), fixture.out("s41r"))
+        cells = {r["component"]: r["GPU-hours"] for r in read_table(fixture.out("s41r"), "S41")}
+        self.assertEqual(cells["admission evaluation"], "arxiv 0.10; Roman —; Pascal 0.10")
+        self.assertEqual(next(v for k, v in cells.items() if k.startswith("total qualification")),
+                         "arxiv 3.70; Roman —; Pascal 3.70")
+        self.assertEqual(cells["exploration logging"], "arxiv 1.00; Roman 2.00; Pascal 1.00")
+        source = data_rows(fixture.out("s41r"), "S41", "stage_hours")
+        split = next(r for r in source if r["dataset"] == "Roman-empire" and r["split"] == "1")
+        self.assertEqual((split["admit_hours"], split["total_hours"]), ("", ""))
 
 
 def gap_rows(values):
@@ -709,6 +722,11 @@ class FigureTests(unittest.TestCase):
         names = {Path(f).name for f in writer.files}
         self.assertTrue({"panel_a_curves.csv", "panel_b.csv", "panel_c.csv", "panel_d.csv", "panel_e.csv",
                          "panel_f.csv", "panel_g_curves.csv", "panel_h.csv", "FigS17.png", "FigS17.svg"} <= names)
+        slack = {r["dataset"]: float(r["slack"]) for r in data_rows(fixture.out("f17"), "FigS17", "panel_c")}
+        for dataset in DATASETS:                                          # Theorem 1: eps_eq + 2 max radius
+            decisions = [m.json("select/decision.json") for m in runs[dataset].members()]
+            self.assertAlmostEqual(slack[dataset], decisions[0]["epsilon_eq"]
+                                   + 2 * max(d["max_radius"] for d in decisions))
         contrasts = (fixture.out("f17") / "data/FigS17/panel_d.csv").read_text().splitlines()
         self.assertEqual([line.split(",")[0] for line in contrasts[1:]], ["A", "O", "X", "AO", "AX", "OX", "AOX"])
         exact = {row["path"] for row in compared if row["status"] == "exact"

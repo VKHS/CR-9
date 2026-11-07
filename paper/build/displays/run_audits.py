@@ -1207,7 +1207,8 @@ def stage_hours(view) -> dict:
         hours[stage] = None if seconds is None else seconds / 3600.0
     hours["total"] = total(hours[stage] for stage, _, _ in QUALIFICATION_STAGES)
     checkpoints = [c for c in view.json("train/manifest.json")["checkpoints"] if not c["baseline"]]
-    hours["seed"] = [c["seconds_this_attempt"] / 3600.0 for c in checkpoints if c.get("seconds_this_attempt")]
+    hours["seed"] = [c["seconds_this_attempt"] / 3600.0 for c in checkpoints
+                     if c.get("seconds_this_attempt") is not None]
     environment = view.json("environment.json")
     hours["device"] = environment.get("gpu") or environment.get("device")
     hours["gpu"] = str(environment.get("device", "")).startswith("cuda")
@@ -1242,19 +1243,20 @@ def table_s41(ctx, out):
     listed = list(measured)
     unit = "GPU-hours" if devices == {True} else "device-hours"
 
-    def per_dataset(key, prefix=""):
-        text = "; ".join(f"{SHORT[d]} {num(measured[d][key], 2) or '—'}" for d in listed)
-        return (prefix + text) if text else None
+    def per_dataset(key, fmt=lambda v: num(v, 2)):
+        return "; ".join(f"{SHORT[d]} {fmt(measured[d][key]) or '—'}" for d in listed) or None
 
     def record(stage):
-        timed = [d for d in listed if measured[d][stage] is not None and measured[d]["total"]]
+        """Share of the stage in the summed totals of the listed datasets that timed every stage."""
+        timed = [d for d in listed if measured[d]["total"]]
         if not timed:
-            return "stage timing"
-        share = sum(measured[d][stage] for d in timed) / sum(measured[d]["total"] for d in timed)
-        return f"stage timing; share {share:.2f}"
+            return None
+        return f"share {sum(measured[d][stage] for d in timed) / sum(measured[d]['total'] for d in timed):.2f}"
 
+    # Per-seed hours at two significant digits, the precision of Table S5's time per seed.
+    seed = per_dataset("seed", lambda v: None if v is None else f"{v:.2g}")
     rows = [["backbone training (shared by every route)", "per checkpoint; per ensemble of E",
-             per_dataset("seed", "per seed: "), "training logs (train/manifest.json)"]]
+             f"per seed: {seed} h (Table S5); ensembles of E checkpoints" if seed else None, "training logs"]]
     for stage, label, _ in QUALIFICATION_STAGES[:4]:
         rows.append([label, "entire search per dataset", per_dataset(stage), record(stage)])
     rows.append(["independent E3–E6 comparison", "entire comparison per dataset", None,
@@ -1273,7 +1275,9 @@ def table_s41(ctx, out):
               notes=[f"{unit}: measured stage wall time (stages/<stage>.json, seconds_this_attempt) on the run's one "
                      "device; backbone training: mean per plant checkpoint (train/manifest.json). Listed datasets "
                      "deploy a rule other than q_C; a comparator deployment has no qualification increment and stays "
-                     "in the source data. The E3–E6 comparison is outside the lifecycle runs and has no measurement "
+                     "in the source data. A stage whose completion marker was rewritten after an interruption has no "
+                     "timing and prints as —, as does its total. Share: the component's part of the summed totals of "
+                     "the listed datasets. The E3–E6 comparison is outside the lifecycle runs and has no measurement "
                      "here.",
                      "Roman-empire: the ten split runs summed; per-checkpoint training averaged over all splits."])
     out.data("stage_hours", ["dataset", "split", "deployed_rule_differs_from_qC", "device",

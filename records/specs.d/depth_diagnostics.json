@@ -1,0 +1,23 @@
+{
+ "title": "Depth diagnostics of the plants and deployed rules",
+ "manuscript_tables": [
+  "Supplementary Figure S14"
+ ],
+ "experiments": [],
+ "keys": [
+  "dataset",
+  "depth",
+  "phase"
+ ],
+ "quantities": {
+  "source_alignment_change": "mean source alignment c_lb over the retained bands at depth l minus its value at the first plotted depth, on the reference plant (D_fit validation)",
+  "policy_loss_change": "paired CE/BCE of the selected policy truncated at depth l minus its value at the first plotted depth (nats)",
+  "first_intervention_depth_q25": "25th percentile over inputs of the first depth with a non-A0 action",
+  "first_intervention_depth_median": "median over inputs of the first depth with a non-A0 action",
+  "first_intervention_depth_q75": "75th percentile over inputs of the first depth with a non-A0 action",
+  "supported_deterioration_depth": "first depth after the plant's best-validation-loss depth whose paired loss increase over that depth has a 95% interval above zero",
+  "transport_fraction": "fraction of executed sites of a depth phase (early, middle, late thirds) that carry a non-A0 transport action"
+ },
+ "table": "list",
+ "notes": "Rows with a depth carry source_alignment_change or policy_loss_change; rows with a phase carry transport_fraction; the other quantities have neither. The lifecycle records nominal depth losses (train/entry_initial.json) but no per-depth source alignment, no truncated-policy losses and no per-graph action sequences for the multigraph benchmarks."
+}
