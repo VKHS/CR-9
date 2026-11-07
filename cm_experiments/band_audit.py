@@ -35,18 +35,28 @@ E7 part of Table S36's readout) is not measured here.
 """
 from __future__ import annotations
 
+import csv
 import json
 import math
+import re
+import shutil
+import tempfile
 from pathlib import Path
 
 import numpy as np
 
-from .artifacts import sha256, write_json
-from .predictability import (ExperimentError, ParentRun, RunDirectory, create_plan, export_record_set, median,
-                             open_plan, quantile, read_csv, read_json, summary_row, write_csv)
+from .artifacts import sha256, verify, write_json
+from .predictability import (CORE_FILES, EXPERIMENTS, ROOT, RUN_SCHEMA, SUMMARY_TAIL, ExperimentError, ParentRun,
+                             RunDirectory, _private_findings, _public_plan, code_identity, compare_rows, create_plan,
+                             export_record_set, load_contract, median, open_plan, quantile, read_csv, read_json,
+                             safe_label, summary_row, write_csv)
 
 BANDS = 6
 TRANSPORT_ACTIONS = tuple(range(1, 8))
+REGISTERED_LAMBDA0 = (0.1, 0.3, 1.0)  # density scales of the E18 audit (records/specs.json band_power_audit)
+NOMINAL_BASELINES = ("shared", "native_mean", "inserted_identity")
+TIGHTNESS_SET = "band_bound_tightness"
+TIGHTNESS_EXPORTS = ("raw/model_densities.csv", "raw/states.csv", "experiment.json")
 RAW_EXPORTS = ("raw/states.csv", "raw/rankings.csv", "raw/model_densities.csv", "raw/constants.json",
                "raw/operators.json", "raw/replay.csv")
 ACTIVATION_LIPSCHITZ_GRID = np.linspace(-12, 12, 480001)
@@ -83,7 +93,7 @@ DEFINITIONS = {
 
 
 def plan_band_audit(parent, output, *, max_trajectories=8, trajectories=None, depth_stride=1,
-                    lambda0=(0.1, 0.3, 1.0), exact_max_nodes=4096, grid_points=4097, allow_fixture=False):
+                    lambda0=REGISTERED_LAMBDA0, exact_max_nodes=4096, grid_points=4097, allow_fixture=False):
     parent = parent if isinstance(parent, ParentRun) else ParentRun(parent)
     if parent.synthetic and not allow_fixture:
         raise ExperimentError("a synthetic fixture parent requires --allow-fixture")
@@ -470,3 +480,171 @@ def export_records(results_dirs, **kwargs):
                 "tightness at exp(-lambda/lambda0) (main Proposition 6, Fig. S18c)")
     return export_record_set("band_audit", results_dirs, summarize=summarize_band_audit,
                              raw_exports=RAW_EXPORTS, protocol=protocol, **kwargs)
+
+
+# ----------------------------------------------------------------------------- records:band_bound_tightness
+def density_locator(path, baseline, action, lam0):
+    """records.py regex locator of the one line of a model_densities.csv holding (baseline, action, lambda0).
+
+    The pattern is the line itself with the tightness_ratio field as the capture
+    group, so ``scripts.records.locate`` reads the value from the sealed raw line.
+    """
+    text = Path(path).read_text(encoding="utf-8")
+    reader = csv.reader(text.splitlines())
+    header = next(reader)
+    if not {"baseline", "action", "lambda0", "tightness_ratio"} <= set(header):
+        raise ExperimentError(f"{Path(path).name} is not a model-density table")
+    found = [line for line in reader if line and line[header.index("baseline")] == baseline
+             and int(line[header.index("action")]) == action and float(line[header.index("lambda0")]) == lam0]
+    if len(found) != 1:
+        raise ExperimentError(f"{len(found)} model-density lines for {baseline} A{action} at lambda0={lam0!r}")
+    if any(re.search(r'[,"\r\n]', field) for field in found[0]):
+        raise ExperimentError("a model-density field needs CSV quoting; it cannot be located line by line")
+    parts = ["([^,\\r\\n]+)" if column == "tightness_ratio" else re.escape(field)
+             for column, field in zip(header, found[0])]
+    pattern = "^" + ",".join(parts) + "\\r?$"
+    if len(re.findall(pattern, text, re.M)) != 1:
+        raise ExperimentError(f"the line of {baseline} A{action} at lambda0={lam0!r} is not unique")
+    return "regex:" + pattern
+
+
+def export_tightness(results_dirs, *, dataset, baseline, hardware, period, records_root=None, replace=False,
+                     allow_private=False, argv=None):
+    """Write records:band_bound_tightness (Fig. S18c, Table S43) from sealed band-audit runs of one plant.
+
+    Each value is a run's model-density tightness of one registered action A1..A7
+    against the declared nominal baseline at one spectral energy scale lambda0:
+    [int (g_a - g_0)^2 dmu]^1/2 / [sum_b s_ab^2 mu(I_b)]^1/2 with mu ~ exp(-lambda/lambda0)
+    on [0, 2], as sealed in raw/model_densities.csv. The file is copied under the
+    set's raw/<run>/ and summary.csv locates every value on its line there; the
+    per-state displacement and bound arrays (raw/states.csv) are deposited beside
+    it. Several runs of one plant must hold identical values. Under records/,
+    synthetic runs and partial grids (an action of A1..A7 or a registered lambda0
+    missing) are refused. Figure S18c names no plant, so dataset and baseline are
+    declared by the caller.
+    """
+    from scripts._paper_common import runtime_source_fingerprint
+    from scripts.export_records import fmt, git_head
+    from scripts.record_mapping import install_verified_set
+    from scripts.records import RECORDS, is_official_root, locate, verify_set, write_manifest
+    if not str(hardware or "").strip() or not str(period or "").strip():
+        raise ExperimentError("pass the hardware and period of the executed runs explicitly")
+    if not str(dataset or "").strip():
+        raise ExperimentError("declare the dataset of the plant; Figure S18c names none")
+    if baseline not in NOMINAL_BASELINES:
+        raise ExperimentError(f"declare the nominal baseline, one of {list(NOMINAL_BASELINES)}; Figure S18c names none")
+    dirs = [Path(d).resolve() for d in results_dirs]
+    if not dirs or len(set(dirs)) != len(dirs):
+        raise ExperimentError("give one or more distinct sealed band-audit run directories")
+    specs, spec = load_contract(TIGHTNESS_SET)
+    loaded, grids = [], []
+    for d in dirs:
+        verify(d)
+        exp, results = read_json(d / "experiment.json"), read_json(d / "results.json")
+        if (exp.get("schema") != RUN_SCHEMA or exp.get("experiment") != "band_audit"
+                or results.get("experiment") != "band_audit"):
+            raise ExperimentError(f"{d.name} is not a sealed band_audit run")
+        if exp["parent"]["dataset"] != dataset:
+            raise ExperimentError(f"{d.name} audits {exp['parent']['dataset']}, not {dataset}")
+        compare_rows(results["rows"], summarize_band_audit([d])["rows"], d.name)
+        densities = read_csv(d / "raw/model_densities.csv")
+        grid = {}
+        for row in densities:
+            if row["baseline"] == baseline:
+                value = float(row["tightness_ratio"])
+                if not math.isfinite(value):
+                    raise ExperimentError(f"{d.name}: non-finite tightness for A{row['action']}")
+                grid[(int(row["action"]), float(row["lambda0"]))] = value
+        if not grid:
+            raise ExperimentError(f"{d.name} holds no model-density tightness against {baseline!r} "
+                                  f"(available: {sorted({r['baseline'] for r in densities})})")
+        loaded.append((d, exp, results))
+        grids.append(grid)
+    first = grids[0]
+    for (d, _, _), grid in zip(loaded[1:], grids[1:]):
+        if set(grid) != set(first) or any(not math.isclose(grid[k], first[k], rel_tol=1e-12, abs_tol=1e-15)
+                                          for k in first):
+            raise ExperimentError(f"{d.name} disagrees with {loaded[0][0].name} on the model-density tightness")
+    scales = sorted({s for _, s in first})
+    missing = sorted({f"A{a}@{s!r}" for a in TRANSPORT_ACTIONS for s in scales if (a, s) not in first}
+                     | {f"lambda0={s!r}" for s in REGISTERED_LAMBDA0 if s not in scales})
+    records_root = Path(records_root or RECORDS).resolve()
+    official = is_official_root(records_root)
+    synthetic = any(exp["parent"]["synthetic"] for _, exp, _ in loaded)
+    truncated = sorted(d.name for d, _, results in loaded if results.get("truncated"))
+    if official and synthetic:
+        raise ExperimentError("synthetic fixture runs cannot be deposited under records/; use another --root")
+    if official and (missing or truncated):
+        raise ExperimentError(f"a partial tightness set cannot be deposited under records/: missing {missing}, "
+                              f"truncated runs {truncated}")
+    records_root.mkdir(parents=True, exist_ok=True)
+    staging_parent = ROOT.parent if records_root.is_relative_to(ROOT) else records_root.parent
+    staging = Path(tempfile.mkdtemp(prefix=f"cm-record-{TIGHTNESS_SET}-", dir=staging_parent))
+    try:
+        target = staging / TIGHTNESS_SET
+        (target / "raw").mkdir(parents=True)
+        (target / "code").mkdir()
+        labels = []
+        for d, exp, _ in loaded:
+            label = safe_label(f"{exp['parent']['dataset']}-{exp['parent']['name']}")
+            if label in labels:
+                raise ExperimentError(f"two result directories share the label {label}")
+            labels.append(label)
+            for relative in TIGHTNESS_EXPORTS:
+                destination = target / "raw" / label / Path(relative).name
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(d / relative, destination)
+            write_json(target / "code" / label / "plan.json", _public_plan(read_json(d / "plan.json")))
+        source_file = f"raw/{labels[0]}/model_densities.csv"
+        rows = []
+        for action, scale in sorted(first):
+            locator = density_locator(target / source_file, baseline, action, scale)
+            raw = float(locate(target / source_file, locator, source_file))
+            if raw != first[(action, scale)]:
+                raise ExperimentError(f"the located value of A{action} at lambda0={scale!r} differs from the table")
+            rows.append([f"A{action}", repr(scale), "displacement_ratio", fmt(raw), "ratio", source_file, locator])
+        with (target / "summary.csv").open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.writer(handle, lineterminator="\n")
+            writer.writerow(list(spec["keys"]) + SUMMARY_TAIL)
+            writer.writerows(rows)
+        for relative in sorted({*CORE_FILES, EXPERIMENTS["band_audit"]["module"]}):
+            destination = target / "code" / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / relative, destination)
+        inputs = [{"run": label, "plan_sha256": sha256(d / "plan.json"),
+                   "artifact_manifest_sha256": sha256(d / "ARTIFACT_MANIFEST.json"),
+                   "model_densities_sha256": sha256(d / "raw/model_densities.csv")}
+                  for label, (d, _, _) in zip(labels, loaded)]
+        write_json(target / "code" / "SOURCE.json", {
+            "schema": "cross-morse-record-source-1", "exporter": "cm_experiments/band_audit.py:export_tightness",
+            "command": [Path(a).name if Path(a).is_absolute() else a for a in (argv or [])],
+            "runtime_source_sha256": runtime_source_fingerprint(ROOT), "repository_commit": git_head(),
+            "experiment_code": code_identity(), "record_contract": "records/specs.json", "inputs": inputs})
+        write_json(target / "provenance.json", {
+            "experiment": "E18 tightness of the band-limited bound (6.1) (Supplementary Figure S18c)",
+            "produced_by": ("python -B scripts/run_experiment_b.py band-audit plan/run/export-tightness; "
+                            f"cm_experiments/band_audit.py:export_tightness on {len(dirs)} sealed band-audit run(s)"),
+            "hardware": str(hardware), "period": str(period),
+            "protocol": ("E18 model-density tightness of main Proposition 6: [int (g_a - g_0)^2 dmu]^1/2 over "
+                         "[sum_b s_ab^2 mu(I_b)]^1/2 with mu proportional to exp(-lambda/lambda0) on [0, 2], g_a the "
+                         "registered response of A1..A7, g_0 the declared nominal baseline, s_ab its band suprema on "
+                         "the six registered bands; read from the sealed raw/model_densities.csv of the band-audit "
+                         "run; the per-state displacement and bound arrays of the audited D_explore states are "
+                         "deposited as raw/<run>/states.csv"),
+            "plant": {"dataset": dataset, "baseline": baseline,
+                      "declared_by": "caller: Supplementary Figure S18c names no plant"},
+            "synthetic": bool(synthetic), "truncated_runs": truncated, "missing_grid_points": missing,
+            "lambda0": scales, "registered_lambda0": list(REGISTERED_LAMBDA0),
+            "parents": [dict(exp["parent"]) for _, exp, _ in loaded], "record_contract": "records/specs.json",
+            "runtime_source_sha256": sorted({exp["runtime_source_sha256"] for _, exp, _ in loaded})})
+        findings = _private_findings(target)
+        if findings and not allow_private:
+            raise ExperimentError("redact private infrastructure identifiers before depositing: " + ", ".join(findings[:10]))
+        write_manifest(target)
+        entry = verify_set(target, spec, specs)
+        final = install_verified_set(staging, target, records_root, specs, replace=replace)
+        return {"set": TIGHTNESS_SET, "path": str(final), "rows": len(rows), "indexed": True,
+                "plant": {"dataset": dataset, "baseline": baseline}, "lambda0": scales,
+                "missing_grid_points": missing, "verification": entry}
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)

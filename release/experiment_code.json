@@ -373,6 +373,31 @@
         "supplementary:Table S37",
         "supplementary:Table S47"
       ]
+    },
+    {
+      "experiment": "E18",
+      "title": "Spectral displacement audit of main Proposition 6 and tightness of the band-limited bound (6.1)",
+      "code": [
+        "cm_experiments/band_audit.py",
+        "cm_experiments/predictability.py",
+        "scripts/run_experiment_b.py"
+      ],
+      "command": "python -B scripts/run_experiment_b.py band-audit plan --parent <run sealed through explore> --output <dir>; ... band-audit run --plan <dir>/plan.json --device cuda --trust-local-checkpoints; ... band-audit export --results <dir> --hardware <hw> --period <period>; ... band-audit export-tightness --results <dir> --dataset <dataset> --baseline shared --hardware <hw> --period <period>",
+      "configurations": [],
+      "outputs": [
+        "records:band_power_audit",
+        "records:band_bound_tightness"
+      ],
+      "displays": [
+        "supplementary:Figure S18",
+        "supplementary:Table S43"
+      ],
+      "not_executable": [
+        {
+          "display": "Table S36, E18 policy-value readout",
+          "reason": "policy value over matched confidence/history controls needs a controller fitted without the spectral coordinates; the released runtime has no switch for it (as for E7, E8)"
+        }
+      ]
     }
   ]
 }

@@ -466,6 +466,77 @@ class SummaryAndExportTests(unittest.TestCase):
         self.assertAlmostEqual(values[("ogbn-arxiv", "all", "all", "explore_states", "ranking_spearman")], .375)
         self.assertFalse(band_audit.summarize_band_audit([run])["notes"]["ogbn-arxiv"]["falsified"])
 
+    def test_band_bound_tightness_is_located_on_the_sealed_model_density_lines(self):
+        from scripts.records import locate
+        run = sealed_run(self.root, "band_audit", e18_raw())
+        records = self.root / "records-tightness"
+        result = band_audit.export_tightness([run], dataset="ogbn-arxiv", baseline="shared", records_root=records,
+                                             hardware="CPU fixture", period="2026-11-07", argv=["fixture"])
+        path = records / "band_bound_tightness"
+        entry = verify_set(path, contract("band_bound_tightness"), SPECS)
+        self.assertTrue(entry["verified"] and entry["synthetic"] and result["indexed"])
+        self.assertEqual(json.loads((records / "index.json").read_text())["sets"][0]["set"], "band_bound_tightness")
+        expected = {(f"A{a}", repr(lam), "displacement_ratio"): .3 + .1 * a for a in range(1, 8) for lam in (.1, 1.)}
+        values = summary_values(path)
+        self.assertEqual(set(values), set(expected))
+        for key, value in expected.items():
+            self.assertAlmostEqual(values[key], value, places=9)
+        source = path / "raw/ogbn-arxiv-fixture/model_densities.csv"
+        self.assertEqual(source.read_bytes(), (run / "raw/model_densities.csv").read_bytes())
+        with (path / "summary.csv").open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                self.assertEqual(row["source_file"], "raw/ogbn-arxiv-fixture/model_densities.csv")
+                action, scale = int(row["action"][1:]), float(row["spectral_scale"])
+                self.assertEqual(float(locate(source, row["locator"], "test")), .3 + .1 * action)
+                self.assertTrue(row["locator"].startswith(f"regex:^shared,{action},"))
+                self.assertIn(scale, (.1, 1.))
+        self.assertTrue((path / "raw/ogbn-arxiv-fixture/states.csv").is_file())
+        self.assertEqual(result["missing_grid_points"], ["lambda0=0.3"])
+        provenance = json.loads((path / "provenance.json").read_text())
+        self.assertEqual(provenance["plant"], {"dataset": "ogbn-arxiv", "baseline": "shared",
+                                               "declared_by": "caller: Supplementary Figure S18c names no plant"})
+        self.assertEqual(tuple(contract("band_power_audit")["registered"]["lambda0"]), band_audit.REGISTERED_LAMBDA0)
+
+    def test_band_bound_tightness_refuses_other_plants_and_disagreeing_runs(self):
+        run = sealed_run(self.root, "band_audit", e18_raw())
+        common = {"records_root": self.root / "r", "hardware": "x", "period": "y"}
+        with self.assertRaisesRegex(ExperimentError, "audits ogbn-arxiv, not ogbn-proteins"):
+            band_audit.export_tightness([run], dataset="ogbn-proteins", baseline="shared", **common)
+        with self.assertRaisesRegex(ExperimentError, "declare the nominal baseline"):
+            band_audit.export_tightness([run], dataset="ogbn-arxiv", baseline="A0", **common)
+        with self.assertRaisesRegex(ExperimentError, r"against 'native_mean' \(available: \['shared'\]\)"):
+            band_audit.export_tightness([run], dataset="ogbn-arxiv", baseline="native_mean", **common)
+        raw = e18_raw()
+        raw["model_densities.csv"][0]["tightness_ratio"] = "0.41"
+        other = sealed_run(self.root, "band_audit", raw, name="other", parent=identity(name="split_01"))
+        with self.assertRaisesRegex(ExperimentError, "disagrees"):
+            band_audit.export_tightness([run, other], dataset="ogbn-arxiv", baseline="shared", **common)
+        self.assertFalse((self.root / "r" / "band_bound_tightness").exists())
+
+    def test_band_bound_tightness_under_records_needs_a_measured_complete_grid(self):
+        official = self.root / "official"
+        official.mkdir()
+        shutil.copyfile(ROOT / "records/specs.json", official / "specs.json")
+        complete = e18_raw()
+        complete["model_densities.csv"] = [{"baseline": "shared", "action": a, "lambda0": lam,
+                                            "tightness_ratio": repr(.2 + .1 * a + lam / 10)}
+                                           for a in range(1, 8) for lam in band_audit.REGISTERED_LAMBDA0]
+        fixture = sealed_run(self.root, "band_audit", complete, name="fixture")
+        partial = sealed_run(self.root, "band_audit", e18_raw(), name="partial", parent=identity(synthetic=False))
+        measured = sealed_run(self.root, "band_audit", complete, name="measured", parent=identity(synthetic=False))
+        common = {"dataset": "ogbn-arxiv", "baseline": "shared", "records_root": official, "hardware": "x",
+                  "period": "y"}
+        with mock.patch("scripts.records.RECORDS", official):
+            with self.assertRaisesRegex(ExperimentError, "synthetic"):
+                band_audit.export_tightness([fixture], **common)
+            with self.assertRaisesRegex(ExperimentError, r"partial tightness set .*lambda0=0\.3"):
+                band_audit.export_tightness([partial], **common)
+            self.assertEqual(sorted(p.name for p in official.iterdir()), ["specs.json"])
+            result = band_audit.export_tightness([measured], **common)
+        self.assertEqual((result["rows"], result["missing_grid_points"]), (21, []))
+        self.assertEqual(sorted(p.name for p in official.iterdir()), ["band_bound_tightness", "index.json", "specs.json"])
+        self.assertTrue(verify_set(official / "band_bound_tightness", contract("band_bound_tightness"), SPECS)["verified"])
+
     def test_negative_controls_cover_the_four_registered_constructions(self):
         from scripts.scientific_evidence_audit import validate_record_coverage
         from cm_campaigns.contract import RECORD_SETS
@@ -591,6 +662,17 @@ class SummaryAndExportTests(unittest.TestCase):
                          "--hardware", "CPU fixture", "--period", "2026-11-07"])
         self.assertEqual(code, 2)
         self.assertIn("--replace", err.getvalue())
+        audit = sealed_run(self.root, "band_audit", e18_raw(), name="audit")
+        tightness = ["band-audit", "export-tightness", "--results", str(audit), "--root", str(self.root / "cli-t"),
+                     "--hardware", "CPU fixture", "--period", "2026-11-07", "--dataset", "ogbn-arxiv"]
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(main(tightness + ["--baseline", "shared"]), 0)
+        self.assertEqual(json.loads(out.getvalue())["set"], "band_bound_tightness")
+        source = json.loads((self.root / "cli-t/band_bound_tightness/code/SOURCE.json").read_text())
+        self.assertEqual(source["command"][:3], ["scripts/run_experiment_b.py", "band-audit", "export-tightness"])
+        self.assertNotIn(str(self.root), json.dumps(source))
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            main(tightness)  # the baseline must be declared
 
 
 # ============================================================================ PyTorch execution tests (CI)
@@ -689,6 +771,15 @@ class SmokeExecutionTests(unittest.TestCase):
             ratios = [float(r["retained_statistic"]) / float(r["logged_statistic"]) for r in states
                       if r["logged_statistic"] != "" and float(r["logged_statistic"]) > 1e-6]
             self.assertTrue(np.allclose(ratios, 1., rtol=1e-3))
+            densities = predictability.read_csv(out / "raw/model_densities.csv")
+            self.assertLessEqual(max(float(r["tightness_ratio"]) for r in densities), 1 + 1e-6)
+            dataset = json.loads((out / "experiment.json").read_text())["parent"]["dataset"]
+            records = self.root / f"records-tightness-{name}"
+            result = band_audit.export_tightness([out], dataset=dataset, baseline=densities[0]["baseline"],
+                                                 records_root=records, hardware="CPU smoke", period="2026-11-07")
+            self.assertEqual(result["missing_grid_points"], [])
+            self.assertTrue(verify_set(records / "band_bound_tightness", contract("band_bound_tightness"),
+                                       SPECS)["verified"])
 
     def test_input_gate_serves_comparator_bytes_on_fallback(self):
         for name in ("arxiv", "pascalvoc_sp"):

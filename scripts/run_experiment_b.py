@@ -7,6 +7,9 @@
     python -B scripts/run_experiment_b.py predictability run --plan DIR/plan.json --device cuda --trust-local-checkpoints
     # recompute the values from the sealed raw files and write the record set
     python -B scripts/run_experiment_b.py predictability export --results DIR --hardware "..." --period "..."
+    # E18 only: records:band_bound_tightness (Fig. S18c) of one declared plant from the same sealed run
+    python -B scripts/run_experiment_b.py band-audit export-tightness --results DIR --dataset NAME --baseline shared \
+        --hardware "..." --period "..."
 
 Experiments: predictability (E2), search-enumeration (E9), band-audit (E18),
 negative-controls (Supplementary Table S19) and input-gate (Tables S23/S37).
@@ -136,6 +139,20 @@ def main(argv=None):
         q.add_argument("--replace", action="store_true")
         q.add_argument("--allow-private-patterns", action="store_true")
         q.add_argument("--allow-truncated", action="store_true")
+        if name == "band-audit":
+            q = actions.add_parser("export-tightness",
+                                   help="write records:band_bound_tightness (Fig. S18c) of one declared plant")
+            q.add_argument("--results", type=Path, action="append", required=True,
+                           help="sealed band-audit run of the plant; repeated runs must hold identical values")
+            q.add_argument("--dataset", required=True, help="dataset of the plant (Figure S18c names none)")
+            q.add_argument("--baseline", required=True,
+                           help="nominal transport the actions are measured against: shared (A0), native_mean "
+                                "or inserted_identity (Figure S18c names none)")
+            q.add_argument("--root", type=Path, default=None, help="records root (default records/)")
+            q.add_argument("--hardware", required=True)
+            q.add_argument("--period", required=True)
+            q.add_argument("--replace", action="store_true")
+            q.add_argument("--allow-private-patterns", action="store_true")
     a = parser.parse_args(argv)
     import importlib
     module_name, key = EXPERIMENTS[a.experiment]
@@ -155,10 +172,15 @@ def main(argv=None):
             print(json.dumps({"output": str(out), "experiment": key, "sealed": True, "record_set_written": False},
                              indent=2))
             return 0
-        result = module.export_records(a.results, records_root=a.root, hardware=a.hardware, period=a.period,
-                                       replace=a.replace, allow_private=a.allow_private_patterns,
-                                       allow_truncated=a.allow_truncated,
-                                       argv=["scripts/run_experiment_b.py", *(argv if argv is not None else sys.argv[1:])])
+        command = ["scripts/run_experiment_b.py", *(argv if argv is not None else sys.argv[1:])]
+        if a.action == "export-tightness":
+            result = module.export_tightness(a.results, dataset=a.dataset, baseline=a.baseline, records_root=a.root,
+                                             hardware=a.hardware, period=a.period, replace=a.replace,
+                                             allow_private=a.allow_private_patterns, argv=command)
+        else:
+            result = module.export_records(a.results, records_root=a.root, hardware=a.hardware, period=a.period,
+                                           replace=a.replace, allow_private=a.allow_private_patterns,
+                                           allow_truncated=a.allow_truncated, argv=command)
         print(json.dumps(result, indent=2, default=str))
         return 0
     except (ExperimentError, ValueError, OSError, RuntimeError, ImportError) as exc:
