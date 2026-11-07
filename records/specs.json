@@ -257,7 +257,7 @@
         "displacement_ratio": "exact one-step displacement of the registered action divided by the band-limited bound (6.1), at states whose spectral energy density is proportional to exp(-lambda/lambda_0) on [0, 2] (ratio)"
       },
       "table": "list",
-      "notes": "Keys: action = registry identifier A1 ... A7; spectral_scale = lambda_0 of the state's spectral energy density. A ratio above one falsifies an assumption of main Proposition 6 for that plant. The displacement and bound arrays of every evaluated state go under raw/; deposit with `python -B scripts/export_records.py from-mapping --mapping <band_bound_tightness mapping>` once the set is registered for the mapping exporter."
+      "notes": "Keys: action = registry identifier A1 .. A7; spectral_scale = lambda_0 of the state's spectral energy density. A ratio above one falsifies an assumption of main Proposition 6 for that plant. The displacement and bound arrays of every evaluated state go under raw/. Produced by scripts/run_experiment_b.py band-audit export-tightness (cm_experiments/band_audit.py); original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
     },
     "band_power_audit": {
       "title": "Spectral displacement audit of main Proposition 6",
@@ -359,14 +359,14 @@
         "contrast"
       ],
       "quantities": {
-        "effect_nats": "paired loss contrast of the test (nats)",
-        "interval_low_nats": "lower end of its 95% interval (nats)",
-        "interval_high_nats": "upper end of its 95% interval (nats)",
-        "p_value_zero": "two-sided P value against zero",
-        "unit_count": "number of statistical units entering the contrast"
+        "effect_nats": "paired loss contrast of the original joint-S14 test (nats)",
+        "interval_low_nats": "lower end of the original test's 95% interval (nats)",
+        "interval_high_nats": "upper end of the original test's 95% interval (nats)",
+        "p_value_zero": "P value of the original test against zero, with the tail the test declares",
+        "unit_count": "original size J_old: statistical units of a single-graph test; validation-split graph count of a multigraph row"
       },
       "table": "list",
-      "notes": "One row per test of cm_campaigns.confirmation.FAMILY. Single-graph rows are the D_confirm tests; the multigraph rows are the validation-split contrasts at the original confirmation size J_old."
+      "notes": "One row per test of cm_campaigns.confirmation.FAMILY: the original tests of the joint S14 campaign (validated by check_campaign; test.json and paired.csv deposited unchanged), at their original sizes J_old (Table S14b caption). Produced by scripts/run_confirmation_analysis.py confirmation (cm_experiments/confirmation_analysis.py) together with confirmation_sensitivity from one raw computation."
     },
     "confirmation_sensitivity": {
       "title": "Confirmation-size sensitivity of the multigraph mechanism contrasts",
@@ -384,12 +384,12 @@
         "ci_low_nats": "lower end of its 95% graph-bootstrap interval at J_old (nats)",
         "ci_high_nats": "upper end of that interval (nats)",
         "units_old": "graphs of the validation-split confirmation J_old (graphs)",
-        "graph_variance_share": "share of the contrast variance attributable to graphs in the two-way seed-by-graph variance model of Note S24 (fraction)",
+        "graph_variance_share": "graph share g = (hw_graph/hw_test)^2 of Note S24: half-width of the admission statistic's graph-unit interval over the half-width of the main Table 1 test interval, from the sealed run",
         "holm_p": "Holm-adjusted P value of the contrast in the nine-test family of Supplementary Table S14 at the D_confirm size (probability)",
         "label_survival_probability": "probability that the Holm-significant label survives at the D_confirm size under the two-way variance model (probability)"
       },
       "table": "list",
-      "notes": "Keys are the contrast identifiers of cm_campaigns.confirmation.FAMILY for the three multigraph benchmarks (Pascal/RH, COCO/RH, Peptides/radius); that registry supplies the D_confirm sizes and the practical margins. The interval at the D_confirm size is computed from these quantities with fixed means (analytical sensitivity, not an observed replication). The paired per-graph arrays and the two-way variance fit go under raw/; deposit with `python -B scripts/export_records.py from-mapping --mapping <confirmation_sensitivity mapping>` once the set is registered for the mapping exporter."
+      "notes": "Keys are the contrast identifiers of cm_campaigns.confirmation.FAMILY for the three multigraph benchmarks (Pascal/RH, COCO/RH, Peptides/radius); that registry supplies the D_confirm sizes and the practical margins. Effect and interval are the original joint-S14 tests at J_old; the interval at the D_confirm size rescales the standard error by sqrt((1 - g) + g J_old/J_new) with fixed means (analytical sensitivity, not an observed replication); the Holm family is re-formed over the nine tests. The per-graph, per-seed validation-split array and its two-way method-of-moments fit (the E16 direct estimate) are deposited under raw/ as a separate estimate. Produced by scripts/run_confirmation_analysis.py confirmation."
     },
     "decision_traces": {
       "title": "Executed decision origins and within-depth action entropy of the deployed rules",
@@ -451,7 +451,7 @@
         "official_score": "official test metric of the comparator's E-member ensemble with the paired seed structure of the ensemble_grid set (percent or F1 points; AP in native units)"
       },
       "table": "list",
-      "notes": "Companion of the ensemble_grid set (same checkpoints, same E grid 1, 2, 4, 8, 12, 16, 20 and the same test inputs): ensemble_grid holds the comparator loss, this set the official score of the same ensembles. Scores are recomputed from each ensemble's saved test predictions with the official metric (cross_morse.evaluation.score_observations) and written with the SHA-256 of the predictions under raw/; deposit with `python -B scripts/export_records.py from-mapping --mapping <ensemble_grid_scores mapping>` once the set is registered for the mapping exporter."
+      "notes": "Companion of the ensemble_grid set (same checkpoints, same E grid 1, 2, 4, 8, 12, 16, 20 and the same test inputs): ensemble_grid holds the comparator loss, this set the official score of the same ensembles. Scores are recomputed from each ensemble's saved test predictions with the official metric (cross_morse.evaluation.score_observations) and written with the SHA-256 of the predictions under raw/. Produced by scripts/run_timing_records.py grid-scores export (cm_experiments/timing_records.py) from a completed scripts/run_experiment.py ensemble-grid output; original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
     },
     "horizon_beam_sweep": {
       "title": "Planning-horizon and beam-width sweep of MPC-RH",
@@ -917,12 +917,12 @@
         "instance"
       ],
       "quantities": {
-        "processed_edges_millions": "edges processed by one execution of the deployed rule on the instance under the implemented scheduling (millions)",
+        "processed_edges_millions": "directed edge entries of the instance's graph operator (GraphOperator.num_edges), the processed graph size (millions)",
         "wall_time_seconds": "synchronized wall time of that execution after warm-up, mean over the post-warm-up repeats (s)",
         "peak_memory_gib": "peak accelerator memory of that execution (GiB)"
       },
       "table": "list",
-      "notes": "One instance per timed graph: a full benchmark graph or a registered subgraph of the scaling sweep, named by the instance key. Timed with the E17 sessions of cm_campaigns.timing inside completed GPU allocations; the peak memory is read with torch.cuda.max_memory_allocated after a reset before each timed execution, and the processed-edge count is the operator's own count of the edges it visits. The timing rows, memory readings and scheduler exports go under raw/; deposit with `python -B scripts/export_records.py from-mapping --mapping <runtime_scaling mapping>` once the set is registered for the mapping exporter."
+      "notes": "One instance per timed graph: a full benchmark graph or a registered subgraph of the scaling sweep, named by the instance key. Timed with the E17 sessions of cm_campaigns.timing inside completed GPU allocations; the peak memory is read with torch.cuda.max_memory_allocated after a reset before each timed execution, and the processed graph size is the operator's own directed edge count. The scaling sweep of a transductive graph is the full graph and breadth-first node-induced subgraphs of 1/2, 1/4, 1/16 and 1/64 of its nodes; a graph collection uses its test graphs at the edge-count quantiles 0, 0.5 and 1. The timing rows, memory readings and scheduler exports go under raw/. Produced by scripts/run_timing_records.py scaling (cm_experiments/timing_records.py); original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
     },
     "search_enumeration": {
       "title": "Search versus model error by exact enumeration at H <= 4",
@@ -1058,7 +1058,7 @@
         "training_anchor_high_seconds": "upper end of that bracket (s)"
       },
       "table": "list",
-      "notes": "Anchors are adopted timing references, kept apart from the measured t_nom of the nominal_time set. Each dataset carries its own anchors, also when Table S23b prints another plant's anchor as the reference range (COCO-SP shares the PascalVOC-SP anchor because the two plants have the same backbone, depth and graph size; the generator applies that convention). The throughput and training-time records (scheduler accounting of the plant seeds, epochs and training inputs, and the sustained-throughput measurement) go under raw/; deposit with `python -B scripts/export_records.py from-mapping --mapping <timing_anchors mapping>` once the set is registered for the mapping exporter."
+      "notes": "Anchors are adopted timing references, kept apart from the measured t_nom of the nominal_time set. Each dataset carries its own anchors, also when Table S23b prints another plant's anchor as the reference range (COCO-SP shares the PascalVOC-SP anchor because the two plants have the same backbone, depth and graph size; the generator applies that convention). The throughput and training-time records (scheduler accounting of the plant seeds, epochs and training inputs, and the sustained-throughput measurement) go under raw/. Produced by scripts/run_timing_records.py anchors (cm_experiments/timing_records.py); original outputs produced elsewhere can be deposited with scripts/export_records.py from-mapping."
     },
     "tube_audit": {
       "title": "Plug-in trajectory-tube audit of main Proposition 2",

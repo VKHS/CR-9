@@ -579,6 +579,32 @@
       "displays": [
         "supplementary:Figure S14"
       ]
+    },
+    {
+      "experiment": "E10",
+      "title": "Confirmation-size sensitivity: the nine joint-S14 original tests at their original sizes (J_old: validation split for the multigraph rows), multigraph rows rescaled to the D_confirm sizes with the Note S24 graph share (hw_graph/hw_test)^2 from each sealed run's admission moments and Table 1 test interval, re-formed nine-test Holm family and label-survival probability; the E16 direct estimate (per-graph, per-seed validation-split array, two-way method of moments) deposited separately",
+      "code": [
+        "cm_experiments/confirmation_analysis.py",
+        "cm_experiments/ensemble_grid.py",
+        "scripts/run_confirmation_analysis.py",
+        "cm_campaigns/confirmation.py"
+      ],
+      "command": "python -B scripts/run_confirmation_analysis.py confirmation plan --parent <pascalvoc_sp run> --parent <coco_sp run> --parent <peptides_func run> --campaign <joint S14 campaign> --output <dir>; ... confirmation run --output <dir> --job K --device cuda --trust-local-checkpoints; ... confirmation export --output <dir>",
+      "configurations": [
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:confirmation_contrasts",
+        "records:confirmation_sensitivity"
+      ],
+      "displays": [
+        "supplementary:Table S14b",
+        "supplementary:Figure S9",
+        "supplementary:Figure S18",
+        "supplementary:Table S43"
+      ]
     }
   ]
 }

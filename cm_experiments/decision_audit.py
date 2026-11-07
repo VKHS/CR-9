@@ -86,6 +86,11 @@ Reliability (Figure S16)
   fallback = share with g_input = 0; residual activity = share served by the confirmed policy q_M (g_input = 1,
   no numerical failure) on which some member executed a non-nominal action (negative_controls' definitions).
 
+Audited rule: the deployed rule q_D of the sealed policy lock. For a dataset declared ``provisional`` at planning
+time the provisional selection q_s of main Eq. (19) (``select/decision.json``) takes its place in every role of
+q_D (served behind g_input with q_C fallback, per-site analysis, harm), e.g. the evaluated radius arm of a run whose
+confirmation map returned q_C; the plan, audit.json and every exported summary name the audited rule.
+
 Tolerance ``IDENTITY_TOLERANCE`` (1e-7 nats, the runtime's nominal-relative identity tolerance of
 ``fit_controller``) applies to "harmful" and to the coverage comparisons, so that the exact A0 identity is not
 broken by floating-point noise.
@@ -163,7 +168,7 @@ DEFINITIONS = {
         "near_zero_fraction": "fraction of audited sites whose gap is below the threshold",
         "switch_fraction": "fraction of audited sites whose decision under the registered perturbation (one draw "
                            "of the observer's measurement-noise model, site-local) is another action",
-        "recovery_index_stability": "fraction of executions (input x member) of the deployed feedback rule in "
+        "recovery_index_stability": "fraction of executions (input x member) of the audited feedback rule in "
                                     "which no site's last-safe anchor update changes under the perturbation",
         "beam_sequence_stability": "fraction of planning sites (MPC-RH policy sites, MPC-OL depth 0) whose planned "
                                    "sequence is unchanged under the perturbation; 1 for rules that do not plan",
@@ -621,6 +626,7 @@ def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=
         raise RunnerError(f"evaluation role must be one of {sorted(ROLE_STAGES)}; decision roles are never reused")
     if not parents:
         raise RunnerError("give at least one --parent run")
+    provisional = {provisional} if isinstance(provisional, str) else set(provisional or ())
     routes = fixture_route.values() if isinstance(fixture_route, dict) else [fixture_route]
     if any(r is not None and r not in FEEDBACK_ROUTES for r in routes):
         raise RunnerError(f"a fixture rule override names a feedback route of {FEEDBACK_ROUTES}")
@@ -644,7 +650,7 @@ def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=
         for run in runs:
             check_role(run, role)
             found = _deployment(run, fixture_route.get(dataset) if isinstance(fixture_route, dict) else fixture_route,
-                                "provisional" if dataset in set(provisional or ()) else "deployed")
+                                "provisional" if dataset in provisional else "deployed")
             deployed = found["deployed"]
             route = deployed["route"]
             profile = "full" if deployed.get("profile") in (None, "none") else deployed["profile"]
@@ -680,11 +686,17 @@ def plan_decision_audit(parents, output, *, role="test", reps=None, seed_offset=
                          "aggregation": "pooled over the official split runs" if len(runs) > 1 else "single run"})
     if stress_dataset is not None and stress_dataset not in seen:
         raise RunnerError(f"the stress dataset {stress_dataset!r} is not among the planned parents")
+    if provisional - seen:
+        raise RunnerError(f"provisional datasets {sorted(provisional - seen)} are not among the planned parents")
     first = SealedRun(member_runs(parents[0])[0])
     return create_plan(output, {
         "experiment": "decision-log audits of the deployed rules (Tables S21, S33-S34; Figures S7, S16, S17; "
                       "main Figure 3c-d; E7, E8)",
         "record_set": PLAN_KIND, "record_sets": list(SETS), "role": role, "horizons": horizons,
+        "audited_rule": {"default": "deployed rule q_D (policy_lock.json deployed_index)",
+                         "provisional": sorted(provisional),
+                         "provisional_rule": "provisional selection q_s of Eq. (19) (select/decision.json "
+                                             "provisional_index) in every role of q_D"},
         "near_zero_threshold_nats": threshold,
         "perturbation": {"factor": float(perturbation_factor), "seed_offset": int(seed_offset),
                          "definition": "one draw of the deployed observer's frozen measurement-noise model R "
@@ -1634,7 +1646,7 @@ def _run_job(plan, entry, directory, device, output):
     _dump(directory / "audit.json", {
         "schema": JOB_SCHEMA, "dataset": entry["dataset"], "member": entry["member"], "role": plan["role"],
         "route": deployed["route"], "deployed": entry["deployed"], "global_return": entry["global_return"],
-        "fixture_override": entry["fixture_override"], "files": files,
+        "rule": entry.get("rule", "deployed"), "fixture_override": entry["fixture_override"], "files": files,
         "identities": {"runtime_source_sha256": runtime_source_sha256(), "parent": entry["identity"],
                        "plan_sha256": sha256(output / "plan.json"), "audit_code_sha256": code_identity(),
                        "parent_files_read": run.inputs()},
@@ -1693,6 +1705,13 @@ def parity_summary(members) -> dict:
     return out
 
 
+def _audited_rule(members) -> str:
+    rules = sorted({j["entry"].get("rule", "deployed") for j in members})
+    if len(rules) != 1:
+        raise RunnerError(f"the runs of one dataset audit different rules: {rules}")
+    return rules[0]
+
+
 def _row(keys, quantity, value):
     value = float(value)
     if not math.isfinite(value):
@@ -1707,13 +1726,14 @@ def summarize_action_gaps(plan, jobs) -> dict:
     for dataset, members in _by_dataset(plan, jobs).items():
         parts = [_npz(j["directory"] / "gaps.npz") for j in members if (j["directory"] / "gaps.npz").is_file()]
         routes = sorted({j["entry"]["route"] for j in members})
+        rule = _audited_rule(members)
         if not parts:
-            details[dataset] = {"status": "NO_SCORED_DECISIONS", "routes": routes,
-                                "reason": "the deployed rule is open loop and does not plan"}
+            details[dataset] = {"status": "NO_SCORED_DECISIONS", "routes": routes, "audited_rule": rule,
+                                "reason": "the audited rule is open loop and does not plan"}
             continue
         gap = np.concatenate([p["gap"] for p in parts])
         if not len(gap):
-            details[dataset] = {"status": "NO_SCORED_DECISIONS", "routes": routes,
+            details[dataset] = {"status": "NO_SCORED_DECISIONS", "routes": routes, "audited_rule": rule,
                                 "reason": "no executed policy decision with two finite candidates"}
             continue
         used = np.maximum(gap, 0.0)
@@ -1733,7 +1753,7 @@ def summarize_action_gaps(plan, jobs) -> dict:
         if len(anchors):
             values["recovery_index_stability"] = float(np.mean(anchors))
         rows += [_row(keys, q, values[q]) for q in DEFINITIONS["action_gap_audit"] if q in values]
-        details[dataset] = {"status": "AUDITED", "routes": routes, "audited_sites": int(len(gap)),
+        details[dataset] = {"status": "AUDITED", "routes": routes, "audited_rule": rule, "audited_sites": int(len(gap)),
                             "search_inversions": int(np.concatenate([p["inversion"] for p in parts]).sum()),
                             "gap_kinds": {GAP_KINDS[k]: int(np.sum(np.concatenate([p["kind"] for p in parts]) == k))
                                           for k in (1, 2, 3)},
@@ -1765,6 +1785,7 @@ def summarize_decision_traces(plan, jobs) -> dict:
         details[dataset] = {"decision_weight": mass.total, "category_weights": mass.categories,
                             "runs": [j["entry"]["member"] for j in members],
                             "routes": sorted({j["entry"]["route"] for j in members}),
+                            "audited_rule": _audited_rule(members),
                             "global_return": sorted({j["entry"]["global_return"] for j in members}),
                             "sealed_parity": parity_summary(members)}
     complete = set(details) >= set(DATASETS)
@@ -1986,6 +2007,8 @@ def export_decision_audit(output, *, sets=SETS, root=None, replace=False, allow_
     if len(synthetic) != 1:
         raise RunnerError("synthetic and benchmark parents cannot share one record set")
     synthetic = synthetic.pop() or any(j["entry"]["fixture_override"] for j in jobs)
+    audited = {dataset: _audited_rule(members) for dataset, members in _by_dataset(plan, jobs).items()}
+    provisional = sorted(d for d, rule in audited.items() if rule == "provisional")
     written = []
     for name in sets:
         if name not in SETS:
@@ -2004,7 +2027,8 @@ def export_decision_audit(output, *, sets=SETS, root=None, replace=False, allow_
                     "details": summary["details"], "inputs": inputs, "plan_sha256": sha256(output / "plan.json"),
                     "recomputed_by": f"cm_experiments/decision_audit.py:{SUMMARIZERS[name].__name__}",
                     "perturbation": plan["perturbation"], "near_zero_threshold_nats": plan["near_zero_threshold_nats"],
-                    "bootstrap": plan["bootstrap"], "tolerance_nats": plan["tolerance_nats"]}
+                    "bootstrap": plan["bootstrap"], "tolerance_nats": plan["tolerance_nats"],
+                    "audited_rules": audited}
         provenance = {
             "experiment": {"action_gap_audit": "Action-gap and switching audit of the deployed rules (Table S21, "
                                                "Fig. S17f)",
@@ -2016,7 +2040,9 @@ def export_decision_audit(output, *, sets=SETS, root=None, replace=False, allow_
             "protocol": ("instrumented serving-time execution of the deployed rule of each sealed run on the "
                          f"{plan['role']} role with the released runtime (recording sensor hook only); decision log "
                          "replayed and checked site by site; registered perturbation: one draw of the observer's "
-                         "measurement-noise model per site; see raw/summary.json for every definition"),
+                         "measurement-noise model per site; see raw/summary.json for every definition"
+                         + (f"; audited rule on {', '.join(provisional)}: the provisional selection q_s of Eq. (19) "
+                            "in place of q_D" if provisional else "")),
             "role": plan["role"], "plan_sha256": sha256(output / "plan.json"),
             "parents": [j["entry"]["identity"] for j in jobs], "synthetic": bool(synthetic),
             "fixture_override": sorted({json.dumps(j["entry"]["fixture_override"], sort_keys=True)

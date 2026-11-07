@@ -60,7 +60,8 @@ def _plan(args):
                                gate_alpha=args.gate_alpha, gate_profile=args.gate_profile, ema_weight=args.ema_weight,
                                stress_dataset=args.stress_dataset,
                                calibration_trajectories=args.calibration_trajectories,
-                               observer_study=not args.no_observer_study, fixture_route=args.fixture_route)
+                               observer_study=not args.no_observer_study, fixture_route=args.fixture_route,
+                               provisional=args.provisional)
 
 
 def _run(args):
@@ -118,6 +119,9 @@ def parser():
     p.add_argument("--no-observer-study", action="store_true", help="skip the E8 observer variants")
     p.add_argument("--fixture-route", choices=("one_step", "radius", "mpc_rh"), default=None,
                    help="synthetic smoke parents only: audit a registered feedback candidate (software check)")
+    p.add_argument("--provisional", action="append", default=[], metavar="DATASET",
+                   help="audit the provisional selection q_s of Eq. (19) instead of the deployed rule q_D on this "
+                        "dataset (repeatable; named in every output)")
     p = actions.add_parser("run", help="execute the plan with the released runtime")
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--job", type=int, default=None, help="execute one job of the plan (default: all)")

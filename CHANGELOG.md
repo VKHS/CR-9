@@ -23,8 +23,30 @@
   (`paper/build/displays/`), full-precision source data of every display and a
   per-cell comparison with the printed values. Exit status 0 only when every
   display is complete and every value agrees.
-@@DISPLAYS@@
-@@EXPERIMENTS@@
+- One generator per numbered display (`paper/build/displays/`): main Tables 1–2 and
+  Figures 1–6, and every supplementary table and figure — 60 measured displays read
+  from the published runs, record sets and campaigns, 16 protocol tables generated
+  from the configurations, code and registered protocol (`paper/protocol/`), 13
+  analytical displays computed from the stated formulas, and one illustration. Each
+  writes the complete table (CSV, Markdown, LaTeX) or figure (PNG, SVG) with the
+  full-precision source data of every panel and declares the printed value each cell
+  reproduces; a generator never reads the printed values. `paper/display_manifest.json`
+  names each display's generator and the record sets it reads.
+- Experiment code for every measurement-record set a display reads
+  (`cm_experiments/`, `scripts/run_experiment.py`, `run_experiment_b.py`,
+  `run_sweep.py`, `run_timing_records.py`, `run_confirmation_analysis.py`,
+  `run_trajectory_audit.py`, `run_decision_audit.py`): E2 predictability, E9 exact
+  enumeration, E10 confirmation-size sensitivity, E13 inserted-site attribution, E14
+  extended ensemble grid and its official scores, E18 spectral displacement audit
+  and bound tightness, E19 sensitivity grids, the horizon/beam sweep, cross-backbone
+  substitutions, factorials, negative controls, the serving-time input gate, the
+  held-out mechanism contrasts, the admission-split oracle, the Proposition 2 tube
+  audit, depth diagnostics, the action-gap, decision-trace and reliability audits,
+  runtime scaling and timing anchors. Every runner reads sealed lifecycle runs
+  without writing them, records the identities of its parents and exports a record
+  set that `scripts/records.py` traces value by value. Thirty record contracts are
+  registered in `records/specs.json`; `scripts/export_records.py from-mapping` accepts
+  every one of them.
 - `release/experiment_code.json` maps every experiment behind a reported table or
   figure to its code, command, configurations and published artifacts.
 - Availability views (`AVAILABILITY.md`, `paper/AVAILABILITY_STATEMENT.txt`,

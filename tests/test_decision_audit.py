@@ -270,6 +270,26 @@ class PlanningTests(unittest.TestCase):
         self.assertTrue(set(peptides["audited_inputs"]) <= set(np.load(EXAMPLES / "peptides_func/prepared/graph_splits.npz")["test"].tolist()))
         self.assertIsNotNone(arxiv["fixture_override"])
 
+    def test_the_provisional_selection_can_replace_the_deployed_rule(self):
+        real = self.root / "returned"
+        shutil.copytree(EXAMPLES / "arxiv", real)
+        candidates = json.loads((real / "select" / "candidates.json").read_text())
+        index = next(i for i, c in enumerate(candidates) if c["route"] == "radius" and c["ensemble"] == 2)
+        decision = json.loads((real / "select" / "decision.json").read_text())
+        decision["provisional_index"] = index                     # q_s = radius, returned to q_C by confirmation
+        (real / "select" / "decision.json").write_text(json.dumps(decision))
+        returned = json.loads(da.plan_decision_audit([real], self.root / "q").read_text())
+        self.assertEqual((returned["jobs"][0]["rule"], returned["jobs"][0]["global_return"]), ("deployed", True))
+        plan = json.loads(da.plan_decision_audit([real], self.root / "p", provisional=["ogbn-arxiv"]).read_text())
+        job = plan["jobs"][0]
+        self.assertEqual((job["rule"], job["route"], job["feedback"], job["global_return"]),
+                         ("provisional", "radius", True, False))
+        self.assertEqual(job["deployed"]["registry_index"], index)
+        self.assertTrue(job["gate"]["needed"])
+        self.assertEqual(plan["audited_rule"]["provisional"], ["ogbn-arxiv"])
+        with self.assertRaisesRegex(RunnerError, "not among the planned parents"):
+            da.plan_decision_audit([real], self.root / "r", provisional=["COCO-SP"])
+
     def test_plan_refusals(self):
         for kwargs, message in ((dict(role="select"), "decision roles"), (dict(fixture_route="phase"), "feedback route"),
                                 (dict(stress_dataset="COCO-SP"), "not among"), (dict(ema_weight=0.0), "EMA"),
@@ -338,6 +358,7 @@ def synthetic_plan(output, stress="PascalVOC-SP"):
                      "feedback": route in da.FEEDBACK_ROUTES, "plans": route in da.PLANNING_ROUTES,
                      "global_return": route == "phase", "admitted": route != "phase", "fixture_override": None,
                      "stress": dataset == stress, "mode": mode,
+                     "rule": "provisional" if dataset == "Peptides-func" else "deployed",
                      "identity": {"name": member, "dataset": dataset, "synthetic": True}})
     datasets = []
     for dataset in dict.fromkeys(j["dataset"] for j in jobs):
@@ -489,6 +510,11 @@ class ExportTests(unittest.TestCase):
         self.assertAlmostEqual(traces[("ogbn-arxiv", "fraction_recovery")], 1 / DEPTH, places=9)
         document = json.loads((targets["action_gap_audit"] / "raw" / "summary.json").read_text())
         self.assertEqual(document["details"]["ogbn-products"]["status"], "NO_SCORED_DECISIONS")
+        # the audited rule is named wherever it is not the deployed rule q_D
+        self.assertEqual(document["details"]["Peptides-func"]["audited_rule"], "provisional")
+        self.assertEqual(document["audited_rules"]["ogbn-arxiv"], "deployed")
+        provenance = json.loads((targets["decision_traces"] / "provenance.json").read_text())
+        self.assertIn("audited rule on Peptides-func: the provisional selection", provenance["protocol"])
 
     def test_reliability_pools_runs_and_reports_the_registered_levels(self):
         targets = self.export(sets=("reliability_diagnostics",))
@@ -569,6 +595,14 @@ class CommandLineTests(unittest.TestCase):
         code, _, err = self.call("plan", "--parent", EXAMPLES / "arxiv", "--output", self.root / "p2", "--gate-from", "x")
         self.assertEqual(code, 2)
         self.assertIn("--gate-from", err)
+        code, out, err = self.call("plan", "--parent", EXAMPLES / "arxiv", "--output", self.root / "p3",
+                                   "--provisional", "ogbn-arxiv")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads((self.root / "p3" / "plan.json").read_text())["jobs"][0]["rule"], "provisional")
+        code, _, err = self.call("plan", "--parent", EXAMPLES / "arxiv", "--output", self.root / "p4",
+                                 "--provisional", "COCO-SP")
+        self.assertEqual(code, 2)
+        self.assertIn("not among the planned parents", err)
         output = self.root / "fabricated"
         plan = synthetic_plan(output)
         rng = np.random.default_rng(1)
