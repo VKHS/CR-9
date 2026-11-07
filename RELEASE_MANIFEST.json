@@ -79,10 +79,10 @@
       "sha256": "4f3271885adc8d29468fd2f5eff6ac74dd604174a79fd57c8c9805a9e5f19e53"
     },
     {
-      "bytes": 20062,
+      "bytes": 21922,
       "executable": false,
       "path": "CHANGELOG.md",
-      "sha256": "97bf84178f849e063dd9c869763dba3c7785cc12cfb4ad31ad156125a293ddfa"
+      "sha256": "2b346cc97aba1abf5a0da90accdd125833c7fcd53035101ca4c0b4b8d03835a9"
     },
     {
       "bytes": 2319,
@@ -109,10 +109,10 @@
       "sha256": "560aa1d50814f35adf6c8b86e2b8bd9ad0c7f3f17f1d532b4cdfa31f59bb390e"
     },
     {
-      "bytes": 37254,
+      "bytes": 37274,
       "executable": false,
       "path": "Makefile",
-      "sha256": "7afd0641587fe9b3fb1d126e92c77576b3df443a5b611561a1de41c46931b34f"
+      "sha256": "9d8195b2a93b53c6dae70d1773d8708d87462b5f4fb37b6aa19ffaa81502a2b9"
     },
     {
       "bytes": 872,
@@ -133,10 +133,10 @@
       "sha256": "f6db928ef7cc27c037eb68bce99d0fa267632daeffd6b16ddbeb79f7a107c349"
     },
     {
-      "bytes": 5271,
+      "bytes": 5159,
       "executable": false,
       "path": "STATEMENT_COMPLIANCE.md",
-      "sha256": "5b8d33aaf88bed82b84ecbb9c2af770541dbb8319ecd6356abc3cac3936f764c"
+      "sha256": "9c16364835787f064c8acab4a3815057f63bb2f66edc35a0bbdf912a442525a4"
     },
     {
       "bytes": 150,
@@ -229,10 +229,10 @@
       "sha256": "9f4799abe38dd740180c40c5ecc2bd374107e2ddcf41b48d860c5de9bace1364"
     },
     {
-      "bytes": 41152,
+      "bytes": 41249,
       "executable": false,
       "path": "cm_experiments/band_audit.py",
-      "sha256": "d4cf28f74464c1b3b453c8f2d6203898dd1dfe62ad2c84a0e46b0853c85163ec"
+      "sha256": "ce0df5e7aede56fe7f5a96c444ef3b268206b73465f26724e1d2218ec77dc15d"
     },
     {
       "bytes": 12209,
@@ -251,6 +251,12 @@
       "executable": false,
       "path": "cm_experiments/confirmation_analysis.py",
       "sha256": "5e2e9a9f215915f1b8b82be4b865694fafc15d0f59c6a1224be72779beaeed95"
+    },
+    {
+      "bytes": 124122,
+      "executable": false,
+      "path": "cm_experiments/decision_audit.py",
+      "sha256": "e6137f46255a6e8b62d63755b52f20571b2e3e0d5bcd73b09ef580243d570553"
     },
     {
       "bytes": 5249,
@@ -283,16 +289,16 @@
       "sha256": "02009417b030a6f190c9f3697f7d80181b98368bb8c3684e6d38bcbbf149f8b0"
     },
     {
-      "bytes": 29590,
+      "bytes": 29695,
       "executable": false,
       "path": "cm_experiments/input_gate.py",
-      "sha256": "2cf4858950f775005ae78339cc40b0a1210be76655a2fc473ad428282c7e63dc"
+      "sha256": "ce9abff1549f4500db6141b34a4a5df7e185f75f6a7e472aa071521a6b85663b"
     },
     {
-      "bytes": 24702,
+      "bytes": 24737,
       "executable": false,
       "path": "cm_experiments/negative_controls.py",
-      "sha256": "b38eea7c6c0caa6e29a96cc9b7a09759d337d2743159b9f5b16105b4a887f52c"
+      "sha256": "c942567d4237862aea61374459f64a63c3b75291be1acfbe12b27417651304f7"
     },
     {
       "bytes": 45599,
@@ -325,10 +331,10 @@
       "sha256": "7cc0624d27cb0aa6ac581caa5e1b39f9fd1d0f662f842ea266e1380273e01bc8"
     },
     {
-      "bytes": 26810,
+      "bytes": 26900,
       "executable": false,
       "path": "cm_experiments/search_enumeration.py",
-      "sha256": "b40d889fb617e02fbb7b26e90a3f4f25b310d1ce46e72541212578b776837398"
+      "sha256": "5da18ff27670cd022c35c1bc9aca0c112ecbc8050cf699c17968b009cd4ee761"
     },
     {
       "bytes": 4182,
@@ -763,10 +769,10 @@
       "sha256": "4093f31d0a184a2d6c550dbcb9e9e46ea9b5523fa08e80087965a2694b3134fe"
     },
     {
-      "bytes": 15683,
+      "bytes": 16486,
       "executable": false,
       "path": "docs/EXPERIMENTS.md",
-      "sha256": "a6c394085dfea5c8b86d14dae21864abbab225029095f99f8828cedcf39c4105"
+      "sha256": "4f6c9fa5ef50aff3ed23a0c54b3612cf5f968468e74de4c84c8cbf87a2aac4db"
     },
     {
       "bytes": 6893,
@@ -6025,10 +6031,10 @@
       "sha256": "352ba26534469b358b090a69dec31dfd3ec8882b80751ae52dd574c147bda277"
     },
     {
-      "bytes": 12493,
+      "bytes": 12571,
       "executable": false,
       "path": "records/README.md",
-      "sha256": "fbabbb0283ef07e69bf21c0d41d9a6e20dd0901b74285159fb4979eec9cd45f0"
+      "sha256": "71d3de959db634c5153086d0e64b75c12f981aee9e3bc212dc918b9bdb7400d0"
     },
     {
       "bytes": 269,
@@ -6037,16 +6043,16 @@
       "sha256": "0e3056c20dfc46d1f2677e4fc379fc15ffc1c3fb5d5fb1144a0774559a5ad483"
     },
     {
-      "bytes": 62590,
+      "bytes": 63529,
       "executable": false,
       "path": "records/specs.json",
-      "sha256": "078d7dfda3761511e6dc67971a49b59cac12b3dba536b8c50b90052a3e7dfcf7"
+      "sha256": "f42bd119b8a8fe250c379892e84e5e9c04d4cad10dc5e3b77c989de8a0be131b"
     },
     {
-      "bytes": 114906,
+      "bytes": 115115,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "cf50db3906f1fdbc15f7b6617b9f952f68db1de14e96355211f646848923c4c6"
+      "sha256": "ad31033df0587bd7971211ce5291992eb0bdc3fc541741fcecb412f1bbd2bc59"
     },
     {
       "bytes": 35593,
@@ -6073,10 +6079,10 @@
       "sha256": "63519378dafb379f852d51d0336b5a98ebe15e95f98eadfabf416ef2797490dc"
     },
     {
-      "bytes": 26902,
+      "bytes": 31076,
       "executable": false,
       "path": "release/experiment_code.json",
-      "sha256": "33efd74459ed91ab5f76341c350a6ad59dfe013caabde1f5d548267aa156767d"
+      "sha256": "0655c5da754292cbb5487559241eed46755bb450a7ea1131a2e10d54d74e4e38"
     },
     {
       "bytes": 3576,
@@ -6595,6 +6601,12 @@
       "sha256": "9695db31a6a2adc64693871d20fa8ac60fe2b7dc5c5f89ccd4cd2579ea8d6af0"
     },
     {
+      "bytes": 9943,
+      "executable": false,
+      "path": "scripts/run_decision_audit.py",
+      "sha256": "036647011837d61e5c71a8ec9832724dd33765f626e480ff664963a29a6e6c75"
+    },
+    {
       "bytes": 10171,
       "executable": false,
       "path": "scripts/run_experiment.py",
@@ -6785,6 +6797,12 @@
       "executable": false,
       "path": "tests/test_dataset_entrypoints.py",
       "sha256": "d529d512c9cdbd5a249deda786e0ff410fd55697ccff8c00ecea7b47273b1c67"
+    },
+    {
+      "bytes": 46265,
+      "executable": false,
+      "path": "tests/test_decision_audit.py",
+      "sha256": "d7d6f9618aeaa8179ed053bbcf7edbf5cbdcea8d3f8683a0a378d8a9eadd4a75"
     },
     {
       "bytes": 23965,
@@ -7222,5 +7240,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "e5baf65f3b11397deb5c1b45a79df4bb01aaae21173436fdcf913472bd8196d4"
+  "tree_sha256": "83812d5fbc7bf3fc01fb944e69a803c40d0ed6c778b5144edb1e90c7ea42e6f0"
 }

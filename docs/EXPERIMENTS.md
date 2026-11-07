@@ -45,7 +45,9 @@ experiments are published with the release `paper-artifacts`
 | Proposition 2 tube audit | S22, Fig. S17, Fig. 2 | `scripts/run_trajectory_audit.py` | `cm_experiments/trajectory_audit.py`, `cm_experiments/ensemble_grid.py` | `tube_audit` | — |
 | Depth diagnostics | Fig. S14 | `scripts/run_trajectory_audit.py` | `cm_experiments/trajectory_audit.py`, `cm_experiments/ensemble_grid.py` | `depth_diagnostics` | — |
 | E10 | S14b, Fig. S9, Fig. S18, S43 | `scripts/run_confirmation_analysis.py` | `cm_experiments/confirmation_analysis.py`, `cm_experiments/ensemble_grid.py`, `cm_campaigns/confirmation.py` | `confirmation_contrasts`, `confirmation_sensitivity` | — |
-
+| Action-gap audit (Prop. 3) | S21, Fig. S17, S33, S34, S47, Fig. S7 | `scripts/run_decision_audit.py` | `cm_experiments/decision_audit.py`, `cm_experiments/ensemble_grid.py`, `cm_experiments/input_gate.py`, `cm_experiments/negative_controls.py`, `cm_experiments/budget.py` | `action_gap_audit` | — |
+| Figure 3c-d decision traces | Fig. 3 | `scripts/run_decision_audit.py` | `cm_experiments/decision_audit.py`, `cm_experiments/ensemble_grid.py`, `cm_experiments/input_gate.py`, `cm_experiments/negative_controls.py` | `decision_traces` | — |
+| E7, E8 reliability diagnostics | Fig. S16 | `scripts/run_decision_audit.py` | `cm_experiments/decision_audit.py`, `cm_experiments/ensemble_grid.py`, `cm_experiments/input_gate.py`, `cm_experiments/negative_controls.py` | `reliability_diagnostics` | — |
 ## Core benchmark campaign
 
 Before evaluating outcome labels, freeze the source revision/fingerprint, model

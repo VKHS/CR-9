@@ -18,7 +18,7 @@ Defined in [`specs.json`](specs.json); the directory name of a set is its key.
 
 | Set | Displays | Experiments | Keys | Quantities | Producing command |
 |---|---|---|---|---|---|
-| `action_gap_audit` | S21, Fig. S17 | — | dataset | `median_gap_nats`, `p5_gap_nats`, `near_zero_threshold_nats`, `near_zero_fraction`, `switch_fraction`, `recovery_index_stability`, `beam_sequence_stability`, `decision_sites` | — |
+| `action_gap_audit` | S21, Fig. S17 | — | dataset | `median_gap_nats`, `p5_gap_nats`, `near_zero_threshold_nats`, `near_zero_fraction`, `switch_fraction`, `recovery_index_stability`, `beam_sequence_stability`, `decision_sites` | scripts/run_decision_audit.py |
 | `band_bound_tightness` | Fig. S18 | E18 | action, spectral_scale | `displacement_ratio` | scripts/run_experiment_b.py |
 | `band_power_audit` | Fig. S18c, S8, S22 | E18 | dataset, baseline, action, spectrum | `tightness_ratio`, `tightness_ratio_max`, `window_bound_ratio`, `retained_statistic_ratio`, `omitted_band_share`, `approximation_error_share`, `degree_factor`, `update_gain_p95`, `logged_statistic_ratio`, `audited_states`, `exact_spectrum_states`, `ranking_spearman`, `replay_max_abs_deviation`, `update_lipschitz_max`, `shared_weight_spectral_norm`, `activation_lipschitz` | scripts/run_experiment_b.py |
 | `baselines` | S15, S15b | E12, E17 | dataset, method, seed | `serial_cost`, `wall_time`, `gpu_hours`, `score`, `hpo_trials`, `params_millions` | scripts/export_records.py; scripts/run_upstream_baseline.py |
@@ -27,7 +27,7 @@ Defined in [`specs.json`](specs.json); the directory name of a set is its key.
 | `confirmation_contrasts` | S14b | E10 | contrast | `effect_nats`, `interval_low_nats`, `interval_high_nats`, `p_value_zero`, `unit_count` | scripts/run_confirmation_analysis.py |
 | `confirmation_sensitivity` | Fig. S18 | E10 | contrast | `effect_nats`, `ci_low_nats`, `ci_high_nats`, `units_old`, `graph_variance_share`, `holm_p`, `label_survival_probability` | scripts/run_confirmation_analysis.py |
 | `cross_backbone` | S25 | — | regime, model | `effect_nats`, `route_stable_folds`, `outer_folds` | scripts/run_experiment.py |
-| `decision_traces` | Fig. 3c-d | — | dataset | `same_depth_action_entropy`, `fraction_schedule_nominal`, `fraction_state_conditioned`, `fraction_exclusive_sequence`, `fraction_recovery`, `fraction_input_fallback` | — |
+| `decision_traces` | Fig. 3c-d | — | dataset | `same_depth_action_entropy`, `fraction_schedule_nominal`, `fraction_state_conditioned`, `fraction_exclusive_sequence`, `fraction_recovery`, `fraction_input_fallback` | scripts/run_decision_audit.py |
 | `depth_diagnostics` | Fig. S14 | — | dataset, depth, phase | `source_alignment_change`, `policy_loss_change`, `first_intervention_depth_q25`, `first_intervention_depth_median`, `first_intervention_depth_q75`, `supported_deterioration_depth`, `transport_fraction` | scripts/run_trajectory_audit.py |
 | `ensemble_grid` | S26b | E14 | dataset, ensemble | `loss_nats` | scripts/run_experiment.py |
 | `ensemble_grid_scores` | S26 | E14 | dataset, ensemble | `official_score` | scripts/run_experiment.py; scripts/run_timing_records.py |
@@ -41,7 +41,7 @@ Defined in [`specs.json`](specs.json); the directory name of a set is its key.
 | `nominal_time` | S23b | E17 | dataset | `t_nom_seconds` | scripts/export_records.py |
 | `oracle_dispersion` | S30, Fig. S13 | — | dataset | `median_oracle_depth`, `oracle_depth_q25`, `oracle_depth_q75`, `fraction_differs_from_qc`, `inputs` | scripts/run_confirmation_analysis.py |
 | `predictability` | S30, S33, S47 | E2 | dataset | `phi_seq`, `phi_gain`, `feedback_gain_nats`, `predictor_gain_nats`, `compared_sequences`, `evaluation_units` | scripts/run_experiment_b.py |
-| `reliability_diagnostics` | Fig. S16 | E7, E8 | diagnostic, level | `coverage`, `coverage_ci_low`, `coverage_ci_high`, `risk_rmse`, `nis_coverage`, `false_safe_rate`, `false_safe_ci_low`, `false_safe_ci_high`, `harm_miss_rate`, `harm_miss_ci_low`, `harm_miss_ci_high`, `input_fallback`, `residual_activity` | — |
+| `reliability_diagnostics` | Fig. S16 | E7, E8 | diagnostic, level | `coverage`, `coverage_ci_low`, `coverage_ci_high`, `risk_rmse`, `nis_coverage`, `false_safe_rate`, `false_safe_ci_low`, `false_safe_ci_high`, `harm_miss_rate`, `harm_miss_ci_low`, `harm_miss_ci_high`, `input_fallback`, `residual_activity` | scripts/run_decision_audit.py |
 | `runtime_scaling` | Fig. S2 | E17 | dataset, instance | `processed_edges_millions`, `wall_time_seconds`, `peak_memory_gib` | scripts/run_timing_records.py |
 | `search_enumeration` | Supplementary Note S20, E9 record | E9 | dataset, planner, horizon | `two_e_H_nats`, `zeta_H_nats`, `realized_regret_nats`, `bound_coverage`, `beam_optimal_fraction`, `two_e_H_zero_uncertainty_nats`, `mean_family_size`, `planning_instances` | scripts/run_experiment_b.py |
 | `sensitivity_grids` | S18 | E19 | parameter, setting, dataset | `qualified_fraction`, `strata_without_transport`, `eligible_count`, `selected_complexity`, `route_changed`, `route_simpler`, `clipped_fraction`, `clipped_mean_nats`, `admission_upper_nats`, `raw_maximum_harm_nats`, `admitted` | scripts/export_sweep_records.py; scripts/run_sweep.py |
