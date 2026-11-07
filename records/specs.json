@@ -239,7 +239,7 @@
         "decision_sites": "number of executed decision sites entering the audit"
       },
       "table": "list",
-      "notes": "Computed from per-site decision logs of the deployed rule on its evaluation role and from a perturbed re-execution of the same inputs. The lifecycle runtime records score_gap only for one-step/radius decisions of node-level member traces (member_predictions/*.json decisions[]); MPC-RH beam decisions, per-graph decisions of the multigraph benchmarks and every perturbed re-execution are not recorded, so the exporter must write the raw per-site gaps and switches."
+      "notes": "Audited sites are executed decisions of the deployed rule (origin policy) with at least two finite candidates; recovery and single-candidate sites are excluded. One-step and radius gaps are the runtime's score_gap; MPC-RH gaps are the Eq. 17 objective of the best other first action minus that of the executed plan. The perturbation is one draw of the deployed observer's measurement-noise model at one site at a time; the near-zero threshold is the certificate floor 0.002 nats. A rule that neither scores nor plans (an open-loop comparator) has no rows; a declared provisional rule q_s may be audited instead. Produced by scripts/run_decision_audit.py (cm_experiments/decision_audit.py), which re-executes the deployed rule with instrumentation and replays the decision log site by site."
     },
     "band_bound_tightness": {
       "title": "Tightness of the band-limited displacement bound",
@@ -409,7 +409,7 @@
         "fraction_input_fallback": "fraction of D_test decisions on inputs returned to q_C by the input gate or by a global q_C return"
       },
       "table": "list",
-      "notes": "The five fractions of a dataset sum to one. Sealed runs keep per-decision origins only for whole-graph executions, so graph-level traces must be exported from the serving-time execution records."
+      "notes": "The five fractions of a dataset sum to one. Sealed runs keep per-decision origins only for whole-graph executions, so graph-level traces must be exported from the serving-time execution records. Each evaluation unit at each executed depth has weight 1, split 1/E over the serving members; the entropy includes fallback decisions and a numerical failure of the deployed rule counts as input fallback. Produced by scripts/run_decision_audit.py (cm_experiments/decision_audit.py)."
     },
     "depth_diagnostics": {
       "title": "Depth diagnostics of the plants and deployed rules",
@@ -902,7 +902,7 @@
         "stress": "level = clean (supported deployment inputs, the reference of the four negative_controls constructions); quantities input_fallback, residual_activity"
       },
       "table": "list",
-      "notes": "Coverage, observer consistency and harm accounting of the deployed rules, from the decision logs and held-out trajectories of the lifecycle runs and the observer-variant comparison of Supplementary Table S17 (the observer risk RMSE is the same measurement as module_ablations/innovation_rmse; both summaries may trace to one raw file). The runtime records sequence coverage as NOT_MEASURED (fit/<profile>/calibration_assessment.json), so these values come from the separate reliability evaluation; deposit with `python -B scripts/export_records.py from-mapping --mapping <reliability_diagnostics mapping>` once the set is registered for the mapping exporter."
+      "notes": "Coverage, observer consistency and harm accounting of the deployed rules, from the decision logs and held-out trajectories of the lifecycle runs and the observer-variant comparison of Supplementary Table S17 (the observer risk RMSE is the same measurement as module_ablations/innovation_rmse; both summaries may trace to one raw file). The runtime records sequence coverage as NOT_MEASURED (fit/<profile>/calibration_assessment.json), so these values come from the separate reliability evaluation. Level 1 coverage compares the realized one-action consequence with the critic mean plus or minus the registered radius; levels 4 to 32 compare h-step realized loss changes with the consequence-model rollout and an h-step radius calibrated by the runtime's rule on the D_explore radius-fit partition; values are pooled over datasets with unit-bootstrap intervals. Harm rows exist for datasets with a feedback rule. Produced by scripts/run_decision_audit.py (cm_experiments/decision_audit.py)."
     },
     "runtime_scaling": {
       "title": "Runtime and memory of the deployed rule against processed graph size",

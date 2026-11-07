@@ -605,6 +605,93 @@
         "supplementary:Figure S18",
         "supplementary:Table S43"
       ]
+    },
+    {
+      "experiment": "Action-gap audit (Prop. 3)",
+      "title": "Per-site action gaps, near-zero fraction and switching under the registered observer-noise perturbation, recovery-index and beam-sequence stability of the deployed rules, from an instrumented serving-time execution with site-by-site decision-log replay",
+      "code": [
+        "cm_experiments/decision_audit.py",
+        "scripts/run_decision_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/negative_controls.py",
+        "cm_experiments/budget.py"
+      ],
+      "command": "python -B scripts/run_decision_audit.py plan --parent <run or Roman campaign> (each of the seven datasets) --stress-dataset <negative-controls dataset> [--provisional <dataset>] --output <dir>; ... run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... export --output <dir> --set action_gap_audit",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:action_gap_audit"
+      ],
+      "displays": [
+        "supplementary:Table S21",
+        "supplementary:Figure S17",
+        "supplementary:Table S33",
+        "supplementary:Table S34",
+        "supplementary:Table S47",
+        "supplementary:Figure S7"
+      ]
+    },
+    {
+      "experiment": "Figure 3c-d decision traces",
+      "title": "Executed D_test decision origins (schedule/nominal, state-conditioned, exclusive sequence, recovery, input fallback) and within-depth action entropy of the deployed rules behind g_input, from the same instrumented execution",
+      "code": [
+        "cm_experiments/decision_audit.py",
+        "scripts/run_decision_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/negative_controls.py"
+      ],
+      "command": "python -B scripts/run_decision_audit.py plan --parent <run or Roman campaign> (each of the seven datasets) [--gate-from <dataset>=<sealed input_gate run>] --output <dir>; ... run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... export --output <dir> --set decision_traces",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:decision_traces"
+      ],
+      "displays": [
+        "main:Figure 3"
+      ]
+    },
+    {
+      "experiment": "E7, E8 reliability diagnostics",
+      "title": "One-step and h-step risk coverage with unit-bootstrap intervals, observer-variant risk RMSE and NIS coverage (raw, EMA, global KF, conditioned KF), false-safe and harm-miss rates, and the clean-input fallback and residual activity of the deployed rules",
+      "code": [
+        "cm_experiments/decision_audit.py",
+        "scripts/run_decision_audit.py",
+        "cm_experiments/ensemble_grid.py",
+        "cm_experiments/input_gate.py",
+        "cm_experiments/negative_controls.py"
+      ],
+      "command": "python -B scripts/run_decision_audit.py plan --parent <run or Roman campaign> (each of the seven datasets) --stress-dataset <negative-controls dataset> --output <dir>; ... run --output <dir> [--job K] --device cuda --trust-local-checkpoints; ... export --output <dir> --set reliability_diagnostics",
+      "configurations": [
+        "configs/arxiv_full.json",
+        "configs/proteins_full.json",
+        "configs/products_full.json",
+        "configs/roman_empire_full.json",
+        "configs/pascalvoc_sp_full.json",
+        "configs/coco_sp_full.json",
+        "configs/peptides_func_full.json"
+      ],
+      "outputs": [
+        "records:reliability_diagnostics"
+      ],
+      "displays": [
+        "supplementary:Figure S16"
+      ]
     }
   ]
 }
