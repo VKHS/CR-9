@@ -13,7 +13,7 @@ Workflow (``scripts/run_internal_baselines.py``):
             method (with the ranking that chose it), the timed inputs and the stage timing of the GPU-hours;
             torch-free
     run     one job per run (--job K for an array task) -> <output>/jobs/<dataset>/<run>/: scores/<method>/
-            seed<s>.json, timing.csv, executions.json, session.log, gpu_hours.json, environment.json, result.json
+            seed<s>.json and seed<s>.npy, timing.csv, executions.json, session.log, gpu_hours.json, environment.json, result.json
             and ARTIFACT_MANIFEST.json (the seal, written last). An interrupted job resumes its scores; the timing
             sessions always run in the allocation that completes the job, whose scheduler key the rows carry.
     export  scripts/export_records.py baselines --internal <output> (verifies the seals, the plan identity and
@@ -72,7 +72,7 @@ from cm_campaigns.contract import METRICS
 from .artifacts import seal, sha256, verify, write_json
 from .ensemble_grid import (STAGES, ParentContext, RunnerError, SealedRun, candidate_identity, check_identity,
                             check_role, create_plan, environment_record, json_safe, load_plan, member_runs,
-                            read_json, runtime_source_sha256, selected_jobs, slug, utc_now)
+                            read_json, runtime_source_sha256, save_array, selected_jobs, slug, utc_now)
 from .timing_records import (DEFAULT_GRAPH_QUANTILES, DEFAULT_REPETITIONS, DEFAULT_WARMUP, PREDICTION_ENCODING,
                              _dump, _write_bytes, graph_instances, member_record, npy_sha256, plant_layout,
                              read_timing_rows, sealed_output, timing_job_key, timing_means, write_timing_rows)
@@ -331,6 +331,27 @@ def timing_inputs(run: SealedRun, quantiles) -> tuple[list[dict], dict]:
     return instances, layout
 
 
+def check_benchmark_members(runs: list[SealedRun]) -> None:
+    """Official split averaging requires all ten distinct Roman splits and no invented split campaigns.
+
+    Synthetic fixtures may exercise aggregation on fewer runs, but cannot be mixed with benchmark evidence.
+    """
+    synthetic = {run.synthetic for run in runs}
+    if len(synthetic) != 1:
+        raise RunnerError("synthetic and benchmark runs cannot share an internal-baseline campaign")
+    if True in synthetic:
+        return
+    dataset = runs[0].dataset
+    if dataset == "Roman-empire":
+        indices = [run.config.get("data", {}).get("split_index") for run in runs]
+        if (any(type(i) is not int for i in indices) or sorted(indices) != list(range(10))):
+            raise RunnerError(f"Roman-empire internal baselines require all ten distinct official splits 0..9; "
+                              f"found {indices}")
+    elif len(runs) != 1:
+        raise RunnerError(f"{dataset}: internal baselines require one benchmark run; only Roman-empire averages "
+                          "official split runs")
+
+
 def plan_internal_baselines(parents, output, *, warmup=DEFAULT_WARMUP, repetitions=DEFAULT_REPETITIONS,
                             graph_quantiles=None, allow_fixture=False) -> Path:
     if not parents:
@@ -348,6 +369,7 @@ def plan_internal_baselines(parents, output, *, warmup=DEFAULT_WARMUP, repetitio
             raise RunnerError(f"{parent}: one parent (run or campaign) per dataset")
         if METRICS.get(dataset) is None:
             raise RunnerError(f"{dataset} is not a dataset of the baselines record set")
+        check_benchmark_members(runs)
         if len({tuple(int(s) for s in r.config["training"]["seeds"]) for r in runs}) != 1:
             raise RunnerError(f"{parent}: the split runs register different plant seeds")
         members = [member_selection(run, allow_fixture=allow_fixture) for run in runs]
@@ -451,7 +473,7 @@ def reproduction(ctx, summary: dict, name: str, ensemble: np.ndarray, labels, un
 
 def score_method(ctx, plan_sha: str, entry: dict, method: dict, directory: Path, *, labels, units, summary,
                  failures=(), boundary=None) -> dict:
-    """Per-seed official scores of one configuration, one execution per plant checkpoint (resumable)."""
+    """Per-seed official scores and prediction arrays, one execution per plant checkpoint (resumable)."""
     from cross_morse.evaluation import score_observations
     run = ctx.run
     candidate = planned_candidate(run, method["candidate"])
@@ -463,12 +485,19 @@ def score_method(ctx, plan_sha: str, entry: dict, method: dict, directory: Path,
     records = []
     for seed in entry["seeds"]:
         path = folder / f"seed{seed}.json"
+        prediction_path = folder / f"seed{seed}.npy"
+        prediction_file = prediction_path.relative_to(directory).as_posix()
         if path.is_file():
             record = read_json(path)
             if (record.get("schema") != SCORE_SCHEMA or record.get("plan_sha256") != plan_sha
                     or record.get("method") != method["key"] or record.get("seed") != seed
                     or record.get("candidate") != method["candidate"]):
                 raise RunnerError(f"{path}: the score belongs to another plan, method or seed")
+            if record.get("status") == "COMPLETE" and (
+                    record.get("prediction_file") != prediction_file or not prediction_path.is_file()
+                    or prediction_path.is_symlink() or sha256(prediction_path) != record.get("prediction_sha256")):
+                raise RunnerError(f"{path}: completed prediction bytes are missing or changed; resume cannot retain "
+                                  "a score whose predictions were not saved")
             resumed = resumed or seed in method["member_seeds"]
         else:
             checkpoint = run.root / "train" / f"plant_seed{seed}_best.pt"
@@ -488,10 +517,12 @@ def score_method(ctx, plan_sha: str, entry: dict, method: dict, directory: Path,
                     raise RunnerError(f"{entry['dataset']}: the run scores {score['metric_name']}, the baselines set "
                                       f"{METRICS.get(entry['dataset'])}")
                 reported, unit = reported_score(score["metric"], score["metric_name"])
+                prediction_sha = save_array(prediction_path, np.ascontiguousarray(rows), replace=True)
                 record.update(status="COMPLETE", metric_name=score["metric_name"], metric=float(score["metric"]),
                               score_reported=reported, unit=unit, loss_nats=float(score["node_ce"]),
                               loss_name=score["loss_name"], units=len(score["core_ids"]), rows=int(rows.shape[0]),
-                              prediction_sha256=npy_sha256(rows), prediction_encoding=PREDICTION_ENCODING,
+                              prediction_sha256=prediction_sha, prediction_file=prediction_file,
+                              prediction_encoding=PREDICTION_ENCODING,
                               execution={k: totals.get(k) for k in ("deployed_multiply_add_work", "multiply_add_work",
                                                                     "wall_seconds", "feasible", "support_violations",
                                                                     "graphs")})
@@ -521,6 +552,7 @@ def score_method(ctx, plan_sha: str, entry: dict, method: dict, directory: Path,
             "ensemble": method["ensemble"], "member_seeds": method["member_seeds"],
             "scores": [{"seed": r["seed"], "status": r["status"], "score_reported": r.get("score_reported"),
                         "unit": r.get("unit"), "prediction_sha256": r.get("prediction_sha256"),
+                        "prediction_file": r.get("prediction_file"),
                         "file": f"scores/{method_directory(method['key'])}/seed{r['seed']}.json",
                         "sha256": sha256(folder / f"seed{r['seed']}.json")} for r in records],
             "failed_seeds": [r["seed"] for r in records if r["status"] != "COMPLETE"],
@@ -787,6 +819,14 @@ def _verify_result(output: Path, plan: dict, plan_sha: str, entry: dict) -> dict
                     and sha256(directory / score["file"]) == score["sha256"])
             if not same:
                 raise RunnerError(f"{where}: {score['file']} differs from the result's record")
+            if record["status"] == "COMPLETE":
+                relative = f"scores/{method_directory(method['key'])}/seed{score['seed']}.npy"
+                prediction = directory / relative
+                if (record.get("prediction_file") != relative or score.get("prediction_file") != relative
+                        or score.get("prediction_sha256") != record.get("prediction_sha256")
+                        or not prediction.is_file() or prediction.is_symlink()
+                        or sha256(prediction) != record.get("prediction_sha256")):
+                    raise RunnerError(f"{where}: saved per-seed prediction bytes are missing or changed")
     gpu = read_json(directory / "gpu_hours.json")
     if sha256(directory / "gpu_hours.json") != result["gpu_hours"]["sha256"]:
         raise RunnerError(f"{where}: gpu_hours.json differs from its recorded SHA-256")

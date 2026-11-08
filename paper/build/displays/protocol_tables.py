@@ -13,9 +13,9 @@ Prose that no configuration or code expresses is kept in
 Tables S5 and S5d also read sealed lifecycle runs (checkpoint inventories, per-seed
 training records, identity audits, sealed sensor settings); they are measurement displays.
 
-Printed values are reached only through ``out.compare``. Apart from S5d these tables
-have no group in ``paper/reported_results.json``; their comparisons name a proposed
-group (the ``*_GROUP`` constants below) and resolve once that group is transcribed.
+Printed values are reached only through ``out.compare``. The independently reviewed
+``paper/printed_display_values.json`` supplies the protocol comparisons and pins
+them to the supplied PDF bytes. It is never read as a computation input.
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ import textwrap
 from pathlib import Path
 
 from .framework import (DATASETS, MISSING_TEXT, SHORT, STEMS, DisplayInputError, display, integer, num,
-                        pyplot)
+                        not_applicable, pyplot)
 
 PROFILE = "full"
 EXAMPLE_RUNS = ("examples/runs/arxiv", "examples/runs/peptides_func")
@@ -47,12 +47,14 @@ S8_GROUP = "supplementary_table_S8_online_features"
 S9_GROUP = "supplementary_table_S9_observer_and_search"
 S10_GROUP = "supplementary_table_S10_policy_definitions"
 S11_GROUP = "supplementary_table_S11_confirmation_map"
+S24_GROUP = "supplementary_table_S24_claim_artifact_registry"
 S31_GROUP = "supplementary_table_S31_reproduction_map"
 S32_GROUP = "supplementary_table_S32_comparator_rules"
 S35_GROUP = "supplementary_table_S35_reporting_conventions"
 S36_GROUP = "supplementary_table_S36_experiment_definitions"
 S38_GROUP = "supplementary_table_S38_results_record_schema"
 S39_GROUP = "supplementary_table_S39_data_role_contract"
+S40_GROUP = "supplementary_table_S40_information_restrictions"
 
 ROLE_ORDER = ("fit", "explore", "select", "confirm", "compare", "admit", "test")
 ROLE_LABELS = {role: f"D_{role}" for role in ROLE_ORDER}
@@ -417,8 +419,9 @@ def table_s2(ctx, out):
                   "compare": f"{controller_seeds} (E3–E6 controller optimization)"}
     rows, numbers = [], []
     for role in ROLE_ORDER:
-        rows.append([ROLE_LABELS[role], allocation[role], folds["outer"].get(role), folds["inner"].get(role),
-                     plant.get(role), controller.get(role), text[role]["labels"], text[role]["operation"],
+        na = not_applicable(f"The released {ROLE_LABELS[role]} stage does not separately execute this fold or seed loop")
+        rows.append([ROLE_LABELS[role], allocation[role], folds["outer"].get(role, na), folds["inner"].get(role, na),
+                     plant.get(role, na), controller.get(role, na), text[role]["labels"], text[role]["operation"],
                      text[role]["frozen_after"]])
         values = {"allocation_percent": round(100 * shares[role], 6) if role in shares else None,
                   "outer_folds": outer if role == "select" else None,
@@ -1226,6 +1229,8 @@ def table_s24(ctx, out):
                      f"{spec['test']} ({', '.join('make ' + c for c in spec['checks'])})"])
         links += [[key, "artifact", a] for a in carriers]
         links += [[key, "check", f"make {c}"] for c in spec["checks"]]
+        for field in ("identity", "ambiguity", "test"):
+            out.compare(S24_GROUP, [key, field], spec[field])
     raise_problems(problems)
     out.uses("repository", "linkage", ["paper/protocol/S24.json", "Makefile", *EXAMPLE_RUNS])
     out.table(["object", "required identity", "prohibited ambiguity", "reconstruction test"], rows,
@@ -1249,14 +1254,20 @@ def table_s31(ctx, out):
         links = resolved_links(ctx, spec)
         problems += check_linkage(ctx, links, key)
         record = linkage_text(links)
-        rows.append([fill(spec["quantity"], values), fill(spec["estimator"], values), record])
-        out.compare(S31_GROUP, (key, "record"), record)
+        description = spec.get("record_description")
+        if not isinstance(description, str) or not description.strip():
+            raise DisplayInputError(f"S31/{key}: the source record description is missing")
+        rows.append([fill(spec["quantity"], values), fill(spec["estimator"], values), description, record])
+        out.compare(S31_GROUP, (key, "record"), description)
     raise_problems(problems)
     absent = [key for key, spec in text.items() if spec.get("absent")]
     out.uses("repository", "linkage", ["paper/protocol/S31.json", "records/specs.json", "paper/display_manifest.json",
                                        *EXAMPLE_RUNS])
-    out.table(["quantity (location)", "estimator", "record"], rows,
-              notes=["Records are the artifacts of this repository: run-archive files written by the runtime, "
+    out.table(["quantity (location)", "estimator", "record", "repository location"], rows,
+              notes=["The record column preserves the protocol description in the source PDF. The additional "
+                     "repository-location column resolves that description to checked implementation files; "
+                     "relocated paths are not treated as changed numerical results.",
+                     "Records are the artifacts of this repository: run-archive files written by the runtime, "
                      "measurement-record sets (records/specs.json) and the experiment code that produces them "
                      "(release/experiment_code.json), campaign exports and analytical modules; every path was "
                      "checked to exist.",
@@ -1314,13 +1325,18 @@ def table_s35(ctx, out):
         links = resolved_links(ctx, spec)
         problems += check_linkage(ctx, links, key)
         record = linkage_text(links)
-        rows.append([key, fill(spec["convention"], values), record])
-        out.compare(S35_GROUP, (key, "supporting_record"), record)
+        description = spec.get("record_description")
+        if not isinstance(description, str) or not description.strip():
+            raise DisplayInputError(f"S35/{key}: the source record description is missing")
+        rows.append([key, fill(spec["convention"], values), description, record])
+        out.compare(S35_GROUP, (key, "supporting_record"), description)
     raise_problems(problems)
     absent = [key for key, spec in text.items() if spec.get("absent")]
     out.uses("repository", "linkage", ["paper/protocol/S35.json", "records/specs.json", *EXAMPLE_RUNS])
-    out.table(["ID", "convention", "supporting record"], rows,
-              notes=["Supporting records are artifacts of this repository (run-archive files written by the runtime, "
+    out.table(["ID", "convention", "supporting record", "repository location"], rows,
+              notes=["The supporting-record column preserves the source PDF description. The additional "
+                     "repository-location column identifies the checked implementation files.",
+                     "Supporting records are artifacts of this repository (run-archive files written by the runtime, "
                      "record sets and the experiment code that produces them, campaign exports, modules and tests); "
                      "every path was checked to exist.",
                      *([f"Conventions whose supporting record the released code does not produce: {', '.join(absent)}; "
@@ -1484,6 +1500,9 @@ def table_s40(ctx, out):
     text = protocol_text(ctx, "S40")["rows"]
     raise_problems(arm_checks(ctx, text))
     rows = [[spec["arm_label"], spec["allowed"], spec["forbidden"], spec["completion"]] for spec in text.values()]
+    for key, spec in text.items():
+        for field in ("allowed", "forbidden", "completion"):
+            out.compare(S40_GROUP, [key, field], spec[field])
     out.uses("code", "cm_experiments", ["protocol.py:ARMS", "execution.py", "budget.py"])
     out.table(["arm", "inputs allowed", "inputs forbidden", "completion and cost rule"], rows,
               notes=["Teachers and arm configurations are fixed before D_compare; every arm of "

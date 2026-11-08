@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-11-07 — Evidence-complete exports and independently checked reconstruction
+
+- Retain actual factorial and internal-baseline predictions, fitted ablation
+  controller packages, and complete external-baseline study archives. E12 exports
+  verify every original search attempt and final checkpoint, prediction, split
+  manifest and timing file, including all Roman official splits.
+- Reconstruct factorial contrast intervals from paired per-unit observations and
+  the original joint bootstrap. Replace E11's overlapping-dependence grouping with
+  versioned connected components; one component cannot support an uncertainty
+  interval or positive admission.
+- Bind twenty-one additional comparison groups to the supplied supplementary PDF.
+  Missing table cells, absent figure source data and omitted comparison targets
+  prevent successful reconstruction. Printed disagreements remain visible.
+- Register the printed S15 reference ranges, S19 control descriptions and S28b
+  sigma grid. Keep the labelled Figure S17d independence illustration separate
+  from the paired intervals of S16/S16b. Correct four groups of textual reference
+  transcriptions, retaining explanations as metadata and preserving all prior
+  numerical targets.
+- Verify cached files, preserve immutable release assets, require explicit
+  manuscript relationships, bind production plans to their auxiliary sources,
+  and prevent duplicate Slurm submissions during resume.
+- Publish source-data, membership, environment and study views atomically, with
+  their release, input, source and report identities. The final statement gate
+  fetches the complete artifact tier and executes reconstruction.
+- Replace fraction-style public status headlines with a resource overview and
+  named artifact status. The registered availability paragraph remains the target
+  checked by the repository; measured benchmark outputs still require publication.
+- Preserve the core runtime, configurations, prior numerical targets and sealed
+  examples. Software fixtures and synthetic CPU checks do not establish benchmark
+  reproduction. See [the availability review](docs/AVAILABILITY_REVIEW.md) and
+  [validation record](docs/VALIDATION.md) for scope and executed checks.
+
 ## 2026-11-07 — Every reported experiment executable; one command produces the measured outputs
 
 - One command produces every measured output of the availability statement on the

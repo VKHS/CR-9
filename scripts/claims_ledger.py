@@ -239,12 +239,12 @@ def render(ledger: dict) -> str:
                  "Generated from `paper/sources.json`, `paper/display_manifest.json`, the display generators and "
                  "`release/paper_artifacts.json`. `make claims-check` checks freshness.", "",
                  "## Outputs in this release", "",
-                 f"- The measured outputs of the reported experiments are assets of the [release]({ledger['release_url']}): "
-                 f"{ledger['artifacts_published']} of {ledger['artifacts_required']} required artifacts published.",
+                 f"- The publication workflow distributes the measured outputs through the [release]({ledger['release_url']}); "
+                 "[artifact availability](../AVAILABILITY.md) identifies each published or awaited artifact.",
                  "- `make paper` downloads and verifies them, rebuilds every numbered display with "
                  "`paper/build/displays/` and compares every computed value with the printed one.",
-                 f"- Availability statement: {ledger['statement_fulfilled']} of {ledger['statement_items']} items "
-                 "fulfilled ([compliance](../STATEMENT_COMPLIANCE.md)).",
+                 "- [Statement compliance](../STATEMENT_COMPLIANCE.md) checks each availability requirement "
+                 "against the release files and reconstruction records.",
                  f"- Runtime source identity: `{ledger['source_sha256']}`.", "",
                  "## Manuscript groups, generators and inputs", ""]
         return "\n".join(lines + _render_rows(ledger)) + "\n"
@@ -311,8 +311,7 @@ def badge(ledger: dict) -> dict:
     if ledger.get("result_distribution") == "repository_release":
         done = ledger["statement_fulfilled"] == ledger["statement_items"]
         return {"schemaVersion": 1, "label": "availability statement",
-                "message": f"{ledger['statement_fulfilled']}/{ledger['statement_items']} fulfilled · outputs "
-                           f"{ledger['artifacts_published']}/{ledger['artifacts_required']} published",
+                "message": "verified" if done else "artifact publication workflow",
                 "color": "brightgreen" if done else "blue"}
     if ledger.get("result_distribution") == "regenerate":
         return {"schemaVersion": 1, "label": "reproduction", "message": "run_cross_morse.sh reproduce", "color": "blue"}
@@ -353,8 +352,7 @@ def main(argv=None) -> int:
                 print("CHECK FAILED:", problem, file=sys.stderr)
             if problems:
                 return 1
-            print(f"claim map matches the indexes ({ledger['official_archives']}/{ledger['official_total']} archives, "
-                  f"{len(ledger['record_sets_registered'])}/{len(ledger['record_sets_defined'])} record sets registered)")
+            print("claim map matches the artifact indexes; paper/CLAIMS.md records each resource's status")
             return 0
         write(ledger, ledger_path=ledger_path, badge_path=badge_path)
         if args.json:

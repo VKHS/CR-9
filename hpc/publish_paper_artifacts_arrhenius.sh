@@ -13,7 +13,7 @@
 # GitHub's 2 GiB asset limit. `publish` needs a token with contents:write on the repository
 # (export GITHUB_TOKEN=...), uploads the parts to the release `paper-artifacts`, records their
 # SHA-256 in release/paper_artifacts.json, downloads everything back and verifies it, rebuilds
-# every table and figure with `scripts/reconstruct_paper.py`, and writes the split/seed manifests, observed
+# supported tables and figures with `scripts/reconstruct_paper.py`, and writes the split/seed manifests, observed
 # environments, source data and the E12 study plans and adapter code (experiments/baselines/) to commit.
 # Set CM_PUBLISH_COMMIT=1 to commit and push them.
 #
@@ -23,11 +23,20 @@ set -Eeuo pipefail
 ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
 cd "${ROOT}"
 eval "$(bash "${ROOT}/run_cross_morse.sh" site-env)"
+if [[ -n "${CM_BUILD_MODULE:-}${CM_PYTHON_MODULE:-}" ]]; then
+    if ! type module >/dev/null 2>&1 && [[ -f "${MODULESHOME:-/nonexistent}/init/bash" ]]; then source "${MODULESHOME}/init/bash"; fi
+    set +u
+    module --force purge >/dev/null 2>&1 || module purge >/dev/null 2>&1 || true
+    # shellcheck disable=SC2086
+    module load ${CM_BUILD_MODULE} ${CM_PYTHON_MODULE} || { echo '[ERROR] cannot load the configured modules' >&2; exit 33; }
+    set -u
+fi
 # The environment created by `run_cross_morse.sh submit setup` when it exists; any Python 3.11+
 # with NumPy and Matplotlib otherwise.
 PYTHON=python3
 [[ -x "${CM_PYTHON:-/nonexistent}" ]] && PYTHON="${CM_PYTHON}"
 STAGE="${CM_PUBLISH_ROOT:-${CM_BASE}/paper-artifacts}"
+STAGE="$(readlink -m "${STAGE}")"
 STAGED="${STAGE}/staged"
 FETCHED="${STAGE}/fetched"
 WORKSPACE="${STAGE}/paper"
@@ -36,43 +45,64 @@ MAP="${2:-}"
 
 die() { printf '[ERROR] %s\n' "$*" >&2; exit 2; }
 note() { printf '[publish] %s\n' "$*"; }
+[[ "${STAGE}" != "${ROOT}" && "${STAGE}" != "${ROOT}"/* && "${ROOT}" != "${STAGE}"/* ]] \
+    || die "CM_PUBLISH_ROOT must be separate from the repository checkout"
+mkdir -p "${STAGE}"
+command -v flock >/dev/null 2>&1 || die "flock is required to protect concurrent publication"
+exec 9>"${STAGE}/publication.lock"
+flock -n 9 || die "another packing or publication process is using ${STAGE}"
 
 pack_here() {
     [[ -f "${MAP}" ]] || die "map file not found: ${MAP} (create it with: $0 template)"
     mkdir -p "${STAGED}"
     note "packing into ${STAGED}"
-    "${PYTHON}" -B scripts/paper_artifacts.py pack --map "${MAP}" --output-dir "${STAGED}"
+    local relationship=()
+    [[ -z "${CM_ARTIFACT_RELATIONSHIP:-}" ]] || relationship=(--relationship "${CM_ARTIFACT_RELATIONSHIP}")
+    "${PYTHON}" -B scripts/paper_artifacts.py pack --map "${MAP}" --output-dir "${STAGED}" \
+        --require-complete "${relationship[@]}"
 }
 
 publish_here() {
     [[ -n "${GITHUB_TOKEN:-${GH_TOKEN:-}}" ]] || command -v gh >/dev/null 2>&1 \
         || die "export GITHUB_TOKEN with contents:write on the repository (or log in with gh)"
     compgen -G "${STAGED}/*.entry.json" >/dev/null || die "nothing packed under ${STAGED}; run: $0 pack MAP"
+    if [[ "${CM_PUBLISH_COMMIT:-0}" == "1" ]]; then
+        [[ -z "$(git status --porcelain --untracked-files=normal)" ]] \
+            || die "automatic commit requires a clean checkout; retain or commit existing work first"
+    fi
     note "uploading to the release"
     "${PYTHON}" -B scripts/paper_artifacts.py publish --staged "${STAGED}"
     note "downloading every published artifact back and verifying it"
-    rm -rf "${FETCHED}"
-    "${PYTHON}" -B scripts/paper_artifacts.py fetch --dest "${FETCHED}" --tier analysis || true
-    note "rebuilding every table and figure from the downloaded artifacts"
-    "${PYTHON}" -B scripts/reconstruct_paper.py --offline --artifacts "${FETCHED}" --output-dir "${WORKSPACE}" || true
+    "${PYTHON}" -B scripts/paper_artifacts.py fetch --dest "${FETCHED}" --tier complete
+    note "reconstructing displays and comparing their values with the manuscript"
+    local reconstruction_status=0
+    "${PYTHON}" -B scripts/reconstruct_paper.py --offline --tier complete --artifacts "${FETCHED}" \
+        --output-dir "${WORKSPACE}" || reconstruction_status=$?
+    [[ "${reconstruction_status}" -le 1 ]] || die "reconstruction failed verification or execution; no derived views will be committed"
+    if [[ "${reconstruction_status}" == 1 ]]; then
+        note "reconstruction records differences or incomplete display coverage; these findings remain in the published report"
+    fi
     note "writing split/seed manifests, observed environments, source data and the E12 study plans into the checkout"
     "${PYTHON}" -B scripts/paper_artifacts.py derive --fetched "${FETCHED}" --workspace "${WORKSPACE}"
     note "refreshing the statement compliance, availability page, claim ledger and paper reports"
-    "${PYTHON}" -B scripts/statement_check.py --write || true
+    local statement_status=0
+    "${PYTHON}" -B scripts/statement_check.py --write || statement_status=$?
+    [[ "${statement_status}" -le 1 ]] || die "statement check failed to execute; inspect the error before committing"
     "${PYTHON}" -B scripts/availability.py
     "${PYTHON}" -B scripts/claims_ledger.py
     "${PYTHON}" -B scripts/manuscript_availability.py
     "${PYTHON}" -B scripts/paper_support_report.py
+    "${PYTHON}" -B scripts/artifact_catalog.py
     "${PYTHON}" -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
     local changed=(release/paper_artifacts.json release/release_scope.json manifests/published environment/observed
                    paper/source_data STATEMENT_COMPLIANCE.md AVAILABILITY.md README.md paper/CLAIMS.md
                    paper/AVAILABILITY_STATEMENT.txt paper/PAPER_SUPPORT.md paper/RESULTS.md docs/badges/evidence.json
-                   RELEASE_MANIFEST.json SHA256SUMS.txt)
+                   release/artifact_catalog.json docs/ARTIFACT_CATALOG.md RELEASE_MANIFEST.json SHA256SUMS.txt)
     # E12 study plans and adapter code, copied from the published baselines record set by derive.
     [[ -d experiments/baselines ]] && changed+=(experiments/baselines)
     if [[ "${CM_PUBLISH_COMMIT:-0}" == "1" ]]; then
         git add "${changed[@]}"
-        git commit -m "Publish the measured outputs of the paper as release assets"
+        git diff --cached --quiet || git commit -m "Publish verified experiment artifacts and reconstruction findings"
         git push
     else
         note "review and commit: git add ${changed[*]}"

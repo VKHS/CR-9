@@ -8,7 +8,7 @@
     # E12/E17: pinned-upstream studies of scripts/run_upstream_baseline.py with their plans and adapter checkouts,
     # the internal rows of scripts/run_internal_baselines.py, E17 timing rows, sacct exports
     python -B scripts/export_records.py baselines --study /abs/studies/arxiv_amp --study /abs/studies/arxiv_admp \
-        --checkouts /abs/baselines --internal /abs/baselines-internal \
+        --checkouts /abs/baselines --internal /abs/baselines-internal --copy-studies --copy-predictions \
         --timing /abs/timing/arxiv.csv --accounting /abs/accounting/sacct.psv \
         --hardware "NVIDIA GH200 96 GB, Arrhenius" --period "2026-11-02/2026-11-09"
 
@@ -26,9 +26,10 @@ the set and re-reads every value from its raw file.  Original outputs are copied
 unchanged.  Where a quantity is computed (a test score from saved predictions, GPU-hours from the
 scheduler export, a wall ratio from timing rows, a resolvent share from action counts), the exporter
 writes the result into a small JSON file under ``raw/`` together with the SHA-256 of every input.
-Small inputs are copied next to it; bulky ones (per-fit test predictions, per-unit campaign
-observations) stay in the archived studies or campaign (DOI in ``provenance.json``) and are named by
-SHA-256 and archive path, unless ``--copy-predictions`` / ``--copy-observations`` is given.
+Small inputs are copied next to it. A complete baseline deposit requires ``--copy-studies`` and
+``--copy-predictions``: sealed original studies, including source snapshots and checkpoints, are
+archived with per-file manifests, and final predictions are also accessible directly. Campaign
+observations use ``--copy-observations``; partial exports that retain external references remain partial.
 
 Nothing is filled in: a study without its predictions, a timing row whose scheduler job is absent
 from the accounting, or a campaign without its complete analysis stops the export.
@@ -55,6 +56,7 @@ import shutil
 import statistics
 import subprocess
 import sys
+import tarfile
 import tempfile
 from collections import defaultdict
 from pathlib import Path
@@ -419,7 +421,59 @@ def study_checkouts(plan: dict, plans: list[tuple[Path, dict]]) -> tuple[tuple[P
     return (source, adapter), None
 
 
-def package_study(target: Path, plan: dict, source: Path, adapter: Path) -> dict:
+def study_artifact_inventory(study: Path, plan: dict) -> dict:
+    """Identify and validate the complete original study, including every sealed attempted fit."""
+    from cm_campaigns.baselines import STUDY_ARTIFACT_SCHEMA, validate_study_artifacts
+    from cm_experiments.artifacts import canonical
+    files = {}
+    for path in sorted(study.rglob("*")):
+        if path.is_symlink():
+            raise ExportError(f"{study.name}: study artifacts must not be symbolic links ({path.relative_to(study)})")
+        if path.is_file():
+            relative = path.relative_to(study).as_posix()
+            files[relative] = {"bytes": path.stat().st_size, "sha256": sha256_file(path),
+                               "mode": 0o755 if path.stat().st_mode & 0o111 else 0o644}
+    try:
+        coverage = validate_study_artifacts(plan, files, lambda name: load_json(study / name))
+    except (ValueError, OSError, KeyError, TypeError) as exc:
+        raise ExportError(f"{study.name}: invalid original study artifacts ({exc})") from None
+    return {"schema": STUDY_ARTIFACT_SCHEMA, "dataset": plan["dataset"], "method": plan["method"],
+            "plan_sha256": canonical(plan), "source_commit": plan["source_commit"],
+            "adapter_commit": plan["adapter_commit"], **coverage,
+            "files": [{"path": name, **item} for name, item in files.items()]}
+
+
+def package_study_outputs(target: Path, study: Path, plan: dict, inventory: dict) -> dict:
+    """A deterministic, complete archive of the original study; checkpoint bytes are never loaded as code."""
+    from cm_campaigns.baselines import check_study_archive, study_paths
+    paths = study_paths(plan["dataset"], plan["method"], plan["adapter_commit"])
+    manifest_path, archive_path = target / paths["study_manifest"], target / paths["study_archive"]
+    dump_json(manifest_path, inventory)
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(archive_path, "w", format=tarfile.PAX_FORMAT) as archive:
+        for item in inventory["files"]:
+            source = study / item["path"]
+            if source.is_symlink() or not source.is_file() or source.stat().st_size != item["bytes"]:
+                raise ExportError(f"{study.name}: original study artifact changed during packaging: {item['path']}")
+            info = tarfile.TarInfo(item["path"])
+            info.size, info.mode, info.mtime = item["bytes"], item["mode"], 0
+            info.uid = info.gid = 0
+            info.uname = info.gname = ""
+            with source.open("rb") as content:
+                archive.addfile(info, content)
+    result = {"file": paths["study_archive"], "sha256": sha256_file(archive_path), "bytes": archive_path.stat().st_size,
+              "manifest_file": paths["study_manifest"], "manifest_sha256": sha256_file(manifest_path),
+              "format": "deterministic uncompressed POSIX tar (sorted files, fixed ownership and timestamps)",
+              "scope": "all original study files, including sealed HPO attempts, final checkpoints, predictions, "
+                       "split manifests, timing traces, logs and per-attempt pinned source snapshots"}
+    try:
+        check_study_archive(target, plan, result)
+    except (ValueError, OSError, KeyError, TypeError) as exc:
+        raise ExportError(f"{study.name}: packaged study did not verify ({exc})") from None
+    return result
+
+
+def package_study(target: Path, plan: dict, source: Path, adapter: Path, *, study_archive=None) -> dict:
     """Write the validated plan, the upstream identity and the adapter archive of one external comparison."""
     from cm_campaigns.baselines import UPSTREAM_SCHEMA, study_paths
     from cm_experiments.artifacts import canonical
@@ -446,14 +500,17 @@ def package_study(target: Path, plan: dict, source: Path, adapter: Path) -> dict
         "adapter_repository": public_url(_git(adapter, "remote", "get-url", "origin")),
         "adapter_archive": {"file": paths["adapter_archive"], "sha256": digest, "commit": plan["adapter_commit"],
                             "format": "git archive --format=tar of the adapter checkout at adapter_commit"},
-        "source_copied": False,
-        "scope": ("the upstream third-party source is referenced by its repository URL and source_commit and is not "
-                  "copied; the adapter code is archived at its pinned commit; plan_sha256 is the canonical hash the "
-                  "study's attempts record (attempt.json plan_sha256)")}
+        "source_copied": bool(study_archive),
+        "study_archive": study_archive,
+        "scope": ("the adapter code is archived at its pinned commit; the upstream source is identified by its "
+                  "repository URL and source_commit; when study_archive is present it includes the original "
+                  "per-attempt source snapshots and all measured model/prediction bytes; plan_sha256 is the "
+                  "canonical hash the study's attempts record (attempt.json plan_sha256)")}
     dump_json(target / paths["upstream"], upstream)
     return {"dataset": plan["dataset"], "method": plan["method"], "plan": paths["plan"],
             "upstream": paths["upstream"], "adapter_archive": paths["adapter_archive"], "adapter_archive_sha256": digest,
-            "source_commit": plan["source_commit"], "adapter_commit": plan["adapter_commit"]}
+            "source_commit": plan["source_commit"], "adapter_commit": plan["adapter_commit"],
+            "study_archive": study_archive}
 
 
 # --- the internal rows (scripts/run_internal_baselines.py)
@@ -531,6 +588,7 @@ def export_baselines(args) -> Path:
 
     # Inputs verified before anything is written: study plans, checkouts, the internal runner outputs.
     plans = {study: study_plan(study) for study in studies}
+    original_artifacts = {study: study_artifact_inventory(study, value) for study, value in plans.items()}
     comparisons = [(p["dataset"], p["method"]) for p in plans.values()]
     if len(set(comparisons)) != len(comparisons):
         raise ExportError("two studies of the same dataset-method comparison")
@@ -541,6 +599,12 @@ def export_baselines(args) -> Path:
             None, f"{plan['dataset']}/{plan['method']}: no --checkouts directory; its adapter is not archived")
         if reason:
             reasons.append(reason)
+        if not args.copy_studies:
+            reasons.append(f"{plan['dataset']}/{plan['method']}: complete original study bytes are not archived; "
+                           "use --copy-studies to publish checkpoints, predictions and original attempts")
+        if not args.copy_predictions:
+            reasons.append(f"{plan['dataset']}/{plan['method']}: individual final-fit predictions are not deposited; "
+                           "use --copy-predictions for direct reconstruction inputs")
         checkouts[study] = located
     internals = []
     if args.internal:
@@ -669,8 +733,10 @@ def export_baselines(args) -> Path:
             else:
                 reasons.append(f"{dataset}/{method}: no sacct export gives the GPU-hours of its attempts")
             # E12 study plan, upstream identity and adapter code
+            archived = (package_study_outputs(target, study, plan, original_artifacts[study])
+                        if args.copy_studies else None)
             if checkouts[study] is not None:
-                packaged.append(package_study(target, plan, *checkouts[study]))
+                packaged.append(package_study(target, plan, *checkouts[study], study_archive=archived))
 
         # The internal rows of Tables S15 and S15b (scripts/run_internal_baselines.py)
         for item in internals:
@@ -750,7 +816,9 @@ def export_baselines(args) -> Path:
                                 "studies": [s.name for s in studies]},
             "study_code": {"packaged": packaged,
                            "scope": "validated plan, upstream repository and commits, and the adapter checkout archived "
-                                    "at its pinned commit; the upstream third-party source is not copied"},
+                                    "at its pinned commit; each study_archive, when present, contains every original "
+                                    "sealed attempt and its source snapshots, checkpoints, predictions, split manifests "
+                                    "and timing traces"},
         }
         if internals:
             from cm_experiments.internal_baselines import DEFINITIONS
@@ -793,7 +861,12 @@ def baselines_arguments(p) -> None:
     p.add_argument("--allow-partial", action="store_true",
                    help="write a set the audit does not accept as complete (missing datasets, comparisons, adapters or "
                         "accounting) to another --root; never a deposit")
-    p.add_argument("--copy-predictions", action="store_true", help="also copy every final fit's prediction NPZ into raw/")
+    p.add_argument("--copy-predictions", action="store_true", help="also copy every final fit's prediction NPZ into raw/; "
+                   "required for direct reconstruction inputs in a complete deposit")
+    p.add_argument("--copy-studies", action="store_true",
+                   help="archive every complete original study with a per-file SHA-256 manifest, including all "
+                        "sealed attempts, checkpoints, predictions, split manifests and timing traces; required "
+                        "for a complete deposit")
     p.add_argument("--archive-doi", default=None, help="DOI of the archived studies")
     p.add_argument("--archive-sha256", default=None)
     p.add_argument("--root", type=Path, default=RECORDS, help="records root (default records/)")

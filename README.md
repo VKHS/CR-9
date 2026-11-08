@@ -18,29 +18,37 @@ selection, confirmation, and admission protocol.
 
 ## Every table and figure in one command
 
-The paper's registered data-availability statement places the complete experiment
-code, configurations, source data, split and seed manifests, environment
-specification, checkpoints, predictions, propensity-logged trajectories,
-statistical outputs and figure/table generators in this repository. The measured
-outputs are assets of the release
-[`paper-artifacts`](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts),
-listed with SHA-256 identities in [`release/paper_artifacts.json`](release/paper_artifacts.json).
+The repository combines experiment code, configurations, environment specifications
+and generators with a verified publication workflow for the measured outputs.
+The artifact inventory covers the paper's source data, executed split and seed
+manifests, checkpoints, predictions, propensity-logged trajectories and statistical
+outputs. The publication workflow uses the `paper-artifacts` release in
+[GitHub Releases](https://github.com/VKHS/CR-9/releases), with published assets
+listed by SHA-256 in [`release/paper_artifacts.json`](release/paper_artifacts.json).
 
 ```bash
 git clone https://github.com/VKHS/CR-9.git && cd CR-9
 make paper                     # download and verify the published outputs, rebuild all 90 displays, compare
-make paper PAPER_TIER=complete # also checkpoints and full prediction arrays
+make paper PAPER_TIER=complete # also the lifecycle checkpoints and full prediction arrays
 make statement-check           # each item of the availability statement and where it is fulfilled
 ```
 
-`make paper` verifies every downloaded byte and every run's sealed eight-stage
-chain, writes each table (CSV, Markdown, LaTeX) and figure (PNG, SVG) with its
-source data, and places every computed value beside the value printed in the paper
-(`displays/compare/`). [Statement compliance](STATEMENT_COMPLIANCE.md) states, item by
+`make paper` verifies the published artifacts and each run's sealed eight-stage
+chain, writes the supported tables (CSV, Markdown, LaTeX) and figures (PNG, SVG)
+with their source data, and places computed values beside independently registered
+paper values (`displays/compare/`). It succeeds only when every required display,
+value and comparison is complete and agrees at the printed precision.
+[Statement compliance](STATEMENT_COMPLIANCE.md) states, item by
 item, what is fulfilled and what awaits publication;
 [Producing the measured outputs](docs/PRODUCTION.md) produces all of them on the
 cluster with one command, and [Publishing the measured outputs](docs/PUBLICATION.md)
 describes how they enter the release.
+
+The final publication check is `make statement-fulfilled`. It verifies the complete
+artifact tier, including checkpoint and prediction bytes, executes reconstruction,
+and checks the committed source-data and manifest views against those artifacts.
+The [paper-reference guide](docs/PAPER_REFERENCE_VALUES.md) explains how printed
+comparison targets are tied to the author's manuscript files.
 
 ## Regenerate the results on a Slurm cluster
 
@@ -201,7 +209,7 @@ assumptions, and the exact implemented variants are explained in the
 ## Release scope
 
 <!-- availability:start -->
-**Availability statement:** 2 of 12 items fulfilled; measured outputs published: 0 of 37 ([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the outputs published with the [release](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) and compares them with the paper; see [availability](AVAILABILITY.md).
+**Reproduction resources:** Experiment code, configurations, artifact verification and reconstruction commands are included. [Statement compliance](STATEMENT_COMPLIANCE.md) identifies the published files and the measured outputs awaiting publication. `make paper` verifies the [release artifacts](https://github.com/VKHS/CR-9/releases), rebuilds their displays and compares them with the paper; see [availability](AVAILABILITY.md).
 <!-- availability:end -->
 
 `make verify` checks the software package and bundled examples. A regenerated

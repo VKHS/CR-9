@@ -73,6 +73,57 @@ and by `make compare RUN_ROOT=...` for a single run.
 The repository's GitHub Actions workflow validates the published checkout. Check
 its result for the commit you use.
 
+## Evidence completion validation — 8 November 2026
+
+The `evidence_completion_validation` section of [VALIDATION.json](VALIDATION.json)
+records the upgrade reviewed against `f34aa5a`, preserving the subsequent author
+change in `578837f`. Earlier dated sections below remain historical records.
+
+| Check | Executed result and scope |
+|---|---|
+| Integrated CPU suite | 1,698 tests: 1,696 passed, 2 skipped; 582.769 seconds |
+| Integrated suite without PyTorch | 1,405 tests: 1,354 passed, 51 skipped; 301.977 seconds |
+| Final focused suite after the source-reference corrections | 195 passed, no skips; 39.318 seconds |
+| Source and release verification | `make verify verify-manifest` passed; 1,229 source files in the release inventory |
+| CPU environment | Python 3.12.14, PyTorch 2.10.0+cpu; all 53 recorded package versions match |
+| Offline reviewer workflow | 17 steps passed; verdict `SOFTWARE-ONLY` |
+| Supplied paper and supplement | Both PDF byte identities verified; 34 registry groups checked |
+| Offline paper reconstruction | 20 repository-source displays rendered, no generator errors; the command correctly returns incomplete while measured artifacts await publication |
+
+The integrated suites and offline reviewer ran before the final bounded S15/S19,
+S17d and textual source-reference corrections. The final focused suite covers
+those corrections and their reconstruction, integrity and availability paths.
+The machine-readable record identifies both software snapshots and the files
+changed between them. GitHub's fresh-clone and CPU-container workflows identify
+the exact proposed commit they validate; a local record does not pre-attest
+their result.
+
+The CPU suite's two skips concern a synthetic smoke execution that did not
+confirm a state contrast and a private cluster profile excluded from the public
+package. The no-PyTorch suite skips cases that require PyTorch. Synthetic
+fixtures, mocked release transports and simulated Slurm state validate software
+behavior; they do not supply original benchmark measurements.
+
+The available offline comparisons contain 437 exact matches, 15 literal
+differences and four missing computed values. Eighteen displays have complete
+content and comparison coverage; coverage alone does not mean every value
+agrees. All ninety numbered displays remain registered. The differences include
+wording, schema representation and scientific protocol questions, as classified
+in [the availability review](AVAILABILITY_REVIEW.md). They are not fifteen
+independent numerical defects. The complete availability statement remains
+unverified until the measured artifacts and all required comparisons pass.
+
+The upgrade preserves the core runtime, configurations, sealed examples and
+source snapshots. It preserves all 2,349 existing numeric leaves in the results
+registry and every existing numerical constant. Eleven text cells are corrected
+against the PDFs, and three PDF-described protocol groups are added to the
+constants registry. Their review is AI-assisted, not an author certification.
+
+Arrhenius hostname resolution failed before authentication. No cluster files
+were accessed and no benchmark jobs were submitted. Recovering the original
+result-producing archives remains the preferred next step; newly executed
+experiments must retain their new-run provenance.
+
 ## Registered statement validation — 7 November 2026
 
 The `registered_statement_validation` section of [VALIDATION.json](VALIDATION.json)

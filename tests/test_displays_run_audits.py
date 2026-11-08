@@ -17,7 +17,8 @@ import numpy as np
 
 from cross_morse import statistics
 from paper.build.displays import run_audits
-from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, RunView
+from paper.build.displays.framework import (DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, DisplayValidationError,
+                                           RunView, comparison_coverage)
 from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table, write_files
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -643,12 +644,16 @@ class ConfirmationTests(unittest.TestCase):
         source = data_rows(self.out, "S14", "joint_family")
         self.assertEqual(len(source), 9)
         self.assertEqual([r["retained"] for r in source].count("True"), 7)
-        self.assertEqual(statuses(compared), {"exact"})
+        self.assertEqual(statuses(compared), {"exact", "missing"})
+        missing = [row for row in compared if row["status"] == "missing"]
+        self.assertEqual(len(missing), 7)
+        self.assertTrue(all(row["path"].endswith("P_vs_margin") for row in missing))
+        self.assertTrue(writer.missing_content)
 
     def test_s14_refuses_an_invalid_campaign(self):
         self.fixture.change_result("COCO/RH", p_value_kind="locally_Holm_adjusted")
         ctx = context(campaigns={"confirmation": self.fixture.root})
-        with self.assertRaises(DisplayInputError):
+        with self.assertRaises(DisplayValidationError):
             build_one("supplementary:Table S14", ctx, self.out)
 
     def test_figure_s9_original_sizes_and_two_way_rescaling(self):
@@ -715,7 +720,7 @@ class FigureTests(unittest.TestCase):
         self.assertEqual(markers[1], "ogbn-arxiv,4,4.0")
         self.assertIn("figures/FigS14.png", writer.files)
 
-    def test_figure_s17_panels_and_required_registered_grid(self):
+    def figure_s17_fixture(self):
         fixture = Fixture(self)
         runs = fixture.runs(comparator=("ogbn-products",), **{
             d: {"admission_differences": [-0.05] * (300 if d in GRAPH_LEVEL else 30)} for d in DATASETS})
@@ -737,6 +742,12 @@ class FigureTests(unittest.TestCase):
         ctx = context(runs=runs, records={"factorials": factorials, "input_gate": gate,
                                           "action_gap_audit": records_for("action_gap_audit", gap_rows(gaps)),
                                           "tube_audit": records_for("tube_audit", gap_rows(tube))})
+        return fixture, ctx, cells
+
+    def test_figure_s17_panels_and_required_registered_grid(self):
+        fixture, ctx, cells = self.figure_s17_fixture()
+        self.constants(ctx)
+        ctx.constants.pop("regret_bound_table_S28b", None)
         with self.assertRaises(DisplayInputError):
             build_one("supplementary:Figure S17", ctx, fixture.out("f17a"))
         self.constants(ctx, regret_bound_table_S28b={"sigma1_grid": [0.005, 0.007, 0.010]})
@@ -746,20 +757,91 @@ class FigureTests(unittest.TestCase):
                          "panel_f.csv", "panel_g_curves.csv", "panel_h.csv", "FigS17.png", "FigS17.svg"} <= names)
         slack = {r["dataset"]: float(r["slack"]) for r in data_rows(fixture.out("f17"), "FigS17", "panel_c")}
         for dataset in DATASETS:                                          # Theorem 1: eps_eq + 2 max radius
-            decisions = [m.json("select/decision.json") for m in runs[dataset].members()]
+            decisions = [m.json("select/decision.json") for m in ctx.require_run(dataset).members()]
             self.assertAlmostEqual(slack[dataset], decisions[0]["epsilon_eq"]
                                    + 2 * max(d["max_radius"] for d in decisions))
-        contrasts = (fixture.out("f17") / "data/FigS17/panel_d.csv").read_text().splitlines()
-        self.assertEqual([line.split(",")[0] for line in contrasts[1:]], ["A", "O", "X", "AO", "AX", "OX", "AOX"])
+        contrasts = data_rows(fixture.out("f17"), "FigS17", "panel_d")
+        self.assertEqual([row["contrast"] for row in contrasts], ["A", "O", "X", "AO", "AX", "OX", "AOX"])
+        expected_width = math.sqrt(sum(((v["interval"][1] - v["interval"][0]) / 2) ** 2
+                                       for v in cells.values())) / 4
+        for row in contrasts:
+            self.assertAlmostEqual(float(row["high_nats"]) - float(row["effect_coded_nats"]), expected_width)
+            self.assertAlmostEqual(float(row["effect_coded_nats"]) - float(row["low_nats"]), expected_width)
+            self.assertEqual(row["interval_method"], "independence approximation (printed Figure S17d illustration)")
+        self.assertEqual(len(data_rows(fixture.out("f17"), "FigS17", "panel_d_cells")), 8)
+        self.assertNotIn("data/FigS17/panel_d_paired_joint.csv", writer.files)
+        scopes = {key: value for scope in writer.evidence_scope for key, value in scope.items()}
+        self.assertFalse(scopes["factorial_joint"]["available"])
+        self.assertFalse(scopes["panel_d_interval_method"]["full_figure_comparison"])
+        self.assertIn("intervals: independence approximation", (fixture.out("f17") / "figures/FigS17.svg").read_text())
         exact = {row["path"] for row in compared if row["status"] == "exact"
                  and row["group"] == "supplementary_table_S16_arxiv_factorial"}
-        self.assertEqual(len(exact), 8)                                   # 3 main, half-width, 3 pairwise, 1 three-way
+        self.assertEqual(len(exact), 8)                                   # printed analytical illustration, including its width
+        self.assertFalse(any(row["status"] == "missing" and row["path"].endswith("half_width_95") for row in compared))
+        # Registering the S28b grid and matching this panel's related S16 values
+        # still cannot promote the entire eight-panel figure to full agreement.
+        missing, coverage = comparison_coverage("supplementary:Figure S17", writer.comparisons, REGISTRY, {},
+                                                scope="measurement")
+        self.assertFalse(coverage["complete"])
+        self.assertTrue(any(row["group"] == "display:supplementary:Figure S17" for row in missing))
         needed = (fixture.out("f17") / "data/FigS17/panel_g_units_for_smallest_effect.csv").read_text()
         self.assertIn("Hoeffding,0.0045,23670", needed)                  # S28: n for the arxiv effect
         breakeven = (fixture.out("f17") / "data/FigS17/panel_h.csv").read_text().splitlines()
         overhead = (0.9 * 1.4 + 0.1 * 1.0) / 1.0 - 1
         self.assertAlmostEqual(float(breakeven[1].split(",")[6]), 0.035 * 0.87 * overhead / (1 + overhead))
         self.assertNotIn("no_reference", statuses(compared))
+
+    def test_figure_s17_keeps_actual_paired_intervals_separate_from_its_illustration(self):
+        from cm_experiments.factorial import cell_statistics
+        from paper.build.displays.factorial_data import CELLS
+        fixture, ctx, _ = self.figure_s17_fixture()
+        self.constants(ctx, regret_bound_table_S28b={"sigma1_grid": [0.005, 0.007, 0.010]})
+        # The common per-unit noise cancels in every paired contrast, while the
+        # explicitly independent illustration has nonzero error bars.
+        noise = np.arange(12) * .002
+        units = {cell: .5 + noise - .004 * int(cell[0]) - .002 * int(cell[1]) - .001 * int(cell[2]) for cell in CELLS}
+        stats, contrasts, draws = cell_statistics(units, np.ones(12), ("A", "O", "X"), reps=128, seed=7)
+        raw_root = fixture.base / "factorial"
+        raw_root.mkdir()
+        np.savez(raw_root / "unit_dil.npz", unit_id=np.arange(12), unit_weight=np.ones(12),
+                 joint_bootstrap_cell_means=draws, **{f"cell{cell}_unit_dil": v for cell, v in units.items()})
+        raw = {"schema": "cm-factorial-2", "dataset": "ogbn-arxiv", "factors": ["A", "O", "X"],
+               "cells": [{"cell": cell, **stats[cell]} for cell in CELLS], "contrasts": contrasts,
+               "bootstrap": {"reps": 128, "seed": 7},
+               "unit_dil": {"file": "unit_dil.npz", "sha256": hashlib.sha256((raw_root / "unit_dil.npz").read_bytes()).hexdigest()}}
+        (raw_root / "factorial.json").write_text(json.dumps(raw))
+        ctx._records["factorials"] = fake_records("factorials", [
+            {"dataset": "ogbn-arxiv", "cell": cell, "quantity": q, "value": stats[cell][q], "source_file": "factorial.json"}
+            for cell in CELLS for q in ("ld_integrated_loss", "interval_low", "interval_high")], root=raw_root)
+        writer, _ = build_one("supplementary:Figure S17", ctx, fixture.out("f17-paired"), registry=REGISTRY)
+        displayed = data_rows(fixture.out("f17-paired"), "FigS17", "panel_d")
+        paired = data_rows(fixture.out("f17-paired"), "FigS17", "panel_d_paired_joint")
+        self.assertEqual(len(paired), 7)
+        for illustration, actual in zip(displayed, paired):
+            self.assertEqual(illustration["contrast"], actual["contrast"])
+            self.assertAlmostEqual(float(illustration["effect_coded_nats"]), float(actual["effect_coded_nats"]))
+            self.assertGreater(float(illustration["high_nats"]) - float(illustration["low_nats"]), .001)
+            self.assertLess(float(actual["high_nats"]) - float(actual["low_nats"]), 1e-12)
+            self.assertIn("paired whole-unit bootstrap", actual["interval_method"])
+        joint_scope = next(scope["factorial_joint"] for scope in writer.evidence_scope if "factorial_joint" in scope)
+        self.assertTrue(joint_scope["available"])
+        self.assertEqual(joint_scope["unit_sha256"], raw["unit_dil"]["sha256"])
+        self.assertEqual(joint_scope["companion_source_data"], "data/FigS17/panel_d_paired_joint.csv")
+        # An invalid supplied paired source is still an error, never a reason
+        # to silently keep only the analytical illustration.
+        with (raw_root / "unit_dil.npz").open("ab") as handle:
+            handle.write(b"changed")
+        with self.assertRaisesRegex(DisplayValidationError, "array hash differs"):
+            build_one("supplementary:Figure S17", ctx, fixture.out("f17-invalid"), registry=REGISTRY)
+
+    def test_figure_s17_independence_illustration_requires_valid_eight_cell_inputs(self):
+        from paper.build.displays.factorial_data import CELLS
+        cells = {cell: {"mean": .5, "low": .49, "high": .51} for cell in CELLS}
+        for invalid in ({cell: row for cell, row in cells.items() if cell != "111"},
+                        {**cells, "111": {"mean": .5, "low": .51, "high": .49}},
+                        {**cells, "111": {"mean": .5, "low": float("nan"), "high": .51}}):
+            with self.assertRaises(DisplayValidationError):
+                run_audits.independent_factorial_illustration(invalid, ("A", "O", "X"))
 
     def test_figure_s19_needs_the_registered_scope_table(self):
         fixture = Fixture(self)

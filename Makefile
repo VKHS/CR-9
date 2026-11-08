@@ -239,6 +239,7 @@ statement-check:
 
 # The final gate: every item of the registered statement fulfilled (after publication).
 statement-fulfilled:
+	"$(PYTHON)" -B scripts/reconstruct_paper.py --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)" --tier complete
 	"$(PYTHON)" -B scripts/statement_check.py --require-fulfilled
 
 # Produce every measured output of the statement on the cluster from a completed reproduction suite
@@ -491,7 +492,7 @@ source-id:
 test:
 	"$(PYTHON)" -B -m unittest discover -s tests -v
 
-NUMPY_TESTS := test_paper_registry test_records test_export_records test_availability test_paper_build test_run_archives \
+NUMPY_TESTS := test_paper_registry test_textual_source_references test_records test_export_records test_availability test_paper_build test_run_archives \
  test_artifact_inventory test_reproduce_examples test_statistics test_evaluation test_compare_with_manuscript \
  test_release_tooling test_release_launcher test_source_fingerprint_cli test_draw_diagrams test_make_workflows \
  test_dataset_entrypoints test_environment_spec \
@@ -504,7 +505,7 @@ NUMPY_TESTS := test_paper_registry test_records test_export_records test_availab
  test_theory_battery test_theory_formulas test_theory_review_regressions test_si_identities \
  test_arrhenius_discovery test_reviewer_faq test_paper_support_report test_review_confirmation test_s14_confirmation test_selection_figure \
  test_reproduction test_reproduction_launcher test_artifact_catalog test_reconstruction test_supplement_build \
- test_paper_artifacts test_reconstruct_paper test_statement_check \
+ test_paper_artifacts test_reconstruct_paper test_statement_check test_statement_evidence test_display_integrity \
  test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
  test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \

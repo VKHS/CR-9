@@ -53,9 +53,9 @@ PROTOCOLS = {
                         "the comparator branch from sealed input_gate and negative_controls runs",
     "buffer_sensitivity": "descriptive admission at each cluster buffer k: the sealed per-core clipped paired losses of "
                           "admit/paired_units.npz regrouped into blocks (cores linked when the k-step random-walk entry "
-                          "dependence exceeds its maximum over core pairs at the registered buffer; roots = the "
-                          "lexicographically first maximum independent set of the link graph, every other core joins "
-                          "the root it depends on most) and cross_morse.statistics.admission applied to the blocks "
+                          "dependence exceeds its maximum over core pairs at the registered buffer; each connected "
+                          "component is one block, with no above-threshold link between resampled blocks; version 2) "
+                          "and cross_morse.statistics.admission applied to the blocks "
                           "with the sealed replicates, alpha, clip and seed; the registered buffer reproduces "
                           "admit/decision.json exactly (cm_experiments/buffered_admission.py)",
 }

@@ -35,7 +35,7 @@ import numpy as np
 from cm_campaigns.contract import ADMITTED, ARMS
 from cm_theory import admission, budget, economics, inference, operators, spectral
 
-from .framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, display, integer, num, pyplot
+from .framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, display, integer, not_applicable, num, pyplot
 
 NORMAL = NormalDist()
 Z975 = NORMAL.inv_cdf(0.975)
@@ -352,13 +352,20 @@ def table_s6(ctx, out):
         transport, resolvent = a.is_transport, a.is_resolvent
         mass = operators.identity_mass(a) if resolvent else None
         products = operators.maximum_reach(a) if transport else 0
-        rows.append([f"A{a.id}", reg["role"], num(a.rho, 2) if transport else None,
-                     num(a.nu, 2) if transport else None, num(a.alpha, 2) if transport else None,
-                     f"η = {a.eta:.2f}" if resolvent else reg["mode"], integer(a.order) if resolvent else None,
-                     num(mass, 4), integer(products), num(a.probability, 2), reg["interpretation"]])
+        na = not_applicable("This action does not use the transport or resolvent parameter")
+        rows.append([f"A{a.id}", reg["role"], num(a.rho, 2) if transport else na,
+                     num(a.nu, 2) if transport else na, num(a.alpha, 2) if transport else na,
+                     f"η = {a.eta:.2f}" if resolvent else reg["mode"], integer(a.order) if resolvent else na,
+                     num(mass, 4) if resolvent else na, integer(products), num(a.probability, 2), reg["interpretation"]])
         coefficients = operators.operator_polynomial(a) if transport else []
         source.append([f"A{a.id}", a.name, a.mode, a.rho, a.nu, a.alpha, a.eta, a.order if resolvent else None,
                        mass, products, a.probability, " ".join(repr(float(c)) for c in coefficients)])
+        values = {"rho": a.rho if transport else None, "nu": a.nu if transport else None,
+                  "alpha": a.alpha if transport else None, "eta": a.eta if resolvent else None,
+                  "T": a.order if resolvent else None, "identity_mass": mass, "sparse_products": products,
+                  "exploration_probability": a.probability}
+        for key, value in values.items():
+            out.compare("supplementary_table_S6_action_registry", (f"A{a.id}", key), value)
     total = math.fsum(a.probability for a in actions)
     out.table(["ID", "role", "ρ", "ν", "α", "mode/range", "T", "identity mass", "sparse products",
                "explore p_ctrl", "exact interpretation"], rows,
@@ -385,9 +392,14 @@ def table_s6b(ctx, out):
         coefficient = operators.identity_coefficient(a)
         mass = operators.identity_mass(a) if a.is_resolvent else None
         rows.append([f"A{a.id}", num(a.nu, 2), num(hops, 3) if a.is_resolvent else integer(hops), num(executed, 3),
-                     integer(reach), num(mass, 4), num(coefficient, 3), integer(reach)])
+                     integer(reach), num(mass, 4) if a.is_resolvent else
+                     not_applicable("The action has no resolvent kernel identity mass"), num(coefficient, 3), integer(reach)])
         source.append([f"A{a.id}", a.nu, hops, executed, reach, mass, coefficient, reach,
                        operators.executed_range_closed_form(a), operators.identity_coefficient_closed_form(a)])
+        for key, value in (("nu", a.nu), ("kernel_hops", hops), ("executed_range", executed), ("max_reach", reach),
+                           ("kernel_identity_mass", mass), ("executed_identity_coefficient", coefficient),
+                           ("sparse_products", reach)):
+            out.compare("supplementary_table_S6b_executed_actions", (f"A{a.id}", key), value)
     nominal = next(a for a in actions if a.id == 0)
     widest = max((a for a in actions if a.is_resolvent), key=operators.identity_mass)
     out.table(["ID", "ν", "kernel hops", "executed range h̄_a (hops/step)", "max. reach (hops)",
@@ -550,7 +562,8 @@ def table_s28(ctx, out):
         at_count, at_ess = two_e(item["minimum_count"]), two_e(item["reference_ess"])
         n_effect = None if item["effect"] is None else hoeffding_count(ctx, item["effect"])
         rows.append([dataset, integer(item["minimum_count"]), integer(item["reference_ess"]), num(at_count, 4),
-                     num(at_ess, 4), None if n_effect is None else f"{round(n_effect):,}"])
+                     num(at_ess, 4), not_applicable("The deployed policy returned qC; no feedback effect defines a target sample size")
+                     if n_effect is None else f"{round(n_effect):,}"])
         source.append([dataset, item["minimum_count"], item["reference_ess"], at_count, at_ess, item["effect"], n_effect,
                        "; ".join(f"{run}:{rel}:{count}:{ess}" for run, rel, count, ess in item["per_member"])])
         out.uses("run", dataset, ["fit/full/audit.json", "final/results_summary.json"])
@@ -1153,6 +1166,8 @@ def held_reserve_ledger(scenario) -> list[tuple[str, float]]:
 @display("supplementary:Figure S11", stem="FigS11", title="Terminal-site budget ledger", scope="analytical")
 def figure_s11(ctx, out):
     scenario = TERMINAL_SITE
+    for key in ("W", "W_C", "C_pred", "w", "sensing", "action"):
+        out.compare("supplementary_figure_S11_terminal_budget", ("scenario", key), scenario[key])
     panels = (("a", "Reserve released to C_pred at the terminal site", released_reserve_ledger(scenario)),
               ("b", "Reserve held: w + W_C ≤ W until the final prediction", held_reserve_ledger(scenario)))
     plt = pyplot()
@@ -1160,6 +1175,7 @@ def figure_s11(ctx, out):
     for ax, (letter, title, steps) in zip(axes, panels):
         xs = np.arange(len(steps))
         work = [w for _, w in steps]
+        out.compare("supplementary_figure_S11_terminal_budget", ("panels", letter, "accumulated_work"), work)
         ax.step(xs, work, where="post", color="#2f7bd9", lw=2)
         ax.plot(xs, work, "o", color="#2f7bd9")
         for x, w in zip(xs, work):

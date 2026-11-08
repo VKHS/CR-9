@@ -39,6 +39,7 @@ need NumPy (and PyTorch for execution).
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import hashlib
 import json
@@ -189,6 +190,41 @@ def runtime_fingerprint(root: Path = ROOT) -> str:
     return fingerprint(root)
 
 
+def producer_sources(root: Path = ROOT) -> dict:
+    """The actual auxiliary code and contracts that a planned job will execute."""
+    paths = set(root.glob("run_cross_morse*.py")) | set(root.glob("run_cross_morse*.sh"))
+    for folder in ("scripts", "cm_experiments", "cm_campaigns", "cm_theory", "cross_morse", "hpc",
+                   "paper/build", "configs", "environment/arrhenius"):
+        paths.update(p for p in (root / folder).rglob("*") if p.is_file() and p.suffix in {".py", ".sh", ".json"})
+    paths.update(root / name for name in ("records/specs.json", "paper/registered_constants.json", "paper/sources.json"))
+    return {p.relative_to(root).as_posix(): sha256_file(p) for p in sorted(paths) if p.is_file()}
+
+
+def verify_plan_source(plan: dict) -> None:
+    repository = plan.get("repository") or {}
+    if repository.get("runtime_sha256") not in (None, runtime_fingerprint()):
+        raise PlanError("the runtime of this checkout changed after planning; restore it or plan again")
+    if repository.get("producer_sources") is not None and repository["producer_sources"] != producer_sources():
+        raise PlanError("the auxiliary producer code/contracts changed after planning; restore the planned checkout or use a new work directory")
+
+
+@contextlib.contextmanager
+def work_lock(work: Path, name: str):
+    """Prevent overlapping submissions, collection or execution of the same task."""
+    import fcntl
+    directory = Path(work) / "locks"
+    directory.mkdir(parents=True, exist_ok=True)
+    with (directory / (slug(name) + ".lock")).open("a+") as stream:
+        try:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise PlanError(f"another {name} operation is using {work}") from None
+        try:
+            yield
+        finally:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+
+
 def _run_dataset(path: Path) -> str | None:
     for name in ("run_state.json", "config.json"):
         try:
@@ -269,7 +305,8 @@ def member_paths(entry: dict) -> list[Path]:
 
 def verify_runs(found: dict, *, runtime: str, allow_fixture: bool = False) -> dict:
     """Every run (every Roman-empire split) is sealed through evaluate, scientific and of the current runtime."""
-    from scripts.archive_run import ArchiveError, verify_stage_chain
+    from scripts.archive_run import ArchiveError
+    from scripts.paper_artifacts import _verify_run
     verified, problems = {}, []
     for dataset in DATASETS:
         if dataset not in found:
@@ -289,7 +326,7 @@ def verify_runs(found: dict, *, runtime: str, allow_fixture: bool = False) -> di
             where = f"{dataset} ({member})"
             try:
                 state, config = read_json(member / "run_state.json"), read_json(member / "config.json")
-                chain = verify_stage_chain(member)
+                chain = _verify_run(member, dataset, scientific_only=False)
             except (OSError, ValueError, KeyError, ArchiveError) as exc:
                 problems.append(f"{where}: not a sealed eight-stage run: {exc}")
                 failed = True
@@ -300,7 +337,7 @@ def verify_runs(found: dict, *, runtime: str, allow_fixture: bool = False) -> di
             if _run_dataset(member) != dataset:
                 problems.append(f"{where}: the run is a {_run_dataset(member)} run")
                 failed = True
-            scientific = state.get("scientific_run") is True and config.get("profile") == "full"
+            scientific = config.get("scientific_run") is True and config.get("profile") == "full"
             if not scientific and not allow_fixture:
                 problems.append(f"{where}: not a full scientific run (profile {config.get('profile')!r}, "
                                 f"scientific_run {state.get('scientific_run')!r}); --allow-fixture is a software check")
@@ -309,7 +346,8 @@ def verify_runs(found: dict, *, runtime: str, allow_fixture: bool = False) -> di
                 problems.append(f"{where}: sealed by runtime source {chain['source_sha256'][:12]}, this checkout is "
                                 f"{runtime[:12]}; run the experiments from the runtime that sealed the runs")
                 failed = True
-            if dataset == "Roman-empire" and (config.get("data") or {}).get("split_index") != index:
+            split_id = (config.get("data") or {}).get("split_index")
+            if dataset == "Roman-empire" and (type(split_id) is not int or split_id != index):
                 problems.append(f"{where}: split index {(config.get('data') or {}).get('split_index')} != {index}")
                 failed = True
             identities.append({"run": str(member), "config_sha256": chain["config_sha256"],
@@ -1001,6 +1039,7 @@ def build_baselines(p, export, directory: Path):
                              "skip_if": str(capture / "sacct_original.psv")},
                             {"argv": py("scripts/export_records.py", "baselines", *repeat("--study", studies),
                                         "--internal", internal, "--checkouts", directory,
+                                        "--copy-studies", "--copy-predictions",
                                         *repeat("--timing", timing),
                                         *repeat("--accounting", [capture / "sacct_original.psv", *accounting]),
                                         "--root", p.records, "--hardware", "{hardware}", "--period", "{period}")}])
@@ -1035,6 +1074,8 @@ def _normalize_only(values) -> set[str]:
 def build_plan(work, runs: dict, options: dict, *, required: list[str], executor=_subprocess_executor,
                suite=None, repository=None) -> dict:
     """The node graph and exports of every required artifact (see the module docstring)."""
+    repository = dict(repository or {})
+    repository.setdefault("producer_sources", producer_sources())
     p = Planner(work, runs, options, executor, repository)
     provided = dict(options.get("artifacts") or {})
     for key, value in (("campaign:budget", "budget_campaign"), ("campaign:confirmation", "confirmation_campaign"),
@@ -1184,7 +1225,7 @@ def build_plan(work, runs: dict, options: dict, *, required: list[str], executor
 
 
 def repository_identity() -> dict:
-    identity = {"root": str(ROOT), "runtime_sha256": runtime_fingerprint()}
+    identity = {"root": str(ROOT), "runtime_sha256": runtime_fingerprint(), "producer_sources": producer_sources()}
     try:
         head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True,
                               check=False, timeout=20)
@@ -1418,16 +1459,49 @@ def load_jobs(work: Path) -> dict:
     return read_json(path)
 
 
-def node_complete(work: Path, node: dict) -> bool:
-    tasks = len(node["tasks"]) or 1
-    for k in range(tasks):
-        marker = Path(work) / "state" / node["id"] / f"task-{k}.json"
-        try:
-            if read_json(marker).get("status") not in COMPLETE_STATES:
-                return False
-        except (OSError, ValueError):
+def completion_evidence(node: dict, task_index: int) -> dict:
+    """Task-specific completion seals, plus its declared output existence contract."""
+    task = node["tasks"][task_index] if node.get("tasks") else {}
+    paths = []
+    if node.get("plan_step"):
+        paths.append(node["plan_step"]["plan_file"])
+    if task.get("skip_if"):
+        paths.append(task["skip_if"])
+        if Path(task["skip_if"]).name == "observed_environment.json":
+            paths.extend(str(Path(task["skip_if"]).parent / name) for name in
+                         ("requirements-gpu.lock", "nvidia-smi.txt", "modules.txt"))
+    if task.get("fresh"):
+        paths.append(task["fresh"]["complete"])
+    seals = {}
+    for name in paths:
+        path = Path(name)
+        if not path.is_file() or path.is_symlink():
+            raise PlanError(f"Completion seal is missing or linked: {path}")
+        seals[str(path)] = sha256_file(path)
+    return seals
+
+
+def task_complete(work: Path, node: dict, task_index: int) -> bool:
+    try:
+        record = read_json(task_marker(work, node["id"], task_index))
+        if record.get("status") not in COMPLETE_STATES:
             return False
-    return True
+        if record.get("plan_sha256") != sha256_file(Path(work) / "plan.json"):
+            return False
+        if record.get("node_sha256") != hashlib.sha256(json.dumps(node, sort_keys=True).encode()).hexdigest():
+            return False
+        if record["status"] == "SKIPPED":
+            job_in = node["tasks"][task_index].get("job_in") or {}
+            return bool(job_in.get("upper_bound") and job_in["index"] >= len(read_json(Path(job_in["plan"])).get("jobs") or []))
+        return (record.get("completion_seals") == completion_evidence(node, task_index)
+                and all(Path(name).exists() for name in node.get("outputs", [])))
+    except (OSError, ValueError, KeyError):
+        return False
+
+
+def node_complete(work: Path, node: dict) -> bool:
+    return (all(task_complete(work, node, index) for index in range(len(node["tasks"]) or 1))
+            and all(Path(name).exists() for name in node.get("outputs", [])))
 
 
 def submission_order(plan: dict, work: Path, *, resume: bool) -> tuple[list[dict], dict, dict]:
@@ -1462,9 +1536,17 @@ def _sbatch(arguments: list[str]) -> str:
 
 
 def command_submit(args) -> int:
+    with work_lock(Path(args.work).expanduser().resolve(), "submit"):
+        return _command_submit(args)
+
+
+def _command_submit(args) -> int:
     work = Path(args.work).expanduser().resolve()
     plan = load_plan(work)
+    verify_plan_source(plan)
     jobs = load_jobs(work)
+    if jobs["nodes"] and jobs.get("plan_sha256") != sha256_file(work / "plan.json"):
+        raise PlanError("jobs.json belongs to another plan; retain the existing workspace and plan in a new directory")
     if jobs["nodes"] and not args.resume and not args.dry_run:
         raise PlanError(f"{work}/jobs.json lists submitted jobs; use --resume to submit only unfinished nodes")
     settings = site_settings()
@@ -1476,8 +1558,34 @@ def command_submit(args) -> int:
     order, skipped, finished = submission_order(plan, work, resume=args.resume)
     (work / "slurm" / "logs").mkdir(parents=True, exist_ok=True)
     ids: dict[str, str] = {}
+    reused = {}
+    if args.resume and jobs["nodes"]:
+        prior = {name: item["job_id"] for name, item in jobs["nodes"].items() if item.get("job_id")}
+        scheduler = scheduler_states(list(prior.values()))
+        for node in [*order, {"id": "collect"}]:
+            name = node["id"]
+            if name not in prior:
+                continue
+            states = (scheduler or {}).get(prior[name]) or []
+            if not states:
+                raise PlanError(f"Cannot establish whether Slurm job {prior[name]} ({name}) is active; "
+                                "resume refuses a duplicate submission until sacct/squeue provides its state")
+            if any(state in SACCT_ACTIVE for state in states):
+                reused[name] = prior[name]
+        replacing = {node["id"] for node in order} - set(reused)
+        for node in order:
+            if node["id"] in reused and any(dep["node"] in replacing for dep in node["dependencies"]):
+                raise PlanError(f"Active job {reused[node['id']]} ({node['id']}) depends on a node that needs retry; "
+                                "wait for its terminal state or cancel that dependent job before resuming")
+        if "collect" in reused and replacing:
+            raise PlanError(f"Collect job {reused['collect']} is still active while upstream nodes need retry; "
+                            "wait for its terminal state or cancel that collect job before resuming")
+        ids.update(reused)
     printed = []
     for node in [*order, collect_node(plan, order)]:
+        if node["id"] in reused:
+            print(f"[active, not resubmitted] {node['id']}: job {reused[node['id']]}")
+            continue
         script = work / "slurm" / f"{node['id']}.sbatch"
         script.write_text(batch_script(node, work), encoding="utf-8")
         script.chmod(0o755)
@@ -1550,7 +1658,16 @@ def write_marker(work, node_id, task, status, **fields) -> dict:
         previous = read_json(path)
     except (OSError, ValueError):
         previous = {}
-    record = dict(previous, schema=TASK_SCHEMA, node=node_id, task=task, status=status, updated_utc=utc_now(),
+    identity = {}
+    if (Path(work) / "plan.json").is_file():
+        plan = load_plan(work)
+        node = next((row for row in plan["nodes"] if row["id"] == node_id), None)
+        if node is not None:
+            identity = {"plan_sha256": sha256_file(Path(work) / "plan.json"),
+                        "node_sha256": hashlib.sha256(json.dumps(node, sort_keys=True).encode()).hexdigest()}
+            if status == "COMPLETE":
+                identity["completion_seals"] = completion_evidence(node, task)
+    record = dict(previous, **identity, schema=TASK_SCHEMA, node=node_id, task=task, status=status, updated_utc=utc_now(),
                   job=os.environ.get("SLURM_JOB_ID"), array_job=os.environ.get("SLURM_ARRAY_JOB_ID"), **fields)
     write_json(path, record)
     return record
@@ -1637,7 +1754,7 @@ def execute_task(work: Path, plan: dict, node: dict, task_index: int) -> int:
         previous = read_json(marker)
     except (OSError, ValueError):
         previous = {}
-    if previous.get("status") in COMPLETE_STATES:
+    if task_complete(work, node, task_index):
         print(f"[skip] {node['id']} task {task_index} is {previous['status']}")
         return 0
     attempts = int(previous.get("attempts", 0)) + 1
@@ -1648,7 +1765,8 @@ def execute_task(work: Path, plan: dict, node: dict, task_index: int) -> int:
             write_marker(work, node["id"], task_index, "COMPLETE", exit_code=0, detail=detail)
             return 0
         task = node["tasks"][task_index]
-        if task.get("skip_if") and Path(task["skip_if"]).exists():
+        if task.get("skip_if") and Path(task["skip_if"]).exists() and previous.get("status") not in COMPLETE_STATES:
+            completion_evidence(node, task_index)
             write_marker(work, node["id"], task_index, "COMPLETE", exit_code=0, detail="output present")
             return 0
         job_in = task.get("job_in")
@@ -1666,7 +1784,7 @@ def execute_task(work: Path, plan: dict, node: dict, task_index: int) -> int:
         if fresh:
             directory = Path(fresh["directory"])
             directory.parent.mkdir(parents=True, exist_ok=True)
-            if fresh_complete(fresh):
+            if fresh_complete(fresh) and previous.get("status") not in COMPLETE_STATES:
                 write_marker(work, node["id"], task_index, "COMPLETE", exit_code=0, detail="sealed output present")
                 return 0
             keep = set(fresh.get("keep") or [])
@@ -1723,12 +1841,12 @@ def command_execute(args) -> int:
     task = args.task if args.task is not None else int(os.environ.get("SLURM_ARRAY_TASK_ID") or 0)
     if not 0 <= task < max(1, len(node["tasks"])):
         raise PlanError(f"{node['id']} has no task {task}")
-    if (plan.get("repository") or {}).get("runtime_sha256") not in (None, runtime_fingerprint()):
-        raise PlanError("the runtime of this checkout changed after planning; restore it or plan again")
+    verify_plan_source(plan)
     # Slurm signals the batch shell (--signal=B:USR1@180), which exec'd this process: pass it to the runner.
     previous = {name: signal.signal(getattr(signal, name), _forward) for name in ("SIGUSR1", "SIGTERM", "SIGINT")}
     try:
-        return execute_task(work, plan, node, task)
+        with work_lock(work, f"task-{node['id']}-{task}"):
+            return execute_task(work, plan, node, task)
     finally:
         for name, handler in previous.items():
             signal.signal(getattr(signal, name), handler)
@@ -1739,21 +1857,29 @@ SACCT_ACTIVE = ("PENDING", "RUNNING", "REQUEUED", "CONFIGURING", "COMPLETING", "
 
 
 def scheduler_states(job_ids: list[str]) -> dict[str, list[str]] | None:
-    """{base job id: [state of every allocation/array task]} from sacct; None without sacct."""
-    if not job_ids or shutil.which("sacct") is None:
-        return None
-    result = subprocess.run(["sacct", "-j", ",".join(job_ids), "-X", "-n", "--parsable2", "--format=JobID,State"],
-                            capture_output=True, text=True, check=False)
-    if result.returncode != 0:
-        return None
-    states: dict[str, list[str]] = {}
-    for line in result.stdout.splitlines():
-        parts = line.strip().split("|")
-        if len(parts) < 2 or not parts[0]:
+    """Accounting plus live queue state: an accounting delay must not duplicate an active job."""
+    if not job_ids:
+        return {}
+    states, available = {}, False
+    commands = []
+    if shutil.which("sacct"):
+        commands.append(["sacct", "-j", ",".join(job_ids), "-X", "-n", "--parsable2", "--format=JobID,State"])
+    if shutil.which("squeue"):
+        commands.append(["squeue", "--jobs", ",".join(job_ids), "--noheader", "--format=%A|%T"])
+    for command in commands:
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+        if result.returncode != 0:
             continue
-        base = parts[0].split("_", 1)[0].split(".", 1)[0]
-        states.setdefault(base, []).append(parts[1].split()[0] if parts[1].split() else "")
-    return states
+        available = True
+        for line in result.stdout.splitlines():
+            parts = line.strip().split("|")
+            if len(parts) < 2 or not parts[0]:
+                continue
+            base = parts[0].split("_", 1)[0].split(".", 1)[0]
+            state = parts[1].split()[0].rstrip("+") if parts[1].split() else ""
+            if base in job_ids:
+                states.setdefault(base, []).append(state)
+    return states if available else None
 
 
 def node_status(work: Path, node: dict, record: dict | None, scheduler: dict | None) -> dict:
@@ -1764,7 +1890,7 @@ def node_status(work: Path, node: dict, record: dict | None, scheduler: dict | N
             markers.append(read_json(task_marker(work, node["id"], k)).get("status"))
         except (OSError, ValueError):
             markers.append(None)
-    done = sum(1 for m in markers if m in COMPLETE_STATES)
+    done = sum(task_complete(work, node, k) for k in range(tasks))
     failed = sum(1 for m in markers if m == "FAILED")
     if node.get("blocked"):
         state = "BLOCKED"
@@ -1780,7 +1906,7 @@ def node_status(work: Path, node: dict, record: dict | None, scheduler: dict | N
             elif any(s not in ("COMPLETED",) for s in sched):
                 state = "FAILED"
             else:
-                state = "COMPLETE" if not failed else "FAILED"
+                state = "INCOMPLETE" if not failed else "FAILED"
         else:
             state = "FAILED" if failed else ("RUNNING" if any(m in ("RUNNING", "REQUEUED") for m in markers)
                                               else "SUBMITTED")
@@ -1811,8 +1937,7 @@ def command_status(args) -> int:
         print(f"  {row['node']:<42} {row['state']:<14} {detail}  job {row['job_id'] or '-'}")
     if collected is not None:
         awaiting = [a for a, e in collected.get("artifacts", {}).items() if not e.get("path")]
-        print(f"map: {collected.get('map')} ({len(collected.get('artifacts', {})) - len(awaiting)} of "
-              f"{len(collected.get('artifacts', {}))} artifacts)")
+        print(f"map: {collected.get('map')} ({collected.get('status', 'UNKNOWN').lower()}; see named artifact statuses)")
     return 0
 
 
@@ -2035,6 +2160,9 @@ def verify_record_set(path: Path, *, allow_fixture: bool) -> dict:
     provenance = read_json(path / "provenance.json")
     if provenance.get("coverage_complete") is False:
         raise PlanError(f"{path.name}: partial coverage (provenance coverage_complete = false)")
+    if not allow_fixture:
+        from scripts.paper_artifacts import _verify_source
+        _verify_source("records:" + path.name, path, scientific_only=True)
     return entry
 
 
@@ -2044,13 +2172,8 @@ def verify_artifact(artifact: str, path: Path, *, allow_fixture: bool) -> dict:
         raise PlanError(f"{artifact}: {path} is missing or empty")
     if kind == "records":
         return verify_record_set(path, allow_fixture=allow_fixture)
-    if kind == "campaign" and artifact == "campaign:budget" and not (path / "analysis.json").is_file():
-        raise PlanError(f"{artifact}: {path} is not a complete campaign export (analysis.json)")
-    if kind == "campaign" and artifact == "campaign:confirmation" and not (path / "campaign.json").is_file():
-        raise PlanError(f"{artifact}: {path} has no campaign.json")
-    if kind == "environment" and not (path / "observed_environment.json").is_file():
-        raise PlanError(f"{artifact}: {path} has no observed_environment.json")
-    return {"files": sum(1 for p in path.rglob("*") if p.is_file())}
+    from scripts.paper_artifacts import _verify_source
+    return _verify_source(artifact, path, scientific_only=not allow_fixture)
 
 
 def _outputs_ready(export: dict, work: Path, plan: dict, *, allow_fixture: bool) -> bool:
@@ -2114,7 +2237,8 @@ def publication_map(plan: dict, results: dict, work: Path) -> dict:
     mapping = {"_instructions": "Generated by scripts/paper_outputs.py collect. Publish with: bash "
                                 "hpc/publish_paper_artifacts_arrhenius.sh all " + str(work / MAP_NAME)
                                 + ". An empty path is an artifact still awaiting its measured outputs (_awaiting).",
-               "_generated_utc": utc_now(), "_plan_sha256": sha256_file(work / "plan.json"), "_awaiting": {}}
+               "_generated_utc": utc_now(), "_plan_sha256": sha256_file(work / "plan.json"), "_awaiting": {},
+               "_relationships": {}}
     for artifact, entry in plan["artifacts"].items():
         path, reason = "", entry.get("reason")
         if entry["status"] in ("run", "provided"):
@@ -2127,6 +2251,7 @@ def publication_map(plan: dict, results: dict, work: Path) -> dict:
                 reason = outcome.get("reason") or "the export has not run"
         if path:
             mapping[artifact] = path
+            mapping["_relationships"][artifact] = "post_result_revision"
         else:
             mapping[artifact] = ""
             mapping["_awaiting"][artifact] = reason or entry["status"]
@@ -2137,9 +2262,17 @@ def publication_map(plan: dict, results: dict, work: Path) -> dict:
 
 
 def command_collect(args) -> int:
+    with work_lock(Path(args.work).expanduser().resolve(), "collect"):
+        return _command_collect(args)
+
+
+def _command_collect(args) -> int:
     work = Path(args.work).expanduser().resolve()
     plan = load_plan(work)
+    verify_plan_source(plan)
     jobs = load_jobs(work)
+    if jobs.get("nodes") and jobs.get("plan_sha256") != sha256_file(work / "plan.json"):
+        raise PlanError("jobs.json does not belong to this production plan")
     allow_fixture = bool((plan.get("options") or {}).get("allow_fixture"))
     (work / "records").mkdir(parents=True, exist_ok=True)
     only = _normalize_only(args.only)
@@ -2163,10 +2296,7 @@ def command_collect(args) -> int:
     for artifact, entry in plan["artifacts"].items():
         if entry["status"] in ("run", "provided") and entry.get("path"):
             try:
-                if entry["status"] == "provided":
-                    verify_artifact(artifact, Path(entry["path"]), allow_fixture=allow_fixture)
-                elif not Path(entry["path"]).is_dir():
-                    raise PlanError(f"{entry['path']} is missing")
+                verify_artifact(artifact, Path(entry["path"]), allow_fixture=allow_fixture)
             except (PlanError, OSError, ValueError, KeyError) as exc:
                 failures.append(artifact)
                 print(f"[FAILED] {artifact}: {exc}", flush=True)
@@ -2177,14 +2307,12 @@ def command_collect(args) -> int:
             mapping["_awaiting"][artifact] = "the supplied directory does not verify"
     write_json(work / MAP_NAME, mapping)
     artifacts = {a: {"path": mapping[a], "reason": mapping["_awaiting"].get(a)} for a in plan["artifacts"]}
-    status = "COMPLETE" if not failures else "INCOMPLETE"
+    status = "COMPLETE" if not failures and not mapping["_awaiting"] else "INCOMPLETE"
     write_json(work / "collect.json", {"schema": COLLECT_SCHEMA, "collected_utc": utc_now(), "status": status,
                                        "exports": results, "artifacts": artifacts, "map": str(work / MAP_NAME)})
-    published = sum(1 for a in plan["artifacts"] if mapping[a])
-    print(f"map: {work / MAP_NAME} ({published} of {len(plan['artifacts'])} artifacts; "
-          f"{len(mapping['_awaiting'])} awaiting)")
+    print(f"map: {work / MAP_NAME} ({status.lower()}; named artifacts and verification status are recorded in collect.json)")
     print(f"publish: bash hpc/publish_paper_artifacts_arrhenius.sh all {work / MAP_NAME}")
-    return 0 if not failures else 1
+    return 0 if not failures and (not mapping["_awaiting"] or only or (plan.get("options") or {}).get("only")) else 1
 
 
 # ============================================================================= command line

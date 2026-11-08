@@ -332,7 +332,8 @@ def plan(dataset="ogbn-arxiv", method="AMP", *, source_commit="a" * 40, adapter_
             "seed_ids": list(range(1, 13)), "search_seed": 0, "selection_role": "internal_training_validation",
             "direction": "maximize", "metric_unit": "native_0_to_1", "source_commit": source_commit,
             "adapter_commit": adapter_commit, "adapter_argv": ["{python}", "adapter.py"],
-            "source_directory": "upstream", "adapter_directory": "adapter"}
+            "source_directory": "upstream", "adapter_directory": "adapter",
+            **({"official_splits": list(range(10))} if dataset == "Roman-empire" else {})}
 
 
 def git_checkout(path: Path, files: dict[str, str], *, origin: str | None = None) -> str:
@@ -362,39 +363,69 @@ def job_key(job: int) -> str:
 
 
 def write_study(root: Path, *, drop_seed=None, classes=4, study_plan=None) -> tuple[Path, list[int], dict[int, float]]:
-    """An upstream study in the layout of cm_experiments.upstream.execute_attempt (fixture values)."""
+    """Sealed software fixtures in the upstream executor's layout; these are not trained checkpoints or measurements."""
+    from cm_experiments.artifacts import canonical, seal
     p = study_plan or plan()
     rng = np.random.default_rng(11)
     jobs, scores = [], {}
+
+    def inputs(leaf, config, seed, job):
+        (leaf / "adapter_output").mkdir(parents=True)
+        export_records.dump_json(leaf / "plan.json", p)
+        export_records.dump_json(leaf / "configuration.json", dict(config, seed=seed))
+        export_records.dump_json(leaf / "invocation.json", {"slurm": {"SLURM_JOB_ID": str(job)},
+                                                          "source_commit": p["source_commit"],
+                                                          "adapter_commit": p["adapter_commit"]})
+        for kind, commit in (("upstream", p["source_commit"]), ("adapter", p["adapter_commit"])):
+            with tarfile.open(leaf / f"{kind}_source.tar", "w", format=tarfile.PAX_FORMAT,
+                              pax_headers={"comment": commit}) as archive:
+                content = b"Software fixture only; no benchmark implementation.\n"
+                info = tarfile.TarInfo("FIXTURE.txt")
+                info.size = len(content)
+                archive.addfile(info, io.BytesIO(content))
+        jobs.append(job)
+
     for i in range(48):
         leaf = root / "hpo" / f"trial-{i:03d}"
-        leaf.mkdir(parents=True)
-        (leaf / "plan.json").write_text(json.dumps(p))
-        (leaf / "attempt.json").write_text(json.dumps({"phase": "hpo", "index": i, "seed": 0, "split": 0,
+        seed = p.get("search_seed", 0)
+        inputs(leaf, p["trials"][i], seed, 100000 + i)
+        (leaf / "attempt.json").write_text(json.dumps({"phase": "hpo", "index": i, "seed": seed, "split": 0,
                                                        "status": "PRUNED" if i % 7 == 0 else "COMPLETE",
                                                        "development_score": 0.7, "elapsed_seconds": 10.0,
-                                                       "process_exit_code": 0, "reason": None}))
-        (leaf / "invocation.json").write_text(json.dumps({"slurm": {"SLURM_JOB_ID": str(100000 + i)}}))
-        jobs.append(100000 + i)
+                                                       "plan_sha256": canonical(p), "process_exit_code": 0, "reason": None}))
+        export_records.dump_json(leaf / "adapter_output/receipt.json", {
+            "status": "PRUNED" if i % 7 == 0 else "COMPLETE", "development_score": .7,
+            "scored_role": p["selection_role"]})
+        seal(leaf)
     n = 400
     y = rng.integers(0, classes, size=n)
     for k, seed in enumerate(p["seed_ids"]):
         if seed == drop_seed:
             continue
-        leaf = root / "final" / f"seed-{seed}" / "split-0"
-        (leaf / "adapter_output").mkdir(parents=True)
-        (leaf / "plan.json").write_text(json.dumps(p))
-        (leaf / "attempt.json").write_text(json.dumps({"phase": "final", "index": k, "seed": seed, "split": 0,
-                                                       "status": "COMPLETE", "elapsed_seconds": 100.0}))
-        (leaf / "invocation.json").write_text(json.dumps({"slurm": {"SLURM_JOB_ID": str(200000 + k)}}))
-        jobs.append(200000 + k)
-        logits = rng.normal(size=(n, classes)) + 1.5 * np.eye(classes)[y] * rng.uniform(0.5, 1.5)
-        prob = np.exp(logits) / np.exp(logits).sum(1, keepdims=True)
-        np.savez(leaf / "adapter_output" / "predictions.npz", y_true=y, y_pred=prob,
-                 observation_id=np.arange(n), unit_id=np.arange(n) % 32)
-        (leaf / "adapter_output" / "receipt.json").write_text(json.dumps({"status": "COMPLETE", "predictions": "predictions.npz",
-                                                                           "parameter_count": 3_255_000}))
-        scores[seed] = float((prob.argmax(1) == y).mean() * 100)
+        values = []
+        for split in p.get("official_splits", [0]):
+            leaf = root / "final" / f"seed-{seed}" / f"split-{split}"
+            inputs(leaf, p["trials"][1], seed, 200000 + k + split * 12)
+            (leaf / "attempt.json").write_text(json.dumps({"phase": "final", "index": k, "seed": seed, "split": split,
+                                                           "status": "COMPLETE", "elapsed_seconds": 100.0,
+                                                           "plan_sha256": canonical(p)}))
+            export_records.dump_json(leaf / "development_selection.json", {
+                "selected_trial": 1, "selected_config": p["trials"][1], "selection_role": p["selection_role"],
+                "development_score": .7, "all_48_attempts_accounted": True,
+                "rule": p["direction"] + " development score; tie lowest trial index"})
+            logits = rng.normal(size=(n, classes)) + 1.5 * np.eye(classes)[y] * rng.uniform(0.5, 1.5)
+            prob = np.exp(logits) / np.exp(logits).sum(1, keepdims=True)
+            np.savez(leaf / "adapter_output" / "predictions.npz", y_true=y, y_pred=prob,
+                     observation_id=np.arange(n), unit_id=np.arange(n) % 32)
+            (leaf / "adapter_output/checkpoint.pt").write_bytes(b"Software fixture only; not a trained model.\n")
+            export_records.dump_json(leaf / "adapter_output/splits.json", {"test": list(range(n))})
+            (leaf / "adapter_output/timing.csv").write_text("repeat,seconds\n0,0.1\n")
+            (leaf / "adapter_output" / "receipt.json").write_text(json.dumps({
+                "status": "COMPLETE", "predictions": "predictions.npz", "checkpoint": "checkpoint.pt",
+                "split_manifest": "splits.json", "timing_trace": "timing.csv", "parameter_count": 3_255_000}))
+            seal(leaf)
+            values.append(float((prob.argmax(1) == y).mean() * 100))
+        scores[seed] = float(np.mean(values))
     return root, jobs, scores
 
 
@@ -497,7 +528,8 @@ class BaselinesTests(unittest.TestCase):
     def test_study_plan_upstream_identity_and_adapter_archive_are_packaged(self):
         directory, value = self.checkouts()
         study, sacct, timing, _, _ = self.inputs(study_plan=value)
-        self.assertEqual(run(self.argv(study, sacct, timing) + ["--checkouts", str(directory)]), 0)
+        self.assertEqual(run(self.argv(study, sacct, timing) + ["--checkouts", str(directory),
+                                                             "--copy-studies", "--copy-predictions"]), 0)
         target = self.root / "baselines"
         self.assertEqual(json.loads((target / "raw/arxiv/AMP/plan.json").read_text()), value)
         upstream = json.loads((target / "raw/arxiv/AMP/upstream.json").read_text())
@@ -509,11 +541,16 @@ class BaselinesTests(unittest.TestCase):
         self.assertEqual(upstream["adapter_commit"], value["adapter_commit"])
         self.assertEqual(upstream["source_commit"], value["source_commit"])
         self.assertEqual(upstream["upstream_repository"], "https://example.org/upstream/amp.git")   # no credentials
-        self.assertIs(upstream["source_copied"], False)
+        self.assertIs(upstream["source_copied"], True)
         self.assertEqual(hashlib.sha256((target / archive["file"]).read_bytes()).hexdigest(), archive["sha256"])
         with tarfile.open(target / archive["file"]) as tar:
             self.assertEqual(sorted(m.name for m in tar.getmembers() if m.isfile()), ["README", "adapter.py"])
-        self.assertFalse(any("model.py" in p.name for p in target.rglob("*")))      # the upstream source is not copied
+        from cm_campaigns.baselines import check_study_archive
+        complete = check_study_archive(target, value, upstream["study_archive"])
+        self.assertEqual((complete["hpo_attempts"], complete["final_fits"]), (48, 12))
+        with tarfile.open(target / complete["file"]) as tar:
+            self.assertEqual(tar.extractfile("final/seed-1/split-0/adapter_output/checkpoint.pt").read(),
+                             (study / "final/seed-1/split-0/adapter_output/checkpoint.pt").read_bytes())
         self.assertEqual(records.cmd_check(self.root, export_records.SPECS_PATH), 0)
         provenance = json.loads((target / "provenance.json").read_text())
         self.assertEqual(provenance["study_code"]["packaged"][0]["adapter_archive"], archive["file"])
@@ -534,6 +571,74 @@ class BaselinesTests(unittest.TestCase):
         self.assertEqual(study_view["adapter_archive"]["sha256"], archive["sha256"])
         self.assertEqual((checkout / "experiments/baselines" / study_view["plan"]["file"]).read_bytes(),
                          (target / "raw/arxiv/AMP/plan.json").read_bytes())
+
+    def test_complete_study_archives_are_deterministic_and_bound_to_original_seals(self):
+        from cm_campaigns.baselines import check_study_archive
+        study, _, _ = write_study(self.tmp / "study")
+        value = plan()
+        inventory = export_records.study_artifact_inventory(study, value)
+        first, second = self.tmp / "first", self.tmp / "second"
+        a = export_records.package_study_outputs(first, study, value, inventory)
+        b = export_records.package_study_outputs(second, study, value, inventory)
+        self.assertEqual(a, b)
+        self.assertEqual((first / a["file"]).read_bytes(), (second / b["file"]).read_bytes())
+        with self.assertRaisesRegex(ValueError, "differs"):
+            check_study_archive(first, value, dict(a, bytes=a["bytes"] + 1))
+        manifest = json.loads((first / a["manifest_file"]).read_text())
+        self.assertEqual(len(manifest["final_fits"]), 12)
+        self.assertEqual(manifest["selected_trial"], 1)   # trial zero pruned; tied development scores
+        self.assertEqual({p["path"] for p in manifest["files"]},
+                         {p.relative_to(study).as_posix() for p in study.rglob("*") if p.is_file()})
+        manifest_path = first / a["manifest_file"]
+        manifest_path.write_text(json.dumps(dict(manifest, source_commit="c" * 40)))
+        with self.assertRaisesRegex(ValueError, "another plan"):
+            check_study_archive(first, value, dict(a, manifest_sha256=export_records.sha256_file(manifest_path)))
+        export_records.dump_json(manifest_path, manifest)
+        a["manifest_sha256"] = export_records.sha256_file(manifest_path)
+        path = first / a["file"]
+        original = path.read_bytes()
+        path.write_bytes(original[:-10240])
+        a["sha256"] = export_records.sha256_file(path)   # changing the outer digest does not reseal the attempts
+        a["bytes"] = path.stat().st_size
+        with self.assertRaises((ValueError, OSError)):
+            check_study_archive(first, value, a)
+
+    def test_missing_checkpoint_or_relabelled_final_fit_is_rejected_even_after_resealing(self):
+        from cm_experiments.artifacts import seal
+        study, _, _ = write_study(self.tmp / "study")
+        leaf = study / "final/seed-1/split-0"
+        checkpoint = leaf / "adapter_output/checkpoint.pt"
+        original = checkpoint.read_bytes()
+        checkpoint.unlink()
+        (leaf / "ARTIFACT_MANIFEST.json").unlink()
+        seal(leaf)
+        with self.assertRaisesRegex(export_records.ExportError, "checkpoint"):
+            export_records.study_artifact_inventory(study, plan())
+        checkpoint.write_bytes(original)
+        config = json.loads((leaf / "configuration.json").read_text())
+        config["seed"] = 2
+        export_records.dump_json(leaf / "configuration.json", config)
+        (leaf / "ARTIFACT_MANIFEST.json").unlink()
+        seal(leaf)
+        with self.assertRaisesRegex(export_records.ExportError, "configuration, seed, split or plan"):
+            export_records.study_artifact_inventory(study, plan())
+
+    def test_study_bytes_changing_after_inventory_cannot_enter_the_archive(self):
+        study, _, _ = write_study(self.tmp / "study")
+        inventory = export_records.study_artifact_inventory(study, plan())
+        checkpoint = study / "final/seed-1/split-0/adapter_output/checkpoint.pt"
+        checkpoint.write_bytes(b"x" * checkpoint.stat().st_size)
+        with self.assertRaisesRegex(export_records.ExportError, "archived study bytes differ"):
+            export_records.package_study_outputs(self.tmp / "changed", study, plan(), inventory)
+
+    def test_roman_archive_requires_every_seed_and_all_ten_official_splits(self):
+        value = plan(dataset="Roman-empire", method="Early-Exit GNN")
+        study, _, _ = write_study(self.tmp / "study", study_plan=value)
+        inventory = export_records.study_artifact_inventory(study, value)
+        self.assertEqual(len(inventory["final_fits"]), 120)
+        shutil.rmtree(study / "final/seed-12/split-9")
+        with self.assertRaisesRegex(export_records.ExportError, "every registered seed and official split"):
+            export_records.study_artifact_inventory(study, value)
 
     def test_checkouts_are_verified_against_the_plan(self):
         directory, value = self.checkouts()

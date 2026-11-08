@@ -1626,13 +1626,14 @@
       "raw_P": 0.035,
       "holm_P": 0.07,
       "P_vs_margin": 0.394,
-      "interpretation": "Analytical confirmation-size sensitivity; frozen-rule outcome follows the S14 confirmation record",
+      "interpretation": "interval excludes zero; Holm P above 0.05 under this model; the confirmation record decides the label (Note S26)",
       "interval_old": [
         -0.00316,
         -0.00028
       ],
       "graph_variance_share": 0.071,
-      "evidence_status": "analytical sensitivity with fixed means; not an observed replication"
+      "evidence_status": "analytical sensitivity with fixed means; not an observed replication",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: Analytical confirmation-size sensitivity; frozen-rule outcome follows the S14 confirmation record"
     }
   ],
   "supplementary_table_S14b_unchanged_contrasts": [
@@ -1648,7 +1649,8 @@
       "raw_P": 0.0014,
       "holm_P": 0.0098,
       "P_vs_margin": 0.0026,
-      "interpretation": "unchanged (Holm value re-formed)"
+      "interpretation": "unchanged",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: unchanged (Holm value re-formed)"
     },
     {
       "contrast": "arxiv/radius",
@@ -1662,7 +1664,8 @@
       "raw_P": 0.003,
       "holm_P": 0.015,
       "P_vs_margin": 0.0858,
-      "interpretation": "unchanged (Holm value re-formed)"
+      "interpretation": "unchanged",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: unchanged (Holm value re-formed)"
     },
     {
       "contrast": "proteins/state",
@@ -1676,7 +1679,8 @@
       "raw_P": 0.0016,
       "holm_P": 0.0098,
       "P_vs_margin": 0.0057,
-      "interpretation": "unchanged (Holm value re-formed)"
+      "interpretation": "unchanged",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: unchanged (Holm value re-formed)"
     },
     {
       "contrast": "proteins/radius",
@@ -1690,7 +1694,8 @@
       "raw_P": 0.0034,
       "holm_P": 0.015,
       "P_vs_margin": 0.1365,
-      "interpretation": "unchanged (Holm value re-formed)"
+      "interpretation": "unchanged",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: unchanged (Holm value re-formed)"
     },
     {
       "contrast": "products/state",
@@ -1704,7 +1709,8 @@
       "raw_P": 0.42,
       "holm_P": 0.42,
       "P_vs_margin": null,
-      "interpretation": "unchanged (not tested against the margin)"
+      "interpretation": "unchanged",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: unchanged (not tested against the margin)"
     },
     {
       "contrast": "Roman/RH",
@@ -1718,7 +1724,8 @@
       "raw_P": 0.0047,
       "holm_P": 0.015,
       "P_vs_margin": 0.007,
-      "interpretation": "unchanged (Holm value re-formed)"
+      "interpretation": "unchanged",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: unchanged (Holm value re-formed)"
     }
   ],
   "supplementary_table_S15_method_comparison": {
@@ -2896,7 +2903,8 @@
       "eps_eq_plus_2r_max": 0.0112,
       "slack_with_12_finalists": 0.0094,
       "resamples": 10000,
-      "interpretation": "fragile graph-level selection"
+      "interpretation": "boundary graph-level selection",
+      "_repository_interpretation_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: fragile graph-level selection"
     }
   },
   "supplementary_table_S21_action_gap_audit": {
@@ -3707,7 +3715,7 @@
       "power_ensemble_spend_pct": 55
     },
     "PascalVOC-SP": {
-      "unit": "425 D_compare graphs (fixed ensemble; analytical power model)",
+      "unit": "comparison graphs (fixed ensemble)",
       "paired_SE_nats": 0.0005,
       "MDE_mnats_0.05": 1.41,
       "MDE_mnats_holm": 1.68,
@@ -3726,10 +3734,11 @@
         100,
         100
       ],
-      "power_ensemble_spend_pct": 100
+      "power_ensemble_spend_pct": 100,
+      "_repository_unit_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: 425 D_compare graphs (fixed ensemble; analytical power model)"
     },
     "COCO-SP": {
-      "unit": "5665 D_compare graphs (fixed ensemble; analytical power model)",
+      "unit": "comparison graphs (fixed ensemble)",
       "paired_SE_nats": 0.00015,
       "MDE_mnats_0.05": 0.43,
       "MDE_mnats_holm": 0.51,
@@ -3748,10 +3757,11 @@
         100,
         100
       ],
-      "power_ensemble_spend_pct": 100
+      "power_ensemble_spend_pct": 100,
+      "_repository_unit_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: 5665 D_compare graphs (fixed ensemble; analytical power model)"
     },
     "Peptides-func": {
-      "unit": "544 D_compare graphs (fixed ensemble; analytical power model)",
+      "unit": "comparison graphs (fixed ensemble)",
       "paired_SE_nats": 0.00034,
       "MDE_mnats_0.05": 0.95,
       "MDE_mnats_holm": 1.14,
@@ -3770,7 +3780,8 @@
         100,
         100
       ],
-      "power_ensemble_spend_pct": 100
+      "power_ensemble_spend_pct": 100,
+      "_repository_unit_note": "Prior repository explanatory wording, retained as metadata rather than printed source text: 544 D_compare graphs (fixed ensemble; analytical power model)"
     }
   },
   "supplementary_table_S44_per_input_cost_model": {

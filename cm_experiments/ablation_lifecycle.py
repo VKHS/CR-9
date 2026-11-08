@@ -1719,6 +1719,66 @@ def open_fitted_cell(cell: dict, parent: SealedRun):
     return run.root, cell["variant"]
 
 
+def controller_artifacts(entry: dict, parent: SealedRun) -> tuple[dict, dict]:
+    """The separately fitted variant's executable controllers and their sealed source descriptors.
+
+    Prepared data and plant checkpoints are shared byte for byte with ``parent`` and are supplied by its
+    lifecycle archive. A controller package retains the variant configuration, every fitted sensor profile,
+    its nominal reference, any scramble donor pool and the stage manifests that identify those bytes. It
+    does not pretend that a completion JSON file contains the fitted models themselves.
+    """
+    # Publication verifies the bytes and their manifest chain without unpickling local checkpoints.
+    # Logical model-state checking remains part of the trusted lifecycle execution.
+    run = open_lifecycle_run(entry, parent, verify_chain=False)
+    through = STAGES.index(entry["through"])
+    if through < STAGES.index("fit"):
+        raise RunnerError(f"{run.root.name}: controller publication needs the sealed fit stage")
+    stage_files = [f"provenance/stages/{i:02d}_{stage}.json" for i, stage in enumerate(STAGES[:through + 1])]
+    sealed, previous = {}, None
+    expected = (entry["parent_identity"]["runtime_source_sha256"], entry["config_sha256"], sha256(run.root / "prepared/splits.npz"),
+                run.config["dataset"])
+    for stage, relative in zip(STAGES, stage_files):
+        path = run.root / relative
+        manifest = read_json(path)
+        identity = tuple(manifest.get(k) for k in ("source_sha256", "config_sha256", "unit_sha256", "dataset"))
+        if manifest.get("stage") != stage or identity != expected or manifest.get("parent_manifest") != previous:
+            raise RunnerError(f"{run.root.name}: broken controller provenance chain at {stage}")
+        if stage != "prepare" and any(sealed.get(item["path"]) != item for item in manifest.get("inputs", [])):
+            raise RunnerError(f"{run.root.name}: controller provenance has an unbound input at {stage}")
+        for item in manifest["outputs"]:
+            if set(item) != {"path", "sha256", "bytes"} or item["path"] in sealed:
+                raise RunnerError(f"{run.root.name}: malformed controller artifact descriptor at {stage}")
+            sealed[item["path"]] = item
+        previous = {"path": relative, "sha256": sha256(path), "bytes": path.stat().st_size}
+    names = ["config.json", "environment.json", "explore/nominal_reference.npz", "provenance/frozen_models.json"]
+    names += [f"fit/{str(profile).lower()}/controller.pt" for profile in run.config["sensor"]["profiles"]]
+    files, descriptors = {}, {}
+    for name in names:
+        path, descriptor = run.root / name, sealed.get(name)
+        if descriptor is None or not path.is_file() or sha256(path) != descriptor["sha256"]:
+            raise RunnerError(f"{run.root.name}: {name} is absent or differs from its sealed controller artifact")
+        files[name], descriptors[name] = path, dict(descriptor)
+    for relative in stage_files:
+        path = run.root / relative
+        files[relative] = path
+        descriptors[relative] = {"path": relative, "sha256": sha256(path), "bytes": path.stat().st_size}
+    for op in entry["variant"]["operations"]:
+        if op["op"] == "scramble":
+            relative = op["pool"]["file"]
+            path = run.root / relative
+            if not path.is_file() or sha256(path) != op["pool"]["sha256"]:
+                raise RunnerError(f"{run.root.name}: the scramble donor pool differs from the variant")
+            files[relative] = path
+            descriptors[relative] = {"path": relative, "sha256": sha256(path), "bytes": path.stat().st_size}
+    manifest = {"schema": "cm-variant-controller-package-1", "variant": entry["variant"],
+                "identity": run.identity(), "files": descriptors, "parent_identity": entry["parent_identity"],
+                "shared_parent_artifacts": "prepared data and frozen plant checkpoints from the identified parent "
+                                           "lifecycle archive; variant prepare/train are byte copies of that parent",
+                "scope": "fitted executable controllers and their configuration/reference/provenance; "
+                         "the parent lifecycle supplies the shared data and plant checkpoints"}
+    return files, manifest
+
+
 # ============================================================================= measurement (PyTorch)
 class RecordingController:
     """A fitted Controller that keeps the observer state of every executed depth (no other change)."""

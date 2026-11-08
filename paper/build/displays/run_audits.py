@@ -28,8 +28,8 @@ from pathlib import Path
 
 import numpy as np
 
-from .framework import (DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, display, integer, interval, num,
-                        pyplot)
+from .framework import (DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, DisplayValidationError,
+                        display, integer, interval, not_applicable, num, pyplot)
 
 GROUP = {
     "T1": "main_table_1_policy_and_deployment_ledger",
@@ -609,7 +609,8 @@ def table_s12(ctx, out):
                          row["profile"], num(row["delta"], 5), num(row["low"], 5), num(row["high"], 5),
                          gate_text((row["support"], row["metric"], row["resource"])),
                          integer(row["rank"]) if isinstance(row["rank"], int) else row["rank"],
-                         _selected_text(row["selected"]), row["confirmation"]])
+                         _selected_text(row["selected"]), row["confirmation"] if row["confirmation"] is not None
+                         else not_applicable("The candidate was not selected for confirmation")])
             for key, value in (("route", row["route"]), ("E", row["E"]), ("profile", row["profile"]),
                                ("Delta_s_hat", row["delta"]), ("L_s", row["low"]), ("U_s", row["high"]),
                                ("rank", row["rank"]), ("selected", row["selected"]),
@@ -806,7 +807,7 @@ def joint_confirmation(ctx) -> tuple[dict, dict]:
         if directory_inventory(path) != before:
             raise EvidenceError("campaign files changed during validation")
     except (EvidenceError, OSError, KeyError) as exc:
-        raise DisplayInputError(f"joint confirmation campaign failed validation: {exc}") from exc
+        raise DisplayValidationError(f"joint confirmation campaign failed validation: {exc}") from exc
     return checked, results
 
 
@@ -855,12 +856,16 @@ def interpretation(row, kind, decisions, alpha) -> str:
 def table_s14(ctx, out):
     from cm_campaigns.confirmation import FAMILY
     checked, results = joint_confirmation(ctx)
+    confirmation_scope(out, checked)
     by_id = {row["contrast_id"]: row for row in checked["rows"]}
     rows, source = [], []
     for i, key in enumerate(FAMILY):
         row, kind = by_id[key], FAMILY[key][1]
         loss = LOSS_LABELS["bce" if "BCE" in row["loss"] else "ce"]
         margin_p = results[key].get("p_value_margin", ...)      # optional field of the original test record
+        if margin_p is not ... and margin_p is not None and (isinstance(margin_p, bool)
+                or not isinstance(margin_p, (int, float)) or not math.isfinite(margin_p) or not 0 <= margin_p <= 1):
+            raise DisplayValidationError(f"{key}: p_value_margin must be a probability or an explicit not-performed null")
         reading = interpretation(row, kind, checked["policy_decisions"], checked["alpha"])
         effect = row["effect_nats"]
         rows.append([key, KIND_TEXT[kind], f"{num(effect, 5, signed=True)} {loss}",
@@ -880,18 +885,30 @@ def table_s14(ctx, out):
             out.compare(GROUP["S14"], (i, field), value)
         if margin_p is not ...:
             out.compare(GROUP["S14"], (i, "P_vs_margin"), p_compare(margin_p, 1e-3))
+        else:
+            out.compare_missing(GROUP["S14"], (i, "P_vs_margin"), reason="The supplied test record omits its margin test")
+            out.incomplete(f"{key}: the margin-test result is absent", location="P vs margin")
     out.uses("campaign", "confirmation", ["campaign.json", "protocol.json", "raw/*/test.json", "raw/*/paired.csv"])
     out.table(["Dataset/claim", "contrast", "effect", "95% interval", "unit/n", "test", "raw P", "Holm P", "margin",
                "P vs margin", "interpretation"], rows,
               notes=["Joint nine-test family of the validated confirmation campaign (cm_campaigns.confirmation): "
-                     "original effects, intervals and raw P against zero; Holm over the nine raw P values; retained "
+                     "supplied effects, intervals and raw P against zero; Holm over the nine raw P values; retained "
                      "when Holm P < alpha and the point effect lies beyond the signed practical margin.",
                      "P vs margin: the one-sided test against the margin, read from the optional p_value_margin field "
-                     "of each original test record (null = not performed); '—' when the record does not carry it."])
+                     "of each supplied test record (null = not performed); an absent field is explicitly incomplete."])
     out.data("joint_family", ["contrast", "dataset", "kind", "effect_nats", "interval_low_nats", "interval_high_nats",
                               "statistical_unit", "units", "seeds", "method", "raw_P_zero", "holm_P_zero",
                               "margin_nats", "beneficial_direction", "P_vs_margin", "retained",
                               "tested_policy_selected"], source)
+
+
+def confirmation_scope(out, checked):
+    """Preserve the distinction between an imported test and a retrospective new family."""
+    out.provenance(confirmation={key: checked.get(key) for key in
+        ("production_kind", "post_hoc", "admission_findings", "original_test_p_values_recomputed", "scope", "limits")})
+    if checked.get("post_hoc"):
+        out.note("This supplied family was produced after the lifecycle admissions. Its reconstructed statistics "
+                 "do not establish that a prospective joint lock governed the original admission decisions.")
 
 
 # ---------------------------------------------------------------------------
@@ -1344,6 +1361,7 @@ def figure_s9(ctx, out):
     """
     from cm_campaigns.confirmation import FAMILY
     checked, _ = joint_confirmation(ctx)
+    confirmation_scope(out, checked)
     sizes = ctx.require_records("confirmation_sensitivity")
     by_id = {row["contrast_id"]: row for row in checked["rows"]}
     data, changed, unchanged = [], 0, 0
@@ -1594,16 +1612,43 @@ def figure_s14(ctx, out):
 # Supplementary Figure S17: analytical and statistical audits
 # ---------------------------------------------------------------------------
 
-def effect_coded(cells: dict, factors: tuple[str, ...]) -> list[list]:
-    """Effect-coded factorial contrasts (divisor 4) with 95% intervals propagated under independent cells."""
+def effect_coded(cells: dict, factors: tuple[str, ...], joint: dict | None = None) -> list[list]:
+    """Effect-coded point contrasts and, only when supplied, the paired joint intervals."""
     out = []
     for mask in (1, 2, 4, 3, 5, 6, 7):
         chosen = [i for i in range(3) if mask & (1 << i)]
         signs = {cell: math.prod(1 if cell[i] == "1" else -1 for i in chosen) for cell in cells}
         effect = math.fsum(signs[c] * v["mean"] for c, v in cells.items()) / 4
-        se = math.sqrt(math.fsum((v["high"] - v["low"]) ** 2 / (2 * 1.959964) ** 2 for v in cells.values())) / 4
-        out.append(["".join(factors[i] for i in chosen), effect, effect - 1.959964 * se, effect + 1.959964 * se])
+        interval = joint["contrasts"][tuple(chosen)] if joint else {}
+        out.append(["".join(factors[i] for i in chosen), effect, interval.get("low"), interval.get("high")])
     return out
+
+
+def independent_factorial_illustration(cells: dict, factors: tuple[str, ...]) -> list[list]:
+    """Figure S17d's explicitly labelled independent-cell approximation.
+
+    This is an analytical illustration, not a reconstruction of paired contrast
+    uncertainty. Each of the eight effect-coded coefficients has magnitude 1/4;
+    under independence and a common interval multiplier the propagated 95%
+    half-width is sqrt(sum(cell_half_width**2)) / 4. Tables S16/S16b and the
+    optional joint source data below retain the actual shared-resampling path.
+    """
+    from .factorial_data import CELLS
+    if set(cells) != set(CELLS) or len(factors) != 3:
+        raise DisplayValidationError("Figure S17d requires the complete three-factor eight-cell design")
+    widths = []
+    for cell in CELLS:
+        row = cells[cell]
+        try:
+            values = [float(row[key]) for key in ("mean", "low", "high")]
+        except (KeyError, TypeError, ValueError) as exc:
+            raise DisplayValidationError(f"Figure S17d cell {cell} lacks its marginal mean/interval") from exc
+        if not all(math.isfinite(value) for value in values) or values[1] > values[2]:
+            raise DisplayValidationError(f"Figure S17d cell {cell} has an invalid marginal interval")
+        widths.append((values[2] - values[1]) / 2)
+    half_width = math.sqrt(math.fsum(width * width for width in widths)) / 4
+    return [[name, effect, effect - half_width, effect + half_width]
+            for name, effect, _, _ in effect_coded(cells, factors)]
 
 
 @display("supplementary:Figure S17", stem="FigS17", title="Analytical and statistical audits",
@@ -1721,7 +1766,8 @@ def figure_s17(ctx, out):
     ax.legend(fontsize=6, frameon=False, loc="lower right")
     out.data("panel_c", ["dataset", "slack", "selected_abs_Delta_s", "epsilon_R", "Q_s_size", "Q_size"], slack)
 
-    # d: arxiv factorial contrasts
+    # d: the printed independence illustration. Actual paired uncertainty is
+    # preserved separately and never replaced by this approximation in S16/S16b.
     ax = axes[1, 0]
     factorials = ctx.require_records("factorials")
     cells = {}
@@ -1729,21 +1775,50 @@ def figure_s17(ctx, out):
         cells[cell] = {"mean": factorials.require("ld_integrated_loss", dataset="ogbn-arxiv", cell=cell),
                        "low": factorials.require("interval_low", dataset="ogbn-arxiv", cell=cell),
                        "high": factorials.require("interval_high", dataset="ogbn-arxiv", cell=cell)}
-    contrasts = effect_coded(cells, ("A", "O", "X"))
+    from .factorial_data import joint_factorial_contrasts
+    joint = joint_factorial_contrasts(factorials, "ogbn-arxiv", {
+        cell: {"ld_integrated_loss": row["mean"], "interval_low": row["low"], "interval_high": row["high"]}
+        for cell, row in cells.items()})
+    contrasts = independent_factorial_illustration(cells, ("A", "O", "X"))
+    illustration_method = "independence approximation (printed Figure S17d illustration)"
+    out.provenance(panel_d_interval_method={
+        "method": illustration_method,
+        "source": {"document": "supplementary", "page": 36, "display": "Figure S17d"},
+        "formula": "h = sqrt(sum(((interval_high - interval_low) / 2)^2)) / 4",
+        "assumption": "zero cross-cell covariance and a common 95% interval multiplier",
+        "scope": "analytical illustration; does not replace paired inferential intervals in Tables S16/S16b",
+        "full_figure_comparison": False,
+    })
+    if joint is None:
+        out.provenance(factorial_joint={"available": False,
+            "reason": "No recognized paired factorial source was supplied; joint uncertainty is not inferred from marginal intervals"})
+    else:
+        joint_rows = effect_coded(cells, ("A", "O", "X"), joint)
+        companion = out.data("panel_d_paired_joint",
+            ["contrast", "effect_coded_nats", "low_nats", "high_nats", "interval_method"],
+            [[*row, joint["method"]] for row in joint_rows])
+        out.provenance(factorial_joint={"available": True, "companion_source_data": companion,
+            **{k: v for k, v in joint.items() if k != "contrasts"}})
     colors = ["#2864a5"] * 3 + ["#2a9d6a"] * 3 + ["#d37a18"]
     for k, (name, effect, low, high) in enumerate(contrasts):
         ax.bar(k, effect, color=colors[k])
-        ax.plot([k, k], [low, high], color="0.2", lw=0.8)
+        if low is not None and high is not None:
+            ax.plot([k, k], [low, high], color="0.2", lw=0.8)
     ax.axhline(0, color="0.4", lw=0.6)
     ax.set_xticks(range(7), [c[0] for c in contrasts])
     ax.set_ylabel("effect on DIL CE (nats)")
-    ax.set_title("d  arxiv factorial (Table S16)", loc="left")
-    out.data("panel_d", ["contrast", "effect_coded_nats", "low_nats", "high_nats"], contrasts)
+    ax.set_title("d  arxiv factorial (Table S16)\nintervals: independence approximation", loc="left")
+    out.data("panel_d", ["contrast", "effect_coded_nats", "low_nats", "high_nats", "interval_method"],
+             [[*row, illustration_method] for row in contrasts])
+    out.data("panel_d_cells", ["cell", "mean_nats", "marginal_low_nats", "marginal_high_nats", "marginal_half_width_nats"],
+             [[cell, row["mean"], row["low"], row["high"], (row["high"] - row["low"]) / 2]
+              for cell, row in cells.items()])
     names = {"A": "actions", "O": "observer", "X": "risk_controlled_execution"}
     for name, effect, low, high in contrasts:
         if name in names:
             out.compare(GROUP["S16"], ("effect_coded_main_effects_nats", names[name]), effect)
-    out.compare(GROUP["S16"], ("effect_coded_main_effects_nats", "half_width_95"), contrasts[0][3] - contrasts[0][1])
+    out.compare(GROUP["S16"], ("effect_coded_main_effects_nats", "half_width_95"),
+                contrasts[0][3] - contrasts[0][1], note=illustration_method)
     for k, (name, effect, _, _) in enumerate(contrasts[3:6]):
         out.compare(GROUP["S16"], ("pairwise_interactions_nats", k), effect)
     out.compare(GROUP["S16"], ("three_way_interaction_nats",), contrasts[6][1])
@@ -1858,7 +1933,10 @@ def figure_s17(ctx, out):
     out.figure(fig)
     out.note("a: cm_theory.admission bound with the S^2, J and D_bar of each multigraph admission; squares at the "
              "single-graph unit counts on the variance-free floor. b: |Delta_sel(q_D)| / |U(Delta_oracle)| from the "
-             "selection record and select/entry_complete.json. h: D_inf = kappa x l_plant with l_plant the q_N test "
+             "selection record and select/entry_complete.json. d: the printed independence illustration propagates "
+             "marginal cell half-widths in quadrature with 1/4 contrast coefficients; verified paired-bootstrap "
+             "intervals, when supplied, remain in separate companion source data. These panel checks and the "
+             "S28b sigma_1 grid do not establish numerical agreement for all eight panels. h: D_inf = kappa x l_plant with l_plant the q_N test "
              "loss and the registered kappa band; overheads from main Eq. (32) and C_assure = C(q_D) + C(q_C).")
 
 

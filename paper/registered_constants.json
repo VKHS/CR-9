@@ -13,7 +13,26 @@
     "transcription_date": "2026-11-01",
     "transcription_rule": "Protocol constants and reporting targets transcribed from the identified manuscript sources; execution choices are documented in IMPLEMENTATION_NOTES.md.",
     "scope": "Registered constants, thresholds, grids and backbone settings from the manuscript; released_full_profiles records independently instantiated source-model counts. Companion file: reported_results.json.",
-    "source_index": "paper/sources.json"
+    "source_index": "paper/sources.json",
+    "additional_registrations": [
+      {
+        "date": "2026-11-07",
+        "document": "supplementary",
+        "sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
+        "groups": {
+          "baseline_reference_ranges_table_S15": [
+            12
+          ],
+          "negative_controls_table_S19": [
+            13
+          ],
+          "regret_bound_table_S28b": [
+            19
+          ]
+        },
+        "scope": "Printed protocol descriptions, declared reference accounting ranges and an analytical grid. These are not measured observations or substitutes for original execution records. The exact numerical o_dec and phi_OL inputs are not printed and remain unspecified."
+      }
+    ]
   },
   "data_roles_table_S2": {
     "official_training_allocation": {
@@ -1167,5 +1186,133 @@
       "admissible_sketch_ratio": "min(1, (m - 1) / (8 r / (1 + r))), the largest (k/d)/P_s compatible with m",
       "W_nom": "L (N d^2 + E d), the paper's propagation-work estimate using published edge counts (Table S23b prints arxiv, proteins and Roman); not a measurement of total runtime operations"
     }
+  },
+  "negative_controls_table_S19": {
+    "graph irrelevant": {
+      "construction": "Y ⟂ A | X on independent realizations",
+      "expected_conclusion": "comparator equivalence and nonvacuous fallback"
+    },
+    "misleading graph": {
+      "construction": "role/edge structure anti-aligned with labels",
+      "expected_conclusion": "detect confidently wrong graph evidence"
+    },
+    "sensor bias": {
+      "construction": "offset/heteroskedastic innovation corruption",
+      "expected_conclusion": "NIS/fallback respond before large harm"
+    },
+    "support shift": {
+      "construction": "unseen degree/size/action strata",
+      "expected_conclusion": "dynamic support prevents extrapolation"
+    }
+  },
+  "baseline_reference_ranges_table_S15": {
+    "external_methods": {
+      "AMP": {
+        "serial_cost_per_member": [
+          1.05,
+          1.2
+        ],
+        "parameter_multiplier": [
+          1.03,
+          1.08
+        ]
+      },
+      "ADMP-GNN": {
+        "serial_cost_per_member": [
+          0.6,
+          1.0
+        ],
+        "parameter_multiplier": [
+          1.05,
+          1.15
+        ]
+      },
+      "GRAMA": {
+        "serial_cost_per_member": [
+          1.2,
+          1.6
+        ],
+        "parameter_multiplier": [
+          1.1,
+          1.25
+        ]
+      },
+      "Graph Mamba": {
+        "serial_cost_per_member": [
+          1.1,
+          1.4
+        ],
+        "parameter_multiplier": [
+          1.1,
+          1.2
+        ]
+      },
+      "Early-Exit GNN": {
+        "serial_cost_per_member": [
+          0.5,
+          0.9
+        ],
+        "parameter_multiplier": [
+          1.02,
+          1.06
+        ]
+      }
+    },
+    "internal_routes": {
+      "best_fixed_depth": {
+        "serial_cost_per_member": [
+          0.5,
+          1.0
+        ]
+      },
+      "phase": {
+        "serial_cost_per_member": [
+          1.0,
+          1.05
+        ]
+      },
+      "fixed_sequence": {
+        "serial_cost_per_member": [
+          1.0,
+          1.05
+        ]
+      },
+      "mpc_ol": {
+        "serial_cost_per_member": [
+          1.0,
+          1.15
+        ]
+      },
+      "one_step": {
+        "serial_cost_per_member": [
+          1.1,
+          1.15
+        ]
+      },
+      "radius": {
+        "serial_cost_per_member": [
+          1.15,
+          1.2
+        ]
+      },
+      "mpc_rh": {
+        "serial_cost_per_member": [
+          1.3,
+          1.36
+        ]
+      }
+    },
+    "retraining_multiplier": [
+      1.1,
+      1.6
+    ],
+    "hpo_trials": 48
+  },
+  "regret_bound_table_S28b": {
+    "sigma1_grid": [
+      0.005,
+      0.007,
+      0.01
+    ]
   }
 }

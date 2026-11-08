@@ -351,6 +351,8 @@ class PaperOutputsTests(unittest.TestCase):
         self.assertEqual(command[command.index("--internal") + 1], internal["outputs"][0])
         self.assertEqual(command[command.index("--checkouts") + 1], str((self.base / "baselines").resolve()))
         self.assertEqual(command.count("--study"), 2)
+        self.assertIn("--copy-studies", command)
+        self.assertIn("--copy-predictions", command)
         self.assertEqual(export["provenance"]["internal"], internal["outputs"][0])
         self.assertIn("baselines.internal.run", plan["artifacts"]["records:baselines"]["nodes"])
         # map coverage: the baselines set is published once its export completed, awaiting otherwise
@@ -552,7 +554,10 @@ class PaperOutputsTests(unittest.TestCase):
         self.assertIn("--resume", again.stderr)
         # resume: complete nodes are not resubmitted and drop out of the dependencies
         for k in range(15):
+            seal = Path(nodes["input_gate.run"]["tasks"][k]["fresh"]["complete"])
+            po.write_json(seal, {"fixture": True})
             po.write_marker(work, "input_gate.run", k, "COMPLETE", exit_code=0)
+        (slurm.root / "sacct.txt").write_text("".join(f"{job['job_id']}|FAILED\n" for job in jobs.values()))
         before = len(slurm.submissions())
         resumed = slurm.run("submit", "--work", work, "--resume", env=settings)
         self.assertEqual(resumed.returncode, 0, resumed.stderr)
@@ -560,6 +565,44 @@ class PaperOutputsTests(unittest.TestCase):
         self.assertNotIn("input_gate.run", later)
         self.assertIsNone(option(later["negative_controls.run"]["args"], "--dependency"))
         self.assertIn("input_gate.run", resumed.stdout)
+
+    def test_resume_reuses_active_jobs_and_refuses_unknown_scheduler_state(self):
+        work = self.tiny_plan([{"id": "one", "title": "one", "resource": "cpu", "array": None,
+                               "tasks": [{"commands": []}], "dependencies": [], "requeue": False}])
+        slurm = MockSlurm(self.base)
+        self.assertEqual(slurm.run("submit", "--work", str(work)).returncode, 0)
+        original = slurm.submissions()
+        unknown = slurm.run("submit", "--work", str(work), "--resume")
+        self.assertEqual(unknown.returncode, 2)
+        self.assertIn("refuses a duplicate", unknown.stderr)
+        self.assertEqual(slurm.submissions(), original)
+        jobs = po.read_json(work / "jobs.json")["nodes"]
+        (slurm.root / "sacct.txt").write_text("".join(f"{job['job_id']}|RUNNING\n" for job in jobs.values()))
+        active = slurm.run("submit", "--work", str(work), "--resume")
+        self.assertEqual(active.returncode, 0, active.stderr)
+        self.assertEqual(slurm.submissions(), original)
+        self.assertIn("active, not resubmitted", active.stdout)
+
+    def test_producer_changes_are_rejected_before_submission(self):
+        plan = full_plan(self.base)
+        plan["repository"]["producer_sources"]["scripts/paper_outputs.py"] = "0" * 64
+        po.write_json(self.base / "work/plan.json", plan)
+        slurm = MockSlurm(self.base)
+        result = slurm.run("submit", "--work", str(self.base / "work"))
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("producer code/contracts changed", result.stderr)
+        self.assertEqual(slurm.submissions(), [])
+
+    def test_stale_completion_seal_is_not_a_completed_node(self):
+        complete = self.base / "output/SEALED.json"
+        work = self.tiny_plan([{"id": "sealed", "resource": "cpu", "outputs": [str(complete.parent)],
+                               "tasks": [{"commands": [], "skip_if": str(complete)}], "dependencies": []}])
+        po.write_json(complete, {"measured": 1})
+        po.write_marker(work, "sealed", 0, "COMPLETE")
+        node = po.load_plan(work)["nodes"][0]
+        self.assertTrue(po.node_complete(work, node))
+        po.write_json(complete, {"measured": 2})
+        self.assertFalse(po.node_complete(work, node))
 
     def test_blocked_nodes_and_their_dependents_are_not_submitted(self):
         _, plan = self.plan_examples()
@@ -587,6 +630,8 @@ class PaperOutputsTests(unittest.TestCase):
         self.assertEqual(rows["ensemble_grid.run"]["state"], "RUNNING")
         self.assertEqual(rows["input_gate.run"]["state"], "FAILED")
         (slurm.root / "bin" / "sacct").unlink()
+        for name in ("observed_environment.json", "requirements-gpu.lock", "nvidia-smi.txt", "modules.txt"):
+            po.write_json(work / "environment/gpu" / name, {"fixture": True})
         po.write_marker(work, "environment.capture", 0, "COMPLETE", exit_code=0)
         po.write_marker(work, "tube_audit.run", 0, "FAILED", exit_code=2)
         status = slurm.run("status", "--work", str(work))

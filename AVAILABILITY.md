@@ -6,7 +6,7 @@ The paper's registered data-availability statement:
 
 > The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
-**2 of 12 items fulfilled**, 10 awaiting the publication of the measured outputs, 0 missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).
+The table below identifies the available resources and the measured outputs that await publication. [Statement compliance](STATEMENT_COMPLIANCE.md) records the checks for each item (`make statement-check`).
 
 | Statement item | Status | Where in the repository |
 |---|---|---|
@@ -25,7 +25,7 @@ The paper's registered data-availability statement:
 
 ## Measured outputs
 
-The checkpoints, predictions, propensity-logged trajectories and statistical outputs of the reported experiments are assets of the release [`paper-artifacts`](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts) of [https://github.com/VKHS/CR-9](https://github.com/VKHS/CR-9); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with the SHA-256 of each part, archive and file. Published: **0 of 37** required artifacts.
+The publication workflow distributes checkpoints, predictions, propensity-logged trajectories and statistical outputs through the `paper-artifacts` release in [GitHub Releases](https://github.com/VKHS/CR-9/releases); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with the SHA-256 of each published part, archive and file. The status of each artifact appears below.
 
 | Artifact | Status | Files | Size | Checkpoints | Predictions | Trajectories | Statistical outputs |
 |---|---|---|---|---|---|---|---|
@@ -69,7 +69,7 @@ The checkpoints, predictions, propensity-logged trajectories and statistical out
 
 ## One command
 
-`make paper` downloads the published outputs (analysis tier; `PAPER_TIER=complete` adds checkpoints and prediction arrays), verifies every part, archive and file against the manifest, verifies each run's sealed eight-stage chain and each record set's trace to its raw files, rebuilds every numbered table and figure with its source data (`paper/build/displays/`) and compares every computed value with the value printed in the paper. It exits 0 only when every display is complete and every compared value agrees. See [Reconstruction](docs/RECONSTRUCTION.md).
+`make paper` downloads the published outputs (analysis tier; `PAPER_TIER=complete` adds lifecycle checkpoints and full prediction arrays), verifies every part, archive and file against the manifest, verifies each run's sealed eight-stage chain and each record set's trace to its raw files, rebuilds every numbered table and figure with its source data (`paper/build/displays/`) and compares every computed value with the value printed in the paper. It exits 0 only when every display is complete and every compared value agrees. See [Reconstruction](docs/RECONSTRUCTION.md).
 
 ## Publication of the measured outputs
 

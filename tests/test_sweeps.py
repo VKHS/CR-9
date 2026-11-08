@@ -480,7 +480,7 @@ def hop_coverage(adjacency, clusters, scored, hops: int) -> np.ndarray:
 
 
 def unit_counts(adjacency, clusters, scored, grid=BUFFERS):
-    """Resampling units of the module's rule and of the connected-components rule on the same links."""
+    """Resampling units and independent component counts on the same declared dependence links."""
     core_ids = np.arange(int(clusters.max()) + 1)
     sources = [scored[clusters[scored] == c] for c in core_ids]
     entry = buffered.walk_entry(adjacency, clusters, core_ids, sources, grid)
@@ -576,8 +576,38 @@ class BufferUnits(unittest.TestCase):
         self.assertEqual(buffered.resampling_blocks(strength, tau)["blocks"], [[0], [1], [2], [3]])
         grown = strength * 1.2                                             # links 0-1, 1-2; 2-3 stays at 0.30
         found = buffered.resampling_blocks(grown, tau)
-        self.assertEqual((found["links"], found["roots"]), (2, [0, 2, 3]))   # alpha = 3: cores 0, 2, 3 independent
-        self.assertEqual(found["blocks"], [[0], [1, 2], [3]])              # core 1 joins the root it depends on most
+        self.assertEqual((found["links"], found["roots"]), (2, [0, 3]))
+        self.assertEqual(found["blocks"], [[0, 1, 2], [3]])                 # dependence through core 1 stays together
+
+    def test_independent_roots_do_not_split_a_dependent_path(self):
+        # The old roots {0, 2} assigned core 1 to 0 and core 3 to 2, leaving the 1-2 edge across bootstrap units.
+        strength = np.zeros((5, 5))
+        for a, b, weight in ((0, 1, .9), (1, 2, .8), (2, 3, .7)):
+            strength[a, b] = strength[b, a] = weight
+        found = buffered.resampling_blocks(strength, .5)
+        self.assertEqual(found["blocks"], [[0, 1, 2, 3], [4]])
+        for left, right in itertools.combinations(found["blocks"], 2):
+            self.assertFalse((strength[np.ix_(left, right)] > .5).any())
+
+    def test_one_dependent_component_has_no_interval_or_admission(self):
+        # The registered graph has four cores; at the larger buffer a path links all four.
+        later = np.eye(4)
+        for a, b in ((0, 1), (1, 2), (2, 3)):
+            later[a, b] = later[b, a] = .4
+        settings = {"reps": 20, "alpha": .025, "epsilon_a": .003, "epsilon_metric": .001,
+                    "clip": .1, "seed": 11, "metric_summary": None, "execution_valid": True}
+        measured = buffered.evaluate_buffers([-.01, -.02, -.03, -.04], [1, 2, 3, 4],
+                                              {2: np.eye(4), 4: later}, [2, 4], 2, settings)
+        before, after = measured["rows"]
+        self.assertEqual(before["resampling_units"], 4)
+        self.assertTrue(before["valid_interval"])
+        self.assertEqual(after["resampling_units"], 1)
+        self.assertEqual(after["blocks"], [[0, 1, 2, 3]])
+        self.assertFalse(after["valid_interval"])
+        self.assertIsNone(after["upper_nats"])
+        self.assertIsNone(after["half_width_nats"])
+        self.assertEqual(after["admitted"], 0.0)
+        self.assertAlmostEqual(after["clipped_effect_nats"], -.03)
 
     def test_walk_dependence_refines_k_hop_coverage(self):
         rng = np.random.default_rng(0)
@@ -590,7 +620,7 @@ class BufferUnits(unittest.TestCase):
             self.assertTrue((entry[k] <= coverage + 1e-12).all())          # a k-step walk stays in the k-hop context
             self.assertTrue(((entry[k] > 0) == (coverage > 0)).all())
 
-    def test_units_fall_gradually_on_metis_like_partitions(self):
+    def test_dependent_components_can_collapse_on_metis_like_partitions(self):
         cases = {"random geometric graph": lambda rng: geometric_graph(3000, 12.0, rng),
                  "small-world geometric graph": lambda rng: geometric_graph(3000, 12.0, rng, rewire=0.02),
                  "torus stochastic-block graph": lambda rng: torus_sbm(3000, 32, rng)}
@@ -604,9 +634,8 @@ class BufferUnits(unittest.TestCase):
                 ours, chained, _ = unit_counts(adjacency, clusters, scored)
                 self.assertEqual(ours[0], 32)
                 self.assertTrue(all(b <= a for a, b in zip(ours, ours[1:])), ours)
-                self.assertGreaterEqual(ours[1], 16, ours)                 # no collapse at 4 hops
-                self.assertTrue(4 <= ours[-1] < 32, ours)                  # the buffer matters, gradually
-                self.assertEqual(chained[-1], 1, chained)                  # components of the same links chain into one
+                self.assertEqual(ours, chained)                           # every link stays inside its block
+                self.assertEqual(ours[-1], 1)                             # an unfavorable collapse is not suppressed
                 coverage = {k: hop_coverage(adjacency, clusters, scored, k) for k in (2, 4)}
                 pairs = ~np.eye(32, dtype=bool)
                 links = np.maximum(coverage[4], coverage[4].T) > np.maximum(coverage[2], coverage[2].T)[pairs].max()
@@ -643,7 +672,12 @@ class BufferAdmission(Workspace):
         weights = np.bincount(clusters[np.load(run / "prepared/splits.npz")["admit"]])
         for row in rows.values():
             self.assertEqual(sorted(c for block in row["blocks"] for c in block), list(range(32)))
-            self.assertAlmostEqual(row["half_width_nats"], row["upper_nats"] - row["clipped_effect_nats"], places=15)
+            if row["resampling_units"] > 1:
+                self.assertAlmostEqual(row["half_width_nats"], row["upper_nats"] - row["clipped_effect_nats"], places=15)
+            else:
+                self.assertIsNone(row["half_width_nats"])
+                self.assertIsNone(row["upper_nats"])
+                self.assertEqual(row["admitted"], 0.0)
         self.assertEqual(job["graph"]["scored_counts"], weights.tolist())
         audit = json.loads((run / "prepared/metadata.json").read_text())["buffer_audit"]
         self.assertEqual(job["graph"]["registered_context_sizes"], audit["core_plus_halo_sizes"])
@@ -697,6 +731,23 @@ class BufferAdmission(Workspace):
             sweeps.collect(path)
         self.assertIn("changed after the job ran", str(caught.exception))
 
+    def test_legacy_buffer_definitions_are_not_resumed_or_exported(self):
+        path = self.sweep(buffer_run(self.tmp / "arxiv_run"))
+        plan = json.loads(path.read_text())
+        old = "walk-dependence-independent-set-blocks-v1"
+        plan["settings"]["definition"] = old
+        path.write_text(json.dumps(plan))
+        with self.assertRaisesRegex(sweeps.SweepError, "another resampling definition"):
+            buffered.run_buffer_jobs(path)
+        plan["settings"]["definition"] = buffered.DEFINITION_ID
+        path.write_text(json.dumps(plan))
+        record_path = buffered.run_buffer_jobs(path)[0]
+        record = json.loads(record_path.read_text())
+        record["definition"]["id"] = old
+        record_path.write_text(json.dumps(record))
+        with self.assertRaisesRegex(sweeps.SweepError, "another resampling definition"):
+            sweeps.collect(path)
+
     def test_export_and_table_s27(self):
         from paper.build.displays.testing import build_one, context, read_table
         from paper.build.displays.framework import RecordSetView
@@ -712,7 +763,8 @@ class BufferAdmission(Workspace):
         specs = export_sweep_records.merged_specs()
         spec = specs["sets"]["buffer_sensitivity"]
         entry = records.verify_set(target, spec, specs)
-        self.assertEqual(entry["rows"], 2 * 5 * 5)
+        self.assertLess(entry["rows"], 2 * 5 * 5)                 # one component: interval quantities are absent
+        self.assertGreaterEqual(entry["rows"], 2 * 5 * 3)
         self.assertTrue((target / "raw/jobs/ogbn-proteins_proteins_run/dependence.npz").is_file())
         source = json.loads((target / "code/SOURCE.json").read_text())
         self.assertIn("cm_experiments/buffered_admission.py", source["experiment_code"])

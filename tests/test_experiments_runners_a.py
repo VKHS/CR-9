@@ -24,6 +24,7 @@ from unittest.mock import patch
 import numpy as np
 
 from cm_experiments import attribution, backbones, ensemble_grid, factorial
+from cm_experiments.artifacts import sha256
 from cm_experiments.ensemble_grid import RunnerError, SealedRun, job_directory, utc_now
 from scripts.records import RECORDS, build_table, load_specs, read_summary, verify_set
 
@@ -581,6 +582,22 @@ class FactorialTests(Workspace):
         self.assertEqual(provenance["cell_definitions"]["ogbn-arxiv"]["010"]["stopping"]["domain"], "unrestricted")
         self.assertTrue((target / "raw" / "ogbn-arxiv" / "executions.npz").is_file())
         self.assertTrue((target / "code" / "cm_experiments" / "ablation_lifecycle.py").is_file())   # switch installer
+        for cell in result["cells"]:
+            relative = cell["terminal_predictions"]["file"]
+            self.assertEqual(sha256(target / "raw" / "ogbn-arxiv" / relative), cell["terminal_predictions"]["sha256"])
+
+    def test_export_refuses_missing_or_changed_prediction_bytes(self):
+        plan = self.plan()
+        self.write_job(plan, np.random.default_rng(12))
+        directory = job_directory(self.root / "fac", plan["jobs"][0])
+        path = directory / "predictions/cell010.npy"
+        original = path.read_bytes()
+        path.unlink()
+        with self.assertRaisesRegex(RunnerError, "prediction is absent or differs"):
+            factorial.export_factorial(self.root / "fac", root=self.records, allow_partial=True)
+        path.write_bytes(original + b"changed")
+        with self.assertRaisesRegex(RunnerError, "prediction is absent or differs"):
+            factorial.export_factorial(self.root / "fac", root=self.records, allow_partial=True)
 
 
 # ============================================================================= job orchestration without the runtime

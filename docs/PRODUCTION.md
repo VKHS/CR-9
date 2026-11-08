@@ -2,27 +2,35 @@
 
 [Documentation](README.md) · [Publishing](PUBLICATION.md) · [HPC guide](HPC.md) · [Experiments](EXPERIMENTS.md) · [S14 confirmation](S14_CONFIRMATION.md)
 
-The paper's data-availability statement is fulfilled once the 37 artifacts that
-[`release/paper_artifacts.json`](../release/paper_artifacts.json) lists are published
-with the release `paper-artifacts`: the seven sealed lifecycle runs, the
-measurement-record sets, the E3–E6 and S14 campaigns and the GPU environment. The runs
-come from `bash run_cross_morse.sh reproduce` ([HPC guide](HPC.md)); every other
-artifact is produced from them by the runners of
-[`release/experiment_code.json`](../release/experiment_code.json). One command plans and
-submits all of that work and ends with the map that the publication step reads:
+This workflow produces and collects the lifecycle runs, measurement-record sets,
+E3–E6 and S14 campaigns, and GPU environment listed in
+[`release/paper_artifacts.json`](../release/paper_artifacts.json). Completed runs from
+`bash run_cross_morse.sh reproduce` are its inputs; E12 additionally requires the
+pinned external study plans and adapter checkouts described below. One command
+plans the work, submits its Slurm dependency graph, and writes a verified publication
+map when collection finishes:
 
 ```bash
-bash hpc/produce_paper_outputs_arrhenius.sh $CM_BASE/outputs/CROSS_MORSE_REPRODUCTION_0001
-python3 -B scripts/paper_outputs.py status --work $CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001
-# when the final collect job has finished (login node, network):
+bash hpc/produce_paper_outputs_arrhenius.sh "$CM_BASE/outputs/CROSS_MORSE_REPRODUCTION_0001" \
+  --baselines /abs/pinned-baseline-study-plans
+python3 -B scripts/paper_outputs.py status --work "$CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001"
+# After the collect job finishes, on a login node with network access:
 export GITHUB_TOKEN=...      # fine-grained, contents: write on VKHS/CR-9
-bash hpc/publish_paper_artifacts_arrhenius.sh all $CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001/paper-artifacts.map.json
+bash hpc/publish_paper_artifacts_arrhenius.sh all \
+  "$CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001/paper-artifacts.map.json"
 ```
 
-Nothing is edited by hand: the map names the directory of every artifact that was
-produced and verified, and leaves an empty path, with the reason under `_awaiting`, for
-every artifact that is still missing. `pack` skips empty paths, so a partial map
-publishes what exists and the manifest keeps the rest `awaiting_measured_outputs`.
+The map names each verified artifact and records unresolved inputs by name under
+`_awaiting`. Collection is `COMPLETE` only when every required path verifies.
+The publication wrapper requires the complete map. For a deliberate incremental
+release, the lower-level `scripts/paper_artifacts.py pack` command accepts selected
+artifacts; the availability gate continues to report the scope of that release.
+
+Newly produced artifacts receive `post_result_revision` in the map's `_relationships`.
+This records their actual relationship to the manuscript. Importing the original
+result-producing archives requires an explicit relationship declaration. Publishing
+artifacts does not by itself establish exact agreement with the paper: reconstruction
+checks display completeness, numerical comparison coverage, and the published bytes.
 
 ## What the command does
 
@@ -34,7 +42,9 @@ publishes what exists and the manifest keeps the rest `awaiting_measured_outputs
    profile, and the runtime fingerprint of this checkout. Then every runner's own
    torch-free `plan` step whose inputs exist is executed, and its jobs size the node's
    Slurm array. `<work>/plan.json` lists every node with its exact command lines, its
-   resources, its dependencies and its outputs, and the export of every artifact.
+   resources, its dependencies and its outputs, and the export of every artifact. The
+   plan also pins the auxiliary producer code, configurations and contracts. Submission,
+   execution and collection refuse a checkout that changed after planning.
 2. **Submit** (`scripts/paper_outputs.py submit`, standard library only, on the login
    node). One batch script per node under `<work>/slurm/`, with the SITE SETTINGS of
    `run_cross_morse.sh` (`bash run_cross_morse.sh site-env`: account, partitions, GPU
@@ -143,7 +153,11 @@ boundary before the time limit (exit 75) requeues its job (`CM_MAX_CONTINUATIONS
 resumes; group-B runs and E3–E6 studies are not resumable, so a failed attempt is moved
 to `<dir>.attempt-<n>` and the task starts again in a fresh directory. A failed node
 cancels its dependents (`--kill-on-invalid-dep=yes`) and the collect job; `submit
---resume` submits what is not complete. `collect` exports only what verifies; an export
+--resume` checks both live queue and accounting state, retains active jobs, and retries
+terminal unfinished jobs. If scheduler state is unavailable, it stops before submitting
+a duplicate. Completion receipts bind the plan, node definition and task-specific
+output seals; a changed or missing seal is incomplete. Submissions, collection and
+individual tasks use separate process locks. `collect` exports only what verifies; an export
 whose nodes have not completed stays `awaiting` (`--ignore-markers` tries it anyway).
 
 Settings beyond the SITE SETTINGS: `CM_PRODUCE_GPU_TIME` (default `CM_TIME` or
@@ -171,3 +185,12 @@ The nodes are ordinary commands: `python -B scripts/paper_outputs.py execute --w
 awaiting). `--allow-fixture` plans a smoke suite (`bash run_cross_morse.sh reproduce
 smoke`) end to end as a software check; its outputs are synthetic and `pack` refuses them.
 `--only SET ...` plans a subset with the nodes it needs.
+
+## Model and prediction delivery
+
+The E12 exporter runs with both `--copy-studies` and `--copy-predictions`. Its record
+asset includes each complete sealed external study, its per-file inventory, required
+final checkpoints and prediction files, and the pinned adapter source. The small
+`experiments/baselines/` view committed by publication contains the plans, adapter
+sources and study inventories, with hash-bound links to the downloadable study
+archives. Checkpoints remain in release assets rather than the Git history.

@@ -14,7 +14,8 @@ import unittest
 from pathlib import Path
 
 from paper.build.displays import protocol_tables as P
-from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, RunView, build_displays
+from paper.build.displays.framework import (DATASETS, GRAPH_LEVEL, RunView, build_displays,
+                                           DisplayValidationError, load_references)
 from paper.build.displays.testing import build_one, context, fake_run, read_table
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,8 +25,8 @@ REGISTRY = json.loads((ROOT / "paper" / "reported_results.json").read_text(encod
 
 # Printed rows x columns of every display (supplementary PDF pages in paper/display_manifest.json).
 LAYOUT = {"S1": (7, 8), "S2": (7, 9), "S3": (4, 4), "S5": (7, 9), "S5b": (7, 4), "S5d": (4, 3), "S8": (13, 6),
-          "S9": (9, 3), "S10": (9, 7), "S11": (4, 5), "S24": (7, 4), "S31": (34, 3), "S32": (9, 3),
-          "S35": (29, 3), "S36": (20, 5), "S38": (12, 3), "S39": (8, 4), "S40": (7, 4)}
+          "S9": (9, 3), "S10": (9, 7), "S11": (4, 5), "S24": (7, 4), "S31": (34, 4), "S32": (9, 3),
+          "S35": (29, 4), "S36": (20, 5), "S38": (12, 3), "S39": (8, 4), "S40": (7, 4)}
 STATIC = {"S1": "supplementary:Table S1", "S2": "supplementary:Table S2", "S3": "supplementary:Table S3",
           "S5b": "supplementary:Table S5b", "S8": "supplementary:Table S8", "S9": "supplementary:Table S9",
           "S10": "supplementary:Table S10", "S11": "supplementary:Table S11", "S24": "supplementary:Table S24",
@@ -179,9 +180,12 @@ class StaticLayoutTests(unittest.TestCase):
                 rows = read_data(self.out, stem, "linkage")
                 self.assertTrue(rows)
                 self.assertTrue(all(r["verified"] == "True" for r in rows if r["kind"] != "absent"))
-        records = {r["quantity (location)"]: r["record"] for r in read_table(self.out, "S31")}
+        records = {r["quantity (location)"]: r["repository location"] for r in read_table(self.out, "S31")}
         self.assertEqual(records["main Table 1: U_a (Pascal, COCO, Peptides)"],
                          "run archive: admit/decision.json, admit/paired_units.npz, admit/prediction_execution.json")
+        descriptions = {r["quantity (location)"]: r["record"] for r in read_table(self.out, "S31")}
+        self.assertEqual(descriptions["main Table 1: U_a (Pascal, COCO, Peptides)"],
+                         "runs/<dataset>/admission.json")
         s24 = read_table(self.out, "S24")
         self.assertTrue(s24[0]["reconstruction test"].endswith("(make reexecute)"))
 
@@ -202,8 +206,8 @@ class StaticLayoutTests(unittest.TestCase):
 class ComparisonTests(unittest.TestCase):
     """Declared comparisons resolve against printed values and expose code/paper disagreements.
 
-    Only S5d has a group in paper/reported_results.json; for the other tables a few printed
-    cells (supplementary pages 2 and 8) stand in for the proposed groups.
+    A restricted injected reference still exercises missing-path behavior. The
+    default build uses the full PDF-bound protocol reference sidecar.
     """
 
     PRINTED = {
@@ -227,12 +231,12 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual([s2[f"multigraph_role_sizes/{d}"] for d in GRAPH_LEVEL], ["exact"] * 3)
         self.assertEqual((s2["D_select/outer_folds"], s2["D_select/inner_folds"]), ("exact", "exact"))
         # The runtime fits the observer and consequence models once per profile, not per controller seed.
-        self.assertEqual(s2["D_select/controller_seeds"], "differs")
+        self.assertEqual(s2["D_select/controller_seeds"], "missing")
         s3 = self.statuses("supplementary:Table S3")
         self.assertEqual({k: v for k, v in s3.items() if not k.endswith("failure_action")},
                          {"nominal_graph_value/epsilon_plant_nats": "exact", "depth_qualification/PDD_pp": "exact",
                           "depth_qualification/DIL_gap_nats": "exact", "registry_support/phi_registry_min": "exact",
-                          "registry_support/selected_strata": "differs",
+                          "registry_support/selected_strata": "missing",
                           "residual_headroom/epsilon_headroom_nats": "no_reference"})
         s11 = self.statuses("supplementary:Table S11")
         self.assertEqual((s11["radius/margin"], s11["radius/fail_output"], s11["full/margin"]),
@@ -243,6 +247,34 @@ class ComparisonTests(unittest.TestCase):
         groups = [getattr(P, name) for name in dir(P) if name.endswith("_GROUP")]
         self.assertEqual(len(groups), len(set(groups)))
         self.assertTrue(all(g.startswith("supplementary_table_S") for g in groups))
+
+    def test_real_pdf_bound_references_cover_all_declared_protocol_comparisons(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report = build_displays(context(), Path(tmp), only=STATIC.values())
+        by_id = {d["id"]: d for d in report["displays"]}
+        self.assertFalse(report["errors"])
+        for display in by_id.values():
+            self.assertEqual(display["comparison"]["no_reference"], 0, display["id"])
+        self.assertEqual(by_id[STATIC["S9"]]["comparison"]["exact"], 18)
+        self.assertEqual(by_id[STATIC["S31"]]["comparison"]["exact"], 34)
+        self.assertEqual(by_id[STATIC["S35"]]["comparison"]["exact"], 29)
+        # A missing executed contract stays a gap even though the paper value is known.
+        self.assertGreater(by_id[STATIC["S3"]]["comparison"]["missing"], 0)
+        self.assertGreater(by_id[STATIC["S38"]]["comparison"]["differs"], 0)
+        self.assertTrue(by_id[STATIC["S2"]]["not_applicable_cells"])
+
+    def test_changed_pdf_identity_invalidates_printed_reference_sidecar(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "paper").mkdir()
+            for name in ("reported_results.json", "sources.json", "display_manifest.json", "printed_display_values.json"):
+                shutil.copyfile(ROOT / "paper" / name, root / "paper" / name)
+            path = root / "paper/printed_display_values.json"
+            reference = json.loads(path.read_text())
+            reference["documents"]["supplementary"] = "f" * 64
+            path.write_text(json.dumps(reference))
+            with self.assertRaisesRegex(DisplayValidationError, "current registered PDFs"):
+                load_references(root)
         self.assertIn(P.S5D_GROUP, REGISTRY)
 
 

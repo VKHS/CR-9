@@ -39,8 +39,8 @@ from cm_theory import economics, factorial
 from scripts._paper_common import BCE_DATASETS, ROUTE_NAMES
 from scripts.record_mapping import BUDGET_ARMS, INSERTED_SITE_ARMS
 
-from .framework import (DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputError, display, integer, interval,
-                        num, pyplot)
+from .framework import (DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputError, DisplayValidationError,
+                        display, integer, interval, not_applicable, num, pyplot)
 
 Z95 = 1.959963984540054
 # ROUTE_METHOD (method names of Table S15) and S15_ROUTES (the internal routes it tabulates; the comparator's and
@@ -54,9 +54,11 @@ RIGHT = "→"
 G_S6C = "supplementary_table_S6c_sensing_cost_identity"
 G_S14B = "supplementary_table_S14b_separated_data_sensitivity"
 G_S15 = "supplementary_table_S15_method_comparison"
+G_S15_REFERENCE = "supplementary_table_S15_reference_ranges"
 G_S15B = "supplementary_table_S15b_per_rerun_resource_ledger"
 G_S16 = "supplementary_table_S16_arxiv_factorial"
 G_S16B = "supplementary_table_S16b_pascal_factorial"
+G_S19 = "supplementary_table_S19_negative_controls"
 G_S23 = "supplementary_table_S23_assurance_and_expected_compute"
 G_S23B = "supplementary_table_S23b_nominal_execution_time_and_amortization"
 G_S26B = "supplementary_table_S26b_ensemble_law_and_break_even"
@@ -423,11 +425,52 @@ def table_s6c(ctx, out):
 # Supplementary Tables S15 and S15b
 # ---------------------------------------------------------------------------
 
+def s15_reference_ranges(ctx, out):
+    """Emit the declared accounting ranges separately from the observed method ledger."""
+    key = "baseline_reference_ranges_table_S15"
+    reference = ctx.constants.get(key)
+    if not isinstance(reference, dict):
+        raise DisplayInputError(f"registered constants {key} are required for the S15 reference ranges")
+    rows = []
+
+    def add_range(path, kind, name, quantity, unit):
+        value = reference
+        for field in path:
+            value = value.get(field) if isinstance(value, dict) else None
+        if (not isinstance(value, (list, tuple)) or len(value) != 2
+                or any(isinstance(v, bool) or not isinstance(v, (int, float))
+                       or not math.isfinite(v) or v <= 0 for v in value)
+                or value[0] > value[1]):
+            raise DisplayInputError(f"{key}.{'/'.join(path)} must be a finite positive ordered range")
+        rows.append([kind, name, quantity, value[0], value[1], unit, "declared reference range"])
+        out.compare(G_S15_REFERENCE, path, list(value),
+                    note="Declared accounting reference from SI p12; separate from measured ledger values")
+
+    for method in ("AMP", "ADMP-GNN", "GRAMA", "Graph Mamba", "Early-Exit GNN"):
+        for quantity, unit in (("serial_cost_per_member", "nominal executions per member"),
+                               ("parameter_multiplier", "times plant parameters")):
+            add_range(("external_methods", method, quantity), "external method", method, quantity, unit)
+    for route in ("best_fixed_depth", "phase", "fixed_sequence", "mpc_ol", "one_step", "radius", "mpc_rh"):
+        add_range(("internal_routes", route, "serial_cost_per_member"), "internal route", route,
+                  "serial_cost_per_member", "nominal executions per member")
+    add_range(("retraining_multiplier",), "shared protocol", "retraining", "retraining_multiplier",
+              "times plant training cost")
+    trials = reference.get("hpo_trials")
+    if isinstance(trials, bool) or not isinstance(trials, int) or trials <= 0:
+        raise DisplayInputError(f"{key}.hpo_trials must be a positive integer")
+    rows.append(["shared protocol", "HPO", "hpo_trials", trials, trials, "trials", "declared protocol"])
+    out.compare(G_S15_REFERENCE, ("hpo_trials",), trials, note="Shared HPO ceiling stated with the reference ranges")
+    out.uses("protocol", key, ["paper/registered_constants.json"])
+    out.data("declared_reference_ranges", ["kind", "method_or_route", "quantity", "low", "high", "unit", "basis"],
+             rows)
+
+
 @display("supplementary:Table S15", stem="S15", title="Method scores and resource ranges",
          needs=("runs", "records:baselines", "records:input_gate"))
 def table_s15(ctx, out):
     base = ctx.require_records("baselines")
     gate = ctx.require_records("input_gate")
+    s15_reference_ranges(ctx, out)
     rows, source = [], []
     for dataset in DATASETS:
         ledger, entries = method_rows(ctx, dataset, base, gate)
@@ -465,7 +508,11 @@ def table_s15(ctx, out):
                      "(select/candidates.json); qC, the deployed rule and the full-depth plant carry their test scores "
                      "and the cost ledger of Table S23. Retrained architectures and the other internal routes: "
                      "parameters, HPO trials, GPU-hours, serial cost and the per-seed scores of the baselines record set "
-                     "(score = mean over seeds). SD: range over methods of the per-seed score SD (AP in percentage points)."])
+                     "(score = mean over seeds). SD: range over methods of the per-seed score SD (AP in percentage points).",
+                     "The declared per-member serial-cost and parameter ranges, retraining multiplier and shared HPO "
+                     "ceiling from SI p12 are provided separately in data/S15/declared_reference_ranges.csv. "
+                     "They are accounting references, not observed per-rerun costs; they do not replace the measured "
+                     "values in this table or data/S15/methods.csv."])
     out.data("methods", ["dataset", "method", "family", "baselines_key", "plant_params_M", "external_params_M", "E",
                          "hpo_trials", "gpu_hours", "C_ctrl_low", "C_ctrl_high", "C_expected", "C_assure",
                          "official_score", "score_origin", "seed_sd_pp"], source)
@@ -524,12 +571,11 @@ def factorial_cells(ctx, dataset: str) -> list[dict]:
     return [row for row in rows if row["dataset"] == dataset]
 
 
-def factorial_contrasts(cells: dict, half_widths: dict) -> dict:
-    """Effect-coded effects, baseline-anchored differences and the independence half-width (cm_theory.factorial)."""
+def factorial_contrasts(cells: dict) -> dict:
+    """Effect-coded and baseline-anchored point contrasts; marginal CIs supply no covariance."""
     effects = factorial.all_effects(cells)
     anchored = {factors: factorial.anchored_difference(cells, factors) for factors in effects if len(factors) > 1}
-    return {"effects": effects, "anchored": anchored, "full_minus_none": factorial.full_minus_none(cells),
-            "half_width": factorial.effect_half_width(half_widths)}
+    return {"effects": effects, "anchored": anchored, "full_minus_none": factorial.full_minus_none(cells)}
 
 
 def factors_names(dataset: str) -> tuple[str, ...]:
@@ -560,12 +606,24 @@ def _factorial_display(ctx, out, dataset: str):
                            ("relative_time", row["relative_time"])):
             out.compare(layout["group"], ("cells", cell, key), value)
     cells = {cell: data[cell]["ld_integrated_loss"] for cell in data}
-    half = {cell: (data[cell]["interval_high"] - data[cell]["interval_low"]) / 2.0 for cell in data}
-    contrasts = factorial_contrasts(cells, half)
+    contrasts = factorial_contrasts(cells)
+    from .factorial_data import joint_factorial_contrasts
+    joint = joint_factorial_contrasts(ctx.require_records("factorials"), dataset, data)
     effects, names = contrasts["effects"], layout["names"]
     for j, name in enumerate(names):
         out.compare(layout["group"], ("effect_coded_main_effects_nats", name), effects[(j,)])
-    out.compare(layout["group"], ("effect_coded_main_effects_nats", "half_width_95"), contrasts["half_width"])
+    if joint is None:
+        out.incomplete("Joint factorial uncertainty requires paired per-unit losses and the shared bootstrap draws",
+                       location="factorial contrasts")
+        out.compare_missing(layout["group"], ("effect_coded_main_effects_nats", "half_width_95"),
+                            reason="Marginal cell intervals cannot identify the paired contrast covariance")
+    else:
+        out.provenance(factorial_joint={k: v for k, v in joint.items() if k != "contrasts"})
+        for j in range(3):
+            ci = joint["contrasts"][(j,)]
+            for end, width in (("lower", ci["effect"] - ci["low"]), ("upper", ci["high"] - ci["effect"])):
+                out.compare(layout["group"], ("effect_coded_main_effects_nats", "half_width_95"), width,
+                            note=f"{labels[j]} {end} distance from its paired-bootstrap point contrast")
     interactions = {f: v for f, v in effects.items() if len(f) > 1}
     if dataset == "ogbn-arxiv":
         out.compare(layout["group"], ("pairwise_interactions_nats",), [effects[(0, 1)], effects[(0, 2)], effects[(1, 2)]])
@@ -579,8 +637,11 @@ def _factorial_display(ctx, out, dataset: str):
         text = ("within 1e-4 nats of zero at the tabulated precision" if round(largest, 4) <= 1e-4
                 else f"largest |interaction| {largest:.4f} nats")
         out.compare(layout["group"], ("interactions",), text)
+    ci_note = ("joint 95% intervals " + ", ".join(
+        f"{labels[j]} [{joint['contrasts'][(j,)]['low']:.4f}, {joint['contrasts'][(j,)]['high']:.4f}]" for j in range(3))
+        if joint is not None else "joint 95% intervals unavailable; the marginal cell intervals do not determine them")
     note = ("Effect-coded main effects " + ", ".join(f"{labels[j]} {_signed(effects[(j,)])}" for j in range(3))
-            + f" nats (95% half-width {contrasts['half_width']:.4f} from the cell intervals under independent cells); "
+            + f" nats ({ci_note}); "
             + "interactions " + ", ".join(f"{factors_label(f, labels)} {_signed(v)}" for f, v in interactions.items())
             + "; baseline-anchored differences "
             + ", ".join(f"I_{factors_label(f, labels)} {_signed(v)}" for f, v in contrasts["anchored"].items())
@@ -590,11 +651,13 @@ def _factorial_display(ctx, out, dataset: str):
                "relative time"], rows, notes=[note])
     out.data("cells", ["cell", *factors, "ld_integrated_loss_nats", "interval_low_nats", "interval_high_nats",
                        "official_metric", "activity", "relative_time", "relative_time_unit"], source)
-    out.data("contrasts", ["contrast", "kind", "value_nats"],
-             [[factors_label(f, labels), "effect-coded", v] for f, v in effects.items()]
-             + [[factors_label(f, labels), "baseline-anchored", v] for f, v in contrasts["anchored"].items()]
-             + [["full minus none", "difference", contrasts["full_minus_none"]],
-                ["half-width (independent cells)", "interval", contrasts["half_width"]]])
+    out.data("contrasts", ["contrast", "kind", "value_nats", "interval_low_nats", "interval_high_nats", "interval_method"],
+             [[factors_label(f, labels), "effect-coded", v,
+               joint["contrasts"][f]["low"] if joint else None, joint["contrasts"][f]["high"] if joint else None,
+               joint["method"] if joint else "unavailable"] for f, v in effects.items()]
+             + [[factors_label(f, labels), "baseline-anchored", v, None, None, "point contrast"]
+                for f, v in contrasts["anchored"].items()]
+             + [["full minus none", "difference", contrasts["full_minus_none"], None, None, "point contrast"]])
 
 
 @display("supplementary:Table S16", stem="S16", title="arxiv component factorial", needs=("records:factorials",))
@@ -627,8 +690,16 @@ def table_s19(ctx, out):
         rows.append([control, definition.get("construction"), num(activity, 3), num(fallback, 3),
                      f"{num(harm, 4)} {unit}", definition.get("expected_conclusion")])
         source.append([control, activity, fallback, harm, unit])
+        for key, value in (("construction", definition.get("construction")),
+                           ("expected_conclusion", definition.get("expected_conclusion")),
+                           ("residual_activity", activity), ("input_fallback", fallback),
+                           ("worst_pre_fallback_harm", harm), ("harm_unit", unit)):
+            out.compare(G_S19, (control, key), value)
     _uses_records(out, controls)
-    notes = ["Residual activity, input fallback and worst pre-fallback harm from the negative_controls record set."]
+    out.uses("protocol", "negative_controls_table_S19", ["paper/registered_constants.json"])
+    notes = ["Construction and expected conclusion are the registered protocol definitions from SI p13. "
+             "Residual activity, input fallback and worst pre-fallback harm, with its recorded unit, come from the "
+             "negative_controls record set. All six fields are compared with the independent printed-value targets."]
     if not definitions:
         notes.append("Construction and expected conclusion are protocol definitions that paper/registered_constants.json "
                      "does not register (key negative_controls_table_S19); they print as missing.")
@@ -947,14 +1018,16 @@ def table_s26(ctx, out):
         split = ledger["splits"][0]
         horizon = split["qc"].get("horizon")
         qc_name = ROUTE_NAMES[ledger["qc_route"]] + (f" H = {horizon}" if horizon is not None else "")
-        rows.append([SHORT[dataset], f"qC: {qc_name}", integer(E), num(c_qc, 1), num(ledger["score_qC"], decimals), None,
+        na = not_applicable("This row is a measured baseline/grid point; no interpolated threshold or verdict applies")
+        rows.append([SHORT[dataset], f"qC: {qc_name}", integer(E), num(c_qc, 1), num(ledger["score_qC"], decimals), na,
                      f"{num(delta, 4, signed=True)} [{num(low, 4, signed=True)}, {num(high, 4, signed=True)}] "
-                     "(main Table 1)", None])
+                     "(main Table 1)", na])
         source.append([dataset, "qC", E, c_qc, ledger["score_qC"], None, None, delta, low, high, None])
         if not ledger["returned"]:
             route = ROUTE_NAMES[ledger["qd_route"]]
             rows.append([SHORT[dataset], f"deployed {route} at expected cost", integer(ledger["E_qd"]),
-                         num(ledger["C_exp"], 2), num(ledger["score_qD"], decimals), None, None, None])
+                         num(ledger["C_exp"], 2), num(ledger["score_qD"], decimals), na,
+                         not_applicable("This row is the deployed rule itself"), na])
             source.append([dataset, "deployed", ledger["E_qd"], ledger["C_exp"], ledger["score_qD"], None, None, None,
                            None, None, None])
             for label, cost in (("expected", ledger["C_exp"]), ("assurance", ledger["C_assure"])):
@@ -979,7 +1052,7 @@ def table_s26(ctx, out):
                 verdict = (f"comparator ahead at this size; cost {cost / ledger['C_exp']:.1f}× the deployed expected cost"
                            if ledger["C_exp"] else "comparator ahead at this size")
             rows.append([SHORT[dataset], f"qC at E = {size} (registered grid)", integer(size), num(cost, 1),
-                         num(grid_scores[size], decimals), None, num(effect, 4, signed=True), verdict])
+                         num(grid_scores[size], decimals), na, num(effect, 4, signed=True), verdict])
             source.append([dataset, f"grid E = {size}", size, cost, grid_scores[size], None, None, effect, None, None,
                            verdict])
         out.uses("run", dataset, ["select/candidates.json", "final/results_summary.json"])
@@ -1010,10 +1083,11 @@ def table_s37(ctx, out):
     gate = ctx.require_records("input_gate")
     episodes = " or ".join(dict.fromkeys(UNIT_WORDS[UNITS[d]] for d in NODE_LEVEL))
     rows, source = [], []
+    na = not_applicable("The printed row refers to the per-unit rate display rather than a pooled numerator/denominator")
     for dataset in DATASETS:
         if dataset in NODE_LEVEL:
             rows.append([SHORT[dataset], f"input fallback (deployment episodes: {episodes}); false-safe and harm-miss "
-                         "rates (executed decisions); stepwise support rejection (sites)", None, None,
+                         "rates (executed decisions); stepwise support rejection (sites)", na, na,
                          "fallback fraction in main Table 1; rates plotted in Fig. S16c–d"])
             continue
         ledger = run_ledger(ctx, dataset)
@@ -1025,7 +1099,7 @@ def table_s37(ctx, out):
         rows.append([SHORT[dataset], "input fallback (deployment graphs; official test split)", integer(count),
                      integer(graphs), f"{num(rate, 3)} (main Table 1)"])
         rows.append([SHORT[dataset], "false-safe rate and harm-miss rate (executed decisions); stepwise support "
-                     "rejection (sites)", None, None, "plotted in Fig. S16c–d"])
+                     "rejection (sites)", na, na, "plotted in Fig. S16c–d"])
         source.append([dataset, rate, graphs, rate * graphs, count])
         for key, value in (("numerator", count), ("denominator", graphs), ("rate", rate)):
             out.compare(G_S37, (dataset, key), value)
@@ -1109,7 +1183,7 @@ def strict_budget_replay(ctx) -> dict:
         except ImportError as exc:
             raise DisplayInputError(f"the strict E3-E6 campaign replay needs the PyTorch runtime ({exc})") from exc
         except (ValueError, KeyError, OSError) as exc:
-            raise DisplayInputError(f"the E3-E6 campaign export does not pass the strict replay: {exc}") from exc
+            raise DisplayValidationError(f"the E3-E6 campaign export does not pass the strict replay: {exc}") from exc
     return cache["budget"]
 
 
@@ -1131,7 +1205,10 @@ def budget_arms(ctx) -> dict:
     arms: dict = {}
     for row in records.rows:
         entry = arms.setdefault((row["dataset"], arm_id(row["arm"])), {})
-        entry.setdefault(row["configuration"], {})[row["quantity"]] = float(row["value"])
+        config = entry.setdefault(row["configuration"], {})
+        if row["quantity"] in config or not math.isfinite(float(row["value"])):
+            raise DisplayValidationError("budget_matched: duplicated or nonfinite arm/configuration quantity")
+        config[row["quantity"]] = float(row["value"])
     expected = {(d, a) for d in ADMITTED for a in ARMS}
     if set(arms) != expected:
         raise DisplayInputError("budget_matched: the record set does not cover the four arms of every admitted dataset")
@@ -1145,7 +1222,7 @@ def budget_arms(ctx) -> dict:
             raise DisplayInputError(f"budget_matched: {key} is absent from the strict campaign replay")
         for quantity, field in REPLAY_FIELDS.items():
             if not math.isclose(selected[quantity], float(reference[field]), rel_tol=1e-8, abs_tol=1e-12):
-                raise DisplayInputError(f"budget_matched: {key} {quantity} differs from the strict campaign replay")
+                raise DisplayValidationError(f"budget_matched: {key} {quantity} differs from the strict campaign replay")
         effects = [c["effect_vs_qc_nats"] for c in configurations.values() if "effect_vs_qc_nats" in c]
         overheads = [c["work_ratio"] - 1.0 for c in configurations.values() if "work_ratio" in c]
         result[key] = {**selected, "configurations": len(configurations),
@@ -1192,8 +1269,14 @@ def table_s46(ctx, out):
             compare.append((name, 1000 * e[arm]["effect_vs_qc_nats"]))
             if e[arm]["effect_range"] is not None:
                 compare.append((f"{arm}_range", [1000 * v for v in e[arm]["effect_range"]]))
+            else:
+                out.incomplete(f"{dataset} {arm} lacks the deposited configuration range", location="grid range")
+                out.compare_missing(G_S46, (dataset, f"{arm}_range"), reason="Only the selected configuration is deposited")
         if ov_range is not None:
             compare.append(("E6_overhead_range", [100 * v for v in ov_range]))
+        else:
+            out.incomplete(f"{dataset} E6 lacks the deposited overhead range", location="grid range")
+            out.compare_missing(G_S46, (dataset, "E6_overhead_range"), reason="Only the selected configuration is deposited")
         for key, value in compare:
             out.compare(G_S46, (dataset, key), value)
         out.uses("run", dataset, ["select/candidates.json", "final/results_summary.json"])
@@ -1244,6 +1327,10 @@ def table_s46b(ctx, out):
             elif e["effect_range"] is not None:
                 out.compare(G_S46B, base + ("retained_share_grid_range_vs_qC_mnats",),
                             [1000 * v for v in e["effect_range"]])
+            else:
+                out.incomplete(f"{dataset} {arm} lacks the deposited configuration range", location="grid range")
+                out.compare_missing(G_S46B, base + ("retained_share_grid_range_vs_qC_mnats",),
+                                    reason="Only the selected configuration is deposited")
     _uses_records(out, ctx.require_records("budget_matched"))
     out.uses("campaign", "budget", ["study.json", "<arm studies and parents named by study.json>"])
     out.table(["Dataset", "arm", "effect vs qC [grid range]", "effect vs qM [95% interval]", "Holm P",

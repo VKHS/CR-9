@@ -26,11 +26,10 @@ weight w_c = the core's scored-node count, exactly as the admit stage passes the
    already treats as separate resampling units.
 3. Dependency graph G_k: cores c != c' are linked when s_k(c, c') > tau. G_k0 has no links and G_k only
    gains links as k grows.
-4. Resampling units. The roots are the lexicographically first maximum independent set of G_k (by core
-   order); its size, the independence number alpha(G_k), is the largest number of cores that are
-   pairwise independent at buffer k. Every other core joins the root on which it depends most (largest
-   s_k, ties to the lower core); that root is linked to it because a maximum independent set dominates
-   G_k. A block is a root with the cores that joined it. resampling_units = alpha(G_k).
+4. Resampling units. A block is a connected component of G_k. All cores connected by an above-threshold
+   dependence, including through another core, are resampled together. No above-threshold link may cross
+   two blocks. The first core of a block identifies it (``roots``); resampling_units is the number of
+   components. This grouping is a descriptive sensitivity rule, not a proof of stochastic independence.
 5. Statistic. ``cross_morse.statistics.admission`` is called on the blocks: a block's difference is the
    w-weighted mean of its cores' clipped differences (the core's own x_c for a one-core block) and its
    weight is the block's scored-node count; replicates, alpha, clip, epsilon_a, epsilon_metric, the
@@ -44,22 +43,16 @@ weight w_c = the core's scored-node count, exactly as the admit stage passes the
 Properties checked on every parent: at k0 every block is one core, so the call is the sealed admission
 and must reproduce admit/decision.json exactly (D_bar, U_desc, units, both gates and the decision; a
 parent that does not reproduce is refused); D_bar is the same at every buffer; resampling_units is
-non-increasing in k (alpha cannot grow when links are added). The contexts of ``data._buffers`` at k0
+non-increasing in k (components cannot split when links are added). The contexts of ``data._buffers`` at k0
 are recomputed and must equal the sealed buffer audit of prepared/metadata.json, which ties the graph
 read here to the graph the runtime prepared.
 
-Why not blocks = connected components of a k-hop coverage graph (cores linked when the k-hop context of
-one covers more of the other than any pair at k0): (a) k-hop contexts saturate within a few hops on
-small-world graphs, so on a compact 32-core partition of a random geometric graph with 2% long-range
-edges every pair passes the threshold at 4 hops (one block), and on a stochastic-block graph some pair
-is already fully covered at 2 hops (tau = 1), so the buffer never changes anything; (b) the transitive
-closure chains neighbouring cores, so even with the walk dependence the components fall to one block
-inside the grid (4 hops on the stochastic-block graph, 16-32 hops on the geometric ones). With the walk
-dependence and the independence-number count the units fall gradually on the same graphs
-(tests/test_sweeps.py, BufferUnits). Cores that are exchangeable rather than local (a degree-stratified
-partition interleaves every core over the whole graph) are all about equally dependent, so every pair
-crosses tau at about the same buffer and the units drop from J to one there; that is a property of such
-partitions, not of the rule.
+Version 2 corrects the earlier independent-set-root grouping. Independent roots do not imply independent
+blocks: assigning other cores to roots can leave dependence links across the resulting blocks (for
+example, the path 0-1-2-3). Components can therefore collapse to a single block earlier than the former
+heuristic. Such a result has no bootstrap interval and is reported as measured; the grouping is never
+chosen to preserve a desired number of units or the manuscript's admission decision. Old plans and
+results name a different definition and must be re-created, not silently resumed under version 2.
 """
 from __future__ import annotations
 
@@ -75,12 +68,12 @@ from .sweeps import (ROOT, SealedRun, SweepError, canonical_sha256, read_json, s
 
 RECORD_SET = "buffer_sensitivity"
 JOB_SCHEMA = "cm-buffer-sensitivity-job-1"
-DEFINITION_ID = "walk-dependence-independent-set-blocks-v1"
+DEFINITION_ID = "walk-dependence-connected-components-v2"
 DEFINITION = ("resampling units at buffer k: the cores of admit/paired_units.npz grouped into blocks; cores c, c' are "
               "linked when s_k(c,c') = max(E_k(c<-c'), E_k(c'<-c)) exceeds tau = max s_k0 over core pairs, where "
               "E_k(c<-c') is the probability that a simple random walk on the prepared graph started at a D_admit "
-              "node of c' enters c within k steps; the roots are the lexicographically first maximum independent "
-              "set of the link graph and every other core joins the root it depends on most; "
+              "node of c' enters c within k steps; each connected component of the link graph is one block, so "
+              "no above-threshold dependence link crosses resampled blocks; "
               "cross_morse.statistics.admission on the blocks (block difference = scored-node-weighted mean of its "
               "cores' clipped differences, block weight = scored-node count) with the sealed admission's "
               "replicates, alpha, clip, epsilon_a and seed")
@@ -255,19 +248,20 @@ def maximum_independent_set(links) -> list[int]:
 
 
 def resampling_blocks(strength: np.ndarray, tau: float) -> dict:
-    """Blocks of core positions at one buffer: roots of a maximum independent set and the cores they absorb."""
+    """Connected components of the thresholded dependence graph, ordered by their first core.
+
+    Independent-set roots alone are insufficient: cores assigned to different roots can remain linked.
+    Components keep every such link inside one resampled block. This is the smallest grouping that does so.
+    """
+    from scipy.sparse.csgraph import connected_components
     links = np.asarray(strength) > tau
     np.fill_diagonal(links, False)
-    roots = maximum_independent_set(links)
-    members = {r: [r] for r in roots}
-    for core in range(len(links)):
-        if core in members:
-            continue
-        linked = [r for r in roots if links[core, r]]
-        if not linked:
-            raise SweepError("internal error: a maximum independent set must dominate the link graph")
-        members[max(linked, key=lambda r: (strength[core, r], -r))].append(core)
-    blocks = sorted((sorted(b) for b in members.values()), key=lambda b: b[0])
+    _bitsets(links)                      # require a square, symmetric, loop-free dependence graph
+    count, labels = connected_components(sparse.csr_matrix(links), directed=False)
+    blocks = sorted((np.flatnonzero(labels == label).tolist() for label in range(count)), key=lambda b: b[0])
+    roots = [block[0] for block in blocks]
+    if np.any(links & (labels[:, None] != labels[None, :])):
+        raise SweepError("internal error: a dependence link crosses resampling blocks")
     return {"links": int(np.triu(links, 1).sum()), "roots": roots, "blocks": blocks}
 
 
@@ -532,6 +526,8 @@ def run_buffer_jobs(plan_path, only=None) -> list[Path]:
     plan = read_json(plan_path)
     if plan.get("schema") != PLAN_SCHEMA or plan.get("sweep") != RECORD_SET:
         raise SweepError("not a buffer_sensitivity sweep plan")
+    if plan.get("settings", {}).get("definition") != DEFINITION_ID:
+        raise SweepError("the buffer plan uses another resampling definition; create a new plan for " + DEFINITION_ID)
     base, written = plan_path.parent, []
     settings = plan["settings"]
     for job in settings["jobs"]:
@@ -573,6 +569,10 @@ def load_job(plan_path, job: dict) -> dict:
     if not path.is_file():
         raise SweepError(f"buffer job {job['id']} has not been run (run_sweep.py run --plan {plan_path})")
     record = read_json(path)
+    definition = read_json(plan_path).get("settings", {}).get("definition")
+    if definition != DEFINITION_ID or record.get("definition", {}).get("id") != definition:
+        raise SweepError(f"{job['id']}: the buffer plan or result uses another resampling definition; "
+                         f"create a new plan for {DEFINITION_ID}")
     if (record.get("schema") != JOB_SCHEMA or record.get("job") != job["id"]
             or record.get("plan_sha256") != sha256_file(plan_path)):
         raise SweepError(f"{path} does not belong to this plan; remove it and run the job again")

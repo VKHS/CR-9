@@ -3,8 +3,8 @@
 This file maps the main topics in the machine-learning reproducibility checklist
 reviewed by [Pineau et al. (JMLR 22(164), 2021)](https://jmlr.org/papers/v22/20-303.html)
 to this repository. A file describing a protocol is distinct from evidence that
-an experiment followed it. The measured outputs of the reported experiments are
-assets of the repository's release `paper-artifacts`
+an experiment followed it. The publication workflow distributes measured outputs
+through the repository's release `paper-artifacts`
 ([publication guide](docs/PUBLICATION.md)); `make paper` verifies them and rebuilds
 every table and figure, and `bash run_cross_morse.sh reproduce` regenerates the
 lifecycle results of all seven datasets on a Slurm cluster ([HPC guide](docs/HPC.md)).
