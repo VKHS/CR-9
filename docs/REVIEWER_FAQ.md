@@ -287,6 +287,30 @@ complete and every value agrees; the report names any difference.
 Where: `scripts/reconstruct_paper.py`, `docs/RECONSTRUCTION.md`.
 Check: `make paper`
 
+**E5. The manuscript prints a longer availability paragraph. Is it checked too?**
+Yes. `release/printed_availability.json` holds the availability text printed in the
+main text (page 15), the two repository sentences of the Methods and the
+Supplementary paragraph (page 30), bound to the PDF identities of `paper/sources.json`,
+and divides it into 39 claims. `scripts/printed_statement_check.py` evaluates each
+claim with the vocabulary of the registered statement, and `STATEMENT_COMPLIANCE.md`
+lists the result below the registered items. Claims about code, contracts and
+commands are checked against the source (symbols located with the Python AST, Make
+targets, the bundled sealed runs); claims about deposits are checked against
+`runs/index.json`, `records/index.json` and `release/paper_artifacts.json`.
+Check: `make printed-statement-check`
+
+**E6. What will the repository look like once the measured outputs are published?**
+`docs/FINAL_DESTINATION.md` draws it from what the repository already fixes. Printed
+values that the released code determines by design (candidate-family sizes, data-role
+sizes, statistical units, trajectories, depths, seeds, folds, sensor settings) are
+computed from the configurations and compared with the paper before publication; the
+data roles of the three independent-graph benchmarks are pre-registered with the
+runtime's own role functions; and the contents, tier sizes and release parts of every
+run archive are projected with the release's own counting rules. Projections are
+marked and replaced by the published values; they never enter a comparison.
+Where: `scripts/final_destination.py`, `release/final_destination.json`.
+Check: `make final-destination-check`
+
 ## F. Repository hygiene, licence and citation
 
 **F1. Licence and citation?**

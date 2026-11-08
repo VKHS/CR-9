@@ -43,6 +43,7 @@ python3 -B scripts/paper_outputs.py status --work $CM_BASE/paper-outputs/CROSS_M
 export GITHUB_TOKEN=...                                           # fine-grained token, contents: write on VKHS/CR-9
 bash hpc/publish_paper_artifacts_arrhenius.sh all $CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001/paper-artifacts.map.json
 make statement-fulfilled                                          # verify the full availability claim
+make availability-fulfilled                                       # also every claim of the printed manuscript text
 ```
 
 [Producing the outputs](PRODUCTION.md) describes the job graph that the first command
@@ -80,7 +81,8 @@ bash hpc/publish_paper_artifacts_arrhenius.sh publish
   its file inventory and a recomputed comparison status). Every view is linked to the
   current release manifest and artifact identities; source data also identifies its
   builders and registered comparison inputs. `make statement` refreshes
-  `STATEMENT_COMPLIANCE.md`.
+  `STATEMENT_COMPLIANCE.md` and [the final destination](FINAL_DESTINATION.md), whose
+  projected values are replaced by the published ones.
 - Commit those files (or set `CM_PUBLISH_COMMIT=1` to commit and push them from a clean
   checkout). Verification or generator errors stop publication before derived views
   are committed. Numerical differences or incomplete display coverage remain explicit

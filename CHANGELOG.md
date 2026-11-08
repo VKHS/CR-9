@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-11-08 — The printed availability text, the final destination and the commands on published outputs
+
+- The availability text printed in the manuscript is registered and checked claim by claim.
+  `release/printed_availability.json` holds the main-text paragraph (page 15), the two
+  repository sentences of the Methods and the Supplementary paragraph (page 30), bound to
+  the PDF identities of `paper/sources.json`, as 39 claims. `scripts/printed_statement_check.py`
+  (`make printed-statement-check`) evaluates them with the vocabulary of the registered
+  statement: symbols located with the Python AST, Make targets, the sealed bundled runs,
+  the record contracts, `runs/index.json`, `records/index.json` and the release manifest.
+  `STATEMENT_COMPLIANCE.md` lists them below the registered items; 29 are fulfilled by the
+  checkout, 8 await the measured outputs, and the two sentences that place the measurement
+  records at deposit DOIs in `records/index.json` are not supported by the record contract.
+  `make availability-fulfilled` requires both texts.
+- The final destination (`scripts/final_destination.py`, `make final-destination`,
+  `docs/FINAL_DESTINATION.md`, `release/final_destination.json`) draws the repository after
+  publication from what it already fixes:
+  - a design forecast of the printed values that the released code determines before any
+    measurement: 64 agree with the paper, and the candidate-family size |Q| of Table S20
+    differs on every dataset (the released registry gives 270, 265, 265, 260, 270, 265 and
+    260 candidates per run against the printed 180, 180, 144, 216, 240, 240 and 180);
+    `make final-destination-runs RUNS_ROOT=<runs>` checks completed runs against it before
+    publication, and the registry formula reproduces both bundled runs route by route;
+  - the data roles of PascalVOC-SP, COCO-SP and Peptides-func, pre-registered with the
+    runtime's own role functions lifted from `cross_morse/data.py` without PyTorch; the same
+    functions reproduce every role hash the bundled runs recorded at preparation;
+  - the projected release: files, checkpoints, prediction and trajectory files, tier sizes
+    and release parts of every run archive, counted with `content_counts`, `is_heavy` and the
+    part size of `scripts/paper_artifacts.py` (about 29 GB in the analysis tier and 1.9 TB in
+    the complete tier, dominated by the full-graph prediction arrays of COCO-SP and
+    ogbn-products, whose complete tiers exceed one Zenodo record);
+  - compliance at publication and the close-out sequence, including the two routes for the
+    printed sentences on deposit DOIs.
+  Projected values are marked, never enter a comparison and are replaced by the published
+  values; publication refreshes the page.
+- `make tables` and `make figures` read completed run directories with `RUNS_ROOT=` (a
+  reproduction suite or the runs that `make paper` verified); `make records-tables` reads
+  `RECORDS_ROOT`, and when `records/` registers no set, the record sets that `make paper`
+  downloaded and verified.
+- `records/index.json` declares all 31 record contracts of `records/specs.json`.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged: source fingerprint
+  `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+
 ## 2026-11-07 — Evidence-complete exports and independently checked reconstruction
 
 - Retain actual factorial and internal-baseline predictions, fitted ablation

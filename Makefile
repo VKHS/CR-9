@@ -27,6 +27,9 @@ EXAMPLE_GENERATED_ROOT ?= examples/generated
 DATASET_STEMS := arxiv products proteins roman_empire pascalvoc_sp coco_sp peptides_func
 EXAMPLE_STEMS := arxiv peptides_func
 RUNS_INDEX ?= runs/index.json
+# A directory of completed run directories (a reproduction suite's runs/ or the runs that
+# `make paper`/`make fetch-artifacts` verified under $(ARTIFACTS_ROOT)/runs); empty reads RUNS_INDEX.
+RUNS_ROOT ?=
 RECORDS_ROOT ?= records
 RECORDS_INDEX ?= $(RECORDS_ROOT)/index.json
 RECONSTRUCTION_ROOT ?= $(REPORT_ROOT)/reconstruction
@@ -108,6 +111,7 @@ endef
 .PHONY: help verify check test test-no-torch test-release \
  tables figures paper paper-offline paper-from-index paper-from-runs fetch-artifacts paper-artifacts-status \
  paper-artifacts-plan paper-artifacts-check statement statement-check statement-fulfilled example-paper example-paper-check \
+ printed-statement-check final-destination final-destination-check final-destination-runs availability-fulfilled \
  paper-outputs paper-outputs-plan paper-outputs-submit paper-outputs-status paper-outputs-collect \
  manifests manifests-check availability availability-check \
  records-index records-check records-tables example-records example-records-check \
@@ -165,6 +169,9 @@ help:
 	  '  make paper-outputs-status PRODUCE_WORK=<work>    follow the jobs' \
 	  '  bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   publish' \
 	  '  make statement-fulfilled  every item of the registered availability statement fulfilled' \
+	  '  make printed-statement-check  each claim of the availability text printed in the manuscript' \
+	  '  make final-destination    the repository after publication, projected (docs/FINAL_DESTINATION.md)' \
+	  '  make availability-fulfilled  the registered statement and every printed claim fulfilled' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
 	  '  make paper                build supported tables/figures from official archives and records' \
@@ -199,14 +206,19 @@ help:
 	  'Common variables: PYTHON, DATASET, PROFILE, RUN_ROOT, REPORT_ROOT, DATA_ROOT, DEVICE, THREADS.'
 
 # ---------------------------------------------------------------- paper from runs
+# The run-derived tables and figures from completed run directories: RUNS_ROOT=<dir of completed runs>
+# (a reproduction suite, or $(ARTIFACTS_ROOT)/runs after `make paper`); without RUNS_ROOT, the archives
+# registered in RUNS_INDEX.
+RUNS_SOURCE = $(if $(strip $(RUNS_ROOT)),--runs-root "$(RUNS_ROOT)",--index "$(RUNS_INDEX)")
+
 tables:
-	"$(PYTHON)" -B scripts/build_paper.py tables --index "$(RUNS_INDEX)" --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
+	"$(PYTHON)" -B scripts/build_paper.py tables $(RUNS_SOURCE) --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
 
 figures:
-	"$(PYTHON)" -B scripts/build_paper.py figures --index "$(RUNS_INDEX)" --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
+	"$(PYTHON)" -B scripts/build_paper.py figures $(RUNS_SOURCE) --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
 
 paper-from-runs:
-	"$(PYTHON)" -B scripts/build_paper.py all --index "$(RUNS_INDEX)" --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
+	"$(PYTHON)" -B scripts/build_paper.py all $(RUNS_SOURCE) --label official --output-dir "$(PAPER_OFFICIAL_ROOT)"
 
 # The one command of the availability statement: download and verify the published outputs,
 # rebuild every numbered table and figure with its source data, compare with the printed values.
@@ -233,14 +245,37 @@ paper-artifacts-check:
 
 statement:
 	"$(PYTHON)" -B scripts/statement_check.py --write
+	"$(PYTHON)" -B scripts/final_destination.py --write
 
 statement-check:
 	"$(PYTHON)" -B scripts/statement_check.py --check
+	"$(PYTHON)" -B scripts/final_destination.py --check
+
+# The availability text printed in the manuscript (main page 15, Methods, SI page 30), claim by claim.
+printed-statement-check:
+	"$(PYTHON)" -B scripts/printed_statement_check.py
+
+# The repository after publication, drawn now: design forecast, pre-registered roles, projected release,
+# compliance at publication and the close-out sequence (docs/FINAL_DESTINATION.md).
+final-destination:
+	"$(PYTHON)" -B scripts/final_destination.py --write
+
+final-destination-check:
+	"$(PYTHON)" -B scripts/final_destination.py --check
+
+# Completed runs against the design forecast before they are published: RUNS_ROOT=<suite>/runs
+final-destination-runs:
+	@test -n "$(RUNS_ROOT)" || { echo 'Set RUNS_ROOT to a directory of completed runs' >&2; exit 2; }
+	"$(PYTHON)" -B scripts/final_destination.py --runs-root "$(RUNS_ROOT)"
 
 # The final gate: every item of the registered statement fulfilled (after publication).
 statement-fulfilled:
 	"$(PYTHON)" -B scripts/reconstruct_paper.py --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)" --tier complete
 	"$(PYTHON)" -B scripts/statement_check.py --require-fulfilled
+
+# Both availability texts: the registered statement and every claim of the printed manuscript text.
+availability-fulfilled: statement-fulfilled
+	"$(PYTHON)" -B scripts/statement_check.py --require-fulfilled --require-printed-fulfilled
 
 # Produce every measured output of the statement on the cluster from a completed reproduction suite
 # (docs/PRODUCTION.md): SUITE=<suite of bash run_cross_morse.sh reproduce> [PRODUCE_WORK=<dir>]
@@ -339,8 +374,16 @@ records-index:
 records-check:
 	"$(PYTHON)" -B scripts/records.py check
 
+# Record-derived supplementary tables, every value traced to its raw file. RECORDS_ROOT names the record
+# sets; when the canonical records/ index registers none, the record sets that `make paper` or
+# `make fetch-artifacts` downloaded and verified under $(ARTIFACTS_ROOT)/records are read.
 records-tables:
-	"$(PYTHON)" -B scripts/records.py tables --output-dir "$(PAPER_OFFICIAL_ROOT)/records"
+	@root="$(RECORDS_ROOT)"; \
+	 if [ "$$(realpath -m -- "$$root")" = "$$(realpath -m -- records)" ] \
+	    && grep -qs '"sets": \[\]' records/index.json && [ -f "$(ARTIFACTS_ROOT)/records/index.json" ]; then \
+	   root="$(ARTIFACTS_ROOT)/records"; printf 'record sets: %s (published release assets verified by make paper)\n' "$$root"; \
+	 fi; \
+	 "$(PYTHON)" -B scripts/records.py tables --root "$$root" --specs "$(RECORDS_SPECS)" --output-dir "$(PAPER_OFFICIAL_ROOT)/records"
 
 example-records:
 	"$(PYTHON)" -B scripts/records.py tables --root "$(EXAMPLE_RECORDS_ROOT)" --specs "$(RECORDS_SPECS)" --output-dir "$(PAPER_EXAMPLES_ROOT)/records"
@@ -509,7 +552,7 @@ NUMPY_TESTS := test_paper_registry test_textual_source_references test_records t
  test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
  test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \
- test_s14_builder test_paper_outputs test_internal_baselines
+ test_s14_builder test_paper_outputs test_internal_baselines test_printed_statement_check test_final_destination
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

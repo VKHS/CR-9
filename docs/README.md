@@ -11,7 +11,8 @@
 | [Availability review](AVAILABILITY_REVIEW.md) | The detailed repository review, scientific corrections, remaining paper/code differences and the artifacts needed for fulfillment |
 | [Producing the measured outputs](PRODUCTION.md) | One command on the cluster: every runner of `release/experiment_code.json` as one Slurm job graph from the seven completed runs, ending with the map that publication reads |
 | [Publishing the measured outputs](PUBLICATION.md) | How the reported runs, record sets, campaigns and environment enter the release `paper-artifacts` |
-| [Statement compliance](../STATEMENT_COMPLIANCE.md) | Each item of the registered availability statement, where the repository fulfils it, and what awaits publication |
+| [Statement compliance](../STATEMENT_COMPLIANCE.md) | Each item of the registered availability statement and each claim of the availability text printed in the manuscript (main page 15, Methods, SI page 30): where the repository fulfils it, and what awaits publication |
+| [The final destination](FINAL_DESTINATION.md) | The repository after publication, drawn now: printed values the released code fixes by design and their agreement with the paper, pre-registered data roles of the independent-graph benchmarks, the projected release (contents, tiers, parts, Zenodo feasibility), compliance at publication and the close-out sequence |
 
 ## Regenerate the results on a cluster
 

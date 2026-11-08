@@ -79,10 +79,10 @@
       "sha256": "7d38436d27c545468557f49a4b90091331da8f14e99a602af690c12e0db715ae"
     },
     {
-      "bytes": 28024,
+      "bytes": 31331,
       "executable": false,
       "path": "CHANGELOG.md",
-      "sha256": "917881acd59295d1de49733e1e0f578075bee6ca076827d048b413a9ed539d1b"
+      "sha256": "a849ea8b823e230f8038b6c608f1d17cb7a0800b6726107255aa78871efdbfa2"
     },
     {
       "bytes": 2319,
@@ -109,10 +109,10 @@
       "sha256": "560aa1d50814f35adf6c8b86e2b8bd9ad0c7f3f17f1d532b4cdfa31f59bb390e"
     },
     {
-      "bytes": 39683,
+      "bytes": 42494,
       "executable": false,
       "path": "Makefile",
-      "sha256": "24a413b04430faff1d102c54c132825b0e886565e7b9d7e5de7e27c9d7311f42"
+      "sha256": "69952b693e342b486f872cdcfefa63f8e769e75480a720882db12631a0ac7bfb"
     },
     {
       "bytes": 872,
@@ -121,10 +121,10 @@
       "sha256": "697959ad39254c4d12ac08a69c81111d1a362e66ba3ac6e3195753aa88a47705"
     },
     {
-      "bytes": 17291,
+      "bytes": 18192,
       "executable": false,
       "path": "README.md",
-      "sha256": "6131b581b4224f2461d6c19b99c6549f42696ade726d2b8ec846bc6ff1b3b9e6"
+      "sha256": "8702e4fd110284beda837fb55aab540cee5ac546fe28da9156a6e39ef1e1ea12"
     },
     {
       "bytes": 10205,
@@ -133,10 +133,10 @@
       "sha256": "eea93895f5451636ddad948944ab05731634332beb88d240fcd3c62750926121"
     },
     {
-      "bytes": 5365,
+      "bytes": 18197,
       "executable": false,
       "path": "STATEMENT_COMPLIANCE.md",
-      "sha256": "a354e4364fff67901e9a4b8c29ef67915f0c770b14c9d898e8879ee7b4021356"
+      "sha256": "b01d0677c8600670ad99f256098409db21185a795689935501fafac130b0ee7a"
     },
     {
       "bytes": 395,
@@ -811,6 +811,12 @@
       "sha256": "672ee1143debd182c9973254c92776199c82ce17a1eba2b19d22c098e32358ed"
     },
     {
+      "bytes": 24614,
+      "executable": false,
+      "path": "docs/FINAL_DESTINATION.md",
+      "sha256": "9b5d149aca40bae22bede35df64990d15ba307ae94814c3e9b0a4930b258d536"
+    },
+    {
       "bytes": 6893,
       "executable": false,
       "path": "docs/GETTING_STARTED.md",
@@ -847,28 +853,28 @@
       "sha256": "1ad0ac27b0ac49a40b6fa399589adbc4842667585bf6c6f00fbfc809e37697c4"
     },
     {
-      "bytes": 8461,
+      "bytes": 8688,
       "executable": false,
       "path": "docs/PUBLICATION.md",
-      "sha256": "29544065d3ffe25b13e9358d14ec1f68d29ee62f8dabf8f165350c4cb03fb047"
+      "sha256": "7b900293bea137ac23f8c5dc112dbe134be24601bed46fea1554b9e9e02ad0cc"
     },
     {
-      "bytes": 4658,
+      "bytes": 5126,
       "executable": false,
       "path": "docs/README.md",
-      "sha256": "7742d08a9d7ec0668ca3013ccb6ec91e49b0a488da9a49bde480287cacd857fe"
+      "sha256": "ce804223b49aaf2e340dd05c7f7190c5f4901609bee26419e4cd898856bfb1fd"
     },
     {
-      "bytes": 10051,
+      "bytes": 11122,
       "executable": false,
       "path": "docs/RECONSTRUCTION.md",
-      "sha256": "65e2a6884d3f136aee590c3bb5837c790483d4cb9d4ce56184b48eae3311d7e9"
+      "sha256": "2bd4dd1c9c5242c56beb819902ac0c30dc956916888e112b7f66ecb06eee1562"
     },
     {
-      "bytes": 18559,
+      "bytes": 20266,
       "executable": false,
       "path": "docs/REVIEWER_FAQ.md",
-      "sha256": "9417c81d830cae379d588a09cfc3a793548d0733b39b155c044184c53d60dc56"
+      "sha256": "fe2cb2a78e1a17dd9ec01890fb0fb01a4f32ad851b739e60ab2233e144c659e0"
     },
     {
       "bytes": 8447,
@@ -5299,10 +5305,10 @@
       "sha256": "46a0e38a6dc6b3ac1a4b31a92d2a98b4653e25d8cce54f97890dba1b32cd1e9b"
     },
     {
-      "bytes": 8019,
+      "bytes": 8151,
       "executable": true,
       "path": "hpc/publish_paper_artifacts_arrhenius.sh",
-      "sha256": "eee9be0f935e047cc9a93ba7bf6348129f899cd091f25ee99159a04400124cbd"
+      "sha256": "31b48dfdba99504bf81b438f9d9f90a8f6e11aae8c2b7959ac13b98a03bdff9c"
     },
     {
       "bytes": 3745,
@@ -6103,10 +6109,10 @@
       "sha256": "af5cbf4dadfd927453911c0dd5f36b11e40459ce317b8707f7de3ba8aadb2ac0"
     },
     {
-      "bytes": 269,
+      "bytes": 765,
       "executable": false,
       "path": "records/index.json",
-      "sha256": "0e3056c20dfc46d1f2677e4fc379fc15ffc1c3fb5d5fb1144a0774559a5ad483"
+      "sha256": "4dab1709276d07e62e04a7b052a3ea5827717e4ae4ffe12454e3da3640129503"
     },
     {
       "bytes": 69346,
@@ -6118,7 +6124,7 @@
       "bytes": 116371,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "e31b518bd9c411cfd04b0e234df7b22d0b6f579ad4fa139f7245067882847311"
+      "sha256": "dfac2668df67b513363c9dacba4ea44c130a129181e271192739d9bcf1226897"
     },
     {
       "bytes": 35593,
@@ -6157,10 +6163,22 @@
       "sha256": "5bac270f378df6aff514d93880d04ba9eb2149028248693f7c3a55e9dda04048"
     },
     {
+      "bytes": 51991,
+      "executable": false,
+      "path": "release/final_destination.json",
+      "sha256": "5c519354a2359010698878ded7c039404f7b5dc8fbb85a5b78292e3882e1a592"
+    },
+    {
       "bytes": 32227,
       "executable": false,
       "path": "release/paper_artifacts.json",
       "sha256": "9a6040a9afc0e10923c467bd4a345cb03e590e6985d39a57772f6ea06a3c71a9"
+    },
+    {
+      "bytes": 17920,
+      "executable": false,
+      "path": "release/printed_availability.json",
+      "sha256": "a89f5c641b8a6eb09dea536ac3f431edec974d3e5e591d897ba3af28d7b961a8"
     },
     {
       "bytes": 5562,
@@ -6547,6 +6565,12 @@
       "sha256": "42961d4c632272a353e8a2637dc0cb862ec7805042197618646c3f86ad4ab535"
     },
     {
+      "bytes": 50584,
+      "executable": false,
+      "path": "scripts/final_destination.py",
+      "sha256": "d4857024b0e0e5b433390dff4e7bdaba352d4dbdfeece2ad7ac66f717f49334e"
+    },
+    {
       "bytes": 22603,
       "executable": false,
       "path": "scripts/ingest_run.py",
@@ -6599,6 +6623,12 @@
       "executable": false,
       "path": "scripts/plot_run_figures.py",
       "sha256": "5c20a744a0d087402cdce8a10b5b79b9544049b1ce4e9709cb55b156dfbedeff"
+    },
+    {
+      "bytes": 37443,
+      "executable": false,
+      "path": "scripts/printed_statement_check.py",
+      "sha256": "f407d6ec0cb260f33bbb9c31d49a9fcc8edc3fbb17417fd87370cee0d909ff62"
     },
     {
       "bytes": 20862,
@@ -6757,10 +6787,10 @@
       "sha256": "d88ad8ea4e8974d3d0192f53602357eef4ae71a85f5deca0e90ccdc31e155d40"
     },
     {
-      "bytes": 19912,
+      "bytes": 21390,
       "executable": false,
       "path": "scripts/statement_check.py",
-      "sha256": "73872ba61e6de94aaf9771c0dba2d67e93bee65cdb8943314c491a88026b3462"
+      "sha256": "24c66a0a4c87c28c14b68ef4748bad5019d439c6892f5b39135ff42740581dd0"
     },
     {
       "bytes": 30082,
@@ -7057,6 +7087,12 @@
       "sha256": "166a6b64d78027137595b1d01b570623cc451ba12c5f957b814eb52eb9dbf509"
     },
     {
+      "bytes": 10109,
+      "executable": false,
+      "path": "tests/test_final_destination.py",
+      "sha256": "63ade7f07179551afab91da58891d7bcd7f80331edf168c7f4de7c598be7575d"
+    },
+    {
       "bytes": 47540,
       "executable": false,
       "path": "tests/test_internal_baselines.py",
@@ -7075,10 +7111,10 @@
       "sha256": "b40128b096e8d34de79e9afc4753fd40a61752f802dc391590481c96beaecf22"
     },
     {
-      "bytes": 13492,
+      "bytes": 16055,
       "executable": false,
       "path": "tests/test_make_workflows.py",
-      "sha256": "da6548965b1aa63a04a61e641920cc7fe6ea5768100f06d8897cd89a6097f9aa"
+      "sha256": "54ae62e425753e7260568857b92b6383cd193d3ff8a3e6c813ffc2b1b0f56a70"
     },
     {
       "bytes": 27519,
@@ -7133,6 +7169,12 @@
       "executable": false,
       "path": "tests/test_policy_guardrails.py",
       "sha256": "4be0e4a444bbf4052f7892bea58d1f9378ff121d5501d080e12aef3d07267c6b"
+    },
+    {
+      "bytes": 8765,
+      "executable": false,
+      "path": "tests/test_printed_statement_check.py",
+      "sha256": "7cdff5d98f27201c4c3212432c5ce8d11f3cb8fee891720c74f9a5e780c6d7a7"
     },
     {
       "bytes": 13670,
@@ -7384,5 +7426,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "2743b5e748c6ef8d2d3509c6a1e74349ac01c85fc9deb4e200054455af2fa7f5"
+  "tree_sha256": "835274e7158e3195a35f2ca3923b752a5cc184d3cea878ff530969e626fdb905"
 }

@@ -1,0 +1,576 @@
+{
+ "schema": "cross-morse-printed-availability-1",
+ "description": "The repository statements printed in the identified manuscript PDFs: the main 'Data and code availability' paragraph, the two repository sentences of the main Methods ('Reported results and statistical power') and the supplementary 'Data and code availability' paragraph. Each paragraph is divided into atomic claims, and scripts/printed_statement_check.py evaluates every claim against the repository with the vocabulary of the registered statement (fulfilled, awaiting measured outputs, missing). The registered statement of release/availability_statement.json remains the journal's registered text; these paragraphs are the manuscript's printed description of the same repository.",
+ "normalization": "Text extracted from the PDF text layer; line breaks joined with single spaces, the subscripted role names written D_fit ... D_test and the URL split at a line break rejoined. '[...]' marks omitted intervening text.",
+ "paragraphs": {
+  "main": {
+   "document": "main",
+   "sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+   "pages": [
+    15
+   ],
+   "heading": "Data and code availability",
+   "text": "Code. The complete implementation of CROSS-MORSE (frozen plants, transport adapter, action registry, sensing, observer, consequence models, the nine policy families, selection, confirmation and admission statistics, and the sealed eight-stage lifecycle), the dataset adapters, one entry point and three configurations per dataset, the Slurm launchers with the Arrhenius site profile, the environment specifications, the test suite, the scripts that build the run-derived tables and figures from completed run directories (make tables, make figures), the code of the experiments outside the eight-stage run (the budget-matched arms E3–E6, the pinned-upstream driver of the retrained external baselines, the E17 timing protocol and the scheduler-accounting capture) and the exporter that turns their outputs into traceable measurement records are available at https://github.com/VKHS/CR-9. The runtime source identity printed by make fingerprint is sealed into every run record. Data. All seven datasets are official public releases obtained from their providers through the repository’s adapters [18–20]; the split rule, seeds, fold structure and margins of every configuration are registered in the repository, and the role membership of D_fit, D_explore, D_select, D_confirm, D_compare, D_admit and D_test of every completed run is extracted into its manifest. Run archives and measurement records. The run archive of each dataset (prepared data and split indices, frozen checkpoints, propensity-logged exploration trajectories, candidate and final predictions, selection, confirmation and admission records, stage manifests and environment records) and the measurement records of the experiments outside the eight-stage run (per-seed scores and timing traces of the retrained baselines with their scheduler accounting, the E3–E6 campaign with its paired observations, and the factorial, negative-control, ensemble-grid, attribution and cross-backbone records) are deposited at the Zenodo DOIs listed in the repository’s runs/index.json and records/index.json; make paper rebuilds every run-derived table and figure of this article from the ingested archives, and make records-tables prints the record-derived supplementary tables, with every value traced to the raw file it is read from [24]."
+  },
+  "methods": {
+   "document": "main",
+   "sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+   "pages": [
+    14,
+    15
+   ],
+   "heading": "Methods: Reported results and statistical power",
+   "text": "The result registry links every table and figure value to its source record, dataset and split identity, configuration hash, checkpoint identity, seed and unit arrays and the generator that produces it. [...] Synthetic smoke runs check the software paths and are kept apart from the benchmark tables."
+  },
+  "supplementary": {
+   "document": "supplementary",
+   "sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
+   "pages": [
+    30
+   ],
+   "heading": "Data and code availability",
+   "text": "Data and code availability. The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CR-9. Official datasets are obtained from their providers through the adapters. The run archive of every dataset and the measurement records of the experiments outside the eight-stage run are deposited at the DOIs listed in the repository’s runs/index.json and records/index.json; make paper rebuilds every run-derived table and figure of this Supplementary Information from the ingested archives and make records-tables prints the record-derived tables, each value traced to the raw file it is read from. The synthetic example runs of the repository exercise the execution paths and are kept out of the benchmark tables."
+  }
+ },
+ "claims": [
+  {
+   "id": "M01",
+   "paragraph": "main",
+   "text": "frozen plants",
+   "check": {
+    "type": "symbols",
+    "symbols": [
+     "cross_morse/core.py::FrozenPlant",
+     "cross_morse/core.py::EdgeWeightedPlant",
+     "cross_morse/core.py::HeterophilyPlant",
+     "cross_morse/core.py::DesignatedSitePlant",
+     "cross_morse/core.py::build_plant",
+     "cross_morse/training.py::audit_training"
+    ]
+   }
+  },
+  {
+   "id": "M02",
+   "paragraph": "main",
+   "text": "transport adapter",
+   "check": {
+    "type": "symbols",
+    "symbols": [
+     "cross_morse/core.py::GraphOperator",
+     "cross_morse/core.py::apply_kernel",
+     "cross_morse/core.py::apply_transport",
+     "cross_morse/core.py::FrozenPlant.native_step",
+     "cross_morse/core.py::FrozenPlant.step",
+     "cross_morse/core.py::DesignatedSitePlant.step"
+    ]
+   }
+  },
+  {
+   "id": "M03",
+   "paragraph": "main",
+   "text": "action registry",
+   "check": {
+    "type": "action_registry",
+    "actions": 10
+   }
+  },
+  {
+   "id": "M04",
+   "paragraph": "main",
+   "text": "sensing",
+   "check": {
+    "type": "symbols",
+    "symbols": [
+     "cross_morse/core.py::MeasurementBank",
+     "cross_morse/core.py::chebyshev_window_coefficients"
+    ]
+   }
+  },
+  {
+   "id": "M05",
+   "paragraph": "main",
+   "text": "observer",
+   "check": {
+    "type": "symbols",
+    "symbols": [
+     "cross_morse/learning.py::ConditionedObserver",
+     "cross_morse/learning.py::ControllerState"
+    ]
+   }
+  },
+  {
+   "id": "M06",
+   "paragraph": "main",
+   "text": "consequence models",
+   "check": {
+    "type": "symbols",
+    "symbols": [
+     "cross_morse/learning.py::ActionCritic",
+     "cross_morse/learning.py::ResidualModel",
+     "cross_morse/learning.py::Controller.stage_cost",
+     "cross_morse/learning.py::Controller.terminal_value"
+    ]
+   }
+  },
+  {
+   "id": "M07",
+   "paragraph": "main",
+   "text": "the nine policy families",
+   "check": {
+    "type": "policy_families",
+    "open_loop": [
+     "nominal",
+     "best_depth",
+     "learned_stop",
+     "phase",
+     "fixed_sequence",
+     "mpc_ol"
+    ],
+    "feedback": [
+     "one_step",
+     "radius",
+     "mpc_rh"
+    ]
+   }
+  },
+  {
+   "id": "M08",
+   "paragraph": "main",
+   "text": "selection, confirmation and admission statistics",
+   "check": {
+    "type": "symbols",
+    "symbols": [
+     "cross_morse/statistics.py::nested_selection",
+     "cross_morse/statistics.py::confirmation",
+     "cross_morse/statistics.py::admission",
+     "cross_morse/statistics.py::empirical_bernstein",
+     "cross_morse/statistics.py::holm_adjust"
+    ]
+   }
+  },
+  {
+   "id": "M09",
+   "paragraph": "main",
+   "text": "the sealed eight-stage lifecycle",
+   "check": {
+    "type": "lifecycle_stages",
+    "stages": [
+     "prepare",
+     "train",
+     "explore",
+     "fit",
+     "select",
+     "confirm",
+     "admit",
+     "evaluate"
+    ],
+    "sources": [
+     "cross_morse/pipeline.py",
+     "cross_morse/provenance.py",
+     "scripts/archive_run.py"
+    ]
+   }
+  },
+  {
+   "id": "M10",
+   "paragraph": "main",
+   "text": "the dataset adapters",
+   "check": {
+    "type": "datasets",
+    "datasets": [
+     "ogbn-arxiv",
+     "ogbn-proteins",
+     "ogbn-products",
+     "Roman-empire",
+     "PascalVOC-SP",
+     "COCO-SP",
+     "Peptides-func"
+    ]
+   }
+  },
+  {
+   "id": "M11",
+   "paragraph": "main",
+   "text": "one entry point and three configurations per dataset",
+   "check": {
+    "type": "entry_points_configs",
+    "stems": [
+     "arxiv",
+     "proteins",
+     "products",
+     "roman_empire",
+     "pascalvoc_sp",
+     "coco_sp",
+     "peptides_func"
+    ],
+    "profiles": [
+     "smoke",
+     "pilot",
+     "full"
+    ]
+   }
+  },
+  {
+   "id": "M12",
+   "paragraph": "main",
+   "text": "the Slurm launchers with the Arrhenius site profile",
+   "check": {
+    "type": "slurm",
+    "stems": [
+     "arxiv",
+     "proteins",
+     "products",
+     "roman_empire",
+     "pascalvoc_sp",
+     "coco_sp",
+     "peptides_func"
+    ],
+    "launcher": "run_cross_morse.sh",
+    "site_profile": "configs/arrhenius-site.env.example"
+   }
+  },
+  {
+   "id": "M13",
+   "paragraph": "main",
+   "text": "the environment specifications",
+   "check": {
+    "type": "paths",
+    "paths": [
+     "environment/requirements-cpu.lock",
+     "environment/apptainer.def",
+     "Dockerfile",
+     "environment/create_cpu_env.sh",
+     "environment/check_environment.py",
+     "environment/arrhenius/capture_environment.sh",
+     "requirements.txt"
+    ]
+   }
+  },
+  {
+   "id": "M14",
+   "paragraph": "main",
+   "text": "the test suite",
+   "check": {
+    "type": "tests",
+    "pattern": "tests/test_*.py",
+    "minimum": 50,
+    "targets": [
+     "test",
+     "test-no-torch"
+    ]
+   }
+  },
+  {
+   "id": "M15",
+   "paragraph": "main",
+   "text": "the scripts that build the run-derived tables and figures from completed run directories (make tables, make figures)",
+   "check": {
+    "type": "make_targets",
+    "targets": {
+     "tables": "scripts/build_paper.py",
+     "figures": "scripts/build_paper.py"
+    },
+    "runs_root_variable": "RUNS_ROOT"
+   }
+  },
+  {
+   "id": "M16",
+   "paragraph": "main",
+   "text": "the budget-matched arms E3–E6",
+   "check": {
+    "type": "experiments",
+    "experiments": [
+     "E3–E6"
+    ]
+   }
+  },
+  {
+   "id": "M17",
+   "paragraph": "main",
+   "text": "the pinned-upstream driver of the retrained external baselines",
+   "check": {
+    "type": "paths",
+    "paths": [
+     "cm_experiments/upstream.py",
+     "scripts/run_upstream_baseline.py",
+     "hpc/run_upstream_baseline_arrhenius.sh"
+    ]
+   }
+  },
+  {
+   "id": "M18",
+   "paragraph": "main",
+   "text": "the E17 timing protocol",
+   "check": {
+    "type": "experiments",
+    "experiments": [
+     "E17"
+    ],
+    "paths": [
+     "cm_campaigns/timing.py",
+     "scripts/run_timing_records.py"
+    ]
+   }
+  },
+  {
+   "id": "M19",
+   "paragraph": "main",
+   "text": "the scheduler-accounting capture",
+   "check": {
+    "type": "paths",
+    "paths": [
+     "hpc/capture_arrhenius_accounting.sh",
+     "cm_campaigns/accounting.py",
+     "hpc/finalize_arm_accounting.sh"
+    ]
+   }
+  },
+  {
+   "id": "M20",
+   "paragraph": "main",
+   "text": "the exporter that turns their outputs into traceable measurement records",
+   "check": {
+    "type": "exporter",
+    "paths": [
+     "scripts/export_records.py",
+     "scripts/records.py",
+     "records/specs.json"
+    ]
+   }
+  },
+  {
+   "id": "M21",
+   "paragraph": "main",
+   "text": "are available at https://github.com/VKHS/CR-9",
+   "check": {
+    "type": "repository_url",
+    "url": "https://github.com/VKHS/CR-9",
+    "files": [
+     "CITATION.cff",
+     "pyproject.toml",
+     "codemeta.json"
+    ]
+   }
+  },
+  {
+   "id": "M22",
+   "paragraph": "main",
+   "text": "The runtime source identity printed by make fingerprint is sealed into every run record.",
+   "check": {
+    "type": "fingerprint",
+    "target": "fingerprint"
+   }
+  },
+  {
+   "id": "M23",
+   "paragraph": "main",
+   "text": "All seven datasets are official public releases obtained from their providers through the repository’s adapters",
+   "check": {
+    "type": "datasets",
+    "datasets": [
+     "ogbn-arxiv",
+     "ogbn-proteins",
+     "ogbn-products",
+     "Roman-empire",
+     "PascalVOC-SP",
+     "COCO-SP",
+     "Peptides-func"
+    ],
+    "providers": true
+   }
+  },
+  {
+   "id": "M24",
+   "paragraph": "main",
+   "text": "the split rule, seeds, fold structure and margins of every configuration are registered in the repository",
+   "check": {
+    "type": "registered_design",
+    "stems": [
+     "arxiv",
+     "proteins",
+     "products",
+     "roman_empire",
+     "pascalvoc_sp",
+     "coco_sp",
+     "peptides_func"
+    ],
+    "profiles": [
+     "pilot",
+     "full"
+    ]
+   }
+  },
+  {
+   "id": "M25",
+   "paragraph": "main",
+   "text": "the role membership of D_fit, D_explore, D_select, D_confirm, D_compare, D_admit and D_test of every completed run is extracted into its manifest",
+   "check": {
+    "type": "role_manifests",
+    "roles": [
+     "fit",
+     "explore",
+     "select",
+     "confirm",
+     "compare",
+     "admit",
+     "test"
+    ]
+   }
+  },
+  {
+   "id": "M26",
+   "paragraph": "main",
+   "text": "The run archive of each dataset (prepared data and split indices, frozen checkpoints, propensity-logged exploration trajectories, candidate and final predictions, selection, confirmation and admission records, stage manifests and environment records)",
+   "check": {
+    "type": "run_archive_contract"
+   }
+  },
+  {
+   "id": "M27",
+   "paragraph": "main",
+   "text": "are deposited at the Zenodo DOIs listed in the repository’s runs/index.json",
+   "check": {
+    "type": "runs_index_dois",
+    "service": "zenodo"
+   },
+   "note": "The run-archive half of the sentence that begins 'The run archive of each dataset'."
+  },
+  {
+   "id": "M28",
+   "paragraph": "main",
+   "text": "the measurement records of the experiments outside the eight-stage run (per-seed scores and timing traces of the retrained baselines with their scheduler accounting, the E3–E6 campaign with its paired observations, and the factorial, negative-control, ensemble-grid, attribution and cross-backbone records) are deposited at the Zenodo DOIs listed in the repository’s runs/index.json and records/index.json",
+   "check": {
+    "type": "records_index_dois",
+    "service": "zenodo",
+    "sets": [
+     "baselines",
+     "budget_matched",
+     "factorials",
+     "negative_controls",
+     "ensemble_grid",
+     "inserted_site",
+     "cross_backbone"
+    ]
+   }
+  },
+  {
+   "id": "M29",
+   "paragraph": "main",
+   "text": "make paper rebuilds every run-derived table and figure of this article from the ingested archives",
+   "check": {
+    "type": "make_paper"
+   }
+  },
+  {
+   "id": "M30",
+   "paragraph": "main",
+   "text": "make records-tables prints the record-derived supplementary tables, with every value traced to the raw file it is read from",
+   "check": {
+    "type": "records_tables"
+   }
+  },
+  {
+   "id": "R01",
+   "paragraph": "methods",
+   "text": "The result registry links every table and figure value to its source record, dataset and split identity, configuration hash, checkpoint identity, seed and unit arrays and the generator that produces it.",
+   "check": {
+    "type": "result_registry"
+   }
+  },
+  {
+   "id": "R02",
+   "paragraph": "methods",
+   "text": "Synthetic smoke runs check the software paths and are kept apart from the benchmark tables.",
+   "check": {
+    "type": "synthetic_separation"
+   }
+  },
+  {
+   "id": "S01",
+   "paragraph": "supplementary",
+   "text": "The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CR-9.",
+   "check": {
+    "type": "all_of",
+    "claims": [
+     "M01",
+     "M02",
+     "M03",
+     "M04",
+     "M05",
+     "M06",
+     "M07",
+     "M08",
+     "M09",
+     "M10",
+     "M11",
+     "M12",
+     "M13",
+     "M14",
+     "M20",
+     "M21"
+    ],
+    "paths": [
+     "scripts/archive_run.py",
+     "release/schemas/stage_manifest.schema.json",
+     "records/specs.json"
+    ],
+    "generators": true
+   }
+  },
+  {
+   "id": "S02",
+   "paragraph": "supplementary",
+   "text": "Official datasets are obtained from their providers through the adapters.",
+   "check": {
+    "type": "same_as",
+    "claim": "M23"
+   }
+  },
+  {
+   "id": "S03",
+   "paragraph": "supplementary",
+   "text": "The run archive of every dataset [...] are deposited at the DOIs listed in the repository’s runs/index.json",
+   "check": {
+    "type": "runs_index_dois",
+    "service": "any"
+   }
+  },
+  {
+   "id": "S04",
+   "paragraph": "supplementary",
+   "text": "the measurement records of the experiments outside the eight-stage run are deposited at the DOIs listed in the repository’s runs/index.json and records/index.json",
+   "check": {
+    "type": "records_index_dois",
+    "service": "any",
+    "sets": "release"
+   }
+  },
+  {
+   "id": "S05",
+   "paragraph": "supplementary",
+   "text": "make paper rebuilds every run-derived table and figure of this Supplementary Information from the ingested archives",
+   "check": {
+    "type": "same_as",
+    "claim": "M29"
+   }
+  },
+  {
+   "id": "S06",
+   "paragraph": "supplementary",
+   "text": "make records-tables prints the record-derived tables, each value traced to the raw file it is read from",
+   "check": {
+    "type": "same_as",
+    "claim": "M30"
+   }
+  },
+  {
+   "id": "S07",
+   "paragraph": "supplementary",
+   "text": "The synthetic example runs of the repository exercise the execution paths and are kept out of the benchmark tables.",
+   "check": {
+    "type": "same_as",
+    "claim": "R02"
+   }
+  }
+ ]
+}

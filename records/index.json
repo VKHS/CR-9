@@ -11,6 +11,27 @@
   "cross_backbone",
   "ensemble_grid",
   "inserted_site",
-  "budget_matched"
+  "budget_matched",
+  "action_gap_audit",
+  "band_bound_tightness",
+  "band_power_audit",
+  "buffer_sensitivity",
+  "confirmation_contrasts",
+  "confirmation_sensitivity",
+  "decision_traces",
+  "depth_diagnostics",
+  "ensemble_grid_scores",
+  "horizon_beam_sweep",
+  "mechanism_contrasts",
+  "module_ablations",
+  "oracle_dispersion",
+  "predictability",
+  "reliability_diagnostics",
+  "runtime_scaling",
+  "search_enumeration",
+  "sensitivity_grids",
+  "timing_anchors",
+  "tube_audit",
+  "spectral_policy_value"
  ]
 }
