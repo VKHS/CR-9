@@ -259,3 +259,82 @@ class StatisticsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AlgorithmS4FamilyTests(unittest.TestCase):
+    """The studentized maximum of the selection runs over Q_feas (main Eq. 18, Supplementary Algorithm S4)."""
+
+    @staticmethod
+    def fixture():
+        rng = np.random.default_rng(5)
+        n = 40
+        base = 1 + rng.normal(0, .01, n)
+        losses = np.stack([base, base - .004, base - .02 + rng.normal(0, .002, n),
+                           base - .021 + rng.normal(0, .002, n), base - .03 + rng.normal(0, .08, n)], axis=1)
+        accuracies = np.full_like(losses, .70)
+        candidates = [
+            {"route": "nominal", "is_open_loop": True, "complexity": 0, "hash": "a"},
+            {"route": "fixed_sequence", "is_open_loop": True, "complexity": 4, "hash": "b"},
+            {"route": "radius", "is_open_loop": False, "complexity": 7, "hash": "c"},
+            {"route": "mpc_rh", "is_open_loop": False, "complexity": 8, "hash": "d"},
+            # A noisy configuration outside Q_feas (resource infeasible): it must not widen the radius.
+            {"route": "mpc_rh", "is_open_loop": False, "complexity": 8, "hash": "e", "feasible": False},
+        ]
+        return losses, accuracies, candidates, np.arange(n) % 5
+
+    def test_feasible_family_excludes_infeasible_configurations_from_the_maximum(self):
+        loss, acc, cands, folds = self.fixture()
+        feasible = nested_selection(loss, acc, cands, folds, reps=200, seed=4)
+        executed = nested_selection(loss, acc, cands, folds, reps=200, seed=4, max_t_family="executed")
+        self.assertEqual((feasible["max_t_family"], executed["max_t_family"]), ("feasible", "executed"))
+        self.assertEqual(feasible["feasible_family_size"], sum(feasible["joint_feasible"]))
+        self.assertEqual(feasible["max_t_family_size"], feasible["feasible_family_size"])
+        self.assertEqual(executed["max_t_family_size"], len(cands))
+        self.assertFalse(feasible["joint_feasible"][4])
+        # The noisy infeasible column dominates the executed maximum; Q_feas excludes it.
+        self.assertLess(feasible["max_t_critical"], executed["max_t_critical"])
+        self.assertLess(feasible["max_radius"], executed["max_radius"])
+        family = [j for j, f in enumerate(feasible["joint_feasible"]) if f]
+        radii = [feasible["U"][j] - feasible["mean"][j] for j in family]
+        self.assertAlmostEqual(feasible["max_radius"], max(radii))
+        # The resamples and point estimates are shared; only the maximum's family differs.
+        self.assertEqual(feasible["mean"], executed["mean"])
+        self.assertEqual(feasible["bootstrap_final_comparator_counts"], executed["bootstrap_final_comparator_counts"])
+
+    def test_diagnostic_maximum_never_changes_the_decision(self):
+        loss, acc, cands, folds = self.fixture()
+        plain = nested_selection(loss, acc, cands, folds, reps=150, seed=8)
+        family = [j for j, f in enumerate(plain["joint_feasible"]) if f]
+        screened = nested_selection(loss, acc, cands, folds, reps=150, seed=8,
+                                    diagnostic_max_t={"family": family, "two": family[:2]})
+        diagnostics = screened.pop("diagnostic_max_t")
+        self.assertEqual(screened, plain)
+        self.assertAlmostEqual(diagnostics["family"]["max_radius"], plain["max_radius"])
+        self.assertLessEqual(diagnostics["two"]["max_t_critical"], diagnostics["family"]["max_t_critical"])
+        with self.assertRaises(ValueError):
+            nested_selection(loss, acc, cands, folds, reps=20, max_t_family="everything")
+
+    def test_executed_family_reproduces_records_sealed_before_algorithm_s4(self):
+        """The released runtime of the bundled runs (examples/source_snapshots) gives the same record."""
+        import importlib.util
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[1]
+        snapshots = sorted((root / "examples" / "source_snapshots").glob("*/cross_morse/statistics.py"))
+        self.assertTrue(snapshots)
+        loss, acc, cands, folds = self.fixture()
+        cands[4]["execution_failure"] = True
+        loss[:, 4] = acc[:, 4] = np.nan
+        current = nested_selection(loss, acc, cands, folds, reps=120, seed=6, max_t_family="executed")
+        for key in ("max_t_family", "feasible_family_size", "max_t_family_size"):
+            current.pop(key)
+        for path in snapshots:
+            spec = importlib.util.spec_from_file_location(f"snapshot_statistics_{path.parts[-3][:8]}", path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            sealed = module.nested_selection(loss, acc, cands, folds, reps=120, seed=6)
+            self.assertEqual(json_safe(current), json_safe(sealed), path.parts[-3])
+
+
+def json_safe(value):
+    import json
+    return json.loads(json.dumps(value, default=float))

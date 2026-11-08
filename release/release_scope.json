@@ -65,7 +65,7 @@
     "values_are_transcribed_not_computed": true
   },
   "data_use_sequence": "official train 60/20/10/5/5 fit/explore/select/confirm/compare; compare reserved during prepare; official validation admit; official test after lock",
-  "validated_runtime_source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "validated_runtime_source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
   "site_profile_policy": "run_cross_morse.sh carries the Arrhenius site settings (partition, GPU request, architecture, modules, PyTorch wheel, storage layout) in its SITE SETTINGS block; configs/arrhenius-site.env.example holds the NAISS allocation and storage project as placeholders for a private copy, and configs/public.env.example is the template for another cluster",
   "measurement_records_contract": {
     "specs": "records/specs.json",

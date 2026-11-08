@@ -69,7 +69,7 @@
  "scientific_run": true,
  "run_name": "coco_sp",
  "identities": {
-  "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
   "config_sha256": "314d03d5ee3eb895aa0e3994404a5614be3eb1c3683e975def9b1765245b41d5",
   "prepared_fingerprint": "pending: prepared-data fingerprint",
   "unit_sha256": "pending: SHA-256 of prepared/splits.npz"

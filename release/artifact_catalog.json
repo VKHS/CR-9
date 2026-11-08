@@ -239,9 +239,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 43626,
+          "bytes": 44460,
           "path": "Makefile",
-          "sha256": "358670f9737472913abad80b6175eeb31af713c265c63bdb33da4d3ef9788281"
+          "sha256": "018f4ff26d4b8d0346aeffb48e67ef28d975749c637ce1e21f0a7471d11ee4d2"
         },
         {
           "bytes": 10386,
@@ -455,9 +455,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 43626,
+          "bytes": 44460,
           "path": "Makefile",
-          "sha256": "358670f9737472913abad80b6175eeb31af713c265c63bdb33da4d3ef9788281"
+          "sha256": "018f4ff26d4b8d0346aeffb48e67ef28d975749c637ce1e21f0a7471d11ee4d2"
         },
         {
           "bytes": 21737,
@@ -603,9 +603,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 43626,
+          "bytes": 44460,
           "path": "Makefile",
-          "sha256": "358670f9737472913abad80b6175eeb31af713c265c63bdb33da4d3ef9788281"
+          "sha256": "018f4ff26d4b8d0346aeffb48e67ef28d975749c637ce1e21f0a7471d11ee4d2"
         }
       ],
       "entrypoints": [
@@ -714,9 +714,9 @@
               "sha256": "9cc514f8ccd70da22c32b5dec73b958618d433692708c46e85b94bfc96c0365c"
             },
             {
-              "bytes": 31807,
+              "bytes": 31894,
               "path": "cm_experiments/backbones.py",
-              "sha256": "9f4799abe38dd740180c40c5ecc2bd374107e2ddcf41b48d860c5de9bace1364"
+              "sha256": "06d548e9d215517b965e33dfe0047d473e348ee1b0219d519ddf0499c727375b"
             },
             {
               "bytes": 41249,
@@ -919,9 +919,9 @@
               "sha256": "bff4f57e8fdf62cdeeabe7dfa245229d30369dc6f32ac7905d6f37f03dac9163"
             },
             {
-              "bytes": 20654,
+              "bytes": 21118,
               "path": "cross_morse/review.py",
-              "sha256": "35b3e48b1cd39e65aeb90dae32cb7dbfb4daf619d58e7e1f10c4dd66f3491fd8"
+              "sha256": "b68dd7700b000ddfb66e50730a971b1dfb761a7612032eaa077934873c08feb6"
             },
             {
               "bytes": 11804,
@@ -944,9 +944,9 @@
               "sha256": "f67b095d944c8ff7f2f3399c2410d297563facf77d79c1043822eea6f35a972c"
             },
             {
-              "bytes": 35860,
+              "bytes": 39217,
               "path": "cross_morse/statistics.py",
-              "sha256": "c72a400e3a7512e63650d2882a08c847e7d4020e3ab2333be4cf903e2e3e951b"
+              "sha256": "f0c10276b69188e1b775de5670fe672dba71b66664da11728a6d4feccaa668bb"
             },
             {
               "bytes": 16915,
@@ -2012,9 +2012,9 @@
           "sha256": "d2f5166139294041c4756551a708600bbaaf728ad27c21682c3f098a02b94e32"
         },
         {
-          "bytes": 20654,
+          "bytes": 21118,
           "path": "cross_morse/review.py",
-          "sha256": "35b3e48b1cd39e65aeb90dae32cb7dbfb4daf619d58e7e1f10c4dd66f3491fd8"
+          "sha256": "b68dd7700b000ddfb66e50730a971b1dfb761a7612032eaa077934873c08feb6"
         },
         {
           "bytes": 9819,
@@ -2485,9 +2485,9 @@
               "sha256": "e030c22cdbee94743c95a0d05b3ac50be07308781d42a1aaf7086c14563810fe"
             },
             {
-              "bytes": 35860,
+              "bytes": 39217,
               "path": "cross_morse/statistics.py",
-              "sha256": "c72a400e3a7512e63650d2882a08c847e7d4020e3ab2333be4cf903e2e3e951b"
+              "sha256": "f0c10276b69188e1b775de5670fe672dba71b66664da11728a6d4feccaa668bb"
             },
             {
               "bytes": 70394,
@@ -2796,9 +2796,9 @@
               "sha256": "29d4081035d1ce55a562fa5ca283af9faf2890b3c374a22d77fcd2a2aa9e2081"
             },
             {
-              "bytes": 135714,
+              "bytes": 135012,
               "path": "paper/build/displays/run_audits.py",
-              "sha256": "13a7e580497bc0bbb561528339609db63f7091c69241290d3b0fb9378f8ab3b8"
+              "sha256": "72062fc910fa7c76e3a893f32c55e4a15bb31ae91acc222a3f7e33477ddd4ff0"
             },
             {
               "bytes": 3580,
@@ -3067,7 +3067,7 @@
     {
       "bytes": 5744,
       "path": "release/release_scope.json",
-      "sha256": "3eab4a18a35f39af955a2aaa278697539a90e0aa9646d3ffd67048a3f362eef5"
+      "sha256": "046ab421556e591e3b5e59aa13c1886b6e9949d65b6a80c1f9f3250c521e37a3"
     },
     {
       "bytes": 57,
@@ -3241,7 +3241,7 @@
   ],
   "registered_measurement_sets": [],
   "registered_runs": [],
-  "runtime_source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "runtime_source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
   "schema": "cross-morse-artifact-catalog-1",
   "scientific_evidence_verified": false,
   "scope": "File availability, generating contracts, registered identities and local byte/trace checks; no execution, public-download check or scientific certification",

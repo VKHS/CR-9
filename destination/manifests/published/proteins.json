@@ -69,7 +69,7 @@
  "scientific_run": true,
  "run_name": "proteins",
  "identities": {
-  "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
   "config_sha256": "5d9c33e44e2e40b3a1b3d374c29c63d161af75cfb72d4ff98381b7f6712a7175",
   "prepared_fingerprint": "pending: prepared-data fingerprint",
   "unit_sha256": "pending: SHA-256 of prepared/splits.npz"

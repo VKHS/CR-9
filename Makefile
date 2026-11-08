@@ -114,6 +114,7 @@ endef
  tables figures paper paper-offline paper-from-index paper-from-runs fetch-artifacts paper-artifacts-status \
  paper-artifacts-plan paper-artifacts-check statement statement-check statement-fulfilled example-paper example-paper-check \
  printed-statement-check final-destination final-destination-check final-destination-runs final-destination-converge availability-fulfilled \
+ consistency consistency-check consistency-audit \
  paper-outputs paper-outputs-plan paper-outputs-submit paper-outputs-status paper-outputs-collect \
  manifests manifests-check availability availability-check \
  records-index records-check records-tables example-records example-records-check \
@@ -175,6 +176,7 @@ help:
 	  '  make printed-statement-check  each claim of the availability text printed in the manuscript' \
 	  '  make final-destination    the repository after publication, projected (docs/FINAL_DESTINATION.md, destination/)' \
 	  '  make final-destination-converge  every published file against its projection in destination/' \
+	  '  make consistency-audit RUNS_ROOT=<runs>  decide each open printed-method question from the original runs' \
 	  '  make availability-fulfilled  the registered statement and every printed claim fulfilled' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
@@ -257,10 +259,12 @@ paper-artifacts-check:
 statement:
 	"$(PYTHON)" -B scripts/statement_check.py --write
 	"$(PYTHON)" -B scripts/final_destination.py --write
+	"$(PYTHON)" -B scripts/consistency_audit.py --write
 
 statement-check:
 	"$(PYTHON)" -B scripts/statement_check.py --check
 	"$(PYTHON)" -B scripts/final_destination.py --check
+	"$(PYTHON)" -B scripts/consistency_audit.py --check
 
 # The availability text printed in the manuscript (main page 15, Methods, SI page 30), claim by claim.
 printed-statement-check:
@@ -283,6 +287,18 @@ final-destination-runs:
 # Every published file of the checkout against its projection in destination/ (exit 1 when an exact value differs).
 final-destination-converge:
 	"$(PYTHON)" -B scripts/final_destination.py --converge
+
+# Scientific consistency: the open questions between the printed methods/values and the code, each with the
+# original record and the rule that decides it (paper/consistency_ledger.json, docs/CONSISTENCY.md).
+consistency:
+	"$(PYTHON)" -B scripts/consistency_audit.py --write
+
+consistency-check:
+	"$(PYTHON)" -B scripts/consistency_audit.py --check
+
+consistency-audit:
+	@test -n "$(RUNS_ROOT)" || { echo 'Set RUNS_ROOT to a directory of completed runs' >&2; exit 2; }
+	"$(PYTHON)" -B scripts/consistency_audit.py --runs-root "$(RUNS_ROOT)"
 
 # The final gate: every item of the registered statement fulfilled (after publication).
 statement-fulfilled:
@@ -569,7 +585,7 @@ NUMPY_TESTS := test_paper_registry test_textual_source_references test_entry_qua
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
  test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \
  test_s14_builder test_paper_outputs test_internal_baselines test_printed_statement_check test_final_destination \
- test_destination
+ test_destination test_consistency_audit
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

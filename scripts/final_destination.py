@@ -688,12 +688,13 @@ def render(doc: dict) -> str:
                  f"{'—' if r['printed'] is None else r['printed']} | {agreement} |")
     q_rows = [r for r in doc["forecast"] if r["quantity"].startswith("|Q|")]
     if q_rows:
-        L += ["", "**Table S20 |Q|.** " + q_rows[0]["derivation"] + ". The Table S20 generator reports |Q_feas| "
+        L += ["", "**Table S20 |Q| and r_max.** " + q_rows[0]["derivation"] + ". The Table S20 generator reports |Q_feas| "
               "(`paper/build/displays/run_audits.py::feasible_family_size`, replayed with Algorithm S4) and the registered "
-              "family size beside it in its source data. Algorithm S4 takes its studentized maximum over Q_feas; the "
-              "runtime's `nested_selection` takes it over every executed registered configuration, a superset whose "
-              "radius r_max is at least as wide, so the r_max column agrees with the printed value only if the runtime's "
-              "maximum runs over Q_feas as well.", ""]
+              "family size beside it in its source data. The runtime's `nested_selection` takes the studentized maximum "
+              "over Q_feas, as Algorithm S4 does, so r_max, |Q_s| and the slack are those of the printed method; "
+              "`select/decision.json` records the family (`max_t_family`), and records sealed before carry none and replay "
+              "with every executed configuration. Whether the original runs used Q_feas is decided from their records "
+              "([consistency item K1](CONSISTENCY.md)).", ""]
     # ---------------------------------------------------------------- B
     L += ["## B. Pre-registered data roles", "",
           "The official split order and the registered seed fix every role before any label is read. These memberships "

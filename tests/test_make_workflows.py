@@ -103,7 +103,8 @@ class MakeWorkflowTests(unittest.TestCase):
         self.capture.unlink()
         calls = self.invoke("statement-check")
         self.assertEqual(calls, [["-B", "scripts/statement_check.py", "--check"],
-                                 ["-B", "scripts/final_destination.py", "--check"]])
+                                 ["-B", "scripts/final_destination.py", "--check"],
+                                 ["-B", "scripts/consistency_audit.py", "--check"]])
         self.assertFalse(any("reported_results" in arg for call in calls for arg in call))
 
     def test_paper_targets_build_from_run_archives_not_from_the_registry(self):
@@ -157,6 +158,9 @@ class MakeWorkflowTests(unittest.TestCase):
                          [["-B", "scripts/final_destination.py", "--runs-root", str(runs)]])
         self.capture.unlink()
         self.assertEqual(self.invoke("final-destination-converge"), [["-B", "scripts/final_destination.py", "--converge"]])
+        self.capture.unlink()
+        self.assertEqual(self.invoke("consistency-audit", RUNS_ROOT=runs),
+                         [["-B", "scripts/consistency_audit.py", "--runs-root", str(runs)]])
         self.capture.unlink()
         self.assertEqual(self.invoke("printed-statement-check"), [["-B", "scripts/printed_statement_check.py"]])
 

@@ -49,6 +49,21 @@ This page is the projection of `STATEMENT_COMPLIANCE.md` once the measured outpu
 | supplementary:Figure S18 | scenario clarification; original analytical grid | the nominal baseline and density-scale grid of panel c |
 | supplementary:Figure S20 | reference work | break-even families, action-bound functions, variance ratios and power curves |
 
+## Scientific consistency
+
+Each open question between the printed methods or values and the code is decided by an original record and a registered rule ([docs/CONSISTENCY.md](../docs/CONSISTENCY.md); `make consistency-audit RUNS_ROOT=<runs>` evaluates the checkable rules). At the destination every item is decided:
+
+| Item | Question | Now | At the destination |
+|---|---|---|---|
+| K1 | Studentized maximum of the selection bootstrap (Algorithm S4) | code aligned; records decide the printed values | $\color{red}{\textsf{decided by the original records}}$ |
+| K2 | Peptides-func confirmation: Holm P = 0.070 above 0.05 | awaiting original records | $\color{red}{\textsf{decided by the original records}}$ |
+| K3 | Selection on the complete candidate ledger of Roman-empire, PascalVOC-SP and COCO-SP | awaiting original records | $\color{red}{\textsf{decided by the original records}}$ |
+| K4 | Seed hierarchy of Table S2 | design difference; records decide | $\color{red}{\textsf{decided by the original records}}$ |
+| K5 | Settings of the budget-matched comparison (Tables S46b and S47, main Figure 6) | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
+| K6 | Failure responses of the target-regime gates (Table S3) | awaiting original records | $\color{red}{\textsf{decided by the original records}}$ |
+| K7 | Table S20 \|Q\|: the feasible family, not the registry | resolved | resolved |
+| K8 | Literal wording and representation differences of the protocol displays | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
+
 ## The printed availability text
 
 | Claim | Now | At the destination | Route |

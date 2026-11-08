@@ -69,7 +69,7 @@
  "scientific_run": true,
  "run_name": "products",
  "identities": {
-  "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
   "config_sha256": "6675def8c2dc20540051943c388721d4d13322f129b93f9acfe93bdecddef06d",
   "prepared_fingerprint": "pending: prepared-data fingerprint",
   "unit_sha256": "pending: SHA-256 of prepared/splits.npz"

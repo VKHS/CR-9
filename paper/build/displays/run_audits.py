@@ -219,10 +219,11 @@ def screened_radius(view, size: int = FINALISTS) -> dict:
     """Simultaneous radius when the max-t maximum runs over ``size`` finalists only.
 
     Finalists: the ``size`` resource/support-feasible candidates with the smallest
-    simultaneous upper bounds ``U`` of the registered full-family selection (ties by
-    registry index). The bootstrap is the released Algorithm S4 replayed with the
-    stage's own arrays, folds, margins, weights and seed; only the set of columns
-    entering the studentized maximum changes.
+    simultaneous upper bounds ``U`` of the registered selection (ties by registry index).
+    The bootstrap is the released Algorithm S4 replayed with the stage's own arrays, folds,
+    margins, weights, seed and studentized-maximum family (select/decision.json
+    ``max_t_family``; records sealed before that field used every executed configuration).
+    The finalists' maximum is evaluated on the same resamples and never changes the decision.
     """
     from cross_morse import statistics
     data, candidates, decision, config, metric_evaluator = selection_inputs(view)
@@ -230,40 +231,22 @@ def screened_radius(view, size: int = FINALISTS) -> dict:
     feasible = [j for j, c in enumerate(candidates)
                 if c.get("feasible", True) and not c.get("execution_failure") and upper[j] is not None]
     finalists = sorted(feasible, key=lambda j: (upper[j], j))[:size]
-    observed = [j for j, c in enumerate(candidates) if not c.get("execution_failure")]
-    columns = np.zeros(len(observed), dtype=bool)
-    columns[[observed.index(j) for j in finalists]] = True
-    original, captured = statistics._max_t_interval, {}
-
-    def restricted(point, draws, alpha):
-        if "radius" in captured:                      # metric interval: unchanged
-            return original(point, draws, alpha)
-        se = np.std(draws, axis=0, ddof=1)
-        use = columns & (se > 1e-12)
-        maxima = (np.max(np.abs(draws[:, use] - point[use]) / se[use], axis=1)
-                  if use.any() else np.zeros(len(draws)))
-        critical = float(np.quantile(maxima, 1 - alpha))
-        captured["radius"] = float(np.max(se[columns] * critical)) if columns.any() else 0.0
-        captured["critical"] = critical
-        return original(point, draws, alpha)
-
+    family = decision.get("max_t_family", "executed")
     sc = config["selection"]
-    statistics._max_t_interval = restricted
-    try:
-        replay = statistics.nested_selection(
-            data["loss"], data.get("accuracy"), candidates, data["outer_fold"], inner_fold_ids=data["inner_fold"],
-            reps=int(decision["bootstrap_replicates"]), alpha=sc["alpha"], epsilon_r=sc["epsilon_r"],
-            epsilon_eq=sc["epsilon_eq"], epsilon_metric=sc["epsilon_metric"], weights=data["counts"],
-            seed=int(decision["bootstrap_seed"]), metric_evaluator=metric_evaluator)
-    finally:
-        statistics._max_t_interval = original
-    # The loop must be the sealed one: the full-family radius has to come back unchanged.
+    replay = statistics.nested_selection(
+        data["loss"], data.get("accuracy"), candidates, data["outer_fold"], inner_fold_ids=data["inner_fold"],
+        reps=int(decision["bootstrap_replicates"]), alpha=sc["alpha"], epsilon_r=sc["epsilon_r"],
+        epsilon_eq=sc["epsilon_eq"], epsilon_metric=sc["epsilon_metric"], weights=data["counts"],
+        seed=int(decision["bootstrap_seed"]), metric_evaluator=metric_evaluator, max_t_family=family,
+        diagnostic_max_t={"finalists": finalists})
+    # The loop must be the sealed one: the selection radius has to come back unchanged.
     if not math.isclose(replay["max_radius"], decision["max_radius"], rel_tol=1e-9, abs_tol=1e-12):
         raise DisplayInputError(f"{view.dataset}: Algorithm S4 replay does not reproduce select/decision.json")
-    # Only the loss maximum is restricted, so the feasible family Q_feas (|Q| of Table S20) is replayed exactly.
+    # The feasible family Q_feas (|Q| of Table S20) is replayed exactly as well.
     if replay.get("joint_feasible") != decision.get("joint_feasible"):
         raise DisplayInputError(f"{view.dataset}: the feasible family of select/decision.json differs from its replay")
-    return {"finalists": finalists, "radius": captured["radius"], "critical": captured["critical"]}
+    screened = replay["diagnostic_max_t"]["finalists"]
+    return {"finalists": finalists, "radius": screened["max_radius"], "critical": screened["max_t_critical"]}
 
 
 def representatives(rec: RunRecord) -> dict:

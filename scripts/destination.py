@@ -838,6 +838,20 @@ def render_compliance(statement: dict, registered_text: str, ledger: list[dict],
           "| Figure | Work that closes the contract | Input |", "|---|---|---|"]
     for row in to_register:
         L.append(f"| {row['id']} | {cell(row['contract']['work'])} | {cell(row['contract']['closes'])} |")
+    ledger = json.loads((ROOT / "paper" / "consistency_ledger.json").read_text(encoding="utf-8"))
+    L += ["", "## Scientific consistency", "",
+          "Each open question between the printed methods or values and the code is decided by an original record "
+          "and a registered rule ([docs/CONSISTENCY.md](../docs/CONSISTENCY.md); `make consistency-audit "
+          "RUNS_ROOT=<runs>` evaluates the checkable rules). At the destination every item is decided:", "",
+          "| Item | Question | Now | At the destination |", "|---|---|---|---|"]
+    words = {"aligned": "code aligned; records decide the printed values", "pending_records": "awaiting original records",
+             "design_difference": "design difference; records decide", "needs_declaration": "needs an author declaration",
+             "resolved": "resolved"}
+    for item in ledger["items"]:
+        final = "resolved" if item["status"] == "resolved" else red("decided by " + ("the author's declaration"
+                                                                                    if item["status"] == "needs_declaration"
+                                                                                    else "the original records"))
+        L.append(f"| {item['id']} | {cell(item['title'])} | {words[item['status']]} | {final} |")
     L += ["", "## The printed availability text", "",
           "| Claim | Now | At the destination | Route |", "|---|---|---|---|"]
     for row in printed:

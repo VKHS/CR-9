@@ -4,10 +4,15 @@
 
 The machine-readable [validation record](VALIDATION.json) identifies each set of
 executed checks by its environment, scope and runtime fingerprint. The current
-runtime is `d9687652…`, which adds the selected-strata entry gate. Earlier checks
-of `0aba361b…` remain under `prior_runtime_validation` and the named historical
-validation sections. Prior smoke records explicitly retain their earlier-source
-scope. The exact previous runtime is preserved for replay.
+runtime is `9f7393f7…`, which takes the studentized maximum of the selection
+bootstrap over the feasible family Q_feas, as Supplementary Algorithm S4 specifies,
+and records that family in every selection decision. Checks of `d9687652…` (the
+selected-strata entry gate) remain under `prior_runtime_validation`, those of
+`0aba361b…` under `earlier_runtime_validations`, and the named historical validation
+sections keep their own source identities. Prior smoke records explicitly retain
+their earlier-source scope. Selection records sealed by earlier runtimes carry no
+family and replay exactly with every executed configuration; a test reproduces the
+selection of both preserved runtimes on identical inputs.
 
 A source fingerprint identifies runtime code; a Git commit additionally identifies
 documentation, examples and packaging. Historical fixture validation does not

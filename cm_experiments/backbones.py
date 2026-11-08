@@ -287,7 +287,8 @@ def route_stability(run: SealedRun, *, reps=None) -> dict:
                                 inner_fold_ids=inner_ids, reps=replicates, alpha=selection["alpha"],
                                 epsilon_r=selection["epsilon_r"], epsilon_eq=selection["epsilon_eq"],
                                 epsilon_metric=selection["epsilon_metric"], seed=seed, weights=counts[keep],
-                                metric_evaluator=evidence)
+                                metric_evaluator=evidence,
+                                max_t_family=decision.get("max_t_family", "executed"))
 
     replay = select(np.ones(len(folds), dtype=bool), inner, int(decision["bootstrap_replicates"]))
     if replay["provisional_index"] != decision["provisional_index"] or replay["U"] != decision["U"]:

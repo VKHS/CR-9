@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-11-08 — Algorithm S4 in the runtime, the scientific-consistency ledger and figure contracts
+
+- The selection's studentized maximum follows Supplementary Algorithm S4: `nested_selection` takes it over
+  the feasible family Q_feas of main Eq. (18) (support, resource and official-metric bounds) instead of every
+  executed registered configuration, a superset whose radius is at least as wide. `select/decision.json`
+  records the family (`max_t_family`), `feasible_family_size` and `max_t_family_size`; r_max is the largest
+  radius over Q_feas. Records sealed by earlier runtimes carry no family and replay exactly with every executed
+  configuration (`cross_morse/review.py`, `paper/build/displays/run_audits.py::screened_radius`,
+  `cm_experiments/backbones.py`); a test reproduces the complete selection record of each preserved runtime on
+  identical inputs. The Table S20 finalist radius is evaluated on the same resamples through
+  `diagnostic_max_t` instead of replacing a module function. The runtime fingerprint is now
+  `9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c`; the previous runtime `d9687652…` is
+  preserved under `examples/source_snapshots/`, and `docs/VALIDATION.json` records the new validation event.
+- The scientific-consistency ledger (`paper/consistency_ledger.json`, `docs/CONSISTENCY.md`) lists every open
+  question between the printed methods or values and the code: the studentized-maximum family (K1), the
+  Peptides-func confirmation at Holm P = 0.070 (K2), the complete-ledger selection on Roman-empire,
+  PascalVOC-SP and COCO-SP (K3), the Table S2 seed hierarchy (K4), the budget-comparison settings (K5), the
+  Table S3 failure responses (K6), Table S20 |Q| (K7, resolved) and the literal protocol-table differences
+  (K8), each with the original record and the rule that decides it. `make consistency-audit RUNS_ROOT=<runs>`
+  (`scripts/consistency_audit.py`) evaluates K1, K2, K3, K4 and K6 on completed runs; on the bundled runs it
+  finds that their selections used every executed configuration, as sealed. No reference value is changed.
+FIGURE_CONTRACTS_BULLET
+- The destination's compliance page lists the consistency items, each decided at the destination by the
+  original records or the author's declaration.
+
 ## 2026-11-08 — The destination tree at twelve of twelve, and Table S20 |Q| as the feasible family
 
 - Table S20 reports |Q| as the paper defines it: the size of the feasible family Q_feas of main
