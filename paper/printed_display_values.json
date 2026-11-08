@@ -6170,6 +6170,635 @@
         },
         "precision_rule": "formula-derived: finest d <= 6 with 0.5e-d >= max deviation over the box of inputs consistent with every printed input, evaluated at the box centre; panel b: 4 decimals; printed values: printed decimals"
       }
+    },
+    "supplementary_figure_S9_mechanism_contrast_sensitivity": {
+      "display_id": "supplementary:Figure S9",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          33
+        ]
+      },
+      "supporting_sources": [
+        {
+          "document": "supplementary",
+          "pages": [
+            10,
+            11
+          ],
+          "label": "Table S14b; J_old, J_new, effects, 95% intervals at J_old and J_new, Holm P"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            10
+          ],
+          "label": "Table S14; margin column (±0.002 for products/state) and Holm P of the multigraph rows"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            8
+          ],
+          "label": "Table S11; practical margins 0.002 nats (state, MPC-RH) and 0.0015 nats (radius)"
+        }
+      ],
+      "values": {
+        "panel_a": {
+          "label": "a",
+          "title": "Held-out mechanism contrasts and confirmation-size sensitivity",
+          "x_label": "contrast (nats); green tick: practical margin of Table S11",
+          "legend": [
+            "contrasts at J_old (95% intervals)",
+            "rescaled to the D_confirm sizes (Table S14b)"
+          ],
+          "zero_line_nats": {
+            "$value": 0.0,
+            "$decimals": 6
+          },
+          "rows": [
+            {
+              "label": "arxiv/state",
+              "J_old": 32,
+              "J_new": 32,
+              "effect_nats": {
+                "$value": 0.00574,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": 0.00312,
+                  "$decimals": 5
+                },
+                {
+                  "$value": 0.00836,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": null,
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.002,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "unit unchanged (n=32)"
+            },
+            {
+              "label": "arxiv/radius",
+              "J_old": 32,
+              "J_new": 32,
+              "effect_nats": {
+                "$value": -0.00286,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": -0.00481,
+                  "$decimals": 5
+                },
+                {
+                  "$value": -0.00091,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": null,
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.0015,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "unit unchanged (n=32)"
+            },
+            {
+              "label": "proteins/state",
+              "J_old": 32,
+              "J_new": 32,
+              "effect_nats": {
+                "$value": 0.00485,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": 0.00264,
+                  "$decimals": 5
+                },
+                {
+                  "$value": 0.00706,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": null,
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.002,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "unit unchanged (n=32)"
+            },
+            {
+              "label": "proteins/radius",
+              "J_old": 32,
+              "J_new": 32,
+              "effect_nats": {
+                "$value": -0.00242,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": -0.00406,
+                  "$decimals": 5
+                },
+                {
+                  "$value": -0.00077,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": null,
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.0015,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "unit unchanged (n=32)"
+            },
+            {
+              "label": "products/state",
+              "J_old": 64,
+              "J_new": 64,
+              "effect_nats": {
+                "$value": 0.00036,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": -0.00064,
+                  "$decimals": 5
+                },
+                {
+                  "$value": 0.00136,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": null,
+              "margin_ticks_nats": [
+                {
+                  "$value": -0.002,
+                  "$decimals": 6
+                },
+                {
+                  "$value": 0.002,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "unit unchanged (n=64)"
+            },
+            {
+              "label": "Roman/RH",
+              "J_old": 10,
+              "J_new": 10,
+              "effect_nats": {
+                "$value": -0.00649,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": -0.01007,
+                  "$decimals": 5
+                },
+                {
+                  "$value": -0.00291,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": null,
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.002,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "unit unchanged (n=10)"
+            },
+            {
+              "label": "Pascal/RH",
+              "J_old": 1428,
+              "J_new": 425,
+              "effect_nats": {
+                "$value": -0.00902,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": -0.01355,
+                  "$decimals": 5
+                },
+                {
+                  "$value": -0.00449,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": {
+                "effect_nats": {
+                  "$value": -0.00902,
+                  "$decimals": 5
+                },
+                "interval_nats": [
+                  {
+                    "$value": -0.01371,
+                    "$decimals": 5
+                  },
+                  {
+                    "$value": -0.00433,
+                    "$decimals": 5
+                  }
+                ]
+              },
+              "holm_P": {
+                "$value": 0.0013,
+                "$decimals": 4
+              },
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.002,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "J: 1428 → 425; Holm P 0.0013"
+            },
+            {
+              "label": "COCO/RH",
+              "J_old": 5000,
+              "J_new": 5664,
+              "effect_nats": {
+                "$value": -0.00962,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": -0.01372,
+                  "$decimals": 5
+                },
+                {
+                  "$value": -0.00552,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": {
+                "effect_nats": {
+                  "$value": -0.00962,
+                  "$decimals": 5
+                },
+                "interval_nats": [
+                  {
+                    "$value": -0.01372,
+                    "$decimals": 5
+                  },
+                  {
+                    "$value": -0.00552,
+                    "$decimals": 5
+                  }
+                ]
+              },
+              "holm_P": "<0.001",
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.002,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "J: 5000 → 5664; Holm P <0.001"
+            },
+            {
+              "label": "Peptides/radius",
+              "J_old": 2331,
+              "J_new": 544,
+              "effect_nats": {
+                "$value": -0.00172,
+                "$decimals": 5
+              },
+              "original_interval_nats": [
+                {
+                  "$value": -0.00316,
+                  "$decimals": 5
+                },
+                {
+                  "$value": -0.00028,
+                  "$decimals": 5
+                }
+              ],
+              "rescaled": {
+                "effect_nats": {
+                  "$value": -0.00172,
+                  "$decimals": 5
+                },
+                "interval_nats": [
+                  {
+                    "$value": -0.00332,
+                    "$decimals": 5
+                  },
+                  {
+                    "$value": -0.00012,
+                    "$decimals": 5
+                  }
+                ]
+              },
+              "holm_P": {
+                "$value": 0.07,
+                "$decimals": 3
+              },
+              "margin_ticks_nats": [
+                {
+                  "$value": 0.0015,
+                  "$decimals": 6
+                }
+              ],
+              "annotation": "J: 2331 → 544; Holm P 0.070"
+            }
+          ]
+        }
+      },
+      "evidence_kind": "printed contrasts and 95% intervals at the original sizes, the historical analytical confirmation-size sensitivity at the D_confirm sizes, and registered practical margins",
+      "note": "Independent transcription of supplementary page 33 (rendered at 160, 300 and 600 dpi; its vector text layer carries every row label and annotation), cross-checked against Tables S14b (pp. 10-11), S14 (p. 10) and S11 (p. 8). The single panel is enumerated completely: panel label, title, axis label, both legend entries and the zero line; and for each of the nine rows in printed order its label, J_old and J_new (an unchanged row prints n, which is both), the grey point and 95% interval at J_old (S14b J_old column; S14b prints 'same' at J_new for an unchanged unit), the blue rescaled point and interval at J_new for the three multigraph rows (S14b J_new column) or an explicit null where no blue interval is drawn, the Holm P of each rescaled-row annotation (0.0013; the printed inequality <0.001 kept as text; 0.070), every green tick and the literal annotation. The green ticks were located on the 600-dpi rendering to within one pixel (1.5e-5 nats): each sits at the Table S11 margin on the positive axis (0.002 nats for state and MPC-RH, 0.0015 nats for radius), and products/state carries two ticks, at -0.002 and +0.002, because Table S14 prints its margin as ±0.002 for an equivalence reading. Margins are registered constants and compare at six decimals, so 0.0015 and 0.002 cannot pass for each other; effects and intervals use the five printed decimals of S14b, and the drawn grey and blue endpoints agree with them at the rendering resolution. The blue intervals are the historical analytical sensitivity of Table S14b: the two-way variance model of Note S24 with fixed means, which S14b's own record classifies as an analytical sensitivity and not an observed replication. They are compared with the generator's rescaling of the supplied J_old intervals, never with the D_confirm intervals of a newly executed or supplied confirmation campaign; those stay separate source data, and this contract does not certify that such a campaign agrees with Table S14. Notation follows the generator vocabulary (J_old, D_confirm). No target was taken from a generator output.",
+      "consistency_check": {
+        "model": "each side of the J_old interval widens by [(1 - g) + g J_old/J_new]^(1/2) about the fixed effect",
+        "graph_variance_share": {
+          "Pascal/RH": 0.03,
+          "COCO/RH": 0.015,
+          "Peptides/radius": 0.071
+        },
+        "share_source": "Table S14b caption: 3.0%, 1.5% and 7.1% of the test-stage variance",
+        "result": "Applied to the printed J_old intervals, the model reproduces every printed J_new endpoint within 3.6e-06 nats, inside the five-decimal rounding. A check only: the J_new targets are the printed values, not this evaluation."
+      },
+      "review": {
+        "date": "2026-11-08",
+        "method": "AI-assisted review of the SHA-256 identified supplementary PDF: text extraction, rendered pages and colour-threshold pixel measurement of every interval end, point and tick",
+        "scope": "Independent source-bound figure contract; original confirmation records remain required. No new benchmark measurements or author certification."
+      }
+    },
+    "supplementary_figure_S13_motivating_settings_and_schedule_adequacy": {
+      "display_id": "supplementary:Figure S13",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          34
+        ]
+      },
+      "supporting_sources": [
+        {
+          "document": "main",
+          "pages": [
+            10
+          ],
+          "label": "Table 1; deployed policies, paired loss effects versus q_C and 95% test-stage intervals"
+        },
+        {
+          "document": "main",
+          "pages": [
+            11
+          ],
+          "label": "Table 2; deployed route and E, and the effect over q_C cited by the panel-c title"
+        }
+      ],
+      "values": {
+        "panel_a": {
+          "label": "a",
+          "title": "Deployment settings in which the backbone stays frozen",
+          "settings": [
+            {
+              "name": "Compiled or certified backbone",
+              "description": "quantized and synthesized to an accelerator, or validated under a release process. Retraining forces re-synthesis and re-validation; a runtime wrapper on the aggregation call does not.",
+              "backbone_box": [
+                "frozen backbone",
+                "θ, update, head, precision unchanged"
+              ],
+              "adapter_box": [
+                "adapter",
+                "reads H_ℓ wraps A_ℓ"
+              ]
+            },
+            {
+              "name": "Shared pretrained backbone",
+              "description": "one checkpoint served to downstream users who hold neither the training data nor the right to retrain it.",
+              "backbone_box": [
+                "frozen backbone",
+                "θ, update, head, precision unchanged"
+              ],
+              "adapter_box": [
+                "adapter",
+                "reads H_ℓ wraps A_ℓ"
+              ]
+            },
+            {
+              "name": "One backbone, heterogeneous inputs",
+              "description": "graphs of different size, degree and homophily reach one model; the useful amount of transport varies per input, so one schedule cannot track it.",
+              "backbone_box": [
+                "frozen backbone",
+                "θ, update, head, precision unchanged"
+              ],
+              "adapter_box": [
+                "adapter",
+                "reads H_ℓ wraps A_ℓ"
+              ]
+            }
+          ]
+        },
+        "panel_b": {
+          "label": "b",
+          "x_label": "propagation depth ℓ",
+          "families": [
+            {
+              "title": "schedule adequate (products)",
+              "y_label": "risk (illustrative)",
+              "x_tick_labels": [
+                "0",
+                "L"
+              ],
+              "annotations": [
+                "one open-loop depth serves every input"
+              ],
+              "common_risk_minimizer": true
+            },
+            {
+              "title": "feedback valuable (six datasets)",
+              "y_label": "risk (illustrative)",
+              "x_tick_labels": [
+                "0",
+                "L"
+              ],
+              "annotations": [
+                "state feedback picks the next transport per input",
+                "best fixed schedule misses input-dependent minima"
+              ],
+              "common_risk_minimizer": false
+            }
+          ]
+        },
+        "panel_c": {
+          "label": "c",
+          "title": "Measured: deployed rule versus q_C (Table 2)",
+          "legend": [
+            "open-loop schedule retained",
+            "uncertainty-radius feedback",
+            "receding-horizon replanning"
+          ],
+          "x_label": "paired CE or BCE effect vs q_C on D_test (nats, 95%)",
+          "zero_line_nats": {
+            "$value": 0.0,
+            "$decimals": 6
+          },
+          "rows": [
+            {
+              "label": [
+                "arxiv",
+                "radius, E=4"
+              ],
+              "category": "uncertainty-radius feedback",
+              "effect_nats": {
+                "$value": -0.0045,
+                "$decimals": 5
+              },
+              "interval_nats": [
+                {
+                  "$value": -0.0075,
+                  "$decimals": 4
+                },
+                {
+                  "$value": -0.0015,
+                  "$decimals": 4
+                }
+              ]
+            },
+            {
+              "label": [
+                "proteins",
+                "radius, E=4"
+              ],
+              "category": "uncertainty-radius feedback",
+              "effect_nats": {
+                "$value": -0.0038,
+                "$decimals": 5
+              },
+              "interval_nats": [
+                {
+                  "$value": -0.0068,
+                  "$decimals": 4
+                },
+                {
+                  "$value": -0.0008,
+                  "$decimals": 4
+                }
+              ]
+            },
+            {
+              "label": [
+                "products",
+                "returns q_C"
+              ],
+              "category": "open-loop schedule retained",
+              "effect_nats": {
+                "$value": 0.0,
+                "$decimals": 5
+              },
+              "interval_nats": null
+            },
+            {
+              "label": [
+                "Roman",
+                "MPC-RH, E=4"
+              ],
+              "category": "receding-horizon replanning",
+              "effect_nats": {
+                "$value": -0.00572,
+                "$decimals": 5
+              },
+              "interval_nats": [
+                {
+                  "$value": -0.0089,
+                  "$decimals": 4
+                },
+                {
+                  "$value": -0.0026,
+                  "$decimals": 4
+                }
+              ]
+            },
+            {
+              "label": [
+                "Pascal",
+                "MPC-RH, E=8"
+              ],
+              "category": "receding-horizon replanning",
+              "effect_nats": {
+                "$value": -0.00842,
+                "$decimals": 5
+              },
+              "interval_nats": [
+                {
+                  "$value": -0.0128,
+                  "$decimals": 4
+                },
+                {
+                  "$value": -0.0041,
+                  "$decimals": 4
+                }
+              ]
+            },
+            {
+              "label": [
+                "COCO",
+                "MPC-RH, E=8"
+              ],
+              "category": "receding-horizon replanning",
+              "effect_nats": {
+                "$value": -0.00905,
+                "$decimals": 5
+              },
+              "interval_nats": [
+                {
+                  "$value": -0.0127,
+                  "$decimals": 4
+                },
+                {
+                  "$value": -0.0054,
+                  "$decimals": 4
+                }
+              ]
+            },
+            {
+              "label": [
+                "Peptides",
+                "radius, E=4"
+              ],
+              "category": "uncertainty-radius feedback",
+              "effect_nats": {
+                "$value": -0.00303,
+                "$decimals": 5
+              },
+              "interval_nats": [
+                {
+                  "$value": -0.0047,
+                  "$decimals": 4
+                },
+                {
+                  "$value": -0.0013,
+                  "$decimals": 4
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "evidence_kind": "structural illustration targets (panels a-b) and measured paired effects with 95% test-stage intervals (panel c)",
+      "note": "Independent transcription of supplementary page 34 (a raster figure without a text layer, read at 160, 300 and 600 dpi) and of main Tables 1 and 2 (pp. 10-11). Panels a and b are illustrations and carry structural targets only: panel letters, titles, every setting name and description, the frozen-backbone and adapter box labels (theta, H_ell and A_ell in plain-text notation), the panel-b family titles, axis labels, the 0/L depth ticks and all three annotations, and, from the caption ('a common risk-minimizing transport admits one open-loop schedule'; 'input-dependent minima preclude a common optimum'), whether each family shares a risk minimizer. The number, shape and placement of the stylized curves (five per family in print), the dashed best-fixed-depth line, the minimum dots, the padlock pictogram and the box connector are drawing choices, not targets; no stylized coordinate is a measurement. The family titles attribute the schedule-adequate case to products and the feedback case to the other six datasets, matching panel c, so they are compared with titles the generator derives from the measured outcomes. Panel c is numerical: for the seven datasets in printed order, the two-line row label, the legend category of the marker colour, the paired effect versus q_C (five printed decimals) and its 95% test-stage interval (four printed decimals) from main Table 1; ogbn-products is the exact comparator identity, effect 0 without an interval (null). The plotted points and interval ends, measured on the 600-dpi rendering, agree with Table 1 at the rendering resolution. The panel title cites Table 2, whose effect column prints the same point effects; the intervals come from Table 1, which the caption cites. Peptides keeps the evaluated radius-arm values of Table 1; this contract does not assert that the arm passed the registered confirmation gate. Zero lines compare at six decimals. No target was taken from a generator output.",
+      "review": {
+        "date": "2026-11-08",
+        "method": "AI-assisted review of the SHA-256 identified PDFs: rendered pages with colour-threshold pixel measurement of panel c, and main Tables 1-2",
+        "scope": "Independent source-bound figure contract; panels a-b are structural illustration targets and panel c requires the original lifecycle runs. No new benchmark measurements or author certification."
+      }
     }
   }
 }
