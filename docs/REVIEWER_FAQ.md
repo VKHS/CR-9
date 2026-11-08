@@ -8,9 +8,11 @@ Each answer names the files that hold the fact and the command that checks it.
 ## A. Provenance and identity
 
 **A1. Which code does a reproduction run, and how is it identified?**
-The runtime (`run_cross_morse*.py` and `cross_morse/*.py`) has one SHA-256
-fingerprint, `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`,
-recorded in `release/release_scope.json` and `docs/VALIDATION.json`.
+The runtime (`run_cross_morse*.py` and `cross_morse/*.py`) has a SHA-256
+fingerprint recorded in `release/release_scope.json` and `docs/VALIDATION.json`.
+`make source-id` prints the current value. Earlier runtimes are retained under
+`examples/source_snapshots/` so archived observations can be replayed with their
+producing code. A newer qualification is not retroactively attributed to an older run.
 `run_cross_morse.sh check` and `reproduce` compute it before anything is
 submitted and refuse a different runtime unless it is explicitly labelled a
 variant; every run writes the fingerprint it ran with into `run_state.json` and
@@ -30,11 +32,11 @@ source registration (`make manuscript-sources`, then
 Where: `paper/README.md`, `scripts/register_manuscript_sources.py`.
 Check: `make registry-check`
 
-**A3. Why does the Git history contain a single commit?**
-Each public release is published as one commit. Identity does not depend on
-commit ids: `RELEASE_MANIFEST.json` and `SHA256SUMS.txt` list every released
-file with its hash, the runtime fingerprint identifies the code, and each
-record in `docs/VALIDATION.json` names the fingerprint it validated.
+**A3. How are revisions and released files identified?**
+Git commits and merged pull requests identify the implementation and documentation
+changes. `RELEASE_MANIFEST.json` and `SHA256SUMS.txt` independently list every
+released file with its hash, the runtime fingerprint identifies the executing
+code, and each dated record in `docs/VALIDATION.json` names the source it validated.
 Check: `make verify-manifest`
 
 **A4. Are the bundled example runs real experiments?**
@@ -48,15 +50,15 @@ Check: `make reproduce`
 ## B. Reproducing the results
 
 **B1. Where are the raw results behind Table 1?**
-They are produced by running the release. This is a code release: it
-distributes the implementation, the configurations, the launcher and the
-registry of reported values, and no run outputs. `run_cross_morse.sh
-reproduce` regenerates every run, and each run directory holds its raw
-observations: prepared data and role membership, checkpoints, exploration
-trajectories, candidate and final predictions, the selection, confirmation and
-admission records and the stage manifests (`select/candidates.json`,
-`confirm/decision.json`, `admit/decision.json`, `final/results_summary.json`).
-Where: `AVAILABILITY.md`, `docs/HPC.md`.
+The release inventory `release/paper_artifacts.json` identifies each measured
+artifact and its publication state. Published run archives contain prepared data
+and role memberships, checkpoints, propensity-logged exploration, predictions,
+selection, confirmation, admission and sealed stage manifests. `make paper`
+retrieves their analysis files and reconstructs the displays; the complete tier
+also retrieves lifecycle checkpoints and full predictions. Original folders can
+be assessed before upload with `make paper-preflight`. Independent regeneration
+uses `run_cross_morse.sh reproduce` and retains its own source and run identity.
+Where: `AVAILABILITY.md`, `docs/PUBLICATION.md`, `docs/HPC.md`.
 Check: `make availability-check`
 
 **B2. How do I regenerate all results on my cluster?**

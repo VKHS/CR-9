@@ -5,8 +5,10 @@ from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 from scripts._paper_common import runtime_source_fingerprint
+from scripts import _source_snapshots as snapshots, artifact_inventory as inventory
 from scripts._source_snapshots import resolve_runtime_source, source_resolution
 from scripts.artifact_inventory import _verified_test_caches, InventoryError
 
@@ -58,6 +60,80 @@ class SourceSnapshotTests(unittest.TestCase):
             (parent / old).symlink_to(original, target_is_directory=True)
             with self.assertRaisesRegex(ValueError, 'symlink'):
                 resolve_runtime_source(old, root)
+
+    def test_original_run_and_campaign_snapshots_resolve_without_rewriting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            checkout, run = base / 'checkout', base / 'campaign/run'
+            self.source(checkout, '# current\n')
+            own = run / 'source'
+            old = self.source(own, '# original\n')
+            self.assertEqual(resolve_runtime_source(old, checkout, run_root=run), own)
+            resolved = source_resolution(old, checkout, run_root=run)
+            self.assertEqual(resolved['source_location'], str(own))
+            self.assertFalse(resolved['run_artifacts_rewritten'])
+            shared = run.parent / 'source'
+            own.rename(shared)
+            self.assertEqual(resolve_runtime_source(old, checkout, run_root=run), shared)
+            (shared / 'cross_morse/pipeline.py').write_text('# changed bytes\n')
+            with self.assertRaisesRegex(ValueError, 'exact runtime source snapshot'):
+                resolve_runtime_source(old, checkout, run_root=run)
+
+    def test_own_source_cannot_escape_through_symlinks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            checkout, run = base / 'checkout', base / 'run'
+            self.source(checkout, '# current\n')
+            external = base / 'external'
+            old = self.source(external, '# original\n')
+            run.mkdir()
+            (run / 'source').symlink_to(external, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                resolve_runtime_source(old, checkout, run_root=run)
+            (run / 'source').unlink()
+            shutil.copytree(external, run / 'source')
+            (run / 'source/cross_morse/linked.py').symlink_to(external / 'cross_morse/pipeline.py')
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                resolve_runtime_source(old, checkout, run_root=run)
+            linked_run = base / 'linked-run'
+            linked_run.symlink_to(run, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                resolve_runtime_source(old, checkout, run_root=linked_run)
+
+    def test_complete_original_run_uses_its_own_exact_source_snapshot(self):
+        # Actual sealed synthetic software run; no result values or provenance
+        # are rewritten to make it agree with the current implementation.
+        original_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            checkout, run = base / 'checkout', base / 'original-run'
+            self.source(checkout, '# unrelated current source\n')
+            shutil.copytree(original_root / 'examples/runs/arxiv', run)
+            before = {p.relative_to(run).as_posix(): p.read_bytes() for p in run.rglob('*') if p.is_file()}
+            old = json.loads((run / 'run_state.json').read_text())['source_sha256']
+            archived = resolve_runtime_source(old, original_root)
+            shutil.copytree(archived, run / 'source')
+            with mock.patch.object(inventory, 'SOURCE', checkout):
+                checked = inventory.build_inventory(run)
+            self.assertEqual(checked['status'], 'PASS')
+            self.assertEqual(checked['source_resolution']['source_location'], str(run / 'source'))
+            self.assertEqual(checked['identities']['source_sha256'], old)
+            self.assertNotEqual(runtime_source_fingerprint(checkout), old)
+            self.assertTrue(all((run / path).read_bytes() == data for path, data in before.items()))
+
+    def test_replay_rejects_unverified_source_before_execution(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            checkout, run = base / 'checkout', base / 'run'
+            self.source(checkout, '# current\n')
+            old = self.source(run / 'source', '# original\n')
+            (run / 'provenance/stages').mkdir(parents=True)
+            (run / 'provenance/stages/00_prepare.json').write_text(json.dumps({'source_sha256': old}))
+            (run / 'source/cross_morse/pipeline.py').write_text('# corrupt\n')
+            with mock.patch.object(snapshots.subprocess, 'run') as execute:
+                with self.assertRaisesRegex(ValueError, 'exact runtime source snapshot'):
+                    snapshots.replay_results_exact(run, root=checkout)
+            execute.assert_not_called()
 
     def test_optional_test_cache_must_match_the_sealed_trace(self):
         with tempfile.TemporaryDirectory() as directory:

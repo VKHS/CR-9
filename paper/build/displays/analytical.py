@@ -36,6 +36,7 @@ from cm_campaigns.contract import ADMITTED, ARMS
 from cm_theory import admission, budget, economics, inference, operators, spectral
 
 from .framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, display, integer, not_applicable, num, pyplot
+from . import regret_data
 
 NORMAL = NormalDist()
 Z975 = NORMAL.inv_cdf(0.975)
@@ -51,9 +52,6 @@ RESOLVENT_STEP_SHARES = (0.25, 0.50)      # Figure S6a-b: fraction of executed s
 TRUNCATION_AXIS = 64                      # Figure S6a-b: largest truncation order shown
 TAIL_REFERENCE_SHARE = 0.25               # Table S44: reference resolvent share f_bar
 RE_SEARCH_SHARES = (0.03, 0.08, 0.15)     # Note S25: re-search share rho of the no-observation arm
-SIGMA1_GRID = (0.005, 0.007, 0.010)       # Table S28b and S31: dispersion of the clipped one-step effects
-COUNT_GRID = (100, 500, 1000, 10000)      # Table S28b: counts besides the registered and reference ones
-TARGET_DATASETS = ("ogbn-arxiv", "PascalVOC-SP", "COCO-SP")   # Table S28b: named effect targets
 PAIRABLE_SHARE = {"single_graph": 0.5, "graph": 0.0}          # Note S24: conservative seed-paired reading
 E18_DENSITIES = (0.1, 0.3, 1.0)           # Table S43 E18 and Figure S20b: spectral energy scales lambda_0
 TERMINAL_SITE = {"W": 10.0, "W_C": 4.0, "C_pred": 0.5, "w": 6.0, "sensing": 2.0, "action": 2.0}  # Figure S11
@@ -75,6 +73,8 @@ G_S34 = "supplementary_table_S34_budget_aware_rule"
 G_S42 = "supplementary_table_S42_power_of_budget_matched_test"
 G_S44 = "supplementary_table_S44_per_input_cost_model"
 G_S47 = "supplementary_table_S47_decision_boundary_and_power"
+G_FS8 = "supplementary_figure_S8_clipping_and_uncertainty"
+G_FS10 = "supplementary_figure_S10_sensing_cost"
 
 ARM_FAMILY = len(ARMS)                    # each dataset's Holm family of the budget-matched arms
 ADMITTED_RUNS = tuple(f"run:{d}" for d in ADMITTED)
@@ -216,7 +216,7 @@ def support_counts(ctx, dataset) -> dict:
         per_member.append((member.root.name, relative, min(member_counts), min(member_ess, default=None)))
     if not qualified:
         raise DisplayInputError(f"{dataset}: no qualified support cell")
-    return {"minimum_count": min(counts), "reference_ess": int(math.floor(min(qualified) + 1e-9)),
+    return {"minimum_count": min(counts), "minimum_qualified_cell_ess": min(qualified),
             "per_member": per_member}
 
 
@@ -533,91 +533,103 @@ def table_s14b(ctx, out):
 # Supplementary Tables S28 and S28b: one-step regret bounds
 # ---------------------------------------------------------------------------
 
-def hoeffding_count(ctx, target) -> float:
-    """Real n with 2 e(n) = target (e(n) proportional to n^-1/2, Proposition 7)."""
-    return (2.0 * admission.hoeffding_radius(1, B=ctx.constants["admission_eq27_theorem2_table_S13"]["B"],
-                                             actions=len(operators.load_registry())) / target) ** 2
-
-
-def regret_inputs(ctx):
-    B = ctx.constants["admission_eq27_theorem2_table_S13"]["B"]
-    actions = len(operators.load_registry())
-    rows = {}
-    for dataset in DATASETS:
-        support = support_counts(ctx, dataset)
-        dep = deployment(ctx, dataset)
-        rows[dataset] = {**support, "effect": None if dep["returns_qC"] else abs(dep["effect"]), "dep": dep}
-    return B, actions, rows
-
-
 @display("supplementary:Table S28", stem="S28", title="Distribution-free one-step regret bound", scope="analytical",
          needs=("runs",))
 def table_s28(ctx, out):
-    B, actions, inputs = regret_inputs(ctx)
-
-    def two_e(n):   # a cell without logged units leaves the bound vacuous
-        return 2 * admission.hoeffding_radius(n, B=B, actions=actions) if n >= 1 else None
-    rows, source = [], []
+    params = regret_data.parameters(ctx)
+    inputs = regret_data.reference_support(ctx)
+    rows, source, observed = [], [], []
     for dataset, item in inputs.items():
-        at_count, at_ess = two_e(item["minimum_count"]), two_e(item["reference_ess"])
-        n_effect = None if item["effect"] is None else hoeffding_count(ctx, item["effect"])
+        support = support_counts(ctx, dataset)
+        dep = deployment(ctx, dataset)
+        effect = None if dep["returns_qC"] else abs(dep["effect"])
+        at_count = 2 * admission.hoeffding_radius(item["minimum_count"], **params)
+        at_ess = 2 * admission.hoeffding_radius(item["reference_ess"], **params)
+        n_effect = None if effect is None else regret_data.hoeffding_equality(effect, params)
         rows.append([dataset, integer(item["minimum_count"]), integer(item["reference_ess"]), num(at_count, 4),
                      num(at_ess, 4), not_applicable("The deployed policy returned qC; no feedback effect defines a target sample size")
                      if n_effect is None else f"{round(n_effect):,}"])
-        source.append([dataset, item["minimum_count"], item["reference_ess"], at_count, at_ess, item["effect"], n_effect,
-                       "; ".join(f"{run}:{rel}:{count}:{ess}" for run, rel, count, ess in item["per_member"])])
-        out.uses("run", dataset, ["fit/full/audit.json", "final/results_summary.json"])
+        source.append([dataset, item["minimum_count"], item["reference_ess"], at_count, at_ess, effect, n_effect,
+                       None if n_effect is None else round(n_effect),
+                       None if effect is None else admission.units_for_hoeffding_regret(effect, **params)])
+        observed += [[dataset, run, relative, count, ess] for run, relative, count, ess in support["per_member"]]
+        for key, value in (("minimum_count", item["minimum_count"]), ("reference_ess", item["reference_ess"]),
+                           ("two_e_minimum_count", at_count), ("two_e_reference_ess", at_ess),
+                           ("n_for_effect_rounded", None if n_effect is None else round(n_effect))):
+            out.compare(regret_data.S28_TARGETS, ("datasets", dataset, key), value)
+        out.uses("run", dataset, [*(r[1] for r in support["per_member"]), "final/results_summary.json"])
+    for key, value in (("B", params["B"]), ("actions", params["actions"]), ("delta_sup", params["delta"])):
+        out.compare(regret_data.S28_TARGETS, ("parameters", key), value)
     out.table(["Dataset", "minimum count", "reference ESS", "2e at minimum count (nats)", "2e at reference ESS (nats)",
                "n for the dataset's effect"], rows,
-              notes=[f"e(n) = 2B [log(2|A|/delta_sup)/(2n)]^(1/2) with B = {B:g}, |A| = {actions} and the cm_theory "
-                     "delta_sup; the regret bound is 2e(n). Minimum count: smallest trajectory count over the support "
-                     "cells of the fit audit; reference ESS: smallest ESS over the qualified cells (integer part); "
-                     "both minima over the splits of a campaign. The last column is the real n at which 2e(n) equals "
-                     "the dataset's admitted |Delta| (main Table 1), rounded; a dataset that returns q_C has none."])
+              notes=[f"e(n) = 2B [log(2|A|/delta_sup)/(2n)]^(1/2) with B = {params['B']:g}, "
+                     f"|A| = {params['actions']} and delta_sup = {params['delta']:g}; the regret bound is 2e(n). "
+                     "The first two columns are the explicitly listed analytical scenario of SI Table S28 (pp. 18–19). "
+                     "The source caption distinguishes its qualified-cell reference ESS from the Table S7 minima. "
+                     "Observed support minima from the supplied runs are retained in observed_support.csv. "
+                     "The last column uses the supplied dataset's admitted |Delta| (main Table 1), with real n at "
+                     "equality rounded to the nearest integer; the smallest sufficient integer is separately "
+                     "exported in the source data. A dataset that returns q_C has no effect target."])
     out.data("regret_bound", ["dataset", "minimum_count", "reference_ess", "two_e_minimum_count", "two_e_reference_ess",
-                              "abs_effect_nats", "n_for_effect", "per_run_minimum_count_and_ess"], source)
+                              "observed_abs_effect_nats", "n_for_effect_at_equality", "n_for_effect_rounded",
+                              "minimum_integer_n_for_effect"], source)
+    out.data("observed_support", ["dataset", "run", "audit_file", "observed_minimum_trajectory_count",
+                                  "observed_minimum_qualified_cell_ESS"], observed)
+    out.provenance(regret_reference_scenario={
+        "source": {"document": "supplementary", "pages": [18, 19], "display": "Table S28"},
+        "counts_role": "Declared analytical inputs; not observations inferred from the supplied runs",
+        "effect_role": "Dataset effect read from the supplied lifecycle run",
+        "observed_support": "data/S28/observed_support.csv"})
+    regret_data.record_parameters(out, params)
 
 
 @display("supplementary:Table S28b", stem="S28b", title="Variance-aware one-step radius", scope="analytical",
-         needs=("runs",))
+         needs=("static",))
 def table_s28b(ctx, out):
-    B, actions, inputs = regret_inputs(ctx)
-    admitted = {d: item for d, item in inputs.items() if item["effect"] is not None}
-    missing = [d for d in TARGET_DATASETS if d not in admitted]
-    if missing:
-        raise DisplayInputError(f"no admitted effect for the named targets {missing}")
-    smallest = min(admitted, key=lambda d: admitted[d]["effect"])
-    # Effect scales at the four-decimal precision of the reported effects (Table S26b).
-    targets = [(round(admitted[smallest]["effect"], 4), "smallest admitted effect")] + [
-        (round(admitted[d]["effect"], 4), f"{SHORT[d]} effect") for d in TARGET_DATASETS]
-    central = SIGMA1_GRID[len(SIGMA1_GRID) // 2]
-    requirement = admission.units_for_bernstein_regret(targets[0][0], central, B=B, actions=actions)
-    ess = {d: item["reference_ess"] for d, item in inputs.items()}
-    counts = sorted({ctx.constants["support_eq7"]["n_min_ESS"], ess[TARGET_DATASETS[0]], min(ess.values()),
-                     max(ess.values()), *COUNT_GRID, requirement})
-    rows, source = [], []
+    params = regret_data.parameters(ctx)
+    sigmas, counts, targets = regret_data.variance_grid(ctx)
+    rows, source, requirements = [], [], []
+    out.compare(regret_data.S28B_TARGETS, ("sigma1_grid",), sigmas)
     for n in counts:
-        values = [2 * admission.hoeffding_radius(n, B=B, actions=actions)] + [
-            2 * admission.bernstein_radius(n, s, B=B, actions=actions) for s in SIGMA1_GRID]
+        values = [2 * admission.hoeffding_radius(n, **params)] + [
+            2 * admission.bernstein_radius(n, sigma, **params) for sigma in sigmas]
         rows.append([f"{n:,}"] + [num(v, 4) for v in values])
         source.append(["count", n, *values])
-    rows.append(["target (nats)", "Hoeffding n"] + [f"n at σ1 = {SIGMA1_GRID[0]:.3f}"] +
-                [f"σ1 = {s:.3f}" for s in SIGMA1_GRID[1:]])
-    for target, label in targets:
-        hoeffding = hoeffding_count(ctx, target)
-        bernstein = [admission.units_for_bernstein_regret(target, s, B=B, actions=actions) for s in SIGMA1_GRID]
-        rows.append([f"{target:.4f} ({label})", f"{round(hoeffding):,}"] + [f"{n:,}" for n in bernstein])
-        source.append(["target", target, hoeffding, *bernstein])
-    out.table(["n", "Hoeffding 2e(n)"] + [f"Bernstein, σ1 = {SIGMA1_GRID[0]:.3f}"] +
-              [f"σ1 = {s:.3f}" for s in SIGMA1_GRID[1:]], rows,
+        for key, value in (("count", n), ("hoeffding_two_e", values[0]), ("bernstein_two_e", values[1:])):
+            out.compare(regret_data.S28B_TARGETS, ("count_rows", str(n), key), value)
+    rows.append(["target (nats)", "Hoeffding n"] + [f"n at σ1 = {sigmas[0]:.3f}"] +
+                [f"σ1 = {s:.3f}" for s in sigmas[1:]])
+    for item in targets:
+        target, label = item["target_nats"], item["label"]
+        needed = regret_data.target_requirements(target, sigmas, params)
+        rows.append([f"{target:.4f} ({label})", f"{needed['hoeffding_n_rounded']:,}"] +
+                    [f"{n:,}" for n in needed["bernstein_n"]])
+        source.append(["target", target, needed["hoeffding_n_at_equality"], *needed["bernstein_n"]])
+        requirements.append([item["id"], label, target, needed["hoeffding_n_at_equality"],
+                             needed["hoeffding_n_rounded"], needed["hoeffding_minimum_integer_n"],
+                             *needed["bernstein_n"]])
+        for key, value in (("label", label), ("target_nats", target),
+                           ("hoeffding_n_rounded", needed["hoeffding_n_rounded"]),
+                           ("bernstein_n", needed["bernstein_n"])):
+            out.compare(regret_data.S28B_TARGETS, ("targets", item["id"], key), value)
+    out.table(["n", "Hoeffding 2e(n)"] + [f"Bernstein, σ1 = {sigmas[0]:.3f}"] +
+              [f"σ1 = {s:.3f}" for s in sigmas[1:]], rows,
               notes=["Empirical-Bernstein regret bound 2 e_B(n), e_B(n) = (2 sigma_1^2 L/n)^(1/2) + 7(2B)L/(3(n - 1)), "
-                     "L = log(4|A|/delta_sup) (cm_theory.admission). Counts: the registered ESS threshold, the arxiv, "
-                     "smallest and largest reference ESS of Table S28, a fixed grid and the Bernstein requirement of the "
-                     f"smallest target at sigma_1 = {central:.3f}. The lower block gives the smallest n with 2e_B(n) at most "
-                     "the target and the real Hoeffding n, rounded; targets are the admitted effects at four decimals."])
-    out.data("radius_grid", ["block", "n_or_target", "hoeffding", *[f"sigma1_{s:.3f}" for s in SIGMA1_GRID]], source)
-    for dataset in DATASETS:
-        out.uses("run", dataset, ["fit/full/audit.json", "final/results_summary.json"])
+                     "L = log(4|A|/delta_sup) (cm_theory.admission). The count grid and four target scales are explicit "
+                     "analytical inputs printed in SI Table S28b (p. 19), including its COCO target of 0.0090 nats. "
+                     "They are not substituted with support minima or rounded effects from a supplied run. "
+                     "The lower block gives the smallest integer n with 2e_B(n) at most the target and the real "
+                     "Hoeffding n at equality rounded to the nearest unit. The smallest sufficient Hoeffding integer "
+                     "is separately exported in target_requirements.csv. This table establishes arithmetic "
+                     "agreement for the stated scenario, not observed benchmark support or effects."])
+    out.data("radius_grid", ["block", "n_or_target", "hoeffding", *[f"sigma1_{s:.3f}" for s in sigmas]], source)
+    out.data("target_requirements", ["target_id", "label", "target_nats", "hoeffding_n_at_equality",
+                                     "hoeffding_n_rounded", "hoeffding_minimum_integer_n",
+                                     *[f"bernstein_n_sigma1_{s:.3f}" for s in sigmas]], requirements)
+    out.provenance(regret_reference_scenario={
+        "source": {"document": "supplementary", "pages": [19], "display": "Table S28b"},
+        "role": "Analytical reconstruction from explicitly declared input coordinates; no measured run inputs"})
+    regret_data.record_parameters(out, params, variance=True)
 
 
 # ---------------------------------------------------------------------------
@@ -1014,6 +1026,13 @@ def figure_s8(ctx, out):
         for field, computed in (("J", s["J"]), ("B", s["B"]), ("D_bar", s["D_bar"]), ("S2", s["S2"])):
             out.compare(G_S13, (dataset, field), computed)
         out.compare(G_T1, (dataset, "loss_effect_interval_nats"), [s["dep"]["lower"], s["dep"]["upper"]])
+        out.compare(G_FS8, ("panel_a", dataset, "clipped_fraction_percent"), 100 * f_max)
+        for field, computed in (("graph_unit_half_width_mnats", 1e3 * s["hw_graph"]),
+                                ("test_stage_half_width_mnats", 1e3 * s["hw_test"]),
+                                ("test_to_graph_ratio", s["ratio"])):
+            out.compare(G_FS8, ("panel_b", dataset, field), computed,
+                        note="Computed from the run's admission moments and test interval; rounded ratio labels "
+                             "are comparison targets only, not inputs used to recover hidden precision.")
         out.uses("run", dataset, ["admit/decision.json", "final/results_summary.json"])
     plt = pyplot()
     fig, axes = plt.subplots(1, 2, figsize=(12, 3.9))
@@ -1031,7 +1050,7 @@ def figure_s8(ctx, out):
     ax.bar(xs - 0.2, [row[6] for row in rows], 0.38, color="#2f7bd9",
            label="graph unit, fixed ensemble: 1.96 S/√J (Table S13)")
     ax.bar(xs + 0.2, [row[7] for row in rows], 0.38, color="#e8673a",
-           label="Table 2 interval (seed-and-graph resampling)")
+           label="test-stage interval (seed-and-graph resampling)")
     for x, row in zip(xs, rows):
         ax.text(x + 0.2, row[7] + 0.05, f"×{row[8]:.1f}", ha="center", va="bottom", fontsize=7)
     ax.set_xticks(xs, [SHORT[row[0]] for row in rows])
@@ -1045,6 +1064,9 @@ def figure_s8(ctx, out):
     out.data("panel_a_clipped_fraction", ["dataset", "J", "B", "D_bar", "S2", "f_max"], [row[:6] for row in rows])
     out.data("panel_b_half_widths", ["dataset", "hw_graph_mnats", "hw_test_mnats", "ratio"],
              [[row[0], row[6], row[7], row[8]] for row in rows])
+    out.note("The fixed-ensemble graph half-width comes from the recorded admission variance and graph count; "
+             "the seed-and-graph half-width comes from the run's test interval. Their ratio is computed directly. "
+             "A rounded ratio in the figure is not an exact variance component or an inferred test interval.")
 
 
 # ---------------------------------------------------------------------------
@@ -1066,12 +1088,27 @@ def figure_s10(ctx, out):
             out.compare(G_S6C, (dataset, field), computed)
         out.compare(G_S23, (dataset, "controller_cost"), dep["C_ctrl"])
         out.compare(G_S23, (dataset, "comparator_cost"), dep["C_qC"])
+        out.compare(G_FS10, ("panel_a", dataset, "controller_overhead_percent"), 100 * (dep["m"] - 1))
+        out.compare(G_FS10, ("panel_a", dataset, "full_state_sensing_share_percent"), 100 * share)
+        residual_percent = 100 * (dep["m"] - 1 - share)
+        out.compare(G_FS10, ("panel_b", "datasets", dataset, "residual_share_percent"), residual_percent)
+        out.compare(G_FS10, ("panel_b", "datasets", dataset, "printed_residual_percent"),
+                    float(f"{residual_percent:.0f}"))
         out.uses("run", dataset, ["select/candidates.json"])
     proteins = next(row for row in rows if row[0] == "ogbn-proteins")
     width = ctx.constants["backbones_table_S5"]["ogbn-proteins"]["hidden"]
     sketches = [2 ** j for j in range(2, int(math.log2(width)) + 1)]
     sketch_rows = [[k, 100 * budget.sketch_relative_sd_bound(k), 100 * budget.sensing_share(proteins[1], k / width, 1)]
                    for k in sketches]
+    for k, precision, sensing in sketch_rows:
+        for field, computed in (("sketch_width", k), ("relative_sd_bound_percent", precision),
+                                ("proteins_sensing_share_percent", sensing)):
+            out.compare(G_FS10, ("panel_c", "points", str(k), field), computed,
+                        note="Analytical coordinate at the source-declared sketch width and period one; "
+                             "not an observation of executed sensing work.")
+    out.compare(G_FS10, ("panel_c", "sketch_width_domain"), [sketches[0], sketches[-1]])
+    out.compare(G_FS10, ("panel_c", "proteins_overhead_ceiling_percent"), 100 * proteins[3])
+    out.compare(G_FS10, ("panel_b", "zero_boundary_percent"), 0.0)
     plt = pyplot()
     fig, axes = plt.subplots(1, 3, figsize=(14, 3.9))
     xs = np.arange(len(rows))
@@ -1122,6 +1159,14 @@ def figure_s10(ctx, out):
     out.data("panel_b_residual", ["dataset", "residual_share"], [[row[0], row[5]] for row in rows])
     out.data("panel_c_reduced_sensor", ["sketch_width", "relative_sd_bound_pct", "proteins_sensing_share_pct",
                                         "proteins_overhead_pct"], [row + [100 * proteins[3]] for row in sketch_rows])
+    out.data("panel_c_boundary", ["minimum_sketch_width", "maximum_sketch_width", "proteins_overhead_pct"],
+             [[sketches[0], sketches[-1], 100 * proteins[3]]])
+    out.uses("repository", "paper/registered_constants.json",
+             ["dataset_statistics_table_S6c_S23b", "backbones_table_S5"])
+    out.note("Controller overhead is computed from observed run costs. Full-state and reduced-sensor shares "
+             "are analytical identities using the declared benchmark dimensions and hidden widths, with each "
+             "provider's reported edge convention. They do not substitute for measured operation counts or "
+             "runtime adjacency statistics. The rounded r of Table S6c is a comparison, not an exact input.")
 
 
 # ---------------------------------------------------------------------------

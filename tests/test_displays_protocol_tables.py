@@ -128,10 +128,13 @@ class StaticLayoutTests(unittest.TestCase):
         rows = {r["Gate"]: r for r in read_table(self.out, "S3")}
         self.assertEqual(rows["nominal graph value"]["prespecified criterion"], "U(Δ_plant) < −0.004 nats")
         self.assertEqual(rows["depth qualification"]["prespecified criterion"], "PDD ≤ 1.0 pp; DIL gap ≤ 0.020")
-        self.assertEqual(rows["registry support"]["prespecified criterion"], "ϕ_registry ≥ 0.80")
+        self.assertEqual(rows["registry support"]["prespecified criterion"], "ϕ_registry ≥ 0.80; selected strata = 1.00")
         self.assertEqual(rows["residual headroom"]["prespecified criterion"], "U(Δ_oracle) < −0.003 nats")
         strata = [c for c in self.writers["S3"].comparisons if c.path == ("registry_support", "selected_strata")]
-        self.assertEqual([c.computed for c in strata], [None])
+        self.assertEqual([c.computed for c in strata], [1.0])
+        thresholds = {r["key"]: r for r in read_data(self.out, "S3", "thresholds")}
+        self.assertEqual((thresholds["selected_strata_fraction"]["operator"],
+                          thresholds["selected_strata_fraction"]["value"]), ("=", "1.0"))
 
     def test_s5b_site_arithmetic(self):
         rows = read_table(self.out, "S5b")
@@ -236,7 +239,7 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual({k: v for k, v in s3.items() if not k.endswith("failure_action")},
                          {"nominal_graph_value/epsilon_plant_nats": "exact", "depth_qualification/PDD_pp": "exact",
                           "depth_qualification/DIL_gap_nats": "exact", "registry_support/phi_registry_min": "exact",
-                          "registry_support/selected_strata": "missing",
+                          "registry_support/selected_strata": "exact",
                           "residual_headroom/epsilon_headroom_nats": "no_reference"})
         s11 = self.statuses("supplementary:Table S11")
         self.assertEqual((s11["radius/margin"], s11["radius/fail_output"], s11["full/margin"]),
@@ -258,8 +261,10 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual(by_id[STATIC["S9"]]["comparison"]["exact"], 18)
         self.assertEqual(by_id[STATIC["S31"]]["comparison"]["exact"], 34)
         self.assertEqual(by_id[STATIC["S35"]]["comparison"]["exact"], 29)
-        # A missing executed contract stays a gap even though the paper value is known.
-        self.assertGreater(by_id[STATIC["S3"]]["comparison"]["missing"], 0)
+        # The prospective selected-strata gate now executes the printed criterion;
+        # unsupported seed replication and different failure actions remain visible.
+        self.assertEqual(by_id[STATIC["S3"]]["comparison"]["missing"], 0)
+        self.assertGreater(by_id[STATIC["S3"]]["comparison"]["differs"], 0)
         self.assertGreater(by_id[STATIC["S38"]]["comparison"]["differs"], 0)
         self.assertTrue(by_id[STATIC["S2"]]["not_applicable_cells"])
 
@@ -289,10 +294,14 @@ class SourceReadingTests(unittest.TestCase):
         self.assertEqual((P.role_sizes(113286)["confirm"], P.role_sizes(113286)["compare"]), (5664, 5665))
 
     def test_measurement_schema_matches_the_recorded_sensor_schema(self):
-        record = json.loads(next((ARXIV / "member_predictions").glob("*.json")).read_text())
-        sensor = record["sensor_configuration"]
+        records = [json.loads(path.read_text())
+                   for path in sorted((ARXIV / "member_predictions").glob("*.json"))]
+        sensors = [record["sensor_configuration"] for record in records if record.get("sensor_configuration")]
+        self.assertTrue(sensors, "the bundled run must include sensing executions")
         ctx = context()
-        self.assertEqual(P.measurement_schema(ctx, sensor["bands"], sensor["sensing_period"]), sensor["schema"])
+        for sensor in sensors:
+            with self.subTest(profile=sensor["profile"]):
+                self.assertEqual(P.measurement_schema(ctx, sensor["bands"], sensor["sensing_period"]), sensor["schema"])
         periodic = P.measurement_schema(ctx, [0, 2, 5], 4)
         self.assertEqual((len(periodic), periodic[-1]), (26, "spectral_age_fraction"))
 

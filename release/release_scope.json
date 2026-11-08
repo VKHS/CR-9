@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "release_type": "reference-implementation-with-role-isolated-evaluation",
   "result_distribution": "repository_release",
-  "result_distribution_note": "The measured outputs of the reported experiments (checkpoints, predictions, propensity-logged trajectories, statistical outputs, executed split/seed memberships and observed environments) are assets of the GitHub release paper-artifacts of this repository, listed with SHA-256 identities in release/paper_artifacts.json. `make paper` downloads and verifies them, rebuilds every numbered table and figure with paper/build/displays and compares every computed value with the printed one. Entries awaiting publication are marked as such; nothing is substituted for them.",
+  "result_distribution_note": "The publication workflow distributes the reported experiment artifacts through the GitHub paper-artifacts release, with identities and actual publication states in release/paper_artifacts.json. make paper retrieves and verifies published inputs, reconstructs numbered displays and compares computed values with independent paper references. Local pre-publication reconstruction is separate from public availability.",
   "availability_statement": "release/availability_statement.json",
   "artifact_manifest": "release/paper_artifacts.json",
   "statement_check": "scripts/statement_check.py (make statement-check)",
@@ -65,13 +65,13 @@
     "values_are_transcribed_not_computed": true
   },
   "data_use_sequence": "official train 60/20/10/5/5 fit/explore/select/confirm/compare; compare reserved during prepare; official validation admit; official test after lock",
-  "validated_runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+  "validated_runtime_source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
   "site_profile_policy": "run_cross_morse.sh carries the Arrhenius site settings (partition, GPU request, architecture, modules, PyTorch wheel, storage layout) in its SITE SETTINGS block; configs/arrhenius-site.env.example holds the NAISS allocation and storage project as placeholders for a private copy, and configs/public.env.example is the template for another cluster",
   "measurement_records_contract": {
     "specs": "records/specs.json",
     "tool": "scripts/records.py (make records-index, make records-check, make records-tables)",
     "index": "records/index.json",
-    "record_sets": 10,
+    "record_sets": 31,
     "trace": "every summary value is re-read from its raw log at its printed precision"
   },
   "manuscript_documents": "PDFs are not distributed. paper/sources.json retains reference hashes, sizes, page counts and table/page mappings; optional local copies can be byte-verified.",
@@ -98,5 +98,10 @@
     "supplementary_builders": "scripts/build_supplement.py",
     "scope": "Verified input bytes and generated outputs with per-display coverage; supporting checks are not full numerical displays. Original experiment identity is checked separately.",
     "strict_completeness_option": "--require-all-displays"
+  },
+  "local_publication_preflight": {
+    "command": "make paper-preflight PUBLISH_MAP=/abs/map.json PAPER_PREFLIGHT_ROOT=/abs/new-work",
+    "entry_point": "scripts/paper_preflight.py",
+    "scope": "Verify original local folders and reconstruct before upload; no public-availability verdict or mutation of the release inventory."
   }
 }

@@ -72,7 +72,7 @@ bash run_cross_morse.sh check            # full profile; `check pilot` or `check
 `check` runs on the login node and creates nothing. It reports:
 
 - the runtime fingerprint of `run_cross_morse*.py` and `cross_morse/*.py`
-  against the released `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`;
+  against the current released identity in `release/release_scope.json`;
 - every configuration the profile will use, with its seeds, epochs and precision;
 - `sbatch`, the account, the partition (`sinfo`), the per-job request, the
   storage base and its free space, the environment and the modules;

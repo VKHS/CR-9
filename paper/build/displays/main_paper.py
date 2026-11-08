@@ -1341,6 +1341,7 @@ def _score_points(dep: dict, name: str) -> float:
 def method_map(ctx, deps, leds, baselines) -> list[dict]:
     """Panel 5a: official score minus the full-depth plant against serial compute relative to the plant."""
     from cm_campaigns.contract import EXTERNAL
+    from .records_campaigns import s15_figure_cost_range
     rows = []
     for dataset in DATASETS:
         dep, led = deps[dataset], leds[dataset]
@@ -1352,10 +1353,17 @@ def method_map(ctx, deps, leds, baselines) -> list[dict]:
         plant_score = _score_points(dep, "qN")
         rows.append({"dataset": dataset, "policy": "qC", "method": route_identity(dep["qC"], style="table2"),
                      "relative_cost": led["C_qC"] / c_plant, "relative_cost_high": None,
+                     "observed_relative_cost": led["C_qC"] / c_plant, "observed_relative_cost_high": None,
+                     "cost_basis": "observed comparator execution", "ensemble": dep["qC"]["ensemble"],
+                     "nominal_cost": c_plant,
                      "score_gain_points": _score_points(dep, "qC") - plant_score})
         if not dep["returned"]:
             rows.append({"dataset": dataset, "policy": "deployed", "method": ROUTE_WORDS[dep["deployed"]["route"]],
                          "relative_cost": led["C_expected"] / c_plant, "relative_cost_high": led["C_assure"] / c_plant,
+                         "observed_relative_cost": led["C_expected"] / c_plant,
+                         "observed_relative_cost_high": led["C_assure"] / c_plant,
+                         "cost_basis": "observed expected cost to assurance cost", "ensemble": dep["qC"]["ensemble"],
+                         "nominal_cost": c_plant,
                          "score_gain_points": _score_points(dep, "qD") - plant_score})
         for method in EXTERNAL[dataset]:
             scores = [row for row in baselines.select("score", dataset=dataset, method=method) if str(row.get("seed", ""))]
@@ -1364,8 +1372,12 @@ def method_map(ctx, deps, leds, baselines) -> list[dict]:
                 raise DisplayInputError(f"baselines: per-seed scores and serial_cost of {method} on {dataset} are required")
             scale = 100.0 if str(scores[0].get("unit", "")).strip().upper() == "AP" else 1.0
             mean = float(np.mean([float(row["value"]) for row in scores])) * scale
-            rows.append({"dataset": dataset, "policy": "retrained", "method": method, "relative_cost": cost / c_plant,
-                         "relative_cost_high": None, "score_gain_points": mean - plant_score, "seeds": len(scores),
+            low, high, _ = s15_figure_cost_range(ctx, dep["qC"]["ensemble"], method=method)
+            rows.append({"dataset": dataset, "policy": "retrained", "method": method, "relative_cost": low / c_plant,
+                         "relative_cost_high": high / c_plant, "observed_relative_cost": cost / c_plant,
+                         "observed_relative_cost_high": None, "cost_basis": "S15 declared range relative to nominal cost",
+                         "ensemble": dep["qC"]["ensemble"], "nominal_cost": c_plant,
+                         "score_gain_points": mean - plant_score, "seeds": len(scores),
                          "score_points": mean})
     for row in rows:
         row.setdefault("seeds", None)
@@ -1399,8 +1411,14 @@ def figure_5(ctx, out):
         for t in t_grid:
             panel_d.append([d, float(t), amortization_horizon(hours, theta, led["added_work"], float(t))])
         markers.append([d, t_nom, amortization_horizon(hours, theta, led["added_work"], t_nom), hours, led["added_work"]])
-    columns_a = ["dataset", "policy", "method", "relative_cost", "relative_cost_high", "score_gain_points", "score_points", "seeds"]
+    columns_a = ["dataset", "policy", "method", "relative_cost", "relative_cost_high", "score_gain_points", "score_points",
+                 "seeds", "ensemble", "nominal_cost", "cost_basis"]
     out.data("panel_a", columns_a, [[r[c] for c in columns_a] for r in panel_a])
+    out.data("panel_a_observed_costs", ["dataset", "policy", "method", "observed_relative_cost",
+                                       "observed_relative_cost_high", "nominal_cost", "basis"],
+             [[r["dataset"], r["policy"], r["method"], r["observed_relative_cost"], r["observed_relative_cost_high"],
+               r["nominal_cost"], "observed execution; separate from declared retrained-architecture plot ranges"]
+              for r in panel_a])
     out.data("panel_b", ["dataset", "lambda_star_mnats", "lambda_low_mnats", "lambda_high_mnats", "metric_points_per_unit"],
              [[d, leds[d]["lambda_star"], *(leds[d]["lambda_range"] or (None, None)), leds[d]["metric_rate"]] for d in shown])
     out.data("panel_c", ["dataset", "cost", "price_mnats_per_nominal_execution", "net_benefit_mnats"], panel_c)
@@ -1408,12 +1426,16 @@ def figure_5(ctx, out):
     out.data("panel_d_operating_points", ["dataset", "t_nom_seconds", "M_star_inputs", "qualification_hours", "added_work"],
              markers)
     from cm_campaigns.contract import EXTERNAL
+    from .records_campaigns import G_S15_REFERENCE
     for row in panel_a:
         d = row["dataset"]
         if row["policy"] == "retrained":
             index = 7 + EXTERNAL[d].index(row["method"])
             raw = row["score_points"] / (100.0 if deps[d]["metric"] == "ap" else 1.0)
             out.compare(S15_GROUP, (d, "rows", index, "official_score"), raw)
+            out.compare(G_S15_REFERENCE, ("external_methods", row["method"], "serial_cost_per_member"),
+                        [row[k] * row["nominal_cost"] / row["ensemble"] for k in ("relative_cost", "relative_cost_high")],
+                        note="Main Figure 5a p12 uses the declared range; executed scalar costs are exported separately")
         else:
             route = deps[d]["qC"]["route"] if row["policy"] == "qC" else deps[d]["deployed"]["route"]
             if route in S15_ROUTE_ROWS:
@@ -1455,10 +1477,13 @@ def figure_5(ctx, out):
                     va="top")
         for r in rows:
             if r["policy"] == "retrained":
+                ax.plot([r["relative_cost"], r["relative_cost_high"]], [r["score_gain_points"]] * 2,
+                        color=color, ls="--", lw=1.2, alpha=0.75)
                 ax.plot(r["relative_cost"], r["score_gain_points"], "o", color=color, ms=6, alpha=0.75)
+                ax.plot(r["relative_cost_high"], r["score_gain_points"], ">", color=color, ms=5, alpha=0.75)
     ax.plot([], [], "o", color=MUTED, label="deployed rule at expected cost; tick: assurance cost")
     ax.plot([], [], "D", mfc="white", mec=MUTED, label="strongest open-loop comparator $q_C$")
-    ax.plot([], [], "o", color=MUTED, alpha=0.6, label="retrained architecture (measured serial cost)")
+    ax.plot([], [], "--", color=MUTED, alpha=0.6, label="retrained architecture (declared cost range)")
     ax.axhline(0, color=INK, lw=0.6)
     ax.set_xlabel("serial compute relative to the full-depth plant")
     ax.set_ylabel("official score minus plant (points; AP in pp)")
@@ -1535,6 +1560,12 @@ def figure_5(ctx, out):
                                   "stages/confirm.json", "stages/admit.json"])
     for name in ("input_gate", "baselines", "nominal_time"):
         out.uses("records", name, ["summary.csv"])
+    out.uses("protocol", "baseline_reference_ranges_table_S15", ["paper/registered_constants.json"])
+    out.provenance(source_document="main", source_pages=[12],
+                   cost_basis="S15 declared retrained-architecture range endpoints relative to nominal cost",
+                   observed_cost_companion="data/Fig5/panel_a_observed_costs.csv",
+                   limitation="This range correction does not establish an independently enumerated reference "
+                              "contract for all four panels; related-table checks alone do not certify the figure.")
 
 
 def _two_significant(value: float) -> float:

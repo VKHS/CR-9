@@ -31,6 +31,21 @@
           ]
         },
         "scope": "Printed protocol descriptions, declared reference accounting ranges and an analytical grid. These are not measured observations or substitutes for original execution records. The exact numerical o_dec and phi_OL inputs are not printed and remain unspecified."
+      },
+      {
+        "date": "2026-11-08",
+        "document": "supplementary",
+        "sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
+        "groups": {
+          "regret_bound_table_S28": [
+            18,
+            19
+          ],
+          "regret_bound_table_S28b": [
+            19
+          ]
+        },
+        "scope": "Explicit analytical scenario inputs: listed counts and qualified-cell reference ESS of Table S28; count abscissas and effect scales of Table S28b. The Table S28 caption distinguishes its reference ESS from Table S7 minima, and Figure S17g labels its markers illustrative ESS. These inputs do not assert that a supplied run observed those counts or effect scales. Table S28 dataset-effect requirements still use supplied run effects. All bounds and required sample sizes are derived, not registered as inputs."
       }
     ]
   },
@@ -1313,6 +1328,243 @@
       0.005,
       0.007,
       0.01
+    ],
+    "count_grid": [
+      64,
+      74,
+      91,
+      100,
+      142,
+      500,
+      1000,
+      3018,
+      10000
+    ],
+    "effect_targets": [
+      {
+        "id": "smallest_admitted_effect",
+        "label": "smallest admitted effect",
+        "target_nats": 0.003
+      },
+      {
+        "id": "arxiv_effect",
+        "label": "arxiv effect",
+        "target_nats": 0.0045
+      },
+      {
+        "id": "Pascal_effect",
+        "label": "Pascal effect",
+        "target_nats": 0.0084
+      },
+      {
+        "id": "COCO_effect",
+        "label": "COCO effect",
+        "target_nats": 0.009
+      }
     ]
+  },
+  "regret_bound_table_S28": {
+    "delta_sup": 0.05,
+    "reference_support": {
+      "ogbn-arxiv": {
+        "minimum_count": 128,
+        "reference_ess": 91
+      },
+      "ogbn-proteins": {
+        "minimum_count": 144,
+        "reference_ess": 96
+      },
+      "ogbn-products": {
+        "minimum_count": 192,
+        "reference_ess": 132
+      },
+      "Roman-empire": {
+        "minimum_count": 96,
+        "reference_ess": 74
+      },
+      "PascalVOC-SP": {
+        "minimum_count": 128,
+        "reference_ess": 88
+      },
+      "COCO-SP": {
+        "minimum_count": 200,
+        "reference_ess": 142
+      },
+      "Peptides-func": {
+        "minimum_count": 150,
+        "reference_ess": 104
+      }
+    }
+  },
+  "guarantee_scope_figure_S19": [
+    {
+      "id": "lemma1",
+      "statement": "Lemma 1 transport validity",
+      "class": "exact",
+      "holds_under": "nonnegative row-stochastic kernels; convex mixture weights"
+    },
+    {
+      "id": "lemma2",
+      "statement": "Lemma 2 resolvent correction",
+      "class": "exact",
+      "holds_under": "row-stochastic P; omitted tail mass 2(1-eta)^(T+1); T sparse products per step"
+    },
+    {
+      "id": "prop1",
+      "statement": "Prop. 1 deterministic replay",
+      "class": "exact",
+      "holds_under": "deterministic sensors, observer and policy"
+    },
+    {
+      "id": "prop6ii",
+      "statement": "Prop. 6(ii) alignment identity",
+      "class": "exact",
+      "holds_under": "exact finite-epsilon law of cosines per band with the measured c_lb"
+    },
+    {
+      "id": "cor2",
+      "statement": "Cor. 2 minimum admission J",
+      "class": "exact",
+      "holds_under": "algebra of the variance-free penalty term"
+    },
+    {
+      "id": "prop4",
+      "statement": "Prop. 4 value of state information",
+      "class": "exact",
+      "holds_under": "replay identity; clairvoyant oracle over the beam-restricted family: an upper bound, not an attainable value"
+    },
+    {
+      "id": "executed_range",
+      "statement": "Executed range; exchange rate lambda_star",
+      "class": "exact",
+      "holds_under": "registry functions; |Delta|/Delta_EC from the cost ledger of Table S23"
+    },
+    {
+      "id": "prop10",
+      "statement": "Prop. 10(i),(iii) decision boundary",
+      "class": "exact",
+      "holds_under": "risk comparison at the common ceiling (phi_star = 1 and r_B) and under priced work (lambda < lambda_pred_star); part (ii) is a sensitivity model with stated assumptions"
+    },
+    {
+      "id": "prop11",
+      "statement": "Prop. 11 advantage decomposition",
+      "class": "exact",
+      "holds_under": "telescoping identity with the comparator's continuation as reference; the critic's estimand, not a certificate"
+    },
+    {
+      "id": "prop6i",
+      "statement": "Prop. 6(i) band-limited sensitivity",
+      "class": "bound",
+      "holds_under": "polynomial adapter kernels; L_U-Lipschitz update; registered bands"
+    },
+    {
+      "id": "prop2",
+      "statement": "Prop. 2 fixed-mode perturbation",
+      "class": "bound",
+      "holds_under": "worst-case constants; the audit uses plug-in constants (tube)"
+    },
+    {
+      "id": "props3_9",
+      "statement": "Props. 3, 9 stability, sensing",
+      "class": "conditional",
+      "holds_under": "Lipschitz score; invariance on the region; the action-gap audit is a sensitivity statistic"
+    },
+    {
+      "id": "prop7",
+      "statement": "Prop. 7 one-step regret",
+      "class": "conditional",
+      "holds_under": "simultaneous per-action coverage; sigma_1 enters only the Bernstein radius"
+    },
+    {
+      "id": "thm1",
+      "statement": "Thm. 1 finite-family selection",
+      "class": "conditional",
+      "holds_under": "simultaneous coverage of the max-t intervals; not proven under dependence"
+    },
+    {
+      "id": "props5_8",
+      "statement": "Props. 5, 8 break-even, search",
+      "class": "conditional",
+      "holds_under": "ensemble-law fit on the grid E <= 20 (Table S26b); e_H, zeta_H from the enumeration of E9"
+    },
+    {
+      "id": "thm2",
+      "statement": "Thm. 2 clipped-loss admission",
+      "class": "finite-sample",
+      "holds_under": "i.i.d. admission graphs not used by any decision that fixed q_tilde_M (separated-data protocol, Table S39)"
+    },
+    {
+      "id": "cor1",
+      "statement": "Cor. 1 per-dataset statement",
+      "class": "finite-sample",
+      "holds_under": "union of the Thm. 1 and Thm. 2 events; one dataset at a time"
+    },
+    {
+      "id": "improvement",
+      "statement": "Improvement over qC (main Table 1)",
+      "class": "empirical",
+      "holds_under": "paired test-stage estimates with intervals; empirical class"
+    },
+    {
+      "id": "mechanisms",
+      "statement": "Mechanism labels (Table S14)",
+      "class": "empirical",
+      "holds_under": "held-out contrasts on D_confirm, Holm-corrected"
+    },
+    {
+      "id": "cost_ledger",
+      "statement": "Cost ledger, lambda_star (main Table 2)",
+      "class": "empirical",
+      "holds_under": "measured serial compute and input-fallback rates; C0.99 and the observed per-input maximum reported separately (E17)"
+    },
+    {
+      "id": "budget",
+      "statement": "Budget-matched comparison (main Section 4; Tables S46-S47)",
+      "class": "empirical",
+      "holds_under": "frozen arms E2-E6 on D_compare at the common ceiling (Tables S46-S46b)"
+    },
+    {
+      "id": "identity_oracle",
+      "statement": "Identity test E1 and oracle dispersion",
+      "class": "empirical",
+      "holds_under": "E1 identity entries and per-input oracle summaries (Tables S5c and S30)"
+    }
+  ],
+  "guarantee_scope_figure_S19_details": {
+    "classes": {
+      "exact": "identity with no approximation",
+      "bound": "deterministic inequality",
+      "conditional": "holds on a registered coverage or invariance event",
+      "finite-sample": "holds with probability >= 1-delta for independent graphs",
+      "empirical": "a measurement with its declared statistical unit",
+      "protocol": "evaluation requirements and reporting definitions"
+    },
+    "boundary_notes": {
+      "priced_work": "The comparator-relative advantage decomposition (Proposition 11) and priced-work boundary (Proposition 10(iii)) are exact identities.",
+      "ensemble_spend": "The ensemble-spend crossovers (Proposition 10(ii)) are a sensitivity model."
+    },
+    "model_class": {
+      "requirements": [
+        "hook access to the intermediate node states H_l",
+        "aggregation exposed as a nonnegative, row-normalizable, state-independent linear operator on node states",
+        "native update U_l Lipschitz in its message argument; weights, head and precision unchanged",
+        "nominal-identity test E1 required (Table S5c)"
+      ],
+      "tested": [
+        "seven frozen plants (Table S5): MLP-encoder transport plants, GraphGPS-style local branch, GINE-style linear-aggregation plant",
+        "inserted control sites between native blocks: a second mechanism (transport insertion) with a literal bypass as A0; its attribution is assessed by E13",
+        "substitutions (Table S25): GCNII, GINE-style; GPR-GNN enters through its per-step operator, its signed readout stays in the head"
+      ],
+      "not_covered": [
+        "prediction-only APIs and fused kernels that expose no hook",
+        "state-dependent kernels (attention weights) and signed per-step propagation operators",
+        "the standard GINE message phi(h_j + e_ij) and other edge-conditioned nonlinear messages",
+        "global-attention branch of hybrid models; topology-changing interventions"
+      ]
+    },
+    "admission_condition": "Theorem 2 requires independent admission graphs that no decision fixing q_tilde_M has used; the separated-data protocol fixes the policy on D_confirm and reads the validation split once at admission, so the three multigraph benchmarks are admitted under the finite-sample statement. Single-graph benchmarks apply the same clipped-loss statistic on their dependent unit under the descriptive rule (Table S27).",
+    "outcome_annotations": {
+      "Peptides-func": "boundary; Note S26"
+    }
   }
 }

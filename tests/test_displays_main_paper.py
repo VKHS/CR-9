@@ -17,11 +17,12 @@ from unittest import mock
 from cm_campaigns.contract import ADMITTED, EXTERNAL
 from cm_theory import admission as adm_theory
 from cm_theory import inference
-from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, DisplayValidationError, RunView
+from paper.build.displays.framework import (DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, DisplayValidationError,
+                                            RunView, load_references)
 from paper.build.displays.testing import build_one, context, fake_records, read_table, write_files
 
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding="utf-8"))
+REGISTRY = load_references(ROOT)[0]
 FEEDBACK = ("one_step", "radius", "mpc_rh")
 OPEN_LOOP_MEANS = {"best_depth": -0.0007, "learned_stop": -0.0010, "phase": -0.0014, "fixed_sequence": -0.0023,
                    "mpc_ol": -0.0032}
@@ -631,6 +632,25 @@ class MainPaperDisplayTests(unittest.TestCase):
         points = {r["dataset"]: r for r in read_data(writer, "panel_d_operating_points")}
         self.assertAlmostEqual(num(points["ogbn-arxiv"]["M_star_inputs"]), 3600 * 1.92 / (0.1 * (expected - 4.0) * 9.54))
         self.assertEqual(len(read_data(writer, "panel_b")), 6)
+
+    def test_figure_5_declared_ranges_do_not_follow_executed_scalar_costs(self):
+        modified = fake_records("baselines", [
+            {**row, "value": 33.0} if row["quantity"] == "serial_cost" and row["dataset"] == "ogbn-arxiv"
+            and row["method"] == "AMP" else dict(row) for row in self.records["baselines"].rows])
+        writer, comparisons = self.build("main:Figure 5", self.ctx(records={"baselines": modified}),
+                                         name="fig5_observed_cost_perturbation")
+        rows = [r for r in read_data(writer, "panel_a") if r["dataset"] == "ogbn-arxiv"]
+        amp = next(r for r in rows if r["method"] == "AMP")
+        self.assertEqual((num(amp["relative_cost"]), num(amp["relative_cost_high"])), (1.05, 1.2))
+        self.assertIn("declared", amp["cost_basis"])
+        observed = next(r for r in read_data(writer, "panel_a_observed_costs")
+                        if r["dataset"] == "ogbn-arxiv" and r["method"] == "AMP")
+        self.assertEqual(num(observed["observed_relative_cost"]), 33.0 / 4.0)
+        deployed = next(r for r in rows if r["policy"] == "deployed")
+        self.assertAlmostEqual(num(deployed["relative_cost"]), ((1 - .118) * 4.7 + .118 * 4) / 4)
+        ranges = [r for r in comparisons if r["group"] == "supplementary_table_S15_reference_ranges"]
+        self.assertEqual(len(ranges), 14)
+        self.assertTrue(all(r["status"] == "exact" for r in ranges))
 
     # ------------------------------------------------------------------ Figure 6
     def test_figure_6_binds_selected_configuration_and_strict_campaign(self):

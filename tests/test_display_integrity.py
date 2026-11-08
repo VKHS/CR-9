@@ -167,7 +167,8 @@ class OneCommandComparisonGate(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             with mock.patch.object(command.artifacts, "load_manifest", return_value={"artifacts": []}), \
-                 mock.patch.object(command.artifacts, "verify_fetched") as verify, \
+                 mock.patch.object(command.artifacts, "required_artifacts", return_value=[]), \
+                 mock.patch.object(command.artifacts, "verify_fetched", return_value={"artifacts": [], "awaiting": []}) as verify, \
                  mock.patch.object(command, "reconstruct", return_value=result):
                 code = command.main(["--offline", "--artifacts", str(root / "artifacts"), "--output-dir", str(root / "paper")])
                 verify.assert_called_once()

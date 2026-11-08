@@ -35,6 +35,8 @@ ARTIFACTS_ROOT ?= ../cm-artifacts
 PAPER_ROOT ?= ../cm-paper
 PAPER_TIER ?= analysis
 PUBLISH_MAP ?=
+PAPER_PREFLIGHT_ROOT ?= $(REPORT_ROOT)/publication-preflight
+PAPER_PREFLIGHT_COPY ?= 0
 RECONSTRUCTION_EXAMPLES_ROOT ?= $(REPORT_ROOT)/reconstruction-examples
 SUPPLEMENT_ROOT ?= $(REPORT_ROOT)/supplement
 REQUIRE_ALL_DISPLAYS ?= 0
@@ -163,6 +165,7 @@ help:
 	  'Produce and publish the measured outputs (docs/PRODUCTION.md; Arrhenius):' \
 	  '  make paper-outputs SUITE=<reproduction suite>   plan and submit every producing job' \
 	  '  make paper-outputs-status PRODUCE_WORK=<work>    follow the jobs' \
+	  '  make paper-preflight PUBLISH_MAP=<map> PAPER_PREFLIGHT_ROOT=<new directory>   verify local inputs before upload' \
 	  '  bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   publish' \
 	  '  make statement-fulfilled  every item of the registered availability statement fulfilled' \
 	  '' \
@@ -215,7 +218,14 @@ paper:
 	  --tier "$(PAPER_TIER)"
 
 paper-offline:
-	"$(PYTHON)" -B scripts/reconstruct_paper.py --offline --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)"
+	"$(PYTHON)" -B scripts/reconstruct_paper.py --offline --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)" --tier "$(PAPER_TIER)"
+
+.PHONY: paper-preflight
+paper-preflight:
+	@test -n "$(PUBLISH_MAP)" || { echo 'Set PUBLISH_MAP to the completed publication input map' >&2; exit 2; }
+	$(call check-boolean,PAPER_PREFLIGHT_COPY)
+	"$(PYTHON)" -B scripts/paper_preflight.py --map "$(PUBLISH_MAP)" --work "$(PAPER_PREFLIGHT_ROOT)" \
+	  $(if $(filter 1,$(PAPER_PREFLIGHT_COPY)),--copy-mode copy,)
 
 paper-from-index: paper-from-runs records-tables
 
@@ -492,8 +502,8 @@ source-id:
 test:
 	"$(PYTHON)" -B -m unittest discover -s tests -v
 
-NUMPY_TESTS := test_paper_registry test_textual_source_references test_records test_export_records test_availability test_paper_build test_run_archives \
- test_artifact_inventory test_reproduce_examples test_statistics test_evaluation test_compare_with_manuscript \
+NUMPY_TESTS := test_paper_registry test_textual_source_references test_entry_qualification test_records test_export_records test_availability test_paper_build test_run_archives \
+ test_artifact_inventory test_reproduce_examples test_reproduce_results_cli test_statistics test_evaluation test_compare_with_manuscript \
  test_release_tooling test_release_launcher test_source_fingerprint_cli test_draw_diagrams test_make_workflows \
  test_dataset_entrypoints test_environment_spec \
  test_experiment_accounting test_experiment_budget test_experiment_revision test_experiment_upstream \
@@ -505,7 +515,7 @@ NUMPY_TESTS := test_paper_registry test_textual_source_references test_records t
  test_theory_battery test_theory_formulas test_theory_review_regressions test_si_identities \
  test_arrhenius_discovery test_reviewer_faq test_paper_support_report test_review_confirmation test_s14_confirmation test_selection_figure \
  test_reproduction test_reproduction_launcher test_artifact_catalog test_reconstruction test_supplement_build \
- test_paper_artifacts test_reconstruct_paper test_statement_check test_statement_evidence test_display_integrity \
+ test_paper_artifacts test_paper_artifact_sources test_paper_preflight test_reconstruct_paper test_statement_check test_statement_evidence test_display_integrity \
  test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
  test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \

@@ -474,18 +474,32 @@ def gate_operator(ctx, key: str) -> str:
     return OPERATORS[found.pop()]
 
 
+def selected_strata_requirement(ctx) -> float:
+    """Read the prospective A0-support requirement from the runtime source."""
+    for node in source_tree(ctx, "cross_morse/qualification.py").body:
+        if isinstance(node, ast.Assign) and any(
+                isinstance(t, ast.Name) and t.id == "SELECTED_STRATA_FRACTION" for t in node.targets):
+            value = ast.literal_eval(node.value)
+            if type(value) not in (float, int) or not 0 < value <= 1:
+                raise DisplayInputError("invalid runtime selected-strata support requirement")
+            return float(value)
+    raise DisplayInputError("the runtime declares no selected-strata support requirement")
+
+
 @display("supplementary:Table S3", stem="S3", title="Target-regime qualification contract", scope="protocol")
 def table_s3(ctx, out):
     text = protocol_text(ctx, "S3")["rows"]
     cfgs = configs(ctx)
     entry = common([c["entry"] for c in cfgs.values()], "entry thresholds")
     enforced = common([c["selection"]["enforce_entry_contract"] for c in cfgs.values()], "entry enforcement")
+    selected_fraction = selected_strata_requirement(ctx)
     op = {key: gate_operator(ctx, key) for key in entry}
     criteria = {
         "nominal_graph_value": minus(f"U(Δ_plant) {op['plant_margin']} -{entry['plant_margin']:.3f} nats"),
         "depth_qualification": (f"PDD {op['pdd_max']} {100 * entry['pdd_max']:.1f} pp; "
                                 f"DIL gap {op['dil_gap_max']} {entry['dil_gap_max']:.3f}"),
-        "registry_support": f"ϕ_registry {op['registry_fraction_min']} {entry['registry_fraction_min']:.2f}",
+        "registry_support": (f"ϕ_registry {op['registry_fraction_min']} {entry['registry_fraction_min']:.2f}; "
+                             f"selected strata = {selected_fraction:.2f}"),
         "residual_headroom": minus(f"U(Δ_oracle) {op['headroom_margin']} -{entry['headroom_margin']:.3f} nats"),
     }
     action = ("feedback candidates made infeasible; strongest open-loop q_C retained" if enforced
@@ -495,21 +509,25 @@ def table_s3(ctx, out):
                ("depth_qualification", "PDD_pp"): 100 * entry["pdd_max"],
                ("depth_qualification", "DIL_gap_nats"): entry["dil_gap_max"],
                ("registry_support", "phi_registry_min"): entry["registry_fraction_min"],
-               ("registry_support", "selected_strata"): None,
+               ("registry_support", "selected_strata"): selected_fraction,
                ("residual_headroom", "epsilon_headroom_nats"): entry["headroom_margin"]}
     for path, value in numbers.items():
         out.compare(S3_GROUP, path, value,
-                    note="no runtime check" if path[1] == "selected_strata" else "")
+                    note="prospective A0-support gate under Table S35 convention C28"
+                    if path[1] == "selected_strata" else "")
     for gate in criteria:
         out.compare(S3_GROUP, (gate, "failure_action"), action)
     out.uses("configuration", "configs/*_full.json", ["entry", "selection.enforce_entry_contract"])
     out.uses("code", "cross_morse", ["training.py:audit_training", "pipeline.py:entry_completion",
-                                     "pipeline.py:_stage_select"])
+                                     "pipeline.py:_stage_select", "qualification.py:selected_strata_support",
+                                     "qualification.py:SELECTED_STRATA_FRACTION"])
     out.table(["Gate", "operational quantity", "prespecified criterion", "failure action"], rows,
               notes=["Thresholds: entry section of configs/<dataset>_full.json (identical for all seven); comparison "
                      "operators as executed by cross_morse/training.py and cross_morse/pipeline.py.",
-                     "The runtime gate checks ϕ_registry only; a selected-strata criterion has no runtime check "
-                     "(cm_theory/contract.py evaluates it on printed rows).",
+                     "Selected-strata support follows Table S35 convention C28: A0 must be qualified in every "
+                     "registered stratum of the full-profile D_explore model-fit support audit. Empty strata or "
+                     "missing A0 cells fail. New runs record the versioned gate in select/entry_complete.json; "
+                     "older source-bound entry records do not demonstrate enforcement of this added gate.",
                      "Failure action: with selection.enforce_entry_contract, any failed gate makes every feedback "
                      "candidate infeasible before selection (cross_morse/pipeline.py, _stage_select)."])
     out.data("thresholds", ["gate", "key", "operator", "value"],
@@ -518,7 +536,8 @@ def table_s3(ctx, out):
                                                 ("depth_qualification", "dil_gap_max", entry["dil_gap_max"]),
                                                 ("registry_support", "registry_fraction_min",
                                                  entry["registry_fraction_min"]),
-                                                ("residual_headroom", "headroom_margin", entry["headroom_margin"]))])
+                                                ("residual_headroom", "headroom_margin", entry["headroom_margin"]))]
+             + [["registry_support", "selected_strata_fraction", "=", selected_fraction]])
 
 
 # ---------------------------------------------------------------------------
