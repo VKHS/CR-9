@@ -6799,6 +6799,794 @@
         "method": "AI-assisted review of the SHA-256 identified PDFs: rendered pages with colour-threshold pixel measurement of panel c, and main Tables 1-2",
         "scope": "Independent source-bound figure contract; panels a-b are structural illustration targets and panel c requires the original lifecycle runs. No new benchmark measurements or author certification."
       }
+    },
+    "supplementary_figure_S6_cost_model_truncation_order": {
+      "display_id": "supplementary:Figure S6",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          32
+        ]
+      },
+      "values": {
+        "model": {
+          "sensing_share_s": {
+            "$value": 0.06,
+            "$decimals": 2
+          }
+        },
+        "panel_a": {
+          "resolvent_step_share_percent": {
+            "$value": 50,
+            "$decimals": 0
+          },
+          "truncation_order_domain": [
+            1,
+            64
+          ],
+          "curves": {
+            "ogbn-arxiv": {
+              "T1": {
+                "$value": 1.059203657,
+                "$decimals": 6
+              },
+              "T8": {
+                "$value": 1.10565702,
+                "$decimals": 6
+              },
+              "T64": {
+                "$value": 1.477283928,
+                "$decimals": 6
+              }
+            },
+            "ogbn-proteins": {
+              "T1": {
+                "$value": 1.037902581,
+                "$decimals": 6
+              },
+              "T8": {
+                "$value": 2.326918679,
+                "$decimals": 6
+              },
+              "T64": {
+                "$value": 12.639047466,
+                "$decimals": 6
+              }
+            },
+            "Roman-empire": {
+              "T1": {
+                "$value": 1.059773831,
+                "$decimals": 6
+              },
+              "T8": {
+                "$value": 1.072967044,
+                "$decimals": 6
+              },
+              "T64": {
+                "$value": 1.178512751,
+                "$decimals": 6
+              }
+            },
+            "PascalVOC-SP": {
+              "T1": {
+                "$value": 1.057461847,
+                "$decimals": 6
+              },
+              "T8": {
+                "$value": 1.205520769,
+                "$decimals": 6
+              },
+              "T64": {
+                "$value": 2.389992147,
+                "$decimals": 6
+              }
+            },
+            "COCO-SP": {
+              "T1": {
+                "$value": 1.057464157,
+                "$decimals": 6
+              },
+              "T8": {
+                "$value": 1.205388329,
+                "$decimals": 6
+              },
+              "T64": {
+                "$value": 2.3887817,
+                "$decimals": 6
+              }
+            },
+            "Peptides-func": {
+              "T1": {
+                "$value": 1.059060609,
+                "$decimals": 6
+              },
+              "T8": {
+                "$value": 1.113858389,
+                "$decimals": 6
+              },
+              "T64": {
+                "$value": 1.552240628,
+                "$decimals": 6
+              }
+            }
+          },
+          "measured_multipliers": {
+            "ogbn-arxiv": {
+              "$value": 1.175,
+              "$decimals": 3
+            },
+            "ogbn-proteins": {
+              "$value": 1.2,
+              "$decimals": 3
+            },
+            "Roman-empire": {
+              "$value": 1.35,
+              "$decimals": 3
+            },
+            "PascalVOC-SP": {
+              "$value": 1.3125,
+              "$decimals": 3
+            },
+            "COCO-SP": {
+              "$value": 1.35,
+              "$decimals": 3
+            },
+            "Peptides-func": {
+              "$value": 1.225,
+              "$decimals": 3
+            }
+          }
+        },
+        "panel_b": {
+          "resolvent_step_shares_percent": [
+            {
+              "$value": 25,
+              "$decimals": 0
+            },
+            {
+              "$value": 50,
+              "$decimals": 0
+            }
+          ],
+          "registered_T_line": 8,
+          "bars": {
+            "ogbn-arxiv": {
+              "25": {
+                "bar_height_T": {
+                  "$value": 35.898416076,
+                  "$decimals": 0
+                },
+                "label": "36"
+              },
+              "50": {
+                "bar_height_T": {
+                  "$value": 18.449208038,
+                  "$decimals": 1
+                },
+                "label": "18"
+              }
+            },
+            "ogbn-proteins": {
+              "25": {
+                "bar_height_T": {
+                  "$value": 2.760539583,
+                  "$decimals": 2
+                },
+                "label": "3"
+              },
+              "50": {
+                "bar_height_T": {
+                  "$value": 1.880269791,
+                  "$decimals": 2
+                },
+                "label": "2"
+              }
+            },
+            "Roman-empire": {
+              "25": {
+                "bar_height_T": {
+                  "$value": 64,
+                  "$decimals": 6
+                },
+                "label": ">64"
+              },
+              "50": {
+                "bar_height_T": {
+                  "$value": 64,
+                  "$decimals": 6
+                },
+                "label": ">64"
+              }
+            },
+            "PascalVOC-SP": {
+              "25": {
+                "bar_height_T": {
+                  "$value": 25.115629704,
+                  "$decimals": 1
+                },
+                "label": "25"
+              },
+              "50": {
+                "bar_height_T": {
+                  "$value": 13.057814852,
+                  "$decimals": 1
+                },
+                "label": "13"
+              }
+            },
+            "COCO-SP": {
+              "25": {
+                "bar_height_T": {
+                  "$value": 28.686494782,
+                  "$decimals": 1
+                },
+                "label": "29"
+              },
+              "50": {
+                "bar_height_T": {
+                  "$value": 14.843247391,
+                  "$decimals": 1
+                },
+                "label": "15"
+              }
+            },
+            "Peptides-func": {
+              "25": {
+                "bar_height_T": {
+                  "$value": 43.394992515,
+                  "$decimals": 0
+                },
+                "label": "43"
+              },
+              "50": {
+                "bar_height_T": {
+                  "$value": 22.197496258,
+                  "$decimals": 1
+                },
+                "label": "22"
+              }
+            }
+          }
+        },
+        "panel_c": {
+          "dataset": "ogbn-proteins",
+          "registered_reduced_sensor": {
+            "sketch_width_k": 32,
+            "sensing_period_P_s": 4
+          },
+          "multiplier_m": {
+            "$value": 1.2,
+            "$decimals": 2
+          },
+          "registered_T_line": 8,
+          "f_res_bound_label": {
+            "$value": 0.063,
+            "$decimals": 3
+          },
+          "truncation_order_domain": [
+            2,
+            16
+          ],
+          "points": {
+            "2": {
+              "$value": 0.440134896,
+              "$decimals": 2
+            },
+            "3": {
+              "$value": 0.220067448,
+              "$decimals": 3
+            },
+            "4": {
+              "$value": 0.146711632,
+              "$decimals": 3
+            },
+            "5": {
+              "$value": 0.110033724,
+              "$decimals": 3
+            },
+            "6": {
+              "$value": 0.088026979,
+              "$decimals": 3
+            },
+            "7": {
+              "$value": 0.073355816,
+              "$decimals": 3
+            },
+            "8": {
+              "$value": 0.062876414,
+              "$decimals": 3
+            },
+            "9": {
+              "$value": 0.055016862,
+              "$decimals": 3
+            },
+            "10": {
+              "$value": 0.048903877,
+              "$decimals": 3
+            },
+            "11": {
+              "$value": 0.04401349,
+              "$decimals": 3
+            },
+            "12": {
+              "$value": 0.040012263,
+              "$decimals": 3
+            },
+            "13": {
+              "$value": 0.036677908,
+              "$decimals": 3
+            },
+            "14": {
+              "$value": 0.03385653,
+              "$decimals": 3
+            },
+            "15": {
+              "$value": 0.031438207,
+              "$decimals": 3
+            },
+            "16": {
+              "$value": 0.029342326,
+              "$decimals": 4
+            }
+          }
+        }
+      },
+      "supporting_sources": [
+        {
+          "document": "supplementary",
+          "pages": [
+            3
+          ],
+          "label": "Table S5 hidden width d"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            4,
+            5
+          ],
+          "label": "Table S6 registered truncation order T = 8; Table S6c and the proteins identity (f_res <= 0.063 at s = 0.06)"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            16
+          ],
+          "label": "Table S23 controller and comparator costs"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            20
+          ],
+          "label": "Note S19 FLOP model, s = 0.06, f_res = 0.5 and the admitted orders"
+        }
+      ],
+      "evidence_kind": "analytical Note S19 cost-model coordinates at declared dataset statistics, evaluated at the observed per-member multipliers of Table S23",
+      "note": "Every printed element is enumerated. Panel a: the six 50%-resolvent-step multiplier curves at the domain start T = 1, the registered T = 8 and the domain end T = 64, the six dotted measured multipliers and the 50% annotation. Panel b: all twelve admissible-order bars (six admitted datasets at 25% and 50% resolvent steps), their twelve printed labels, both share levels and the registered T = 8 line. Panel c: all fifteen printed ogbn-proteins markers T = 2..16, their domain, the registered T = 8 line, the printed bound label f_res <= 0.063, the title multiplier m = 1.20, the dataset and the caption's reduced sensor (k = 32, P_s = 4), compared with the registered proteins configuration. The sensing share s = 0.06 is shared by all panels; it is the declared residual share of that sensor and is not derived from (k, P_s) here (Note S19's s_sense = 8 r (k/d)/P_s would give 0.073 for it). Coordinates are independent evaluations of the Note S19 identities (formulas) at the source inputs; they are not copied from a display build. The printed labels and Note S19's admitted orders require the unrounded r = E/(N d): the three-decimal r of Note S19 and Table S6c would give 37 and 19 for arxiv instead of the printed 36 and 18, so the rounded r is a comparison of Table S6c only, never an input here. The bar labels are the nearest integer of the real bound, whereas Note S19 quotes integer parts of the admitted orders and one decimal below 2 (COCO at 50%: 14.84 is printed 15 in the figure and 'T <= 14' in Note S19; proteins at 50%: 1.88 is printed 2 in the figure and 'T <= 1.9' in Note S19). A bound above the axis is drawn at T = 64 and labelled >64; the Roman-empire bounds (309.0 at 25% and 155.0 at 50% with these statistics) are not displayed and are not targets. In the printed panel b the two rotated labels of each pair sit at their own bar's height but are horizontally interchanged; the label-to-bar association follows the label heights and agrees with the formula. Panel c's 0.063 is the analytical model bound at the registered order; the executed resolvent fraction (f_res column of Table S6c, 0.061 on proteins) and the executed sensor settings are observations that the figure does not plot and are not targets. The vector geometry of the printed panels agrees with these coordinates (curves within about 1e-4 decade, markers within 1e-4, bars drawn at the bounds rounded to 0.1); it served only as a cross-check. Axis tick labels (1, 3.16 and 10 on panel a's logarithmic axis) and axis ranges are presentation, not targets. ogbn-products is not drawn: it returns q_C and has no deployed multiplier.",
+      "formulas": {
+        "r": "E / (N d)",
+        "m": "C_ctrl / C_qC (Table S23)",
+        "panel_a": "m(T) = (1 + r + s + f r (T - 1)) / (1 + r) at f = 0.5, evaluated at T = 1, 8 and 64",
+        "panel_b": "T_adm(f) = 1 + [m (1 + r) - (1 + r + s)] / (f r) at f = 0.25 and 0.5; bar height min(T_adm, 64); label the nearest integer of T_adm, or >64 above the axis",
+        "panel_c": "f_res(T) = [m (1 + r) - (1 + r + s)] / (r (T - 1)) on ogbn-proteins at T = 2..16; the label rounds f_res(8) to three decimals"
+      },
+      "source_inputs": {
+        "datasets": {
+          "ogbn-arxiv": {
+            "N": 169343,
+            "E": 1166243,
+            "d": 512,
+            "C_ctrl": 4.7,
+            "C_qC": 4.0
+          },
+          "ogbn-proteins": {
+            "N": 132534,
+            "E": 39561252,
+            "d": 512,
+            "C_ctrl": 4.8,
+            "C_qC": 4.0
+          },
+          "Roman-empire": {
+            "N": 22662,
+            "E": 32927,
+            "d": 384,
+            "C_ctrl": 5.4,
+            "C_qC": 4.0
+          },
+          "PascalVOC-SP": {
+            "N": 479.4,
+            "E": 2710.48,
+            "d": 128,
+            "C_ctrl": 10.5,
+            "C_qC": 8.0
+          },
+          "COCO-SP": {
+            "N": 476.88,
+            "E": 2693.67,
+            "d": 128,
+            "C_ctrl": 10.8,
+            "C_qC": 8.0
+          },
+          "Peptides-func": {
+            "N": 150.94,
+            "E": 307.3,
+            "d": 128,
+            "C_ctrl": 4.9,
+            "C_qC": 4.0
+          }
+        },
+        "sensing_share_s": 0.06,
+        "resolvent_step_shares": [
+          0.25,
+          0.5
+        ],
+        "panel_a_resolvent_step_share": 0.5,
+        "registered_truncation_order_T": 8,
+        "truncation_axis_T": 64,
+        "panel_a_anchor_orders": [
+          1,
+          8,
+          64
+        ],
+        "panel_c_orders": [
+          2,
+          16
+        ],
+        "panel_c_reduced_sensor": {
+          "k": 32,
+          "P_s": 4
+        },
+        "provenance": {
+          "N_E": "provider dataset statistics (OGB node-property table; heterophilous-graphs dataset table; LRGB statistics table) as registered in paper/registered_constants.json (dataset_statistics_table_S6c_S23b) and verified for supplementary_figure_S10_sensing_cost; each provider's reported edge convention",
+          "d": "Supplementary Table S5 hidden width (SI p. 3)",
+          "C_ctrl_C_qC": "Supplementary Table S23 (SI p. 16), printed to three decimals",
+          "s_and_f": "Note S19 (SI p. 20) 'With s = 0.06 and f_res = 0.5'; Figure S6 caption, panel-a annotation, panel-b legend and panel-c annotation",
+          "T": "Table S6 (SI p. 4) registered truncation order; 'registered T = 8' in panels b and c",
+          "domains": "panel a: printed curves start at T = 1 (the model's smallest order) and end at the axis limit T = 64, the largest order shown (panel b '>64', Note S19 'T > 64'); panel c: the fifteen printed markers at T = 2..16",
+          "reduced_sensor": "Figure S6 caption 'reduced sensor (k = 32, P_s = 4)'; SI p. 5 sensing configuration '(k, P_s) = (32, 4) on proteins'; compared with the registered configs/proteins_full.json"
+        }
+      },
+      "precision": {
+        "deterministic": "Six decimals for coordinates that depend only on the declared statistics, s, f and T (panel a curves).",
+        "cost_dependent": "Per target, the tightest printed-decimal tolerance 0.5*10^-d that covers the largest shift over the rounding box of the two three-decimal S23 costs (each +-0.0005). Panel b bars: shifts 0.0015-0.082, so d = 0 for arxiv and Peptides at 25%, d = 2 for proteins and d = 1 otherwise; panel c markers: shift 0.000747/(T - 1), so d = 2 at T = 2, d = 3 for T = 3..15 and d = 4 at T = 16; dotted multipliers: d = 3 (shift <= 0.00028), stored as C_ctrl/C_qC (Pascal 1.3125).",
+        "printed": "Labels compare as printed text; annotations at their printed decimals (s = 0.06, m = 1.20, f_res <= 0.063, 25% and 50%); integer orders, domains and sensor settings as integers."
+      },
+      "review": {
+        "date": "2026-11-08",
+        "method": "AI-assisted, source-bound: supplementary p. 32 rendered at 400 dpi, its text layer and its vector or embedded-image content inspected; every coordinate re-evaluated with the standard library from hand-typed printed inputs; no display-generator output was read or used as a reference."
+      }
+    },
+    "supplementary_figure_S7_acquisition_gate": {
+      "display_id": "supplementary:Figure S7",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          32
+        ]
+      },
+      "values": {
+        "panel_a": {
+          "boundary_slope": {
+            "$value": 2.0,
+            "$decimals": 6
+          },
+          "radius_domain": [
+            {
+              "$value": 0.0,
+              "$decimals": 6
+            },
+            {
+              "$value": 1.0,
+              "$decimals": 6
+            }
+          ],
+          "boundary_gap_at_domain_ends": [
+            {
+              "$value": 0.0,
+              "$decimals": 6
+            },
+            {
+              "$value": 2.0,
+              "$decimals": 6
+            }
+          ],
+          "x_axis": "predicted-state region radius r_ℓ (units of 1/L_J)",
+          "y_axis": "action-score gap m_ℓ/L_J",
+          "regions": {
+            "retain": {
+              "label": "retain the action (support, mode and search procedure invariant on the region)",
+              "side": "above"
+            },
+            "acquire": {
+              "label": "acquire a sensor profile and replan, or reserve q_C",
+              "side": "below"
+            }
+          }
+        },
+        "panel_b": {
+          "x_axis": "action-score gap (mnats)",
+          "y_axis": "density per log-gap",
+          "p5_standard_normal_quantile": {
+            "$value": 1.644853627,
+            "$decimals": 6
+          },
+          "threshold_tau_mnats": {
+            "$value": 2.0,
+            "$decimals": 6
+          },
+          "threshold_label": "τ",
+          "gap_domain_mnats": [
+            {
+              "$value": 0.05,
+              "$decimals": 6
+            },
+            {
+              "$value": 50.0,
+              "$decimals": 6
+            }
+          ],
+          "curves": {
+            "ogbn-arxiv": {
+              "median_mnats": {
+                "$value": 6.2,
+                "$decimals": 1
+              },
+              "p5_mnats": {
+                "$value": 1.1,
+                "$decimals": 1
+              },
+              "legend_label": "arxiv: median 6.2, p5 1.1",
+              "mu_log_nats": {
+                "$value": -5.083205987,
+                "$decimals": 1
+              },
+              "sigma_log": {
+                "$value": 1.051302732,
+                "$decimals": 1
+              },
+              "density_at_median": {
+                "$value": 0.379474216,
+                "$decimals": 1
+              },
+              "density_at_tau": {
+                "$value": 0.212659768,
+                "$decimals": 2
+              }
+            },
+            "ogbn-proteins": {
+              "median_mnats": {
+                "$value": 5.7,
+                "$decimals": 1
+              },
+              "p5_mnats": {
+                "$value": 1.0,
+                "$decimals": 1
+              },
+              "legend_label": "proteins: median 5.7, p5 1.0",
+              "mu_log_nats": {
+                "$value": -5.167289104,
+                "$decimals": 1
+              },
+              "sigma_log": {
+                "$value": 1.058128302,
+                "$decimals": 1
+              },
+              "density_at_median": {
+                "$value": 0.377026377,
+                "$decimals": 1
+              },
+              "density_at_tau": {
+                "$value": 0.231014036,
+                "$decimals": 2
+              }
+            },
+            "Roman-empire": {
+              "median_mnats": {
+                "$value": 4.9,
+                "$decimals": 1
+              },
+              "p5_mnats": {
+                "$value": 0.8,
+                "$decimals": 1
+              },
+              "legend_label": "Roman: median 4.9, p5 0.8",
+              "mu_log_nats": {
+                "$value": -5.318520074,
+                "$decimals": 1
+              },
+              "sigma_log": {
+                "$value": 1.101848047,
+                "$decimals": 1
+              },
+              "density_at_median": {
+                "$value": 0.362066513,
+                "$decimals": 1
+              },
+              "density_at_tau": {
+                "$value": 0.260117304,
+                "$decimals": 1
+              }
+            },
+            "PascalVOC-SP": {
+              "median_mnats": {
+                "$value": 5.4,
+                "$decimals": 1
+              },
+              "p5_mnats": {
+                "$value": 0.9,
+                "$decimals": 1
+              },
+              "legend_label": "Pascal: median 5.4, p5 0.9",
+              "mu_log_nats": {
+                "$value": -5.221356325,
+                "$decimals": 1
+              },
+              "sigma_log": {
+                "$value": 1.08931241,
+                "$decimals": 1
+              },
+              "density_at_median": {
+                "$value": 0.366233118,
+                "$decimals": 1
+              },
+              "density_at_tau": {
+                "$value": 0.241668379,
+                "$decimals": 2
+              }
+            },
+            "COCO-SP": {
+              "median_mnats": {
+                "$value": 5.6,
+                "$decimals": 1
+              },
+              "p5_mnats": {
+                "$value": 1.0,
+                "$decimals": 1
+              },
+              "legend_label": "COCO: median 5.6, p5 1.0",
+              "mu_log_nats": {
+                "$value": -5.184988681,
+                "$decimals": 1
+              },
+              "sigma_log": {
+                "$value": 1.047367723,
+                "$decimals": 1
+              },
+              "density_at_median": {
+                "$value": 0.380899919,
+                "$decimals": 1
+              },
+              "density_at_tau": {
+                "$value": 0.234942009,
+                "$decimals": 2
+              }
+            },
+            "Peptides-func": {
+              "median_mnats": {
+                "$value": 3.6,
+                "$decimals": 1
+              },
+              "p5_mnats": {
+                "$value": 0.5,
+                "$decimals": 1
+              },
+              "legend_label": "Peptides: median 3.6, p5 0.5",
+              "mu_log_nats": {
+                "$value": -5.626821434,
+                "$decimals": 1
+              },
+              "sigma_log": {
+                "$value": 1.200156047,
+                "$decimals": 0
+              },
+              "density_at_median": {
+                "$value": 0.332408674,
+                "$decimals": 1
+              },
+              "density_at_tau": {
+                "$value": 0.29484018,
+                "$decimals": 1
+              }
+            }
+          }
+        }
+      },
+      "supporting_sources": [
+        {
+          "document": "main",
+          "pages": [
+            8
+          ],
+          "label": "Proposition 9: retain when the gap exceeds 2 L_J r_ℓ"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            15,
+            16
+          ],
+          "label": "Table S21 median and 5th-percentile action gaps"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            21
+          ],
+          "label": "Table S32 registered certificate threshold tau = 0.002; Table S34 log-normal gap model"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            28
+          ],
+          "label": "Note S23 invariance conditions of the certificate"
+        }
+      ],
+      "evidence_kind": "analytical certificate illustration and explicit log-normal gap model at the printed Table S21 quantiles",
+      "note": "Panel a, the conditional-region illustration of Proposition 9, is enumerated as the boundary m_ℓ/L_J = 2 r_ℓ (slope 2 through the origin) on the printed radius domain [0, 1] with its end values 0 and 2, both axis quantities, and the two region labels with their side of the boundary (retain above, acquire below); the 2.2 top of the plotted window is a presentation limit, not a target. Panel b is enumerated for each of the six admitted datasets as the legend median and 5th-percentile gaps (Table S21, in mnats), the legend text, the fitted log-normal parameters mu = ln(median) and sigma = (ln median - ln p5)/z_0.95, and the plotted density at the median (the peak) and at the threshold; shared targets are z_0.95, the registered threshold tau = 0.002 nats (Table S32) = 2 mnats with its label, the printed gap domain and both axis quantities. The density is an explicit model per unit natural-log gap ('density per log-gap'): g(x) = exp(-(ln x - mu)^2/(2 sigma^2))/(sigma sqrt(2 pi)), whose peak 1/(sigma sqrt(2 pi)) lies at the median and which does not depend on the gap unit; it is not a recovered empirical histogram, and no empirical gap distribution is a target. The domain 0.05-50 mnats is the printed extent of every curve (both ends lie on the 5e-2 and 5e1 minor ticks of the labelled logarithmic axis, whose limits are the default 5% logarithmic margins around exactly this range); the renderer's sampling inside it is not a target. Table S34's skip and retained fractions are not plotted and are not targets. The rendered raster agrees with the model at the printed quantiles (peak heights of the separable curves within 0.0003, boundary slope 2.00, threshold at 2.0 mnats); it served only as a cross-check.",
+      "formulas": {
+        "panel_a": "retain without acquisition when m_ℓ > 2 L_J r_ℓ (Proposition 9); in the plotted units m_ℓ/L_J = 2 r_ℓ for r_ℓ in [0, 1]",
+        "mu": "ln(median gap in nats)",
+        "sigma": "(ln median - ln p5) / z_0.95, z_0.95 = Phi^-1(0.95)",
+        "density": "g(x) = exp(-(ln x - mu)^2 / (2 sigma^2)) / (sigma sqrt(2 pi)) per unit natural-log gap",
+        "anchors": "g at the dataset's median (= 1/(sigma sqrt(2 pi))) and at tau = 2 mnats"
+      },
+      "source_inputs": {
+        "action_gap_quantiles_mnats": {
+          "ogbn-arxiv": {
+            "median_gap_mnats": 6.2,
+            "p5_gap_mnats": 1.1
+          },
+          "ogbn-proteins": {
+            "median_gap_mnats": 5.7,
+            "p5_gap_mnats": 1.0
+          },
+          "Roman-empire": {
+            "median_gap_mnats": 4.9,
+            "p5_gap_mnats": 0.8
+          },
+          "PascalVOC-SP": {
+            "median_gap_mnats": 5.4,
+            "p5_gap_mnats": 0.9
+          },
+          "COCO-SP": {
+            "median_gap_mnats": 5.6,
+            "p5_gap_mnats": 1.0
+          },
+          "Peptides-func": {
+            "median_gap_mnats": 3.6,
+            "p5_gap_mnats": 0.5
+          }
+        },
+        "quantile_level_of_p5": 0.05,
+        "z_0.95": 1.6448536269514722,
+        "tau_nats": 0.002,
+        "gap_domain_mnats": [
+          0.05,
+          50
+        ],
+        "boundary_slope": 2,
+        "radius_domain": [
+          0,
+          1
+        ],
+        "provenance": {
+          "quantiles": "Table S21 (SI pp. 15-16) and the Figure S7b legend, one decimal in mnats",
+          "tau": "Table S32 (SI p. 21) 'certificate of main Proposition 9 with tau = 0.002'; the dashed line marked tau in panel b",
+          "boundary": "Proposition 9 (main p. 8) and the Figure S7 caption 'exceeds 2 L_J r_ℓ'; labelled ticks 0.0-1.0 and 0.00-2.00 of panel a",
+          "domain": "printed curve extent of panel b against its logarithmic axis"
+        }
+      },
+      "precision": {
+        "exact": "Six decimals for the slope, the domains, z_0.95 and tau.",
+        "quantile_dependent": "The printed quantiles carry one decimal in mnats (+-0.05 mnats). Each fitted coordinate uses the tightest printed-decimal tolerance 0.5*10^-d covering its largest shift over that rounding box: mu <= 0.014 (d = 1); sigma <= 0.046 (d = 1) except Peptides, whose one-significant-digit p5 = 0.5 mnats shifts it by up to 0.072 (d = 0); density at the median <= 0.020 (d = 1); density at tau <= 0.0035 (d = 2) for arxiv, proteins, Pascal and COCO, 0.0056 and 0.015 for Roman and Peptides (d = 1).",
+        "printed": "Legend medians and p5 at one decimal; legend, axis and region texts compare as printed text (subscripts written as q_C, r_ℓ, m_ℓ and L_J)."
+      },
+      "review": {
+        "date": "2026-11-08",
+        "method": "AI-assisted, source-bound: supplementary p. 32 rendered at 400 dpi, its text layer and its vector or embedded-image content inspected; every coordinate re-evaluated with the standard library from hand-typed printed inputs; no display-generator output was read or used as a reference."
+      }
     }
   }
 }
