@@ -76,23 +76,15 @@ FIGURE_WORK = {
                       "mechanism-contrast families, within-depth action entropies and action-origin fractions of the original records"),
     "main:Figure 4": ("original plotted data; reference work",
                       "panel 4b feedback risk and work by ensemble size from the original selection arrays; other panels from S16, S15, S23 and S41"),
-    "main:Figure 5": ("reference work", "all four panels from S15, Tables 1-2, S23/S23b/S41 and Definition 2"),
     "main:Figure 6": ("scenario clarification", "the declared settings of the decoding-cost scenario of S47"),
     "supplementary:Figure S2": ("original plotted data", "per-instance processed edges, wall time and peak memory of runtime_scaling"),
     "supplementary:Figure S3": ("original plotted data", "the complete comparator-grid losses of the ensemble grid"),
     "supplementary:Figure S4": ("original plotted data; scope clarification",
                                 "scores and provenance of GRAMA/arxiv, AMP/Roman and AMP/Pascal outside the fourteen E12 pairs"),
-    "supplementary:Figure S6": ("reference work", "curve families, 25%/50% scenarios, markers and the T=8 boundary"),
-    "supplementary:Figure S7": ("reference work", "conditional-region illustration and fitted log-gap density parameters"),
-    "supplementary:Figure S9": ("reference work", "the original/rescaled interval family of S14/S14b, margins and printed P inequalities"),
-    "supplementary:Figure S12": ("reference work", "six power curves, central margins and seed-design assumptions of S42 and Note S24"),
-    "supplementary:Figure S13": ("reference work", "panel c effects and intervals of Table 1; structural panels a-b"),
     "supplementary:Figure S14": ("original plotted data", "depth curves, effects by depth, quartiles and phase allocations of depth_diagnostics"),
-    "supplementary:Figure S15": ("reference work", "action curves, sensitivity matrix, reach quantities and headroom bars of S4/S6/S6b"),
     "supplementary:Figure S16": ("original plotted data", "horizon coverage, NIS coverage and false-safe/harm-miss rates of the reliability records"),
     "supplementary:Figure S17": ("original plotted data; scenario clarification", "the held-out critic-RMSE band endpoints"),
     "supplementary:Figure S18": ("scenario clarification; original analytical grid", "the nominal baseline and density-scale grid of panel c"),
-    "supplementary:Figure S20": ("reference work", "break-even families, action-bound functions, variance ratios and power curves"),
 }
 
 

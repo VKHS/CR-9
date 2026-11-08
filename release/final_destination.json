@@ -2021,28 +2021,20 @@
   "tables": 64,
   "table_targets": 3340,
   "quantitative_figures": 25,
-  "figures_with_contracts": 6,
-  "figure_targets": 407,
+  "figures_with_contracts": 14,
+  "figure_targets": 1642,
   "figures_to_register": {
    "main:Figure 2": "scenario clarification; original plotted data",
    "main:Figure 3": "original plotted data",
    "main:Figure 4": "original plotted data; reference work",
-   "main:Figure 5": "reference work",
    "main:Figure 6": "scenario clarification",
    "supplementary:Figure S2": "original plotted data",
    "supplementary:Figure S3": "original plotted data",
    "supplementary:Figure S4": "original plotted data; scope clarification",
-   "supplementary:Figure S6": "reference work",
-   "supplementary:Figure S7": "reference work",
-   "supplementary:Figure S9": "reference work",
-   "supplementary:Figure S12": "reference work",
-   "supplementary:Figure S13": "reference work",
    "supplementary:Figure S14": "original plotted data",
-   "supplementary:Figure S15": "reference work",
    "supplementary:Figure S16": "original plotted data",
    "supplementary:Figure S17": "original plotted data; scenario clarification",
-   "supplementary:Figure S18": "scenario clarification; original analytical grid",
-   "supplementary:Figure S20": "reference work"
+   "supplementary:Figure S18": "scenario clarification; original analytical grid"
   }
  },
  "destination": {

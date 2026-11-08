@@ -14,6 +14,7 @@ Questions on which the printed methods or printed values and the released code (
 | K6 | Failure responses of the target-regime gates (Table S3) | Awaiting original records | train/entry_initial.json and select/entry_complete.json of every original run |
 | K7 | Table S20 \|Q\|: the feasible family, not the registry | Resolved | nothing further: the definition is fixed by Algorithm S4 |
 | K8 | Literal wording and representation differences of the protocol displays | Needs an author declaration | the author's choice of wording for each cell (manuscript or generator) |
+| K9 | Manuscript corrections found while registering the figure contracts | Needs an author declaration | the author's correction of the manuscript |
 
 On the cluster, after the seven lifecycles have run:
 
@@ -110,6 +111,20 @@ Each check reports `consistent`, `needs correction` (the rule names what changes
 - **Code now:** Unchanged: literal comparisons are retained; none is rewritten to force equality.
 - **Decided by:** the author's choice of wording for each cell (manuscript or generator)
 - **Rule:** Each remaining difference is listed in paper/source_data/compare/ after make paper; the manuscript cell or the generator wording is aligned by the author.
+
+## K9. Manuscript corrections found while registering the figure contracts
+
+**Displays:** supplementary:Figure S6, supplementary:Figure S7, supplementary:Figure S8, supplementary:Figure S13, supplementary:Figure S20, supplementary:Table S21. **Status:** Needs an author declaration.
+
+- **Printed** (supplementary, p. 32): Figure S6c and Note S19 declare the sensing share s = 0.06 for the reduced ogbn-proteins sensor (k = 32, P_s = 4), whose own Note S19 cost 8r(k/d)/P_s is 0.073; with s >= 0.073 the T = 8 bound would be f_res <= 0.060, below the executed 0.061 of Table S6c.
+- **Printed** (supplementary, p. 32): Figure S6b prints each bar pair's labels over the other bar (e.g. 36 above the 50% bar), and labels COCO at 50% with 15 where Note S19 states T <= 14 (14.84 rounded against its integer part).
+- **Printed** (supplementary, p. 32, 15): The Figure S7b legend prints the ogbn-proteins and COCO-SP fifth-percentile gaps as 1.0 mnats where Table S21 prints 0.001 nats.
+- **Printed** (supplementary, p. 32, 34): The captions of Figure S8 and the title of Figure S13c refer to Table 2 for the paired test intervals, which main Table 1 prints.
+- **Printed** (supplementary, p. 38): On the printed page of Figure S20a a white overlay covers the E = 4 legend entry and the Roman-empire filled marker and label, which the embedded figure image contains.
+- **Code before:** Not applicable: these are differences inside the manuscript.
+- **Code now:** The figure contracts follow the printed values and record each difference in their group notes (paper/printed_display_values.json).
+- **Decided by:** the author's correction of the manuscript
+- **Rule:** Correct each item in the manuscript source and regenerate the PDFs; then register the new PDF identities (paper/sources.json) and re-register the affected contract values from the corrected pages, so that the comparison targets stay the printed values.
 
 Generated from `paper/consistency_ledger.json` by `scripts/consistency_audit.py --write`; `make consistency-check` verifies it is current.
 

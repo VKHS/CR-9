@@ -17,11 +17,26 @@
   question between the printed methods or values and the code: the studentized-maximum family (K1), the
   Peptides-func confirmation at Holm P = 0.070 (K2), the complete-ledger selection on Roman-empire,
   PascalVOC-SP and COCO-SP (K3), the Table S2 seed hierarchy (K4), the budget-comparison settings (K5), the
-  Table S3 failure responses (K6), Table S20 |Q| (K7, resolved) and the literal protocol-table differences
-  (K8), each with the original record and the rule that decides it. `make consistency-audit RUNS_ROOT=<runs>`
+  Table S3 failure responses (K6), Table S20 |Q| (K7, resolved), the literal protocol-table differences (K8)
+  and the manuscript corrections found in the figure contracts (K9), each with the original record and the rule that decides it. `make consistency-audit RUNS_ROOT=<runs>`
   (`scripts/consistency_audit.py`) evaluates K1, K2, K3, K4 and K6 on completed runs; on the bundled runs it
   finds that their selections used every executed configuration, as sealed. No reference value is changed.
-FIGURE_CONTRACTS_BULLET
+- Eight more quantitative figures carry complete, independently reviewed printed-value contracts: main Figure 5
+  (268 targets) and supplementary Figures S6 (78), S7 (60), S9 (97), S12 (128), S13 (83), S15 (211) and S20
+  (310), 1,235 targets in all, from the printed tables, captions and formulas evaluated in scratch code that
+  imports no repository module. Each generator compares every target, and omission and perturbation tests guard
+  each panel (`tests/test_figure_contracts_*.py`). Fourteen of the 25 quantitative figures now have contracts; the
+  other eleven need original plotted data or a scenario declaration (`docs/FIGURE_REFERENCE_COVERAGE.md`).
+  Figure 5 declares the `timing_anchors` record set it reads; the S9 margin ticks are drawn at the printed
+  positive margins (products ±0.002) with the signed thresholds kept in the source data; S13 and S7 use the printed
+  labels. Registering the contracts surfaced manuscript corrections (the Figure S6 sensing share, the S6b labels,
+  the S7b/S21 p5 units, the Table 2 references of S8 and S13c, an overlay hiding part of Figure S20a), now ledger
+  item K9.
+- `make independent-verification VERIFY_WORK=<new directory>` (`scripts/independent_verification.sh`) is the
+  acceptance test as a reviewer runs it: a fresh clone of the published repository at one revision, the complete
+  tier retrieved there, `make paper`, `make statement-fulfilled` and `make final-destination-converge`, never
+  reusing a local checkout or artifact cache. The final destination's close-out sequence runs it, after
+  `make consistency-audit`.
 - The destination's compliance page lists the consistency items, each decided at the destination by the
   original records or the author's declaration.
 

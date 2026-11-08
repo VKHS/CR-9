@@ -11,7 +11,7 @@ This page draws the repository as it will stand once the measured outputs of the
 | Registered statement (12 items) | 2 fulfilled, 10 awaiting measured outputs, 0 missing | **$\color{red}{\textsf{12 of 12 fulfilled}}$** ([destination/STATEMENT_COMPLIANCE.md](../destination/STATEMENT_COMPLIANCE.md)) |
 | Printed manuscript text (39 claims) | 29 fulfilled, 8 awaiting, 2 missing | $\color{red}{\textsf{35 of 39}}$ fulfilled with the current wording; $\color{red}{\textsf{39 of 39}}$ with route R (section E) |
 | Design-determined printed values (section A) | 64 agree, 7 measured within their design bound, 1 not printed | 0 conflicts |
-| Numbered displays rebuilt by `make paper` | 64 tables and 25 quantitative figures awaiting their artifacts; 3747 printed values registered as comparison targets | $\color{red}{\textsf{all 90 rebuilt, every compared value agrees}}$; $\color{red}{\textsf{19 figure contracts}}$ registered (section D) |
+| Numbered displays rebuilt by `make paper` | 64 tables and 25 quantitative figures awaiting their artifacts; 4982 printed values registered as comparison targets | $\color{red}{\textsf{all 90 rebuilt, every compared value agrees}}$; $\color{red}{\textsf{11 figure contracts}}$ registered (section D) |
 | Run archives (seven datasets; Roman ten splits) | awaiting | $\color{red}{\textsf{29 GB}}$ analysis tier, $\color{red}{\textsf{1.9 TB}}$ complete tier, $\color{red}{\textsf{969 release parts}}$ |
 
 ## A. Design forecast: printed values the released code fixes before any measurement
@@ -213,7 +213,7 @@ Each registered item is evaluated on the files of [`destination/`](../destinatio
 | one-command reconstruction of every reported table and figure | Awaiting measured outputs | $\color{red}{\textsf{Fulfilled}}$ | `make paper`: every display rebuilt and every compared value agrees |
 | follows established reproducibility guidance | Fulfilled | Fulfilled | fulfilled now |
 
-The one-command item needs every numbered display rebuilt and every compared value equal to the printed one. 3340 printed values of the 64 tables and 407 of 6 figures are registered comparison targets now; the other 19 quantitative figures receive their dedicated contracts before publication (original plotted data: 9, reference work: 9, scenario clarification: 4, scope clarification: 1, original analytical grid: 1; [the list with the input that closes each](../destination/STATEMENT_COMPLIANCE.md#every-reported-table-and-figure), [the plan](FIGURE_REFERENCE_COVERAGE.md)).
+The one-command item needs every numbered display rebuilt and every compared value equal to the printed one. 3340 printed values of the 64 tables and 1642 of 14 figures are registered comparison targets now; the other 11 quantitative figures receive their dedicated contracts before publication (original plotted data: 9, scenario clarification: 4, reference work: 1, scope clarification: 1, original analytical grid: 1; [the list with the input that closes each](../destination/STATEMENT_COMPLIANCE.md#every-reported-table-and-figure), [the plan](FIGURE_REFERENCE_COVERAGE.md)).
 
 | Printed claim | Now | Final destination | Note |
 |---|---|---|---|

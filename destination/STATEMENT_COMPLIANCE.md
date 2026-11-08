@@ -25,29 +25,21 @@ This page is the projection of `STATEMENT_COMPLIANCE.md` once the measured outpu
 
 ## Every reported table and figure
 
-`make paper` rebuilds 90 numbered displays. 3747 printed values are registered as comparison targets now; at the destination every one of them agrees, and the 19 quantitative figures below carry their own registered contracts as well:
+`make paper` rebuilds 90 numbered displays. 4982 printed values are registered as comparison targets now; at the destination every one of them agrees, and the 11 quantitative figures below carry their own registered contracts as well:
 
 | Figure | Work that closes the contract | Input |
 |---|---|---|
 | main:Figure 2 | scenario clarification; original plotted data | the reference-ESS scenario and candidate/stage population; raw P coordinates where S14 prints a bound |
 | main:Figure 3 | original plotted data | mechanism-contrast families, within-depth action entropies and action-origin fractions of the original records |
 | main:Figure 4 | original plotted data; reference work | panel 4b feedback risk and work by ensemble size from the original selection arrays; other panels from S16, S15, S23 and S41 |
-| main:Figure 5 | reference work | all four panels from S15, Tables 1-2, S23/S23b/S41 and Definition 2 |
 | main:Figure 6 | scenario clarification | the declared settings of the decoding-cost scenario of S47 |
 | supplementary:Figure S2 | original plotted data | per-instance processed edges, wall time and peak memory of runtime_scaling |
 | supplementary:Figure S3 | original plotted data | the complete comparator-grid losses of the ensemble grid |
 | supplementary:Figure S4 | original plotted data; scope clarification | scores and provenance of GRAMA/arxiv, AMP/Roman and AMP/Pascal outside the fourteen E12 pairs |
-| supplementary:Figure S6 | reference work | curve families, 25%/50% scenarios, markers and the T=8 boundary |
-| supplementary:Figure S7 | reference work | conditional-region illustration and fitted log-gap density parameters |
-| supplementary:Figure S9 | reference work | the original/rescaled interval family of S14/S14b, margins and printed P inequalities |
-| supplementary:Figure S12 | reference work | six power curves, central margins and seed-design assumptions of S42 and Note S24 |
-| supplementary:Figure S13 | reference work | panel c effects and intervals of Table 1; structural panels a-b |
 | supplementary:Figure S14 | original plotted data | depth curves, effects by depth, quartiles and phase allocations of depth_diagnostics |
-| supplementary:Figure S15 | reference work | action curves, sensitivity matrix, reach quantities and headroom bars of S4/S6/S6b |
 | supplementary:Figure S16 | original plotted data | horizon coverage, NIS coverage and false-safe/harm-miss rates of the reliability records |
 | supplementary:Figure S17 | original plotted data; scenario clarification | the held-out critic-RMSE band endpoints |
 | supplementary:Figure S18 | scenario clarification; original analytical grid | the nominal baseline and density-scale grid of panel c |
-| supplementary:Figure S20 | reference work | break-even families, action-bound functions, variance ratios and power curves |
 
 ## Scientific consistency
 
@@ -63,6 +55,7 @@ Each open question between the printed methods or values and the code is decided
 | K6 | Failure responses of the target-regime gates (Table S3) | awaiting original records | $\color{red}{\textsf{decided by the original records}}$ |
 | K7 | Table S20 \|Q\|: the feasible family, not the registry | resolved | resolved |
 | K8 | Literal wording and representation differences of the protocol displays | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
+| K9 | Manuscript corrections found while registering the figure contracts | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
 
 ## The printed availability text
 

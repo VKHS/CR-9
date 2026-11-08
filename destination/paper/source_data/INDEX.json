@@ -4,7 +4,7 @@
   "schema": "cross-morse-destination-1",
   "replaces": "paper/source_data/INDEX.json",
   "generated_by": "scripts/final_destination.py --write",
-  "about": "The source data of every numbered display after `make paper` has rebuilt them from the published artifacts: all 90 displays complete and every compared value equal to the printed one. `values_exact` counts the 3747 printed values registered now; the 19 figure contracts still to be registered add theirs.",
+  "about": "The source data of every numbered display after `make paper` has rebuilt them from the published artifacts: all 90 displays complete and every compared value equal to the printed one. `values_exact` counts the 4982 printed values registered now; the 11 figure contracts still to be registered add theirs.",
   "classes": {
    "exact": [
     "schema",
@@ -31,7 +31,7 @@
   "displays": 90,
   "complete": 90,
   "incomplete": [],
-  "values_exact": 3747,
+  "values_exact": 4982,
   "values_differ": 0,
   "values_not_comparable": 0,
   "values_no_reference": 0,
@@ -137,13 +137,12 @@
     "records:baselines",
     "records:input_gate",
     "records:nominal_time",
+    "records:timing_anchors",
     "runs"
    ],
-   "registered_targets": 0,
+   "registered_targets": 268,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "all four panels from S15, Tables 1-2, S23/S23b/S41 and Definition 2"
+    "now": "registered"
    }
   },
   {
@@ -318,11 +317,9 @@
     "run:ogbn-arxiv",
     "run:ogbn-proteins"
    ],
-   "registered_targets": 0,
+   "registered_targets": 78,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "curve families, 25%/50% scenarios, markers and the T=8 boundary"
+    "now": "registered"
    }
   },
   {
@@ -336,11 +333,9 @@
    "needs": [
     "records:action_gap_audit"
    ],
-   "registered_targets": 0,
+   "registered_targets": 60,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "conditional-region illustration and fitted log-gap density parameters"
+    "now": "registered"
    }
   },
   {
@@ -373,11 +368,9 @@
     "campaign:confirmation",
     "records:confirmation_sensitivity"
    ],
-   "registered_targets": 0,
+   "registered_targets": 97,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "the original/rescaled interval family of S14/S14b, margins and printed P inequalities"
+    "now": "registered"
    }
   },
   {
@@ -434,11 +427,9 @@
     "run:ogbn-arxiv",
     "run:ogbn-proteins"
    ],
-   "registered_targets": 0,
+   "registered_targets": 128,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "six power curves, central margins and seed-design assumptions of S42 and Note S24"
+    "now": "registered"
    }
   },
   {
@@ -452,11 +443,9 @@
    "needs": [
     "runs"
    ],
-   "registered_targets": 0,
+   "registered_targets": 83,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "panel c effects and intervals of Table 1; structural panels a-b"
+    "now": "registered"
    }
   },
   {
@@ -489,11 +478,9 @@
    "needs": [
     "runs"
    ],
-   "registered_targets": 0,
+   "registered_targets": 211,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "action curves, sensitivity matrix, reach quantities and headroom bars of S4/S6/S6b"
+    "now": "registered"
    }
   },
   {
@@ -592,11 +579,9 @@
     "run:ogbn-arxiv",
     "run:ogbn-proteins"
    ],
-   "registered_targets": 0,
+   "registered_targets": 310,
    "contract": {
-    "now": "to register",
-    "work": "reference work",
-    "closes": "break-even families, action-bound functions, variance ratios and power curves"
+    "now": "registered"
    }
   },
   {

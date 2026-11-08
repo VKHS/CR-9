@@ -220,7 +220,8 @@
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
       "notes": [
         "F2 is a partial internal-method map using absolute official scores and serial costs. Panel 5a additionally uses external baselines and gain/cost normalization; the complete panel and other cost-model panels require their original data, assumptions and generator.",
-        "Source review of main page 12: panel a uses S15 declared cost-range endpoints for retrained architectures; observed executed costs are retained as separately labelled companion data. The complete four-panel reference contract remains required."
+        "Source review of main page 12: panel a uses S15 declared cost-range endpoints for retrained architectures; observed executed costs are retained as separately labelled companion data.",
+        "Independently reviewed complete reference definition: main_figure_5_deployment_economics. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
       ],
       "related_tables": [
         "supplementary:Table S15",
@@ -542,7 +543,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S6_cost_model_truncation_order. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S6",
         "supplementary:Table S6b",
@@ -578,7 +581,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S7_acquisition_gate. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S21",
         "supplementary:Table S34"
@@ -651,7 +656,8 @@
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
       "notes": [
         "F6 reconstructs available local mechanism contrasts; joint-family and sensitivity panels require the complete S14 sources.",
-        "The supplementary builder adds a validated original joint-S14 forest. It does not reconstruct the original-versus-rescaled J_old/J_new sensitivity intervals or replace the complete Supplementary Figure S9 design."
+        "The supplementary builder adds a validated original joint-S14 forest. It does not reconstruct the original-versus-rescaled J_old/J_new sensitivity intervals or replace the complete Supplementary Figure S9 design.",
+        "Independently reviewed complete reference definition: supplementary_figure_S9_mechanism_contrast_sensitivity. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
       ],
       "related_tables": [
         "supplementary:Table S14",
@@ -748,7 +754,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S12_budget_matched_test_power. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S42"
       ],
@@ -777,7 +785,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S13_motivating_settings_and_schedule_adequacy. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S30",
         "supplementary:Table S33"
@@ -846,7 +856,8 @@
       "coverage": "full_display_generator",
       "required_evidence": "Registered action constants for panels a-c, plus original per-input oracle search and complete-policy effects for the headroom quantities in panel d. Theory checks verify operator identities; original plotted data and the generator remain required for the complete figure.",
       "notes": [
-        "Panels a-c are exact registered action calculations. Panel d uses the measured oracle upper confidence bound and deployed policy effect; its headroom denominator is a confidence bound, not the oracle point estimate."
+        "Panels a-c are exact registered action calculations. Panel d uses the measured oracle upper confidence bound and deployed policy effect; its headroom denominator is a confidence bound, not the oracle point estimate.",
+        "Independently reviewed complete reference definition: supplementary_figure_S15_spectral_fingerprint_and_headroom. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
       ],
       "related_tables": [
         "supplementary:Table S6",
@@ -1051,7 +1062,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S20_analytical_panels. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S26b",
         "supplementary:Table S42",

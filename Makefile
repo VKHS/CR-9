@@ -591,7 +591,8 @@ NUMPY_TESTS := test_paper_registry test_textual_source_references test_entry_qua
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
  test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \
  test_s14_builder test_paper_outputs test_internal_baselines test_printed_statement_check test_final_destination \
- test_destination test_consistency_audit
+ test_destination test_consistency_audit test_figure_contracts_s6_s7 test_figure_contracts_s9_s13 \
+ test_figure_contracts_s12_s20 test_figure_contracts_s15_f5
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

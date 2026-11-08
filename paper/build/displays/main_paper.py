@@ -1395,7 +1395,7 @@ F5_ROLES = {"qC": "strongest open-loop comparator q_C",
 
 
 @display("main:Figure 5", stem="Fig5", title="Deployment effect and cost",
-         needs=("runs", "records:input_gate", "records:baselines", "records:nominal_time"))
+         needs=("runs", "records:input_gate", "records:baselines", "records:nominal_time", "records:timing_anchors"))
 def figure_5(ctx, out):
     from cm_theory.economics import amortization_horizon, net_benefit
     from .records_campaigns import anchor_reference

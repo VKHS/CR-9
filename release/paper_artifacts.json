@@ -914,6 +914,7 @@
         "source data"
       ],
       "displays": [
+        "main:Figure 5",
         "supplementary:Table S23b"
       ],
       "status": "awaiting_measured_outputs",

@@ -12,10 +12,27 @@
   {
    "id": "K1",
    "title": "Studentized maximum of the selection bootstrap (Algorithm S4)",
-   "displays": ["supplementary:Table S20", "supplementary:Table S12", "supplementary:Table S12c", "main:Table 1"],
+   "displays": [
+    "supplementary:Table S20",
+    "supplementary:Table S12",
+    "supplementary:Table S12c",
+    "main:Table 1"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [8], "text": "Algorithm S4 requires the feasible family Q_feas, evaluates every q in Q_feas against the nested comparator in each resample and records the studentized maximum over q; its line 10 reports |Q|, |Q_s|, r_max and the slack of Table S20."},
-    {"document": "main", "pages": [5], "text": "Eq. (18) defines Q_feas by dynamic support, the official-metric bound and the resource bounds; Eq. (19) forms Q_s from the simultaneous upper limits."}
+    {
+     "document": "supplementary",
+     "pages": [
+      8
+     ],
+     "text": "Algorithm S4 requires the feasible family Q_feas, evaluates every q in Q_feas against the nested comparator in each resample and records the studentized maximum over q; its line 10 reports |Q|, |Q_s|, r_max and the slack of Table S20."
+    },
+    {
+     "document": "main",
+     "pages": [
+      5
+     ],
+     "text": "Eq. (18) defines Q_feas by dynamic support, the official-metric bound and the resource bounds; Eq. (19) forms Q_s from the simultaneous upper limits."
+    }
    ],
    "code_before": "nested_selection took the studentized maximum over every executed registered configuration, a superset of Q_feas whose radius is at least as wide.",
    "code_now": "nested_selection takes the maximum over Q_feas (select/decision.json: max_t_family = feasible, feasible_family_size, max_t_family_size); records sealed before carry no max_t_family and replay with every executed configuration (cross_morse/review.py, paper/build/displays/run_audits.py::screened_radius, cm_experiments/backbones.py).",
@@ -27,10 +44,28 @@
   {
    "id": "K2",
    "title": "Peptides-func confirmation: Holm P = 0.070 above 0.05",
-   "displays": ["supplementary:Table S14", "supplementary:Table S14b", "main:Table 1", "supplementary:Figure S1", "supplementary:Table S1"],
+   "displays": [
+    "supplementary:Table S14",
+    "supplementary:Table S14b",
+    "main:Table 1",
+    "supplementary:Figure S1",
+    "supplementary:Table S1"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [10], "text": "The Peptides radius-minus-one-step contrast has P = 0.035 and Holm P = 0.070 > 0.05; the registered frozen confirmation map would return q_C unless the selected radius outcome is supported by a separate corrected confirmation record."},
-    {"document": "main", "pages": [10], "text": "Table 1 reports radius, E = 4, as the deployed Peptides-func rule with a boundary admission."}
+    {
+     "document": "supplementary",
+     "pages": [
+      10
+     ],
+     "text": "The Peptides radius-minus-one-step contrast has P = 0.035 and Holm P = 0.070 > 0.05; the registered frozen confirmation map would return q_C unless the selected radius outcome is supported by a separate corrected confirmation record."
+    },
+    {
+     "document": "main",
+     "pages": [
+      10
+     ],
+     "text": "Table 1 reports radius, E = 4, as the deployed Peptides-func rule with a boundary admission."
+    }
    ],
    "code_before": "The frozen confirmation map (cross_morse/statistics.py::confirmation) retains a provisional route only when its contrast exceeds the margin and is Holm-significant against zero; otherwise it downgrades to the eligible predecessor or q_C.",
    "code_now": "Unchanged: the map is applied as registered; nothing overrides a failed Holm test.",
@@ -42,9 +77,19 @@
   {
    "id": "K3",
    "title": "Selection on the complete candidate ledger of Roman-empire, PascalVOC-SP and COCO-SP",
-   "displays": ["supplementary:Table S12c", "supplementary:Table S12", "main:Table 1"],
+   "displays": [
+    "supplementary:Table S12c",
+    "supplementary:Table S12",
+    "main:Table 1"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [9], "text": "On the representative rows the registered rule reads radius (radius lies 0.00110, 0.00085 and 0.00101 above U_min, inside the band), whereas the executed selection on the complete candidate ledger chose MPC-RH; Table 1 deploys MPC-RH on the three datasets."}
+    {
+     "document": "supplementary",
+     "pages": [
+      9
+     ],
+     "text": "On the representative rows the registered rule reads radius (radius lies 0.00110, 0.00085 and 0.00101 above U_min, inside the band), whereas the executed selection on the complete candidate ledger chose MPC-RH; Table 1 deploys MPC-RH on the three datasets."
+    }
    ],
    "code_before": "The Table S12c generator replays main Eq. (19) on the representative rows and on every configuration of select/decision.json (paper/build/selection.py::registered_rule_on_all_configurations) and compares both readings with the printed table.",
    "code_now": "Unchanged.",
@@ -56,9 +101,17 @@
   {
    "id": "K4",
    "title": "Seed hierarchy of Table S2",
-   "displays": ["supplementary:Table S2"],
+   "displays": [
+    "supplementary:Table S2"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [2], "text": "D_select: twelve plant seeds repeated within fold and twelve controller seeds; D_explore: twelve controller seeds; D_compare: paired frozen plant seeds."}
+    {
+     "document": "supplementary",
+     "pages": [
+      2
+     ],
+     "text": "D_select: twelve plant seeds repeated within fold and twelve controller seeds; D_explore: twelve controller seeds; D_compare: paired frozen plant seeds."
+    }
    ],
    "code_before": "Selection evaluates precomputed frozen-ensemble losses without a plant refit inside each fold; the controller is fitted once per Lean/Full profile (with cross-fitting folds) and selection has no twelve-controller-seed loop; E3-E6 repeat controller optimization conditional on one paired parent ensemble.",
    "code_now": "Unchanged.",
@@ -70,10 +123,26 @@
   {
    "id": "K5",
    "title": "Settings of the budget-matched comparison (Tables S46b and S47, main Figure 6)",
-   "displays": ["supplementary:Table S46b", "supplementary:Table S47", "main:Figure 6"],
+   "displays": [
+    "supplementary:Table S46b",
+    "supplementary:Table S47",
+    "main:Figure 6"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [27], "text": "The E3 execution of Table S46b consumes its whole work ceiling, while the ensemble-spend crossover of Table S47 uses a separate decoding-cost scenario."},
-    {"document": "main", "pages": [13], "text": "Figure 6 draws the budget frontier, retained shares and the ensemble-spend comparison together."}
+    {
+     "document": "supplementary",
+     "pages": [
+      27
+     ],
+     "text": "The E3 execution of Table S46b consumes its whole work ceiling, while the ensemble-spend crossover of Table S47 uses a separate decoding-cost scenario."
+    },
+    {
+     "document": "main",
+     "pages": [
+      13
+     ],
+     "text": "Figure 6 draws the budget frontier, retained shares and the ensemble-spend comparison together."
+    }
    ],
    "code_before": "The E3-E6 arms run at the common ceiling (cm_campaigns); the settings of the S47 decoding-cost scenario are not registered.",
    "code_now": "Unchanged.",
@@ -85,9 +154,17 @@
   {
    "id": "K6",
    "title": "Failure responses of the target-regime gates (Table S3)",
-   "displays": ["supplementary:Table S3"],
+   "displays": [
+    "supplementary:Table S3"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [2], "text": "Nominal graph value failure: stop or improve the plant; registry support failure: prune, collect and re-explore; depth qualification failure: do not credit the controller with plant rescue."}
+    {
+     "document": "supplementary",
+     "pages": [
+      2
+     ],
+     "text": "Nominal graph value failure: stop or improve the plant; registry support failure: prune, collect and re-explore; depth qualification failure: do not credit the controller with plant rescue."
+    }
    ],
    "code_before": "A failed entry contract makes every feedback configuration infeasible, so the lifecycle returns q_C; a support failure does not prune, collect or re-explore; a depth failure applies an operational exclusion rather than a reporting instruction.",
    "code_now": "Unchanged.",
@@ -99,9 +176,19 @@
   {
    "id": "K7",
    "title": "Table S20 |Q|: the feasible family, not the registry",
-   "displays": ["supplementary:Table S20", "supplementary:Figure S17"],
+   "displays": [
+    "supplementary:Table S20",
+    "supplementary:Figure S17"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [8, 15], "text": "Algorithm S4 reports |Q| of the family it runs over, Q_feas; Table S20 prints 180, 180, 144, 216, 240, 240 and 180."}
+    {
+     "document": "supplementary",
+     "pages": [
+      8,
+      15
+     ],
+     "text": "Algorithm S4 reports |Q| of the family it runs over, Q_feas; Table S20 prints 180, 180, 144, 216, 240, 240 and 180."
+    }
    ],
    "code_before": "The Table S20 generator reported the registry size (270, 265, 260, 270, 265, 265 and 260), the upper bound of |Q|.",
    "code_now": "The generator reports |Q_feas| (select/decision.json joint_feasible), verified against its Algorithm S4 replay, with the registry size beside it in the source data.",
@@ -113,14 +200,84 @@
   {
    "id": "K8",
    "title": "Literal wording and representation differences of the protocol displays",
-   "displays": ["supplementary:Table S1", "supplementary:Table S3", "supplementary:Table S8", "supplementary:Table S11", "supplementary:Table S38"],
+   "displays": [
+    "supplementary:Table S1",
+    "supplementary:Table S3",
+    "supplementary:Table S8",
+    "supplementary:Table S11",
+    "supplementary:Table S38"
+   ],
    "printed": [
-    {"document": "supplementary", "pages": [1, 2], "text": "Literal cells of the protocol tables (degree and split detail, repeated-split terminology, the Peptides boundary annotation, the observer-period annotation, fallback descriptions, stage and unit keys)."}
+    {
+     "document": "supplementary",
+     "pages": [
+      1,
+      2
+     ],
+     "text": "Literal cells of the protocol tables (degree and split detail, repeated-split terminology, the Peptides boundary annotation, the observer-period annotation, fallback descriptions, stage and unit keys)."
+    }
    ],
    "code_before": "The offline build compares these cells literally and reports each difference (docs/AVAILABILITY_REVIEW.md).",
    "code_now": "Unchanged: literal comparisons are retained; none is rewritten to force equality.",
    "decided_by": "the author's choice of wording for each cell (manuscript or generator)",
    "rule": "Each remaining difference is listed in paper/source_data/compare/ after make paper; the manuscript cell or the generator wording is aligned by the author.",
+   "status": "needs_declaration",
+   "check": null
+  },
+  {
+   "id": "K9",
+   "title": "Manuscript corrections found while registering the figure contracts",
+   "displays": [
+    "supplementary:Figure S6",
+    "supplementary:Figure S7",
+    "supplementary:Figure S8",
+    "supplementary:Figure S13",
+    "supplementary:Figure S20",
+    "supplementary:Table S21"
+   ],
+   "printed": [
+    {
+     "document": "supplementary",
+     "pages": [
+      32
+     ],
+     "text": "Figure S6c and Note S19 declare the sensing share s = 0.06 for the reduced ogbn-proteins sensor (k = 32, P_s = 4), whose own Note S19 cost 8r(k/d)/P_s is 0.073; with s >= 0.073 the T = 8 bound would be f_res <= 0.060, below the executed 0.061 of Table S6c."
+    },
+    {
+     "document": "supplementary",
+     "pages": [
+      32
+     ],
+     "text": "Figure S6b prints each bar pair's labels over the other bar (e.g. 36 above the 50% bar), and labels COCO at 50% with 15 where Note S19 states T <= 14 (14.84 rounded against its integer part)."
+    },
+    {
+     "document": "supplementary",
+     "pages": [
+      32,
+      15
+     ],
+     "text": "The Figure S7b legend prints the ogbn-proteins and COCO-SP fifth-percentile gaps as 1.0 mnats where Table S21 prints 0.001 nats."
+    },
+    {
+     "document": "supplementary",
+     "pages": [
+      32,
+      34
+     ],
+     "text": "The captions of Figure S8 and the title of Figure S13c refer to Table 2 for the paired test intervals, which main Table 1 prints."
+    },
+    {
+     "document": "supplementary",
+     "pages": [
+      38
+     ],
+     "text": "On the printed page of Figure S20a a white overlay covers the E = 4 legend entry and the Roman-empire filled marker and label, which the embedded figure image contains."
+    }
+   ],
+   "code_before": "Not applicable: these are differences inside the manuscript.",
+   "code_now": "The figure contracts follow the printed values and record each difference in their group notes (paper/printed_display_values.json).",
+   "decided_by": "the author's correction of the manuscript",
+   "rule": "Correct each item in the manuscript source and regenerate the PDFs; then register the new PDF identities (paper/sources.json) and re-register the affected contract values from the corrected pages, so that the comparison targets stay the printed values.",
    "status": "needs_declaration",
    "check": null
   }

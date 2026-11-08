@@ -29,7 +29,7 @@ def as_runs(views: dict, benchmark: bool = True) -> dict:
 class Ledger(unittest.TestCase):
     def test_ledger_is_well_formed_and_its_page_is_current(self):
         ledger = ca.load_ledger(ROOT)
-        self.assertEqual([i["id"] for i in ledger["items"]], [f"K{k}" for k in range(1, 9)])
+        self.assertEqual([i["id"] for i in ledger["items"]], [f"K{k}" for k in range(1, 10)])
         checks = {i["check"] for i in ledger["items"]} - {None}
         self.assertEqual(checks, set(ca.CHECKS))
         self.assertEqual((ROOT / ca.DOC).read_text(encoding="utf-8"), ca.render(ledger) + "\n",
@@ -120,7 +120,7 @@ class Decisions(unittest.TestCase):
             ca.main(["--runs-root", str(EXAMPLES), "--output", str(output)])
             report = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(report["benchmark_runs"], 0)
-            self.assertEqual([i["id"] for i in report["items"]], [f"K{k}" for k in range(1, 9)])
+            self.assertEqual([i["id"] for i in report["items"]], [f"K{k}" for k in range(1, 10)])
 
 
 if __name__ == "__main__":
