@@ -7,7 +7,7 @@ Generated from `paper/sources.json`, `paper/display_manifest.json`, the display 
 - The publication workflow distributes the measured outputs through the [release](https://github.com/VKHS/CR-9/releases/tag/paper-artifacts); [artifact availability](../AVAILABILITY.md) identifies each published or awaited artifact.
 - `make paper` downloads and verifies them, rebuilds every numbered display with `paper/build/displays/` and compares every computed value with the printed one.
 - [Statement compliance](../STATEMENT_COMPLIANCE.md) checks each availability requirement against the release files and reconstruction records.
-- Runtime source identity: `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+- Runtime source identity: `d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651`.
 
 ## Manuscript groups, generators and inputs
 

@@ -95,7 +95,11 @@ class MakeWorkflowTests(unittest.TestCase):
         self.capture.unlink()
         calls = self.invoke("paper-offline", ARTIFACTS_ROOT=artifacts, PAPER_ROOT=out)
         self.assertEqual(calls, [["-B", "scripts/reconstruct_paper.py", "--offline", "--artifacts", str(artifacts),
-                                  "--output-dir", str(out)]])
+                                  "--output-dir", str(out), "--tier", "analysis"]])
+        self.capture.unlink()
+        calls = self.invoke("paper-offline", ARTIFACTS_ROOT=artifacts, PAPER_ROOT=out, PAPER_TIER="complete")
+        self.assertEqual(calls, [["-B", "scripts/reconstruct_paper.py", "--offline", "--artifacts", str(artifacts),
+                                  "--output-dir", str(out), "--tier", "complete"]])
         self.capture.unlink()
         calls = self.invoke("statement-check")
         self.assertEqual(calls, [["-B", "scripts/statement_check.py", "--check"],

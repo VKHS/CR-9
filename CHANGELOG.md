@@ -39,8 +39,45 @@
   `RECORDS_ROOT`, and when `records/` registers no set, the record sets that `make paper`
   downloaded and verified.
 - `records/index.json` declares all 31 record contracts of `records/specs.json`.
-- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged: source fingerprint
-  `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged by this entry: source
+  fingerprint `d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651`.
+
+## 2026-11-08 — Local publication preflight and source-backed completion
+
+- Enforce nominal A0 support in every registered Full-profile stratum before
+  selection when the entry contract is enabled. Record the support fraction,
+  missing cells and enforcement state in the sealed entry audit. Preserve the
+  preceding runtime snapshot for exact-source historical replay.
+- Reconstruct S28/S28b and Figure S17g from the paper's explicitly declared
+  analytical counts, ESS and target-effect grids. Export actual run support and
+  effect-dependent quantities separately. S28b now builds without archives.
+  Add two PDF-bound reference groups while preserving all prior numerical values.
+- Distinguish printed rounded Hoeffding equality counts from the smallest
+  sufficient integer; export both and verify the Bernstein integer boundary.
+- Plot the declared S15 cost ranges in main Figure 5a and Figure S4, retaining
+  executed scalar costs separately. Record the three additional S4 method points
+  that require original source data and study-scope clarification; do not infer
+  their exact values from the plotted image.
+- Add independent full-display contracts for Figures S1, S5, S8, S10 and S19 and
+  Table S29: 430 additional required reference leaves, source-document bindings
+  and input-perturbation/omission regressions. Correct S1's Peptides BCE label
+  and distinguish a global comparator-return identity point from an interval.
+  Preserve S8's rounded ratio annotations without inventing hidden precision.
+  Keep declared analytical coordinates separate from measured outcomes.
+- Require every canonical artifact and the requested cached tier during offline
+  reconstruction, including environment evidence unused by a display. Emit named
+  missing-input diagnostics without converting an incomplete cache into success.
+- Add `make paper-preflight` to verify original local folders and reconstruct
+  before upload. Recheck source and materialized input identities after the build;
+  record local readiness separately from public availability. Original runs may
+  supply their own exact, verified runtime snapshot.
+- Carry an external run runtime snapshot in both release tiers so an archive
+  verifies on another checkout. Stage only the small fingerprinted source files,
+  stream heavy original files and recheck all source bytes before installing assets.
+- Route the public `make replay` entry point through the same exact-source resolver
+  as reconstruction, so historical runs use their recorded runtime implementation.
+- Update the availability review and validation history. Current runtime checks
+  remain separate from historical runs and from measured benchmark evidence.
 
 ## 2026-11-07 — Evidence-complete exports and independently checked reconstruction
 

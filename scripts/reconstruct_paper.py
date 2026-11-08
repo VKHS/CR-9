@@ -55,11 +55,10 @@ def inputs_from(directory: Path) -> dict:
     }
 
 
-def summarize(result: dict, manifest: dict) -> dict:
+def display_summary(result: dict) -> dict:
+    """Summarize reconstruction itself, independently of how its inputs arrived."""
     generators = result.get("display_generators") or {}
     comparison = generators.get("comparison_with_printed_values") or {}
-    awaiting = [a["id"] for a in manifest["artifacts"]
-                if a.get("required", True) and a.get("status") != artifacts.PUBLISHED]
     full = [d["id"] for d in result["displays"] if d["full_numerical_display"]]
     return {"displays": len(result["displays"]), "complete": len(full),
             "incomplete": [d["id"] for d in result["displays"] if not d["full_numerical_display"]],
@@ -70,8 +69,36 @@ def summarize(result: dict, manifest: dict) -> dict:
             "comparison_coverage_complete": generators.get("comparison_coverage_complete") is True,
             "display_content_incomplete": [d["id"] for d in result["displays"]
                                            if d.get("content_complete") is not True],
-            "artifacts_awaiting_publication": awaiting,
             "generator_errors": generators.get("errors") or {}, "module_errors": generators.get("module_errors") or {}}
+
+
+def summarize(result: dict, manifest: dict) -> dict:
+    return {**display_summary(result),
+            "artifacts_awaiting_publication": [a["id"] for a in manifest["artifacts"]
+                if a.get("required", True) and a.get("status") != artifacts.PUBLISHED]}
+
+
+def materialization_status(verification: dict, manifest: dict, tier: str) -> dict:
+    """A published descriptor or an analysis cache does not supply complete bytes.
+
+    Canonical artifact requirements survive missing manifest rows and edited
+    ``required`` flags. Optional extra artifacts do not block reconstruction.
+    A complete cache also satisfies an analysis request, never the reverse.
+    """
+    required = {row["id"] for row in artifacts.required_artifacts()}
+    required.update(row["id"] for row in manifest["artifacts"] if row.get("required", True))
+    entries = {row["id"]: row for row in manifest["artifacts"]}
+    published = {key for key, row in entries.items() if row.get("status") == artifacts.PUBLISHED}
+    present = {row["id"]: row for row in verification["artifacts"]}
+    missing = (required & published) & (set(verification["awaiting"]) | (required - set(present)))
+    incomplete_tiers = [{"id": key, "available_tier": present[key]["tier"], "requested_tier": tier}
+                        for key in sorted(required & published & set(present))
+                        if tier == "complete" and present[key]["tier"] != "complete"]
+    return {"requested_tier": tier, "required_artifacts": sorted(required),
+            "not_registered": sorted(required - set(entries)),
+            "not_published": sorted(required - published),
+            "missing_local": sorted(missing), "incomplete_tiers": incomplete_tiers,
+            "verified_tiers": {key: row["tier"] for key, row in sorted(present.items())}}
 
 
 def main(argv=None) -> int:
@@ -93,17 +120,20 @@ def main(argv=None) -> int:
                 print(f"verified {row['id']} ({row['tier']})")
         # Offline reuse must satisfy the same current release inventory and
         # artifact identity as a fresh fetch; a prior download stamp is not proof.
-        artifacts.verify_fetched(args.artifacts, manifest_path=args.manifest, require_all=False)
+        verified = artifacts.verify_fetched(args.artifacts, manifest_path=args.manifest, require_all=False)
+        materialization = materialization_status(verified, manifest, args.tier)
         found = inputs_from(args.artifacts)
         campaigns = dict(found["campaigns"])
         result = reconstruct(args.output_dir, runs_root=found["runs_root"], records_index=found["records_index"],
                              confirmation_campaign=campaigns.pop("confirmation", None),
                              budget_campaign=campaigns.pop("budget", None), campaigns=campaigns,
-                             label=f"paper-artifacts ({args.tier} tier)")
+                             label=f"paper-artifacts (requested {args.tier} tier)")
     except (artifacts.ArtifactError, ReconstructionError, OSError, ValueError, KeyError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     status = summarize(result, manifest)
+    status["artifacts_awaiting_publication"] = materialization["not_published"]
+    status["artifact_materialization"] = materialization
     status_path = args.output_dir.parent / f"{args.output_dir.name}.status.json"
     status_path.write_text(json.dumps(status, indent=1) + "\n", encoding="utf-8")
     print(f"Displays complete: {status['complete']} of {status['displays']}")
@@ -112,11 +142,21 @@ def main(argv=None) -> int:
           f"{status['values_missing']} missing")
     if status["artifacts_awaiting_publication"]:
         print("Awaiting publication: " + ", ".join(status["artifacts_awaiting_publication"]))
+    if materialization["not_registered"]:
+        print("Required artifacts absent from the manifest: " + ", ".join(materialization["not_registered"]))
+    if materialization["missing_local"]:
+        print("Published artifacts not available locally: " + ", ".join(materialization["missing_local"]))
+    if materialization["incomplete_tiers"]:
+        print("Complete-tier files still needed: " + ", ".join(row["id"] for row in materialization["incomplete_tiers"]))
     for name, error in {**status["generator_errors"], **status["module_errors"]}.items():
         print(f"Generator failure: {name}: {error}", file=sys.stderr)
     print(f"Report: {args.output_dir / 'RECONSTRUCTION_REPORT.md'}; status: {status_path}")
     if status["generator_errors"] or status["module_errors"]:
         return 2
+    if materialization["missing_local"] or materialization["incomplete_tiers"]:
+        print("Fetch the requested artifact tier before treating this offline reconstruction as complete.",
+              file=sys.stderr)
+        return 1
     if status["artifacts_awaiting_publication"]:
         print(f"{len(status['artifacts_awaiting_publication'])} artifact(s) await publication of the measured "
               "outputs (hpc/produce_paper_outputs_arrhenius.sh, then hpc/publish_paper_artifacts_arrhenius.sh all); "

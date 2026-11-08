@@ -18,11 +18,11 @@ import numpy as np
 from cross_morse import statistics
 from paper.build.displays import run_audits
 from paper.build.displays.framework import (DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, DisplayValidationError,
-                                           RunView, comparison_coverage)
+                                           RunView, comparison_coverage, load_references)
 from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table, write_files
 
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding="utf-8"))
+REGISTRY, REFERENCE_METADATA, _ = load_references(ROOT)
 SPECS = json.loads((ROOT / "records/specs.json").read_text(encoding="utf-8"))["sets"]
 # The measurement-record contracts these generators introduced, registered in records/specs.json.
 RECORD_CONTRACTS = {name: SPECS[name] for name in ("action_gap_audit", "tube_audit", "oracle_dispersion",
@@ -747,10 +747,10 @@ class FigureTests(unittest.TestCase):
     def test_figure_s17_panels_and_required_registered_grid(self):
         fixture, ctx, cells = self.figure_s17_fixture()
         self.constants(ctx)
-        ctx.constants.pop("regret_bound_table_S28b", None)
+        regret = ctx.constants.pop("regret_bound_table_S28b")
         with self.assertRaises(DisplayInputError):
             build_one("supplementary:Figure S17", ctx, fixture.out("f17a"))
-        self.constants(ctx, regret_bound_table_S28b={"sigma1_grid": [0.005, 0.007, 0.010]})
+        self.constants(ctx, regret_bound_table_S28b=regret)
         writer, compared = build_one("supplementary:Figure S17", ctx, fixture.out("f17"), registry=REGISTRY)
         names = {Path(f).name for f in writer.files}
         self.assertTrue({"panel_a_curves.csv", "panel_b.csv", "panel_c.csv", "panel_d.csv", "panel_e.csv",
@@ -778,14 +778,37 @@ class FigureTests(unittest.TestCase):
                  and row["group"] == "supplementary_table_S16_arxiv_factorial"}
         self.assertEqual(len(exact), 8)                                   # printed analytical illustration, including its width
         self.assertFalse(any(row["status"] == "missing" and row["path"].endswith("half_width_95") for row in compared))
-        # Registering the S28b grid and matching this panel's related S16 values
+        # Matching S28/S28b analytical values and this panel's related S16 values
         # still cannot promote the entire eight-panel figure to full agreement.
-        missing, coverage = comparison_coverage("supplementary:Figure S17", writer.comparisons, REGISTRY, {},
+        missing, coverage = comparison_coverage("supplementary:Figure S17", writer.comparisons, REGISTRY,
+                                                REFERENCE_METADATA,
                                                 scope="measurement")
         self.assertFalse(coverage["complete"])
         self.assertTrue(any(row["group"] == "display:supplementary:Figure S17" for row in missing))
-        needed = (fixture.out("f17") / "data/FigS17/panel_g_units_for_smallest_effect.csv").read_text()
-        self.assertIn("Hoeffding,0.0045,23670", needed)                  # S28: n for the arxiv effect
+        from paper.build.displays import regret_data
+        references = data_rows(fixture.out("f17"), "FigS17", "panel_g_reference_ess")
+        self.assertEqual({row["dataset"]: int(row["scenario_reference_ESS"]) for row in references},
+                         {"ogbn-arxiv": 91, "ogbn-proteins": 96, "ogbn-products": 132, "Roman-empire": 74,
+                          "PascalVOC-SP": 88, "COCO-SP": 142, "Peptides-func": 104})
+        observed = data_rows(fixture.out("f17"), "FigS17", "panel_g_observed_support")
+        synthetic_members = [row for row in observed if row["dataset"] != "ogbn-products"]
+        self.assertTrue(all(float(row["observed_minimum_qualified_cell_ESS"]) == 65 for row in synthetic_members))
+        self.assertTrue(all(float(row["observed_minimum_trajectory_count"]) == 0 for row in synthetic_members))
+        needed = data_rows(fixture.out("f17"), "FigS17", "panel_g_units_for_reference_target")
+        self.assertEqual(float(needed[0]["reference_target_nats"]), .003)
+        self.assertEqual(int(needed[0]["n_label_rounded"]), 53257)
+        self.assertEqual(int(needed[0]["minimum_satisfying_integer_n"]), 53258)
+        self.assertEqual([int(row["n_label_rounded"]) for row in needed[1:]], [2716, 3018, 3529])
+        actual_needed = data_rows(fixture.out("f17"), "FigS17", "panel_g_units_for_smallest_observed_effect")
+        self.assertEqual(float(actual_needed[0]["observed_abs_effect_nats"]), .0045)
+        self.assertEqual(int(actual_needed[0]["hoeffding_minimum_integer_n"]), 23670)
+        panel_g_comparisons = [row for row in compared if row["group"] in
+                               (regret_data.S28_TARGETS, regret_data.S28B_TARGETS)]
+        self.assertEqual(len(panel_g_comparisons), 44)
+        self.assertTrue(all(row["status"] == "exact" for row in panel_g_comparisons))
+        self.assertFalse(scopes["panel_g_reference_scenario"]["full_figure_comparison"])
+        self.assertIn("illustrative ESS", (fixture.out("f17") / "figures/FigS17.svg").read_text())
+        self.assertIn("Reference target: 0.0030 nats", (fixture.out("f17") / "figures/FigS17.svg").read_text())
         breakeven = (fixture.out("f17") / "data/FigS17/panel_h.csv").read_text().splitlines()
         overhead = (0.9 * 1.4 + 0.1 * 1.0) / 1.0 - 1
         self.assertAlmostEqual(float(breakeven[1].split(",")[6]), 0.035 * 0.87 * overhead / (1 + overhead))
@@ -795,7 +818,7 @@ class FigureTests(unittest.TestCase):
         from cm_experiments.factorial import cell_statistics
         from paper.build.displays.factorial_data import CELLS
         fixture, ctx, _ = self.figure_s17_fixture()
-        self.constants(ctx, regret_bound_table_S28b={"sigma1_grid": [0.005, 0.007, 0.010]})
+        self.constants(ctx)
         # The common per-unit noise cancels in every paired contrast, while the
         # explicitly independent illustration has nonzero error bars.
         noise = np.arange(12) * .002
@@ -847,11 +870,11 @@ class FigureTests(unittest.TestCase):
         fixture = Fixture(self)
         runs = fixture.runs(comparator=("ogbn-products",))
         ctx = context(runs=runs)
+        original_scope = ctx.constants["guarantee_scope_figure_S19"]
+        self.constants(ctx, guarantee_scope_figure_S19=None)
         with self.assertRaises(DisplayInputError):
             build_one("supplementary:Figure S19", ctx, fixture.out("f19a"))
-        self.constants(ctx, guarantee_scope_figure_S19=[
-            {"statement": "Lemma 1 transport validity", "class": "exact", "holds_under": "row-stochastic kernels"},
-            {"statement": "Thm. 2 clipped-loss admission", "class": "finite-sample", "holds_under": "i.i.d. graphs"}])
+        self.constants(ctx, guarantee_scope_figure_S19=original_scope)
         writer, compared = build_one("supplementary:Figure S19", ctx, fixture.out("f19"), registry=REGISTRY)
         panel = (fixture.out("f19") / "data/FigS19/panel_b.csv").read_text().splitlines()
         self.assertEqual(len(panel), 8)
@@ -861,6 +884,95 @@ class FigureTests(unittest.TestCase):
         self.assertTrue({"figures/FigS19.png", "data/FigS19/panel_a.csv", "data/FigS19/panel_c.csv"}
                         <= set(writer.files))
         self.assertNotIn("no_reference", statuses(compared))
+
+    def test_figure_s19_independent_contract_covers_every_panel_and_source_scope(self):
+        fixture = Fixture(self)
+        writer, compared = build_one("supplementary:Figure S19", context(runs=fixture.runs()),
+                                     fixture.out("s19-contract"), registry=REGISTRY)
+        group = run_audits.S19_SCOPE_GROUP
+        missing, coverage = comparison_coverage("supplementary:Figure S19", writer.comparisons, REGISTRY,
+                                                REFERENCE_METADATA, scope="measurement")
+        self.assertEqual((coverage["expected_values"], coverage["covered_values"]), (138, 138))
+        self.assertTrue(coverage["complete"])
+        self.assertEqual(missing, [])
+        self.assertEqual(REFERENCE_METADATA[group]["source"], {"document": "supplementary", "pages": [37]})
+        literal = [row for row in compared if row["group"] == group
+                   and row["path"].startswith(("panel_a/", "panel_c/"))]
+        self.assertEqual(len(literal), 85)
+        self.assertEqual({row["status"] for row in literal}, {"exact"})
+        classes = [row["class"] for row in data_rows(fixture.out("s19-contract"), "FigS19", "panel_a")]
+        self.assertEqual({name: classes.count(name) for name in set(classes)},
+                         {"exact": 9, "bound": 2, "conditional": 4, "finite-sample": 2, "empirical": 5})
+        self.assertEqual(len(data_rows(fixture.out("s19-contract"), "FigS19", "panel_c")), 4)
+        provenance = writer.evidence_scope[-1]
+        self.assertEqual(provenance["evidence_kind"], "mixed")
+        self.assertEqual(provenance["source"], {
+            "document": "supplementary", "pages": [37],
+            "sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"})
+        self.assertIn("sensitivity model", provenance["analytical_sensitivity"])
+        source = next(item for item in writer.inputs if item["kind"] == "registered_constants")
+        self.assertIn("guarantee_scope_figure_S19_details", source["files"])
+        self.assertEqual(len([item for item in writer.inputs if item["kind"] == "run"]), 7)
+        # Counts come from the synthetic run: they are deliberately not the
+        # manuscript's 32/64 cores, ten splits or independent-graph sample sizes.
+        count_rows = [row for row in compared if row["group"] == group and row["path"].endswith("/unit_count")]
+        self.assertEqual(len(count_rows), 7)
+        self.assertEqual({row["status"] for row in count_rows}, {"differs"})
+
+    def test_figure_s19_omitted_comparisons_remain_in_independent_denominator(self):
+        fixture = Fixture(self)
+        writer, _ = build_one("supplementary:Figure S19", context(runs=fixture.runs()),
+                              fixture.out("s19-omitted"), registry=REGISTRY)
+        omitted = {("panel_a", "statements", "prop11", "class"),
+                   ("panel_b", "datasets", "Peptides-func", "G_admit"),
+                   ("panel_c", "not_covered", 3)}
+        retained = [item for item in writer.comparisons
+                    if item.group != run_audits.S19_SCOPE_GROUP or item.path not in omitted]
+        missing, coverage = comparison_coverage("supplementary:Figure S19", retained, REGISTRY,
+                                                REFERENCE_METADATA, scope="measurement")
+        self.assertEqual(coverage["expected_values"], 138)
+        self.assertEqual(coverage["covered_values"], 135)
+        self.assertFalse(coverage["complete"])
+        self.assertEqual({row["path"] for row in missing}, {"/".join(map(str, path)) for path in omitted})
+
+    def test_figure_s19_changed_class_model_and_run_inputs_disagree_with_fixed_references(self):
+        fixture = Fixture(self)
+        runs = fixture.runs()
+        ctx = context(runs=runs)
+        scope = json.loads(json.dumps(ctx.constants["guarantee_scope_figure_S19"]))
+        next(row for row in scope if row["id"] == "prop11")["class"] = "bound"
+        details = json.loads(json.dumps(ctx.constants["guarantee_scope_figure_S19_details"]))
+        details["model_class"]["not_covered"][3] = "global attention is supported (adversarial fixture)"
+        self.constants(ctx, guarantee_scope_figure_S19=scope, guarantee_scope_figure_S19_details=details)
+        config = runs["PascalVOC-SP"].json("config.json")
+        config["admission"]["alpha"] = .05
+        write_files(runs["PascalVOC-SP"].root, {"config.json": config})
+        admission = runs["ogbn-arxiv"].json("admit/decision.json")
+        admission["loss"]["units"] = 33
+        write_files(runs["ogbn-arxiv"].root, {"admit/decision.json": admission})
+        _, compared = build_one("supplementary:Figure S19", ctx, fixture.out("s19-changed"), registry=REGISTRY)
+        rows = {row["path"]: row for row in compared if row["group"] == run_audits.S19_SCOPE_GROUP}
+        for key in ("panel_a/statements/prop11/class", "panel_c/not_covered/3",
+                    "panel_b/datasets/PascalVOC-SP/coverage_percent", "panel_b/datasets/ogbn-arxiv/unit_count"):
+            self.assertEqual(rows[key]["status"], "differs", key)
+        self.assertEqual(rows["panel_b/datasets/ogbn-arxiv/unit_count"]["computed"], 33)
+        self.assertEqual(rows["panel_b/datasets/ogbn-arxiv/unit_count"]["reported"], 32)
+        self.assertAlmostEqual(rows["panel_b/datasets/PascalVOC-SP/coverage_percent"]["computed"], 92.5)
+
+    def test_figure_s19_source_text_cannot_supply_missing_measured_outcomes(self):
+        fixture = Fixture(self)
+        with self.assertRaises(DisplayInputError):
+            build_one("supplementary:Figure S19", context(), fixture.out("s19-no-runs"), registry=REGISTRY)
+        self.assertFalse((fixture.out("s19-no-runs") / "figures/FigS19.png").exists())
+
+    def test_figure_s19_rejects_an_unregistered_statement_class(self):
+        fixture = Fixture(self)
+        ctx = context(runs=fixture.runs())
+        scope = json.loads(json.dumps(ctx.constants["guarantee_scope_figure_S19"]))
+        scope[0]["class"] = "unconditional guarantee"
+        self.constants(ctx, guarantee_scope_figure_S19=scope)
+        with self.assertRaisesRegex(DisplayInputError, "unregistered classes"):
+            build_one("supplementary:Figure S19", ctx, fixture.out("s19-bad-class"), registry=REGISTRY)
 
 
 if __name__ == "__main__":

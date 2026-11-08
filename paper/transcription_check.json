@@ -144,12 +144,12 @@
       "supplementary": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"
     },
     "registry_sha256": {
-      "registered_constants": "2512eb47a72b67b303ad86967ee2895a94c2fb7c3f64fe09f8c34dcdaf4a9d67",
+      "registered_constants": "67b2100ef4f8127b19738d2326826b50dab6acc35332f26c3cd9d38aff18e4a6",
       "reported_results": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b"
     },
     "reviewed_by": "ChatGPT: AI-assisted contextual review requested by author on 2026-11-06; main and supplementary review agents",
     "schema": "cross-morse-manuscript-review-1",
-    "scope": "Contextual source review of registry interpretation and page provenance by the named reviewer; not verification of measurements or an attestation of personal review by an author."
+    "scope": "Contextual source review of registry interpretation and page provenance by the named reviewer; not verification of measurements or an attestation of personal review by an author. 2026-11-08 AI-assisted source review added explicitly declared analytical input coordinates for Tables S28/S28b and Figure S17g from supplementary pages 18-19 and 36. These coordinates are distinct from observed support minima and unrounded measured effects. Independent comparison targets remain in printed_display_values.json. Existing registered numerical values are unchanged; this is not an author certification or verification of experiment measurements. 2026-11-08 source-bound completion reviewed supplementary Figures S1, S5, S8, S10 and S19 and Table S29 (pages 19, 31-33, 37, with supporting main Table 1 page 10). Figure S19 literal statement classifications, conditions and model scope are registered as protocol inputs; measured outcomes remain comparison targets only."
   },
   "extractor": "poppler",
   "page_map_sha256": "fb94f7da0f6f12fa8259998aa0d13b4d70545e3561bb77cebfbeb2bec1373c1b",
@@ -159,7 +159,7 @@
   },
   "registered_utc": "2026-11-06T10:32:13+00:00",
   "registry_sha256": {
-    "registered_constants": "2512eb47a72b67b303ad86967ee2895a94c2fb7c3f64fe09f8c34dcdaf4a9d67",
+    "registered_constants": "67b2100ef4f8127b19738d2326826b50dab6acc35332f26c3cd9d38aff18e4a6",
     "reported_results": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b"
   },
   "schema": "cross-morse-transcription-check-2",

@@ -51,6 +51,7 @@ GROUP = {
     "S41": "supplementary_table_S41_qualification_cost_components",
 }
 S20_GROUP = GROUP["S20"]
+S19_SCOPE_GROUP = "supplementary_figure_S19_guarantee_scope"
 FINALISTS = 12
 ROUTE_LABELS = {"nominal": "nominal", "best_depth": "best-depth", "learned_stop": "learned-stop", "phase": "phase",
                 "fixed_sequence": "fixed-sequence", "mpc_ol": "MPC-OL", "one_step": "one-step", "radius": "radius",
@@ -1656,11 +1657,10 @@ def independent_factorial_illustration(cells: dict, factors: tuple[str, ...]) ->
                 "records:tube_audit"))
 def figure_s17(ctx, out):
     from cm_theory import admission as theory
-    regret = ctx.constants.get("regret_bound_table_S28b")
-    if not regret or "sigma1_grid" not in regret:
-        raise DisplayInputError("registered constant regret_bound_table_S28b.sigma1_grid (the sigma_1 grid of "
-                                "Supplementary Table S28b) is required for panel g")
-    sigma_grid = regret["sigma1_grid"]
+    from . import regret_data
+    regret_params = regret_data.parameters(ctx)
+    reference_support = regret_data.reference_support(ctx)
+    sigma_grid, reference_count_grid, reference_targets = regret_data.variance_grid(ctx)
     gate = ctx.require_records("input_gate")
     outcomes = {d: dataset_outcome(ctx, d, gate) for d in DATASETS}
     for d in DATASETS:
@@ -1855,37 +1855,67 @@ def figure_s17(ctx, out):
     out.data("panel_f", ["dataset", "p5_gap_mnats", "switch_fraction", "near_zero_fraction", "interpretation"],
              gap_rows)
 
-    # g: one-step regret radius
+    # g: the explicitly labelled analytical scenario of S28/S28b. Observed
+    # support summaries remain companion data, not replacement marker inputs.
     ax = axes[2, 0]
-    n = np.unique(np.round(np.logspace(np.log10(30), 5, 160)).astype(int))
-    curves = [["Hoeffding", int(k), 2 * theory.hoeffding_radius(int(k))] for k in n]
+    n = np.unique(np.r_[np.round(np.logspace(np.log10(30), 5, 160)).astype(int), reference_count_grid])
+    curves = [["Hoeffding", int(k), 2 * theory.hoeffding_radius(int(k), **regret_params)] for k in n]
     for sigma in (sigma_grid[0], sigma_grid[-1]):
-        curves += [[f"Bernstein sigma1={sigma:g}", int(k), 2 * theory.bernstein_radius(int(k), sigma)] for k in n]
+        curves += [[f"Bernstein sigma1={sigma:g}", int(k),
+                    2 * theory.bernstein_radius(int(k), sigma, **regret_params)] for k in n]
     for name in dict.fromkeys(c[0] for c in curves):
         ax.plot([c[1] for c in curves if c[0] == name], [c[2] for c in curves if c[0] == name], lw=1, label=name)
-    ess, rmse, effects = [], [], []
+    curve_values = {(name, k): value for name, k, value in curves}
+    for k in reference_count_grid:
+        out.compare(regret_data.S28B_TARGETS, ("count_rows", str(k), "hoeffding_two_e"),
+                    curve_values["Hoeffding", k], note="Figure S17g curve at the Table S28b abscissa")
+        for i in (0, len(sigma_grid) - 1):
+            out.compare(regret_data.S28B_TARGETS, ("count_rows", str(k), "bernstein_two_e", i),
+                        curve_values[f"Bernstein sigma1={sigma_grid[i]:g}", k],
+                        note="Figure S17g curve at the Table S28b abscissa")
+    ess, observed_support, rmse, effects = [], [], [], []
     for dataset in DATASETS:
+        reference_ess = reference_support[dataset]["reference_ess"]
+        bound = 2 * theory.hoeffding_radius(reference_ess, **regret_params)
+        ess.append([dataset, reference_ess, bound])
+        out.compare(regret_data.S28_TARGETS, ("datasets", dataset, "reference_ess"), reference_ess,
+                    note="Figure S17g illustrative marker input, as stated in its legend")
+        out.compare(regret_data.S28_TARGETS, ("datasets", dataset, "two_e_reference_ess"), bound)
         for rec in outcomes[dataset]["recs"]:
             audit = rec.view.json("fit/full/audit.json")
-            qualified = [c["ess"] for c in audit["support"]["cells"].values() if c["qualified"]]
-            if qualified:
-                ess.append([dataset, min(qualified), 2 * theory.hoeffding_radius(max(1, int(min(qualified))))])
+            cells = list(audit["support"]["cells"].values())
+            qualified = [c["ess"] for c in cells if c["qualified"]]
+            observed_support.append([dataset, rec.view.root.name, "fit/full/audit.json",
+                                     min((c["trajectory_count"] for c in cells), default=None),
+                                     min(qualified, default=None)])
             rmse.append(audit["oof_rmse"])
         if outcomes[dataset]["deployed"]:
-            effects.append(abs(outcomes[dataset]["loss"]))
-    for row in ess:
-        ax.plot(row[1], row[2], "o", color="#e76f51", ms=3)
+            effects.append([dataset, abs(outcomes[dataset]["loss"])])
+    ax.plot([row[1] for row in ess], [row[2] for row in ess], "o", color="#e76f51", ms=3,
+            label=f"illustrative ESS ({min(row[1] for row in ess)}–{max(row[1] for row in ess)}; Table S28)")
     if rmse:
         ax.axhspan(min(rmse), max(rmse), color="#2864a5", alpha=0.12, label="critic held-out RMSE")
-    needed = []
+    effect_values = [row[1] for row in effects]
     if effects:
-        smallest = min(effects)
-        ax.axhspan(min(effects), max(effects), color="#2a9d6a", alpha=0.15, label="admitted effects")
-        needed = [["Hoeffding", smallest, theory.units_for_hoeffding_regret(smallest)]]
-        needed += [[f"Bernstein sigma1={s:g}", smallest, theory.units_for_bernstein_regret(smallest, s)]
-                   for s in sigma_grid]
-        for row in needed:
-            ax.axvline(row[2], ls=":", color="0.4", lw=0.8)
+        ax.axhspan(min(effect_values), max(effect_values), color="#2a9d6a", alpha=0.15, label="admitted effects")
+    target = reference_targets[0]["target_nats"]
+    requirements = regret_data.target_requirements(target, sigma_grid, regret_params)
+    needed = [["Hoeffding", target, requirements["hoeffding_n_at_equality"],
+               requirements["hoeffding_n_rounded"], requirements["hoeffding_minimum_integer_n"], "real equality"]]
+    needed += [[f"Bernstein sigma1={s:g}", target, count, count, count, "smallest satisfying integer"]
+               for s, count in zip(sigma_grid, requirements["bernstein_n"])]
+    for row in (needed[0], needed[1], needed[-1]):
+        ax.axvline(row[2], ls=":", color="0.4", lw=0.8)
+    ax.text(0.98, 0.98, f"Reference target: {target:.4f} nats\n"
+            f"Hoeffding: {requirements['hoeffding_n_rounded']:,} (rounded)\n"
+            f"Bernstein: {requirements['bernstein_n'][0]:,}–{requirements['bernstein_n'][-1]:,}",
+            transform=ax.transAxes, ha="right", va="top", fontsize=5.5,
+            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.85, "pad": 2})
+    out.compare(regret_data.S28B_TARGETS, ("targets", "smallest_admitted_effect", "target_nats"), target)
+    out.compare(regret_data.S28B_TARGETS, ("targets", "smallest_admitted_effect", "hoeffding_n_rounded"),
+                requirements["hoeffding_n_rounded"])
+    out.compare(regret_data.S28B_TARGETS, ("targets", "smallest_admitted_effect", "bernstein_n"),
+                requirements["bernstein_n"])
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("independent logged units per (stratum, action)")
@@ -1893,11 +1923,33 @@ def figure_s17(ctx, out):
     ax.set_title("g  One-step regret radius (Prop. 7)", loc="left")
     ax.legend(fontsize=5, frameon=False)
     out.data("panel_g_curves", ["bound", "n", "regret_bound_nats"], curves)
-    out.data("panel_g_reference_ess", ["dataset", "minimum_qualified_cell_ESS", "hoeffding_bound_nats"], ess)
-    out.data("panel_g_units_for_smallest_effect", ["bound", "target_nats", "units"], needed)
+    out.data("panel_g_reference_ess", ["dataset", "scenario_reference_ESS", "hoeffding_bound_nats"], ess)
+    out.data("panel_g_observed_support", ["dataset", "run", "audit_file", "observed_minimum_trajectory_count",
+                                         "observed_minimum_qualified_cell_ESS"], observed_support)
+    out.data("panel_g_units_for_reference_target", ["bound", "reference_target_nats", "n_at_reference",
+                                                   "n_label_rounded", "minimum_satisfying_integer_n", "n_kind"], needed)
+    out.data("panel_g_observed_effects", ["dataset", "observed_abs_effect_nats"], effects)
+    if effects:
+        smallest_dataset, smallest_effect = min(effects, key=lambda row: row[1])
+        observed_requirement = regret_data.target_requirements(smallest_effect, sigma_grid, regret_params)
+        out.data("panel_g_units_for_smallest_observed_effect",
+                 ["dataset", "observed_abs_effect_nats", "hoeffding_n_at_equality", "hoeffding_n_rounded",
+                  "hoeffding_minimum_integer_n", *[f"bernstein_n_sigma1_{s:.3f}" for s in sigma_grid]],
+                 [[smallest_dataset, smallest_effect, observed_requirement["hoeffding_n_at_equality"],
+                   observed_requirement["hoeffding_n_rounded"], observed_requirement["hoeffding_minimum_integer_n"],
+                   *observed_requirement["bernstein_n"]]])
     out.data("panel_g_bands", ["band", "low", "high"],
              [["critic_held_out_rmse", min(rmse) if rmse else None, max(rmse) if rmse else None],
-              ["admitted_effects", min(effects) if effects else None, max(effects) if effects else None]])
+              ["admitted_effects", min(effect_values) if effects else None, max(effect_values) if effects else None]])
+    out.provenance(panel_g_reference_scenario={
+        "source": {"document": "supplementary", "pages": [18, 19, 36], "display": "Tables S28/S28b; Figure S17g"},
+        "counts_role": "Illustrative ESS of Table S28, as labelled in Figure S17g",
+        "target_role": "Explicit 0.0030 nats analytical target of Table S28b; not the smallest observed run effect",
+        "observed_support": "data/FigS17/panel_g_observed_support.csv",
+        "observed_effects": "data/FigS17/panel_g_observed_effects.csv",
+        "hoeffding_count_convention": "Vertical line at real equality; nearest-unit label and smallest sufficient integer exported separately",
+        "full_figure_comparison": False})
+    regret_data.record_parameters(out, regret_params, prefix="panel_g_", variance=True)
 
     # h: equal-compute break-even under the ensemble law (main Proposition 5)
     ax = axes[2, 1]
@@ -1936,7 +1988,10 @@ def figure_s17(ctx, out):
              "selection record and select/entry_complete.json. d: the printed independence illustration propagates "
              "marginal cell half-widths in quadrature with 1/4 contrast coefficients; verified paired-bootstrap "
              "intervals, when supplied, remain in separate companion source data. These panel checks and the "
-             "S28b sigma_1 grid do not establish numerical agreement for all eight panels. h: D_inf = kappa x l_plant with l_plant the q_N test "
+             "S28/S28b analytical checks do not establish numerical agreement for all eight panels. g: markers use "
+             "the explicitly labelled illustrative ESS of Table S28; vertical lines use the declared 0.0030 nats "
+             "target of Table S28b. Actual support minima and the smallest observed-effect requirement remain "
+             "separately labelled companion data. h: D_inf = kappa x l_plant with l_plant the q_N test "
              "loss and the registered kappa band; overheads from main Eq. (32) and C_assure = C(q_D) + C(q_C).")
 
 
@@ -1951,80 +2006,154 @@ def figure_s19(ctx, out):
     if not scope:
         raise DisplayInputError("registered constant guarantee_scope_figure_S19 (statement, class, condition of "
                                 "Supplementary Figure S19a) is required for panel a")
+    details = ctx.constants.get("guarantee_scope_figure_S19_details")
+    if not details:
+        raise DisplayInputError("registered constant guarantee_scope_figure_S19_details is required for the "
+                                "class definitions, model scope and printed annotations")
     classes = ("exact", "bound", "conditional", "finite-sample", "empirical", "protocol")
+    if (not isinstance(scope, list) or any(not isinstance(row, dict)
+            or any(not isinstance(row.get(k), str) or not row[k].strip()
+                   for k in ("id", "statement", "class", "holds_under")) for row in scope)
+            or len({row["id"] for row in scope}) != len(scope)):
+        raise DisplayInputError("Figure S19 statement rows need unique IDs and nonempty statement/class/condition text")
     unknown = [row for row in scope if row["class"] not in classes]
     if unknown:
         raise DisplayInputError(f"guarantee_scope_figure_S19 uses unregistered classes: {unknown}")
+    definitions = details.get("classes", {})
+    if set(definitions) != set(classes) or any(not isinstance(v, str) or not v.strip() for v in definitions.values()):
+        raise DisplayInputError("Figure S19 needs the six printed class definitions")
+    model = details.get("model_class", {})
+    for key in ("requirements", "tested", "not_covered"):
+        if not isinstance(model.get(key), list) or not model[key] or any(
+                not isinstance(value, str) or not value.strip() for value in model[key]):
+            raise DisplayInputError(f"Figure S19 needs the source-registered model scope: {key}")
+    boundary = details.get("boundary_notes", {})
+    if (set(boundary) != {"priced_work", "ensemble_spend"}
+            or any(not isinstance(value, str) or not value.strip() for value in boundary.values())
+            or not isinstance(details.get("admission_condition"), str) or not details["admission_condition"].strip()):
+        raise DisplayInputError("Figure S19 needs its exact-identity/sensitivity distinction and printed admission condition")
+    for name in classes:
+        out.compare(S19_SCOPE_GROUP, ("panel_a", "classes", name), definitions[name])
+    for row in scope:
+        for key in ("statement", "class", "holds_under"):
+            out.compare(S19_SCOPE_GROUP, ("panel_a", "statements", row["id"], key), row[key])
+    for key, value in boundary.items():
+        out.compare(S19_SCOPE_GROUP, ("panel_a", "boundary_notes", key), value)
     delta_s = ctx.constants["selection_eq19_algorithm_S4"]["delta_s"]
-    admitted = []
+    admitted, quantities = [], []
     for dataset in DATASETS:
         view = ctx.require_run(dataset)
         recs = records(view)
         rec = recs[0]
         units = rec.admission["loss"]["units"]
         if independent(dataset):
-            unit = f"{rec.admission['empirical_bernstein']['units']:,} i.i.d. graphs (validation split)"
-            criterion = "emp. Bernstein U_a <= -eps_a (Theorem 2)"
-            coverage = f">= {1 - delta_s - rec.config['admission']['alpha']:.0%}; policy fixed on D_confirm"
+            units = rec.admission["empirical_bernstein"]["units"]
+            unit = f"{units:,} i.i.d. graphs (validation split)"
+            criterion = "emp. Bernstein U_a <= -epsilon_a (Theorem 2)"
+            coverage_percent = 100 * (1 - delta_s - rec.config["admission"]["alpha"])
+            coverage = f">= {coverage_percent:.0f}%; policy fixed on D_confirm"
         elif view.is_campaign:
-            unit, criterion, coverage = f"{len(recs)} official splits", "paired repeated-split interval", "none"
+            units = len(recs)
+            unit, criterion, coverage = f"{units} official splits", "paired repeated-split interval", "none"
+            coverage_percent = None
         else:
             unit, criterion, coverage = f"{units} buffered cores", "cluster bootstrap (descriptive)", "none"
+            coverage_percent = None
         G = min(r.admission["Gadmit"] for r in recs)
         returned = all(r.deployed == r.qc for r in recs)
-        admitted.append([SHORT[dataset], unit, criterion, coverage, f"{G} (qC)" if returned else str(G)])
+        outcome = f"{G} (qC)" if returned else str(G)
+        # This is the figure's printed context, not a newly inferred statistical
+        # classification. Failed or comparator-returning runs retain their own outcome.
+        annotation = details.get("outcome_annotations", {}).get(dataset)
+        if annotation and G == 1 and not returned:
+            outcome = f"{G} ({annotation})"
+        admitted.append([SHORT[dataset], unit, criterion, coverage, outcome])
+        values = {"dataset": SHORT[dataset], "unit_count": units, "unit": unit, "criterion": criterion,
+                  "coverage": coverage, "G_admit": G, "outcome": outcome}
+        if independent(dataset):
+            values["coverage_percent"] = coverage_percent
+        for key, value in values.items():
+            out.compare(S19_SCOPE_GROUP, ("panel_b", "datasets", dataset, key), value)
+        quantities.append([dataset, units, G, coverage_percent, returned, annotation])
         out.compare(GROUP["T1"], (dataset, "G_admit"), G)
         if independent(dataset):
             out.compare(GROUP["S13"], (dataset, "J"), rec.admission["empirical_bernstein"]["units"])
         out.uses("run", dataset, ["admit/decision.json", "select/decision.json", "config.json"])
-    model = ctx.constants["model_class_definition1"]
-    backbones = ctx.constants["backbones_table_S5"]
-    tested = list(dict.fromkeys(backbones[d]["backbone_family"] for d in DATASETS if d in backbones))
-    longest = max(len(model["requirements"]), len(tested), len(model["excluded"]))
+    out.compare(S19_SCOPE_GROUP, ("panel_b", "printed_condition"), details["admission_condition"])
+    for key, values in model.items():
+        for index, value in enumerate(values):
+            out.compare(S19_SCOPE_GROUP, ("panel_c", key, index), value)
+    tested = model["tested"]
+    longest = max(len(model["requirements"]), len(tested), len(model["not_covered"]))
     pad = lambda items: list(items) + [None] * (longest - len(items))
-    panel_c = [list(row) for row in zip(pad(model["requirements"]), pad(tested), pad(model["excluded"]))]
+    panel_c = [list(row) for row in zip(pad(model["requirements"]), pad(tested), pad(model["not_covered"]))]
     out.data("panel_a", ["statement", "class", "holds_under"], [[r["statement"], r["class"], r["holds_under"]]
                                                                 for r in scope])
     out.data("panel_b", ["dataset", "unit_J_or_repeats", "criterion", "coverage", "G_admit"], admitted)
+    out.data("panel_b_quantities", ["dataset", "unit_count", "G_admit", "conditional_coverage_percent",
+                                    "comparator_returned", "printed_outcome_annotation"], quantities)
+    out.data("class_definitions", ["class", "definition"], [[name, definitions[name]] for name in classes])
+    out.data("scope_annotations", ["location", "text"],
+             [[key, value] for key, value in boundary.items()] + [["panel_b", details["admission_condition"]]])
     out.data("panel_c", ["requirement", "tested", "not_covered"], panel_c)
+    out.uses("registered_constants", "paper/registered_constants.json",
+             ["guarantee_scope_figure_S19", "guarantee_scope_figure_S19_details", "selection_eq19_algorithm_S4.delta_s"])
+    document = json.loads((ctx.root / "paper/sources.json").read_text())["documents"]["supplementary"]
+    out.provenance(evidence_kind="mixed", source={"document": "supplementary", "pages": [37],
+                    "sha256": document["sha256"]},
+                   panel_a="Source-registered statement classes and explicit assumptions; no experimental certification",
+                   panel_b="Counts, admission outcomes and coverage arithmetic from supplied runs/configuration; the printed condition and boundary notation are contextual annotations",
+                   panel_c="Source-registered supported-model requirements, tested mechanisms and exclusions",
+                   analytical_sensitivity="Proposition 10(ii) remains a sensitivity model, distinct from the exact identities in Propositions 10(iii) and 11")
     plt = pyplot()
-    fig = plt.figure(figsize=(12.0, 8.0))
+    fig = plt.figure(figsize=(16.0, 13.0))
     grid = fig.add_gridspec(2, 2, width_ratios=(1.3, 1.0), wspace=0.08, hspace=0.25)
     ax = fig.add_subplot(grid[:, 0])
     ax.axis("off")
     ax.set_title("a  The class of each statement and the condition it holds under", loc="left")
-    colors = ("#2864a5", "#2864a5", "#2a9d6a", "#2a9d6a", "#d37a18", "#d37a18")
-    step = 0.86 / max(len(scope), 1)
+    colors = ("#525252", "#525252", "#2864a5", "#2a9d6a", "#e96a25", "#6b55c9")
+    heights = [max(len(wrap(row["statement"], 34).splitlines()),
+                   len(wrap(row["holds_under"], 52).splitlines())) + 0.8 for row in scope]
+    step, offset = 0.81 / sum(heights), 0.0
     for k, name in enumerate(classes):
-        ax.text(0.36 + 0.03 * k, 0.89, name, transform=ax.transAxes, rotation=90, fontsize=6, ha="center",
-                va="bottom")
+        ax.text(0.36 + 0.03 * k, 0.89, name, transform=ax.transAxes, rotation=90, fontsize=7, ha="center",
+                va="bottom", color=colors[k])
     for y, row in enumerate(scope):
-        top = 0.87 - (y + 0.5) * step
+        top = 0.87 - (offset + 0.5 * heights[y]) * step
+        offset += heights[y]
         index = classes.index(row["class"])
-        ax.text(0.0, top, wrap(row["statement"], 34), transform=ax.transAxes, fontsize=6, va="center")
+        ax.text(0.0, top, wrap(row["statement"], 34), transform=ax.transAxes, fontsize=7, va="center")
         ax.plot(0.36 + 0.03 * index, top, "o", ms=3.5, color=colors[index], transform=ax.transAxes)
-        ax.text(0.55, top, wrap(row["holds_under"], 52), transform=ax.transAxes, fontsize=5.5, va="center")
+        ax.text(0.55, top, wrap(row["holds_under"], 52), transform=ax.transAxes, fontsize=6.5, va="center")
+    ax.text(0, 0.015, wrap("; ".join(f"{name}: {definitions[name]}" for name in classes), 112),
+            transform=ax.transAxes, fontsize=6, va="bottom")
     ax = fig.add_subplot(grid[0, 1])
     ax.axis("off")
     ax.set_title("b  Admission criterion and outcome per dataset", loc="left")
-    widths = (8, 16, 18, 16, 8)
-    table = ax.table(cellText=[[wrap(c, w) if c is not None else "" for c, w in zip(row, widths)]
-                               for row in admitted],
+    widths = (8, 20, 24, 19, 16)
+    body = [[wrap(c, w) if c is not None else "" for c, w in zip(row, widths)] for row in admitted]
+    table = ax.table(cellText=body,
                      colLabels=["dataset", "unit; J or repeats", "criterion", "coverage", "G_admit"],
                      colWidths=[w / sum(widths) for w in widths], loc="upper center", cellLoc="left")
     table.auto_set_font_size(False)
-    table.set_fontsize(6)
-    table.scale(1, 2.3)
+    table.set_fontsize(7)
+    for (r, c), cell in table.get_celld().items():
+        cell.set_height(0.055 if r == 0 else 0.024 * max(text.count("\n") + 1 for text in body[r - 1]) + 0.012)
+    ax.text(0, 0.22, wrap("Printed scope condition: " + details["admission_condition"], 113),
+            transform=ax.transAxes, fontsize=6.3, va="top")
     ax = fig.add_subplot(grid[1, 1])
     ax.axis("off")
     ax.set_title("c  Supported model class (Definition 1)", loc="left")
     for k, (title, items, color) in enumerate((("Requirements", model["requirements"], "#d6e4f2"),
                                                ("Tested", tested, "#d8eedf"),
-                                               ("Not covered", model["excluded"], "#f7d9c4"))):
+                                               ("Not covered", model["not_covered"], "#f7d9c4"))):
         body = "\n".join(wrap(f"- {item}", 30) for item in items)
-        ax.text(0.0 + 0.34 * k, 0.97, f"{title}\n{body}", transform=ax.transAxes, fontsize=5.5, va="top",
+        ax.text(0.0 + 0.34 * k, 0.97, f"{title}\n{body}", transform=ax.transAxes, fontsize=7, va="top",
                 bbox={"boxstyle": "round", "fc": color, "ec": "0.6"})
+    fig.text(0.125, 0.055, wrap(" ".join(boundary.values()), 180), fontsize=7)
     out.figure(fig)
     out.note("a: registered statement classes (registered_constants guarantee_scope_figure_S19). b: admission unit, "
-             "criterion and outcome of every run; coverage of Corollary 1 = 1 - delta_s - delta_a. c: Definition 1 and "
-             "the backbone families of registered_constants (model_class_definition1, backbones_table_S5).")
+             "criterion and outcome of every run; conditional coverage of Corollary 1 = 1 - delta_s - delta_a. "
+             "c: the complete model-scope bullets printed in Figure S19c, including insertion, GPR-GNN's signed "
+             "readout and the global-attention exclusion. Printed contextual notes do not establish that a run "
+             "satisfies a theorem's independence or policy-freezing assumptions.")

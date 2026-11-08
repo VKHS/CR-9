@@ -1,7 +1,7 @@
 {
   "schema": "cross-morse-display-manifest-1",
-  "review_date": "2026-11-07",
-  "review_scope": "AI-assisted contextual inventory of every numbered table and figure in both supplied PDFs. Presence in this inventory records a support path, not deposited experimental evidence or an exact-artwork reproduction. Numerical supplementary builder coverage reviewed on 2026-11-07; related columns/panels remain distinct from complete historical display reconstruction. Display generators reviewed on 2026-11-07: every numbered display has a full-display generator in paper/build/displays (implementation[0]) that `make paper` runs on the published outputs; record_sets lists the measurement-record sets each generator reads. Additional source review on 2026-11-07 registered S15 declared accounting ranges, S19 descriptions and S28b sigma grid; corrected four textual reference groups with numerical values preserved; Figure S17d retains its explicitly labelled independence illustration separately from paired S16/S16b intervals. This refresh does not attest benchmark reproduction.",
+  "review_date": "2026-11-08",
+  "review_scope": "AI-assisted contextual inventory of every numbered table and figure in both supplied PDFs. Presence in this inventory records a support path, not deposited experimental evidence or an exact-artwork reproduction. Numerical supplementary builder coverage reviewed on 2026-11-07; related columns/panels remain distinct from complete historical display reconstruction. Display generators reviewed on 2026-11-07: every numbered display has a full-display generator in paper/build/displays (implementation[0]) that `make paper` runs on the published outputs; record_sets lists the measurement-record sets each generator reads. Additional source review on 2026-11-07 registered S15 declared accounting ranges, S19 descriptions and S28b sigma grid; corrected four textual reference groups with numerical values preserved; Figure S17d retains its explicitly labelled independence illustration separately from paired S16/S16b intervals. This refresh does not attest benchmark reproduction. 2026-11-08 AI-assisted source review added explicitly declared analytical input coordinates for Tables S28/S28b and Figure S17g from supplementary pages 18-19 and 36. These coordinates are distinct from observed support minima and unrounded measured effects. Independent comparison targets remain in printed_display_values.json. Existing registered numerical values are unchanged; this is not an author certification or verification of experiment measurements. 2026-11-08 rendered-page review of main Figure 5a (page 12) and supplementary Figure S4 (page 32) confirmed declared cost-range endpoints and three additional S4 methods not tabulated in S15/S15b; these are explicit source requirements, not inferred measurements. 2026-11-08 independent reference definitions added for supplementary Figures S1, S5, S8, S10 and S19 and Table S29. Formula-derived coordinates are labelled with their source inputs and precision; complete reference coverage is distinct from measured reconstruction.",
   "documents": {
     "main": {
       "sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
@@ -15,7 +15,7 @@
     }
   },
   "registry_sha256": {
-    "registered_constants.json": "2512eb47a72b67b303ad86967ee2895a94c2fb7c3f64fe09f8c34dcdaf4a9d67",
+    "registered_constants.json": "67b2100ef4f8127b19738d2326826b50dab6acc35332f26c3cd9d38aff18e4a6",
     "reported_results.json": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b"
   },
   "displays": [
@@ -219,7 +219,8 @@
       "coverage": "full_display_generator",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
       "notes": [
-        "F2 is a partial internal-method map using absolute official scores and serial costs. Panel 5a additionally uses external baselines and gain/cost normalization; the complete panel and other cost-model panels require their original data, assumptions and generator."
+        "F2 is a partial internal-method map using absolute official scores and serial costs. Panel 5a additionally uses external baselines and gain/cost normalization; the complete panel and other cost-model panels require their original data, assumptions and generator.",
+        "Source review of main page 12: panel a uses S15 declared cost-range endpoints for retrained architectures; observed executed costs are retained as separately labelled companion data. The complete four-panel reference contract remains required."
       ],
       "related_tables": [
         "supplementary:Table S15",
@@ -359,7 +360,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S1_integrated_decision_surface. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S48",
         "supplementary:Table S23"
@@ -473,7 +476,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "Source review of supplementary page 32: declared S15 cost ranges remain distinct from observed scalar costs. Three additional figure points (GRAMA on ogbn-arxiv; AMP on Roman-empire and PascalVOC-SP) are outside the fourteen S15/S15b external pairs. Exact scores, original study provenance and the producer-contract scope require source records or author clarification; no numerical coordinates are inferred from the image. Missing points and the absent full-figure reference contract prevent a complete claim."
+      ],
       "related_tables": [
         "supplementary:Table S15",
         "supplementary:Table S15b"
@@ -503,7 +508,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S5_horizon_beam_sensitivity. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S29"
       ],
@@ -602,7 +609,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S8_clipping_and_uncertainty. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S13"
       ],
@@ -677,7 +686,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original figure data/generator and stated analytical assumptions; raw empirical inputs remain required where used.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_figure_S10_sensing_cost. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "related_tables": [
         "supplementary:Table S6c",
         "supplementary:Table S23"
@@ -898,6 +909,7 @@
       ],
       "implementation": [
         "paper/build/displays/run_audits.py",
+        "paper/build/displays/regret_data.py",
         "cm_theory/control.py",
         "cm_theory/factorial.py",
         "cm_theory/selection.py",
@@ -915,12 +927,15 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original plotted data, panel definitions, generating script and underlying run/record sources; related table checks do not rebuild an entire figure.",
-      "notes": [],
+      "notes": [
+        "Panel g uses the source-declared illustrative ESS values 74-142 and target 0.0030 nats. Actual per-run support and effect-dependent requirements remain separate companion data. Related-table agreement for this panel cannot certify the complete eight-panel figure."
+      ],
       "related_tables": [
         "supplementary:Table S13",
         "supplementary:Table S16",
         "supplementary:Table S20",
-        "supplementary:Table S28"
+        "supplementary:Table S28",
+        "supplementary:Table S28b"
       ],
       "evidence_kind": "mixed"
     },
@@ -994,7 +1009,8 @@
       "coverage": "full_display_generator",
       "required_evidence": "Method and guarantee definitions for panels a/c, plus original per-dataset admission statistics and frozen policy outcomes for panel b. Protocol and theory checks do not reconstruct those measured outcomes; the complete figure needs its original data and artwork generator.",
       "notes": [
-        "Panel b reports dataset-specific admission outcomes, including the distinction between descriptive single-graph criteria and independent-graph admission. The figure is not solely a method illustration."
+        "Panel b reports dataset-specific admission outcomes, including the distinction between descriptive single-graph criteria and independent-graph admission. The figure is not solely a method illustration.",
+        "Independently reviewed complete reference definition: supplementary_figure_S19_guarantee_scope. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
       ],
       "related_tables": [
         "supplementary:Table S1",
@@ -1106,7 +1122,8 @@
       "registry_groups": [],
       "implementation": [
         "paper/build/displays/protocol_tables.py",
-        "cross_morse/pipeline.py"
+        "cross_morse/pipeline.py",
+        "cross_morse/qualification.py"
       ],
       "record_sets": [],
       "commands": [
@@ -1115,7 +1132,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Declared protocol and actual per-run configuration/role/source identities for claims that it was executed.",
-      "notes": [],
+      "notes": [
+        "Current runtime enforces nominal A0 qualification in every registered Full-profile stratum before selection when the entry contract is enabled. Older source-bound entry records remain historical and are not certified as having enforced this added requirement."
+      ],
       "evidence_kind": "protocol"
     },
     {
@@ -2154,7 +2173,8 @@
       "registry_groups": [],
       "implementation": [
         "paper/build/displays/analytical.py",
-        "cm_theory/control.py"
+        "paper/build/displays/regret_data.py",
+        "cm_theory/admission.py"
       ],
       "record_sets": [],
       "commands": [
@@ -2163,8 +2183,10 @@
         "make si-check"
       ],
       "coverage": "full_display_generator",
-      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
-      "notes": [],
+      "required_evidence": "Declared analytical count and ESS scenario, bound parameters and original lifecycle effect for the effect-dependent final column. Observed support minima are exported separately and do not replace the printed analytical scenario.",
+      "notes": [
+        "Independent PDF reference group supplementary_table_S28_one_step_regret_bound covers all declared cells. Rounded count at equality is distinct from the smallest sufficient integer, both exported."
+      ],
       "evidence_kind": "mixed"
     },
     {
@@ -2179,7 +2201,8 @@
       "registry_groups": [],
       "implementation": [
         "paper/build/displays/analytical.py",
-        "cm_theory/control.py"
+        "paper/build/displays/regret_data.py",
+        "cm_theory/admission.py"
       ],
       "record_sets": [],
       "commands": [
@@ -2188,9 +2211,11 @@
         "make si-check"
       ],
       "coverage": "full_display_generator",
-      "required_evidence": "Stated mathematical assumptions and original measured inputs wherever the analysis uses empirical quantities; no empirical origin is inferred from arithmetic agreement.",
-      "notes": [],
-      "evidence_kind": "mixed"
+      "required_evidence": "The fully specified sigma, count and effect-target grids on supplementary page 19 and the runtime bound formulas. This table is an analytical calculation and reconstructs without experiment archives.",
+      "notes": [
+        "Independent PDF reference group supplementary_table_S28b_variance_aware_regret_bound covers all declared cells. The 0.0090 target is an explicit analytical input, not a replacement for the measured COCO effect. Rounded equality counts and sufficient integer counts are both exported."
+      ],
+      "evidence_kind": "analytical"
     },
     {
       "kind": "table",
@@ -2215,7 +2240,9 @@
       ],
       "coverage": "full_display_generator",
       "required_evidence": "Original source arrays, estimator, analysis script, configuration, split/seed identities and output-to-source mapping; no dedicated full-display builder is declared.",
-      "notes": [],
+      "notes": [
+        "Independently reviewed complete reference definition: supplementary_table_S29_horizon_beam_sweep. Every registered target must be compared; empirical content still requires original artifacts and agreement is assessed separately."
+      ],
       "evidence_kind": "mixed"
     },
     {

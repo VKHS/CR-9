@@ -66,6 +66,7 @@ G_S37 = "supplementary_table_S37_input_fallback_counts"
 G_S45 = "supplementary_table_S45_inserted_site_attribution"
 G_S46 = "supplementary_table_S46_budget_matched_frontier"
 G_S46B = "supplementary_table_S46b_arm_level_outcomes"
+G_FIG_S1 = "supplementary_figure_S1_integrated_decision_surface"
 
 
 # ---------------------------------------------------------------------------
@@ -315,7 +316,7 @@ def route_cost_range(ledger: dict, route: str):
 
 
 def method_rows(ctx, dataset: str, base, gate) -> tuple[dict, list[dict]]:
-    """Rows of Supplementary Table S15 for one dataset (also the points of Figure S4)."""
+    """Observed rows of Supplementary Table S15; figure ranges are applied separately."""
     ledger = run_ledger(ctx, dataset, gate)
     params = plant_parameters(ctx, dataset)
     open_loop = _open_loop_routes(ctx)
@@ -425,6 +426,37 @@ def table_s6c(ctx, out):
 # Supplementary Tables S15 and S15b
 # ---------------------------------------------------------------------------
 
+def s15_declared_range(ctx, path) -> tuple[float, float]:
+    """Read a source-declared range, independently of the executed method ledger."""
+    key = "baseline_reference_ranges_table_S15"
+    value = ctx.constants.get(key)
+    for field in path:
+        value = value.get(field) if isinstance(value, dict) else None
+    if (not isinstance(value, (list, tuple)) or len(value) != 2
+            or any(isinstance(v, bool) or not isinstance(v, (int, float))
+                   or not math.isfinite(v) or v <= 0 for v in value)
+            or value[0] > value[1]):
+        raise DisplayInputError(f"{key}.{'/'.join(path)} must be a finite positive ordered range")
+    return float(value[0]), float(value[1])
+
+
+def s15_figure_cost_range(ctx, ensemble: int, *, method=None, route=None) -> tuple[float, float, tuple]:
+    """The S15 per-member declared range, in nominal executions at the same E.
+
+    Figures 5a and S4 explicitly use these ranges for retrained architectures
+    (and S4 for other internal routes). Executed scalar costs are different
+    observations and must remain separately labelled companions.
+    """
+    if (method is None) == (route is None):
+        raise DisplayInputError("A declared figure range requires exactly one method or internal route")
+    if isinstance(ensemble, bool) or not isinstance(ensemble, int) or ensemble <= 0:
+        raise DisplayInputError("A declared figure range requires a positive integer ensemble size")
+    path = (("external_methods", method, "serial_cost_per_member") if method is not None else
+            ("internal_routes", "best_fixed_depth" if route == "best_depth" else route, "serial_cost_per_member"))
+    low, high = s15_declared_range(ctx, path)
+    return ensemble * low, ensemble * high, path
+
+
 def s15_reference_ranges(ctx, out):
     """Emit the declared accounting ranges separately from the observed method ledger."""
     key = "baseline_reference_ranges_table_S15"
@@ -434,14 +466,7 @@ def s15_reference_ranges(ctx, out):
     rows = []
 
     def add_range(path, kind, name, quantity, unit):
-        value = reference
-        for field in path:
-            value = value.get(field) if isinstance(value, dict) else None
-        if (not isinstance(value, (list, tuple)) or len(value) != 2
-                or any(isinstance(v, bool) or not isinstance(v, (int, float))
-                       or not math.isfinite(v) or v <= 0 for v in value)
-                or value[0] > value[1]):
-            raise DisplayInputError(f"{key}.{'/'.join(path)} must be a finite positive ordered range")
+        value = s15_declared_range(ctx, path)
         rows.append([kind, name, quantity, value[0], value[1], unit, "declared reference range"])
         out.compare(G_S15_REFERENCE, path, list(value),
                     note="Declared accounting reference from SI p12; separate from measured ledger values")
@@ -1367,47 +1392,93 @@ def figure_s1(ctx, out):
     plt = pyplot()
     fig, axes = plt.subplots(1, 3, figsize=(11.0, 3.4))
     positions = {ledger["dataset"]: len(ledgers) - 1 - i for i, ledger in enumerate(ledgers)}
-    panel_a, panel_b, panel_c = [], [], []
+    panel_a, panel_b, panel_c, observed_intervals = [], [], [], []
+    out.compare(G_FIG_S1, ("dataset_order",), list(positions))
+    for panel in ("a", "b"):
+        out.compare(G_FIG_S1, ("panels", panel, "reference"), "qC")
+        out.compare(G_FIG_S1, ("panels", panel, "zero_line"), 0)
+    out.compare(G_FIG_S1, ("panels", "b", "unit"), "nats")
     for ledger in ledgers:
         y = positions[ledger["dataset"]]
-        for ax, (mean, low, high), rows in ((axes[0], (ledger["gain"], ledger["gain_low"], ledger["gain_high"]), panel_a),
-                                            (axes[1], (ledger["effect"], ledger["effect_low"], ledger["effect_high"]),
-                                             panel_b)):
+        for panel, ax, (mean, low, high), rows in (
+                ("a", axes[0], (ledger["gain"], ledger["gain_low"], ledger["gain_high"]), panel_a),
+                ("b", axes[1], (ledger["effect"], ledger["effect_low"], ledger["effect_high"]), panel_b)):
+            observed_intervals.append([ledger["dataset"], panel, mean, low, high, ledger["returned"]])
+            interval_kind = "comparator identity; no statistical interval" if ledger["returned"] else "95% paired test interval"
+            if ledger["returned"]:
+                if any(value not in (None, 0.0) for value in (low, high)):
+                    out.incomplete("A returned comparator has a nonzero supplied interval; inspect the retained source record",
+                                   location=f"panel/{panel}/{ledger['dataset']}/interval")
+                low = high = None   # source Table 1: identity point, not an estimated zero-width interval
+            elif low is None or high is None:
+                out.incomplete("Figure S1 requires both endpoints of the 95% paired test interval",
+                               location=f"panel/{panel}/{ledger['dataset']}/interval")
+            unit = ("AP" if ledger["native_metric"] else "pp") if panel == "a" else ledger["loss_label"]
+            values = {"effect": mean, "low": low, "high": high, "unit" if panel == "a" else "loss": unit,
+                      "interval_kind": interval_kind}
+            for key, value in values.items():
+                out.compare(G_FIG_S1, ("panels", panel, "rows", ledger["dataset"], key), value)
             if mean is None:
+                out.incomplete("Figure S1 requires the paired effect", location=f"panel/{panel}/{ledger['dataset']}/effect")
                 continue
             err = None if low is None or high is None else [[mean - low], [high - mean]]
             ax.errorbar(mean, y, xerr=err, fmt="o", color="#1f77b4", capsize=3, ms=5)
-            rows.append([ledger["dataset"], mean, low, high,
-                         "AP" if ledger["native_metric"] else "pp" if rows is panel_a else ledger["loss_label"]])
+            rows.append([ledger["dataset"], mean, low, high, unit, interval_kind])
     categories = []
     for ledger in sorted(ledgers, key=lambda l: (l["returned"], -list(ROUTE_NAMES).index(l["qd_route"]))):
         if mechanism_label(ledger) not in categories:
             categories.append(mechanism_label(ledger))
     level = {label: len(categories) - 1 - i for i, label in enumerate(categories)}
-    for i, ledger in enumerate(ledgers):
+    area_scale = 8.0  # common presentation scale, not a measured or source-transcribed quantity
+    out.compare(G_FIG_S1, ("panels", "c", "category_order"), categories)
+    out.compare(G_FIG_S1, ("panels", "c", "marker_area_encoding"), "proportional to expected serial cost")
+    for ledger in ledgers:
         fallback = 1.0 if ledger["returned"] else ledger["p"]
-        y = level[mechanism_label(ledger)] + 0.12 * (i % 3 - 1)
-        area = 30.0 * ledger["C_exp"]
+        fallback_role = "global comparator return" if ledger["returned"] else "input comparator fallback"
+        peers = [item["dataset"] for item in ledgers if mechanism_label(item) == mechanism_label(ledger)]
+        y = level[mechanism_label(ledger)] + 0.12 * (peers.index(ledger["dataset"]) - (len(peers) - 1) / 2)
+        area = area_scale * ledger["C_exp"]
         axes[2].scatter([fallback], [y], s=area, color="#1f77b4")
         axes[2].annotate(SHORT[ledger["dataset"]], (fallback, y), xytext=(5, -2), textcoords="offset points", fontsize=6)
-        panel_c.append([ledger["dataset"], mechanism_label(ledger), fallback, ledger["C_exp"], area])
+        values = {"mechanism": mechanism_label(ledger), "fallback_fraction": fallback, "fallback_role": fallback_role,
+                  "comparator_returned": ledger["returned"], "expected_serial_cost": ledger["C_exp"],
+                  "marker_cost": area / area_scale, "annotation": SHORT[ledger["dataset"]]}
+        for key, value in values.items():
+            out.compare(G_FIG_S1, ("panels", "c", "rows", ledger["dataset"], key), value)
+        panel_c.append([ledger["dataset"], mechanism_label(ledger), fallback, ledger["C_exp"], area, fallback_role,
+                        ledger["returned"], area_scale, SHORT[ledger["dataset"]]])
         out.compare(G_S23, (ledger["dataset"], "fallback_probability"), ledger["p"])
     for ax in axes[:2]:
         ax.axvline(0, color="0.3", lw=0.8)
         ax.set_yticks(list(positions.values()), [SHORT[d] for d in positions])
     axes[2].set_yticks(list(level.values()), list(level))
     axes[2].set_xlim(-0.05, 1.08)
-    axes[0].set_xlabel("official-metric effect over $q_C$ (pp; AP for an AP metric)")
+    axes[0].set_xlabel("official-metric effect over $q_C$\n(pp; AP in native units)")
     axes[1].set_xlabel("paired CE/BCE effect over $q_C$ (nats)")
-    axes[2].set_xlabel("input comparator-fallback fraction (marker area: expected serial cost)")
+    axes[1].locator_params(axis="x", nbins=4)
+    axes[2].set_xlabel("input comparator-fallback fraction\n(marker area: expected serial cost)")
     for ax, title in zip(axes, ("a  Endpoint effect", "b  Primary loss effect", "c  Selected mechanism and resource scale")):
-        ax.set_title(title)
+        ax.set_title(title, fontsize=9)
+    if ctx.synthetic:
+        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
     fig.tight_layout()
     out.figure(fig)
-    out.data("panel_a_endpoint_effect", ["dataset", "effect", "low", "high", "unit"], panel_a)
-    out.data("panel_b_loss_effect", ["dataset", "effect_nats", "low", "high", "loss"], panel_b)
+    out.data("panel_a_endpoint_effect", ["dataset", "effect", "low", "high", "unit", "interval_kind"], panel_a)
+    out.data("panel_b_loss_effect", ["dataset", "effect_nats", "low", "high", "loss", "interval_kind"], panel_b)
     out.data("panel_c_mechanism", ["dataset", "mechanism", "fallback_fraction", "expected_serial_cost", "marker_area"],
-             panel_c)
+             [row[:5] for row in panel_c])
+    out.data("panel_c_roles", ["dataset", "mechanism", "fallback_fraction", "expected_serial_cost", "marker_area",
+                               "fallback_role", "comparator_returned", "marker_area_scale", "annotation"], panel_c)
+    out.data("observed_intervals", ["dataset", "panel", "observed_effect", "observed_low", "observed_high",
+                                    "comparator_returned"], observed_intervals)
+    out.provenance(source_document="supplementary", source_pages=[31],
+                   supporting_sources=[{"document": "main", "pages": [10], "table": "Table 1"},
+                                       {"document": "supplementary", "pages": [16], "table": "Table S23"}],
+                   reference_scope="Every dataset, paired mean/interval/unit, categorical route, fallback role/coordinate, "
+                                   "expected-work marker encoding and dataset annotation is independently referenced",
+                   presentation="Route jitter and the common marker-area scale are rendering choices, not new measurements",
+                   interpretation="The Peptides reference is the source's evaluated radius arm; matching its values does "
+                                  "not assert that this arm passed the registered confirmation gate")
     for dataset in DATASETS:
         out.uses("run", dataset, ["select/candidates.json", "final/results_summary.json"])
     _uses_records(out, gate)
@@ -1557,6 +1628,42 @@ def figure_s3(ctx, out):
 
 
 FIGURE_S4_DATASETS = ("ogbn-arxiv", "Roman-empire", "PascalVOC-SP")     # the three regimes of main Table 2
+# Named points visible in the actual SI Figure S4 (p32), additional to the
+# fourteen dataset/method pairs tabulated by S15/S15b. Their scores are not
+# numerically printed in those tables; no coordinates are digitized or invented.
+FIGURE_S4_ADDITIONAL_METHODS = {"ogbn-arxiv": ("GRAMA",), "Roman-empire": ("AMP",), "PascalVOC-SP": ("AMP",)}
+
+
+def figure_s4_rows(ctx, dataset, base, gate, out):
+    ledger, observed = method_rows(ctx, dataset, base, gate)
+    entries = [{**entry, "s15_row": index} for index, entry in enumerate(observed)]
+    for method in FIGURE_S4_ADDITIONAL_METHODS[dataset]:
+        scores = seed_scores(base, dataset, method)
+        cost = method_value(base, "serial_cost", dataset, method)
+        entries.append({"dataset": dataset, "route": None, "method": method, "key": method,
+                        "family": FAMILY_EXTERNAL, "role": "external", "E": ledger["E"],
+                        "cost_low": cost, "cost_high": cost, "C_exp": None, "C_assure": None,
+                        "score": statistics.fmean(scores) if scores else None, "s15_row": None,
+                        "score_origin": f"baselines: mean of {len(scores)} seeds" if scores else ""})
+    for entry in entries:
+        entry["observed_cost_low"], entry["observed_cost_high"] = entry["cost_low"], entry["cost_high"]
+        entry["cost_basis"] = "observed deployment ledger" if entry["role"] == "deployed" else "observed execution"
+        if entry["role"] == "external" or entry["role"] == "route" and entry["route"] != "nominal":
+            low, high, path = s15_figure_cost_range(ctx, ledger["E"],
+                    method=entry["method"] if entry["role"] == "external" else None,
+                    route=entry["route"] if entry["role"] == "route" else None)
+            entry["cost_low"], entry["cost_high"] = low, high
+            entry["cost_basis"] = "S15 declared per-member range times E"
+            out.compare(G_S15_REFERENCE, path, [low / ledger["E"], high / ledger["E"]],
+                        note="SI Figure S4 p32 calls for S15 declared ranges; observed costs stay separate")
+        if entry["score"] is None:
+            extra = "; this named point is not tabulated in S15/S15b" if entry["s15_row"] is None else ""
+            out.incomplete(f"SI Figure S4 p32 requires original per-seed official scores for "
+                           f"{dataset}/{entry['method']}{extra}", location=f"panel/{dataset}/{entry['method']}")
+        if entry["cost_low"] is None:
+            out.incomplete(f"Required observed cost is absent for {dataset}/{entry['method']}",
+                           location=f"panel/{dataset}/{entry['method']}/cost")
+    return ledger, entries
 
 
 @display("supplementary:Figure S4", stem="FigS4", title="Method score and cost maps",
@@ -1565,10 +1672,13 @@ def figure_s4(ctx, out):
     base, gate = ctx.require_records("baselines"), ctx.require_records("input_gate")
     plt = pyplot()
     fig, axes = plt.subplots(1, 3, figsize=(12.0, 3.6))
+    observed_costs = []
     for ax, dataset in zip(axes, FIGURE_S4_DATASETS):
-        ledger, entries = method_rows(ctx, dataset, base, gate)
+        ledger, entries = figure_s4_rows(ctx, dataset, base, gate, out)
         data = []
-        for index, e in enumerate(entries):
+        for e in entries:
+            observed_costs.append([dataset, e["method"], e["role"], e["observed_cost_low"], e["observed_cost_high"],
+                                   e["C_exp"], e["C_assure"], "observed execution; separate from declared plot ranges"])
             if e["score"] is None or e["cost_low"] is None:
                 continue
             if e["role"] == "deployed" and not ledger["returned"]:
@@ -1594,25 +1704,45 @@ def figure_s4(ctx, out):
                 if external:
                     ax.annotate(e["method"], (x, e["score"]), xytext=(0, 5), textcoords="offset points", fontsize=6,
                                 color=color, ha="center")
-            data.append([e["method"], e["family"], e["cost_low"], e["cost_high"], x, e["score"], e["C_assure"]])
-            out.compare(G_S15, (dataset, "rows", index, "official_score"), e["score"])
+            data.append([e["method"], e["family"], e["cost_low"], e["cost_high"], x, e["score"], e["C_assure"],
+                         e["role"], e["E"], e["cost_basis"]])
+            if e["s15_row"] is not None:
+                out.compare(G_S15, (dataset, "rows", e["s15_row"], "official_score"), e["score"])
         ax.set_title(dataset, loc="left")
         ax.set_xlabel("serial compute (one nominal execution = 1)")
         ax.set_ylabel({"accuracy": "accuracy (%)", "rocauc": "ROC-AUC (%)", "macro_f1": "macro F1 (%)",
                        "ap": "AP"}.get(METRICS.get(dataset), "official score"))
         ax.grid(alpha=0.25)
         out.data(f"panel_{SHORT[dataset].lower()}", ["method", "family", "cost_low", "cost_high", "x_plotted",
-                                                     "official_score", "assurance_cost"], data)
+                                                     "official_score", "assurance_cost", "role", "ensemble",
+                                                     "cost_basis"], data)
         out.uses("run", dataset, ["select/candidates.json", "final/results_summary.json", "train/model_inventory.json"])
     handles = [plt.Line2D([], [], marker="o", color="#2a7bd6", label="deployed rule: expected cost (marker) to "
                           "assurance cost (tick)"),
                plt.Line2D([], [], marker="s", color="#e8642c", ls="", label="$q_C$"),
-               plt.Line2D([], [], marker="D", color="#2bb38a", lw=3, alpha=0.7, label="retrained architectures"),
+               plt.Line2D([], [], marker="D", color="#2bb38a", lw=3, alpha=0.7,
+                          label="retrained architectures (declared range)"),
                plt.Line2D([], [], marker="o", color="0.55", lw=2, alpha=0.7,
-                          label="other internal routes (configuration cost range)")]
+                          label="other internal routes (declared range)")]
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=7, frameon=False)
+    if ctx.synthetic:
+        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     out.figure(fig)
+    out.data("observed_costs", ["dataset", "method", "role", "observed_cost_low", "observed_cost_high",
+                                "observed_expected_cost", "observed_assurance_cost", "basis"], observed_costs)
+    out.note("SI Figure S4 p32 additionally names GRAMA on ogbn-arxiv and AMP on Roman-empire and PascalVOC-SP. "
+             "Their exact scores are not printed in S15/S15b; original per-seed baseline records are required. "
+             "S15/S15b's fourteen-pair table contract is unchanged. Full-figure reference coverage remains incomplete.")
+    out.provenance(source_document="supplementary", source_pages=[32], supporting_table_pages=[11, 12],
+                   cost_basis="S15 declared ranges for other methods; observed qC and deployed expected/assurance ledgers",
+                   observed_cost_companion="data/FigS4/observed_costs.csv",
+                   points_outside_S15_method_contract=[{"dataset": d, "method": m}
+                       for d, methods in FIGURE_S4_ADDITIONAL_METHODS.items() for m in methods],
+                   limitation="The three additional plotted pairs need original score records and study-plan/producer "
+                              "scope clarification. E12/S15's fourteen-pair contract is unchanged; no plot coordinates "
+                              "were digitized and no full-figure reference contract is certified.")
+    out.uses("protocol", "baseline_reference_ranges_table_S15", ["paper/registered_constants.json"])
     _uses_records(out, base)
     _uses_records(out, gate)
 

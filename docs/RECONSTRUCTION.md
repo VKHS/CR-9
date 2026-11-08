@@ -9,6 +9,7 @@ make paper                                   # omits heavy lifecycle checkpoint/
 make paper PAPER_TIER=complete               # every published file
 make paper ARTIFACTS_ROOT=/abs/artifacts PAPER_ROOT=/abs/paper
 make paper-offline                           # reuse artifacts already downloaded
+make paper-offline PAPER_TIER=complete       # require complete cached lifecycle artifacts
 ```
 
 The smaller analysis tier applies to lifecycle run archives. Record sets and
@@ -32,13 +33,26 @@ or controller checkpoints they contain.
 | Exit status | Meaning |
 |---|---|
 | `0` | every display has complete content and comparison coverage from the published outputs; all required values agree at printed precision |
-| `1` | required outputs await publication, content or a comparison definition is missing, a value cannot be compared, or a value differs |
+| `1` | a required artifact is unregistered, unpublished, absent locally or cached at an insufficient tier; content or a comparison definition is missing; a value cannot be compared or differs |
 | `2` | a download, an input verification or a generator failed |
 
 The summary is printed and saved beside the workspace as `<workspace>.status.json`.
 Offline reuse checks each artifact against the current release manifest, verification
 stamp and file inventory. It does not trust an old download directory solely because
 the files are present.
+
+An analysis-tier cache cannot satisfy a complete-tier request. Canonical required
+artifacts remain mandatory even if their manifest row is absent or its `required`
+flag is edited. This includes the observed environment, which may not be read by
+an individual figure generator. The status JSON reports `artifact_materialization`
+with the requested tier, verified tiers and named missing inputs. An incomplete
+local cache still produces the available reconstruction and a diagnostic report;
+changed or conflicting bytes fail verification.
+
+To reconstruct from original local experiment folders before upload, use
+`make paper-preflight PUBLISH_MAP=/abs/map.json PAPER_PREFLIGHT_ROOT=/abs/new-work`.
+The [publication guide](PUBLICATION.md) describes the verified input workspace and
+its local-only readiness verdict.
 
 ### The commands named in the manuscript on the published outputs
 
@@ -92,6 +106,13 @@ display reproduces the paper. Each display separately records `content_complete`
 coverage requires complete content and the required independent comparison targets.
 A quantitative figure needs plotted source data and a reviewed display-specific
 comparison contract; a few checks against a related table do not certify all its panels.
+
+Table S28b is a fully specified analytical calculation. It builds without lifecycle
+archives from the count, variance and target-effect grids printed on supplementary
+page 19. Table S28 retains its observed-effect dependency, while its listed reference
+counts and ESS define an analytical scenario. Figure S17g uses that declared ESS
+scenario; its actual-support companion data remain separate. Successful checks of
+panel g do not certify all eight panels of Figure S17.
 
 Comparison CSVs distinguish `exact`, `differs`, `not_comparable`, `no_reference` and
 `missing`. Required registered values remain in this accounting even when a generator

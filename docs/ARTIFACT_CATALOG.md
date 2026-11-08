@@ -76,7 +76,7 @@ URLs and adapter identities come from [data/sources.json](../data/sources.json).
 
 Every run uses source, resolved-configuration and unit-membership identities. The prepared split arrays record the executed memberships; registered design manifests specify the intended seeds and rules. The roles are `fit`, `explore`, `select`, `confirm`, `compare`, `admit` and `test`. Optimization seeds, ensemble members, resampling seeds, evaluator and statistical unit must remain attached to each relevant result. [The registration guide](EVIDENCE_REGISTRATION.md) explains the original-run declarations.
 
-Current runtime identity: `0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb`.
+Current runtime identity: `d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651`.
 
 | Bundled synthetic run | Source identity | Sealed stages |
 |---|---|---|

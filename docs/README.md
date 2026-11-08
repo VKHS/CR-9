@@ -8,9 +8,10 @@
 |---|---|
 | [Reconstruction](RECONSTRUCTION.md) | `make paper`: download and verify the published outputs, rebuild all 90 displays with their source data, compare with the printed values |
 | [Paper references and reconstruction evidence](PAPER_REFERENCE_VALUES.md) | PDF-bound comparison targets, required cells and panels, source-data provenance and the final publication gate |
+| [Figure reference coverage plan](FIGURE_REFERENCE_COVERAGE.md) | Every remaining figure contract, exact source pages, available targets and the specific original data or scenario declarations required |
 | [Availability review](AVAILABILITY_REVIEW.md) | The detailed repository review, scientific corrections, remaining paper/code differences and the artifacts needed for fulfillment |
 | [Producing the measured outputs](PRODUCTION.md) | One command on the cluster: every runner of `release/experiment_code.json` as one Slurm job graph from the seven completed runs, ending with the map that publication reads |
-| [Publishing the measured outputs](PUBLICATION.md) | How the reported runs, record sets, campaigns and environment enter the release `paper-artifacts` |
+| [Publishing the measured outputs](PUBLICATION.md) | Local original-folder preflight, followed by verified publication of runs, record sets, campaigns and environments in `paper-artifacts` |
 | [Statement compliance](../STATEMENT_COMPLIANCE.md) | Each item of the registered availability statement and each claim of the availability text printed in the manuscript (main page 15, Methods, SI page 30): where the repository fulfils it, and what awaits publication |
 | [The final destination](FINAL_DESTINATION.md) | The repository after publication, drawn now: printed values the released code fixes by design and their agreement with the paper, pre-registered data roles of the independent-graph benchmarks, the projected release (contents, tiers, parts, Zenodo feasibility), compliance at publication and the close-out sequence |
 

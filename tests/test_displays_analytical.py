@@ -16,13 +16,15 @@ import tempfile
 import unittest
 from pathlib import Path
 from statistics import NormalDist
+from unittest import mock
 
-from paper.build.displays import analytical
-from paper.build.displays.framework import ROOT, DATASETS, RunView
+from paper.build.displays import analytical, regret_data
+from paper.build.displays.framework import (ROOT, DATASETS, RunView, DisplayInputError, DisplayValidationError,
+                                           comparison_coverage)
 from paper.build.displays.testing import build_one, context, fake_records, read_table, write_files
 
 from paper.build.displays.framework import load_references
-REGISTRY, _, _ = load_references(ROOT)
+REGISTRY, REFERENCE_METADATA, _ = load_references(ROOT)
 CONSTANTS = json.loads((ROOT / "paper/registered_constants.json").read_text(encoding="utf-8"))
 Z = NormalDist().inv_cdf(0.975)
 IDS = ["supplementary:Table S6", "supplementary:Table S6b", "supplementary:Table S14b",
@@ -157,7 +159,7 @@ LAYOUT = {"S6": (10, 11), "S6b": (8, 8), "S14b": (9, 10), "S28": (7, 6), "S28b":
 FIGURE_DATA = {"FigS6": ("panel_a_multiplier", "panel_b_admissible_order", "panel_c_proteins_resolvent_fraction"),
                "FigS7": ("panel_a_certificate", "panel_b_gap_density"),
                "FigS8": ("panel_a_clipped_fraction", "panel_b_half_widths"),
-               "FigS10": ("panel_a_sensing_share", "panel_b_residual", "panel_c_reduced_sensor"),
+               "FigS10": ("panel_a_sensing_share", "panel_b_residual", "panel_c_reduced_sensor", "panel_c_boundary"),
                "FigS11": ("panel_a_ledger", "panel_b_ledger"),
                "FigS12": ("power_curves", "central_margins"),
                "FigS15": ("panel_a_response", "panel_b_band_sensitivity", "panel_c_executed_range", "panel_d_headroom"),
@@ -222,8 +224,7 @@ class AnalyticalDisplayTests(unittest.TestCase):
                 differing = {(display_id, r["path"]) for r in rows if r["status"] != "exact"}
                 self.assertEqual(differing, {d for d in EXPECTED_DIFFERENCES if d[0] == display_id})
         transcribed = {i for i, (_, rows) in self.results.items() if rows}
-        self.assertEqual(transcribed, set(IDS) - {"supplementary:Table S28", "supplementary:Table S28b",
-                                                    "supplementary:Table S33"})
+        self.assertEqual(transcribed, set(IDS) - {"supplementary:Table S33"})
 
     def test_generators_never_read_the_registry(self):
         source = Path(analytical.__file__).read_text(encoding="utf-8")
@@ -295,9 +296,90 @@ class AnalyticalDisplayTests(unittest.TestCase):
         self.assertEqual(rows[10], ["0.0030 (smallest admitted effect)", "53,257", "2,716", "3,018", "3,529"])
         self.assertEqual(rows[11], ["0.0045 (arxiv effect)", "23,670", "1,725", "1,881", "2,139"])
         self.assertEqual(rows[12], ["0.0084 (Pascal effect)", "6,793", "873", "930", "1,022"])
-        # Table 1's COCO effect -0.00905 gives the four-decimal target 0.0091 (S28b prints 0.0090, S26b 0.0091).
-        self.assertEqual(rows[13][0], "0.0091 (COCO effect)")
-        self.assertEqual(rows[13][1], f"{round(8 * 0.01 * math.log(400) / 0.0091 ** 2):,}")
+        # S28b explicitly declares 0.0090 as an analytical target. It is not
+        # obtained by rounding this fixture's independently supplied 0.00905.
+        self.assertEqual(rows[13], ["0.0090 (COCO effect)", "5,917", "810", "861", "944"])
+
+    def test_regret_tables_cover_every_independently_transcribed_cell(self):
+        for display_id, expected in (("supplementary:Table S28", 38), ("supplementary:Table S28b", 72)):
+            with self.subTest(display=display_id):
+                writer, rows = self.results[display_id]
+                missing, coverage = comparison_coverage(display_id, writer.comparisons, REGISTRY,
+                                                        REFERENCE_METADATA, scope="analytical")
+                self.assertEqual(missing, [])
+                self.assertTrue(coverage["complete"])
+                self.assertEqual(coverage["expected_values"], expected)
+                self.assertTrue(all(row["status"] == "exact" for row in rows))
+                missing, coverage = comparison_coverage(display_id, writer.comparisons[:-1], REGISTRY,
+                                                        REFERENCE_METADATA, scope="analytical")
+                self.assertFalse(coverage["complete"])
+                self.assertTrue(missing)
+
+    def test_s28_reference_scenario_does_not_substitute_observed_support(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = build_context(root / "inputs")
+            altered = audit("ogbn-arxiv")
+            altered["support"]["cells"]["0:0"].update(trajectory_count=77, ess=65.9)
+            altered["support"]["cells"]["1:0"].update(trajectory_count=0, ess=0.0)
+            write_files(root / "inputs/ogbn-arxiv", {"fit/full/audit.json": altered})
+            writer, compared = build_one("supplementary:Table S28", ctx, root / "out", registry=REGISTRY)
+            self.assertEqual(read_table(root / "out", "S28"), self.table("S28"))
+            observed = data_rows(root / "out", "S28", "observed_support")
+            row = next(r for r in observed if r["dataset"] == "ogbn-arxiv")
+            self.assertEqual(float(row["observed_minimum_trajectory_count"]), 0)
+            self.assertEqual(float(row["observed_minimum_qualified_cell_ESS"]), 65.9)
+            self.assertTrue(all(r["status"] == "exact" for r in compared))
+            self.assertIn("Declared analytical inputs", writer.evidence_scope[0]["regret_reference_scenario"]["counts_role"])
+            # The final column remains measured-input dependent.
+            ctx.require_run("ogbn-arxiv").evidence["final"]["paired_loss"]["mean"] = -.006
+            _, changed = build_one("supplementary:Table S28", ctx, root / "changed", registry=REGISTRY)
+            differing = [r["path"] for r in changed if r["status"] == "differs"]
+            self.assertEqual(differing, ["datasets/ogbn-arxiv/n_for_effect_rounded"])
+
+    def test_s28b_builds_without_runs_and_exports_sufficient_integer_counts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = context()
+            writer, compared = build_one("supplementary:Table S28b", ctx, root, registry=REGISTRY)
+            self.assertEqual(read_table(root, "S28b"), self.table("S28b"))
+            self.assertTrue(all(r["status"] == "exact" for r in compared))
+            self.assertFalse(any(item["kind"] == "run" for item in writer.inputs))
+            needed = {r["target_id"]: r for r in data_rows(root, "S28b", "target_requirements")}
+            self.assertEqual(int(needed["smallest_admitted_effect"]["hoeffding_n_rounded"]), 53257)
+            self.assertEqual(int(needed["smallest_admitted_effect"]["hoeffding_minimum_integer_n"]), 53258)
+            self.assertEqual(int(needed["COCO_effect"]["hoeffding_minimum_integer_n"]), 5918)
+            params = regret_data.parameters(ctx)
+            for row in needed.values():
+                target = float(row["target_nats"])
+                minimum = int(row["hoeffding_minimum_integer_n"])
+                self.assertLessEqual(2 * analytical.admission.hoeffding_radius(minimum, **params), target)
+                self.assertGreater(2 * analytical.admission.hoeffding_radius(minimum - 1, **params), target)
+                for sigma in (.005, .007, .01):
+                    count = int(row[f"bernstein_n_sigma1_{sigma:.3f}"])
+                    self.assertLessEqual(2 * analytical.admission.bernstein_radius(count, sigma, **params), target)
+                    self.assertGreater(2 * analytical.admission.bernstein_radius(count - 1, sigma, **params), target)
+
+    def test_regret_scenarios_reject_missing_or_invalid_declared_inputs(self):
+        for value in (0, -1, float("nan"), True, 1.5):
+            with self.subTest(reference_ess=value):
+                ctx = context()
+                ctx.__dict__["constants"] = json.loads(json.dumps(CONSTANTS))
+                ctx.constants[regret_data.S28_INPUTS]["reference_support"]["ogbn-arxiv"]["reference_ess"] = value
+                with self.assertRaises(DisplayValidationError):
+                    regret_data.reference_support(ctx)
+        for value in (0, -1, float("nan"), True):
+            with self.subTest(target=value):
+                ctx = context()
+                ctx.__dict__["constants"] = json.loads(json.dumps(CONSTANTS))
+                ctx.constants[regret_data.S28B_INPUTS]["effect_targets"][0]["target_nats"] = value
+                with self.assertRaises(DisplayValidationError):
+                    regret_data.variance_grid(ctx)
+        ctx = context()
+        ctx.__dict__["constants"] = json.loads(json.dumps(CONSTANTS))
+        del ctx.constants[regret_data.S28B_INPUTS]["effect_targets"]
+        with self.assertRaises(analytical.DisplayInputError):
+            regret_data.variance_grid(ctx)
 
     # -- retained-share, selective sensing, power and boundaries -------------------------------------
     def test_s33_reproduces_the_printed_model(self):
@@ -379,6 +461,146 @@ class AnalyticalDisplayTests(unittest.TestCase):
         self.assertEqual([int(r["sketch_width"]) for r in sketch], [4, 8, 16, 32, 64, 128, 256, 512])
         self.assertAlmostEqual(float(sketch[0]["relative_sd_bound_pct"]), 100 * math.sqrt(2 / 4))
 
+    def test_s8_s10_cover_every_independent_panel_reference(self):
+        for display_id, group, expected in (("supplementary:Figure S8", analytical.G_FS8, 12),
+                                            ("supplementary:Figure S10", analytical.G_FS10, 52)):
+            with self.subTest(display=display_id):
+                writer, rows = self.results[display_id]
+                missing, coverage = comparison_coverage(display_id, writer.comparisons, REGISTRY,
+                                                        REFERENCE_METADATA, scope="measurement")
+                self.assertEqual(missing, [])
+                self.assertTrue(coverage["complete"])
+                self.assertEqual(coverage["expected_values"], expected)
+                self.assertTrue(all(row["status"] == "exact" for row in rows if row["group"] == group))
+        graph_datasets = {"PascalVOC-SP", "COCO-SP", "Peptides-func"}
+        self.assertEqual(set(REGISTRY[analytical.G_FS8]["panel_a"]), graph_datasets)
+        self.assertEqual(set(REGISTRY[analytical.G_FS8]["panel_b"]), graph_datasets)
+        self.assertEqual(set(REGISTRY[analytical.G_FS10]["panel_a"]), set(ADMITTED))
+        self.assertEqual(set(REGISTRY[analytical.G_FS10]["panel_b"]["datasets"]), set(ADMITTED))
+        self.assertEqual(set(REGISTRY[analytical.G_FS10]["panel_c"]["points"]),
+                         {"4", "8", "16", "32", "64", "128", "256", "512"})
+
+    def test_s8_s10_omitted_series_or_boundary_cannot_claim_complete_coverage(self):
+        targets = {
+            "supplementary:Figure S8": (analytical.G_FS8, [
+                ("panel_a", "PascalVOC-SP", "clipped_fraction_percent"),
+                ("panel_b", "COCO-SP", "graph_unit_half_width_mnats"),
+                ("panel_b", "Peptides-func", "test_stage_half_width_mnats"),
+                ("panel_b", "Peptides-func", "test_to_graph_ratio")]),
+            "supplementary:Figure S10": (analytical.G_FS10, [
+                ("panel_a", "ogbn-arxiv", "controller_overhead_percent"),
+                ("panel_a", "ogbn-proteins", "full_state_sensing_share_percent"),
+                ("panel_b", "datasets", "PascalVOC-SP", "residual_share_percent"),
+                ("panel_b", "datasets", "Peptides-func", "printed_residual_percent"),
+                ("panel_b", "zero_boundary_percent"),
+                ("panel_c", "points", "4", "sketch_width"),
+                ("panel_c", "points", "128", "relative_sd_bound_percent"),
+                ("panel_c", "points", "512", "proteins_sensing_share_percent"),
+                ("panel_c", "sketch_width_domain"),
+                ("panel_c", "proteins_overhead_ceiling_percent")]),
+        }
+        for display_id, (group, paths) in targets.items():
+            writer, _ = self.results[display_id]
+            for path in paths:
+                with self.subTest(display=display_id, path=path):
+                    retained = [row for row in writer.comparisons if not (row.group == group and row.path == path)]
+                    self.assertLess(len(retained), len(writer.comparisons))
+                    missing, coverage = comparison_coverage(display_id, retained, REGISTRY,
+                                                            REFERENCE_METADATA, scope="measurement")
+                    self.assertFalse(coverage["complete"])
+                    self.assertTrue(any(row["group"] == group and row["path"].startswith("/".join(path))
+                                        for row in missing))
+
+    def test_s8_rounded_ratio_is_not_used_to_invent_an_exact_interval(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = build_context(root / "inputs")
+            # Exact printed endpoints are a valid software input, but do not
+            # identify the hidden unrounded coordinates of the figure's 3.8 label.
+            paired = ctx.require_run("Peptides-func").evidence["final"]["paired_loss"]
+            paired.update(lower=-0.0047, upper=-0.0013)
+            _, comparisons = build_one("supplementary:Figure S8", ctx, root / "out", registry=REGISTRY)
+            rows = {row["dataset"]: row for row in data_rows(root / "out", "FigS8", "panel_b_half_widths")}
+            computed = float(rows["Peptides-func"]["ratio"])
+            self.assertAlmostEqual(computed, 0.0017 / (Z * math.sqrt(0.000126 / 2331)))
+            self.assertNotAlmostEqual(computed, 3.8)
+            ratio = next(row for row in comparisons if row["group"] == analytical.G_FS8
+                         and row["path"] == "panel_b/Peptides-func/test_to_graph_ratio")
+            self.assertEqual(ratio["status"], "differs")
+            interval = next(row for row in comparisons if row["group"] == analytical.G_T1
+                            and row["path"] == "Peptides-func/loss_effect_interval_nats")
+            self.assertEqual(interval["status"], "exact")
+
+    def test_s8_changed_admission_moments_change_the_plotted_bounds_and_widths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = build_context(root / "inputs")
+            ctx.require_run("PascalVOC-SP").evidence["admission"]["empirical_bernstein"]["sample_variance"] *= 2
+            _, rows = build_one("supplementary:Figure S8", ctx, root / "out", registry=REGISTRY)
+            differing = {row["path"] for row in rows if row["group"] == analytical.G_FS8 and row["status"] == "differs"}
+            self.assertEqual(differing, {"panel_a/PascalVOC-SP/clipped_fraction_percent",
+                                         "panel_b/PascalVOC-SP/graph_unit_half_width_mnats",
+                                         "panel_b/PascalVOC-SP/test_to_graph_ratio"})
+
+    def test_s10_cost_changes_do_not_replace_analytical_sensor_coordinates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = build_context(root / "inputs")
+            ctx.require_run("ogbn-proteins").evidence["cost"]["C_qD"] = 5.2
+            _, rows = build_one("supplementary:Figure S10", ctx, root / "out", registry=REGISTRY)
+            comparisons = {row["path"]: row["status"] for row in rows if row["group"] == analytical.G_FS10}
+            self.assertEqual(comparisons["panel_a/ogbn-proteins/controller_overhead_percent"], "differs")
+            self.assertEqual(comparisons["panel_b/datasets/ogbn-proteins/residual_share_percent"], "differs")
+            self.assertEqual(comparisons["panel_c/proteins_overhead_ceiling_percent"], "differs")
+            self.assertEqual(comparisons["panel_a/ogbn-proteins/full_state_sensing_share_percent"], "exact")
+            self.assertTrue(all(status == "exact" for path, status in comparisons.items()
+                                if path.startswith("panel_c/points/")))
+
+    def test_s10_perturbed_precision_curve_fails_its_independent_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = build_context(root / "inputs")
+            with mock.patch.object(analytical.budget, "sketch_relative_sd_bound",
+                                   side_effect=lambda k: 1.1 * math.sqrt(2 / k)):
+                _, rows = build_one("supplementary:Figure S10", ctx, root / "out", registry=REGISTRY)
+            differing = [row for row in rows if row["group"] == analytical.G_FS10 and row["status"] == "differs"]
+            self.assertEqual(len(differing), 8)
+            self.assertTrue(all(row["path"].endswith("relative_sd_bound_percent") for row in differing))
+
+    def test_s8_s10_missing_observations_are_not_supplied_by_reference_coordinates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = build_context(root / "inputs")
+            del ctx.require_run("PascalVOC-SP").evidence["final"]["paired_loss"]["upper"]
+            with self.assertRaisesRegex(DisplayInputError, "interval is not recorded"):
+                build_one("supplementary:Figure S8", ctx, root / "s8", registry=REGISTRY)
+            del ctx.require_run("ogbn-proteins").evidence["cost"]["C_qD"]
+            with self.assertRaisesRegex(DisplayInputError, "records no comparator or deployed serial cost"):
+                build_one("supplementary:Figure S10", ctx, root / "s10", registry=REGISTRY)
+
+    def test_s10_all_source_formula_coordinates_and_boundaries(self):
+        # Independent provider/PDF inputs, not reads of the rendering helpers.
+        dimensions = {"ogbn-arxiv": (169343, 1166243, 512), "ogbn-proteins": (132534, 39561252, 512),
+                      "Roman-empire": (22662, 32927, 384), "PascalVOC-SP": (479.40, 2710.48, 128),
+                      "COCO-SP": (476.88, 2693.67, 128), "Peptides-func": (150.94, 307.30, 128)}
+        bars = {row["dataset"]: row for row in data_rows(self.out, "FigS10", "panel_a_sensing_share")}
+        residuals = {row["dataset"]: row for row in data_rows(self.out, "FigS10", "panel_b_residual")}
+        for dataset, (nodes, edges, hidden) in dimensions.items():
+            r = edges / (nodes * hidden)
+            overhead = COSTS[dataset][0] / COSTS[dataset][1] - 1
+            self.assertAlmostEqual(float(bars[dataset]["full_state_sensing_share"]), 8 * r / (1 + r))
+            self.assertAlmostEqual(float(residuals[dataset]["residual_share"]), overhead - 8 * r / (1 + r))
+        r = 39561252 / (132534 * 512)
+        for row in data_rows(self.out, "FigS10", "panel_c_reduced_sensor"):
+            k = int(row["sketch_width"])
+            self.assertAlmostEqual(float(row["relative_sd_bound_pct"]), 100 * math.sqrt(2 / k))
+            self.assertAlmostEqual(float(row["proteins_sensing_share_pct"]), 800 * r / (1 + r) * k / 512)
+            self.assertAlmostEqual(float(row["proteins_overhead_pct"]), 20)
+        boundary = data_rows(self.out, "FigS10", "panel_c_boundary")[0]
+        self.assertEqual(int(boundary["minimum_sketch_width"]), 4)
+        self.assertEqual(int(boundary["maximum_sketch_width"]), 512)
+        self.assertAlmostEqual(float(boundary["proteins_overhead_pct"]), 20)
+
     def test_figure_s11_ledgers(self):
         released = [float(r["accumulated_work"]) for r in data_rows(self.out, "FigS11", "panel_a_ledger")]
         held = [float(r["accumulated_work"]) for r in data_rows(self.out, "FigS11", "panel_b_ledger")]
@@ -443,7 +665,7 @@ class MissingInputTests(unittest.TestCase):
         cells = json.loads((ROOT / "examples/runs/arxiv/fit/full/audit.json").read_text())["support"]["cells"].values()
         support = analytical.support_counts(ctx, "ogbn-arxiv")
         self.assertEqual(support["minimum_count"], min(c["trajectory_count"] for c in cells))
-        self.assertEqual(support["reference_ess"], int(min(c["ess"] for c in cells if c["qualified"]) + 1e-9))
+        self.assertEqual(support["minimum_qualified_cell_ess"], min(c["ess"] for c in cells if c["qualified"]))
         dep = analytical.deployment(ctx, "ogbn-arxiv")
         self.assertTrue(dep["returns_qC"])
         self.assertEqual(dep["m"], 1.0)
@@ -466,8 +688,11 @@ class MissingInputTests(unittest.TestCase):
                     pass
             s28 = {r["Dataset"]: r for r in read_table(Path(tmp), "S28")}
         self.assertEqual(built, {"supplementary:Table S6", "supplementary:Table S6b", "supplementary:Table S28",
+                                 "supplementary:Table S28b",
                                  "supplementary:Figure S7", "supplementary:Figure S11", "supplementary:Figure S15"})
-        self.assertEqual((s28["ogbn-arxiv"]["minimum count"], s28["ogbn-arxiv"]["2e at minimum count (nats)"]), ("0", ""))
+        # Empty observed cells do not change the source-declared scenario.
+        self.assertEqual((s28["ogbn-arxiv"]["minimum count"], s28["ogbn-arxiv"]["2e at minimum count (nats)"]),
+                         ("128", "0.0612"))
 
 
 if __name__ == "__main__":
