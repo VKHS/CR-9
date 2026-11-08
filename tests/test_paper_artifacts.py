@@ -13,6 +13,8 @@ import json
 import os
 from pathlib import Path
 import shutil
+import shlex
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -205,9 +207,9 @@ class PaperArtifactTransport(unittest.TestCase):
         self.assertTrue(all(row["reused"] for row in again["published"]))
 
     def test_a_changed_published_part_is_rejected(self):
-        staged, _ = self.stage()
+        staged, entry = self.stage()
         pa.publish(staged, self.manifest, client=self.client(), download_base=f"{self.server.base}/download")
-        name = sorted(n for n in self.server.assets if n.startswith("run-arxiv.tar.gz"))[0]
+        name = entry["tiers"]["complete"]["parts"][0]["asset"]
         corrupted = bytearray(self.server.assets[name]["bytes"])
         corrupted[100] ^= 0xFF
         self.server.assets[name]["bytes"] = bytes(corrupted)
@@ -233,6 +235,122 @@ class PaperArtifactTransport(unittest.TestCase):
         second = pa.pack_one("run:ogbn-arxiv", self.tmp / "measured/arxiv_run", again,
                              relationship="exact_result_producing_run", part_bytes=64 * 1024, scientific_only=False)
         self.assertEqual(first["tiers"], second["tiers"])
+
+    def test_cached_fetched_bytes_are_reverified(self):
+        staged, _ = self.stage()
+        pa.publish(staged, self.manifest, client=self.client(), download_base=f"{self.server.base}/download")
+        destination = self.tmp / "cached"
+        pa.fetch(destination, manifest_path=self.manifest, tier="complete")
+        (destination / "runs/arxiv/final/results_summary.json").write_text("{}")
+        for check in (lambda: pa.fetch(destination, manifest_path=self.manifest, tier="complete"),
+                      lambda: pa.verify_fetched(destination, manifest_path=self.manifest)):
+            with self.assertRaisesRegex(pa.ArtifactError, "differs from its inventory"):
+                check()
+
+    def test_offline_use_rejects_a_published_directory_without_its_stamp(self):
+        staged, _ = self.stage()
+        pa.publish(staged, self.manifest, client=self.client(), download_base=f"{self.server.base}/download")
+        destination = self.tmp / "offline"
+        pa.fetch(destination, manifest_path=self.manifest)
+        (destination / ".artifacts/run-arxiv.json").unlink()
+        with self.assertRaisesRegex(pa.ArtifactError, "no managed download stamp"):
+            pa.verify_fetched(destination, manifest_path=self.manifest)
+
+    def test_publish_never_deletes_a_conflicting_existing_asset(self):
+        staged, entry = self.stage()
+        pa.publish(staged, self.manifest, client=self.client(), download_base=f"{self.server.base}/download")
+        before = self.manifest.read_bytes()
+        name = entry["tiers"]["complete"]["parts"][0]["asset"]
+        original = self.server.assets[name]
+        self.server.assets[name] = dict(original, bytes=b"X" * len(original["bytes"]))
+        with self.assertRaisesRegex(pa.ArtifactError, "differs|collision"):
+            pa.publish(staged, self.manifest, client=self.client(), download_base=f"{self.server.base}/download")
+        self.assertEqual(self.server.assets[name]["bytes"], b"X" * len(original["bytes"]))
+        self.assertEqual(self.manifest.read_bytes(), before)
+
+    def test_repack_into_the_same_stage_is_idempotent(self):
+        staged, first = self.stage()
+        second = pa.pack_one("run:ogbn-arxiv", self.tmp / "measured/arxiv_run", staged,
+                             relationship="post_result_revision", part_bytes=64 * 1024, scientific_only=False)
+        self.assertEqual(first["tiers"], second["tiers"])
+        self.assertEqual(second["relationship"], "post_result_revision")
+
+    def test_traceable_but_partial_records_do_not_pass_scientific_packing(self):
+        from scripts import records
+        source = self.tmp / "records/nominal_time"
+        shutil.copytree(EXAMPLE_RECORDS, source)
+        provenance = pa.read_json(source / "provenance.json")
+        provenance["synthetic"] = False  # adversarial claim; no benchmark evidence is created
+        pa.write_json(source / "provenance.json", provenance)
+        records.write_manifest(source)
+        with self.assertRaisesRegex(ValueError, "incomplete or unexpected dataset coverage"):
+            pa.pack_one("records:nominal_time", source, self.tmp / "staged", relationship="post_result_revision")
+
+    def test_empty_or_unsafe_published_descriptors_are_refused(self):
+        staged, _ = self.stage()
+        manifest = pa.publish(staged, self.manifest, client=self.client(), download_base=f"{self.server.base}/download")
+        for change in (lambda value: value["artifacts"][0]["tiers"]["complete"].update(parts=[]),
+                       lambda value: value["artifacts"][0]["tiers"]["complete"]["parts"][0].update(asset="../outside")):
+            broken = json.loads(json.dumps(manifest))
+            change(broken)
+            with self.assertRaises(pa.ArtifactError):
+                pa.validate_manifest(broken)
+
+    def test_pack_requires_an_explicit_relationship_and_complete_map_when_requested(self):
+        mapping = self.tmp / "map.json"
+        pa.write_json(mapping, {"run:ogbn-arxiv": str(EXAMPLE_RUN)})
+        with mock.patch("sys.stderr"):
+            self.assertEqual(pa.main(["pack", "--map", str(mapping), "--output-dir", str(self.tmp / "staged")]), 2)
+            self.assertEqual(pa.main(["pack", "--map", str(mapping), "--output-dir", str(self.tmp / "staged"),
+                                      "--relationship", "post_result_revision", "--require-complete"]), 2)
+        self.assertFalse((self.tmp / "staged").exists())
+
+    def test_derive_binds_all_views_to_verified_assets_and_report_files(self):
+        from scripts.reconstruct import write_file_manifest
+        staged, _ = self.stage()
+        pa.publish(staged, self.manifest, client=self.client(), download_base=f"{self.server.base}/download")
+        fetched, checkout, workspace = self.tmp / "fetched", self.tmp / "checkout", self.tmp / "workspace"
+        checkout.mkdir()
+        pa.fetch(fetched, manifest_path=self.manifest, tier="complete")
+        (workspace / "displays/data").mkdir(parents=True)
+        (workspace / "displays/data/panel.json").write_text('{"value":1}')
+        (workspace / "displays/data/panel.csv").write_text("value\n1\n")
+        identities, _ = pa.verify_analysis_run(fetched / "runs/arxiv", {})
+        run = fetched / "runs/arxiv"
+        record_index = pa.read_json(fetched / "records/index.json")
+        inputs = [{"kind": "sealed_run", "path": str(run), "identities": identities,
+                   "stage_manifests": {p.name: pa.sha256_file(p) for p in (run / "provenance/stages").glob("*.json")}},
+                  {"kind": "measurement_records", "path": str(fetched / "records/index.json"),
+                   "sha256": pa.sha256_file(fetched / "records/index.json"), "sets": record_index["sets"]}]
+        report = {"schema": "cross-morse-reconstruction-1", "label": "transport fixture", "inputs": inputs,
+                  "software_sources": {}, "displays": [{"id": "fixture", "full_numerical_display": False}],
+                  "display_generators": {"comparison_with_printed_values": {"no_reference": 1}}}
+        pa.write_json(workspace / "reconstruction.json", report)
+        write_file_manifest(workspace)
+        pa.derive(fetched, checkout=checkout, workspace=workspace, manifest_path=self.manifest)
+        index = pa.read_json(checkout / "paper/source_data/INDEX.json")
+        self.assertEqual(index["artifact_manifest_sha256"], pa.sha256_file(self.manifest))
+        self.assertEqual(index["reconstruction"]["values_no_reference"], 1)
+        self.assertEqual(set(index["reports"]), {"reconstruction", "workspace_files", "status"})
+        self.assertIn("data/panel.json", index["files"])
+        for directory in ("paper/source_data", "manifests/published", "environment/observed"):
+            view = checkout / directory
+            value = pa.read_json(view / "INDEX.json")
+            self.assertEqual(value["files"], pa.view_files(view))
+            self.assertEqual({a["id"] for a in value["artifacts"]}, {r["id"] for r in REQUIRED})
+        previous = (checkout / "paper/source_data/INDEX.json").read_bytes()
+        # A self-consistent report cannot silently omit a fetched measured input.
+        pa.write_json(workspace / "reconstruction.json", dict(report, inputs=inputs[1:]))
+        write_file_manifest(workspace)
+        with self.assertRaisesRegex(pa.ArtifactError, "complete fetched run set"):
+            pa.derive(fetched, checkout=checkout, workspace=workspace, manifest_path=self.manifest)
+        self.assertEqual((checkout / "paper/source_data/INDEX.json").read_bytes(), previous)
+        pa.write_json(workspace / "reconstruction.json", report)
+        write_file_manifest(workspace)
+        (workspace / "displays/data/panel.csv").write_text("changed")
+        with self.assertRaises(ValueError):
+            pa.derive(fetched, checkout=checkout, workspace=workspace, manifest_path=self.manifest)
+        self.assertEqual((checkout / "paper/source_data/INDEX.json").read_bytes(), previous)
 
     def test_parts_reassemble_to_the_original_bytes(self):
         source = self.tmp / "blob.bin"
@@ -281,6 +399,15 @@ class BaselineStudyView(unittest.TestCase):
             self.assertEqual(pa.sha256_file(path), study[key]["sha256"])
         self.assertEqual((view / study["adapter_archive"]["file"]).read_bytes(), self.archive.read_bytes())
 
+    def test_a_failed_refresh_retains_the_previous_complete_view(self):
+        pa.derive_baseline_studies(self.records, self.checkout)
+        index = self.checkout / "experiments/baselines/INDEX.json"
+        before = index.read_bytes()
+        self.archive.write_bytes(b"changed")
+        with self.assertRaises(pa.ArtifactError):
+            pa.derive_baseline_studies(self.records, self.checkout)
+        self.assertEqual(index.read_bytes(), before)
+
     def test_no_baselines_set_writes_nothing(self):
         self.assertIsNone(pa.derive_baseline_studies(self.tmp / "absent", self.checkout))
         self.assertFalse((self.checkout / "experiments").exists())
@@ -295,6 +422,64 @@ class BaselineStudyView(unittest.TestCase):
         self.write_upstream()
         with self.assertRaisesRegex(pa.ArtifactError, "is not a file inside"):
             pa.derive_baseline_studies(self.records, self.checkout)
+
+
+class PublicationWrapper(unittest.TestCase):
+    """Failure propagation through the real shell wrapper with a local interpreter stand-in."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="cm publication shell ")
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.root, self.stage = self.base / "checkout", self.base / "publication"
+        (self.root / "hpc").mkdir(parents=True)
+        shutil.copyfile(ROOT / "hpc/publish_paper_artifacts_arrhenius.sh", self.root / "hpc/publish.sh")
+        interpreter = self.base / "fake-python"
+        interpreter.write_text("#!" + sys.executable + "\n" +
+            "import json,os,sys\n" +
+            "with open(os.environ['FAKE_LOG'],'a') as f: f.write(json.dumps(sys.argv[1:])+'\\n')\n" +
+            "args=sys.argv[1:]\n" +
+            "code=int(os.environ.get('FAKE_FETCH_RC','0')) if 'fetch' in args else " +
+            "int(os.environ.get('FAKE_RECONSTRUCT_RC','0')) if 'scripts/reconstruct_paper.py' in args else 0\n" +
+            "raise SystemExit(code)\n")
+        interpreter.chmod(0o755)
+        assignments = ["CM_BASE=" + shlex.quote(str(self.base)), "CM_PYTHON=" + shlex.quote(str(interpreter)),
+                       "CM_BUILD_MODULE=", "CM_PYTHON_MODULE="]
+        (self.root / "run_cross_morse.sh").write_text("#!/bin/bash\nprintf '%s\\n' " +
+                                                     " ".join(shlex.quote(line) for line in assignments) + "\n")
+        (self.stage / "staged").mkdir(parents=True)
+        (self.stage / "staged/fixture.entry.json").write_text("{}")
+        (self.stage / "fetched").mkdir()
+        (self.stage / "fetched/retain.txt").write_text("previous managed download")
+        self.log = self.base / "calls.jsonl"
+
+    def run_publish(self, *, fetch=0, reconstruct=0):
+        environment = dict(os.environ, CM_PUBLISH_ROOT=str(self.stage), CM_PUBLISH_COMMIT="0",
+                           GITHUB_TOKEN="local-test-token", FAKE_LOG=str(self.log),
+                           FAKE_FETCH_RC=str(fetch), FAKE_RECONSTRUCT_RC=str(reconstruct))
+        process = subprocess.run(["bash", str(self.root / "hpc/publish.sh"), "publish"], env=environment,
+                                 capture_output=True, text=True, timeout=30)
+        calls = [json.loads(line) for line in self.log.read_text().splitlines()]
+        return process, calls
+
+    def test_transfer_failure_stops_before_reconstruction_and_preserves_cache(self):
+        result, calls = self.run_publish(fetch=2)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertFalse(any("scripts/reconstruct_paper.py" in call or "derive" in call for call in calls))
+        self.assertTrue((self.stage / "fetched/retain.txt").is_file())
+        fetch = next(call for call in calls if "fetch" in call)
+        self.assertEqual(fetch[fetch.index("--tier") + 1], "complete")
+
+    def test_generator_error_stops_before_derived_views(self):
+        result, calls = self.run_publish(reconstruct=2)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertFalse(any("derive" in call for call in calls))
+
+    def test_comparison_difference_is_retained_in_a_derived_report(self):
+        result, calls = self.run_publish(reconstruct=1)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(any("derive" in call for call in calls))
+        self.assertIn("differences or incomplete display coverage", result.stdout)
 
 
 if __name__ == "__main__":

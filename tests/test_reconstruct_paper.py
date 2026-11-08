@@ -37,6 +37,12 @@ class OneCommandReconstruction(unittest.TestCase):
         cls.server.server_close()
 
     def setUp(self):
+        # Each test owns a release. A tampered asset in the preceding test must
+        # not become an immutable published-asset conflict in the next one.
+        self.server.release = None
+        self.server.assets.clear()
+        self.server.uploads = 0
+        self.server.next_id = 100
         self.tmp = Path(tempfile.mkdtemp(prefix="cm-one-command-"))
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
         self.manifest = self.tmp / "paper_artifacts.json"

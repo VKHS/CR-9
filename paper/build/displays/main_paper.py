@@ -35,7 +35,8 @@ from statistics import NormalDist
 
 import numpy as np
 
-from .framework import (DATASETS, SHORT, DisplayInputError, display, integer, num, pyplot)
+from .framework import (DATASETS, SHORT, DisplayInputError, DisplayValidationError,
+                        display, integer, not_applicable, num, pyplot)
 
 T1_GROUP = "main_table_1_policy_and_deployment_ledger"
 T2_GROUP = "main_table_2_gain_and_cost_ledger"
@@ -457,7 +458,7 @@ def table_1(ctx, out):
     out.table(["Dataset", "q_C identity", "q_C E", "provisional rule", "confirmation output", "G_admit",
                "admission criterion", "D-bar", "U_desc", "U_a", "J", "input-fallback fraction",
                "official gain [95% interval]", "loss effect [95% interval]", "scope", "deployed rule", "deployed E"],
-              ledger_rows, name="T1_ledger",
+              ledger_rows, name="T1_ledger", required=False,
               notes=["Policy and deployment ledger behind Table 1: confirmation contrasts of the run, the admission "
                      "criterion with its statistics (Theorem 2 on independent graphs, descriptive clipped mean on "
                      "dependent units) and the serving-time input-fallback fraction of the input_gate record set."])
@@ -484,8 +485,9 @@ def table_2(ctx, out):
         unit = METRIC_LABELS[dep["metric"]][0]
         tail = led["tail"]
         if dep["returned"]:
-            cells = [f"q_C returned, {qc['ensemble']}", num(led["C_qC"], 1), f"{num(led['C_expected'], 1)} (0%)", None,
-                     f"{num(led['C_assure'], 1)} (0%)", None, None, "exactly 0"]
+            na = not_applicable("The deployment returned qC; there is no controller tail, gain rate or break-even")
+            cells = [f"q_C returned, {qc['ensemble']}", num(led["C_qC"], 1), f"{num(led['C_expected'], 1)} (0%)", na,
+                     f"{num(led['C_assure'], 1)} (0%)", na, na, "exactly 0"]
         else:
             loss = dep["loss_effect"]
             gain = metric_texts(dep, dep["gain_pp"])[0]
@@ -559,14 +561,17 @@ def _deployed_datasets(deps: dict) -> list[str]:
     return [d for d in DATASETS if not deps[d]["returned"]]
 
 
-def confirmation_family(ctx) -> dict:
+def confirmation_family(ctx, out=None) -> dict:
     """The joint nine-test S14 family, validated by its dedicated campaign auditor."""
     from paper.build.supplement import _confirmation_data
     campaign = ctx.require_campaign("confirmation")
     try:
         checked, _ = _confirmation_data(campaign, ctx.root)
     except (OSError, ValueError, KeyError, TypeError) as exc:
-        raise DisplayInputError(f"confirmation campaign: {exc}") from None
+        raise DisplayValidationError(f"confirmation campaign: {exc}") from None
+    if out is not None:
+        from .run_audits import confirmation_scope
+        confirmation_scope(out, checked)
     return {row["contrast_id"]: row for row in checked["rows"]}
 
 
@@ -779,7 +784,7 @@ def holm_family(ctx, family) -> list[dict]:
 def figure_2(ctx, out):
     deps = deployments(ctx)
     leds = ledgers(ctx, deps, ctx.require_records("input_gate"))
-    family = confirmation_family(ctx)
+    family = confirmation_family(ctx, out)
     fits = ensemble_fits(ctx)
     tube = ctx.require_records("tube_audit")
     panel_a = audit_ratios(ctx, deps, leds, fits, tube)
@@ -1019,7 +1024,7 @@ def trace_rows(traces) -> list[dict]:
          needs=("runs", "campaign:confirmation", "records:mechanism_contrasts", "records:decision_traces"))
 def figure_3(ctx, out):
     deps = deployments(ctx)
-    family = confirmation_family(ctx)
+    family = confirmation_family(ctx, out)
     contrasts = mechanism_rows(deps, family, ctx.require_records("mechanism_contrasts"))
     traces = trace_rows(ctx.require_records("decision_traces"))
     margin = ctx.constants["confirmation_eq20_table_S11"]["contrasts"]["MPC-RH"]["practical_margin_nats"]
@@ -1543,18 +1548,15 @@ def _two_significant(value: float) -> float:
 # Figure 6
 # ---------------------------------------------------------------------------
 
-def budget_arms(budget, dataset: str) -> dict:
-    arms = {}
-    for arm in ARMS:
-        keys = {"dataset": dataset, "arm": arm}
-        if not budget.select("effect_vs_qc_nats", **keys):
-            raise DisplayInputError(f"budget_matched: arm {arm} of {dataset} is not in the record set")
-        row = {q: _require_value(budget, q, **keys) for q in
-               ("effect_vs_qc_nats", "effect_vs_feedback_nats", "effect_vs_feedback_ci_low_nats",
-                "effect_vs_feedback_ci_high_nats", "p_holm", "work_ratio", "ceiling")}
+def budget_arms(ctx, dataset: str) -> dict:
+    """Use the same selected configurations and certified replay as Tables S46/S46b."""
+    from .records_campaigns import budget_arms as certified_arms
+    if not hasattr(ctx, "_main_budget_arms"):
+        ctx._main_budget_arms = certified_arms(ctx)
+    arms = {arm: ctx._main_budget_arms[(dataset, arm)] for arm in ARMS}
+    for arm, row in arms.items():
         if not row["effect_vs_feedback_ci_low_nats"] <= row["effect_vs_feedback_nats"] <= row["effect_vs_feedback_ci_high_nats"]:
             raise DisplayInputError(f"budget_matched: the {arm} interval of {dataset} does not contain its effect")
-        arms[arm] = row
     ceilings = {round(row["ceiling"], 12) for row in arms.values()}
     if len(ceilings) != 1:
         raise DisplayInputError(f"budget_matched: the four arms of {dataset} do not share one ceiling")
@@ -1571,7 +1573,7 @@ def _share_grid(ctx, dep: dict) -> list[float]:
     raise DisplayInputError(f"{dep['dataset']}: no registered retained-share grid for a {route} comparator")
 
 
-def budget_rows(ctx, deps, leds, budget) -> list[dict]:
+def budget_rows(ctx, deps, leds) -> list[dict]:
     """Every quantity of Figure 6a-c for one admitted dataset."""
     from cm_campaigns.contract import UNITS
     from cm_theory import economics, inference
@@ -1583,7 +1585,7 @@ def budget_rows(ctx, deps, leds, budget) -> list[dict]:
     rows = []
     for dataset in _deployed_datasets(deps):
         dep, led = deps[dataset], leds[dataset]
-        arms = budget_arms(budget, dataset)
+        arms = budget_arms(ctx, dataset)
         g = -dep["loss_effect"]["mean"]
         if g <= 0:
             continue
@@ -1636,12 +1638,16 @@ def budget_rows(ctx, deps, leds, budget) -> list[dict]:
 
 
 @display("main:Figure 6", stem="Fig6", title="Budget-matched comparison",
-         needs=("runs", "records:input_gate", "records:budget_matched"))
+         needs=("runs", "records:input_gate", "records:budget_matched", "campaign:budget"))
 def figure_6(ctx, out):
     deps = deployments(ctx)
     gate = ctx.require_records("input_gate")
     leds = ledgers(ctx, deps, gate)
-    rows = budget_rows(ctx, deps, leds, ctx.require_records("budget_matched"))
+    rows = budget_rows(ctx, deps, leds)
+    omitted = set(_deployed_datasets(deps)) - {row["dataset"] for row in rows}
+    for dataset in sorted(omitted):
+        out.incomplete(f"{dataset} has no positive measured gain for the gain-normalized panels", location="panels a-c")
+    out.uses("campaign", "budget")
     columns_b = ["dataset", "g_nats", "ceiling", "overhead_o", "phi_grid_low", "phi_grid_central", "phi_grid_high",
                  "phi_measured", "r_B", "decoding_overhead", "budget_aware_overhead", "l_plant_nats",
                  "phi_FB_ensemble_low", "phi_FB_ensemble_high", "phi_B_ensemble_low", "phi_B_ensemble_high"]

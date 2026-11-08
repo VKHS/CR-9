@@ -309,7 +309,7 @@
   "live_zenodo_operations": "not performed",
   "local_container_execution": "not performed; inspect the hosted container workflow for the published commit",
   "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
-  "validation_record_updated": "2026-11-07",
+  "validation_record_updated": "2026-11-08",
   "availability_reconstruction_validation": {
     "date": "2026-11-07",
     "base_commit": "5c1399eabb64f58926e7a28d171c4c2cfb771b38",
@@ -463,6 +463,268 @@
       "paper/build/displays/framework.py": "7859924cf7e870cedf02e585a84d0adb4f03be8ddc088aa0d70eebf619ce7ed0",
       "release/availability_statement.json": "b3d2973b5c9eaa91a8b506b42802b7f0af7dd45d168e5a1d9f51660a59ce8eea",
       "release/experiment_code.json": "d9ae4c577deed0b0d26e1cdd1fe215b595c84e299763c049bb379a7172c8cd5c"
+    }
+  },
+  "evidence_completion_validation": {
+    "date": "2026-11-08",
+    "base_commit": "f34aa5a8f1d9c3d379fc0e6a288aa4373c1b980b",
+    "publication_base_commit": "578837f9c165a3d1bbe4cc2d9fce3783ae5d5f03",
+    "scope": "Availability-statement evidence verification, complete artifact publication, auxiliary scientific exports, paired and illustrative factorial uncertainty, independent PDF comparison targets and source correspondence. Synthetic CPU executions and a simulated scheduler validate software behavior. No original benchmark observation was produced, recovered or reproduced.",
+    "runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+    "runtime_unchanged": true,
+    "checks": {
+      "integrated_full": {
+        "tests_run": 1698,
+        "passed": 1696,
+        "skipped": 2,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 582.769,
+        "command": "make test in the recorded CPU environment",
+        "status": "PASS",
+        "scope": "Executed before the final bounded S15/S19/S17d and textual source-reference corrections; those changes are covered by the final focused suite. Hosted CI identifies its own exact commit."
+      },
+      "integrated_no_torch": {
+        "tests_run": 1405,
+        "passed": 1354,
+        "skipped": 51,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 301.977,
+        "command": "make test-no-torch with an interpreter without PyTorch",
+        "status": "PASS",
+        "scope": "Same pre-final-reference-correction snapshot as the integrated full suite."
+      },
+      "final_focused": {
+        "status": "PASS",
+        "tests_run": 195,
+        "passed": 195,
+        "skipped": 0,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 39.318,
+        "modules": [
+          "tests.test_displays_records_campaigns",
+          "tests.test_displays_run_audits",
+          "tests.test_displays_analytical",
+          "tests.test_textual_source_references",
+          "tests.test_paper_registry",
+          "tests.test_reconstruct_paper",
+          "tests.test_statement_evidence",
+          "tests.test_display_integrity",
+          "tests.test_availability"
+        ]
+      },
+      "verify": {
+        "command": "make verify verify-manifest",
+        "status": "PASS",
+        "source_files": 1229,
+        "scope": "Source metadata, generated views, registered mathematics/arithmetic, sealed examples, statement consistency and complete release checksums; does not establish availability-statement fulfillment."
+      },
+      "offline_review": {
+        "command": "make review REVIEW_OFFLINE=1",
+        "status": "PASS",
+        "steps": 17,
+        "verdict": "SOFTWARE-ONLY",
+        "scope": "Bundled synthetic examples; executed before the final bounded reference corrections. No public benchmark deposit verification."
+      },
+      "pdf_sources": {
+        "command": "scripts/check_manuscript_sources.py with both supplied local PDFs",
+        "status": "PASS",
+        "pdf_bytes_verified": {
+          "main": true,
+          "supplementary": true
+        },
+        "table_groups_checked": 34,
+        "scope": "Document identity and source correspondence, not an author certification or experimental verification."
+      },
+      "final_public_link": {
+        "status": "PASS",
+        "command": "python -B -m unittest tests.test_availability",
+        "tests_run": 6,
+        "seconds": 0.15,
+        "scope": "After the final 195-test suite, the generated README link was changed to use the Releases listing until an artifact is published; availability regressions and freshness checks passed."
+      }
+    },
+    "environment": {
+      "python": "3.12.14",
+      "torch": "2.10.0+cpu",
+      "pinned_packages": 53,
+      "pinned_packages_match": true,
+      "scope": "Recorded CPU package versions; no GPU or live cluster execution.",
+      "thread_limits": {
+        "OMP_NUM_THREADS": 2,
+        "OPENBLAS_NUM_THREADS": 2,
+        "MKL_NUM_THREADS": 2
+      },
+      "no_torch_interpreter": {
+        "python": "3.12.14",
+        "numpy": "2.3.5",
+        "matplotlib": "3.10.8",
+        "scipy": "1.17.0",
+        "torch": "absent"
+      }
+    },
+    "skip_scope": {
+      "integrated_full": [
+        "One synthetic smoke execution did not confirm a state contrast; no improvement was inferred.",
+        "Private cluster profile excluded from the public package."
+      ],
+      "integrated_no_torch": "PyTorch-dependent cases, separately exercised in the full CPU suite."
+    },
+    "offline_reconstruction": {
+      "command": "scripts/reconstruct_paper.py --offline --tier complete",
+      "status": "INCOMPLETE",
+      "expected_exit_code": 1,
+      "registered_displays": 90,
+      "displays_rendered_from_repository_sources": 20,
+      "displays_with_complete_content_and_comparison_coverage": 18,
+      "coverage_does_not_mean_all_values_agree": true,
+      "values_exact": 437,
+      "values_differ": 15,
+      "values_missing": 4,
+      "values_not_comparable": 0,
+      "values_no_reference": 0,
+      "generator_errors": {},
+      "module_errors": {},
+      "artifacts_awaiting_publication": [
+        "run:ogbn-arxiv",
+        "run:ogbn-proteins",
+        "run:ogbn-products",
+        "run:Roman-empire",
+        "run:PascalVOC-SP",
+        "run:COCO-SP",
+        "run:Peptides-func",
+        "records:action_gap_audit",
+        "records:band_bound_tightness",
+        "records:baselines",
+        "records:budget_matched",
+        "records:buffer_sensitivity",
+        "records:confirmation_contrasts",
+        "records:confirmation_sensitivity",
+        "records:cross_backbone",
+        "records:decision_traces",
+        "records:depth_diagnostics",
+        "records:ensemble_grid",
+        "records:ensemble_grid_scores",
+        "records:factorials",
+        "records:horizon_beam_sweep",
+        "records:input_gate",
+        "records:inserted_site",
+        "records:mechanism_contrasts",
+        "records:module_ablations",
+        "records:negative_controls",
+        "records:nominal_time",
+        "records:oracle_dispersion",
+        "records:reliability_diagnostics",
+        "records:runtime_scaling",
+        "records:sensitivity_grids",
+        "records:sensor_parameters",
+        "records:timing_anchors",
+        "records:tube_audit",
+        "campaign:budget",
+        "campaign:confirmation",
+        "environment:gpu"
+      ],
+      "scope": "Available protocol/analytical displays. Required benchmark measurements are absent; their results were not reconstructed."
+    },
+    "scientific_input_preservation": {
+      "comparison_base": "f34aa5a8f1d9c3d379fc0e6a288aa4373c1b980b",
+      "unchanged_trees": [
+        "cross_morse/",
+        "configs/",
+        "examples/",
+        "source_snapshots/"
+      ],
+      "reported_results_existing_numeric_leaves": 2349,
+      "reported_results_existing_numeric_values_changed": false,
+      "reported_results_text_cells_corrected": 11,
+      "registered_constants_existing_numeric_leaves": 539,
+      "registered_constants_existing_numeric_values_changed": false,
+      "added_pdf_source_groups": [
+        "baseline_reference_ranges_table_S15",
+        "negative_controls_table_S19",
+        "regret_bound_table_S28b"
+      ],
+      "independent_reference_groups": 21,
+      "registry_sha256": {
+        "paper/reported_results.json": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b",
+        "paper/registered_constants.json": "2512eb47a72b67b303ad86967ee2895a94c2fb7c3f64fe09f8c34dcdaf4a9d67",
+        "paper/printed_display_values.json": "214898e92f6678feacc879a7724fb438bffe72971c46227a7e88b993388a5ce1",
+        "paper/transcription_check.json": "f5592db698f01325f394e83d7e08ad5d5115e33b10fd9713da569c96850c2523",
+        "paper/display_manifest.json": "8ff9c264c029abd87c5e04ebe1c19f40eaabd2db49a81f41b565eac5913db631"
+      },
+      "author_certification": false
+    },
+    "source_identity": {
+      "inventory_hash_encoding": "sha256 of UTF-8 JSON with sorted keys and compact separators",
+      "integrated_suite_inventory_sha256": "39a0baf2d45d86fa4c97e0109fc05f9d0e68fdb3fbb6e938b2429a5d29f3da91",
+      "final_focused_inventory_sha256": "1d785db940054252ddb883aa304fadb050e956944a44586e0f340d1d4f207b6c",
+      "files_changed_after_integrated_suites": [
+        "paper/build/displays/records_campaigns.py",
+        "paper/build/displays/run_audits.py",
+        "paper/display_manifest.json",
+        "paper/printed_display_values.json",
+        "paper/registered_constants.json",
+        "paper/reported_results.json",
+        "scripts/availability.py"
+      ],
+      "changed_tooling_sha256": {
+        "cm_campaigns/baselines.py": "efdb58cb25b7b83dbf5cbe1aa92404775b4903c9edcd651af235b783df102f32",
+        "cm_experiments/ablation_lifecycle.py": "d869922c72ec4c4a3f465bb456268554851d9153d053cc3679763eb21df1586c",
+        "cm_experiments/buffered_admission.py": "38f95d9c7e3c689267f95be6fe181ad4559728f56e3a57e7ddb7fa098dd352d4",
+        "cm_experiments/factorial.py": "550cabd0ee0cff5323818c1500fe6aed63440660add6f073cd0827dda3cecbe8",
+        "cm_experiments/internal_baselines.py": "3311a3239d938be27fabf3f34b09f9ad5b9a0cbe6bcaaf0c0c283f62a2ac1780",
+        "paper/build/displays/analytical.py": "d8d221cdc631fd4dd367ff2b32bebce2819077d6f93bbd5cf9824114993a09bd",
+        "paper/build/displays/factorial_data.py": "ea5fdce3fa107df3421a10d303e02c604e74b0f4cfb9868ad1b999c09e0d080b",
+        "paper/build/displays/framework.py": "79d8c9c676433b307600ed2598cae2195c807f99e45f4ef49fcea791b4cc2609",
+        "paper/build/displays/main_paper.py": "c344f8c85b913e6f3ef978dc7a323e739110d414d19d11ab1e6030a2903b97df",
+        "paper/build/displays/protocol_tables.py": "d1639f1efaaffb014f583d714b0a1b54305b621f6af66c80009710183f73c0a0",
+        "paper/build/displays/records_campaigns.py": "543e5e27dab70397cf5735197bed308d81266df8e9e90975380113f8239b74a5",
+        "paper/build/displays/run_audits.py": "a8372e2c5836c39cf983af3c87c0f244e821ed8bd51d6d6a55354c67154073b4",
+        "scripts/availability.py": "57bb3ff51bbaf980b9ab09782eae9a1a69ad47b3b28edf7d3c0336d801a02d29",
+        "scripts/claims_ledger.py": "72c6599b5a8466ccc15bf941674631236e7a50232354a57467820cec403d1a02",
+        "scripts/export_records.py": "72c10f3d2e4bf9806315c576587a4ee6c3b05ef978f2beb18940e4c648a3b3c8",
+        "scripts/export_sweep_records.py": "7e84df48788a5092fa01a535a17fbf26622037576355e4df9ca992752fe02951",
+        "scripts/paper_artifacts.py": "0b69cabd8f888d0c028b70b188ce66d2b92fb6938b5c818d7c65112b32a740bd",
+        "scripts/paper_outputs.py": "2259d3d8ba34a91bab851049c4f3f4e1b8e392a549f2f72c2485cf6eb1c4fbf1",
+        "scripts/reconstruct.py": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41",
+        "scripts/reconstruct_paper.py": "5fd92c279d7eec62862db5a1ec91223b0e3255be834b49020b03807f11fc07a9",
+        "scripts/statement_check.py": "73872ba61e6de94aaf9771c0dba2d67e93bee65cdb8943314c491a88026b3462",
+        "scripts/statement_evidence.py": "89adb02d5d64c73f0377eec59b8235aba0ac63b703a0264ae9066c634f0357ab",
+        "hpc/publish_paper_artifacts_arrhenius.sh": "eee9be0f935e047cc9a93ba7bf6348129f899cd091f25ee99159a04400124cbd"
+      },
+      "publication_inventory_sha256": "72f2e69903f683db73e4e67be628cf0da049337467c253b20c9b176989764672",
+      "files_changed_after_final_focused_suite": [
+        "scripts/availability.py"
+      ]
+    },
+    "hosted_ci": {
+      "status": "RECORDED_BY_GITHUB_ACTIONS",
+      "scope": "Fresh-clone and CPU-container workflows run on the proposed commit before merge; consult the checks attached to that Git revision. No hosted result is pre-attested in this local record."
+    },
+    "remaining_evidence": {
+      "full_availability_statement_verified": false,
+      "original_benchmark_measurements_added": false,
+      "original_artifacts_needed": true,
+      "unresolved_numerical_settings": [
+        "o_dec",
+        "phi_OL"
+      ],
+      "author_decisions_document": "CR-9: decisions left for the author was referenced in the work report but not located among accessible files.",
+      "review": "docs/AVAILABILITY_REVIEW.md"
+    },
+    "hpc_access": {
+      "attempt": "SSH connection to the author-provided Arrhenius hostname",
+      "result": "DNS_RESOLUTION_FAILED_BEFORE_AUTHENTICATION",
+      "documented_hosts_checked": [
+        "login.hpc.arrhenius.naiss.se",
+        "arrhenius1.hpc.arrhenius.naiss.se",
+        "arrhenius3.hpc.arrhenius.naiss.se"
+      ],
+      "credentials_used": false,
+      "cluster_files_accessed": false,
+      "cluster_jobs_submitted": false
     }
   }
 }

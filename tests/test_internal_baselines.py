@@ -177,7 +177,9 @@ def complete_rows(seeds=BASELINE_SEEDS):
 
 
 def write_study_files(root: Path, *, skip=()):
-    """raw/<slug>/<method>/plan.json, upstream.json and the adapter archive of every external comparison."""
+    """Every external comparison's metadata plus sealed software fixtures, never measured study outputs."""
+    from scripts.export_records import package_study_outputs, study_artifact_inventory
+    from tests.test_export_records import write_study
     for dataset in DATASETS:
         for method in EXTERNAL[dataset]:
             if (dataset, method) in skip:
@@ -194,9 +196,20 @@ def write_study_files(root: Path, *, skip=()):
                 (root / relative).parent.mkdir(parents=True, exist_ok=True)
                 (root / relative).write_text(content)
             digest = hashlib.sha256((root / paths["adapter_archive"]).read_bytes()).hexdigest()
+            with tempfile.TemporaryDirectory(prefix="cm-study-fixture-") as directory:
+                study = Path(directory) / "study"
+                write_study(study, study_plan=plan)
+                inventory = study_artifact_inventory(study, plan)
+                archive = package_study_outputs(root, study, plan, inventory)
+                for fit in inventory["final_fits"]:
+                    source = study / fit["artifacts"]["predictions"]["path"]
+                    destination = (root / Path(paths["plan"]).parent / f"seed-{fit['seed']}" /
+                                   f"split-{fit['split']}" / source.name)
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(source, destination)
             (root / paths["upstream"]).write_text(json.dumps({
                 "schema": baselines.UPSTREAM_SCHEMA, "dataset": dataset, "method": method, "plan": paths["plan"],
-                "source_commit": "a" * 40, "adapter_commit": commit, "source_copied": False,
+                "source_commit": "a" * 40, "adapter_commit": commit, "source_copied": True, "study_archive": archive,
                 "adapter_archive": {"file": paths["adapter_archive"], "sha256": digest, "commit": commit}}))
 
 
@@ -290,6 +303,20 @@ class ContractTests(unittest.TestCase):
 
 # ============================================================================= planning (torch-free)
 class PlanTests(Workspace):
+    def test_official_split_aggregation_requires_the_registered_members(self):
+        from types import SimpleNamespace
+        def member(split, dataset="Roman-empire", synthetic=False):
+            return SimpleNamespace(dataset=dataset, synthetic=synthetic, config={"data": {"split_index": split}})
+        ib.check_benchmark_members([member(i) for i in range(10)])
+        for indices in ([0], list(range(9)), [0, *range(9)], [*range(9), True]):
+            with self.subTest(indices=indices), self.assertRaisesRegex(RunnerError, "all ten distinct official splits"):
+                ib.check_benchmark_members([member(i) for i in indices])
+        with self.assertRaisesRegex(RunnerError, "one benchmark run"):
+            ib.check_benchmark_members([member(i, dataset="ogbn-arxiv") for i in (0, 1)])
+        with self.assertRaisesRegex(RunnerError, "synthetic and benchmark"):
+            ib.check_benchmark_members([member(0), member(1, synthetic=True)])
+        ib.check_benchmark_members([member(i, synthetic=True) for i in (0, 1)])
+
     def test_plan_registers_methods_configurations_inputs_and_stage_times(self):
         plan = plan_examples(self.root / "internal")
         self.assertEqual(plan["record_set"], "baselines")
@@ -413,6 +440,10 @@ class JobTests(Workspace):
                 self.assertEqual((record["unit"], record["metric_name"]), ("%", "accuracy"))
                 self.assertEqual(record["prediction_sha256"],
                                  tr.npy_sha256(member_predictions(ctx, candidate, score["seed"])))
+                prediction = directory / record["prediction_file"]
+                np.testing.assert_array_equal(np.load(prediction, allow_pickle=False),
+                                              member_predictions(ctx, candidate, score["seed"]))
+                self.assertEqual(ib.sha256(prediction), record["prediction_sha256"])
                 self.assertEqual(record["checkpoint_sha256"],
                                  ib.sha256(run.root / "train" / f"plant_seed{score['seed']}_best.pt"))
         methods = {m["key"]: m for m in result["methods"]}
@@ -447,7 +478,7 @@ class JobTests(Workspace):
         self.assertEqual(peptides["methods"][2]["scores"][0]["unit"], "AP")
         for path in directory.rglob("*"):
             if path.is_file():
-                self.assertNotIn(str(EXAMPLES), path.read_text(encoding="utf-8"), path.name)
+                self.assertNotIn(str(EXAMPLES).encode(), path.read_bytes(), path.name)
 
     def test_an_interrupted_job_keeps_its_scores_and_times_again(self):
         plan = plan_examples(self.root / "internal", "arxiv")
@@ -492,6 +523,27 @@ class JobTests(Workspace):
         method = next(m for m in collected["datasets"][0]["methods"] if m["key"] == "radius")
         self.assertEqual([s["seed"] for s in method["seeds"]], [1])
         self.assertTrue(any("radius" in r and "seed 2" in r for r in collected["reasons"]))
+
+    def test_resume_refuses_a_saved_score_with_missing_prediction_bytes(self):
+        plan_examples(self.root / "internal", "arxiv")
+        with self.assertRaisesRegex(RuntimeError, "allocation ended"):
+            complete_jobs(self.root / "internal", interrupted={("learned_stop", 2)})
+        entry = json.loads((self.root / "internal/plan.json").read_text())["jobs"][0]
+        directory = ib.job_directory(self.root / "internal", entry)
+        next(directory.glob("scores/*/seed1.npy")).unlink()
+        with self.assertRaisesRegex(RunnerError, "prediction bytes are missing or changed"):
+            complete_jobs(self.root / "internal")
+
+    def test_collect_refuses_missing_predictions_even_with_a_new_outer_seal(self):
+        from cm_experiments.artifacts import seal
+        plan_examples(self.root / "internal", "arxiv")
+        _, paths = complete_jobs(self.root / "internal")
+        directory = paths[0].parent
+        next(directory.glob("scores/*/seed1.npy")).unlink()
+        (directory / ib.MANIFEST).unlink()
+        seal(directory)
+        with self.assertRaisesRegex(RunnerError, "per-seed prediction bytes are missing or changed"):
+            ib.collect_internal_baselines(self.root / "internal")
 
     def test_the_session_alternates_and_refuses_work_that_changes(self):
         plan = plan_examples(self.root / "internal", "arxiv")

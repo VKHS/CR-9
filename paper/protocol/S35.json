@@ -7,7 +7,7 @@
    22
   ]
  },
- "scope": "Reporting conventions C1–C29 as registered. The supporting record of each convention is linked to the artifacts of THIS repository: 'run' lists files relative to a run directory (verified against the files the released runtime writes in the bundled example runs), 'records' names record sets of records/specs.json, 'module' names repository modules or tests, 'campaign' names campaign export modules 'absent' names a record the released code does not produce, and 'displays' the displays that record serves (used to link a declared record contract).",
+ "scope": "Reporting conventions C1–C29 as registered. The supporting record of each convention is linked to the artifacts of THIS repository: 'run' lists files relative to a run directory (verified against the files the released runtime writes in the bundled example runs), 'records' names record sets of records/specs.json, 'module' names repository modules or tests, 'campaign' names campaign export modules 'absent' names a record the released code does not produce, and 'displays' the displays that record serves (used to link a declared record contract). record_description retains the source PDF description; the generator verifies and exposes actual repository locations separately.",
  "rows": {
   "C1": {
    "convention": "Two interval units accompany every paired effect: the test-stage interval of main Table 1 resamples optimization seeds and graphs; the admission moments of Table S13 condition on the fixed deployed ensemble (Note S24; Fig. S20c)",
@@ -15,7 +15,8 @@
     "member_predictions/",
     "final/paired_test_units.npz",
     "admit/paired_units.npz"
-   ]
+   ],
+   "record_description": "per-seed, per-graph loss vectors (E16)"
   },
   "C2": {
    "convention": "Confirmation, comparison and admission read disjoint data roles reserved at preparation (D_confirm, D_compare, D_admit; Table S39)",
@@ -23,41 +24,47 @@
     "prepared/metadata.json",
     "prepared/splits.npz",
     "provenance/stages/"
-   ]
+   ],
+   "record_description": "stage manifest with graph identities"
   },
   "C3": {
    "convention": "Support statistics are computed per (stratum, action) cell from one logged weight vector, so min_c ESS_c ≤ 1/(max_c,i v_ci)² holds on every cell (Table S7)",
    "run": [
     "fit/full/audit.json",
     "fit/lean/audit.json"
-   ]
+   ],
+   "record_description": "per-cell weights, propensities and masks (E19)"
   },
   "C4": {
    "convention": "|Q_s| is the size of the eligible set under main Eq. (19); ogbn-products has |Q_s| = 0 and returns q_C",
    "run": [
     "select/decision.json",
     "select/candidates.json"
-   ]
+   ],
+   "record_description": "selector trace (E15)"
   },
   "C5": {
    "convention": "Outer-fold representatives and nested family comparisons are distinct estimators (Tables S12, S12b)",
    "run": [
     "select/unit_scores.npz",
     "select/candidates.json"
-   ]
+   ],
+   "record_description": "nested family ledger (Algorithm S4)"
   },
   "C6": {
    "convention": "Improvement relative to zero, improvement beyond the practical margin and equivalence within the margin are three tests with three labels (Tables S11, S14)",
    "run": [
     "confirm/decision.json",
     "confirm/paired_contrasts.json"
-   ]
+   ],
+   "record_description": "bootstrap statistics of every contrast"
   },
   "C7": {
    "convention": "Each factorial cell records its integration domain; a read-only observer on the nominal trajectory reproduces cell 000 (Table S16)",
    "records": [
     "factorials"
-   ]
+   ],
+   "record_description": "cell execution records"
   },
   "C8": {
    "convention": "Internal recovery is part of C_S in main Eq. (32) (p_1 = 0 for the deployed rules); only q_B aborts to a restarted comparator (Algorithm S3; Table S34)",
@@ -66,7 +73,8 @@
    ],
    "records": [
     "budget_matched"
-   ]
+   ],
+   "record_description": "event-cost traces"
   },
   "C9": {
    "convention": "A resolvent step executes T sparse products and reaches T hops; the identity mass of the kernel and the identity coefficient of the executed operator are listed separately (Tables S6, S6b)",
@@ -75,20 +83,23 @@
    ],
    "module": [
     "cm_theory/operators.py"
-   ]
+   ],
+   "record_description": "registry functions; storage and timing records"
   },
   "C10": {
    "convention": "Each backbone's native call, controlled depth index and A0 identity are declared before instrumentation (Tables S5b, S5c)",
    "run": [
     "train/entry_initial.json",
     "train/manifest.json"
-   ]
+   ],
+   "record_description": "E1 identity record"
   },
   "C11": {
    "convention": "Serial-cost ranges (Table S15) and per-rerun entries (Table S15b) carry their own units; Peptides SD is in AP percentage points",
    "records": [
     "baselines"
-   ]
+   ],
+   "record_description": "per-seed score and timing records"
   },
   "C12": {
    "convention": "The admission-stage oracle is a diagnostic enumerated after every decision is fixed (Table S30); scaling curves are measured separately (Fig. S2)",
@@ -102,7 +113,8 @@
    "records": [
     "oracle_dispersion",
     "runtime_scaling"
-   ]
+   ],
+   "record_description": "oracle and scaling logs"
   },
   "C13": {
    "convention": "Qualification GPU-hours are decomposed into exploration logging, model fitting, nested selection, confirmation, comparison and admission (Table S41)",
@@ -115,14 +127,16 @@
    ],
    "module": [
     "cm_campaigns/accounting.py"
-   ]
+   ],
+   "record_description": "qualification ledger"
   },
   "C14": {
    "convention": "The registered selector (ε_eq = {epsilon_eq} on U_s, least-complex near-best configuration) is replayed on the complete candidate ledger; the representative rows of Table S12 summarize that ledger (Table S12c)",
    "run": [
     "select/candidate_ledger.csv",
     "select/decision.json"
-   ]
+   ],
+   "record_description": "candidate-level trace (E15)"
   },
   "C15": {
    "convention": "Per-checkpoint training, ensemble composition and the {hpo_trials}-trial search are separate accounting units (Tables S5, S15b, S23)",
@@ -134,21 +148,24 @@
    ],
    "module": [
     "cm_campaigns/accounting.py"
-   ]
+   ],
+   "record_description": "training and qualification ledgers"
   },
   "C16": {
    "convention": "One selected rule identifies every comparator q_C; its family and selection record are part of the results schema (Table S38)",
    "run": [
     "select/decision.json",
     "policy_lock.json"
-   ]
+   ],
+   "record_description": "selection record"
   },
   "C17": {
    "convention": "Conditional state destruction replaces controller observations only; plant state and support are checked separately",
    "run": [
     "confirm/paired_contrasts.json",
     "member_predictions/"
-   ]
+   ],
+   "record_description": "intervention logs"
   },
   "C18": {
    "convention": "Native AP and AP percentage points are labelled distinctly; paired effects are computed per graph before averaging (Table S26)",
@@ -156,7 +173,8 @@
     "final/results.csv",
     "final/results_summary.json",
     "final/paired_test_units.npz"
-   ]
+   ],
+   "record_description": "unrounded result record"
   },
   "C19": {
    "convention": "Extended-depth probes (Fig. S14) are reported separately from the controlled depth range",
@@ -168,7 +186,8 @@
    ],
    "records": [
     "depth_diagnostics"
-   ]
+   ],
+   "record_description": "pilot and depth records"
   },
   "C20": {
    "convention": "The confirmatory contrasts are the nine rows of Table S14; every other contrast of main Fig. 3 is exploratory",
@@ -177,7 +196,8 @@
    ],
    "campaign": [
     "cm_campaigns/confirmation.py"
-   ]
+   ],
+   "record_description": "contrast record"
   },
   "C21": {
    "convention": "Latency entries share one execution object: the warm-up, synchronization, batching, placement and normalization of E17 (Tables S15b, S23)",
@@ -188,7 +208,8 @@
    ],
    "module": [
     "cm_campaigns/timing.py"
-   ]
+   ],
+   "record_description": "timing traces"
   },
   "C22": {
    "convention": "The violation rate of Table S22 is the complement of mode-stable trajectory coverage",
@@ -200,20 +221,23 @@
    ],
    "records": [
     "tube_audit"
-   ]
+   ],
+   "record_description": "tube-audit record"
   },
   "C23": {
    "convention": "Retained-share crossovers are stated in one normalization: 1 against full feedback and r_B against selective sensing (main Proposition 10; Tables S46–S47)",
    "module": [
     "cm_theory/economics.py"
-   ]
+   ],
+   "record_description": "Note S25"
   },
   "C24": {
    "convention": "Algorithm S3 holds the restart reserve until the final prediction; invariant w + W_C ≤ W (Lemma S1; Fig. S11)",
    "module": [
     "cm_experiments/budget.py",
     "tests/test_experiment_budget.py"
-   ]
+   ],
+   "record_description": "boundary-case tests of E6"
   },
   "C25": {
    "convention": "False-safe and harm-miss rates are defined at sequence level and at action level (Table S37)",
@@ -222,13 +246,15 @@
    ],
    "records": [
     "input_gate"
-   ]
+   ],
+   "record_description": "decision logs"
   },
   "C26": {
    "convention": "Full-state degree-8 sensing is priced at 8r/(1 + r) of a nominal step; proteins and PascalVOC-SP run the reduced sensors of Table S6c",
    "records": [
     "sensor_parameters"
-   ]
+   ],
+   "record_description": "sensor traces (E17)"
   },
   "C27": {
    "convention": "Observer and consequence models are fitted on D_explore; D_fit trains the plant (Tables S2, S39)",
@@ -236,20 +262,23 @@
     "prepared/splits.npz",
     "stages/fit.json",
     "stages/train.json"
-   ]
+   ],
+   "record_description": "split manifests"
   },
   "C28": {
    "convention": "A0 belongs to the supported set of every stratum, so both regret inequalities of main Proposition 7 apply",
    "run": [
     "fit/full/audit.json"
-   ]
+   ],
+   "record_description": "support workbook"
   },
   "C29": {
    "convention": "Admission statistics are stage-specific statistics on D_admit; pooled selection and test effects are reported separately (main Table 1)",
    "run": [
     "admit/paired_units.npz",
     "admit/decision.json"
-   ]
+   ],
+   "record_description": "clipped paired-loss vectors (E16)"
   }
  }
 }

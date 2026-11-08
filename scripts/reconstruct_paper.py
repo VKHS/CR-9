@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One command: reconstruct every table and figure of the paper from its published outputs.
 
-    make paper                                  # analysis tier (no checkpoints, no prediction arrays)
+    make paper                                  # omits heavy lifecycle checkpoint/prediction files
     make paper PAPER_TIER=complete              # everything, including checkpoints and predictions
     python -B scripts/reconstruct_paper.py --artifacts ../cm-artifacts --output-dir ../cm-paper
 
@@ -20,8 +20,9 @@ Steps:
    the printed precision.
 
 Exit status 0 means every display was generated in full from the published outputs
-and every compared value agrees; 1 means outputs are still awaiting publication or a
-value differs (the report names which); 2 means an input failed verification or a
+and every required value has a comparable printed reference and agrees; 1 means
+outputs or comparison definitions are missing, a value differs, or content is
+incomplete (the report names which); 2 means an input failed verification or a
 generator failed.
 """
 from __future__ import annotations
@@ -57,12 +58,18 @@ def inputs_from(directory: Path) -> dict:
 def summarize(result: dict, manifest: dict) -> dict:
     generators = result.get("display_generators") or {}
     comparison = generators.get("comparison_with_printed_values") or {}
-    awaiting = [a["id"] for a in manifest["artifacts"] if a.get("status") != artifacts.PUBLISHED]
+    awaiting = [a["id"] for a in manifest["artifacts"]
+                if a.get("required", True) and a.get("status") != artifacts.PUBLISHED]
     full = [d["id"] for d in result["displays"] if d["full_numerical_display"]]
     return {"displays": len(result["displays"]), "complete": len(full),
             "incomplete": [d["id"] for d in result["displays"] if not d["full_numerical_display"]],
             "values_exact": comparison.get("exact", 0), "values_differ": comparison.get("differs", 0),
             "values_not_comparable": comparison.get("not_comparable", 0),
+            "values_no_reference": comparison.get("no_reference", 0),
+            "values_missing": comparison.get("missing", 0),
+            "comparison_coverage_complete": generators.get("comparison_coverage_complete") is True,
+            "display_content_incomplete": [d["id"] for d in result["displays"]
+                                           if d.get("content_complete") is not True],
             "artifacts_awaiting_publication": awaiting,
             "generator_errors": generators.get("errors") or {}, "module_errors": generators.get("module_errors") or {}}
 
@@ -84,6 +91,9 @@ def main(argv=None) -> int:
             report = artifacts.fetch(args.artifacts, manifest_path=args.manifest, tier=args.tier)
             for row in report["published"]:
                 print(f"verified {row['id']} ({row['tier']})")
+        # Offline reuse must satisfy the same current release inventory and
+        # artifact identity as a fresh fetch; a prior download stamp is not proof.
+        artifacts.verify_fetched(args.artifacts, manifest_path=args.manifest, require_all=False)
         found = inputs_from(args.artifacts)
         campaigns = dict(found["campaigns"])
         result = reconstruct(args.output_dir, runs_root=found["runs_root"], records_index=found["records_index"],
@@ -98,7 +108,8 @@ def main(argv=None) -> int:
     status_path.write_text(json.dumps(status, indent=1) + "\n", encoding="utf-8")
     print(f"Displays complete: {status['complete']} of {status['displays']}")
     print(f"Printed values reproduced: {status['values_exact']} exact, {status['values_differ']} differ, "
-          f"{status['values_not_comparable']} not comparable")
+          f"{status['values_not_comparable']} not comparable, {status['values_no_reference']} without a reference, "
+          f"{status['values_missing']} missing")
     if status["artifacts_awaiting_publication"]:
         print("Awaiting publication: " + ", ".join(status["artifacts_awaiting_publication"]))
     for name, error in {**status["generator_errors"], **status["module_errors"]}.items():
@@ -112,7 +123,9 @@ def main(argv=None) -> int:
               "displays that need them are not yet complete.",
               file=sys.stderr)
         return 1
-    if status["incomplete"] or status["values_differ"]:
+    if (status["incomplete"] or status["values_differ"] or status["values_not_comparable"]
+            or status["values_no_reference"] or status["values_missing"]
+            or not status["comparison_coverage_complete"] or status["display_content_incomplete"]):
         return 1
     return 0
 

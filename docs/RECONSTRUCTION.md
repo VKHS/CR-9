@@ -5,11 +5,15 @@
 ## One command
 
 ```bash
-make paper                                   # analysis tier: no checkpoints or full prediction arrays
+make paper                                   # omits heavy lifecycle checkpoint/prediction files
 make paper PAPER_TIER=complete               # every published file
 make paper ARTIFACTS_ROOT=/abs/artifacts PAPER_ROOT=/abs/paper
 make paper-offline                           # reuse artifacts already downloaded
 ```
+
+The smaller analysis tier applies to lifecycle run archives. Record sets and
+campaigns retain their complete evidence, including any baseline-study archives
+or controller checkpoints they contain.
 
 `make paper` (`scripts/reconstruct_paper.py`):
 
@@ -22,16 +26,19 @@ make paper-offline                           # reuse artifacts already downloade
    trace from summary values to raw files;
 4. runs the display generators in `paper/build/displays/`, one per numbered table and
    figure, and the run-derived and supplementary builders;
-5. compares every computed value with the value printed in the paper at the printed
-   precision.
+5. compares declared computed values with independently reviewed printed targets,
+   and checks that no required registered target or display content was omitted.
 
 | Exit status | Meaning |
 |---|---|
-| `0` | every display generated in full from the published outputs and every compared value agrees |
-| `1` | outputs still await publication, a display is incomplete or a value differs; the report names which |
+| `0` | every display has complete content and comparison coverage from the published outputs; all required values agree at printed precision |
+| `1` | required outputs await publication, content or a comparison definition is missing, a value cannot be compared, or a value differs |
 | `2` | a download, an input verification or a generator failed |
 
 The summary is printed and saved beside the workspace as `<workspace>.status.json`.
+Offline reuse checks each artifact against the current release manifest, verification
+stamp and file inventory. It does not trust an old download directory solely because
+the files are present.
 
 ## Display generators
 
@@ -53,8 +60,76 @@ campaign, or only the repository's sources. A generator reads its inputs and the
 repository's configuration and code; it never reads the printed values. It declares
 which printed value each computed cell should reproduce, and the comparison step looks
 the printed value up in [`paper/reported_results.json`](../paper/reported_results.json)
-afterwards. A generator whose inputs are not yet published is reported as awaiting
+and the PDF-bound [`paper/printed_display_values.json`](../paper/printed_display_values.json)
+afterwards. Runtime-filled protocol templates are not comparison references. The
+reviewed sidecar identifies the document SHA-256, display and source pages; typed
+numeric targets preserve printed trailing-zero precision. A generator whose inputs are not yet published is reported as awaiting
 those inputs; nothing is substituted for them.
+
+### Content and comparison coverage
+
+`built` means a generator rendered files. It does not, by itself, mean that the whole
+display reproduces the paper. Each display separately records `content_complete`,
+`missing_content`, `comparison_complete` and `comparison_coverage`. Full numerical
+coverage requires complete content and the required independent comparison targets.
+A quantitative figure needs plotted source data and a reviewed display-specific
+comparison contract; a few checks against a related table do not certify all its panels.
+
+Comparison CSVs distinguish `exact`, `differs`, `not_comparable`, `no_reference` and
+`missing`. Required registered values remain in this accounting even when a generator
+omits its comparison call. A printed dash represented by an explicit reference null
+can agree with a not-applicable computation; an absent field is different. Required
+blank or nonfinite table cells, absent factorial intervals, missing S14 margin tests
+and unprovided configuration ranges remain incomplete. Intentional table dashes use
+`not_applicable(reason)` so their meaning travels with the output metadata.
+
+The machine-readable summary includes `values_no_reference`, `values_missing`,
+`comparison_coverage_complete` and `display_content_incomplete`, in addition to the
+matching and differing counts. Every incomplete comparison state prevents a successful
+`make paper` exit. A computed disagreement is retained for investigation; it is not
+changed to the printed number.
+
+### Paired statistical and campaign inputs
+
+Tables S16/S16b reconstruct factorial contrast intervals from a
+recognized `cm-factorial-2` raw record, its hashed `unit_dil.npz`, paired per-unit
+losses and the original shared bootstrap stream. They verify all eight means and
+marginal intervals, replay the declared seed and replicate count, and compute each
+contrast from the same draws. Whole-graph Pascal means use equal graph weights;
+arxiv means retain the scored-node weights of the buffered clusters. A summary-only
+record supports point contrasts, but cannot determine the joint contrast covariance.
+It therefore produces no substituted independent-cell interval.
+
+Figure S17d reproduces the analytical illustration explicitly labelled
+"intervals: independence" on supplementary page 36. Its effect-coded coefficients
+have magnitude 1/4, so its illustrated half-width is
+`sqrt(sum(cell_half_width**2)) / 4`, using the eight measured marginal 95% intervals
+and the printed independence assumption. The plot, `panel_d.csv` and the
+`panel_d_interval_method` entry in `evidence_scope` identify that assumption; `panel_d_cells.csv`
+preserves its source means and interval endpoints. This approximation does not
+replace paired inference in Tables S16/S16b. When a recognized joint record is
+available, it is also replayed and its actual intervals are exported separately as
+`panel_d_paired_joint.csv`, with the source hashes, seed and replicate count in
+the factorial provenance. An invalid supplied joint record remains an error; an
+absent one is disclosed and is not fabricated from marginal intervals.
+
+The sigma grid `[0.005, 0.007, 0.010]` comes from the S28b caption on supplementary
+page 19; panel S17g plots its endpoint curves, as printed on page 36. Registration
+of that grid and comparisons for panel d do not establish agreement for the full
+eight-panel Figure S17. That requires independently reviewed comparison targets
+for all its quantitative content.
+
+Main Figure 6 uses the same strict E3–E6 campaign replay as Tables S46/S46b. It selects
+the `selected` configuration explicitly, accepts the registered producer arm labels,
+and checks its values against the 24 replayed campaign contrasts. Other configurations
+remain available for configuration ranges; they cannot be mistaken for the selected
+estimate.
+
+S14-related displays preserve the campaign's production kind, admission findings and
+`post_hoc` flag in `evidence_scope`. A new joint family computed after admission can
+render actual statistics, but cannot establish that an earlier admission was governed
+by a prospective joint lock. Missing original margin-test results are not inferred
+from the zero-null P values.
 
 ## Workspace contents
 
@@ -63,8 +138,8 @@ those inputs; nothing is substituted for them.
 | `RECONSTRUCTION_REPORT.md` | every display with its generator status, its comparison counts and any awaited input |
 | `reconstruction.json` | input and software identities, outputs and their relationship to the 90 displays |
 | `FILES.json` | SHA-256 and byte size of every exported file |
-| `displays/tables/` | complete tables (CSV, Markdown, LaTeX) |
-| `displays/figures/` | complete figures (PNG, SVG) |
+| `displays/tables/` | rendered tables (CSV, Markdown, LaTeX); completeness is recorded per display |
+| `displays/figures/` | rendered figures (PNG, SVG); completeness is recorded per display |
 | `displays/data/<stem>/` | full-precision source data of every table and figure panel |
 | `displays/compare/<stem>.csv` | every printed value beside the computed one, with its status |
 | `runs/`, `records/`, `supplement/` | the run-derived, record-set and supplementary builder outputs |

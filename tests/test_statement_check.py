@@ -28,6 +28,10 @@ def published(manifest, *, contents=CONTENTS):
         entry["status"] = pa.PUBLISHED
         entry["contents"] = dict(contents) if entry["kind"] == "run" else {"statistical_outputs": 5}
         entry["identity"] = {}
+        entry["relationship"] = "post_result_revision"
+        entry["inventory_sha256"] = "a" * 64
+        entry["scientific_only_verification"] = True
+        entry["tiers"] = {"complete": {"sha256": "b" * 64}}
     manifest["status"] = pa.PUBLISHED
     return manifest
 
@@ -79,23 +83,19 @@ class StatementCheck(unittest.TestCase):
 
     def _with_view(self, mutate=None):
         """The E12 declaration pointed at a temporary experiments/baselines/ view of fourteen studies."""
-        import hashlib
+        from tests.test_statement_evidence import baseline_view
         experiments = copy.deepcopy(sc._json(ROOT / sc.EXPERIMENTS))
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         view = Path(tmp.name) / "experiments" / "baselines"
-        studies = []
-        for index in range(14):
-            folder = view / f"dataset{index}" / "method"
-            folder.mkdir(parents=True)
-            entry = {"dataset": f"dataset{index}", "method": "method"}
-            for key, name, data in (("plan", "plan.json", b'{"schema": "cm-upstream-study-1"}'),
-                                    ("upstream", "upstream.json", b"{}"),
-                                    ("adapter_archive", "adapter-0123456789ab.tar", bytes(512))):
-                (folder / name).write_bytes(data)
-                entry[key] = {"file": f"dataset{index}/method/{name}", "sha256": hashlib.sha256(data).hexdigest()}
-            studies.append(entry)
-        (view / "INDEX.json").write_text(json.dumps({"studies": studies}), encoding="utf-8")
+        baseline_view(view)
+        index = json.loads((view / "INDEX.json").read_text())
+        index.update(artifact_manifest_sha256=sc._sha(ROOT / "release/paper_artifacts.json"),
+                     artifacts=[pa.artifact_identity(entry, "complete")
+                                for entry in published(self.manifest)["artifacts"]],
+                     files={p.relative_to(view).as_posix(): sc._sha(p) for p in view.rglob("*")
+                            if p.is_file() and p.name != "INDEX.json"})
+        (view / "INDEX.json").write_text(json.dumps(index), encoding="utf-8")
         if mutate:
             mutate(view)
         declared = [e for e in experiments["experiments"] if e.get("published_with_outputs")]
@@ -122,21 +122,38 @@ class StatementCheck(unittest.TestCase):
 
     def test_a_changed_or_incomplete_view_is_a_gap(self):
         def change(view):
-            (view / "dataset3" / "method" / "adapter-0123456789ab.tar").write_bytes(b"changed")
+            index = json.loads((view / "INDEX.json").read_text())
+            (view / index["studies"][3]["adapter_archive"]["file"]).write_bytes(b"changed")
         path = self._with_view(change)
         with mock.patch.object(sc, "EXPERIMENTS", str(path)):
             rows = {row["id"]: row for row in self.evaluate(published(self.manifest))["items"]}
         self.assertEqual(rows["experiment_code"]["status"], sc.MISSING)
-        self.assertIn("adapter-0123456789ab.tar differs", rows["experiment_code"]["remaining"])
+        self.assertIn("adapter.tar: differs", rows["experiment_code"]["remaining"])
 
         def drop(view):
             index = json.loads((view / "INDEX.json").read_text(encoding="utf-8"))
-            (view / "INDEX.json").write_text(json.dumps({"studies": index["studies"][:13]}), encoding="utf-8")
+            index["studies"] = index["studies"][:13]
+            (view / "INDEX.json").write_text(json.dumps(index), encoding="utf-8")
         path = self._with_view(drop)
         with mock.patch.object(sc, "EXPERIMENTS", str(path)):
             rows = {row["id"]: row for row in self.evaluate(published(self.manifest))["items"]}
         self.assertEqual(rows["configurations"]["status"], sc.MISSING)
-        self.assertIn("lists 13 of 14 entries", rows["configurations"]["remaining"])
+        self.assertIn("omits registered studies", rows["configurations"]["remaining"])
+
+    def test_deleting_required_artifact_rows_does_not_shrink_the_statement(self):
+        manifest = published(self.manifest)
+        manifest["artifacts"] = [a for a in manifest["artifacts"] if a["id"] != "run:ogbn-arxiv"]
+        result = self.evaluate(manifest)
+        self.assertIn("run:ogbn-arxiv", result["awaiting_artifacts"])
+        status = {r["id"]: r["status"] for r in result["items"]}
+        self.assertEqual(status["checkpoints"], sc.AWAITING)
+
+    def test_software_fixture_archives_cannot_fulfil_benchmark_items(self):
+        manifest = published(self.manifest)
+        next(a for a in manifest["artifacts"] if a["id"] == "run:ogbn-arxiv")["scientific_only_verification"] = False
+        status = {r["id"]: r["status"] for r in self.evaluate(manifest)["items"]}
+        self.assertEqual(status["checkpoints"], sc.MISSING)
+        self.assertEqual(status["statistical_outputs"], sc.MISSING)
 
     def test_report_names_every_item(self):
         text = sc.render(self.evaluate(self.manifest))

@@ -720,7 +720,15 @@ class FittedFactorialOrchestrationTests(Workspace):
             ablation._dump(self.root / "fac" / "jobs" / job["slug"] / "lifecycle.json",
                            {"schema": "cm-ablation-lifecycle-1", "job": job["job"], "variant": job["variant"],
                             "config_sha256": job["config_sha256"]})
-        target = factorial.export_factorial(output, root=records, allow_partial=True)
+        # This orchestration test substitutes measurement and fitting, so substitute the verified model package
+        # boundary too. Real checkpoint bytes, their seals and hash failures are covered by LifecycleExecutionTests.
+        def package(job, parent):
+            model = self.root / "fac" / "jobs" / job["slug"] / "fixture_controller.pt"
+            model.write_bytes(b"synthetic package fixture: " + job["slug"].encode())
+            return {"fit/full/controller.pt": model}, {"synthetic": True, "files": {
+                "fit/full/controller.pt": {"sha256": sha256(model), "bytes": model.stat().st_size}}}
+        with patch.object(ablation, "controller_artifacts", side_effect=package):
+            target = factorial.export_factorial(output, root=records, allow_partial=True)
         from scripts.records import verify_set
         verify_set(target, specs()["sets"]["factorials"], specs())
         provenance = json.loads((target / "provenance.json").read_text())
@@ -730,6 +738,9 @@ class FittedFactorialOrchestrationTests(Workspace):
         self.assertEqual(len(lifecycles), 8)
         for job in lifecycles:
             self.assertTrue((target / "raw" / "fitted" / job["slug"] / "lifecycle.json").is_file())
+            package = target / "raw" / "fitted" / job["slug"] / "controller_package"
+            self.assertTrue((package / "fit/full/controller.pt").is_file())
+            self.assertTrue((package / "CONTROLLERS.json").is_file())
         self.assertNotIn(str(self.root), (target / "code" / "ablation_plan.json").read_text())
 
     def test_a_changed_ablation_plan_is_refused(self):
@@ -1038,6 +1049,26 @@ class LifecycleExecutionTests(unittest.TestCase):
         target = ablation.export_factorial_fit(output, root=self.work / "records", allow_partial=True)
         verify_set(target, specs()["sets"]["factorials"], specs())
         self.assertTrue((target / "raw" / "ogbn-arxiv" / "executions.npz").is_file())
+        for job in plan["jobs"]:
+            package = target / "raw" / "fitted" / job["slug"] / "controller_package"
+            manifest = json.loads((package / "CONTROLLERS.json").read_text())
+            for profile in config_of(self.parent)["sensor"]["profiles"]:
+                relative = f"fit/{profile}/controller.pt"
+                self.assertEqual(sha256(package / relative), sha256(Path(job["run"]) / relative))
+                self.assertEqual(sha256(package / relative), manifest["files"][relative]["sha256"])
+            self.assertEqual(manifest["parent_identity"], job["parent_identity"])
+        job = plan["jobs"][0]
+        import torch
+        with patch.object(torch, "load", side_effect=AssertionError("publication must not unpickle checkpoints")):
+            ablation.controller_artifacts(job, SealedRun(self.parent))
+        model_path = Path(job["run"]) / "fit/full/controller.pt"
+        original = model_path.read_bytes()
+        model_path.write_bytes(original + b"changed")
+        try:
+            with self.assertRaisesRegex(RunnerError, "differs from its sealed controller artifact"):
+                ablation.controller_artifacts(job, SealedRun(self.parent))
+        finally:
+            model_path.write_bytes(original)
 
 
 if __name__ == "__main__":

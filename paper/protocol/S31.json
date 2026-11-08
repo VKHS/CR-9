@@ -7,7 +7,7 @@
    30
   ]
  },
- "scope": "Quantity and estimator text of every row of the reproduction map, the displays each row covers, and the artifacts of THIS repository that hold its record: 'run' lists files relative to a run directory (the generator verifies that the released runtime writes them, using the bundled example runs), 'records' names a measurement-record set of records/specs.json, 'campaign' names a campaign export module, 'module' names an analytical or accounting module, and 'absent' names a record the released code does not produce (a record contract of records/specs.json or records/specs.d whose manuscript_tables cover the row's displays, and whose experiments match the row's 'experiments' when both declare them, is then linked). Placeholders in braces are filled from configurations, registered constants and code.",
+ "scope": "Quantity and estimator text of every row of the reproduction map, the displays each row covers, and the artifacts of THIS repository that hold its record: 'run' lists files relative to a run directory (the generator verifies that the released runtime writes them, using the bundled example runs), 'records' names a measurement-record set of records/specs.json, 'campaign' names a campaign export module, 'module' names an analytical or accounting module, and 'absent' names a record the released code does not produce (a record contract of records/specs.json or records/specs.d whose manuscript_tables cover the row's displays, and whose experiments match the row's 'experiments' when both declare them, is then linked). Placeholders in braces are filled from configurations, registered constants and code. record_description retains the source PDF description; the generator verifies and exposes actual repository locations separately.",
  "rows": {
   "R01": {
    "quantity": "main Table 1: admission statistics D̄, U_desc (arxiv, proteins, Roman)",
@@ -18,7 +18,8 @@
    "run": [
     "admit/decision.json",
     "admit/paired_units.npz"
-   ]
+   ],
+   "record_description": "clipped paired-loss vectors on D_admit; records/admission"
   },
   "R02": {
    "quantity": "main Table 1: U_a (Pascal, COCO, Peptides)",
@@ -30,7 +31,8 @@
     "admit/decision.json",
     "admit/paired_units.npz",
     "admit/prediction_execution.json"
-   ]
+   ],
+   "record_description": "runs/<dataset>/admission.json"
   },
   "R03": {
    "quantity": "Tables S46–S47, S33, main Fig. 6, Fig. S3: budget-matched arms, crossovers, margins, power",
@@ -47,7 +49,8 @@
    ],
    "campaign": [
     "cm_campaigns/arm_campaign.py"
-   ]
+   ],
+   "record_description": "E3–E6 outcomes on D_compare; acquisition traces; cost ledger; records/budget_matched"
   },
   "R04": {
    "quantity": "main Table 2, Table S44, main Fig. 6d: C_0.99",
@@ -66,7 +69,8 @@
    ],
    "records": [
     "input_gate"
-   ]
+   ],
+   "record_description": "per-input timing traces (E17)"
   },
   "R05": {
    "quantity": "Table S45, Fig. S18a: E13 arms",
@@ -77,7 +81,8 @@
    ],
    "records": [
     "inserted_site"
-   ]
+   ],
+   "record_description": "E13 record"
   },
   "R06": {
    "quantity": "Table S6c, Fig. S10: sensing identity",
@@ -88,7 +93,8 @@
    ],
    "records": [
     "sensor_parameters"
-   ]
+   ],
+   "record_description": "executed sensor parameters and resolvent fraction (E17)"
   },
   "R07": {
    "quantity": "Table S41: qualification components",
@@ -105,7 +111,8 @@
    ],
    "module": [
     "cm_campaigns/accounting.py"
-   ]
+   ],
+   "record_description": "qualification ledger"
   },
   "R08": {
    "quantity": "Table S37: input-fallback counts",
@@ -115,7 +122,8 @@
    ],
    "records": [
     "input_gate"
-   ]
+   ],
+   "record_description": "decision logs"
   },
   "R09": {
    "quantity": "Table S22: violation rate",
@@ -128,7 +136,8 @@
    ],
    "records": [
     "tube_audit"
-   ]
+   ],
+   "record_description": "tube-audit record"
   },
   "R10": {
    "quantity": "Table S5c: identity deviations and tolerances",
@@ -139,7 +148,8 @@
    "run": [
     "train/entry_initial.json",
     "member_predictions/"
-   ]
+   ],
+   "record_description": "E1 record; executed action mix"
   },
   "R11": {
    "quantity": "Fig. S18c: tightness of bound (6.1)",
@@ -156,7 +166,8 @@
    "records": [
     "band_power_audit",
     "band_bound_tightness"
-   ]
+   ],
+   "record_description": "E18 displacement record"
   },
   "R12": {
    "quantity": "main Fig. 2a: ratio ledger",
@@ -167,7 +178,8 @@
    ],
    "module": [
     "cm_theory/statements.py"
-   ]
+   ],
+   "record_description": "the records of the underlying rows"
   },
   "R13": {
    "quantity": "main Fig. 2c: selection geometry",
@@ -180,7 +192,8 @@
     "select/candidates.json",
     "select/candidate_ledger.csv",
     "select/unit_scores.npz"
-   ]
+   ],
+   "record_description": "selector trace (E15)"
   },
   "R14": {
    "quantity": "Fig. S20c, Note S24: seed share of the test-stage interval",
@@ -191,7 +204,8 @@
    "run": [
     "member_predictions/",
     "final/paired_test_units.npz"
-   ]
+   ],
+   "record_description": "per-seed, per-graph loss vectors (E16)"
   },
   "R15": {
    "quantity": "main Fig. 2b, d: evidence margins and Holm ladder",
@@ -207,7 +221,8 @@
    ],
    "campaign": [
     "cm_campaigns/confirmation.py"
-   ]
+   ],
+   "record_description": "stage records; E10 contrasts"
   },
   "R16": {
    "quantity": "Table S12b, nested column",
@@ -219,7 +234,8 @@
     "select/unit_scores.npz",
     "select/candidates.json",
     "select/decision.json"
-   ]
+   ],
+   "record_description": "nested re-evaluation of every family"
   },
   "R17": {
    "quantity": "main Table 1 (†), Table S14b, Note S26: Peptides confirmation",
@@ -237,7 +253,8 @@
    ],
    "records": [
     "budget_matched"
-   ]
+   ],
+   "record_description": "confirmation record; E3–E6 comparison on D_compare"
   },
   "R18": {
    "quantity": "main Table 2, main Fig. 4f, Tables S15b and S23: wall-time overhead",
@@ -254,7 +271,8 @@
    "records": [
     "baselines",
     "input_gate"
-   ]
+   ],
+   "record_description": "timing traces after warm-up (E17)"
   },
   "R19": {
    "quantity": "main Table 2, main Fig. 5d: t_nom and M⋆",
@@ -265,7 +283,8 @@
    ],
    "records": [
     "nominal_time"
-   ]
+   ],
+   "record_description": "timing traces (E17)"
   },
   "R20": {
    "quantity": "Table S34, Table S46 (q_B column): q_B overhead",
@@ -279,7 +298,8 @@
    ],
    "campaign": [
     "cm_campaigns/arm_campaign.py"
-   ]
+   ],
+   "record_description": "acquisition traces and the cost ledger (E6)"
   },
   "R21": {
    "quantity": "Fig. S17b",
@@ -289,7 +309,8 @@
    ],
    "run": [
     "select/entry_complete.json"
-   ]
+   ],
+   "record_description": "training-only oracle records"
   },
   "R22": {
    "quantity": "Table S30: per-input dispersion",
@@ -299,7 +320,8 @@
    ],
    "records": [
     "oracle_dispersion"
-   ]
+   ],
+   "record_description": "oracle record"
   },
   "R23": {
    "quantity": "Fig. S17h, Tables S26, S26b, Fig. S3 band: ensemble law",
@@ -312,7 +334,8 @@
    ],
    "records": [
     "ensemble_grid"
-   ]
+   ],
+   "record_description": "comparator loss at E ∈ {1, 2, 4, 8, 12, 16, 20} with paired seeds (E14)"
   },
   "R24": {
    "quantity": "main Prop. 7(ii), Table S28b, Fig. S17g: σ_1",
@@ -324,7 +347,8 @@
    "run": [
     "explore/",
     "fit/full/audit.json"
-   ]
+   ],
+   "record_description": "per-cell records"
   },
   "R25": {
    "quantity": "Table S6b note, Note S19, Fig. S6c: proteins f_res",
@@ -334,7 +358,8 @@
    ],
    "records": [
     "sensor_parameters"
-   ]
+   ],
+   "record_description": "executed resolvent fraction from the execution logs; kernel storage and timing records"
   },
   "R26": {
    "quantity": "Table S15: resource ranges; Table S15b: per-rerun entries",
@@ -345,7 +370,8 @@
    ],
    "records": [
     "baselines"
-   ]
+   ],
+   "record_description": "per-rerun timing ledger and per-seed scores (E12, E17)"
   },
   "R27": {
    "quantity": "Table S16 note (cell 010)",
@@ -355,7 +381,8 @@
    ],
    "records": [
     "factorials"
-   ]
+   ],
+   "record_description": "cell execution record"
   },
   "R28": {
    "quantity": "Table S16b: Pascal factorial",
@@ -365,7 +392,8 @@
    ],
    "records": [
     "factorials"
-   ]
+   ],
+   "record_description": "paired factorial record"
   },
   "R29": {
    "quantity": "Table S20: slack with twelve finalists",
@@ -377,7 +405,8 @@
     "select/unit_scores.npz",
     "select/candidates.json",
     "select/decision.json"
-   ]
+   ],
+   "record_description": "resampling record (Algorithm S4)"
   },
   "R30": {
    "quantity": "Tables S23, S15b, main Table 2 (M⋆): qualification GPU-h",
@@ -399,7 +428,8 @@
    ],
    "records": [
     "baselines"
-   ]
+   ],
+   "record_description": "scheduler accounting"
   },
   "R31": {
    "quantity": "Table S25: Roman substitute backbone",
@@ -409,7 +439,8 @@
    ],
    "records": [
     "cross_backbone"
-   ]
+   ],
+   "record_description": "configuration and checkpoint identities"
   },
   "R32": {
    "quantity": "Table S27: buffer sensitivity",
@@ -422,7 +453,8 @@
    ],
    "records": [
     "buffer_sensitivity"
-   ]
+   ],
+   "record_description": "admission records at buffers 2–32"
   },
   "R33": {
    "quantity": "Table S29, Fig. S5: horizon and beam sweep",
@@ -437,7 +469,8 @@
    ],
    "records": [
     "horizon_beam_sweep"
-   ]
+   ],
+   "record_description": "sweep record"
   },
   "R34": {
    "quantity": "Note S20: search versus model error",
@@ -451,7 +484,8 @@
    ],
    "records": [
     "search_enumeration"
-   ]
+   ],
+   "record_description": "E9 record"
   }
  }
 }

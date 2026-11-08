@@ -142,18 +142,17 @@ def render_repository_release(st: dict) -> str:
     url = st["scope"].get("repository_url") or "https://github.com/VKHS/CR-9"
     lines = ["# Data and code availability", "", "## Availability statement", "",
              "The paper's registered data-availability statement:", "", f"> {statement['registered_text']}", "",
-             f"**{counts['fulfilled']} of {len(compliance['items'])} items fulfilled**, "
-             f"{counts['awaiting_measured_outputs']} awaiting the publication of the measured outputs, "
-             f"{counts['missing']} missing ([full evaluation](STATEMENT_COMPLIANCE.md); `make statement-check`).", "",
+             "The table below identifies the available resources and the measured outputs that await publication. "
+             "[Statement compliance](STATEMENT_COMPLIANCE.md) records the checks for each item "
+             "(`make statement-check`).", "",
              "| Statement item | Status | Where in the repository |", "|---|---|---|"]
     lines += [f"| {row['phrase']} | {STATUS_TEXT[row['status']]} | {row['where']} |" for row in compliance["items"]]
     published = [a for a in manifest["artifacts"] if a.get("status") == "published"]
     lines += ["", "## Measured outputs", "",
-              f"The checkpoints, predictions, propensity-logged trajectories and statistical outputs of the reported "
-              f"experiments are assets of the release [`{manifest['release_tag']}`]({manifest['release_url']}) of "
-              f"[{url}]({url}); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with "
-              f"the SHA-256 of each part, archive and file. Published: **{len(published)} of "
-              f"{len(manifest['artifacts'])}** required artifacts.", "",
+              f"The publication workflow distributes checkpoints, predictions, propensity-logged trajectories and "
+              f"statistical outputs through the `{manifest['release_tag']}` release in "
+              f"[GitHub Releases]({url}/releases); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with "
+              "the SHA-256 of each published part, archive and file. The status of each artifact appears below.", "",
               "| Artifact | Status | Files | Size | Checkpoints | Predictions | Trajectories | Statistical outputs |",
               "|---|---|---|---|---|---|---|---|"]
     for entry in manifest["artifacts"]:
@@ -165,8 +164,8 @@ def render_repository_release(st: dict) -> str:
         else:
             lines.append(f"| `{entry['id']}` | awaiting measured outputs | — | — | — | — | — | — |")
     lines += ["", "## One command", "",
-              "`make paper` downloads the published outputs (analysis tier; `PAPER_TIER=complete` adds checkpoints "
-              "and prediction arrays), verifies every part, archive and file against the manifest, verifies each run's "
+              "`make paper` downloads the published outputs (analysis tier; `PAPER_TIER=complete` adds lifecycle checkpoints "
+              "and full prediction arrays), verifies every part, archive and file against the manifest, verifies each run's "
               "sealed eight-stage chain and each record set's trace to its raw files, rebuilds every numbered table and "
               "figure with its source data (`paper/build/displays/`) and compares every computed value with the value "
               "printed in the paper. It exits 0 only when every display is complete and every compared value agrees. "
@@ -345,13 +344,15 @@ def readme_block(st: dict) -> str:
         compliance = st["release"]["compliance"]
         manifest = st["release"]["manifest"]
         published = sum(1 for a in manifest["artifacts"] if a.get("status") == "published")
+        release_url = (manifest["release_url"] if published else
+                       f"https://github.com/{manifest['repository']}/releases")
         return "\n".join([
             START,
-            f"**Availability statement:** {compliance['counts']['fulfilled']} of {len(compliance['items'])} items "
-            f"fulfilled; measured outputs published: {published} of {len(manifest['artifacts'])} "
-            "([statement compliance](STATEMENT_COMPLIANCE.md)). `make paper` rebuilds every table and figure from the "
-            "outputs published with the [release](" + manifest["release_url"] + ") and compares them with the paper; "
-            "see [availability](AVAILABILITY.md).",
+            "**Reproduction resources:** Experiment code, configurations, artifact verification and reconstruction "
+            "commands are included. [Statement compliance](STATEMENT_COMPLIANCE.md) identifies the published "
+            "files and the measured outputs awaiting publication. `make paper` verifies the "
+            "[release artifacts](" + release_url + "), rebuilds their displays and compares them with "
+            "the paper; see [availability](AVAILABILITY.md).",
             END,
         ])
     if code_release(st):

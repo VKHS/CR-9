@@ -52,13 +52,18 @@ def _sha(path: Path) -> str:
 
 def evaluate(root: Path = ROOT) -> dict:
     from scripts import paper_artifacts
+    from scripts import statement_evidence as evidence
     from paper.build.displays import framework
     framework._load_generators()
     statement = _json(root / STATEMENT)
     manifest = paper_artifacts.load_manifest(root / "release/paper_artifacts.json")
     artifacts = {a["id"]: a for a in manifest["artifacts"]}
-    required = [a for a in manifest["artifacts"] if a.get("required", True)]
-    published = {i for i, a in artifacts.items() if a.get("status") == paper_artifacts.PUBLISHED}
+    # A missing row or a changed `required` flag cannot shrink the paper's contract.
+    required = paper_artifacts.required_artifacts(root)
+    fixture_only = {i for i, a in artifacts.items() if a.get("status") == paper_artifacts.PUBLISHED
+                    and a.get("scientific_only_verification") is False}
+    published = {i for i, a in artifacts.items() if a.get("status") == paper_artifacts.PUBLISHED
+                 and i not in fixture_only}
     awaiting = sorted(a["id"] for a in required if a["id"] not in published)
     runs = [f"run:{d}" for d in DATASETS]
     displays = _json(root / "paper/display_manifest.json")["displays"]
@@ -87,16 +92,11 @@ def evaluate(root: Path = ROOT) -> dict:
                 pending.append(f"{e['experiment']}: {parts} (published inside {declared['artifact']} "
                                f"and copied to {Path(declared['view']).parent.as_posix()}/)")
                 continue
-            entries = view.get("studies") or []
-            if len(entries) != declared.get("count", len(entries)):
-                changed.append(f"{declared['view']} lists {len(entries)} of {declared['count']} entries")
-            for entry in entries:
-                for value in entry.values():
-                    if isinstance(value, dict) and "file" in value and "sha256" in value:
-                        path = view_path.parent / value["file"]
-                        if not path.is_file() or _sha(path) != value["sha256"]:
-                            changed.append(f"{(Path(declared['view']).parent / value['file']).as_posix()} differs "
-                                           "from its published identity")
+            try:
+                evidence.check_baseline_studies(view_path)
+                evidence.check_snapshot(root, view_path.parent, manifest)
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                changed.append(f"{declared['view']}: {exc}")
         return pending, changed
 
     absent = sorted({p for e in experiments for p in e.get("code", []) if not (root / p).exists()})
@@ -135,10 +135,12 @@ def evaluate(root: Path = ROOT) -> dict:
     # Generators
     without = [i for i in display_ids if i not in framework.GENERATORS]
     broken = dict(framework.LOAD_ERRORS)
-    if without or broken:
+    duplicate_displays = len(display_ids) != len(set(display_ids))
+    if without or broken or not display_ids or duplicate_displays:
         item("generators", MISSING, "`paper/build/displays/`",
              "; ".join(filter(None, [f"{len(without)} displays without a generator: {', '.join(without)}" if without else "",
-                                     f"modules that fail to import: {broken}" if broken else ""])))
+                                     f"modules that fail to import: {broken}" if broken else "",
+                                     "empty or duplicate display inventory" if not display_ids or duplicate_displays else ""])))
     else:
         item("generators", FULFILLED, f"`paper/build/displays/`: a generator for each of the {len(display_ids)} "
                                       "numbered displays")
@@ -153,7 +155,10 @@ def evaluate(root: Path = ROOT) -> dict:
                                  ("predictions", "predictions", "prediction arrays"),
                                  ("trajectories", "propensity_logged_trajectories", "exploration trajectories")):
         missing, empty = run_contents(category)
-        if empty:
+        if fixture_only & set(runs):
+            item(key, MISSING, "release `paper-artifacts`", "software fixtures cannot fulfil benchmark availability: "
+                 + ", ".join(sorted(fixture_only & set(runs))))
+        elif empty:
             item(key, MISSING, "release `paper-artifacts`", f"published runs without {words}: {', '.join(empty)}")
         elif missing:
             item(key, AWAITING, "release `paper-artifacts` (`release/paper_artifacts.json`)",
@@ -162,31 +167,32 @@ def evaluate(root: Path = ROOT) -> dict:
             item(key, FULFILLED, "release `paper-artifacts`; complete tier of every run")
 
     stats_missing = [a for a in awaiting if not a.startswith("environment:")]
-    item("statistical_outputs", AWAITING if stats_missing else FULFILLED,
+    item("statistical_outputs", MISSING if fixture_only else (AWAITING if stats_missing else FULFILLED),
          "release `paper-artifacts`: runs, measurement-record sets and campaigns",
-         f"{len(stats_missing)} of {len([a for a in required if a['kind'] != 'environment'])} artifacts: "
-         + ", ".join(stats_missing) if stats_missing else "")
+         ("software fixtures cannot fulfil benchmark availability: " + ", ".join(sorted(fixture_only)))
+         if fixture_only else ("awaiting publication: " + ", ".join(stats_missing) if stats_missing else ""))
 
     # Split and seed manifests
     registered = [f"manifests/registered/{STEMS[d]}_full.json" for d in DATASETS]
     absent = [p for p in registered if not (root / p).is_file()]
     published_manifests = [f"manifests/published/{STEMS[d]}.json" for d in DATASETS]
-    pending = [p for p in published_manifests if not (root / p).is_file()]
+    pending = [p for dataset, p in zip(DATASETS, published_manifests)
+               if not (root / p).is_file() or f"run:{dataset}" not in published]
     stale = []
     for dataset, path in zip(DATASETS, published_manifests):
         entry = artifacts.get(f"run:{dataset}")
-        if (root / path).is_file() and entry and entry.get("status") == paper_artifacts.PUBLISHED:
-            value = _json(root / path)
-            units = ([s["unit_sha256"] for s in value["campaign"]["per_split"]] if "campaign" in value
-                     else [value["identities"]["unit_sha256"]])
-            identity = entry.get("identity") or {}
-            expected = ([s["unit_sha256"] for _, s in sorted((identity.get("splits") or {}).items())]
-                        if identity.get("campaign") else [identity.get("unit_sha256")])
-            if units != expected:
-                stale.append(path)
+        if (root / path).is_file() and f"run:{dataset}" in published:
+            try:
+                evidence.check_run_manifest(root / "manifests/published", STEMS[dataset], dataset, entry)
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                stale.append(f"{path}: {exc}")
+    if not pending:
+        try:
+            evidence.check_snapshot(root, root / "manifests/published", manifest)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            stale.append(str(exc))
     if absent or stale:
-        item("split_seed_manifests", MISSING, "`manifests/`", ", ".join(absent + [f"{p} differs from the published run"
-                                                                                  for p in stale]))
+        item("split_seed_manifests", MISSING, "`manifests/`", "; ".join(absent + stale))
     elif pending:
         item("split_seed_manifests", AWAITING, "`manifests/registered/` (design); `manifests/published/` (executed)",
              f"executed memberships of {len(pending)} runs")
@@ -197,11 +203,25 @@ def evaluate(root: Path = ROOT) -> dict:
     specs = ["environment/requirements-cpu.lock", "environment/apptainer.def", "Dockerfile", "run_cross_morse.sh"]
     absent = [p for p in specs if not (root / p).is_file()]
     observed = [f"environment/observed/{STEMS[d]}.json" for d in DATASETS]
-    pending = [p for p in observed if not (root / p).is_file()]
+    pending = [p for dataset, p in zip(DATASETS, observed)
+               if not (root / p).is_file() or f"run:{dataset}" not in published]
+    stale = []
+    for dataset, path in zip(DATASETS, observed):
+        if (root / path).is_file() and f"run:{dataset}" in published:
+            try:
+                evidence.check_observed_environment(root / "environment/observed", STEMS[dataset], dataset,
+                                                    artifacts[f"run:{dataset}"])
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                stale.append(f"{path}: {exc}")
     if "environment:gpu" not in published:
         pending.append("environment:gpu")
-    if absent:
-        item("environment", MISSING, "`environment/`", ", ".join(absent))
+    if not pending:
+        try:
+            evidence.check_snapshot(root, root / "environment/observed", manifest)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            stale.append(str(exc))
+    if absent or stale:
+        item("environment", MISSING, "`environment/`", "; ".join(absent + stale))
     elif pending:
         item("environment", AWAITING, "`environment/`, `Dockerfile`, SITE SETTINGS of `run_cross_morse.sh`",
              "observed environment of the reported runs: " + ", ".join(pending))
@@ -209,26 +229,29 @@ def evaluate(root: Path = ROOT) -> dict:
         item("environment", FULFILLED, "`environment/` specifications and `environment/observed/`")
 
     # Source data and one-command reconstruction
-    index = _json(root / "paper/source_data/INDEX.json")
-    if index is None:
+    index_path = root / "paper/source_data/INDEX.json"
+    index, summary, source_errors = None, {}, []
+    if not index_path.is_file():
         item("source_data", AWAITING if awaiting else MISSING, "`paper/source_data/` (written by the publication step)",
              "generated from the published outputs")
     else:
-        changed = [name for name, digest in index["files"].items()
-                   if not (root / "paper/source_data" / name).is_file() or _sha(root / "paper/source_data" / name) != digest]
-        item("source_data", MISSING if changed else (AWAITING if awaiting else FULFILLED),
-             "`paper/source_data/`", ", ".join(changed) or (", ".join(awaiting) if awaiting else ""))
+        try:
+            index, summary = evidence.check_source_data(root, manifest, display_ids)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            source_errors.append(str(exc))
+        item("source_data", MISSING if source_errors else (AWAITING if awaiting else FULFILLED),
+             "`paper/source_data/`", "; ".join(source_errors) or (", ".join(awaiting) if awaiting else ""))
     paper_target = (root / "Makefile").is_file() and "scripts/reconstruct_paper.py" in (root / "Makefile").read_text(encoding="utf-8")
-    summary = (index or {}).get("reconstruction") or {}
     if not paper_target or not (root / "scripts/reconstruct_paper.py").is_file():
         item("one_command", MISSING, "`make paper`", "the make target or scripts/reconstruct_paper.py is absent")
+    elif source_errors:
+        item("one_command", MISSING, "`make paper`", "; ".join(source_errors))
     elif awaiting:
         item("one_command", AWAITING, "`make paper` (scripts/reconstruct_paper.py)",
              f"{len(awaiting)} artifacts unpublished; displays needing them cannot be rebuilt yet")
-    elif summary.get("complete") != len(display_ids) or summary.get("values_differ"):
+    elif evidence.reconstruction_problems(summary, len(display_ids)):
         item("one_command", MISSING, "`make paper`",
-             f"last published reconstruction: {summary.get('complete')} of {len(display_ids)} displays complete, "
-             f"{summary.get('values_differ')} values differ from the paper")
+             "; ".join(evidence.reconstruction_problems(summary, len(display_ids))))
     else:
         item("one_command", FULFILLED, "`make paper`: every display rebuilt and every compared value agrees")
 
@@ -247,13 +270,19 @@ def evaluate(root: Path = ROOT) -> dict:
 
 def render(evaluation: dict) -> str:
     counts = evaluation["counts"]
+    if counts[MISSING]:
+        scope = "The checks below identify the files or validation results that need attention."
+    elif counts[AWAITING]:
+        scope = ("Experiment and reconstruction tooling is included. The measured artifacts identified below "
+                 "await publication from the completed runs.")
+    else:
+        scope = "The published files and reconstruction records satisfy each item checked below."
     lines = ["# Compliance with the data-availability statement", "",
              "The paper's registered data-availability statement:", "",
              f"> {evaluation['statement']}", "",
-             f"**{counts[FULFILLED]} of {len(evaluation['items'])} items fulfilled**; "
-             f"{counts[AWAITING]} awaiting the publication of the measured outputs; {counts[MISSING]} missing. "
-             f"Published artifacts: {evaluation['artifacts_published']} of {evaluation['artifacts_required']} "
-             "(`release/paper_artifacts.json`).", "",
+             scope, "", "This offline check validates the release manifest and its committed views. "
+             "`make statement-fulfilled` also downloads and verifies the complete artifacts and executes the "
+             "reconstruction before evaluating this statement.", "",
              "| Statement item | Status | Where | Remaining |", "|---|---|---|---|"]
     for row in evaluation["items"]:
         lines.append(f"| {row['phrase']} | {LABEL[row['status']]} | {row['where']} | {row['remaining'] or '—'} |")
@@ -282,7 +311,11 @@ def main(argv=None) -> int:
     parser.add_argument("--require-fulfilled", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
-    evaluation = evaluate(ROOT)
+    try:
+        evaluation = evaluate(ROOT)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"Invalid availability evidence: {exc}", file=sys.stderr)
+        return 2
     text = render(evaluation)
     if args.json:
         print(json.dumps(evaluation, indent=1))

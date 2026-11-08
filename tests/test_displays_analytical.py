@@ -21,7 +21,8 @@ from paper.build.displays import analytical
 from paper.build.displays.framework import ROOT, DATASETS, RunView
 from paper.build.displays.testing import build_one, context, fake_records, read_table, write_files
 
-REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding="utf-8"))
+from paper.build.displays.framework import load_references
+REGISTRY, _, _ = load_references(ROOT)
 CONSTANTS = json.loads((ROOT / "paper/registered_constants.json").read_text(encoding="utf-8"))
 Z = NormalDist().inv_cdf(0.975)
 IDS = ["supplementary:Table S6", "supplementary:Table S6b", "supplementary:Table S14b",
@@ -162,13 +163,9 @@ FIGURE_DATA = {"FigS6": ("panel_a_multiplier", "panel_b_admissible_order", "pane
                "FigS15": ("panel_a_response", "panel_b_band_sensitivity", "panel_c_executed_range", "panel_d_headroom"),
                "FigS20": ("panel_a_break_even_points", "panel_a_break_even_curves", "panel_b_reach",
                           "panel_c_half_widths", "panel_d_seed_design")}
-# Registry entries whose text differs from the current PDF, and the S47 ensemble-spend crossovers that the
-# fixture-only o_dec cannot reproduce for every dataset at once.
+# S47 ensemble-spend crossovers that the fixture-only o_dec cannot reproduce for
+# every dataset at once. Source-verified S14b/S42 text must match without exceptions.
 EXPECTED_DIFFERENCES = {
-    ("supplementary:Table S14b", "2/interpretation"),
-    *(("supplementary:Table S14b", f"{i}/interpretation") for i in range(6)),
-    ("supplementary:Table S42", "PascalVOC-SP/unit"), ("supplementary:Table S42", "COCO-SP/unit"),
-    ("supplementary:Table S42", "Peptides-func/unit"),
     ("supplementary:Table S47", "Roman-empire/phi_B_ensemble"), ("supplementary:Table S47", "Peptides-func/phi_B_ensemble")}
 # Supplementary Table S33 as printed (numeric cells after the dataset and scenario columns).
 PRINTED_S33 = """
@@ -225,9 +222,8 @@ class AnalyticalDisplayTests(unittest.TestCase):
                 differing = {(display_id, r["path"]) for r in rows if r["status"] != "exact"}
                 self.assertEqual(differing, {d for d in EXPECTED_DIFFERENCES if d[0] == display_id})
         transcribed = {i for i, (_, rows) in self.results.items() if rows}
-        self.assertEqual(transcribed, set(IDS) - {"supplementary:Table S6", "supplementary:Table S6b",
-                                                    "supplementary:Table S28", "supplementary:Table S28b",
-                                                    "supplementary:Table S33", "supplementary:Figure S11"})
+        self.assertEqual(transcribed, set(IDS) - {"supplementary:Table S28", "supplementary:Table S28b",
+                                                    "supplementary:Table S33"})
 
     def test_generators_never_read_the_registry(self):
         source = Path(analytical.__file__).read_text(encoding="utf-8")

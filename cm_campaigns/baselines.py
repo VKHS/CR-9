@@ -17,9 +17,12 @@ A complete set holds, for each of the seven datasets,
 * the two external comparisons of ``cm_campaigns.contract.EXTERNAL``: per-seed ``score`` rows,
   ``hpo_trials``, ``params_millions``, ``gpu_hours``, ``serial_cost`` and ``wall_time``;
 
-and, for each of the fourteen external comparisons, the validated study plan, its upstream identity and the
-adapter archive: ``raw/<slug>/<method>/plan.json``, ``raw/<slug>/<method>/upstream.json`` and the archive that
-``upstream.json`` names under ``code/adapters/<slug>/<method>/``.
+and, for each of the fourteen external comparisons, the validated study plan, its upstream identity,
+adapter archive and complete original study: ``raw/<slug>/<method>/plan.json``, ``upstream.json``,
+``study.tar`` and ``study_files.json``, plus the adapter archive named under ``code/adapters/<slug>/<method>/``.
+The study archive contains all 48 sealed HPO attempts and every registered final seed/split, including
+checkpoints, predictions, split manifests, timing traces and per-attempt source snapshots. Checks verify
+their original seals and the development-selected configuration without loading checkpoint objects.
 
 Standard library only (the study plans are validated with ``cm_experiments.upstream.validate_plan``).
 """
@@ -27,7 +30,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
+import tarfile
 from pathlib import Path, PurePosixPath
 
 from .contract import BASELINE_SEEDS, DATASETS, EXTERNAL, SLUGS
@@ -54,6 +59,7 @@ REQUIRED = {QC: ("serial_cost", "wall_time", "gpu_hours"),
             ROUTE: ("gpu_hours",),
             EXTERNAL_METHOD: ("hpo_trials", "params_millions", "gpu_hours", "serial_cost", "wall_time")}
 UPSTREAM_SCHEMA = "cm-upstream-identity-1"
+STUDY_ARTIFACT_SCHEMA = "cm-upstream-study-artifacts-1"
 
 
 def method_keys(qc_route: str, qd_route: str | None, returned: bool) -> tuple[str, str | None]:
@@ -118,11 +124,166 @@ def method_directory(method: str) -> str:
 
 
 def study_paths(dataset: str, method: str, adapter_commit: str) -> dict[str, str]:
-    """Set-relative locations of an external comparison's plan, upstream identity and adapter archive."""
+    """Set-relative locations of an external comparison's plan, source identity, adapter and complete study."""
     folder = f"raw/{SLUGS[dataset]}/{method_directory(method)}"
     return {"plan": f"{folder}/plan.json", "upstream": f"{folder}/upstream.json",
+            "study_archive": f"{folder}/study.tar", "study_manifest": f"{folder}/study_files.json",
             "adapter_archive": f"code/adapters/{SLUGS[dataset]}/{method_directory(method)}/"
                                f"adapter-{adapter_commit[:12]}.tar"}
+
+
+def _study_relative(value, where: str) -> str:
+    if (not isinstance(value, str) or not value or "\\" in value or PurePosixPath(value).is_absolute()
+            or any(p in (".", "..") for p in value.split("/")) or "//" in value):
+        raise ValueError(f"{where}: unsafe study artifact path {value!r}")
+    return value
+
+
+def validate_study_artifacts(plan: dict, files: dict, read_json) -> dict:
+    """Validate sealed HPO/final attempts and the actual checkpoint/prediction file identities.
+
+    ``files`` maps study-relative paths to {bytes, sha256}; ``read_json`` reads those already identified
+    bytes from a local study or its published archive. No checkpoint is unpickled or adapter executed.
+    """
+    from cm_experiments.artifacts import canonical
+    from cm_experiments.upstream import validate_plan
+    validate_plan(plan)
+    plan_sha = canonical(plan)
+    selected, selected_score = None, None
+
+    def attempt(prefix, phase, index, seed, split, configuration):
+        record = read_json(f"{prefix}/attempt.json")
+        if (record.get("plan_sha256") != plan_sha or read_json(f"{prefix}/plan.json") != plan
+                or (record.get("phase"), record.get("index"), record.get("seed"), record.get("split"))
+                != (phase, index, seed, split) or read_json(f"{prefix}/configuration.json") != configuration):
+            raise ValueError(f"{prefix}: attempted configuration, seed, split or plan differs from the registration")
+        seal = read_json(f"{prefix}/ARTIFACT_MANIFEST.json")
+        if seal.get("schema") != "cm-arm-artifacts-1" or not isinstance(seal.get("files"), list) or not seal["files"]:
+            raise ValueError(f"{prefix}: missing original attempt seal")
+        expected = {}
+        for item in seal["files"]:
+            name = f"{prefix}/" + _study_relative(item.get("path"), prefix)
+            if name in expected:
+                raise ValueError(f"{prefix}: duplicate sealed artifact")
+            expected[name] = {k: item.get(k) for k in ("bytes", "sha256")}
+        actual = {name: {k: item[k] for k in ("bytes", "sha256")} for name, item in files.items()
+                  if name.startswith(prefix + "/") and name != f"{prefix}/ARTIFACT_MANIFEST.json"}
+        if actual != expected:
+            raise ValueError(f"{prefix}: original sealed attempt bytes are missing or changed")
+        invocation = read_json(f"{prefix}/invocation.json")
+        for kind, identity in (("upstream", "source_commit"), ("adapter", "adapter_commit")):
+            name = f"{prefix}/{kind}_source.tar"
+            if invocation.get(identity) != plan[identity] or name not in files or files[name]["bytes"] <= 0:
+                raise ValueError(f"{prefix}: pinned {kind} source snapshot or invocation identity is missing")
+        return record
+
+    expected_hpo = {f"hpo/trial-{i:03d}/attempt.json" for i in range(len(plan["trials"]))}
+    if {name for name in files if name.startswith("hpo/") and name.endswith("/attempt.json")} != expected_hpo:
+        raise ValueError("the study must retain exactly the 48 registered HPO attempts, including failures/pruning")
+    for i, config in enumerate(plan["trials"]):
+        prefix, seed = f"hpo/trial-{i:03d}", int(plan.get("search_seed", 0))
+        record = attempt(prefix, "hpo", i, seed, 0, dict(config, seed=seed))
+        if record.get("status") not in ("COMPLETE", "FAILED", "PRUNED"):
+            raise ValueError(f"{prefix}: invalid original attempt status")
+        if record["status"] == "COMPLETE":
+            score = float(record["development_score"])
+            receipt = read_json(f"{prefix}/adapter_output/receipt.json")
+            if (not math.isfinite(score) or not 0 <= score <= 1 or receipt.get("status") != "COMPLETE"
+                    or receipt.get("scored_role") != plan["selection_role"]
+                    or receipt.get("development_score") != score):
+                raise ValueError(f"{prefix}: invalid development score or prohibited selection role")
+            if selected is None or (score > selected_score if plan["direction"] == "maximize" else score < selected_score):
+                selected, selected_score = i, score
+    if selected is None:
+        raise ValueError("all HPO attempts failed or were pruned; no final configuration can be selected")
+    splits = plan.get("official_splits", [0])
+    expected_final = {f"final/seed-{seed}/split-{split}/attempt.json" for seed in plan["seed_ids"] for split in splits}
+    if {name for name in files if name.startswith("final/") and name.endswith("/attempt.json")} != expected_final:
+        raise ValueError("the final fits must cover every registered seed and official split exactly once")
+    final = []
+    for i, seed in enumerate(plan["seed_ids"]):
+        for split in splits:
+            prefix = f"final/seed-{seed}/split-{split}"
+            record = attempt(prefix, "final", i, seed, split, dict(plan["trials"][selected], seed=seed))
+            selection = read_json(f"{prefix}/development_selection.json")
+            receipt = read_json(f"{prefix}/adapter_output/receipt.json")
+            if (record.get("status") != "COMPLETE" or receipt.get("status") != "COMPLETE"
+                    or selection.get("selected_trial") != selected or selection.get("selected_config") != plan["trials"][selected]
+                    or selection.get("selection_role") != plan["selection_role"]
+                    or selection.get("development_score") != selected_score):
+                raise ValueError(f"{prefix}: final fit did not execute the registered development-selected configuration")
+            artifacts = {}
+            for kind in ("predictions", "checkpoint", "split_manifest", "timing_trace"):
+                name = f"{prefix}/adapter_output/" + _study_relative(receipt.get(kind), prefix)
+                if name not in files or files[name]["bytes"] <= 0:
+                    raise ValueError(f"{prefix}: missing or empty final {kind} artifact")
+                artifacts[kind] = {"path": name, **{k: files[name][k] for k in ("bytes", "sha256")}}
+            final.append({"seed": seed, "split": split, "artifacts": artifacts})
+    return {"hpo_attempts": len(expected_hpo), "selected_trial": selected, "final_fits": final}
+
+
+def check_study_archive(root: Path, plan: dict, archive: dict) -> dict:
+    """Stream-verify every published study byte and its original attempt seals without extracting or loading models."""
+    where = f"{plan['dataset']}/{plan['method']}"
+    expected_paths = study_paths(plan["dataset"], plan["method"], plan["adapter_commit"])
+    if archive.get("file") != expected_paths["study_archive"] or archive.get("manifest_file") != expected_paths["study_manifest"]:
+        raise ValueError(f"{where}: the complete original study archive and file manifest are missing")
+    path = _inside(root, archive["file"], where)
+    manifest_path = _inside(root, archive["manifest_file"], where)
+    if (path.stat().st_size != archive.get("bytes") or _sha256(path) != archive.get("sha256")
+            or _sha256(manifest_path) != archive.get("manifest_sha256")):
+        raise ValueError(f"{where}: original study archive or file manifest differs from its SHA-256")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    from cm_experiments.artifacts import canonical
+    if (manifest.get("schema") != STUDY_ARTIFACT_SCHEMA or manifest.get("plan_sha256") != canonical(plan)
+            or manifest.get("source_commit") != plan["source_commit"]
+            or manifest.get("adapter_commit") != plan["adapter_commit"]
+            or (manifest.get("dataset"), manifest.get("method")) != (plan["dataset"], plan["method"])):
+        raise ValueError(f"{where}: study file manifest belongs to another plan")
+    expected = {}
+    for item in manifest.get("files", []):
+        name = _study_relative(item.get("path"), where)
+        if name in expected:
+            raise ValueError(f"{where}: duplicate study manifest path {name}")
+        expected[name] = {k: item[k] for k in ("bytes", "sha256")}
+    observed, documents = {}, {}
+    try:
+        with tarfile.open(path, mode="r|*") as stream:
+            for item in stream:
+                name = _study_relative(item.name, where)
+                if not item.isfile() or name in observed or name not in expected:
+                    raise ValueError(f"{where}: unlisted, duplicate or non-file study archive member {name}")
+                content = stream.extractfile(item)
+                digest, size = hashlib.sha256(), 0
+                capture = (PurePosixPath(name).name in {"attempt.json", "plan.json", "configuration.json",
+                           "invocation.json", "ARTIFACT_MANIFEST.json", "development_selection.json", "receipt.json"}
+                           and item.size <= 16 * 1024 * 1024)
+                chunks = []
+                for chunk in iter(lambda: content.read(1024 * 1024), b""):
+                    digest.update(chunk)
+                    size += len(chunk)
+                    if capture:
+                        chunks.append(chunk)
+                observed[name] = {"bytes": size, "sha256": digest.hexdigest()}
+                if observed[name] != expected[name]:
+                    raise ValueError(f"{where}: archived study bytes differ for {name}")
+                if capture:
+                    documents[name] = b"".join(chunks)
+    except tarfile.TarError as exc:
+        raise ValueError(f"{where}: invalid original study archive ({exc})") from None
+    if observed != expected or not expected:
+        raise ValueError(f"{where}: original study archive has missing files")
+    def read_json(name):
+        if name not in documents:
+            raise ValueError(f"{where}: required study JSON is absent or too large: {name}")
+        return json.loads(documents[name])
+    result = validate_study_artifacts(plan, observed, read_json)
+    if any(manifest.get(k) != result[k] for k in ("hpo_attempts", "selected_trial", "final_fits")):
+        raise ValueError(f"{where}: study manifest coverage differs from the archived original attempts")
+    return {"file": archive["file"], "sha256": archive["sha256"], "files": len(observed),
+            "hpo_attempts": result["hpo_attempts"], "final_fits": len(result["final_fits"]),
+            "predictions": [{"seed": item["seed"], "split": item["split"], **item["artifacts"]["predictions"]}
+                            for item in result["final_fits"]]}
 
 
 # ----------------------------------------------------------------------------- the record audit
@@ -199,7 +360,7 @@ def _inside(root: Path, relative, what: str) -> Path:
 
 
 def check_studies(path) -> dict:
-    """The study plan, upstream identity and adapter archive of every external comparison of a set."""
+    """Plans, source identities, adapters and sealed original study bytes of all external comparisons."""
     from cm_experiments.upstream import validate_plan
     root = Path(path)
     problems, studies = [], []
@@ -229,14 +390,21 @@ def check_studies(path) -> dict:
                 adapter = _inside(root, archive["file"], where)
                 if _sha256(adapter) != archive.get("sha256"):
                     raise ValueError(f"{where}: {archive['file']} differs from the SHA-256 in upstream.json")
+                outputs = check_study_archive(root, plan, upstream.get("study_archive") or {})
+                for item in outputs["predictions"]:
+                    relative = (f"{folder}/seed-{item['seed']}/split-{item['split']}/"
+                                f"{PurePosixPath(item['path']).name}")
+                    prediction = _inside(root, relative, where)
+                    if prediction.stat().st_size != item["bytes"] or _sha256(prediction) != item["sha256"]:
+                        raise ValueError(f"{where}: direct prediction copy differs from its sealed original: {relative}")
             except (ValueError, OSError, KeyError, TypeError) as exc:
                 problems.append(str(exc) if str(exc).startswith(where) else f"{where}: {exc}")
                 continue
             studies.append({"dataset": dataset, "method": method, "plan": expected["plan"],
                             "adapter_archive": archive["file"], "adapter_commit": plan["adapter_commit"],
-                            "source_commit": plan["source_commit"]})
+                            "source_commit": plan["source_commit"], "study_archive": outputs})
     if problems:
-        raise ValueError("baselines: study plans and adapter code incomplete: " + "; ".join(problems[:8])
+        raise ValueError("baselines: study plans, source code or original study outputs incomplete: " + "; ".join(problems[:8])
                          + (f"; and {len(problems) - 8} more" if len(problems) > 8 else ""))
     return {"external_comparisons": len(studies), "studies": studies}
 

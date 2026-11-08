@@ -18,11 +18,12 @@ from unittest import mock
 import numpy as np
 
 from paper.build.displays import records_campaigns as rc
-from paper.build.displays.framework import DATASETS, GENERATORS, DisplayInputError, RunView
+from paper.build.displays.framework import (DATASETS, GENERATORS, DisplayInputError, DisplayValidationError, RunView,
+                                            load_references)
 from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table
 
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding="utf-8"))
+REGISTRY = load_references(ROOT)[0]
 SPECS = json.loads((ROOT / "records/specs.json").read_text(encoding="utf-8"))["sets"]
 ADMITTED = [d for d in DATASETS if d != "ogbn-products"]
 ARMS = ("E3", "E4", "E5", "E6")
@@ -415,6 +416,38 @@ class LedgerTables(World):
         self.assertEqual(lookup(rows, "ogbn-arxiv/rows/1/C_ctrl")["status"], "exact")
         self.assertEqual(lookup(rows, "ogbn-arxiv/plant_params_M")["status"], "exact")
 
+    def test_s15_declared_ranges_stay_separate_from_observed_costs(self):
+        first, _, first_comparisons = self.build("supplementary:Table S15", self.ctx("baselines", "input_gate"))
+        declared = data_rows(first, "S15", "declared_reference_ranges")
+        self.assertEqual(len(declared), 19)
+        amp = next(row for row in declared if row["method_or_route"] == "AMP"
+                   and row["quantity"] == "serial_cost_per_member")
+        self.assertEqual((amp["low"], amp["high"], amp["basis"]), ("1.05", "1.2", "declared reference range"))
+        reference_checks = [row for row in first_comparisons if row["group"] == rc.G_S15_REFERENCE]
+        self.assertEqual(len(reference_checks), 19)
+        self.assertEqual({row["status"] for row in reference_checks}, {"exact"})
+
+        changed = self.ctx("baselines", "input_gate")
+        reference = changed.constants["baseline_reference_ranges_table_S15"]
+        reference["external_methods"]["AMP"]["serial_cost_per_member"] = [7.0, 8.0]
+        reference["external_methods"]["AMP"]["parameter_multiplier"] = [3.0, 4.0]
+        reference["internal_routes"]["best_fixed_depth"]["serial_cost_per_member"] = [0.2, 0.3]
+        second, _, second_comparisons = self.build("supplementary:Table S15", changed)
+        for relative in ("tables/S15.csv", "data/S15/methods.csv"):
+            self.assertEqual((first / relative).read_bytes(), (second / relative).read_bytes())
+        self.assertNotEqual(declared, data_rows(second, "S15", "declared_reference_ranges"))
+        self.assertEqual([r for r in first_comparisons if r["group"] == rc.G_S15],
+                         [r for r in second_comparisons if r["group"] == rc.G_S15])
+        differences = [r for r in second_comparisons if r["group"] == rc.G_S15_REFERENCE and r["status"] == "differs"]
+        self.assertEqual(len(differences), 3)
+        self.assertIn("accounting references, not observed per-rerun costs", (second / "tables/S15.md").read_text())
+
+    def test_s15_rejects_malformed_declared_reference_range(self):
+        changed = self.ctx("baselines", "input_gate")
+        changed.constants["baseline_reference_ranges_table_S15"]["retraining_multiplier"] = [1.6, 1.1]
+        with self.assertRaisesRegex(DisplayInputError, "retraining_multiplier.*ordered range"):
+            self.build("supplementary:Table S15", changed)
+
     def test_s15b_from_baselines(self):
         out, _, rows = self.build("supplementary:Table S15b", self.ctx("baselines"))
         table = self.assertLayout(out, "S15b", 27, 6)
@@ -505,6 +538,7 @@ class RecordTables(World):
         self.assertEqual([r["cell"] for r in table], ["000", "100", "010", "001", "110", "101", "011", "111"])
         self.assertEqual(table[0]["95% interval"], "[0.8660, 0.8746]")
         self.assertResolved(rows)
+        self.assertEqual(lookup(rows, "effect_coded_main_effects_nats/half_width_95")["status"], "missing")
         self.assertEqual(status_counts(rows).get("differs", 0), 0, [r for r in rows if r["status"] != "exact"])
         effects = {r["contrast"] + "/" + r["kind"]: float(r["value_nats"]) for r in data_rows(out, "S16", "contrasts")}
         self.assertAlmostEqual(effects["A/effect-coded"], -0.0086)
@@ -514,7 +548,7 @@ class RecordTables(World):
         self.assertEqual([r["cell"] for r in table][:4], ["000", "001", "010", "011"])
         main = [lookup(rows, f"effect_coded_main_effects_nats/{k}")["status"]
                 for k in ("spectral_information", "conditioned_observer", "risk_controlled_execution", "half_width_95")]
-        self.assertEqual(main, ["exact"] * 4)
+        self.assertEqual(main, ["exact"] * 3 + ["missing"])
 
     def test_s19_negative_controls(self):
         rows = [{"control": c, "quantity": q, "value": v, "unit": u}
@@ -522,12 +556,29 @@ class RecordTables(World):
                                   "sensor bias": (0.168, 0.748, 0.0104), "support shift": (0.064, 0.907, 0.0062)}.items()
                 for q, v, u in zip(("residual_activity", "input_fallback", "worst_pre_fallback_harm"), values,
                                    ("fraction", "fraction", "CE"))]
-        out, _, _ = self.build("supplementary:Table S19", context(records={"negative_controls": records(
+        out, _, compared = self.build("supplementary:Table S19", context(records={"negative_controls": records(
             "negative_controls", rows)}))
         table = self.assertLayout(out, "S19", 4, 6)
         self.assertEqual([r["control"] for r in table], ["graph irrelevant", "misleading graph", "sensor bias", "support shift"])
         self.assertEqual((table[1]["input fallback"], table[1]["worst pre-fallback harm"]), ("0.824", "0.0093 CE"))
-        self.assertEqual(table[0]["construction"], "")      # protocol text is not registered
+        self.assertEqual(table[0]["construction"], "Y ⟂ A | X on independent realizations")
+        self.assertEqual(table[0]["expected conclusion"], "comparator equivalence and nonvacuous fallback")
+        self.assertEqual(len(compared), 24)
+        self.assertEqual({row["status"] for row in compared}, {"exact"})
+
+        # An altered observation and its unit stay visible; the source targets cannot overwrite them.
+        altered = [dict(row) for row in rows]
+        for row in altered:
+            if row["control"] == "misleading graph" and row["quantity"] == "worst_pre_fallback_harm":
+                row.update(value=0.02, unit="nats")
+        out, _, compared = self.build("supplementary:Table S19", context(records={"negative_controls": records(
+            "negative_controls", altered)}))
+        self.assertEqual(read_table(out, "S19")[1]["worst pre-fallback harm"], "0.0200 nats")
+        raw = next(row for row in data_rows(out, "S19", "controls") if row["control"] == "misleading graph")
+        self.assertEqual((raw["worst_pre_fallback_harm"], raw["harm_unit"]), ("0.02", "nats"))
+        self.assertEqual(lookup(compared, "misleading graph/worst_pre_fallback_harm")["status"], "differs")
+        self.assertEqual(lookup(compared, "misleading graph/harm_unit")["status"], "differs")
+        self.assertEqual(lookup(compared, "misleading graph/construction")["status"], "exact")
 
     def test_s25_cross_backbone(self):
         rows = []
@@ -603,9 +654,9 @@ class BudgetTables(World):
         replay["summary"][0]["effect_vs_qC"] += 1e-4
         ctx = self.ctx("budget_matched", runs=False, campaign=True)
         with mock.patch("cm_campaigns.arm_campaign.check_campaign", return_value=replay):
-            with self.assertRaisesRegex(DisplayInputError, "strict campaign replay"):
+            with self.assertRaisesRegex(DisplayValidationError, "strict campaign replay"):
                 build_one("supplementary:Table S46b", ctx, Path(tempfile.mkdtemp(dir=self.tmp)))
-        with self.assertRaises(DisplayInputError):      # the stub study.json is not a campaign export
+        with self.assertRaises(DisplayValidationError):      # the stub study.json is not a campaign export
             build_one("supplementary:Table S46b", self.ctx("budget_matched", runs=False, campaign=True),
                       Path(tempfile.mkdtemp(dir=self.tmp)))
 

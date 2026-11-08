@@ -183,19 +183,26 @@ Final receipts identify checkpoints, prediction files, split identities and timi
 traces. Export recomputes official scores from predictions rather than trusting a
 receipt's score.
 
-The study plans and adapter code travel inside the `baselines` record set. For every
-study, `scripts/export_records.py baselines --checkouts DIR` (DIR holds the plan files;
+The study plans, adapter code and original study bytes travel inside the `baselines` record set. For every
+study, `scripts/export_records.py baselines --checkouts DIR --copy-studies --copy-predictions` (DIR holds the plan files;
 each plan's `source_directory` and `adapter_directory` resolve against its own directory,
 as `scripts/run_upstream_baseline.py` resolves them) writes the validated plan to
 `raw/<dataset>/<method>/plan.json`, writes `raw/<dataset>/<method>/upstream.json`
 (dataset, method, plan location, upstream repository URL of the source checkout's
 `origin`, source and adapter commits, and the adapter archive with its SHA-256) and
 archives the adapter checkout at `adapter_commit` with `git archive` to
-`code/adapters/<dataset>/<method>/adapter-<commit>.tar`. The upstream third-party source
-is referenced by URL and commit and is not copied. Each checkout's commit must equal the
-plan's; a study without its checkouts makes the set partial (`--allow-partial`, never
-into `records/`), and the record audit of a complete set requires the plan, the upstream
-identity and the adapter archive of all fourteen comparisons.
+`code/adapters/<dataset>/<method>/adapter-<commit>.tar`. `--copy-studies` also writes
+`raw/<dataset>/<method>/study.tar` and `study_files.json`: a deterministic archive of every original study
+file and its SHA-256 inventory. It retains the executor's per-attempt upstream and adapter source snapshots,
+all 48 attempted HPO fits, and each final fit's checkpoint, prediction, split manifest, timing trace and logs.
+The exporter verifies the original attempt seals, reconstructs the development-selected trial with the
+registered tie rule, and requires every registered final seed and official split. Missing checkpoint or
+prediction bytes stop the export; opaque checkpoints are hashed and copied without executing them.
+`--copy-predictions` additionally supplies directly accessible final-fit arrays for reconstruction.
+Each checkout's commit must equal the plan's. Missing checkouts or either copy flag makes the set partial
+(`--allow-partial`, never into `records/`); the complete record audit requires all fourteen study archives
+and verifies their contents against the original attempt seals. Large study archives travel in the release
+record asset; the small Git publication view retains their paths, hashes and per-file manifests.
 
 The internal rows of Supplementary Tables S15 and S15b (per-seed scores and GPU-hours of
 every internal route, E17 serial cost and wall time of q_C and of the deployed rule) are
@@ -208,8 +215,15 @@ python -B scripts/run_internal_baselines.py plan --parent ../runs/arxiv --parent
 python -B scripts/run_internal_baselines.py run --output ../baselines-internal --job 0 --device cuda \
   --trust-local-checkpoints
 python -B scripts/export_records.py baselines --internal ../baselines-internal --study ../studies/arxiv_AMP ... \
-  --checkouts ../baselines --accounting ../acct/sacct_original.psv --hardware "..." --period "..."
+  --checkouts ../baselines --copy-studies --copy-predictions \
+  --accounting ../acct/sacct_original.psv --hardware "..." --period "..."
 ```
+
+Each internal method retains its per-seed test prediction array beside its score JSON. Resume and export
+verify those bytes against their recorded SHA-256; a legacy score with no retained predictions cannot certify
+a complete result. Parent plant checkpoints and test-label/unit identities remain bound to the sealed
+lifecycle archive. Official Roman campaigns require all ten distinct split indices, and synthetic fixtures
+cannot be mixed with benchmark runs.
 
 Its definitions, recorded in the plan and the set's provenance: the method rows are those
 of `method_rows` in `paper/build/displays/records_campaigns.py` (keys from
@@ -250,7 +264,29 @@ scenarios must retain their separate definitions.
 
 The additional factorial, negative-control, sensor, input-gate, cross-backbone,
 ensemble and inserted-site results use the contracts in
-[records/specs.json](../records/specs.json). After actual runs are exported:
+[records/specs.json](../records/specs.json).
+
+The factorial export retains each cell's original prediction array, validates its hash and planned policy
+identity, and, for separately fitted cells, packages their actual controller checkpoints and supporting
+configuration, nominal reference and lifecycle seals. `CONTROLLERS.json` identifies those files and the
+shared parent plant/data archive required to execute them. The package does not substitute a lifecycle
+summary for trained controller bytes.
+
+The factorial's existing timing definition requires care: a read-only observer stop ends the online wall
+timer, then an untimed replay produces the stopped output. Such cells' `wall_seconds` and `relative_time`
+therefore measure partial execution latency and omit completion of the final returned predictions. Their
+`deployed_work` likewise excludes stopping-rule evaluations and the stopping-site measurement. These
+definitions are retained and now explicit in result/provenance `measurement_scope`; comparison as complete
+inference latency requires a separately specified measurement that includes the full returned output.
+
+E11 buffer sensitivity uses `walk-dependence-connected-components-v2`: every above-threshold graph link
+belongs to a single resampling component. This corrects the earlier independent-root assignment, which
+could leave linked cores in separate bootstrap blocks. The rule remains descriptive and does not prove
+stochastic independence. It may collapse to one component, in which case no interval or positive admission
+decision is reported. Versioned plans/results prevent an earlier grouping from silently resuming under the
+corrected method; neither the threshold nor the grouping is tuned to reproduce a printed target.
+
+After actual runs are exported:
 
 ```bash
 make records-index

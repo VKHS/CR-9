@@ -82,6 +82,7 @@ Cell protocol (the six quantities of the record set):
 from __future__ import annotations
 
 import contextlib
+import json
 import math
 import time
 from pathlib import Path
@@ -113,6 +114,14 @@ STOP_RULE = ("read-only observer stop (O = 1 cells): at every controlled depth d
              "with y_d, an eligible state (finite, valid NIS; under X = 1 also A0 qualified in the measurement's "
              "support stratum) whose terminal-value model predicts a remaining nominal CE change above 1e-7 nats stops "
              "propagation; the prediction is the head at d and no later site is executed")
+MEASUREMENT_SCOPE = {
+    "wall_seconds": ("device-synchronized online call; for a stopped observer cell the timer ends at the stop "
+                     "exception before the replay that produces final probabilities, so this is a partial "
+                     "execution latency rather than complete inference latency"),
+    "deployed_work": ("runtime product count of execution to the stopping depth; for stopped cells this "
+                      "excludes stop-rule evaluations and the stopping-site measurement"),
+    "relative_time": "the above wall_seconds divided by cell 000 wall_seconds; retains the stopped-cell scope",
+}
 METRIC_UNITS = {"accuracy": "%", "macro_f1": "F1 points", "rocauc": "AUC points", "ap": "AP points"}
 EXECUTION_FIELDS = ("input", "member", "terminal_depth", "stopped", "stop_value", "evaluated_depths", "wall_seconds",
                     "actions", "active")
@@ -548,7 +557,8 @@ def _execute(model, x, graph, config, candidate, controller, reference, depths, 
 
     The online execution is timed around the runtime's call with device synchronization.  In an observer cell it
     carries the read-only stopping observer; a stop at depth d* ends it, and the stopped execution is the runtime
-    executing the same rule to depth d* (identical first d* decisions, checked against the online pass).
+    executing the same rule to depth d* (identical first d* decisions, checked against the online pass). The
+    replay producing final probabilities is outside the timer; MEASUREMENT_SCOPE records this limitation.
     """
     from cross_morse.common import synchronize
     from cross_morse.policies import execute_policy
@@ -745,6 +755,7 @@ def write_factorial_result(directory, plan, entry, *, sums, counts, unit_ids, le
                             "measurement; their executable definitions differ (planning checks it), e.g. an observer "
                             "cell whose stopping rule stopped no execution"),
         "stopping_rule": plan.get("stopping_rule"),
+        "measurement_scope": MEASUREMENT_SCOPE,
         "member_seeds": entry["member_seeds"], "base": entry["base"], "base_origin": entry["base_origin"],
         "factor_switches": plan["factor_switches"], "truncated": truncated, "max_graphs": plan["max_graphs"],
         "warmup": plan["warmup"], "bootstrap": entry["bootstrap"],
@@ -780,10 +791,17 @@ def export_factorial(output, *, root=None, replace=False, allow_partial=False, h
         result = read_json(path)
         if [c["cell"] for c in result["cells"]] != list(CELLS) or result["role"] != plan["role"]:
             raise RunnerError(f"{path}: cells or role differ from the plan")
+        identities = result.get("identities") or {}
+        if identities.get("plan_sha256") != sha256(output / "plan.json") or identities.get("parent") != entry["identity"]:
+            raise RunnerError(f"{path}: the measurement belongs to another plan or parent")
         if result["truncated"] and not allow_partial:
             raise RunnerError(f"{entry['dataset']}: a run truncated by max_graphs is not a complete measurement")
         if not (directory / "executions.npz").is_file():
             raise RunnerError(f"{entry['dataset']}: job {entry['job']} has no execution record (executions.npz)")
+        for field, relative in (("unit_dil", "unit_dil.npz"), ("executions", "executions.npz")):
+            if (result.get(field, {}).get("file") != relative or not (directory / relative).is_file()
+                    or sha256(directory / relative) != result[field].get("sha256")):
+                raise RunnerError(f"{entry['dataset']}: {relative} differs from its measured artifact hash")
         base = f"raw/{entry['slug']}"
         files[f"{base}/factorial.json"] = path
         files[f"{base}/unit_dil.npz"] = directory / "unit_dil.npz"
@@ -791,6 +809,16 @@ def export_factorial(output, *, root=None, replace=False, allow_partial=False, h
         files[f"{base}/environment.json"] = directory / "environment.json"
         definitions[entry["dataset"]] = {c["cell"]: c.get("definition") for c in entry["cells"]}
         for i, cell in enumerate(result["cells"]):
+            planned = entry["cells"][i]
+            if cell["candidate"] != candidate_identity(planned["candidate"]) or cell.get("definition") != planned.get("definition"):
+                raise RunnerError(f"{entry['dataset']}: cell {cell['cell']} differs from its planned policy or definition")
+            relative = f"predictions/cell{cell['cell']}.npy"
+            prediction = cell.get("terminal_predictions") or {}
+            if (prediction.get("file") != relative or not (directory / relative).is_file()
+                    or sha256(directory / relative) != prediction.get("sha256")):
+                raise RunnerError(f"{entry['dataset']}: cell {cell['cell']} prediction is absent or differs from its "
+                                  "measured artifact hash")
+            files[f"{base}/{relative}"] = directory / relative
             for quantity in ("ld_integrated_loss", "interval_low", "interval_high", "official_metric", "activity",
                              "relative_time"):
                 unit = result["units"]["official_metric"] if quantity == "official_metric" else QUANTITY_UNITS[quantity]
@@ -809,6 +837,7 @@ def export_factorial(output, *, root=None, replace=False, allow_partial=False, h
     generated = {"code/plan.json": public_plan(output)}
     if mode == "fitted":             # the cell lifecycles: the ablation plan and each lifecycle's completion record
         from .ensemble_grid import ROOT
+        from .ablation_lifecycle import controller_artifacts
         files.update({f"code/{name}": ROOT / name for name in ABLATION_FILES if (ROOT / name).is_file()})
         fitted = Path(plan["fitted_plan"]["path"])
         if sha256(fitted / "plan.json") != plan["fitted_plan"]["plan_sha256"]:
@@ -819,6 +848,10 @@ def export_factorial(output, *, root=None, replace=False, allow_partial=False, h
             if not record.is_file():
                 raise RunnerError(f"cell lifecycle {job['slug']} has no completion record (jobs/.../lifecycle.json)")
             files[f"raw/fitted/{job['slug']}/lifecycle.json"] = record
+            assets, manifest = controller_artifacts(job, SealedRun(job["parent"]))
+            base = f"raw/fitted/{job['slug']}/controller_package"
+            files.update({f"{base}/{relative}": path for relative, path in assets.items()})
+            generated[f"{base}/CONTROLLERS.json"] = json.dumps(json_safe(manifest), indent=2, sort_keys=True) + "\n"
     else:                            # the installer of the switch mode's decision operations
         from .ensemble_grid import ROOT
         files["code/cm_experiments/ablation_lifecycle.py"] = ROOT / "cm_experiments" / "ablation_lifecycle.py"
@@ -841,6 +874,7 @@ def export_factorial(output, *, root=None, replace=False, allow_partial=False, h
                      "online wall time over cell 000; every execution's stopping depth in raw/<dataset>/executions.npz"),
         "synthetic": synthetic.pop(), "role": plan["role"], "mode": mode, "factor_switches": plan["factor_switches"],
         "cell_definitions": definitions, "stopping_rule": plan.get("stopping_rule"),
+        "measurement_scope": MEASUREMENT_SCOPE,
         "fitted_plan": None if mode == "switch" else {"plan_sha256": plan["fitted_plan"]["plan_sha256"]},
         "cell_definition_status": plan["cell_definition_status"], "plan_sha256": sha256(output / "plan.json")}
     return write_record_set("factorials", rows, files, provenance, root=root, replace=replace,

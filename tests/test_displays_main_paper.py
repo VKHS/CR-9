@@ -12,11 +12,12 @@ import math
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from cm_campaigns.contract import ADMITTED, EXTERNAL
 from cm_theory import admission as adm_theory
 from cm_theory import inference
-from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, RunView
+from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, SHORT, DisplayInputError, DisplayValidationError, RunView
 from paper.build.displays.testing import build_one, context, fake_records, read_table, write_files
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -335,6 +336,20 @@ class MainPaperDisplayTests(unittest.TestCase):
                        "baselines": baselines(), "nominal_time": nominal_time(), "budget_matched": budget_matched(),
                        "tube_audit": tube_audit(), "mechanism_contrasts": mechanism_contrasts(),
                        "decision_traces": decision_traces()}
+        cls.budget_dir = cls.base / "budget"
+        cls.budget_dir.mkdir()
+        (cls.budget_dir / "study.json").write_text("{}")
+        from paper.build.displays.records_campaigns import REPLAY_FIELDS
+        budget = cls.records["budget_matched"]
+        cls.budget_replay = {"passed": True, "summary": [
+            {"dataset": dataset, "arm": arm, **{field: budget.require(quantity, dataset=dataset, arm=arm,
+                 configuration="selected") for quantity, field in REPLAY_FIELDS.items()}}
+            for dataset in ADMITTED for arm in ARM_FIXTURE]}
+
+    def setUp(self):
+        checker = mock.patch("cm_campaigns.arm_campaign.check_campaign", return_value=self.budget_replay)
+        checker.start()
+        self.addCleanup(checker.stop)
 
     @classmethod
     def tearDownClass(cls):
@@ -345,7 +360,7 @@ class MainPaperDisplayTests(unittest.TestCase):
         records = dict(self.records)
         records.update(overrides.pop("records", {}))
         return context(runs=overrides.pop("runs", self.runs), records=records,
-                       campaigns={"confirmation": self.s14.root}, **overrides)
+                       campaigns={"confirmation": self.s14.root, "budget": self.budget_dir}, **overrides)
 
     def build(self, display_id, ctx=None, name=None):
         out = self.base / "out" / (name or display_id.replace(":", "_").replace(" ", "_"))
@@ -513,7 +528,7 @@ class MainPaperDisplayTests(unittest.TestCase):
         self.assertEqual(needs["main:Table 1"], {"runs", "records:input_gate"})
         self.assertEqual(needs["main:Figure 2"], {"runs", "campaign:confirmation", "records:ensemble_grid",
                                                   "records:input_gate", "records:tube_audit"})
-        self.assertEqual(needs["main:Figure 6"], {"runs", "records:input_gate", "records:budget_matched"})
+        self.assertEqual(needs["main:Figure 6"], {"runs", "records:input_gate", "records:budget_matched", "campaign:budget"})
         partial = context(runs=self.runs, records={k: v for k, v in self.records.items() if k != "tube_audit"},
                           campaigns={"confirmation": self.s14.root})
         self.assertEqual([n for n in GENERATORS["main:Figure 2"].needs if not partial.available(n)], ["records:tube_audit"])
@@ -566,7 +581,7 @@ class MainPaperDisplayTests(unittest.TestCase):
         self.assertNotEqual(status[("supplementary_table_S14_mechanism_contrasts_submitted_protocol", "8/raw_P")], "exact")
         self.build("main:Figure 3", ctx, name="fig3_mismatch")
         fixture.change_result("COCO/RH", p_value_kind="locally_Holm_adjusted")
-        with self.assertRaisesRegex(DisplayInputError, "original unrounded"):
+        with self.assertRaisesRegex(DisplayValidationError, "original unrounded"):
             build_one("main:Figure 2", ctx, self.base / "out" / "fig2_invalid")
 
     # ------------------------------------------------------------------ Figure 4
@@ -618,6 +633,19 @@ class MainPaperDisplayTests(unittest.TestCase):
         self.assertEqual(len(read_data(writer, "panel_b")), 6)
 
     # ------------------------------------------------------------------ Figure 6
+    def test_figure_6_binds_selected_configuration_and_strict_campaign(self):
+        from paper.build.displays.main_paper import budget_arms
+        original = self.records["budget_matched"]
+        rows = [{**row, "arm": row["arm"] + " producer label"} for row in original.rows]
+        rows += [{**row, "configuration": "other", "value": row["value"] + .1}
+                 for row in rows if row["quantity"] == "effect_vs_qc_nats"]
+        records = fake_records("budget_matched", rows)
+        ctx = self.ctx(records={"budget_matched": records})
+        self.assertAlmostEqual(budget_arms(ctx, "ogbn-arxiv")["E3"]["effect_vs_qc_nats"], -.0016)
+        records.rows[0]["value"] += .001
+        with self.assertRaisesRegex(DisplayValidationError, "strict campaign replay"):
+            budget_arms(self.ctx(records={"budget_matched": records}), "ogbn-arxiv")
+
     def test_figure_6_budget_matched(self):
         writer, rows = self.build("main:Figure 6")
         frontier = [r for r in read_data(writer, "panel_a") if r["dataset"] == "ogbn-arxiv"]

@@ -7,6 +7,8 @@
 | Guide | Purpose |
 |---|---|
 | [Reconstruction](RECONSTRUCTION.md) | `make paper`: download and verify the published outputs, rebuild all 90 displays with their source data, compare with the printed values |
+| [Paper references and reconstruction evidence](PAPER_REFERENCE_VALUES.md) | PDF-bound comparison targets, required cells and panels, source-data provenance and the final publication gate |
+| [Availability review](AVAILABILITY_REVIEW.md) | The detailed repository review, scientific corrections, remaining paper/code differences and the artifacts needed for fulfillment |
 | [Producing the measured outputs](PRODUCTION.md) | One command on the cluster: every runner of `release/experiment_code.json` as one Slurm job graph from the seven completed runs, ending with the map that publication reads |
 | [Publishing the measured outputs](PUBLICATION.md) | How the reported runs, record sets, campaigns and environment enter the release `paper-artifacts` |
 | [Statement compliance](../STATEMENT_COMPLIANCE.md) | Each item of the registered availability statement, where the repository fulfils it, and what awaits publication |
@@ -50,5 +52,7 @@
 
 The [two bundled examples](../examples/README.md) are complete synthetic runs for
 software verification. [runs/index.json](../runs/index.json) and
-[records/index.json](../records/index.json) accept registered archives and record
-sets; this release registers none.
+[records/index.json](../records/index.json) accept separately registered archives
+and record sets. The release publication path uses
+[release/paper_artifacts.json](../release/paper_artifacts.json); the
+[availability page](../AVAILABILITY.md) identifies each artifact's current status.

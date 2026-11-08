@@ -16,10 +16,12 @@ from __future__ import annotations
 import csv
 import dataclasses
 import functools
+import hashlib
 import io
 import json
 import math
 from pathlib import Path
+import re
 from typing import Any, Callable, Iterable
 
 import numpy as np
@@ -39,6 +41,22 @@ MISSING_TEXT = "—"
 
 class DisplayInputError(ValueError):
     """A declared input of a display is absent or does not hold the required field."""
+
+
+class DisplayValidationError(ValueError):
+    """Supplied evidence is inconsistent or invalid, rather than merely absent."""
+
+
+@dataclasses.dataclass(frozen=True)
+class NotApplicable:
+    reason: str
+
+
+def not_applicable(reason: str) -> NotApplicable:
+    """An intentional nonnumeric cell, distinct from a missing observation."""
+    if not isinstance(reason, str) or not reason.strip():
+        raise ValueError("A not-applicable cell requires its reason")
+    return NotApplicable(reason)
 
 
 # ---------------------------------------------------------------------------
@@ -274,6 +292,8 @@ def percent(value, decimals: int = 1) -> str | None:
 
 
 def _text(value) -> str:
+    if isinstance(value, NotApplicable):
+        return MISSING_TEXT
     if value is None:
         return MISSING_TEXT
     if isinstance(value, bool):
@@ -299,6 +319,7 @@ class Comparison:
     path: tuple
     computed: Any
     note: str = ""
+    missing: bool = False
 
 
 class DisplayWriter:
@@ -316,6 +337,21 @@ class DisplayWriter:
         self.comparisons: list[Comparison] = []
         self.notes: list[str] = []
         self.inputs: list[dict] = []
+        self.missing_content: list[dict] = []
+        self.not_applicable_cells: list[dict] = []
+        self.table_count = 0
+        self.figure_count = 0
+        self.data_count = 0
+        self.evidence_scope: list[dict] = []
+
+    def incomplete(self, reason: str, *, location: str = "display") -> None:
+        item = {"location": location, "reason": reason}
+        if item not in self.missing_content:
+            self.missing_content.append(item)
+
+    def provenance(self, **details) -> None:
+        """Carry source-method/history limits into the machine-readable display record."""
+        self.evidence_scope.append(details)
 
     def _write(self, relative: str, text: str) -> str:
         path = self.out_dir / relative
@@ -339,13 +375,23 @@ class DisplayWriter:
         return f"{self.display_id} — {self.title} ({scope})"
 
     def table(self, columns: list[str], rows: list[list], *, name: str | None = None,
-              notes: Iterable[str] = ()) -> list[str]:
+              notes: Iterable[str] = (), required: bool = True) -> list[str]:
         """Write the complete table. Cells are text (already at printed precision), numbers or None."""
         stem = name or self.stem
         width = len(columns)
-        for row in rows:
+        self.table_count += 1
+        if required and not rows:
+            self.incomplete("The required table has no rows", location=f"tables/{stem}")
+        for index, row in enumerate(rows):
             if len(row) != width:
                 raise ValueError(f"{self.display_id}: row has {len(row)} cells, header has {width}")
+            for column, cell in zip(columns, row):
+                location = f"tables/{stem}/row/{index}/{column}"
+                if isinstance(cell, NotApplicable):
+                    self.not_applicable_cells.append({"location": location, "reason": cell.reason})
+                elif required and (cell is None or isinstance(cell, str) and not cell.strip()
+                                   or isinstance(cell, (float, np.floating)) and not math.isfinite(cell)):
+                    self.incomplete("Required table cell has no finite supplied value", location=location)
         texts = [[_text(cell) for cell in row] for row in rows]
         notes = [*notes, *self.notes]
         buffer = io.StringIO()
@@ -367,10 +413,18 @@ class DisplayWriter:
 
     def data(self, name: str, columns: list[str], rows: Iterable[Iterable]) -> str:
         """Full-precision source data (CSV) behind a table or a figure panel."""
+        rows = list(rows)
+        self.data_count += 1
+        if not rows:
+            self.incomplete("The declared source-data series is empty", location=f"data/{self.stem}/{name}")
         buffer = io.StringIO()
         writer = csv.writer(buffer, lineterminator="\n")
         writer.writerow(columns)
         for row in rows:
+            if len(row) != len(columns):
+                raise ValueError(f"{self.display_id}/{name}: source row width differs from its columns")
+            if any(isinstance(value, (float, np.floating)) and not math.isfinite(value) for value in row):
+                self.incomplete("Source data contain a nonfinite numeric value", location=f"data/{self.stem}/{name}")
             writer.writerow(["" if v is None else (repr(float(v)) if isinstance(v, (float, np.floating))
                                                     else str(v)) for v in row])
         return self._write(f"data/{self.stem}/{name}.csv", buffer.getvalue())
@@ -378,6 +432,7 @@ class DisplayWriter:
     def figure(self, fig, *, name: str | None = None) -> list[str]:
         """Save a Matplotlib figure as PNG and SVG; panel data go through :meth:`data`."""
         stem = name or self.stem
+        self.figure_count += 1
         files = []
         for suffix, options in (("png", {"dpi": 200}), ("svg", {})):
             relative = f"figures/{stem}.{suffix}"
@@ -393,6 +448,10 @@ class DisplayWriter:
     def compare(self, group: str, path: Iterable, computed, *, note: str = "") -> None:
         """Declare that ``computed`` should reproduce ``registry[group][path...]``."""
         self.comparisons.append(Comparison(group, tuple(path), computed, note))
+
+    def compare_missing(self, group: str, path: Iterable, *, reason: str) -> None:
+        """Keep an omitted required value in the comparison denominator."""
+        self.comparisons.append(Comparison(group, tuple(path), None, reason, missing=True))
 
     def note(self, text: str) -> None:
         self.notes.append(text)
@@ -453,6 +512,77 @@ def display(display_id: str, *, stem: str, title: str, needs: Iterable[str] = ("
 # Comparison with the printed values
 # ---------------------------------------------------------------------------
 
+PRINTED_SCHEMA = "cross-morse-printed-display-values-1"
+COMPARISON_STATES = ("exact", "differs", "not_comparable", "no_reference", "missing")
+
+
+def _typed_reference(value):
+    return isinstance(value, dict) and "$value" in value
+
+
+def _validate_reference_values(value):
+    if _typed_reference(value):
+        if set(value) != {"$value", "$decimals"} or finite(value["$value"]) is None:
+            raise DisplayValidationError("A typed printed reference requires a finite $value and $decimals")
+        if type(value["$decimals"]) is not int or not 0 <= value["$decimals"] <= 18:
+            raise DisplayValidationError("Printed decimal precision must be an integer from 0 to 18")
+    elif isinstance(value, dict):
+        for child in value.values():
+            _validate_reference_values(child)
+    elif isinstance(value, list):
+        for child in value:
+            _validate_reference_values(child)
+    elif isinstance(value, float) and not math.isfinite(value):
+        raise DisplayValidationError("Printed references cannot contain nonfinite numbers")
+
+
+def load_references(root: Path, registry: dict | None = None) -> tuple[dict, dict, list[dict]]:
+    """Read independently reviewed targets only on the comparison side.
+
+    The protocol templates used to render descriptions are deliberately not a
+    fallback target: substituting their runtime placeholders would compare the
+    implementation with itself. Explicit registry arguments remain useful for
+    isolated software tests and do not implicitly load another target file.
+    """
+    root = Path(root)
+    if registry is not None:
+        return dict(registry), {}, []
+    from cm_campaigns.common import loads, read_json
+    base = root / "paper/reported_results.json"
+    base_bytes = base.read_bytes()
+    values = loads(base_bytes.decode("utf-8"))
+    files = [{"path": "paper/reported_results.json", "sha256": hashlib.sha256(base_bytes).hexdigest()}]
+    path = root / "paper/printed_display_values.json"
+    metadata = {}
+    if not path.is_file():
+        return values, metadata, files
+    sidecar_bytes = path.read_bytes()
+    sidecar = loads(sidecar_bytes.decode("utf-8"))
+    sources = read_json(root / "paper/sources.json")["documents"]
+    manifest = read_json(root / "paper/display_manifest.json")
+    displays = {row["id"]: row for row in manifest["displays"]}
+    if sidecar.get("schema") != PRINTED_SCHEMA or sidecar.get("documents") != {k: v["sha256"] for k, v in sources.items()}:
+        raise DisplayValidationError("Printed display references must identify the current registered PDFs")
+    groups = sidecar.get("groups")
+    if not isinstance(groups, dict):
+        raise DisplayValidationError("Printed display reference groups must be an object")
+    for group, entry in groups.items():
+        if group in values:
+            raise DisplayValidationError(f"Ambiguous duplicate printed reference group: {group}")
+        if not isinstance(entry, dict) or entry.get("display_id") not in displays or "values" not in entry:
+            raise DisplayValidationError(f"Invalid printed reference group: {group}")
+        source = entry.get("source") or {}
+        display_row = displays[entry["display_id"]]
+        pages = source.get("pages")
+        if (source.get("document") != display_row["source"] or not isinstance(pages, list) or not pages
+                or any(type(page) is not int or page not in display_row["pages"] for page in pages)):
+            raise DisplayValidationError(f"Printed reference page/display identity differs: {group}")
+        _validate_reference_values(entry["values"])
+        values[group] = entry["values"]
+        metadata[group] = {"display_id": entry["display_id"], "source": source}
+    files.append({"path": "paper/printed_display_values.json", "sha256": hashlib.sha256(sidecar_bytes).hexdigest()})
+    return values, metadata, files
+
 def _decimals(value) -> int | None:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
@@ -486,6 +616,12 @@ def _normal_text(value: str) -> str:
 
 def compare_value(computed, reported) -> str:
     """``exact`` at the printed precision, ``differs``, or ``not_comparable``."""
+    if _typed_reference(reported):
+        number = finite(computed)
+        if number is None:
+            return "differs" if computed is None else "not_comparable"
+        tolerance = 0.5 * 10.0 ** (-reported["$decimals"])
+        return "exact" if abs(number - reported["$value"]) <= tolerance * (1 + 1e-9) + 1e-15 else "differs"
     if reported is None:
         return "exact" if computed is None else "differs"
     if isinstance(reported, list):
@@ -497,12 +633,16 @@ def compare_value(computed, reported) -> str:
     if isinstance(reported, str):
         if computed is None:
             return "differs"
-        return "exact" if _normal_text(computed) == _normal_text(reported) else "differs"
+        left = re.sub(r"([<>]=?)\s+", r"\1", _normal_text(computed))
+        right = re.sub(r"([<>]=?)\s+", r"\1", _normal_text(reported))
+        return "exact" if left == right else "differs"
     if isinstance(reported, bool):
         return "exact" if computed is reported else "differs"
     number = finite(computed)
     if number is None:
         return "differs" if computed is None else "not_comparable"
+    if not isinstance(reported, (int, float)) or isinstance(reported, bool):
+        return "not_comparable"
     places = _decimals(reported)
     tolerance = 0.5 * 10.0 ** (-places) if places is not None else 0.0
     return "exact" if abs(number - float(reported)) <= tolerance * (1 + 1e-9) + 1e-15 else "differs"
@@ -516,9 +656,59 @@ def compare(comparisons: list[Comparison], registry: dict) -> list[dict]:
             rows.append({"group": item.group, "path": "/".join(map(str, item.path)), "computed": item.computed,
                          "reported": None, "status": "no_reference", "note": reason})
             continue
+        missing = item.missing or item.computed is None and reported is not None
         rows.append({"group": item.group, "path": "/".join(map(str, item.path)), "computed": item.computed,
-                     "reported": reported, "status": compare_value(item.computed, reported), "note": item.note})
+                     "reported": reported, "status": "missing" if missing else compare_value(item.computed, reported),
+                     "note": item.note})
     return rows
+
+
+def _reference_leaves(value, path=(), *, include_text=False):
+    if _typed_reference(value):
+        yield path, value
+    elif isinstance(value, dict):
+        for key, child in value.items():
+            if not str(key).startswith("_"):
+                yield from _reference_leaves(child, (*path, key), include_text=include_text)
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            yield from _reference_leaves(child, (*path, index), include_text=include_text)
+    elif (value is None or isinstance(value, (int, float, bool)) or include_text
+          or isinstance(value, str) and re.fullmatch(r"\s*[<>]=?\s*[0-9.eE+-]+\s*", value)):
+        yield path, value
+
+
+def comparison_coverage(display_id: str, comparisons: list[Comparison], registry: dict, metadata: dict,
+                        *, scope: str) -> tuple[list[dict], dict]:
+    """Account for required targets independently of which comparisons ran.
+
+    Legacy table groups have independently registered numerical cells. Figures
+    need a dedicated reviewed target map: a few related table checks cannot
+    establish that every printed panel value was compared.
+    """
+    role, label = display_id.split(":", 1)
+    token = label.replace("Table ", "")
+    prefix = (f"main_table_{token}_" if role == "main" else f"supplementary_table_{token}_")
+    groups = {name for name in registry if label.startswith("Table ") and name.startswith(prefix)}
+    groups.update(name for name, entry in metadata.items() if entry["display_id"] == display_id)
+    targets = {(group, path): value for group in groups
+               for path, value in _reference_leaves(registry[group], include_text=group in metadata)}
+    covered = set()
+    for item in comparisons:
+        value, reason = _lookup(registry, item.group, item.path)
+        if not reason:
+            covered.update((item.group, path) for path, _ in _reference_leaves(value, item.path, include_text=True))
+    absent = sorted(set(targets) - covered, key=lambda pair: (pair[0], tuple(map(str, pair[1]))))
+    extra = [{"group": group, "path": "/".join(map(str, path)), "computed": None,
+              "reported": targets[group, path], "status": "missing",
+              "note": "No comparison was supplied for this registered printed value"} for group, path in absent]
+    if not targets and scope != "illustration":
+        extra.append({"group": f"display:{display_id}", "path": "", "computed": None, "reported": None,
+                      "status": "missing", "note": "No dedicated independently reviewed printed-value contract is registered for this display"})
+    complete = not extra
+    return extra, {"expected_values": len(targets), "covered_values": len(set(targets) & covered),
+                   "missing_values": len(extra), "complete": complete,
+                   "scope": "Registered table numerical cells and reviewed display-specific targets; related-table checks alone do not certify a figure"}
 
 
 # ---------------------------------------------------------------------------
@@ -548,8 +738,7 @@ def build_displays(ctx: DisplayContext, out_dir: Path, *, registry: dict | None 
     """Run every generator whose inputs are present; record the rest as awaiting inputs."""
     _load_generators()
     out_dir = Path(out_dir)
-    if registry is None:
-        registry = json.loads((ctx.root / "paper/reported_results.json").read_text(encoding="utf-8"))
+    registry, reference_metadata, reference_files = load_references(ctx.root, registry)
     order = [row["id"] for row in ctx.manifest["displays"]]
     wanted = set(only) if only is not None else None
     results = []
@@ -579,8 +768,18 @@ def build_displays(ctx: DisplayContext, out_dir: Path, *, registry: dict | None 
                             "traceback": traceback.format_exc(limit=6)})
             continue
         if not writer.files:
-            raise ValueError(f"{display_id}: the generator wrote no files")
+            writer.incomplete("The generator wrote no files")
+        if ":Table " in display_id and not writer.table_count:
+            writer.incomplete("The numbered table was not emitted")
+        if ":Figure " in display_id:
+            if not writer.figure_count:
+                writer.incomplete("The numbered figure was not emitted")
+            if generator.scope != "illustration" and not writer.data_count:
+                writer.incomplete("The quantitative figure has no plotted source data")
         checks = compare(writer.comparisons, registry)
+        missing_checks, coverage = comparison_coverage(display_id, writer.comparisons, registry,
+                                                      reference_metadata, scope=generator.scope)
+        checks.extend(missing_checks)
         if checks:
             rel = f"compare/{generator.stem}.csv"
             path = out_dir / rel
@@ -593,12 +792,20 @@ def build_displays(ctx: DisplayContext, out_dir: Path, *, registry: dict | None 
                     w.writerow({k: json.dumps(v) if isinstance(v, (list, tuple, dict)) else
                                 ("" if v is None else v) for k, v in row.items()})
             writer.files.append(rel)
-        counts = {s: sum(1 for c in checks if c["status"] == s)
-                  for s in ("exact", "differs", "not_comparable", "no_reference")}
+        counts = {s: sum(1 for c in checks if c["status"] == s) for s in COMPARISON_STATES}
+        comparison_complete = coverage["complete"] and not any(counts[s] for s in
+                                                                ("not_comparable", "no_reference", "missing"))
+        coverage["complete"] = comparison_complete
         results.append({**entry, "status": "built", "files": list(writer.files), "comparison": counts,
+                        "content_complete": not writer.missing_content,
+                        "missing_content": writer.missing_content,
+                        "not_applicable_cells": writer.not_applicable_cells,
+                        "comparison_complete": comparison_complete,
+                        "comparison_coverage": coverage,
+                        "evidence_scope": writer.evidence_scope,
                         "inputs": writer.inputs, "synthetic": ctx.synthetic})
     return {"schema": "cross-morse-displays-1", "displays": results,
             "generators": len([r for r in results if r["status"] != "no_generator"]),
             "built": len([r for r in results if r["status"] == "built"]),
             "errors": [r["id"] for r in results if r["status"] == "error"],
-            "module_errors": dict(LOAD_ERRORS)}
+            "module_errors": dict(LOAD_ERRORS), "comparison_sources": reference_files}

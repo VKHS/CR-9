@@ -87,9 +87,12 @@ def relative_file(directory: Path, name: str) -> Path:
 
 
 def source_inventory(root: Path) -> dict:
-    paths = [root / "paper/display_manifest.json", root / "records/specs.json"]
-    for directory in ("scripts", "paper/build", "cross_morse", "cm_campaigns", "cm_experiments"):
-        paths.extend((root / directory).glob("*.py"))
+    paths = [root / name for name in ("paper/display_manifest.json", "paper/reported_results.json",
+             "paper/printed_display_values.json", "paper/sources.json", "paper/registered_constants.json", "records/specs.json")]
+    for directory in ("scripts", "paper/build", "cross_morse", "cm_campaigns", "cm_experiments", "cm_theory"):
+        paths.extend((root / directory).rglob("*.py"))
+    paths.extend((root / "paper/protocol").glob("*.json"))
+    paths.extend((root / "configs").rglob("*.json"))
     paths.extend(root.glob("run_cross_morse*.py"))
     return {p.relative_to(root).as_posix(): sha256(p) for p in sorted(set(paths)) if p.is_file()}
 
@@ -225,12 +228,21 @@ def add_display_outputs(outputs: list, stage: Path, result: dict, ids: set, synt
         artifact_inputs = [need for need in row["needs"] if need != "static"]
         kind = ("repository_sources" if not artifact_inputs else
                 "synthetic_examples" if synthetic else "verified_experiment_artifacts")
+        complete = row.get("content_complete") is True and row.get("comparison_complete") is True
+        coverage = ("full_numerical_display" if complete else
+                    "columns" if ":Table " in row["id"] else "partial_panels")
         add_output(outputs, stage, {"id": "display:" + row["id"],
                    "files": ["displays/" + name for name in row["files"]], "display_ids": [row["id"]],
-                   "coverage": "full_numerical_display", "input_kind": kind, "scope": row["scope"],
+                   "coverage": coverage, "input_kind": kind, "scope": row["scope"],
                    "comparison": row["comparison"],
-                   "note": "Complete display generated from the declared inputs; comparison/<stem>.csv "
-                           "places every transcribed printed value beside the computed one."}, ids)
+                   "content_complete": row.get("content_complete", False),
+                   "comparison_complete": row.get("comparison_complete", False),
+                   "comparison_coverage": row.get("comparison_coverage", {}),
+                   "missing_content": row.get("missing_content", []),
+                   "evidence_scope": row.get("evidence_scope", []),
+                   "note": "Display rendered from declared inputs. Complete coverage requires every required "
+                           "cell and a reviewed comparison target; see displays/compare/<stem>.csv and the "
+                           "content/comparison metadata for missing values and scope."}, ids)
 
 
 def add_output(outputs: list, directory: Path, entry: dict, display_ids: set) -> None:
@@ -290,13 +302,14 @@ def render_report(result: dict) -> str:
     if generators:
         counts = generators["comparison_with_printed_values"]
         lines += ["", "## Display generators and comparison with the paper", "",
-                  f"{generators['built']} of {len(result['displays'])} numbered displays were generated in full; "
+                  f"{generators['built']} of {len(result['displays'])} numbered displays were rendered; "
+                  f"{sum(d['full_numerical_display'] for d in result['displays'])} have complete numerical coverage; "
                   f"{generators['awaiting_inputs']} await their experiment inputs; "
                   f"{generators['without_generator']} have no generator; "
                   f"{len(generators.get('errors') or {})} generator errors.", "",
                   f"Printed values compared: **{counts['exact']} exact** at the printed precision, "
                   f"**{counts['differs']} differ**, {counts['not_comparable']} not comparable, "
-                  f"{counts['no_reference']} without a transcribed reference. "
+                  f"{counts['no_reference']} without a transcribed reference, {counts.get('missing', 0)} missing. "
                   "Each display's `displays/compare/<stem>.csv` lists every comparison.", "",
                   "| Display | Generator | Exact | Differs | Awaiting |", "|---|---|---|---|---|"]
         for display in result["displays"]:
@@ -451,8 +464,13 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
             row["generator"] = built.get("status", "no_generator")
             row["comparison"] = built.get("comparison")
             row["awaiting"] = built.get("missing", [])
+            row["content_complete"] = built.get("content_complete", False)
+            row["missing_content"] = built.get("missing_content", [])
+            row["comparison_complete"] = built.get("comparison_complete", False)
+            row["comparison_coverage"] = built.get("comparison_coverage", {})
+            row["evidence_scope"] = built.get("evidence_scope", [])
         comparison = {state: sum((row.get("comparison") or {}).get(state, 0) for row in generated["displays"])
-                      for state in ("exact", "differs", "not_comparable", "no_reference")}
+                      for state in ("exact", "differs", "not_comparable", "no_reference", "missing")}
         # Displays generated from the repository's own sources (protocol, analytical) need no
         # experiment input; they never turn a workspace without inputs into a reconstruction.
         experimental = [o for o in outputs if o.get("input_kind") != "repository_sources"]
@@ -473,6 +491,9 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
                                          "errors": {r["id"]: r["error"] for r in generated["displays"]
                                                     if r["status"] == "error"},
                                          "module_errors": generated.get("module_errors", {}),
+                                         "comparison_sources": generated.get("comparison_sources", []),
+                                         "comparison_coverage_complete": all(d["comparison_complete"] for d in displays),
+                                         "display_content_incomplete": [d["id"] for d in displays if not d["content_complete"]],
                                          "comparison_with_printed_values": comparison}}
         write_json(stage / "reconstruction.json", result)
         (stage / "RECONSTRUCTION_REPORT.md").write_text(render_report(result), encoding="utf-8")

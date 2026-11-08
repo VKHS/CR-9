@@ -90,22 +90,26 @@ not a replacement for the original nine-contrast record.
 
 ## Repository evidence and the availability paragraph
 
-This repository is a code release. `release/release_scope.json` declares that
-its results are regenerated (`"result_distribution": "regenerate"`);
-`runs/index.json` and `records/index.json` register no archives. This describes
-the contents of the release; it does not say that the experiments were not
-performed. `bash run_cross_morse.sh reproduce` regenerates the lifecycle runs of
-all seven datasets, and its report rebuilds the run-derived tables and places
-every compared quantity beside the value printed in the paper
-([HPC guide](../docs/HPC.md)).
+The repository now uses the GitHub-release publication path declared by
+`release/release_scope.json` (`"result_distribution": "repository_release"`).
+`release/paper_artifacts.json` identifies the measured artifacts and their
+publication status. The author's subsequently supplied availability statement
+is registered in `release/availability_statement.json` and evaluated by
+[statement compliance](../STATEMENT_COMPLIANCE.md). This describes which files
+are available; it does not infer whether an unpublished experiment was performed.
 
-The main paper's page-15 availability paragraph and the supplementary "Data and
-code availability" paragraph describe run archives and experiment records
-deposited at Zenodo DOIs listed in these two indexes, and `make paper`
-rebuilding the tables from the ingested archives. That description does not
-match this release. [AVAILABILITY_STATEMENT.txt](AVAILABILITY_STATEMENT.txt) is
-the paragraph generated from the release scope (`make availability-statement`);
-it states what the repository contains and how the results are regenerated.
+The PDF copies reviewed here retain their original page-15 and supplementary
+availability paragraphs, which describe Zenodo indexes. Their PDF identities
+have not changed. [AVAILABILITY_STATEMENT.txt](AVAILABILITY_STATEMENT.txt) holds
+the author's registered GitHub statement; the repository checks it against
+published artifacts and a verified reconstruction. The separate Zenodo
+registration tools remain available for archives using that distribution route.
+
+The additional protocol references in
+[printed_display_values.json](printed_display_values.json) were transcribed from
+these same PDF bytes on 7 November 2026. They supply previously absent comparison
+targets without changing the original measured numerical registry; see the
+[reference guide](../docs/PAPER_REFERENCE_VALUES.md).
 
 A regenerated run records its own complete candidate ledger and selector trace
 (`select/`), its local confirmation family (`confirm/decision.json`) and its

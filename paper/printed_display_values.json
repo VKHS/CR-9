@@ -1,0 +1,1713 @@
+{
+  "schema": "cross-morse-printed-display-values-1",
+  "documents": {
+    "main": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+    "supplementary": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"
+  },
+  "review": {
+    "date": "2026-11-07",
+    "method": "AI-assisted contextual transcription from the author-supplied, SHA-256 identified supplementary PDF; text extraction and rendered-page inspection. Not an execution record or author certification.",
+    "normalization": "Whitespace and LaTeX notation are normalized to the generator field vocabulary. A printed dash is null. Signed thresholds are stored as positive margin magnitudes where the field explicitly names epsilon. Recorded values are comparison targets only; generators do not read this file as an experiment input.",
+    "coverage": "Twenty-one PDF-bound comparison groups: previously unreferenced protocol and analytical displays, S15 declared accounting ranges, and S19 negative-control descriptions and measured targets. Comparison targets remain separate from execution inputs and from unresolved paper/code disagreements."
+  },
+  "groups": {
+    "supplementary_table_S1_statistical_design": {
+      "display_id": "supplementary:Table S1",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          1,
+          2
+        ]
+      },
+      "values": {
+        "ogbn-arxiv": {
+          "independent_graphs": "1",
+          "primary_unit": "buffered graph cluster",
+          "repeated_units": "32 METIS cores; 2-hop buffer",
+          "interval_role": "descriptive",
+          "formal_gate": "no"
+        },
+        "ogbn-proteins": {
+          "independent_graphs": "1",
+          "primary_unit": "degree-stratified buffered cluster",
+          "repeated_units": "32 cores; 2-hop buffer",
+          "interval_role": "descriptive",
+          "formal_gate": "no"
+        },
+        "ogbn-products": {
+          "independent_graphs": "1",
+          "primary_unit": "buffered graph cluster",
+          "repeated_units": "64 METIS cores; 2-hop buffer",
+          "interval_role": "descriptive",
+          "formal_gate": "no"
+        },
+        "Roman-empire": {
+          "independent_graphs": "1",
+          "primary_unit": "official split",
+          "repeated_units": "10 splits",
+          "interval_role": "repeated-split empirical",
+          "formal_gate": "no"
+        },
+        "PascalVOC-SP": {
+          "independent_graphs": "many",
+          "primary_unit": "complete graph",
+          "repeated_units": "J = 1428",
+          "interval_role": "inferential",
+          "formal_gate": "yes",
+          "J": 1428,
+          "B": {
+            "$value": 0.1,
+            "$decimals": 2
+          },
+          "delta_a": {
+            "$value": 0.025,
+            "$decimals": 3
+          }
+        },
+        "COCO-SP": {
+          "independent_graphs": "many",
+          "primary_unit": "complete graph",
+          "repeated_units": "J = 5000",
+          "interval_role": "inferential",
+          "formal_gate": "yes",
+          "J": 5000,
+          "B": {
+            "$value": 0.1,
+            "$decimals": 2
+          },
+          "delta_a": {
+            "$value": 0.025,
+            "$decimals": 3
+          }
+        },
+        "Peptides-func": {
+          "independent_graphs": "many",
+          "primary_unit": "complete graph",
+          "repeated_units": "J = 2331",
+          "interval_role": "inferential; boundary",
+          "formal_gate": "yes",
+          "J": 2331,
+          "B": {
+            "$value": 0.1,
+            "$decimals": 2
+          },
+          "delta_a": {
+            "$value": 0.025,
+            "$decimals": 3
+          }
+        }
+      }
+    },
+    "supplementary_table_S2_data_role_ledger": {
+      "display_id": "supplementary:Table S2",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          2
+        ]
+      },
+      "values": {
+        "D_fit": {
+          "allocation_percent": 60,
+          "outer_folds": null,
+          "inner_folds": null,
+          "plant_seeds": 12,
+          "controller_seeds": null
+        },
+        "D_explore": {
+          "allocation_percent": 20,
+          "outer_folds": null,
+          "inner_folds": 5,
+          "plant_seeds": null,
+          "controller_seeds": 12
+        },
+        "D_select": {
+          "allocation_percent": 10,
+          "outer_folds": 5,
+          "inner_folds": 4,
+          "plant_seeds": "repeated within fold",
+          "controller_seeds": 12
+        },
+        "D_confirm": {
+          "allocation_percent": 5,
+          "outer_folds": null,
+          "inner_folds": null,
+          "plant_seeds": null,
+          "controller_seeds": null
+        },
+        "D_compare": {
+          "allocation_percent": 5,
+          "outer_folds": null,
+          "inner_folds": null,
+          "plant_seeds": "paired frozen seeds",
+          "controller_seeds": null
+        },
+        "D_admit": {
+          "allocation_percent": null,
+          "outer_folds": null,
+          "inner_folds": null,
+          "plant_seeds": null,
+          "controller_seeds": null
+        },
+        "D_test": {
+          "allocation_percent": null,
+          "outer_folds": null,
+          "inner_folds": null,
+          "plant_seeds": null,
+          "controller_seeds": null
+        },
+        "multigraph_role_sizes": {
+          "PascalVOC-SP": [
+            425,
+            425
+          ],
+          "COCO-SP": [
+            5664,
+            5665
+          ],
+          "Peptides-func": [
+            544,
+            544
+          ]
+        }
+      },
+      "note": "D_select plant seeds and D_compare plant seeds are printed text, not missing counts. D_compare controller seeds are a printed dash. These distinctions are retained even when the implementation uses a different seed scope."
+    },
+    "supplementary_table_S3_target_regime_contract": {
+      "display_id": "supplementary:Table S3",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          2
+        ]
+      },
+      "values": {
+        "nominal_graph_value": {
+          "epsilon_plant_nats": {
+            "$value": 0.004,
+            "$decimals": 3
+          },
+          "failure_action": "stop or improve plant"
+        },
+        "depth_qualification": {
+          "PDD_pp": {
+            "$value": 1.0,
+            "$decimals": 1
+          },
+          "DIL_gap_nats": {
+            "$value": 0.02,
+            "$decimals": 3
+          },
+          "failure_action": "do not credit controller with plant rescue"
+        },
+        "registry_support": {
+          "phi_registry_min": {
+            "$value": 0.8,
+            "$decimals": 2
+          },
+          "selected_strata": {
+            "$value": 1.0,
+            "$decimals": 2
+          },
+          "failure_action": "prune bank or collect exploration"
+        },
+        "residual_headroom": {
+          "epsilon_headroom_nats": {
+            "$value": 0.003,
+            "$decimals": 3
+          },
+          "failure_action": "retain strongest open loop"
+        }
+      }
+    },
+    "supplementary_table_S5b_instrumentation_map": {
+      "display_id": "supplementary:Table S5b",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          3,
+          4
+        ]
+      },
+      "values": {
+        "ogbn-arxiv": {
+          "native_sites": 256,
+          "inserted_sites": 0,
+          "controlled_sites": 256,
+          "native_a0": [
+            0,
+            0.7,
+            0.25
+          ]
+        },
+        "ogbn-proteins": {
+          "native_sites": 128,
+          "inserted_sites": 0,
+          "controlled_sites": 128
+        },
+        "ogbn-products": {
+          "native_sites": 64,
+          "inserted_sites": 0,
+          "controlled_sites": 64
+        },
+        "Roman-empire": {
+          "native_sites": 256,
+          "inserted_sites": 0,
+          "controlled_sites": 256
+        },
+        "PascalVOC-SP": {
+          "native_sites": 6,
+          "inserted_sites": 122,
+          "controlled_sites": 128,
+          "substeps": 21
+        },
+        "COCO-SP": {
+          "native_sites": 6,
+          "inserted_sites": 122,
+          "controlled_sites": 128,
+          "substeps": 21
+        },
+        "Peptides-func": {
+          "native_sites": 8,
+          "inserted_sites": 56,
+          "controlled_sites": 64,
+          "substeps": 8
+        }
+      },
+      "note": "The inserted-site counts are the printed controlled-site count minus the printed designated native-site count: 128−6 and 64−8. They are protocol arithmetic, not newly measured model outputs."
+    },
+    "supplementary_table_S8_online_features": {
+      "display_id": "supplementary:Table S8",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          5,
+          6
+        ]
+      },
+      "values": {
+        "entropy": {
+          "dim": 1,
+          "period": "every depth"
+        },
+        "margin": {
+          "dim": 1,
+          "period": "every depth"
+        },
+        "source_disagreement": {
+          "dim": 1,
+          "period": "every depth"
+        },
+        "effective_rank": {
+          "dim": 1,
+          "period": "every depth"
+        },
+        "dirichlet": {
+          "dim": 1,
+          "period": "every depth"
+        },
+        "band_power": {
+          "dim": 3,
+          "period": "sensing period P_s"
+        },
+        "source_alignment": {
+          "dim": 3,
+          "period": "sensing period P_s"
+        },
+        "innovation": {
+          "dim": 3,
+          "period": "every update"
+        },
+        "transport_history": {
+          "dim": 3,
+          "period": "every depth"
+        },
+        "degree_weighted": {
+          "dim": 3,
+          "period": "sensing period P_s"
+        },
+        "spectral_age": {
+          "dim": 1,
+          "period": "every depth"
+        },
+        "state_energy": {
+          "dim": 1,
+          "period": "every depth"
+        },
+        "reachability": {
+          "dim": 7,
+          "period": "every depth; powers at P_s"
+        },
+        "coordinates": {
+          "cheap": 9,
+          "spectral_and_reach": 16,
+          "totals": [
+            25,
+            26
+          ]
+        }
+      },
+      "note": "The degree-weighted period cell cites Table S6c; the citation is omitted from the normalized period label. Innovation/NIS is an observer diagnostic, not a sensor coordinate."
+    },
+    "supplementary_table_S9_observer_and_search": {
+      "display_id": "supplementary:Table S9",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          6
+        ]
+      },
+      "values": {
+        "trajectory_folds": {
+          "value": 5
+        },
+        "observer": {
+          "state_dim": 16,
+          "rank": 4
+        },
+        "filters": {
+          "candidates": 6,
+          "active": 3,
+          "degree": 8
+        },
+        "critic": {
+          "hidden_widths": [
+            128,
+            128,
+            64
+          ],
+          "dropout": {
+            "$value": 0.1,
+            "$decimals": 2
+          },
+          "log_scale_clip": [
+            -7,
+            3
+          ]
+        },
+        "sequence_models": {
+          "width": 128,
+          "residual_layers": 2
+        },
+        "search": {
+          "horizons": [
+            1,
+            4,
+            8,
+            16,
+            32
+          ],
+          "beam": 16,
+          "top_k": 2
+        },
+        "observer_period": {
+          "r": 2
+        },
+        "ensemble": {
+          "sizes": [
+            1,
+            2,
+            4,
+            8,
+            12
+          ]
+        },
+        "clipping": {
+          "B": {
+            "$value": 0.1,
+            "$decimals": 2
+          },
+          "sensitivity": [
+            0.05,
+            0.2
+          ]
+        }
+      }
+    },
+    "supplementary_table_S10_policy_definitions": {
+      "display_id": "supplementary:Table S10",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          6
+        ]
+      },
+      "values": {
+        "nominal": {
+          "feedback": "no"
+        },
+        "best_depth": {
+          "feedback": "no"
+        },
+        "learned_stop": {
+          "feedback": "no"
+        },
+        "phase": {
+          "feedback": "no"
+        },
+        "fixed_sequence": {
+          "feedback": "no"
+        },
+        "mpc_ol": {
+          "feedback": "no"
+        },
+        "one_step": {
+          "feedback": "yes"
+        },
+        "radius": {
+          "feedback": "yes"
+        },
+        "mpc_rh": {
+          "feedback": "yes"
+        }
+      }
+    },
+    "supplementary_table_S11_confirmation_map": {
+      "display_id": "supplementary:Table S11",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          8
+        ]
+      },
+      "values": {
+        "state": {
+          "margin": {
+            "$value": 0.002,
+            "$decimals": 3
+          },
+          "fail_output": "strongest open-loop predecessor or q_C"
+        },
+        "radius": {
+          "margin": {
+            "$value": 0.0015,
+            "$decimals": 4
+          },
+          "fail_output": "one-step if one-step ∈ Q_s, otherwise q_C"
+        },
+        "mpc": {
+          "margin": {
+            "$value": 0.002,
+            "$decimals": 3
+          },
+          "fail_output": "MPC-OL if MPC-OL ∈ Q_s, otherwise q_C"
+        },
+        "full": {
+          "margin": {
+            "$value": 0.02,
+            "$decimals": 2
+          },
+          "fail_output": "Lean"
+        }
+      },
+      "note": "The Full-profile row prints Lean without the membership qualification used by the executable rule. The caption and row are retained as printed; this sidecar does not resolve that inconsistency."
+    },
+    "supplementary_table_S31_reproduction_map": {
+      "display_id": "supplementary:Table S31",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          29,
+          30
+        ]
+      },
+      "values": {
+        "R01": {
+          "record": "clipped paired-loss vectors on D_admit; records/admission"
+        },
+        "R02": {
+          "record": "runs/<dataset>/admission.json"
+        },
+        "R03": {
+          "record": "E3–E6 outcomes on D_compare; acquisition traces; cost ledger; records/budget_matched"
+        },
+        "R04": {
+          "record": "per-input timing traces (E17)"
+        },
+        "R05": {
+          "record": "E13 record"
+        },
+        "R06": {
+          "record": "executed sensor parameters and resolvent fraction (E17)"
+        },
+        "R07": {
+          "record": "qualification ledger"
+        },
+        "R08": {
+          "record": "decision logs"
+        },
+        "R09": {
+          "record": "tube-audit record"
+        },
+        "R10": {
+          "record": "E1 record; executed action mix"
+        },
+        "R11": {
+          "record": "E18 displacement record"
+        },
+        "R12": {
+          "record": "the records of the underlying rows"
+        },
+        "R13": {
+          "record": "selector trace (E15)"
+        },
+        "R14": {
+          "record": "per-seed, per-graph loss vectors (E16)"
+        },
+        "R15": {
+          "record": "stage records; E10 contrasts"
+        },
+        "R16": {
+          "record": "nested re-evaluation of every family"
+        },
+        "R17": {
+          "record": "confirmation record; E3–E6 comparison on D_compare"
+        },
+        "R18": {
+          "record": "timing traces after warm-up (E17)"
+        },
+        "R19": {
+          "record": "timing traces (E17)"
+        },
+        "R20": {
+          "record": "acquisition traces and the cost ledger (E6)"
+        },
+        "R21": {
+          "record": "training-only oracle records"
+        },
+        "R22": {
+          "record": "oracle record"
+        },
+        "R23": {
+          "record": "comparator loss at E ∈ {1, 2, 4, 8, 12, 16, 20} with paired seeds (E14)"
+        },
+        "R24": {
+          "record": "per-cell records"
+        },
+        "R25": {
+          "record": "executed resolvent fraction from the execution logs; kernel storage and timing records"
+        },
+        "R26": {
+          "record": "per-rerun timing ledger and per-seed scores (E12, E17)"
+        },
+        "R27": {
+          "record": "cell execution record"
+        },
+        "R28": {
+          "record": "paired factorial record"
+        },
+        "R29": {
+          "record": "resampling record (Algorithm S4)"
+        },
+        "R30": {
+          "record": "scheduler accounting"
+        },
+        "R31": {
+          "record": "configuration and checkpoint identities"
+        },
+        "R32": {
+          "record": "admission records at buffers 2–32"
+        },
+        "R33": {
+          "record": "sweep record"
+        },
+        "R34": {
+          "record": "E9 record"
+        }
+      },
+      "note": "These are the printed record descriptions. Concrete paths in this repository are separately validated and exported by the generator; a relocated file is not a numerical disagreement."
+    },
+    "supplementary_table_S32_comparator_rules": {
+      "display_id": "supplementary:Table S32",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          21
+        ]
+      },
+      "values": {
+        "budget": {
+          "tau": {
+            "$value": 0.002,
+            "$decimals": 3
+          }
+        }
+      }
+    },
+    "supplementary_table_S35_reporting_conventions": {
+      "display_id": "supplementary:Table S35",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          21,
+          22
+        ]
+      },
+      "values": {
+        "C1": {
+          "supporting_record": "per-seed, per-graph loss vectors (E16)"
+        },
+        "C2": {
+          "supporting_record": "stage manifest with graph identities"
+        },
+        "C3": {
+          "supporting_record": "per-cell weights, propensities and masks (E19)"
+        },
+        "C4": {
+          "supporting_record": "selector trace (E15)"
+        },
+        "C5": {
+          "supporting_record": "nested family ledger (Algorithm S4)"
+        },
+        "C6": {
+          "supporting_record": "bootstrap statistics of every contrast"
+        },
+        "C7": {
+          "supporting_record": "cell execution records"
+        },
+        "C8": {
+          "supporting_record": "event-cost traces"
+        },
+        "C9": {
+          "supporting_record": "registry functions; storage and timing records"
+        },
+        "C10": {
+          "supporting_record": "E1 identity record"
+        },
+        "C11": {
+          "supporting_record": "per-seed score and timing records"
+        },
+        "C12": {
+          "supporting_record": "oracle and scaling logs"
+        },
+        "C13": {
+          "supporting_record": "qualification ledger"
+        },
+        "C14": {
+          "supporting_record": "candidate-level trace (E15)"
+        },
+        "C15": {
+          "supporting_record": "training and qualification ledgers"
+        },
+        "C16": {
+          "supporting_record": "selection record"
+        },
+        "C17": {
+          "supporting_record": "intervention logs"
+        },
+        "C18": {
+          "supporting_record": "unrounded result record"
+        },
+        "C19": {
+          "supporting_record": "pilot and depth records"
+        },
+        "C20": {
+          "supporting_record": "contrast record"
+        },
+        "C21": {
+          "supporting_record": "timing traces"
+        },
+        "C22": {
+          "supporting_record": "tube-audit record"
+        },
+        "C23": {
+          "supporting_record": "Note S25"
+        },
+        "C24": {
+          "supporting_record": "boundary-case tests of E6"
+        },
+        "C25": {
+          "supporting_record": "decision logs"
+        },
+        "C26": {
+          "supporting_record": "sensor traces (E17)"
+        },
+        "C27": {
+          "supporting_record": "split manifests"
+        },
+        "C28": {
+          "supporting_record": "support workbook"
+        },
+        "C29": {
+          "supporting_record": "clipped paired-loss vectors (E16)"
+        }
+      },
+      "note": "Printed supporting-record descriptions are preserved separately from the actual repository paths verified by the generator."
+    },
+    "supplementary_table_S36_experiment_definitions": {
+      "display_id": "supplementary:Table S36",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          22,
+          23
+        ]
+      },
+      "values": {
+        "E14": {
+          "extended_grid": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            16,
+            20
+          ],
+          "distinct_checkpoints_beyond_registry": [
+            16,
+            20
+          ]
+        },
+        "E16": {
+          "plant_seeds": 12
+        }
+      }
+    },
+    "supplementary_table_S38_results_record_schema": {
+      "display_id": "supplementary:Table S38",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          23,
+          24
+        ]
+      },
+      "values": {
+        "dataset": {
+          "role": "key"
+        },
+        "backbone": {
+          "role": "key"
+        },
+        "checkpoint": {
+          "role": "key"
+        },
+        "policy": {
+          "role": "key"
+        },
+        "profile": {
+          "role": "key"
+        },
+        "stage": {
+          "role": "key"
+        },
+        "unit": {
+          "role": "key"
+        },
+        "protocol": {
+          "role": "key"
+        },
+        "score": {
+          "role": "value"
+        },
+        "uncertainty": {
+          "role": "value"
+        },
+        "cost": {
+          "role": "value"
+        },
+        "identifier": {
+          "role": "provenance"
+        }
+      }
+    },
+    "supplementary_table_S39_data_role_contract": {
+      "display_id": "supplementary:Table S39",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          24
+        ]
+      },
+      "values": {
+        "PascalVOC-SP": {
+          "D_confirm": 425,
+          "D_compare": 425,
+          "D_admit": 1428
+        },
+        "COCO-SP": {
+          "D_confirm": 5664,
+          "D_compare": 5665,
+          "D_admit": 5000
+        },
+        "Peptides-func": {
+          "D_confirm": 544,
+          "D_compare": 544,
+          "D_admit": 2331
+        },
+        "allocation_percent": [
+          60,
+          20,
+          10,
+          5,
+          5
+        ]
+      }
+    },
+    "supplementary_table_S6_action_registry": {
+      "display_id": "supplementary:Table S6",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          4
+        ]
+      },
+      "values": {
+        "A0": {
+          "rho": {
+            "$value": 0.0,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.7,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.25,
+            "$decimals": 2
+          },
+          "eta": null,
+          "T": null,
+          "identity_mass": null,
+          "sparse_products": 1,
+          "exploration_probability": {
+            "$value": 0.28,
+            "$decimals": 2
+          }
+        },
+        "A1": {
+          "rho": {
+            "$value": 0.2,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.55,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.25,
+            "$decimals": 2
+          },
+          "eta": null,
+          "T": null,
+          "identity_mass": null,
+          "sparse_products": 1,
+          "exploration_probability": {
+            "$value": 0.09,
+            "$decimals": 2
+          }
+        },
+        "A2": {
+          "rho": {
+            "$value": 0.2,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.85,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.2,
+            "$decimals": 2
+          },
+          "eta": null,
+          "T": null,
+          "identity_mass": null,
+          "sparse_products": 1,
+          "exploration_probability": {
+            "$value": 0.09,
+            "$decimals": 2
+          }
+        },
+        "A3": {
+          "rho": {
+            "$value": 0.25,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.7,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.25,
+            "$decimals": 2
+          },
+          "eta": {
+            "$value": 0.5,
+            "$decimals": 2
+          },
+          "T": 8,
+          "identity_mass": {
+            "$value": 0.002,
+            "$decimals": 4
+          },
+          "sparse_products": 8,
+          "exploration_probability": {
+            "$value": 0.09,
+            "$decimals": 2
+          }
+        },
+        "A4": {
+          "rho": {
+            "$value": 0.3,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.65,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.35,
+            "$decimals": 2
+          },
+          "eta": {
+            "$value": 0.5,
+            "$decimals": 2
+          },
+          "T": 8,
+          "identity_mass": {
+            "$value": 0.002,
+            "$decimals": 4
+          },
+          "sparse_products": 8,
+          "exploration_probability": {
+            "$value": 0.09,
+            "$decimals": 2
+          }
+        },
+        "A5": {
+          "rho": {
+            "$value": 0.3,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.7,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.2,
+            "$decimals": 2
+          },
+          "eta": {
+            "$value": 0.2,
+            "$decimals": 2
+          },
+          "T": 8,
+          "identity_mass": {
+            "$value": 0.1342,
+            "$decimals": 4
+          },
+          "sparse_products": 8,
+          "exploration_probability": {
+            "$value": 0.09,
+            "$decimals": 2
+          }
+        },
+        "A6": {
+          "rho": {
+            "$value": 0.35,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.6,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.35,
+            "$decimals": 2
+          },
+          "eta": {
+            "$value": 0.2,
+            "$decimals": 2
+          },
+          "T": 8,
+          "identity_mass": {
+            "$value": 0.1342,
+            "$decimals": 4
+          },
+          "sparse_products": 8,
+          "exploration_probability": {
+            "$value": 0.09,
+            "$decimals": 2
+          }
+        },
+        "A7": {
+          "rho": {
+            "$value": 0.25,
+            "$decimals": 2
+          },
+          "nu": {
+            "$value": 0.5,
+            "$decimals": 2
+          },
+          "alpha": {
+            "$value": 0.4,
+            "$decimals": 2
+          },
+          "eta": {
+            "$value": 0.08,
+            "$decimals": 2
+          },
+          "T": 8,
+          "identity_mass": {
+            "$value": 0.4722,
+            "$decimals": 4
+          },
+          "sparse_products": 8,
+          "exploration_probability": {
+            "$value": 0.08,
+            "$decimals": 2
+          }
+        },
+        "A8": {
+          "rho": null,
+          "nu": null,
+          "alpha": null,
+          "eta": null,
+          "T": null,
+          "identity_mass": null,
+          "sparse_products": 0,
+          "exploration_probability": {
+            "$value": 0.05,
+            "$decimals": 2
+          }
+        },
+        "A9": {
+          "rho": null,
+          "nu": null,
+          "alpha": null,
+          "eta": null,
+          "T": null,
+          "identity_mass": null,
+          "sparse_products": 0,
+          "exploration_probability": {
+            "$value": 0.05,
+            "$decimals": 2
+          }
+        }
+      },
+      "note": "Direct transcription of the numeric registry fields and printed dashes; eta is the stated resolvent mode parameter. These are protocol constants, not measured execution frequencies."
+    },
+    "supplementary_table_S6b_executed_actions": {
+      "display_id": "supplementary:Table S6b",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          5
+        ]
+      },
+      "values": {
+        "A0": {
+          "nu": {
+            "$value": 0.7,
+            "$decimals": 2
+          },
+          "kernel_hops": 1,
+          "executed_range": {
+            "$value": 0.7,
+            "$decimals": 3
+          },
+          "max_reach": 1,
+          "kernel_identity_mass": null,
+          "executed_identity_coefficient": {
+            "$value": 0.3,
+            "$decimals": 3
+          },
+          "sparse_products": 1
+        },
+        "A1": {
+          "nu": {
+            "$value": 0.55,
+            "$decimals": 2
+          },
+          "kernel_hops": 1,
+          "executed_range": {
+            "$value": 0.55,
+            "$decimals": 3
+          },
+          "max_reach": 1,
+          "kernel_identity_mass": null,
+          "executed_identity_coefficient": {
+            "$value": 0.45,
+            "$decimals": 3
+          },
+          "sparse_products": 1
+        },
+        "A2": {
+          "nu": {
+            "$value": 0.85,
+            "$decimals": 2
+          },
+          "kernel_hops": 1,
+          "executed_range": {
+            "$value": 0.85,
+            "$decimals": 3
+          },
+          "max_reach": 1,
+          "kernel_identity_mass": null,
+          "executed_identity_coefficient": {
+            "$value": 0.15,
+            "$decimals": 3
+          },
+          "sparse_products": 1
+        },
+        "A3": {
+          "nu": {
+            "$value": 0.7,
+            "$decimals": 2
+          },
+          "kernel_hops": {
+            "$value": 0.995,
+            "$decimals": 3
+          },
+          "executed_range": {
+            "$value": 0.697,
+            "$decimals": 3
+          },
+          "max_reach": 8,
+          "kernel_identity_mass": {
+            "$value": 0.002,
+            "$decimals": 4
+          },
+          "executed_identity_coefficient": {
+            "$value": 0.388,
+            "$decimals": 3
+          },
+          "sparse_products": 8
+        },
+        "A4": {
+          "nu": {
+            "$value": 0.65,
+            "$decimals": 2
+          },
+          "kernel_hops": {
+            "$value": 0.994,
+            "$decimals": 3
+          },
+          "executed_range": {
+            "$value": 0.646,
+            "$decimals": 3
+          },
+          "max_reach": 8,
+          "kernel_identity_mass": {
+            "$value": 0.002,
+            "$decimals": 4
+          },
+          "executed_identity_coefficient": {
+            "$value": 0.448,
+            "$decimals": 3
+          },
+          "sparse_products": 8
+        },
+        "A5": {
+          "nu": {
+            "$value": 0.7,
+            "$decimals": 2
+          },
+          "kernel_hops": {
+            "$value": 1.377,
+            "$decimals": 3
+          },
+          "executed_range": {
+            "$value": 0.964,
+            "$decimals": 3
+          },
+          "max_reach": 8,
+          "kernel_identity_mass": {
+            "$value": 0.1342,
+            "$decimals": 4
+          },
+          "executed_identity_coefficient": {
+            "$value": 0.37,
+            "$decimals": 3
+          },
+          "sparse_products": 8
+        },
+        "A6": {
+          "nu": {
+            "$value": 0.6,
+            "$decimals": 2
+          },
+          "kernel_hops": {
+            "$value": 1.439,
+            "$decimals": 3
+          },
+          "executed_range": {
+            "$value": 0.864,
+            "$decimals": 3
+          },
+          "max_reach": 8,
+          "kernel_identity_mass": {
+            "$value": 0.1342,
+            "$decimals": 4
+          },
+          "executed_identity_coefficient": {
+            "$value": 0.47,
+            "$decimals": 3
+          },
+          "sparse_products": 8
+        },
+        "A7": {
+          "nu": {
+            "$value": 0.5,
+            "$decimals": 2
+          },
+          "kernel_hops": {
+            "$value": 1.205,
+            "$decimals": 3
+          },
+          "executed_range": {
+            "$value": 0.603,
+            "$decimals": 3
+          },
+          "max_reach": 8,
+          "kernel_identity_mass": {
+            "$value": 0.4722,
+            "$decimals": 4
+          },
+          "executed_identity_coefficient": {
+            "$value": 0.569,
+            "$decimals": 3
+          },
+          "sparse_products": 8
+        }
+      },
+      "note": "Printed registry functions at their displayed decimal precision; the resolvent-kernel identity mass is explicitly not applicable to A0-A2."
+    },
+    "supplementary_figure_S11_terminal_budget": {
+      "display_id": "supplementary:Figure S11",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          33
+        ]
+      },
+      "values": {
+        "scenario": {
+          "W": 10,
+          "W_C": 4,
+          "C_pred": 0.5,
+          "w": 6,
+          "sensing": 2,
+          "action": 2
+        },
+        "panels": {
+          "a": {
+            "accumulated_work": [
+              6,
+              8,
+              8,
+              12
+            ]
+          },
+          "b": {
+            "accumulated_work": [
+              6,
+              6,
+              10
+            ]
+          }
+        }
+      },
+      "note": "Caption parameters and plotted point labels transcribed from the rendered PDF. The caption also states scoring cost 2; the illustrated abort occurs before scoring. These are an analytical counterexample, not benchmark measurements."
+    },
+    "supplementary_table_S24_claim_artifact_registry": {
+      "display_id": "supplementary:Table S24",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          16,
+          17
+        ]
+      },
+      "values": {
+        "plant": {
+          "identity": "architecture, preprocessing, external-data status, split and hashes",
+          "ambiguity": "unspecified graph-derived preprocessing",
+          "test": "reproduce frozen logits/states"
+        },
+        "models": {
+          "identity": "schema, folds, propensities, architecture, calibration and hash",
+          "ambiguity": "validation/test-derived online features",
+          "test": "label-removal invariance and held-out residuals"
+        },
+        "comparator": {
+          "identity": "family, nested selections, frequencies and prediction hash",
+          "ambiguity": "favourable comparator chosen on evaluation units",
+          "test": "repeat comparator reconstruction in every resample"
+        },
+        "selected": {
+          "identity": "candidate ledger, confirmation contrast, resources, origins and hashes",
+          "ambiguity": "post-hoc route or margin changes",
+          "test": "reproduce complete decision trace"
+        },
+        "executable": {
+          "identity": "g_input, support strata, recovery priorities and hash",
+          "ambiguity": "implicit input fallback",
+          "test": "reproduce branch and recovery origins"
+        },
+        "deployed": {
+          "identity": "admission arithmetic, branch ID and prediction hash",
+          "ambiguity": "hidden replacement after failure",
+          "test": "equality with selected executable branch"
+        },
+        "displays": {
+          "identity": "source data, generator, environment and commit",
+          "ambiguity": "manual edits",
+          "test": "clean regeneration and hash comparison"
+        }
+      },
+      "note": "The original protocol descriptions are compared independently. Repository carrier paths and Makefile targets are additional checked links, not substituted paper text."
+    },
+    "supplementary_table_S40_information_restrictions": {
+      "display_id": "supplementary:Table S40",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          24
+        ]
+      },
+      "values": {
+        "comparator": {
+          "allowed": "initial input x; development labels at selection time",
+          "forbidden": "any intermediate measurement at evaluation time",
+          "completion": "fixed schedule or plan-once sequence executed to its terminal depth; cost C_qC"
+        },
+        "mpc_ol": {
+          "allowed": "initial state H_0 and the consequence models at planning time",
+          "forbidden": "intermediate measurements after the plan is fixed",
+          "completion": "beyond the horizon H the plan is completed by the registered completion rule (nominal continuation to the terminal depth); cost charged in full"
+        },
+        "predictor": {
+          "allowed": "H_0 pooled, graph size and degree statistics; a network of the critic's parameter count; decoding over the registry with support masking",
+          "forbidden": "actual intermediate measurements of the evaluated input; admission-oracle labels",
+          "completion": "the decoded sequence is executed open loop; decoding cost charged in full; ϕ_x^seq and ϕ_x^gain reported separately (E2)"
+        },
+        "distilled": {
+          "allowed": "the feedback policy's executed sequences on D_explore as targets; the predictor's inputs at evaluation",
+          "forbidden": "admission-oracle labels; intermediate measurements at evaluation",
+          "completion": "executed open loop; student and execution cost charged"
+        },
+        "replanning": {
+          "allowed": "model-predicted states; the same search calls as MPC-RH",
+          "forbidden": "assimilated observations",
+          "completion": "replanning on predicted states with matched search calls, or the actual difference in work reported"
+        },
+        "feedback": {
+          "allowed": "intermediate measurements through the observer at every replanning site",
+          "forbidden": "labels at evaluation",
+          "completion": "receding horizon with the same completion rule; cost C_expected, the observed per-input maximum and the modelled C_0.99 kept apart"
+        },
+        "budget": {
+          "allowed": "as MPC-RH, acquisitions gated by the certificate of Algorithm S3",
+          "forbidden": "labels at evaluation",
+          "completion": "Algorithm S3; acquisition rate, retained gain, late-abort rate, total work and latency tails reported; periodic, gap-trigger and learned triggers compared at the same actions and budget"
+        }
+      },
+      "note": "The declared comparison-arm protocol is transcribed here. Matching this text does not certify that a measured study executed the restrictions; those checks require its original artifacts."
+    },
+    "supplementary_table_S15_reference_ranges": {
+      "display_id": "supplementary:Table S15",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          12
+        ]
+      },
+      "values": {
+        "external_methods": {
+          "AMP": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.05,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.2,
+                "$decimals": 2
+              }
+            ],
+            "parameter_multiplier": [
+              {
+                "$value": 1.03,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.08,
+                "$decimals": 2
+              }
+            ]
+          },
+          "ADMP-GNN": {
+            "serial_cost_per_member": [
+              {
+                "$value": 0.6,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.0,
+                "$decimals": 2
+              }
+            ],
+            "parameter_multiplier": [
+              {
+                "$value": 1.05,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.15,
+                "$decimals": 2
+              }
+            ]
+          },
+          "GRAMA": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.2,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.6,
+                "$decimals": 2
+              }
+            ],
+            "parameter_multiplier": [
+              {
+                "$value": 1.1,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.25,
+                "$decimals": 2
+              }
+            ]
+          },
+          "Graph Mamba": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.1,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.4,
+                "$decimals": 2
+              }
+            ],
+            "parameter_multiplier": [
+              {
+                "$value": 1.1,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.2,
+                "$decimals": 2
+              }
+            ]
+          },
+          "Early-Exit GNN": {
+            "serial_cost_per_member": [
+              {
+                "$value": 0.5,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.9,
+                "$decimals": 2
+              }
+            ],
+            "parameter_multiplier": [
+              {
+                "$value": 1.02,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.06,
+                "$decimals": 2
+              }
+            ]
+          }
+        },
+        "internal_routes": {
+          "best_fixed_depth": {
+            "serial_cost_per_member": [
+              {
+                "$value": 0.5,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.0,
+                "$decimals": 2
+              }
+            ]
+          },
+          "phase": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.0,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.05,
+                "$decimals": 2
+              }
+            ]
+          },
+          "fixed_sequence": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.0,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.05,
+                "$decimals": 2
+              }
+            ]
+          },
+          "mpc_ol": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.0,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.15,
+                "$decimals": 2
+              }
+            ]
+          },
+          "one_step": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.1,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.15,
+                "$decimals": 2
+              }
+            ]
+          },
+          "radius": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.15,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.2,
+                "$decimals": 2
+              }
+            ]
+          },
+          "mpc_rh": {
+            "serial_cost_per_member": [
+              {
+                "$value": 1.3,
+                "$decimals": 2
+              },
+              {
+                "$value": 1.36,
+                "$decimals": 2
+              }
+            ]
+          }
+        },
+        "retraining_multiplier": [
+          {
+            "$value": 1.1,
+            "$decimals": 1
+          },
+          {
+            "$value": 1.6,
+            "$decimals": 1
+          }
+        ],
+        "hpo_trials": 48
+      },
+      "note": "Direct transcription of the declared reference accounting ranges in lines155-161. These targets compare the labelled reference companion data; they must not replace measured per-rerun quantities or the executed candidate cost ledger."
+    },
+    "supplementary_table_S19_negative_controls": {
+      "display_id": "supplementary:Table S19",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          13
+        ]
+      },
+      "values": {
+        "graph irrelevant": {
+          "construction": "Y ⟂ A | X on independent realizations",
+          "expected_conclusion": "comparator equivalence and nonvacuous fallback",
+          "residual_activity": {
+            "$value": 0.028,
+            "$decimals": 3
+          },
+          "input_fallback": {
+            "$value": 0.963,
+            "$decimals": 3
+          },
+          "worst_pre_fallback_harm": {
+            "$value": 0.0018,
+            "$decimals": 4
+          },
+          "harm_unit": "CE"
+        },
+        "misleading graph": {
+          "construction": "role/edge structure anti-aligned with labels",
+          "expected_conclusion": "detect confidently wrong graph evidence",
+          "residual_activity": {
+            "$value": 0.107,
+            "$decimals": 3
+          },
+          "input_fallback": {
+            "$value": 0.824,
+            "$decimals": 3
+          },
+          "worst_pre_fallback_harm": {
+            "$value": 0.0093,
+            "$decimals": 4
+          },
+          "harm_unit": "CE"
+        },
+        "sensor bias": {
+          "construction": "offset/heteroskedastic innovation corruption",
+          "expected_conclusion": "NIS/fallback respond before large harm",
+          "residual_activity": {
+            "$value": 0.168,
+            "$decimals": 3
+          },
+          "input_fallback": {
+            "$value": 0.748,
+            "$decimals": 3
+          },
+          "worst_pre_fallback_harm": {
+            "$value": 0.0104,
+            "$decimals": 4
+          },
+          "harm_unit": "CE"
+        },
+        "support shift": {
+          "construction": "unseen degree/size/action strata",
+          "expected_conclusion": "dynamic support prevents extrapolation",
+          "residual_activity": {
+            "$value": 0.064,
+            "$decimals": 3
+          },
+          "input_fallback": {
+            "$value": 0.907,
+            "$decimals": 3
+          },
+          "worst_pre_fallback_harm": {
+            "$value": 0.0062,
+            "$decimals": 4
+          },
+          "harm_unit": "CE"
+        }
+      },
+      "note": "Descriptions and all printed numerical cells transcribed directly from Table S19. Only descriptions are protocol inputs; activity, fallback and harm must come from verified measured records. CE is the literal printed unit label; mismatched units remain visible."
+    }
+  }
+}

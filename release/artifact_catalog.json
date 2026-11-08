@@ -114,9 +114,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 64603,
+          "bytes": 69769,
           "path": "scripts/export_records.py",
-          "sha256": "17fb79e546524b48760a2d00f48dda4b13743a5a8a7d2994a912c26cc755d70d"
+          "sha256": "72c10f3d2e4bf9806315c576587a4ee6c3b05ef978f2beb18940e4c648a3b3c8"
         },
         {
           "bytes": 31729,
@@ -239,14 +239,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 39483,
+          "bytes": 39683,
           "path": "Makefile",
-          "sha256": "229c99486cd7faf25d5c17d92fe07707aad861b531f89ba8e92d7fb8d4dab9c3"
+          "sha256": "24a413b04430faff1d102c54c132825b0e886565e7b9d7e5de7e27c9d7311f42"
         },
         {
-          "bytes": 6693,
+          "bytes": 7766,
           "path": "scripts/reconstruct_paper.py",
-          "sha256": "6ede310c81f1c99186728da09ec353a57e8e320896061cc33df3f2d9c47a8275"
+          "sha256": "5fd92c279d7eec62862db5a1ec91223b0e3255be834b49020b03807f11fc07a9"
         }
       ],
       "entrypoints": [
@@ -269,14 +269,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 6035,
+          "bytes": 8019,
           "path": "hpc/publish_paper_artifacts_arrhenius.sh",
-          "sha256": "db64a059935d0382688851104c8e232b8455957951c2d48dc52009509a4f0e61"
+          "sha256": "eee9be0f935e047cc9a93ba7bf6348129f899cd091f25ee99159a04400124cbd"
         },
         {
-          "bytes": 52943,
+          "bytes": 84897,
           "path": "scripts/paper_artifacts.py",
-          "sha256": "b959723dcd7906c0f0071b09d8199070e3acac6498b55fe74b882a749c0cf450"
+          "sha256": "0b69cabd8f888d0c028b70b188ce66d2b92fb6938b5c818d7c65112b32a740bd"
         }
       ],
       "entrypoints": [
@@ -298,9 +298,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 33698,
+          "bytes": 35562,
           "path": "scripts/reconstruct.py",
-          "sha256": "c6262bbd590d1ca41e60ec719064161593e17b96a8cbdb828c0d0ac2b801283c"
+          "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
         }
       ],
       "entrypoints": [
@@ -321,9 +321,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 33698,
+          "bytes": 35562,
           "path": "scripts/reconstruct.py",
-          "sha256": "c6262bbd590d1ca41e60ec719064161593e17b96a8cbdb828c0d0ac2b801283c"
+          "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
         }
       ],
       "entrypoints": [
@@ -455,14 +455,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 39483,
+          "bytes": 39683,
           "path": "Makefile",
-          "sha256": "229c99486cd7faf25d5c17d92fe07707aad861b531f89ba8e92d7fb8d4dab9c3"
+          "sha256": "24a413b04430faff1d102c54c132825b0e886565e7b9d7e5de7e27c9d7311f42"
         },
         {
-          "bytes": 18349,
+          "bytes": 19912,
           "path": "scripts/statement_check.py",
-          "sha256": "dd8570a3f349d951538705f2bd40109d75cee39a8e2e9f727623b5f1821d0680"
+          "sha256": "73872ba61e6de94aaf9771c0dba2d67e93bee65cdb8943314c491a88026b3462"
         }
       ],
       "entrypoints": [
@@ -603,9 +603,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 39483,
+          "bytes": 39683,
           "path": "Makefile",
-          "sha256": "229c99486cd7faf25d5c17d92fe07707aad861b531f89ba8e92d7fb8d4dab9c3"
+          "sha256": "24a413b04430faff1d102c54c132825b0e886565e7b9d7e5de7e27c9d7311f42"
         }
       ],
       "entrypoints": [
@@ -649,9 +649,9 @@
               "sha256": "1eede7853015945bea00d93944c4552793b93e466f8a0fea19c0b812c236c23b"
             },
             {
-              "bytes": 13712,
+              "bytes": 25326,
               "path": "cm_campaigns/baselines.py",
-              "sha256": "4454b8102ad93db6587894d8d3480e66e8f642da53e7f5259d4816104f97924d"
+              "sha256": "efdb58cb25b7b83dbf5cbe1aa92404775b4903c9edcd651af235b783df102f32"
             },
             {
               "bytes": 5471,
@@ -689,9 +689,9 @@
               "sha256": "5d0d4dda3f40af6859256d980cd4b0e1db50a57e07db1dca22b14bc23004ccf5"
             },
             {
-              "bytes": 140313,
+              "bytes": 144636,
               "path": "cm_experiments/ablation_lifecycle.py",
-              "sha256": "ee76746719c3c2ac63d00edbea89f8c83ba0c2a5bcd8bcfff8b64f88fbab7bc0"
+              "sha256": "d869922c72ec4c4a3f465bb456268554851d9153d053cc3679763eb21df1586c"
             },
             {
               "bytes": 5191,
@@ -729,9 +729,9 @@
               "sha256": "3d6a45bc1a13bc07a0d1bf69bf5f528faf6372b0e28d69629be1bd1ede026d34"
             },
             {
-              "bytes": 36749,
+              "bytes": 36883,
               "path": "cm_experiments/buffered_admission.py",
-              "sha256": "d083a5c796751ba6427a06e04760c377c27a9ac34a0da06e9cbf542eb8261d99"
+              "sha256": "38f95d9c7e3c689267f95be6fe181ad4559728f56e3a57e7ddb7fa098dd352d4"
             },
             {
               "bytes": 12620,
@@ -764,9 +764,9 @@
               "sha256": "06a781d8cf750da0fa0887c72f7df6b9417029c336db4e79e6f1943341cd022d"
             },
             {
-              "bytes": 54584,
+              "bytes": 57353,
               "path": "cm_experiments/factorial.py",
-              "sha256": "1681c58f0691d3f8e4bfe2d1e2c677fc6fb9539962e6f2619a0aa13a791e61e6"
+              "sha256": "550cabd0ee0cff5323818c1500fe6aed63440660add6f073cd0827dda3cecbe8"
             },
             {
               "bytes": 3506,
@@ -779,9 +779,9 @@
               "sha256": "ce9abff1549f4500db6141b34a4a5df7e185f75f6a7e472aa071521a6b85663b"
             },
             {
-              "bytes": 58249,
+              "bytes": 60898,
               "path": "cm_experiments/internal_baselines.py",
-              "sha256": "5f4c0e039715ce6ffcd18039a2d0f8895494af9847b533c6be6283a86f61b2e8"
+              "sha256": "3311a3239d938be27fabf3f34b09f9ad5b9a0cbe6bcaaf0c0c283f62a2ac1780"
             },
             {
               "bytes": 24737,
@@ -1041,9 +1041,9 @@
           "sha256": "a77ba64cd56c094588819717e9102d882b1bf1a56de552da58b83c182a7ee661"
         },
         {
-          "bytes": 19404,
+          "bytes": 22487,
           "path": "docs/EXPERIMENTS.md",
-          "sha256": "1bddfa544afc1a3a759d014081d9a65fbd92995dd3d70848361036231263d5ad"
+          "sha256": "672ee1143debd182c9973254c92776199c82ce17a1eba2b19d22c098e32358ed"
         },
         {
           "bytes": 18523,
@@ -1323,14 +1323,14 @@
           "artifact_class": "reported_reference",
           "files": [
             {
-              "bytes": 44633,
+              "bytes": 48012,
               "path": "paper/registered_constants.json",
-              "sha256": "d783497b4d129a3268fe223e07459fb001d31f2b3e9ce78c61db8d8499427dbe"
+              "sha256": "2512eb47a72b67b303ad86967ee2895a94c2fb7c3f64fe09f8c34dcdaf4a9d67"
             },
             {
-              "bytes": 130692,
+              "bytes": 132467,
               "path": "paper/reported_results.json",
-              "sha256": "042c01a5c8b514ef49de983869b7fae986d60e82fb0c76c86aa3d8f79e678cf5"
+              "sha256": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b"
             },
             {
               "bytes": 12980,
@@ -1393,9 +1393,9 @@
           "sha256": "7ebdc3a0006ab8b2176bdd380822b77d20e218db677f10bcf631b0bc488aba2d"
         },
         {
-          "bytes": 29016,
+          "bytes": 33066,
           "path": "paper/transcription_check.json",
-          "sha256": "dd2895576e08e3598eca0a698f9674e1df971897c96d6221cf779becf762d7e6"
+          "sha256": "f5592db698f01325f394e83d7e08ad5d5115e33b10fd9713da569c96850c2523"
         }
       ],
       "contracts": [
@@ -2601,9 +2601,9 @@
           "sha256": "ee9c8a622a0dc051f499a0987c77de9f66e2d8c357d7469459b603c5e7ef433c"
         },
         {
-          "bytes": 68997,
+          "bytes": 69346,
           "path": "records/specs.json",
-          "sha256": "a10b92b38b28844d15825f759d50110032991e05516774afa3e1e1c3bea42075"
+          "sha256": "e8bed3de597a2ac1f756561358f6a5284154a2a3e8f8f02a3be0bbb36dffae21"
         },
         {
           "bytes": 3941,
@@ -2751,9 +2751,9 @@
               "sha256": "bf406b49fe2553b1dec84e4e086cb3166b7178fa981539617d189c0231e8f583"
             },
             {
-              "bytes": 92039,
+              "bytes": 93520,
               "path": "paper/build/displays/analytical.py",
-              "sha256": "976b258b697335a3a92d1bc48bf6f3998a4ea1392825a46b44bf2153ab4e3756"
+              "sha256": "d8d221cdc631fd4dd367ff2b32bebce2819077d6f93bbd5cf9824114993a09bd"
             },
             {
               "bytes": 54293,
@@ -2761,29 +2761,34 @@
               "sha256": "8b0c9319bf79e4903ee00c8aa722b8e65a3c6ab1807f6f317cfeec98a494a1a4"
             },
             {
-              "bytes": 25764,
+              "bytes": 7969,
+              "path": "paper/build/displays/factorial_data.py",
+              "sha256": "ea5fdce3fa107df3421a10d303e02c604e74b0f4cfb9868ad1b999c09e0d080b"
+            },
+            {
+              "bytes": 37396,
               "path": "paper/build/displays/framework.py",
-              "sha256": "7859924cf7e870cedf02e585a84d0adb4f03be8ddc088aa0d70eebf619ce7ed0"
+              "sha256": "79d8c9c676433b307600ed2598cae2195c807f99e45f4ef49fcea791b4cc2609"
             },
             {
-              "bytes": 109119,
+              "bytes": 109528,
               "path": "paper/build/displays/main_paper.py",
-              "sha256": "fbdc5e0da5e3799212b2f9ce6649c5ec30afc138e3c209a74ec4b891b2cc7053"
+              "sha256": "c344f8c85b913e6f3ef978dc7a323e739110d414d19d11ab1e6030a2903b97df"
             },
             {
-              "bytes": 99716,
+              "bytes": 101281,
               "path": "paper/build/displays/protocol_tables.py",
-              "sha256": "d224a8f6cb3596644a62531a4b36adb2e867e48836247cfbdf80dec8a94201b4"
+              "sha256": "d1639f1efaaffb014f583d714b0a1b54305b621f6af66c80009710183f73c0a0"
             },
             {
-              "bytes": 104707,
+              "bytes": 111104,
               "path": "paper/build/displays/records_campaigns.py",
-              "sha256": "98cae1e9f04b0290d5e2b75b9bc6767df305c712e95bc60cdc85c23d39242b1a"
+              "sha256": "543e5e27dab70397cf5735197bed308d81266df8e9e90975380113f8239b74a5"
             },
             {
-              "bytes": 118047,
+              "bytes": 123440,
               "path": "paper/build/displays/run_audits.py",
-              "sha256": "d8d6ecfd93401cd77313f4e496dee26c4c263979d8cc2077680abbd3cc20cb9c"
+              "sha256": "a8372e2c5836c39cf983af3c87c0f244e821ed8bd51d6d6a55354c67154073b4"
             },
             {
               "bytes": 3580,
@@ -2836,14 +2841,14 @@
               "sha256": "91f51168e4557974dc7fcc6ec0e88669230ad403e259bb9c3f20acc9531fa91c"
             },
             {
-              "bytes": 33698,
+              "bytes": 35562,
               "path": "scripts/reconstruct.py",
-              "sha256": "c6262bbd590d1ca41e60ec719064161593e17b96a8cbdb828c0d0ac2b801283c"
+              "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
             },
             {
-              "bytes": 6693,
+              "bytes": 7766,
               "path": "scripts/reconstruct_paper.py",
-              "sha256": "6ede310c81f1c99186728da09ec353a57e8e320896061cc33df3f2d9c47a8275"
+              "sha256": "5fd92c279d7eec62862db5a1ec91223b0e3255be834b49020b03807f11fc07a9"
             }
           ],
           "patterns": [
@@ -2861,9 +2866,9 @@
           "artifact_class": "reported_reference",
           "files": [
             {
-              "bytes": 91729,
+              "bytes": 92088,
               "path": "paper/display_manifest.json",
-              "sha256": "0cf9bb89341f1a994205aab3ddff54d5b68f0b20aa87bc687019d360e00ffb72"
+              "sha256": "8ff9c264c029abd87c5e04ebe1c19f40eaabd2db49a81f41b565eac5913db631"
             }
           ],
           "patterns": [
@@ -2880,9 +2885,9 @@
       ],
       "contract_identities": [
         {
-          "bytes": 4962,
+          "bytes": 10051,
           "path": "docs/RECONSTRUCTION.md",
-          "sha256": "716d6850a968ceebdb12b4301985cbcb2ec9c16ed221267ac3bb880e0989343f"
+          "sha256": "65e2a6884d3f136aee590c3bb5837c790483d4cb9d4ce56184b48eae3311d7e9"
         },
         {
           "bytes": 13407,
@@ -2890,9 +2895,9 @@
           "sha256": "ee9c8a622a0dc051f499a0987c77de9f66e2d8c357d7469459b603c5e7ef433c"
         },
         {
-          "bytes": 91729,
+          "bytes": 92088,
           "path": "paper/display_manifest.json",
-          "sha256": "0cf9bb89341f1a994205aab3ddff54d5b68f0b20aa87bc687019d360e00ffb72"
+          "sha256": "8ff9c264c029abd87c5e04ebe1c19f40eaabd2db49a81f41b565eac5913db631"
         },
         {
           "bytes": 39899,
@@ -3065,9 +3070,9 @@
       "sha256": "0e3056c20dfc46d1f2677e4fc379fc15ffc1c3fb5d5fb1144a0774559a5ad483"
     },
     {
-      "bytes": 68997,
+      "bytes": 69346,
       "path": "records/specs.json",
-      "sha256": "a10b92b38b28844d15825f759d50110032991e05516774afa3e1e1c3bea42075"
+      "sha256": "e8bed3de597a2ac1f756561358f6a5284154a2a3e8f8f02a3be0bbb36dffae21"
     },
     {
       "bytes": 6510,
@@ -3080,9 +3085,9 @@
       "sha256": "6cd0f44e2894ef96e0db5752dde442fbcee7af14524167de618b74ab3920dbb7"
     },
     {
-      "bytes": 91729,
+      "bytes": 92088,
       "path": "paper/display_manifest.json",
-      "sha256": "0cf9bb89341f1a994205aab3ddff54d5b68f0b20aa87bc687019d360e00ffb72"
+      "sha256": "8ff9c264c029abd87c5e04ebe1c19f40eaabd2db49a81f41b565eac5913db631"
     }
   ],
   "provider_datasets": [

@@ -1,7 +1,7 @@
 {
   "schema": "cross-morse-display-manifest-1",
   "review_date": "2026-11-07",
-  "review_scope": "AI-assisted contextual inventory of every numbered table and figure in both supplied PDFs. Presence in this inventory records a support path, not deposited experimental evidence or an exact-artwork reproduction. Numerical supplementary builder coverage reviewed on 2026-11-07; related columns/panels remain distinct from complete historical display reconstruction. Display generators reviewed on 2026-11-07: every numbered display has a full-display generator in paper/build/displays (implementation[0]) that `make paper` runs on the published outputs; record_sets lists the measurement-record sets each generator reads.",
+  "review_scope": "AI-assisted contextual inventory of every numbered table and figure in both supplied PDFs. Presence in this inventory records a support path, not deposited experimental evidence or an exact-artwork reproduction. Numerical supplementary builder coverage reviewed on 2026-11-07; related columns/panels remain distinct from complete historical display reconstruction. Display generators reviewed on 2026-11-07: every numbered display has a full-display generator in paper/build/displays (implementation[0]) that `make paper` runs on the published outputs; record_sets lists the measurement-record sets each generator reads. Additional source review on 2026-11-07 registered S15 declared accounting ranges, S19 descriptions and S28b sigma grid; corrected four textual reference groups with numerical values preserved; Figure S17d retains its explicitly labelled independence illustration separately from paired S16/S16b intervals. This refresh does not attest benchmark reproduction.",
   "documents": {
     "main": {
       "sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
@@ -15,8 +15,8 @@
     }
   },
   "registry_sha256": {
-    "registered_constants.json": "d783497b4d129a3268fe223e07459fb001d31f2b3e9ce78c61db8d8499427dbe",
-    "reported_results.json": "042c01a5c8b514ef49de983869b7fae986d60e82fb0c76c86aa3d8f79e678cf5"
+    "registered_constants.json": "2512eb47a72b67b303ad86967ee2895a94c2fb7c3f64fe09f8c34dcdaf4a9d67",
+    "reported_results.json": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b"
   },
   "displays": [
     {
