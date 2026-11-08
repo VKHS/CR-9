@@ -114,7 +114,7 @@ endef
  tables figures paper paper-offline paper-from-index paper-from-runs fetch-artifacts paper-artifacts-status \
  paper-artifacts-plan paper-artifacts-check statement statement-check statement-fulfilled example-paper example-paper-check \
  printed-statement-check final-destination final-destination-check final-destination-runs final-destination-converge availability-fulfilled \
- consistency consistency-check consistency-audit \
+ consistency consistency-check consistency-audit independent-verification \
  paper-outputs paper-outputs-plan paper-outputs-submit paper-outputs-status paper-outputs-collect \
  manifests manifests-check availability availability-check \
  records-index records-check records-tables example-records example-records-check \
@@ -177,6 +177,7 @@ help:
 	  '  make final-destination    the repository after publication, projected (docs/FINAL_DESTINATION.md, destination/)' \
 	  '  make final-destination-converge  every published file against its projection in destination/' \
 	  '  make consistency-audit RUNS_ROOT=<runs>  decide each open printed-method question from the original runs' \
+	  '  make independent-verification VERIFY_WORK=<new dir>  the acceptance test from a fresh clone' \
 	  '  make availability-fulfilled  the registered statement and every printed claim fulfilled' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
@@ -299,6 +300,11 @@ consistency-check:
 consistency-audit:
 	@test -n "$(RUNS_ROOT)" || { echo 'Set RUNS_ROOT to a directory of completed runs' >&2; exit 2; }
 	"$(PYTHON)" -B scripts/consistency_audit.py --runs-root "$(RUNS_ROOT)"
+
+# The acceptance test from a fresh clone against the published artifacts (scripts/independent_verification.sh).
+independent-verification:
+	@test -n "$(VERIFY_WORK)" || { echo 'Set VERIFY_WORK to a new, empty absolute directory' >&2; exit 2; }
+	PYTHON="$(PYTHON)" bash scripts/independent_verification.sh --work "$(VERIFY_WORK)" $(if $(VERIFY_REVISION),--revision "$(VERIFY_REVISION)",)
 
 # The final gate: every item of the registered statement fulfilled (after publication).
 statement-fulfilled:

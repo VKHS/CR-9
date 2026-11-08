@@ -236,12 +236,16 @@ From the current state to the final destination, on the cluster that ran the sev
 
 ```bash
 make final-destination-runs RUNS_ROOT=<suite>/runs          # completed runs against sections A and B
+make consistency-audit RUNS_ROOT=<suite>/runs               # the open questions of docs/CONSISTENCY.md
 bash hpc/produce_paper_outputs_arrhenius.sh <suite>          # every other measured output (docs/PRODUCTION.md)
 bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   # release paper-artifacts
 make statement-fulfilled                                     # the twelve registered items
 make final-destination-converge                              # every published file against destination/
+make independent-verification VERIFY_WORK=<new directory>    # the same from a fresh clone of the release
 make final-destination                                       # projections become realized values
 ```
+
+Runs that already exist on the cluster are exported, not repeated: `make paper-preflight` verifies their folders before upload, and the publication map declares each artifact's relationship to the paper (`exact_result_producing_run`, `post_result_revision` or `refactor_with_prediction_equivalence`), so a repeated run never stands in for a historical result-producing run.
 
 The printed manuscript text places the run archives and measurement records at deposit DOIs listed in `runs/index.json` and `records/index.json`, whereas the registered statement and the publication workflow place them in the repository's release. Two routes close the claims that depend on this:
 

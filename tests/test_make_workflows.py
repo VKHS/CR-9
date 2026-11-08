@@ -254,3 +254,35 @@ class MakeWorkflowTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IndependentVerificationTests(unittest.TestCase):
+    """The acceptance test from a fresh clone: its plan, and its refusal to reuse earlier work."""
+
+    SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "independent_verification.sh"
+
+    def run_script(self, *args):
+        return subprocess.run(["bash", str(self.SCRIPT), *args], capture_output=True, text=True,
+                              env={**os.environ, "PYTHON": "python3"})
+
+    def test_plan_clones_one_revision_and_builds_from_published_artifacts_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp) / "verification"
+            result = self.run_script("--work", str(work), "--revision", "0123abc", "--dry-run")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            steps = result.stdout.splitlines()
+            self.assertEqual(steps[0], f"git clone --quiet https://github.com/VKHS/CR-9.git {work}/checkout")
+            self.assertEqual(steps[1], f"git -C {work}/checkout checkout --quiet 0123abc")
+            self.assertIn(f"paper PYTHON=python3 PAPER_TIER=complete ARTIFACTS_ROOT={work}/artifacts PAPER_ROOT={work}/paper", steps[2])
+            self.assertIn("statement-fulfilled", steps[3])
+            self.assertIn("final-destination-converge", steps[4])
+            self.assertTrue(all(str(work) in step for step in steps[:4]))
+            self.assertFalse(work.exists())
+
+    def test_existing_work_and_relative_paths_are_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "left-over").write_text("x")
+            refused = self.run_script("--work", tmp, "--revision", "0123abc")
+            self.assertEqual(refused.returncode, 2)
+            self.assertIn("must be new or empty", refused.stderr)
+        self.assertEqual(self.run_script("--work", "relative/dir", "--dry-run").returncode, 2)
