@@ -33,7 +33,7 @@ make statement-fulfilled                                 # every item fulfilled
 
 The first command is described in [docs/PRODUCTION.md](docs/PRODUCTION.md); its last job writes the map of all artifacts. The second uploads them to the release `paper-artifacts`, downloads and verifies them, rebuilds every table and figure with `make paper` and writes the manifests, observed environments and source data into the checkout (`CM_PUBLISH_COMMIT=1` commits and pushes them). The reconstruction item is fulfilled when every display is rebuilt and every compared value agrees with the printed one; `paper/source_data/compare/` lists each difference.
 
-[The final destination](docs/FINAL_DESTINATION.md) projects the repository after publication: the contents and sizes of every artifact, the pre-registered data roles, the design-determined values of the reconstruction and the complete close-out sequence.
+[The final destination](docs/FINAL_DESTINATION.md) projects the repository after publication: the contents and sizes of every artifact, the pre-registered data roles, the design-determined values of the reconstruction and the complete close-out sequence. [`destination/`](destination/README.md) holds every file that publication writes into the checkout, projected, with the twelve items evaluated on them ([at the destination](destination/STATEMENT_COMPLIANCE.md)); `make final-destination-converge` compares each published file with its projection.
 
 ## The availability text printed in the manuscript
 

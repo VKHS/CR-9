@@ -302,7 +302,10 @@ def render(evaluation: dict, printed: dict | None = None) -> str:
               "with the printed one; `paper/source_data/compare/` lists each difference.", "",
               "[The final destination](docs/FINAL_DESTINATION.md) projects the repository after publication: the "
               "contents and sizes of every artifact, the pre-registered data roles, the design-determined values "
-              "of the reconstruction and the complete close-out sequence.", ""]
+              "of the reconstruction and the complete close-out sequence. [`destination/`](destination/README.md) "
+              "holds every file that publication writes into the checkout, projected, with the twelve items "
+              "evaluated on them ([at the destination](destination/STATEMENT_COMPLIANCE.md)); "
+              "`make final-destination-converge` compares each published file with its projection.", ""]
     if printed is not None:
         from scripts import printed_statement_check
         lines += printed_statement_check.render_section(printed, None)

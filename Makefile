@@ -113,7 +113,7 @@ endef
 .PHONY: help verify check test test-no-torch test-release \
  tables figures paper paper-offline paper-from-index paper-from-runs fetch-artifacts paper-artifacts-status \
  paper-artifacts-plan paper-artifacts-check statement statement-check statement-fulfilled example-paper example-paper-check \
- printed-statement-check final-destination final-destination-check final-destination-runs availability-fulfilled \
+ printed-statement-check final-destination final-destination-check final-destination-runs final-destination-converge availability-fulfilled \
  paper-outputs paper-outputs-plan paper-outputs-submit paper-outputs-status paper-outputs-collect \
  manifests manifests-check availability availability-check \
  records-index records-check records-tables example-records example-records-check \
@@ -173,7 +173,8 @@ help:
 	  '  bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   publish' \
 	  '  make statement-fulfilled  every item of the registered availability statement fulfilled' \
 	  '  make printed-statement-check  each claim of the availability text printed in the manuscript' \
-	  '  make final-destination    the repository after publication, projected (docs/FINAL_DESTINATION.md)' \
+	  '  make final-destination    the repository after publication, projected (docs/FINAL_DESTINATION.md, destination/)' \
+	  '  make final-destination-converge  every published file against its projection in destination/' \
 	  '  make availability-fulfilled  the registered statement and every printed claim fulfilled' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
@@ -266,7 +267,8 @@ printed-statement-check:
 	"$(PYTHON)" -B scripts/printed_statement_check.py
 
 # The repository after publication, drawn now: design forecast, pre-registered roles, projected release,
-# compliance at publication and the close-out sequence (docs/FINAL_DESTINATION.md).
+# compliance at publication, the close-out sequence (docs/FINAL_DESTINATION.md) and every file publication
+# writes into the checkout, projected (destination/).
 final-destination:
 	"$(PYTHON)" -B scripts/final_destination.py --write
 
@@ -277,6 +279,10 @@ final-destination-check:
 final-destination-runs:
 	@test -n "$(RUNS_ROOT)" || { echo 'Set RUNS_ROOT to a directory of completed runs' >&2; exit 2; }
 	"$(PYTHON)" -B scripts/final_destination.py --runs-root "$(RUNS_ROOT)"
+
+# Every published file of the checkout against its projection in destination/ (exit 1 when an exact value differs).
+final-destination-converge:
+	"$(PYTHON)" -B scripts/final_destination.py --converge
 
 # The final gate: every item of the registered statement fulfilled (after publication).
 statement-fulfilled:
@@ -562,7 +568,8 @@ NUMPY_TESTS := test_paper_registry test_textual_source_references test_entry_qua
  test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
  test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \
- test_s14_builder test_paper_outputs test_internal_baselines test_printed_statement_check test_final_destination
+ test_s14_builder test_paper_outputs test_internal_baselines test_printed_statement_check test_final_destination \
+ test_destination
 
 test-no-torch:
 	"$(PYTHON)" -B -m unittest $(addprefix tests.,$(NUMPY_TESTS)) -v

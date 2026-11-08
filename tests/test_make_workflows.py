@@ -156,6 +156,8 @@ class MakeWorkflowTests(unittest.TestCase):
         self.assertEqual(self.invoke("final-destination-runs", RUNS_ROOT=runs),
                          [["-B", "scripts/final_destination.py", "--runs-root", str(runs)]])
         self.capture.unlink()
+        self.assertEqual(self.invoke("final-destination-converge"), [["-B", "scripts/final_destination.py", "--converge"]])
+        self.capture.unlink()
         self.assertEqual(self.invoke("printed-statement-check"), [["-B", "scripts/printed_statement_check.py"]])
 
     def test_reconstruction_preserves_input_paths_and_explicit_completeness(self):

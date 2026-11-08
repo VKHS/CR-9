@@ -31,6 +31,8 @@ def sha256(path):
 def read_json(path):
     value = json.loads(Path(path).read_text(encoding="utf-8"))
     require(isinstance(value, dict), f"{path}: expected a JSON object")
+    # A projected file of destination/ (scripts/destination.py) is never a publication record.
+    require("projection" not in value, f"{path} is a projection from destination/, not a published file")
     return value
 
 

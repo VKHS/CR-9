@@ -6,7 +6,7 @@ Abdolvahab Khalili Sadaghiani · Linköping University
 
 [![Software checks](https://github.com/VKHS/CR-9/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CR-9/actions/workflows/quality.yml)
 [![Availability statement](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json)](STATEMENT_COMPLIANCE.md)
-[Statement compliance](STATEMENT_COMPLIANCE.md) · [Final destination](docs/FINAL_DESTINATION.md) · [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
+[Statement compliance](STATEMENT_COMPLIANCE.md) · [Final destination](docs/FINAL_DESTINATION.md) · [destination/](destination/README.md) · [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
 
 CROSS-MORSE attaches an external controller to a frozen graph predictor. At
 inference, intermediate representations guide whether and how propagation
@@ -54,9 +54,12 @@ manuscript prints (main text page 15, Methods, Supplementary Information page 30
 [Statement compliance](STATEMENT_COMPLIANCE.md) evaluates claim by claim. The
 [final destination](docs/FINAL_DESTINATION.md) draws the repository as it will stand after
 publication from what the repository already fixes: the printed values that the released code
-determines by design and their agreement with the paper, the pre-registered data roles of the
-independent-graph benchmarks, the projected contents and size of every run archive, and the
-close-out sequence.
+determines by design and their agreement with the paper, the pre-registered data roles, the
+projected contents and size of every run archive, and the close-out sequence.
+[`destination/`](destination/README.md) holds every file that publication writes into the
+checkout, projected at the path it will occupy, with the twelve registered items evaluated on
+them ([12 of 12 at the destination](destination/STATEMENT_COMPLIANCE.md)); after publication,
+`make final-destination-converge` checks every realized file against its projection.
 The [paper-reference guide](docs/PAPER_REFERENCE_VALUES.md) explains how printed
 comparison targets are tied to the author's manuscript files.
 

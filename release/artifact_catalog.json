@@ -239,9 +239,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 43185,
+          "bytes": 43626,
           "path": "Makefile",
-          "sha256": "c0a0b5310aa4287c2c9130033c10124e119fa231f210154da62e485aecdd0040"
+          "sha256": "358670f9737472913abad80b6175eeb31af713c265c63bdb33da4d3ef9788281"
         },
         {
           "bytes": 10386,
@@ -269,14 +269,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 8151,
+          "bytes": 8378,
           "path": "hpc/publish_paper_artifacts_arrhenius.sh",
-          "sha256": "31b48dfdba99504bf81b438f9d9f90a8f6e11aae8c2b7959ac13b98a03bdff9c"
+          "sha256": "125fae95eaa28c1aa897237f3c9075021623ca18b32d16b3a5febd9f7862edd0"
         },
         {
-          "bytes": 89669,
+          "bytes": 89930,
           "path": "scripts/paper_artifacts.py",
-          "sha256": "39b54d0d823de1dba9125fc3daad9016a00d536a1680a7a75a46e5681eeae6a9"
+          "sha256": "f643645e291cc3667cde2b1890a576bf3e90a3dedd1aaf737eb2098657a84b38"
         }
       ],
       "entrypoints": [
@@ -455,14 +455,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 43185,
+          "bytes": 43626,
           "path": "Makefile",
-          "sha256": "c0a0b5310aa4287c2c9130033c10124e119fa231f210154da62e485aecdd0040"
+          "sha256": "358670f9737472913abad80b6175eeb31af713c265c63bdb33da4d3ef9788281"
         },
         {
-          "bytes": 21390,
+          "bytes": 21737,
           "path": "scripts/statement_check.py",
-          "sha256": "24c66a0a4c87c28c14b68ef4748bad5019d439c6892f5b39135ff42740581dd0"
+          "sha256": "c276ca40c28770a15d1e799610b3b52d361f58c9f2e7af7df7b26e2654b57e9e"
         }
       ],
       "entrypoints": [
@@ -603,9 +603,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 43185,
+          "bytes": 43626,
           "path": "Makefile",
-          "sha256": "c0a0b5310aa4287c2c9130033c10124e119fa231f210154da62e485aecdd0040"
+          "sha256": "358670f9737472913abad80b6175eeb31af713c265c63bdb33da4d3ef9788281"
         }
       ],
       "entrypoints": [
@@ -2796,9 +2796,9 @@
               "sha256": "29d4081035d1ce55a562fa5ca283af9faf2890b3c374a22d77fcd2a2aa9e2081"
             },
             {
-              "bytes": 134116,
+              "bytes": 135714,
               "path": "paper/build/displays/run_audits.py",
-              "sha256": "4bd78c66883649caf03778866919a484009ef18f93f4dce977d6fecdb7ece282"
+              "sha256": "13a7e580497bc0bbb561528339609db63f7091c69241290d3b0fb9378f8ab3b8"
             },
             {
               "bytes": 3580,

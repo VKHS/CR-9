@@ -94,13 +94,19 @@ class Forecast(unittest.TestCase):
                 self.assertEqual(row["forecast"], config["exploration"]["trajectories"])
             elif row["quantity"] == "controlled depth L":
                 self.assertEqual(row["forecast"], config["model"]["depth"])
-            expected = ("not printed" if row["printed"] is None else
-                        "agrees" if row["forecast"] == row["printed"] else "differs")
+            if row["quantity"].startswith("|Q|"):
+                # |Q| = |Q_feas| (main Eq. 18) is measured; the registry bounds it from above.
+                expected = ("not printed" if row["printed"] is None else
+                            "within bound" if row["printed"] <= row["forecast"] else "exceeds bound")
+            else:
+                expected = ("not printed" if row["printed"] is None else
+                            "agrees" if row["forecast"] == row["printed"] else "differs")
             self.assertEqual(row["status"], expected, row)
 
-    def test_design_values_other_than_the_candidate_family_agree_with_the_paper(self):
-        disagreements = [r for r in self.rows if r["status"] == "differs" and not r["quantity"].startswith("|Q|")]
-        self.assertEqual(disagreements, [])
+    def test_every_design_value_agrees_with_the_paper_or_lies_within_its_bound(self):
+        conflicts = [r for r in self.rows if r["status"] in ("differs", "exceeds bound")]
+        self.assertEqual(conflicts, [])
+        self.assertEqual(sum(1 for r in self.rows if r["status"] == "within bound"), 7)
 
 
 class Projection(unittest.TestCase):
@@ -182,6 +188,10 @@ class Outputs(unittest.TestCase):
             self.assertTrue(row["registry_agrees"])
             self.assertFalse(row["benchmark"])
             self.assertIsNone(row["printed_Q"])
+            self.assertTrue(row["role_sizes_follow_the_rule"])
+            decision = read(EXAMPLES / row["run"] / "select" / "decision.json")
+            self.assertEqual(row["feasible_family"], sum(1 for f in decision["joint_feasible"] if f is True))
+            self.assertNotIn("configuration_is_registered", row)   # smoke runs are not compared with the paper
 
 
 if __name__ == "__main__":

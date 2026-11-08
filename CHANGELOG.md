@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-11-08 — The destination tree at twelve of twelve, and Table S20 |Q| as the feasible family
+
+- Table S20 reports |Q| as the paper defines it: the size of the feasible family Q_feas of main
+  Eq. (18), over which Supplementary Algorithm S4 runs and whose size its line 10 reports. The
+  generator (`paper/build/displays/run_audits.py::feasible_family_size`) counts the registered
+  configurations that satisfy dynamic support, the resource bounds and the official-metric bound
+  (`select/decision.json` `joint_feasible`), verifies that count against its Algorithm S4 replay, and
+  lists the registered family size beside it in the source data; Figure S17c uses the same count.
+  It previously reported the registry size (`candidate_count`), which bounds |Q| from above and
+  could never equal the printed values. The design forecast now treats |Q| as a measured quantity
+  with the registry as its bound: the printed 180, 180, 144, 216, 240, 240 and 180 lie within the
+  registered 270, 265, 260, 270, 265, 265 and 260; no design-determined printed value conflicts
+  with the released code.
+- `destination/` holds every file that publication writes into the checkout, projected now at the
+  path it will occupy (`scripts/destination.py`, written by `make final-destination`): the release
+  manifest with all 37 required artifacts published, the seven executed split and seed manifests
+  (runtime fingerprint, the configuration identity of every run and Roman split, seeds, role sizes
+  from the registered floors and the providers' official split sizes, the pre-registered graph-role
+  and official-split hashes of the LRGB benchmarks), the observed environments of the registered
+  GH200 site, the E12 study view of the fourteen external comparisons and the source data of a
+  complete reconstruction (90 displays, the 3747 printed values registered now, and the 19 figure
+  contracts still to be registered with the input that closes each). The twelve registered items,
+  evaluated on that tree with the checks of `scripts/statement_check.py`, are all fulfilled
+  (`destination/STATEMENT_COMPLIANCE.md`); `STATEMENT_COMPLIANCE.md` keeps reporting the checkout.
+- Every projected file carries a `projection` block that classifies its values (exact, registered,
+  size, count, minimum, pending). `scripts/paper_artifacts.py` and `scripts/statement_evidence.py`
+  refuse any file carrying it. `make final-destination-converge` compares every realized file of the
+  checkout with its projection and exits non-zero when an exact value differs;
+  `make final-destination-runs` additionally checks completed runs against the registered
+  configurations, the released runtime, the role floors and the printed |Q|.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged by this entry: source fingerprint
+  `d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651`.
+
 ## 2026-11-08 — The printed availability text, the final destination and the commands on published outputs
 
 - The availability text printed in the manuscript is registered and checked claim by claim.
@@ -17,9 +50,8 @@
   `docs/FINAL_DESTINATION.md`, `release/final_destination.json`) draws the repository after
   publication from what it already fixes:
   - a design forecast of the printed values that the released code determines before any
-    measurement: 64 agree with the paper, and the candidate-family size |Q| of Table S20
-    differs on every dataset (the released registry gives 270, 265, 265, 260, 270, 265 and
-    260 candidates per run against the printed 180, 180, 144, 216, 240, 240 and 180);
+    measurement: 64 agree with the paper, and the printed |Q| of Table S20 lies within the
+    registered candidate family of every dataset (next entry);
     `make final-destination-runs RUNS_ROOT=<runs>` checks completed runs against it before
     publication, and the registry formula reproduces both bundled runs route by route;
   - the data roles of PascalVOC-SP, COCO-SP and Peptides-func, pre-registered with the

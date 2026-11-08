@@ -53,7 +53,7 @@ def fold_plan(n, outer_folds, inner_folds, seed):
 
 
 def lifecycle_files(dataset, seed, *, entry=None, support=None, stage_seconds=None, admission_differences=None,
-                    paired_loss=-0.0045, metric_pp=0.07, violating=(4,)):
+                    paired_loss=-0.0045, metric_pp=0.07, violating=(4,), infeasible=()):
     """Every file the run-derived audit displays read, sealed with the runtime statistics."""
     rng = np.random.default_rng(seed)
     candidates = []
@@ -61,7 +61,7 @@ def lifecycle_files(dataset, seed, *, entry=None, support=None, stage_seconds=No
         digest = hashlib.sha256(f"{dataset}-{seed}-{j}".encode()).hexdigest()
         candidates.append({"route": route, "complexity": complexity, "is_open_loop": open_loop, "profile": profile,
                            "ensemble": ensemble, "cost": cost, "hash": digest, "candidate_id": digest[:20],
-                           "behavior_id": digest[:16], "feasible": True, "execution_failure": False,
+                           "behavior_id": digest[:16], "feasible": j not in infeasible, "execution_failure": False,
                            "depth": 6, "qualification_cost": 0.0})
     offsets = np.array([row[5] for row in REGISTRY_FAMILY])
     loss = 1.0 + 0.1 * rng.random(UNITS)[:, None] + offsets[None, :] + rng.normal(0.0, 0.002, (UNITS, len(offsets)))
@@ -201,7 +201,10 @@ class SelectionDisplayTests(unittest.TestCase):
         self.assertEqual(len(rows[0]), 8)
         decision = runs["ogbn-arxiv"].json("select/decision.json")
         arxiv = rows[0]
-        self.assertEqual(arxiv["|Q|"], str(len(REGISTRY_FAMILY)))
+        # |Q| is the feasible family of main Eq. (18) (Algorithm S4, line 10); the registry bounds it.
+        feasible = sum(1 for flag in decision["joint_feasible"] if flag is True)
+        self.assertEqual(arxiv["|Q|"], str(feasible))
+        self.assertLessEqual(feasible, len(REGISTRY_FAMILY))
         self.assertEqual(arxiv["|Qs|"], str(len(decision["Q_s"])))
         self.assertEqual(arxiv["rmax"], f"{decision['max_radius']:.4f}")
         self.assertEqual(arxiv["eps_eq + 2 rmax"], f"{0.002 + 2 * decision['max_radius']:.4f}")
@@ -211,11 +214,37 @@ class SelectionDisplayTests(unittest.TestCase):
         # Fewer columns in the studentized maximum can only shrink the radius.
         data = Path(fixture.out("s20") / "data/S20/selection_radii.csv").read_text().splitlines()
         self.assertEqual(len(data), 1 + 6 + 2)                      # Roman keeps both splits
+        header = data[0].split(",")
+        self.assertEqual(header[2:5], ["Q_size", "registered_candidates", "Q_s_size"])
         for line in data[1:]:
             values = line.split(",")
-            self.assertLessEqual(float(values[7]), float(values[4]) + 1e-12)
+            self.assertEqual(int(values[3]), len(REGISTRY_FAMILY))
+            self.assertLessEqual(int(values[2]), int(values[3]))
+            self.assertLessEqual(float(values[header.index("r_max_12_finalists")]),
+                                 float(values[header.index("r_max")]) + 1e-12)
         self.assertNotIn("no_reference", statuses(compared))
         self.assertEqual(len(compared), 7 * 7)
+
+    def test_s20_q_is_the_feasible_family_of_eq_18_not_the_registry(self):
+        fixture = Fixture(self)
+        runs = fixture.runs(**{"ogbn-arxiv": {"infeasible": (1, 3)}})
+        decision = runs["ogbn-arxiv"].json("select/decision.json")
+        expected = sum(1 for flag in decision["joint_feasible"] if flag is True)
+        self.assertLessEqual(expected, len(REGISTRY_FAMILY) - 2)
+        writer, compared = build_one("supplementary:Table S20", context(runs=runs), fixture.out("s20q"),
+                                     registry=REGISTRY)
+        rows = read_table(fixture.out("s20q"), "S20")
+        self.assertEqual(rows[0]["|Q|"], str(expected))
+        source = data_rows(fixture.out("s20q"), "S20", "selection_radii")
+        arxiv = next(row for row in source if row["dataset"] == "ogbn-arxiv")
+        self.assertEqual((int(arxiv["Q_size"]), int(arxiv["registered_candidates"])), (expected, len(REGISTRY_FAMILY)))
+        # An edited feasibility record no longer matches the replayed Algorithm S4 and is refused.
+        run = fixture.run("ogbn-arxiv", "edited", 21)
+        edited = run.json("select/decision.json")
+        edited["joint_feasible"][0] = not edited["joint_feasible"][0]
+        (run.root / "select/decision.json").write_text(json.dumps(edited))
+        with self.assertRaises(DisplayInputError):
+            run_audits.screened_radius(run)
 
     def test_s20_on_the_bundled_examples_and_a_changed_record_is_refused(self):
         writer, compared = build_one("supplementary:Table S20", context(runs=example_runs()),

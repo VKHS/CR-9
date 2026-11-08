@@ -1,0 +1,167 @@
+{
+ "projection": {
+  "projected": true,
+  "schema": "cross-morse-destination-1",
+  "replaces": "manifests/published/coco_sp.json",
+  "generated_by": "scripts/final_destination.py --write",
+  "about": "The executed split and seed manifest of the reported run: identities, seeds and role sizes from the released runtime and the effective configuration; graph-level role hashes of the LRGB benchmarks from the official file order (section B of docs/FINAL_DESTINATION.md).",
+  "classes": {
+   "exact": [
+    "schema",
+    "dataset",
+    "benchmark_dataset",
+    "data_kind",
+    "is_benchmark_data",
+    "profile",
+    "scientific_run",
+    "identities/source_sha256",
+    "identities/config_sha256",
+    "seeds/partition_seed",
+    "seeds/training_seeds",
+    "seeds/bootstrap_seeds/*",
+    "seeds/split_index",
+    "splits/split_protocol",
+    "splits/comparison_reserved_at",
+    "splits/unit",
+    "splits/rule",
+    "splits/sizes/*",
+    "splits/graph_split_sizes/*",
+    "splits/role_hashes/*",
+    "splits/graph_role_hashes/*",
+    "splits/official_split_hashes/*",
+    "splits/official_split_axis",
+    "splits/independent_graphs",
+    "splits/statistical_unit",
+    "source_data/num_*",
+    "campaign/splits",
+    "campaign/per_split/*/split_index",
+    "campaign/per_split/*/identities/source_sha256",
+    "campaign/per_split/*/identities/config_sha256",
+    "campaign/per_split/*/sizes/*",
+    "environment/precision",
+    "environment/device",
+    "environment/cudnn_deterministic",
+    "environment/tf32_matmul"
+   ],
+   "registered": [
+    "environment/python",
+    "environment/python_implementation",
+    "environment/torch",
+    "environment/cuda_runtime",
+    "environment/gpu",
+    "environment/machine"
+   ],
+   "pending": [
+    "identities/prepared_fingerprint",
+    "identities/unit_sha256",
+    "seeds/ensemble_seeds",
+    "campaign/per_split/*/identities/prepared_fingerprint",
+    "campaign/per_split/*/identities/unit_sha256"
+   ]
+  },
+  "rule": "Every value in this file is a projection of the file that publication writes at `replaces`. Real loaders refuse it. `make final-destination-converge` compares the realized file with it: exact values must be identical, registered values follow the registered site profile, sizes must fall within a factor of 2 and counts within 25%, minimums must be reached, and pending values are supplied by the realized output."
+ },
+ "schema": "cross-morse-run-manifest-1",
+ "dataset": "COCO-SP",
+ "benchmark_dataset": "COCO-SP",
+ "data_kind": "COCO-SP",
+ "is_benchmark_data": true,
+ "profile": "full",
+ "scientific_run": true,
+ "run_name": "coco_sp",
+ "identities": {
+  "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "config_sha256": "314d03d5ee3eb895aa0e3994404a5614be3eb1c3683e975def9b1765245b41d5",
+  "prepared_fingerprint": "pending: prepared-data fingerprint",
+  "unit_sha256": "pending: SHA-256 of prepared/splits.npz"
+ },
+ "seeds": {
+  "partition_seed": 314159,
+  "training_seeds": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "ensemble_seeds": "pending: seeds of the selected ensembles",
+  "bootstrap_seeds": {
+   "selection": 314163,
+   "admission": 314165,
+   "final": 314166
+  },
+  "split_index": null
+ },
+ "splits": {
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "comparison_reserved_at": "prepare",
+  "unit": "graph",
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": "pending: node-row role sizes; follow from the official graph sizes",
+  "graph_split_sizes": {
+   "fit_train": 61174,
+   "fit_val": 6797,
+   "fit": 67971,
+   "explore": 22657,
+   "select": 11329,
+   "confirm": 5664,
+   "compare": 5665,
+   "admit": 5000,
+   "test": 5000
+  },
+  "role_hashes": "pending: node-row role hashes",
+  "graph_role_hashes": {
+   "fit_train": "48d0fc27d1f4b2bd549f3b65bb16a5b7040482840ad05104e66248ecc1714abb",
+   "fit_val": "01fb5daa54804498a855fd25a70467d2c4824e24062ee82ef24003e86dcec61b",
+   "fit": "352c863294490056be8ca4e5f712fefda142813d48348429b931c4593bb3177d",
+   "explore": "0099a0f13ce0dc08f9e4f897484c677cb98b250ef8743443a33243fda112f48d",
+   "select": "62b4aa0a11d798075c6bf94c747320c8abe25144cca9a894c69b4de3f075b291",
+   "confirm": "1e6c8ba87ec47d54a46ef1469a7cddda25764021f0ed4c2a84ea111930d0234c",
+   "compare": "3989cb07b566088eefaced09b310b878b4874d22efbd58ed57bf59dc8b0e9011",
+   "admit": "b011553c7a267196f381b4703bb79f39e6d1c392eca16bfc8dce6a91a45e20a7",
+   "test": "d8879264fec7fb14e01033043221884af842a88ce9e0e6cc3c52a91f782e6cfe"
+  },
+  "official_split_hashes": {
+   "train": "8ba1546e94c1dd6b3c2526039dc210bd93a7d5846b68fd80e2aa286735b2b83e",
+   "valid": "b011553c7a267196f381b4703bb79f39e6d1c392eca16bfc8dce6a91a45e20a7",
+   "test": "d8879264fec7fb14e01033043221884af842a88ce9e0e6cc3c52a91f782e6cfe"
+  },
+  "official_split_axis": "graph",
+  "independent_graphs": true,
+  "statistical_unit": "complete graph",
+  "arrays": "pending: splits.npz, official_splits.npz and clusters.npz with SHA-256 and bytes"
+ },
+ "source_data": {
+  "source": "pending: provider record of the LRGB archive",
+  "source_array_hashes": "pending: provider array hashes",
+  "num_nodes": "pending: total nodes of the official graphs",
+  "num_graphs": 123286,
+  "num_features": 14,
+  "num_outputs": 81
+ },
+ "policy_lock": "pending: comparator, deployed-rule and frozen-model hashes of policy_lock.json",
+ "environment": {
+  "python": "3.13.5",
+  "python_implementation": "CPython",
+  "torch": "2.12.1+cu130",
+  "cuda_runtime": "13.0",
+  "gpu": "NVIDIA GH200",
+  "device": "cuda",
+  "platform": "pending: platform string of the compute node",
+  "machine": "aarch64",
+  "numpy": "pending: NumPy of the run environment",
+  "precision": "bf16",
+  "deterministic_algorithms_enabled": "pending: recorded by the run",
+  "cudnn_deterministic": true,
+  "tf32_matmul": false
+ },
+ "packages": "pending: installed distributions of the run environment",
+ "index_arrays_copied": "pending: membership arrays copied next to this manifest"
+}

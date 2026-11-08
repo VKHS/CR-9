@@ -308,10 +308,17 @@ sizes, statistical units, trajectories, depths, seeds, folds, sensor settings) a
 computed from the configurations and compared with the paper before publication; the
 data roles of the three independent-graph benchmarks are pre-registered with the
 runtime's own role functions; and the contents, tier sizes and release parts of every
-run archive are projected with the release's own counting rules. Projections are
-marked and replaced by the published values; they never enter a comparison.
-Where: `scripts/final_destination.py`, `release/final_destination.json`.
-Check: `make final-destination-check`
+run archive are projected with the release's own counting rules. `destination/` holds
+every file that publication writes into the checkout, projected at its path: the release
+manifest with all 37 artifacts, the seven executed manifests (configuration identities,
+seeds, role sizes, pre-registered role hashes), the observed environments of the
+registered GH200 site, the E12 study view and the source data of a complete
+reconstruction. The twelve registered items evaluated on that tree are all fulfilled. Every
+projected file carries a `projection` block, the real loaders refuse it, and after
+publication `make final-destination-converge` compares each realized file with its
+projection.
+Where: `scripts/final_destination.py`, `scripts/destination.py`, `release/final_destination.json`, `destination/`.
+Check: `make final-destination-check`, `make final-destination-converge`
 
 ## F. Repository hygiene, licence and citation
 

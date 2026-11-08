@@ -1,0 +1,1716 @@
+{
+ "projection": {
+  "projected": true,
+  "schema": "cross-morse-destination-1",
+  "replaces": "paper/source_data/INDEX.json",
+  "generated_by": "scripts/final_destination.py --write",
+  "about": "The source data of every numbered display after `make paper` has rebuilt them from the published artifacts: all 90 displays complete and every compared value equal to the printed one. `values_exact` counts the 3747 printed values registered now; the 19 figure contracts still to be registered add theirs.",
+  "classes": {
+   "exact": [
+    "schema",
+    "reconstruction/displays",
+    "reconstruction/complete",
+    "reconstruction/incomplete",
+    "reconstruction/values_differ",
+    "reconstruction/values_not_comparable",
+    "reconstruction/values_no_reference",
+    "reconstruction/values_missing",
+    "reconstruction/comparison_coverage_complete",
+    "reconstruction/display_content_incomplete",
+    "reconstruction/artifacts_awaiting_publication"
+   ],
+   "minimum": [
+    "reconstruction/values_exact"
+   ]
+  },
+  "rule": "Every value in this file is a projection of the file that publication writes at `replaces`. Real loaders refuse it. `make final-destination-converge` compares the realized file with it: exact values must be identical, registered values follow the registered site profile, sizes must fall within a factor of 2 and counts within 25%, minimums must be reached, and pending values are supplied by the realized output."
+ },
+ "schema": "cross-morse-source-data-1",
+ "label": "paper-artifacts",
+ "reconstruction": {
+  "displays": 90,
+  "complete": 90,
+  "incomplete": [],
+  "values_exact": 3747,
+  "values_differ": 0,
+  "values_not_comparable": 0,
+  "values_no_reference": 0,
+  "values_missing": 0,
+  "comparison_coverage_complete": true,
+  "display_content_incomplete": [],
+  "generator_errors": {},
+  "module_errors": {},
+  "artifacts_awaiting_publication": []
+ },
+ "reports": "pending: reconstruction, workspace inventory and status reports with SHA-256",
+ "files": "pending: the CSV and JSON source files of every display",
+ "displays": [
+  {
+   "id": "main:Figure 1",
+   "kind": "figure",
+   "pages": [
+    2
+   ],
+   "generator": "protocol_tables",
+   "scope": "illustration",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "main:Figure 2",
+   "kind": "figure",
+   "pages": [
+    9
+   ],
+   "generator": "main_paper",
+   "scope": "measurement",
+   "needs": [
+    "campaign:confirmation",
+    "records:ensemble_grid",
+    "records:input_gate",
+    "records:tube_audit",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "scenario clarification; original plotted data",
+    "closes": "the reference-ESS scenario and candidate/stage population; raw P coordinates where S14 prints a bound"
+   }
+  },
+  {
+   "id": "main:Figure 3",
+   "kind": "figure",
+   "pages": [
+    10
+   ],
+   "generator": "main_paper",
+   "scope": "measurement",
+   "needs": [
+    "campaign:confirmation",
+    "records:decision_traces",
+    "records:mechanism_contrasts",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data",
+    "closes": "mechanism-contrast families, within-depth action entropies and action-origin fractions of the original records"
+   }
+  },
+  {
+   "id": "main:Figure 4",
+   "kind": "figure",
+   "pages": [
+    11
+   ],
+   "generator": "main_paper",
+   "scope": "measurement",
+   "needs": [
+    "records:baselines",
+    "records:factorials",
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data; reference work",
+    "closes": "panel 4b feedback risk and work by ensemble size from the original selection arrays; other panels from S16, S15, S23 and S41"
+   }
+  },
+  {
+   "id": "main:Figure 5",
+   "kind": "figure",
+   "pages": [
+    12
+   ],
+   "generator": "main_paper",
+   "scope": "measurement",
+   "needs": [
+    "records:baselines",
+    "records:input_gate",
+    "records:nominal_time",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "all four panels from S15, Tables 1-2, S23/S23b/S41 and Definition 2"
+   }
+  },
+  {
+   "id": "main:Figure 6",
+   "kind": "figure",
+   "pages": [
+    13
+   ],
+   "generator": "main_paper",
+   "scope": "measurement",
+   "needs": [
+    "campaign:budget",
+    "records:budget_matched",
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "scenario clarification",
+    "closes": "the declared settings of the decoding-cost scenario of S47"
+   }
+  },
+  {
+   "id": "main:Table 1",
+   "kind": "table",
+   "pages": [
+    10
+   ],
+   "generator": "main_paper",
+   "scope": "measurement",
+   "needs": [
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 100,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "main:Table 2",
+   "kind": "table",
+   "pages": [
+    11
+   ],
+   "generator": "main_paper",
+   "scope": "measurement",
+   "needs": [
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 96,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Figure S1",
+   "kind": "figure",
+   "pages": [
+    31
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 135,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Figure S2",
+   "kind": "figure",
+   "pages": [
+    31
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:runtime_scaling"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data",
+    "closes": "per-instance processed edges, wall time and peak memory of runtime_scaling"
+   }
+  },
+  {
+   "id": "supplementary:Figure S3",
+   "kind": "figure",
+   "pages": [
+    31,
+    32
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "campaign:budget",
+    "records:budget_matched",
+    "records:ensemble_grid",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data",
+    "closes": "the complete comparator-grid losses of the ensemble grid"
+   }
+  },
+  {
+   "id": "supplementary:Figure S4",
+   "kind": "figure",
+   "pages": [
+    32
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:baselines",
+    "records:input_gate",
+    "run:PascalVOC-SP",
+    "run:Roman-empire",
+    "run:ogbn-arxiv"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data; scope clarification",
+    "closes": "scores and provenance of GRAMA/arxiv, AMP/Roman and AMP/Pascal outside the fourteen E12 pairs"
+   }
+  },
+  {
+   "id": "supplementary:Figure S5",
+   "kind": "figure",
+   "pages": [
+    32
+   ],
+   "generator": "experiments",
+   "scope": "measurement",
+   "needs": [
+    "records:horizon_beam_sweep"
+   ],
+   "registered_targets": 57,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Figure S6",
+   "kind": "figure",
+   "pages": [
+    32
+   ],
+   "generator": "analytical",
+   "scope": "measurement",
+   "needs": [
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "curve families, 25%/50% scenarios, markers and the T=8 boundary"
+   }
+  },
+  {
+   "id": "supplementary:Figure S7",
+   "kind": "figure",
+   "pages": [
+    32
+   ],
+   "generator": "analytical",
+   "scope": "measurement",
+   "needs": [
+    "records:action_gap_audit"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "conditional-region illustration and fitted log-gap density parameters"
+   }
+  },
+  {
+   "id": "supplementary:Figure S8",
+   "kind": "figure",
+   "pages": [
+    32
+   ],
+   "generator": "analytical",
+   "scope": "measurement",
+   "needs": [
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func"
+   ],
+   "registered_targets": 12,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Figure S9",
+   "kind": "figure",
+   "pages": [
+    33
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "campaign:confirmation",
+    "records:confirmation_sensitivity"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "the original/rescaled interval family of S14/S14b, margins and printed P inequalities"
+   }
+  },
+  {
+   "id": "supplementary:Figure S10",
+   "kind": "figure",
+   "pages": [
+    33
+   ],
+   "generator": "analytical",
+   "scope": "measurement",
+   "needs": [
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 52,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Figure S11",
+   "kind": "figure",
+   "pages": [
+    33
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 13,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Figure S12",
+   "kind": "figure",
+   "pages": [
+    34
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "records:budget_matched",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "six power curves, central margins and seed-design assumptions of S42 and Note S24"
+   }
+  },
+  {
+   "id": "supplementary:Figure S13",
+   "kind": "figure",
+   "pages": [
+    34
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "panel c effects and intervals of Table 1; structural panels a-b"
+   }
+  },
+  {
+   "id": "supplementary:Figure S14",
+   "kind": "figure",
+   "pages": [
+    34
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "records:depth_diagnostics",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data",
+    "closes": "depth curves, effects by depth, quartiles and phase allocations of depth_diagnostics"
+   }
+  },
+  {
+   "id": "supplementary:Figure S15",
+   "kind": "figure",
+   "pages": [
+    35
+   ],
+   "generator": "analytical",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "action curves, sensitivity matrix, reach quantities and headroom bars of S4/S6/S6b"
+   }
+  },
+  {
+   "id": "supplementary:Figure S16",
+   "kind": "figure",
+   "pages": [
+    35
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:negative_controls",
+    "records:reliability_diagnostics"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data",
+    "closes": "horizon coverage, NIS coverage and false-safe/harm-miss rates of the reliability records"
+   }
+  },
+  {
+   "id": "supplementary:Figure S17",
+   "kind": "figure",
+   "pages": [
+    36
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "records:action_gap_audit",
+    "records:factorials",
+    "records:input_gate",
+    "records:tube_audit",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "original plotted data; scenario clarification",
+    "closes": "the held-out critic-RMSE band endpoints"
+   }
+  },
+  {
+   "id": "supplementary:Figure S18",
+   "kind": "figure",
+   "pages": [
+    37
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:band_bound_tightness",
+    "records:confirmation_sensitivity",
+    "records:inserted_site"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "scenario clarification; original analytical grid",
+    "closes": "the nominal baseline and density-scale grid of panel c"
+   }
+  },
+  {
+   "id": "supplementary:Figure S19",
+   "kind": "figure",
+   "pages": [
+    37
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 138,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Figure S20",
+   "kind": "figure",
+   "pages": [
+    38
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "records:budget_matched",
+    "records:ensemble_grid",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "to register",
+    "work": "reference work",
+    "closes": "break-even families, action-bound functions, variance ratios and power curves"
+   }
+  },
+  {
+   "id": "supplementary:Table S1",
+   "kind": "table",
+   "pages": [
+    1,
+    2
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 44,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S2",
+   "kind": "table",
+   "pages": [
+    2
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 41,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S3",
+   "kind": "table",
+   "pages": [
+    2
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 10,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S4",
+   "kind": "table",
+   "pages": [
+    2
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 49,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S5",
+   "kind": "table",
+   "pages": [
+    3
+   ],
+   "generator": "protocol_tables",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S5b",
+   "kind": "table",
+   "pages": [
+    3,
+    4
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 27,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S5c",
+   "kind": "table",
+   "pages": [
+    4
+   ],
+   "generator": "experiments",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S5d",
+   "kind": "table",
+   "pages": [
+    3
+   ],
+   "generator": "protocol_tables",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 3,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S6",
+   "kind": "table",
+   "pages": [
+    4
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 80,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S6b",
+   "kind": "table",
+   "pages": [
+    5
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 56,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S6c",
+   "kind": "table",
+   "pages": [
+    5
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:sensor_parameters",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 54,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S7",
+   "kind": "table",
+   "pages": [
+    5
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 42,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S8",
+   "kind": "table",
+   "pages": [
+    5,
+    6
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 30,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S9",
+   "kind": "table",
+   "pages": [
+    6
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 30,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S10",
+   "kind": "table",
+   "pages": [
+    6
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 9,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S11",
+   "kind": "table",
+   "pages": [
+    8
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 8,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S12",
+   "kind": "table",
+   "pages": [
+    8,
+    9
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 434,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S12b",
+   "kind": "table",
+   "pages": [
+    9
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 30,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S12c",
+   "kind": "table",
+   "pages": [
+    9
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 7,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S13",
+   "kind": "table",
+   "pages": [
+    10
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func"
+   ],
+   "registered_targets": 45,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S14",
+   "kind": "table",
+   "pages": [
+    10
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "campaign:confirmation"
+   ],
+   "registered_targets": 72,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S14b",
+   "kind": "table",
+   "pages": [
+    10,
+    11
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "records:confirmation_contrasts",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func"
+   ],
+   "registered_targets": 81,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S15",
+   "kind": "table",
+   "pages": [
+    11,
+    12
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:baselines",
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 344,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S15b",
+   "kind": "table",
+   "pages": [
+    12
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:baselines",
+    "runs"
+   ],
+   "registered_targets": 108,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S16",
+   "kind": "table",
+   "pages": [
+    12
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:factorials"
+   ],
+   "registered_targets": 61,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S16b",
+   "kind": "table",
+   "pages": [
+    12,
+    13
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:factorials"
+   ],
+   "registered_targets": 52,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S17",
+   "kind": "table",
+   "pages": [
+    13
+   ],
+   "generator": "experiments",
+   "scope": "measurement",
+   "needs": [
+    "records:module_ablations"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S18",
+   "kind": "table",
+   "pages": [
+    13
+   ],
+   "generator": "experiments",
+   "scope": "measurement",
+   "needs": [
+    "records:sensitivity_grids"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S19",
+   "kind": "table",
+   "pages": [
+    13
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:negative_controls"
+   ],
+   "registered_targets": 24,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S20",
+   "kind": "table",
+   "pages": [
+    15
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 42,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S21",
+   "kind": "table",
+   "pages": [
+    15,
+    16
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "records:action_gap_audit"
+   ],
+   "registered_targets": 42,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S22",
+   "kind": "table",
+   "pages": [
+    16
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "records:tube_audit"
+   ],
+   "registered_targets": 50,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S23",
+   "kind": "table",
+   "pages": [
+    16
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:baselines",
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 77,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S23b",
+   "kind": "table",
+   "pages": [
+    16
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:baselines",
+    "records:input_gate",
+    "records:nominal_time",
+    "records:timing_anchors",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 66,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S24",
+   "kind": "table",
+   "pages": [
+    16,
+    17
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 21,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S25",
+   "kind": "table",
+   "pages": [
+    17
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:cross_backbone",
+    "run:PascalVOC-SP",
+    "run:Roman-empire",
+    "run:ogbn-arxiv"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S26",
+   "kind": "table",
+   "pages": [
+    17,
+    18
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:ensemble_grid",
+    "records:ensemble_grid_scores",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S26b",
+   "kind": "table",
+   "pages": [
+    18
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:ensemble_grid",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 72,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S27",
+   "kind": "table",
+   "pages": [
+    18
+   ],
+   "generator": "experiments",
+   "scope": "measurement",
+   "needs": [
+    "records:buffer_sensitivity"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S28",
+   "kind": "table",
+   "pages": [
+    18,
+    19
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "runs"
+   ],
+   "registered_targets": 38,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S28b",
+   "kind": "table",
+   "pages": [
+    19
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 72,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S29",
+   "kind": "table",
+   "pages": [
+    19
+   ],
+   "generator": "experiments",
+   "scope": "measurement",
+   "needs": [
+    "records:horizon_beam_sweep"
+   ],
+   "registered_targets": 36,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S30",
+   "kind": "table",
+   "pages": [
+    19
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "records:oracle_dispersion",
+    "runs"
+   ],
+   "registered_targets": 55,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S31",
+   "kind": "table",
+   "pages": [
+    29,
+    30
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 34,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S32",
+   "kind": "table",
+   "pages": [
+    21
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 1,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S33",
+   "kind": "table",
+   "pages": [
+    21
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "records:action_gap_audit",
+    "records:budget_matched",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S34",
+   "kind": "table",
+   "pages": [
+    21
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "records:action_gap_audit",
+    "records:budget_matched",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 54,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S35",
+   "kind": "table",
+   "pages": [
+    21,
+    22
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 29,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S36",
+   "kind": "table",
+   "pages": [
+    22,
+    23
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 10,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S37",
+   "kind": "table",
+   "pages": [
+    23
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func"
+   ],
+   "registered_targets": 9,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S38",
+   "kind": "table",
+   "pages": [
+    23,
+    24
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 12,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S39",
+   "kind": "table",
+   "pages": [
+    24
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 14,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S40",
+   "kind": "table",
+   "pages": [
+    24
+   ],
+   "generator": "protocol_tables",
+   "scope": "protocol",
+   "needs": [
+    "static"
+   ],
+   "registered_targets": 21,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S41",
+   "kind": "table",
+   "pages": [
+    24,
+    25
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "campaign:budget",
+    "runs"
+   ],
+   "registered_targets": 56,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S42",
+   "kind": "table",
+   "pages": [
+    25
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "records:budget_matched",
+    "records:ensemble_grid",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 78,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S43",
+   "kind": "table",
+   "pages": [
+    25,
+    26
+   ],
+   "generator": "experiments",
+   "scope": "measurement",
+   "needs": [
+    "records:band_bound_tightness",
+    "records:baselines",
+    "records:budget_matched",
+    "records:confirmation_sensitivity",
+    "records:ensemble_grid",
+    "records:factorials",
+    "records:input_gate",
+    "records:inserted_site",
+    "records:nominal_time",
+    "records:oracle_dispersion",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  },
+  {
+   "id": "supplementary:Table S44",
+   "kind": "table",
+   "pages": [
+    26
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 84,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S45",
+   "kind": "table",
+   "pages": [
+    26
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "records:inserted_site"
+   ],
+   "registered_targets": 27,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S46",
+   "kind": "table",
+   "pages": [
+    26
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "campaign:budget",
+    "records:budget_matched",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 96,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S46b",
+   "kind": "table",
+   "pages": [
+    27
+   ],
+   "generator": "records_campaigns",
+   "scope": "measurement",
+   "needs": [
+    "campaign:budget",
+    "records:budget_matched"
+   ],
+   "registered_targets": 187,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S47",
+   "kind": "table",
+   "pages": [
+    27
+   ],
+   "generator": "analytical",
+   "scope": "analytical",
+   "needs": [
+    "records:action_gap_audit",
+    "records:budget_matched",
+    "records:input_gate",
+    "run:COCO-SP",
+    "run:PascalVOC-SP",
+    "run:Peptides-func",
+    "run:Roman-empire",
+    "run:ogbn-arxiv",
+    "run:ogbn-proteins"
+   ],
+   "registered_targets": 120,
+   "contract": {
+    "now": "registered"
+   }
+  },
+  {
+   "id": "supplementary:Table S48",
+   "kind": "table",
+   "pages": [
+    31
+   ],
+   "generator": "run_audits",
+   "scope": "measurement",
+   "needs": [
+    "records:input_gate",
+    "runs"
+   ],
+   "registered_targets": 0,
+   "contract": {
+    "now": "illustration"
+   }
+  }
+ ]
+}

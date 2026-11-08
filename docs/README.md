@@ -13,7 +13,8 @@
 | [Producing the measured outputs](PRODUCTION.md) | One command on the cluster: every runner of `release/experiment_code.json` as one Slurm job graph from the seven completed runs, ending with the map that publication reads |
 | [Publishing the measured outputs](PUBLICATION.md) | Local original-folder preflight, followed by verified publication of runs, record sets, campaigns and environments in `paper-artifacts` |
 | [Statement compliance](../STATEMENT_COMPLIANCE.md) | Each item of the registered availability statement and each claim of the availability text printed in the manuscript (main page 15, Methods, SI page 30): where the repository fulfils it, and what awaits publication |
-| [The final destination](FINAL_DESTINATION.md) | The repository after publication, drawn now: printed values the released code fixes by design and their agreement with the paper, pre-registered data roles of the independent-graph benchmarks, the projected release (contents, tiers, parts, Zenodo feasibility), compliance at publication and the close-out sequence |
+| [The final destination](FINAL_DESTINATION.md) | The repository after publication, drawn now: printed values the released code fixes by design and their agreement with the paper, pre-registered data roles, the projected release (contents, tiers, parts, Zenodo feasibility), compliance at the destination and the close-out sequence |
+| [destination/](../destination/README.md) | Every file publication writes into the checkout, projected at the path it will occupy (release manifest, executed manifests, observed environments, E12 study view, source data), the twelve registered items evaluated on them and the convergence check `make final-destination-converge` |
 
 ## Regenerate the results on a cluster
 

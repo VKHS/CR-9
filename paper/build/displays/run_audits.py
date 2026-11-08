@@ -200,6 +200,21 @@ def selection_inputs(view):
     return data, candidates, decision, config, metric_evaluator
 
 
+def feasible_family_size(decision: dict) -> int:
+    """|Q| of Table S20: the size of the feasible family Q_feas of main Eq. (18).
+
+    Algorithm S4 runs over Q_feas and reports its size as |Q| (line 10): the registered (route, E, profile)
+    configurations that satisfy dynamic support and the componentwise resource bounds (``feasible`` of
+    select/candidates.json) and the official-metric bound L_met(q) >= -eps_met (``metric_feasible``).
+    select/decision.json records both conditions together as ``joint_feasible``; the registry size
+    ``candidate_count`` is the upper bound of |Q|, not |Q| itself.
+    """
+    flags = decision.get("joint_feasible")
+    if not isinstance(flags, list) or len(flags) != decision.get("candidate_count"):
+        raise DisplayInputError("select/decision.json records no joint feasibility for every registered candidate")
+    return sum(1 for flag in flags if flag is True)
+
+
 def screened_radius(view, size: int = FINALISTS) -> dict:
     """Simultaneous radius when the max-t maximum runs over ``size`` finalists only.
 
@@ -245,6 +260,9 @@ def screened_radius(view, size: int = FINALISTS) -> dict:
     # The loop must be the sealed one: the full-family radius has to come back unchanged.
     if not math.isclose(replay["max_radius"], decision["max_radius"], rel_tol=1e-9, abs_tol=1e-12):
         raise DisplayInputError(f"{view.dataset}: Algorithm S4 replay does not reproduce select/decision.json")
+    # Only the loss maximum is restricted, so the feasible family Q_feas (|Q| of Table S20) is replayed exactly.
+    if replay.get("joint_feasible") != decision.get("joint_feasible"):
+        raise DisplayInputError(f"{view.dataset}: the feasible family of select/decision.json differs from its replay")
     return {"finalists": finalists, "radius": captured["radius"], "critical": captured["critical"]}
 
 
@@ -930,7 +948,7 @@ def table_s20(ctx, out):
         r_max = max(d["max_radius"] for d in decisions)
         r12 = max(s["radius"] for s in screened)
         eps_eq = decisions[0]["epsilon_eq"]
-        q_sizes = [d["candidate_count"] for d in decisions]
+        q_sizes = [feasible_family_size(d) for d in decisions]
         qs_sizes = [len(d["Q_s"]) for d in decisions]
         resamples = [d["bootstrap_replicates"] for d in decisions]
         reference = max(decisions, key=lambda d: (len(d["Q_s"]), d["max_radius"]))
@@ -938,9 +956,9 @@ def table_s20(ctx, out):
         rows.append([SHORT[dataset], common(q_sizes), common(qs_sizes), num(r_max, 4), num(eps_eq + 2 * r_max, 4),
                      num(eps_eq + 2 * r12, 4), common(resamples), reading])
         for index, (d, s) in enumerate(zip(decisions, screened)):
-            source.append([dataset, index if view.is_campaign else "", d["candidate_count"], len(d["Q_s"]),
-                           d["max_radius"], d["epsilon_eq"], d["epsilon_eq"] + 2 * d["max_radius"], s["radius"],
-                           d["epsilon_eq"] + 2 * s["radius"], s["critical"], d["bootstrap_replicates"],
+            source.append([dataset, index if view.is_campaign else "", feasible_family_size(d), d["candidate_count"],
+                           len(d["Q_s"]), d["max_radius"], d["epsilon_eq"], d["epsilon_eq"] + 2 * d["max_radius"],
+                           s["radius"], d["epsilon_eq"] + 2 * s["radius"], s["critical"], d["bootstrap_replicates"],
                            d["bootstrap_seed"], " ".join(str(j) for j in s["finalists"])])
         single = lambda values: values[0] if len(set(values)) == 1 else None
         for key, value in (("Q_size", single(q_sizes)), ("Q_s_size", single(qs_sizes)), ("r_max", r_max),
@@ -951,12 +969,15 @@ def table_s20(ctx, out):
                                   "select/metric_observations.npz", "config.json"])
     out.table(["Dataset", "|Q|", "|Qs|", "rmax", "eps_eq + 2 rmax", "slack with 12 finalists", "resamples",
                "interpretation"], rows,
-              notes=["Twelve finalists: the feasible candidates with the smallest simultaneous upper bounds U; the "
+              notes=["|Q|: the feasible family Q_feas of main Eq. (18) (support, resource and official-metric "
+                     "bounds; select/decision.json joint_feasible), over which Algorithm S4 runs; the registered "
+                     "candidate family is its upper bound and is listed in the source data.",
+                     "Twelve finalists: the feasible candidates with the smallest simultaneous upper bounds U; the "
                      "slack replays Algorithm S4 (cross_morse.statistics.nested_selection with the stage's arrays, "
                      "folds, weights and seed) with the max-t maximum over those finalists.",
                      "Roman-empire: the largest radius over the ten splits; |Q| and |Qs| as a range when splits "
                      "differ."])
-    out.data("selection_radii", ["dataset", "split", "Q_size", "Q_s_size", "r_max", "epsilon_eq",
+    out.data("selection_radii", ["dataset", "split", "Q_size", "registered_candidates", "Q_s_size", "r_max", "epsilon_eq",
                                  "eps_eq_plus_2r_max", "r_max_12_finalists", "slack_12_finalists",
                                  "max_t_critical_12_finalists", "resamples", "bootstrap_seed", "finalist_indices"],
              source)
@@ -1748,7 +1769,7 @@ def figure_s17(ctx, out):
         selected = mean(0.0 if rec.provisional == rec.qc else rec.decision["mean"][rec.provisional] for rec in recs)
         slack.append([dataset, eps_eq + 2 * r_max, abs(selected), eps_r,
                       common([len(rec.decision["Q_s"]) for rec in recs]),
-                      common([rec.decision["candidate_count"] for rec in recs])])
+                      common([feasible_family_size(rec.decision) for rec in recs])])
         out.compare(S20_GROUP, (dataset, "eps_eq_plus_2r_max"), eps_eq + 2 * r_max)
     for y, row in enumerate(slack):
         ax.plot([0, row[1]], [y, y], color="0.85", lw=6, solid_capstyle="butt")

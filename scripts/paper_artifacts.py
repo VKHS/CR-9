@@ -96,7 +96,11 @@ def read_json(path: Path):
         return value
     def reject(value):
         raise ArtifactError(f"Nonfinite JSON in {path}: {value}")
-    return json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=pairs, parse_constant=reject)
+    value = json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=pairs, parse_constant=reject)
+    # A projected file of destination/ (scripts/destination.py) is never a publication record.
+    require(not (isinstance(value, dict) and "projection" in value),
+            f"{path} is a projection from destination/, not a published file")
+    return value
 
 
 def write_json(path: Path, value) -> None:

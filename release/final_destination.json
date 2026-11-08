@@ -1,6 +1,6 @@
 {
  "schema": "cross-morse-final-destination-1",
- "about": "Projected end state of the repository after its measured outputs are published. Projected values carry projected=true; they are replaced by realized values from release/paper_artifacts.json and never enter a comparison with the paper.",
+ "about": "Projected end state of the repository after its measured outputs are published. Projected values carry projected=true; they are replaced by realized values from release/paper_artifacts.json and never enter a comparison with the paper. destination/ holds every file publication writes into the checkout, projected (scripts/destination.py).",
  "inputs": {
   "configs": "configs/<stem>_full.json",
   "constants": "paper/registered_constants.json",
@@ -11,13 +11,14 @@
  "forecast": [
   {
    "display": "Table S20",
-   "quantity": "|Q| candidate family size",
+   "quantity": "|Q| feasible family (registry bound)",
    "dataset": "ogbn-arxiv",
    "forecast": 270,
    "printed": 180,
-   "status": "differs",
-   "derivation": "make_registry: 54 route configurations (nominal 1, best depth 8, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes; selection/decision.json candidate_count = len(candidates) (cross_morse/statistics.py)",
-   "unit": ""
+   "status": "within bound",
+   "derivation": "|Q| = |Q_feas| of main Eq. (18), the family Algorithm S4 runs over and reports (line 10): measured at the select stage (select/decision.json joint_feasible). It is bounded by the registered family of make_registry: 54 route configurations (nominal 1, best depth 8, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes",
+   "unit": "",
+   "kind": "bound"
   },
   {
    "display": "Table S20",
@@ -27,7 +28,8 @@
    "printed": 10000,
    "status": "agrees",
    "derivation": "configs: selection.bootstrap_reps",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S7",
@@ -37,7 +39,8 @@
    "printed": 12800,
    "status": "agrees",
    "derivation": "configs: exploration.trajectories",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S5",
@@ -47,7 +50,8 @@
    "printed": 256,
    "status": "agrees",
    "derivation": "configs: model.depth",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -57,7 +61,8 @@
    "printed": 12,
    "status": "agrees",
    "derivation": "configs: training.seeds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -67,7 +72,8 @@
    "printed": "5/4",
    "status": "agrees",
    "derivation": "configs: selection.outer_folds, selection.inner_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -77,7 +83,8 @@
    "printed": 5,
    "status": "agrees",
    "derivation": "configs: controller.crossfit_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S6c",
@@ -87,7 +94,8 @@
    "printed": "0/1",
    "status": "agrees",
    "derivation": "configs: sensor.sketch_dim, sensor.sensing_period",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S1",
@@ -97,17 +105,19 @@
    "printed": 32,
    "status": "agrees",
    "derivation": "configs: data.num_clusters (buffered cores)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S20",
-   "quantity": "|Q| candidate family size",
+   "quantity": "|Q| feasible family (registry bound)",
    "dataset": "ogbn-proteins",
    "forecast": 265,
    "printed": 180,
-   "status": "differs",
-   "derivation": "make_registry: 53 route configurations (nominal 1, best depth 7, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes; selection/decision.json candidate_count = len(candidates) (cross_morse/statistics.py)",
-   "unit": ""
+   "status": "within bound",
+   "derivation": "|Q| = |Q_feas| of main Eq. (18), the family Algorithm S4 runs over and reports (line 10): measured at the select stage (select/decision.json joint_feasible). It is bounded by the registered family of make_registry: 53 route configurations (nominal 1, best depth 7, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes",
+   "unit": "",
+   "kind": "bound"
   },
   {
    "display": "Table S20",
@@ -117,7 +127,8 @@
    "printed": 10000,
    "status": "agrees",
    "derivation": "configs: selection.bootstrap_reps",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S7",
@@ -127,7 +138,8 @@
    "printed": 14400,
    "status": "agrees",
    "derivation": "configs: exploration.trajectories",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S5",
@@ -137,7 +149,8 @@
    "printed": 128,
    "status": "agrees",
    "derivation": "configs: model.depth",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -147,7 +160,8 @@
    "printed": 12,
    "status": "agrees",
    "derivation": "configs: training.seeds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -157,7 +171,8 @@
    "printed": "5/4",
    "status": "agrees",
    "derivation": "configs: selection.outer_folds, selection.inner_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -167,7 +182,8 @@
    "printed": 5,
    "status": "agrees",
    "derivation": "configs: controller.crossfit_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S6c",
@@ -177,7 +193,8 @@
    "printed": "32/4",
    "status": "agrees",
    "derivation": "configs: sensor.sketch_dim, sensor.sensing_period",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S1",
@@ -187,17 +204,19 @@
    "printed": 32,
    "status": "agrees",
    "derivation": "configs: data.num_clusters (buffered cores)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S20",
-   "quantity": "|Q| candidate family size",
+   "quantity": "|Q| feasible family (registry bound)",
    "dataset": "ogbn-products",
    "forecast": 260,
    "printed": 144,
-   "status": "differs",
-   "derivation": "make_registry: 52 route configurations (nominal 1, best depth 6, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes; selection/decision.json candidate_count = len(candidates) (cross_morse/statistics.py)",
-   "unit": ""
+   "status": "within bound",
+   "derivation": "|Q| = |Q_feas| of main Eq. (18), the family Algorithm S4 runs over and reports (line 10): measured at the select stage (select/decision.json joint_feasible). It is bounded by the registered family of make_registry: 52 route configurations (nominal 1, best depth 6, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes",
+   "unit": "",
+   "kind": "bound"
   },
   {
    "display": "Table S20",
@@ -207,7 +226,8 @@
    "printed": 10000,
    "status": "agrees",
    "derivation": "configs: selection.bootstrap_reps",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S7",
@@ -217,7 +237,8 @@
    "printed": 19200,
    "status": "agrees",
    "derivation": "configs: exploration.trajectories",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S5",
@@ -227,7 +248,8 @@
    "printed": 64,
    "status": "agrees",
    "derivation": "configs: model.depth",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -237,7 +259,8 @@
    "printed": 12,
    "status": "agrees",
    "derivation": "configs: training.seeds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -247,7 +270,8 @@
    "printed": "5/4",
    "status": "agrees",
    "derivation": "configs: selection.outer_folds, selection.inner_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -257,7 +281,8 @@
    "printed": 5,
    "status": "agrees",
    "derivation": "configs: controller.crossfit_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S6c",
@@ -267,7 +292,8 @@
    "printed": null,
    "status": "not printed",
    "derivation": "configs: sensor.sketch_dim, sensor.sensing_period",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S1",
@@ -277,17 +303,19 @@
    "printed": 64,
    "status": "agrees",
    "derivation": "configs: data.num_clusters (buffered cores)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S20",
-   "quantity": "|Q| candidate family size",
+   "quantity": "|Q| feasible family (registry bound)",
    "dataset": "Roman-empire",
    "forecast": 270,
    "printed": 216,
-   "status": "differs",
-   "derivation": "make_registry: 54 route configurations (nominal 1, best depth 8, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes; selection/decision.json candidate_count = len(candidates) (cross_morse/statistics.py)",
-   "unit": ""
+   "status": "within bound",
+   "derivation": "|Q| = |Q_feas| of main Eq. (18), the family Algorithm S4 runs over and reports (line 10): measured at the select stage (select/decision.json joint_feasible). It is bounded by the registered family of make_registry: 54 route configurations (nominal 1, best depth 8, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes",
+   "unit": "",
+   "kind": "bound"
   },
   {
    "display": "Table S20",
@@ -297,7 +325,8 @@
    "printed": 10000,
    "status": "agrees",
    "derivation": "configs: selection.bootstrap_reps",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S7",
@@ -307,7 +336,8 @@
    "printed": 9600,
    "status": "agrees",
    "derivation": "configs: exploration.trajectories",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S5",
@@ -317,7 +347,8 @@
    "printed": 256,
    "status": "agrees",
    "derivation": "configs: model.depth",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -327,7 +358,8 @@
    "printed": 12,
    "status": "agrees",
    "derivation": "configs: training.seeds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -337,7 +369,8 @@
    "printed": "5/4",
    "status": "agrees",
    "derivation": "configs: selection.outer_folds, selection.inner_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -347,7 +380,8 @@
    "printed": 5,
    "status": "agrees",
    "derivation": "configs: controller.crossfit_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S6c",
@@ -357,7 +391,8 @@
    "printed": "0/1",
    "status": "agrees",
    "derivation": "configs: sensor.sketch_dim, sensor.sensing_period",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S1",
@@ -367,17 +402,19 @@
    "printed": 10,
    "status": "agrees",
    "derivation": "ten official splits (configs: data.split_index 0-9, one lifecycle each)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S20",
-   "quantity": "|Q| candidate family size",
+   "quantity": "|Q| feasible family (registry bound)",
    "dataset": "PascalVOC-SP",
    "forecast": 265,
    "printed": 240,
-   "status": "differs",
-   "derivation": "make_registry: 53 route configurations (nominal 1, best depth 7, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes; selection/decision.json candidate_count = len(candidates) (cross_morse/statistics.py)",
-   "unit": ""
+   "status": "within bound",
+   "derivation": "|Q| = |Q_feas| of main Eq. (18), the family Algorithm S4 runs over and reports (line 10): measured at the select stage (select/decision.json joint_feasible). It is bounded by the registered family of make_registry: 53 route configurations (nominal 1, best depth 7, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes",
+   "unit": "",
+   "kind": "bound"
   },
   {
    "display": "Table S20",
@@ -387,7 +424,8 @@
    "printed": 10000,
    "status": "agrees",
    "derivation": "configs: selection.bootstrap_reps",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S7",
@@ -397,7 +435,8 @@
    "printed": 20480,
    "status": "agrees",
    "derivation": "configs: exploration.trajectories",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S5",
@@ -407,7 +446,8 @@
    "printed": 128,
    "status": "agrees",
    "derivation": "configs: model.depth",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -417,7 +457,8 @@
    "printed": 12,
    "status": "agrees",
    "derivation": "configs: training.seeds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -427,7 +468,8 @@
    "printed": "5/4",
    "status": "agrees",
    "derivation": "configs: selection.outer_folds, selection.inner_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -437,7 +479,8 @@
    "printed": 5,
    "status": "agrees",
    "derivation": "configs: controller.crossfit_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S6c",
@@ -447,7 +490,8 @@
    "printed": "64/2",
    "status": "agrees",
    "derivation": "configs: sensor.sketch_dim, sensor.sensing_period",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2 / Note S26",
@@ -457,7 +501,8 @@
    "printed": 425,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2 / Table S39",
@@ -467,7 +512,8 @@
    "printed": 425,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S13",
@@ -477,7 +523,8 @@
    "printed": 1428,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S37",
@@ -487,17 +534,19 @@
    "printed": 1429,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S20",
-   "quantity": "|Q| candidate family size",
+   "quantity": "|Q| feasible family (registry bound)",
    "dataset": "COCO-SP",
    "forecast": 265,
    "printed": 240,
-   "status": "differs",
-   "derivation": "make_registry: 53 route configurations (nominal 1, best depth 7, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes; selection/decision.json candidate_count = len(candidates) (cross_morse/statistics.py)",
-   "unit": ""
+   "status": "within bound",
+   "derivation": "|Q| = |Q_feas| of main Eq. (18), the family Algorithm S4 runs over and reports (line 10): measured at the select stage (select/decision.json joint_feasible). It is bounded by the registered family of make_registry: 53 route configurations (nominal 1, best depth 7, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes",
+   "unit": "",
+   "kind": "bound"
   },
   {
    "display": "Table S20",
@@ -507,7 +556,8 @@
    "printed": 10000,
    "status": "agrees",
    "derivation": "configs: selection.bootstrap_reps",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S7",
@@ -517,7 +567,8 @@
    "printed": 32000,
    "status": "agrees",
    "derivation": "configs: exploration.trajectories",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S5",
@@ -527,7 +578,8 @@
    "printed": 128,
    "status": "agrees",
    "derivation": "configs: model.depth",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -537,7 +589,8 @@
    "printed": 12,
    "status": "agrees",
    "derivation": "configs: training.seeds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -547,7 +600,8 @@
    "printed": "5/4",
    "status": "agrees",
    "derivation": "configs: selection.outer_folds, selection.inner_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -557,7 +611,8 @@
    "printed": 5,
    "status": "agrees",
    "derivation": "configs: controller.crossfit_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S6c",
@@ -567,7 +622,8 @@
    "printed": "0/1",
    "status": "agrees",
    "derivation": "configs: sensor.sketch_dim, sensor.sensing_period",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2 / Note S26",
@@ -577,7 +633,8 @@
    "printed": 5664,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2 / Table S39",
@@ -587,7 +644,8 @@
    "printed": 5665,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S13",
@@ -597,7 +655,8 @@
    "printed": 5000,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S37",
@@ -607,17 +666,19 @@
    "printed": 5000,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S20",
-   "quantity": "|Q| candidate family size",
+   "quantity": "|Q| feasible family (registry bound)",
    "dataset": "Peptides-func",
    "forecast": 260,
    "printed": 180,
-   "status": "differs",
-   "derivation": "make_registry: 52 route configurations (nominal 1, best depth 6, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes; selection/decision.json candidate_count = len(candidates) (cross_morse/statistics.py)",
-   "unit": ""
+   "status": "within bound",
+   "derivation": "|Q| = |Q_feas| of main Eq. (18), the family Algorithm S4 runs over and reports (line 10): measured at the select stage (select/decision.json joint_feasible). It is bounded by the registered family of make_registry: 52 route configurations (nominal 1, best depth 6, learned stop 1, phase 12, fixed sequence 4, MPC-OL 10, one-step 2, radius 6, MPC-RH 10) x 5 ensemble sizes",
+   "unit": "",
+   "kind": "bound"
   },
   {
    "display": "Table S20",
@@ -627,7 +688,8 @@
    "printed": 10000,
    "status": "agrees",
    "derivation": "configs: selection.bootstrap_reps",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S7",
@@ -637,7 +699,8 @@
    "printed": 24000,
    "status": "agrees",
    "derivation": "configs: exploration.trajectories",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S5",
@@ -647,7 +710,8 @@
    "printed": 64,
    "status": "agrees",
    "derivation": "configs: model.depth",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -657,7 +721,8 @@
    "printed": 12,
    "status": "agrees",
    "derivation": "configs: training.seeds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -667,7 +732,8 @@
    "printed": "5/4",
    "status": "agrees",
    "derivation": "configs: selection.outer_folds, selection.inner_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2",
@@ -677,7 +743,8 @@
    "printed": 5,
    "status": "agrees",
    "derivation": "configs: controller.crossfit_folds",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S6c",
@@ -687,7 +754,8 @@
    "printed": "0/1",
    "status": "agrees",
    "derivation": "configs: sensor.sketch_dim, sensor.sensing_period",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2 / Note S26",
@@ -697,7 +765,8 @@
    "printed": 544,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S2 / Table S39",
@@ -707,7 +776,8 @@
    "printed": 544,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S13",
@@ -717,7 +787,8 @@
    "printed": 2331,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   },
   {
    "display": "Table S37",
@@ -727,12 +798,15 @@
    "printed": 2331,
    "status": "agrees",
    "derivation": "runtime _make_roles on the official split (floors at 0.60/0.80/0.90/0.95)",
-   "unit": ""
+   "unit": "",
+   "kind": "value"
   }
  ],
  "forecast_counts": {
   "agrees": 64,
-  "differs": 7,
+  "within bound": 7,
+  "differs": 0,
+  "exceeds bound": 0,
   "not printed": 1
  },
  "preregistered_roles": {
@@ -760,6 +834,11 @@
     "confirm": "4af89040bbfb4e82cf2226e9e25ae4fd382ea4bcb42d3ce010586d15a0d74d3c",
     "compare": "d87ecbe2b17abc0e869145ae4922aafec4db520e8569d0f9766cc876afbaf26e",
     "admit": "86799e42333807ac7b0aa2bb36c280a63a9fe88ede590a5fbe70b95b450a3a2c",
+    "test": "3b8c9e62b8437f55e6b221919033b217e4fda97b79a3704d69c38b56555c1f4b"
+   },
+   "official_split_hashes": {
+    "train": "cb619d7f45b7cb5b86c3f0117175b62ce17ee9ed86d7d3b303e4a22b9b4f2eb7",
+    "valid": "86799e42333807ac7b0aa2bb36c280a63a9fe88ede590a5fbe70b95b450a3a2c",
     "test": "3b8c9e62b8437f55e6b221919033b217e4fda97b79a3704d69c38b56555c1f4b"
    },
    "role_hashes": null,
@@ -791,6 +870,11 @@
     "admit": "b011553c7a267196f381b4703bb79f39e6d1c392eca16bfc8dce6a91a45e20a7",
     "test": "d8879264fec7fb14e01033043221884af842a88ce9e0e6cc3c52a91f782e6cfe"
    },
+   "official_split_hashes": {
+    "train": "8ba1546e94c1dd6b3c2526039dc210bd93a7d5846b68fd80e2aa286735b2b83e",
+    "valid": "b011553c7a267196f381b4703bb79f39e6d1c392eca16bfc8dce6a91a45e20a7",
+    "test": "d8879264fec7fb14e01033043221884af842a88ce9e0e6cc3c52a91f782e6cfe"
+   },
    "role_hashes": null,
    "role_hash_scope": "node-level labels: row-role hashes need the official graph sizes (prepared graph_ptr) and are compared after publication"
   },
@@ -820,6 +904,11 @@
     "admit": "b79ec814006b8c3ba782312a62b2ca4df9f41a2ac4f1d18d47a189053a1f7afe",
     "test": "c32c29425c46bb9f8f859c2cb777193afd63b43f921e6a7187c103201bd4ba43"
    },
+   "official_split_hashes": {
+    "train": "cc731862dc7a30745283615ad20bed73ab102d320a8aa196dd8362b815cbac7e",
+    "valid": "b79ec814006b8c3ba782312a62b2ca4df9f41a2ac4f1d18d47a189053a1f7afe",
+    "test": "c32c29425c46bb9f8f859c2cb777193afd63b43f921e6a7187c103201bd4ba43"
+   },
    "role_hashes": {
     "fit_train": "a3e068d8db7c814b4a9383f68e31bf5ad30cdc549f57e608c4a4de56f6786448",
     "fit_val": "664eb1c8cf47309cab014cb096b6daa7c96464d61d05621f8657d88f2ae17629",
@@ -832,6 +921,80 @@
     "test": "c32c29425c46bb9f8f859c2cb777193afd63b43f921e6a7187c103201bd4ba43"
    },
    "role_hash_scope": "graph-level labels: the row roles are the graph roles"
+  }
+ },
+ "node_roles": {
+  "ogbn-arxiv": {
+   "official_sizes": {
+    "train": 90941,
+    "valid": 29799,
+    "test": 48603
+   },
+   "sizes": {
+    "fit_train": 49108,
+    "fit_val": 5456,
+    "fit": 54564,
+    "explore": 18188,
+    "select": 9094,
+    "confirm": 4547,
+    "compare": 4548,
+    "admit": 29799,
+    "test": 48603
+   }
+  },
+  "ogbn-proteins": {
+   "official_sizes": {
+    "train": 86619,
+    "valid": 21236,
+    "test": 24679
+   },
+   "sizes": {
+    "fit_train": 46774,
+    "fit_val": 5197,
+    "fit": 51971,
+    "explore": 17324,
+    "select": 8662,
+    "confirm": 4331,
+    "compare": 4331,
+    "admit": 21236,
+    "test": 24679
+   }
+  },
+  "ogbn-products": {
+   "official_sizes": {
+    "train": 196615,
+    "valid": 39323,
+    "test": 2213091
+   },
+   "sizes": {
+    "fit_train": 106173,
+    "fit_val": 11796,
+    "fit": 117969,
+    "explore": 39323,
+    "select": 19661,
+    "confirm": 9831,
+    "compare": 9831,
+    "admit": 39323,
+    "test": 2213091
+   }
+  },
+  "Roman-empire": {
+   "official_sizes": {
+    "train": 11331,
+    "valid": 5665,
+    "test": 5666
+   },
+   "sizes": {
+    "fit_train": 6119,
+    "fit_val": 679,
+    "fit": 6798,
+    "explore": 2266,
+    "select": 1133,
+    "confirm": 567,
+    "compare": 567,
+    "admit": 5665,
+    "test": 5666
+   }
   }
  },
  "runs": [
@@ -1450,6 +1613,19 @@
    "status": "awaiting_measured_outputs"
   }
  ],
+ "zenodo_limits": {
+  "default_record_bytes": 50000000000,
+  "largest_record_bytes": 200000000000,
+  "files_per_record": 100,
+  "sources": [
+   "https://help.zenodo.org/docs/deposit/manage-quota/",
+   "https://support.zenodo.org/help/en-gb/1-upload-deposit/80-what-are-the-size-limitations-of-zenodo"
+  ]
+ },
+ "release_limits": {
+  "part_bytes": 1992294400,
+  "asset_limit": "2 GiB per asset; no total release size limit"
+ },
  "compliance": {
   "registered": [
    {
@@ -1457,84 +1633,96 @@
     "phrase": "complete experiment code",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "E12 adapter code of the fourteen external comparisons at their pinned commits (experiments/baselines/, from records:baselines)",
+    "problems": []
    },
    {
     "id": "configurations",
     "phrase": "configurations",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "E12 study plans: 48 HPO configurations and 12 optimization seeds per comparison",
+    "problems": []
    },
    {
     "id": "source_data",
     "phrase": "source data",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "paper/source_data/ written from the published outputs",
+    "problems": []
    },
    {
     "id": "split_seed_manifests",
     "phrase": "split and seed manifests",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "manifests/published/: executed memberships of the seven runs (Roman-empire: ten splits)",
+    "problems": []
    },
    {
     "id": "environment",
     "phrase": "environment specification",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "environment/observed/ of the seven runs and the release asset environment:gpu",
+    "problems": []
    },
    {
     "id": "checkpoints",
     "phrase": "checkpoints",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "checkpoints in the complete tier of every run",
+    "problems": []
    },
    {
     "id": "predictions",
     "phrase": "predictions",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "prediction arrays in the complete tier of every run",
+    "problems": []
    },
    {
     "id": "trajectories",
     "phrase": "propensity-logged trajectories",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "propensity-logged trajectories of every run",
+    "problems": []
    },
    {
     "id": "statistical_outputs",
     "phrase": "statistical outputs",
     "now": "awaiting_measured_outputs",
     "projected": "fulfilled",
-    "note": "published with the release paper-artifacts"
+    "note": "every run, measurement-record set and campaign published",
+    "problems": []
    },
    {
     "id": "generators",
     "phrase": "figure/table generators",
     "now": "fulfilled",
     "projected": "fulfilled",
-    "note": "fulfilled now"
+    "note": "fulfilled now",
+    "problems": []
    },
    {
     "id": "one_command",
     "phrase": "one-command reconstruction of every reported table and figure",
     "now": "awaiting_measured_outputs",
-    "projected": "Blocked by section A",
-    "note": "`make paper` succeeds only when every compared value agrees; the design forecast already differs from the printed value in 7 cells (section A)"
+    "projected": "fulfilled",
+    "note": "`make paper`: every display rebuilt and every compared value agrees",
+    "problems": []
    },
    {
     "id": "guidance",
     "phrase": "follows established reproducibility guidance",
     "now": "fulfilled",
     "projected": "fulfilled",
-    "note": "fulfilled now"
+    "note": "fulfilled now",
+    "problems": []
    }
   ],
   "printed": [
@@ -1725,14 +1913,14 @@
     "text": "are deposited at the Zenodo DOIs listed in the repository’s runs/index.json",
     "now": "awaiting_measured_outputs",
     "projected": "Route-dependent",
-    "note": "fulfilled only if the run archives are also deposited on Zenodo and registered (section E, route Z)"
+    "note": "route R: fulfilled with the aligned wording; route Z: fulfilled once the run archives are deposited and registered (section E)"
    },
    {
     "id": "M28",
     "text": "the measurement records of the experiments outside the eight-stage run (per-seed scores and timing traces of the retrained baselines with their scheduler accounting, the E3–E6 campaign with its paired observations, and the factorial, negative-control, ensemble-grid, attribution and cross-backbone records) are deposited at the Zenodo DOIs listed in the repository’s runs/index.json and records/index.json",
     "now": "missing",
-    "projected": "missing",
-    "note": "needs record-set deposit DOIs or aligned wording (section E)"
+    "projected": "Route-dependent",
+    "note": "route R: fulfilled with the aligned wording; route Z: needs record-set deposit registration (section E)"
    },
    {
     "id": "M29",
@@ -1781,14 +1969,14 @@
     "text": "The run archive of every dataset [...] are deposited at the DOIs listed in the repository’s runs/index.json",
     "now": "awaiting_measured_outputs",
     "projected": "Route-dependent",
-    "note": "fulfilled only if the run archives are also deposited on Zenodo and registered (section E, route Z)"
+    "note": "route R: fulfilled with the aligned wording; route Z: fulfilled once the run archives are deposited and registered (section E)"
    },
    {
     "id": "S04",
     "text": "the measurement records of the experiments outside the eight-stage run are deposited at the DOIs listed in the repository’s runs/index.json and records/index.json",
     "now": "missing",
-    "projected": "missing",
-    "note": "needs record-set deposit DOIs or aligned wording (section E)"
+    "projected": "Route-dependent",
+    "note": "route R: fulfilled with the aligned wording; route Z: needs record-set deposit registration (section E)"
    },
    {
     "id": "S05",
@@ -1823,19 +2011,67 @@
     "awaiting_measured_outputs": 8,
     "missing": 2
    }
+  },
+  "destination": {
+   "registered": 12,
+   "of": 12
   }
  },
- "zenodo_limits": {
-  "default_record_bytes": 50000000000,
-  "largest_record_bytes": 200000000000,
-  "files_per_record": 100,
-  "sources": [
-   "https://help.zenodo.org/docs/deposit/manage-quota/",
-   "https://support.zenodo.org/help/en-gb/1-upload-deposit/80-what-are-the-size-limitations-of-zenodo"
-  ]
+ "displays": {
+  "tables": 64,
+  "table_targets": 3340,
+  "quantitative_figures": 25,
+  "figures_with_contracts": 6,
+  "figure_targets": 407,
+  "figures_to_register": {
+   "main:Figure 2": "scenario clarification; original plotted data",
+   "main:Figure 3": "original plotted data",
+   "main:Figure 4": "original plotted data; reference work",
+   "main:Figure 5": "reference work",
+   "main:Figure 6": "scenario clarification",
+   "supplementary:Figure S2": "original plotted data",
+   "supplementary:Figure S3": "original plotted data",
+   "supplementary:Figure S4": "original plotted data; scope clarification",
+   "supplementary:Figure S6": "reference work",
+   "supplementary:Figure S7": "reference work",
+   "supplementary:Figure S9": "reference work",
+   "supplementary:Figure S12": "reference work",
+   "supplementary:Figure S13": "reference work",
+   "supplementary:Figure S14": "original plotted data",
+   "supplementary:Figure S15": "reference work",
+   "supplementary:Figure S16": "original plotted data",
+   "supplementary:Figure S17": "original plotted data; scenario clarification",
+   "supplementary:Figure S18": "scenario clarification; original analytical grid",
+   "supplementary:Figure S20": "reference work"
+  }
  },
- "release_limits": {
-  "part_bytes": 1992294400,
-  "asset_limit": "2 GiB per asset; no total release size limit"
+ "destination": {
+  "tree": "destination/",
+  "files": [
+   "README.md",
+   "STATEMENT_COMPLIANCE.md",
+   "environment/observed/arxiv.json",
+   "environment/observed/coco_sp.json",
+   "environment/observed/pascalvoc_sp.json",
+   "environment/observed/peptides_func.json",
+   "environment/observed/products.json",
+   "environment/observed/proteins.json",
+   "environment/observed/roman_empire.json",
+   "experiments/baselines/INDEX.json",
+   "manifests/published/arxiv.json",
+   "manifests/published/coco_sp.json",
+   "manifests/published/pascalvoc_sp.json",
+   "manifests/published/peptides_func.json",
+   "manifests/published/products.json",
+   "manifests/published/proteins.json",
+   "manifests/published/roman_empire.json",
+   "paper/source_data/INDEX.json",
+   "release/paper_artifacts.json"
+  ],
+  "fingerprint": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "statement": {
+   "fulfilled": 12,
+   "of": 12
+  }
  }
 }
