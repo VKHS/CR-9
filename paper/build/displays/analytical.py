@@ -1316,6 +1316,11 @@ def figure_s12(ctx, out):
 # Supplementary Figure S15: spectral fingerprint, executed range and headroom
 # ---------------------------------------------------------------------------
 
+G_FS15 = "supplementary_figure_S15_spectral_fingerprint_and_headroom"
+# Panel a is checked at the edges of the uniform six-band partition of [0, 2] that panel b names.
+FS15_ANCHORS = ("lambda_0", "lambda_1_3", "lambda_2_3", "lambda_1", "lambda_4_3", "lambda_5_3", "lambda_2")
+
+
 @display("supplementary:Figure S15", stem="FigS15", title="Spectral fingerprint, action range and headroom",
          scope="measurement", needs=("runs",))
 def figure_s15(ctx, out):
@@ -1326,7 +1331,38 @@ def figure_s15(ctx, out):
     lam = np.linspace(0.0, 2.0, 401)
     responses = {a.id: spectral.action_response(a, lam) for a in transport}
     edges = spectral.band_edges(6)
+    anchors = [edges[0][0]] + [hi for _, hi in edges]
     sensitivity = np.array([spectral.band_sensitivity(a, nominal) for a in transport[1:]])
+
+    def zero_crossings(action):
+        """lambda in [0, 2] where g_a vanishes: real roots x = 1 - lambda in [-1, 1] of sum_t c_t x^t."""
+        roots = np.polynomial.polynomial.polyroots(operators.operator_polynomial(action))
+        real = sorted(1.0 - float(r.real) for r in roots if abs(r.imag) <= 1e-9 and -1.0 <= r.real <= 1.0)
+        return real
+
+    note = "Exact registry function evaluated at a source-named anchor, not a renderer sample."
+    out.compare(G_FS15, ("panel_a", "series"), [f"A{a.id}" for a in transport])
+    out.compare(G_FS15, ("panel_a", "nominal_series"), f"A{nominal.id}")
+    out.compare(G_FS15, ("panel_a", "truncation_order"), order)
+    out.compare(G_FS15, ("panel_a", "lambda_domain"), [float(lam[0]), float(lam[-1])])
+    out.compare(G_FS15, ("panel_a", "anchor_lambdas"), anchors)
+    zero_line = 0.0
+    out.compare(G_FS15, ("panel_a", "zero_line"), zero_line)
+    crossings = {}
+    for a in transport:
+        values = spectral.action_response(a, np.asarray(anchors, dtype=float))
+        for key, value in zip(FS15_ANCHORS, values):
+            out.compare(G_FS15, ("panel_a", "curves", f"A{a.id}", "response", key), float(value), note=note)
+        found = zero_crossings(a)
+        crossings[a.id] = found
+        out.compare(G_FS15, ("panel_a", "curves", f"A{a.id}", "zero_crossing_lambda"),
+                    None if not found else (found[0] if len(found) == 1 else found), note=note)
+    out.compare(G_FS15, ("panel_b", "reference_action"), f"A{nominal.id}")
+    out.compare(G_FS15, ("panel_b", "band_edges"), anchors)
+    out.compare(G_FS15, ("panel_b", "rows"), [f"A{a.id}" for a in transport[1:]])
+    for i, a in enumerate(transport[1:]):
+        out.compare(G_FS15, ("panel_b", "sensitivity", f"A{a.id}"), [float(v) for v in sensitivity[i]],
+                    note="Conservative bandwise bound of cm_theory.spectral; the figure prints two decimals.")
     headroom = []
     for dataset in DATASETS:
         dep = deployment(ctx, dataset)
@@ -1338,14 +1374,20 @@ def figure_s15(ctx, out):
                          " ".join(f"{m['run']}:{m['headroom_upper']!r}" for m in dep["members"])])
         out.compare(G_S4, (dataset, "U_Delta_oracle"), upper)
         out.compare(G_T1, (dataset, "loss_effect_nats"), dep["effect"])
+        for field, computed in (("headroom_bound_mnats", bound), ("realized_effect_mnats", 1e3 * abs(dep["effect"])),
+                                ("unrealized_lower_bound_mnats", bound - 1e3 * abs(dep["effect"]))):
+            out.compare(G_FS15, ("panel_d", "datasets", dataset, field), computed,
+                        note="The headroom denominator is the oracle's upper confidence limit U(Delta_oracle), "
+                             "not its point estimate; the realized part is the deployed rule's paired test effect.")
         out.uses("run", dataset, ["select/entry_complete.json", "final/results_summary.json"])
+    out.compare(G_FS15, ("panel_d", "dataset_order"), [row[0] for row in headroom])
     plt = pyplot()
     fig, axes = plt.subplots(2, 2, figsize=(12, 8.4))
     ax = axes[0, 0]
     for a in transport:
         ax.plot(lam, responses[a.id], color=ACTION_COLORS[a.id], lw=2.4 if a.id == 0 else 1.4,
                 label="A0 (nominal)" if a.id == 0 else f"A{a.id}")
-    ax.axhline(0, color="#555555", lw=0.7)
+    ax.axhline(zero_line, color="#555555", lw=0.7)
     ax.set_xlim(0, 2)
     ax.set_xlabel("graph frequency λ of L_sym")
     ax.set_ylabel("response g_a(λ)")
@@ -1365,6 +1407,12 @@ def figure_s15(ctx, out):
     ranges = [operators.executed_range(a) for a in transport]
     reach = [operators.maximum_reach(a) for a in transport]
     identity = [operators.identity_coefficient(a) for a in transport]
+    out.compare(G_FS15, ("panel_c", "nominal_level"), ranges[0])
+    out.compare(G_FS15, ("panel_c", "nominal_level_label"), float(f"{ranges[0]:.2f}"))
+    for a, h, t, c in zip(transport, ranges, reach, identity):
+        for field, computed in (("executed_range", h), ("executed_range_label", float(f"{h:.2f}")),
+                                ("identity_coefficient", c), ("identity_label", float(f"{c:.2f}")), ("max_reach", t)):
+            out.compare(G_FS15, ("panel_c", "actions", f"A{a.id}", field), computed)
     xs = np.arange(len(transport))
     ax.bar(xs, ranges, 0.6, color=[ACTION_COLORS[a.id] for a in transport])
     for x, h, c in zip(xs, ranges, identity):
@@ -1396,6 +1444,10 @@ def figure_s15(ctx, out):
     out.figure(fig)
     out.data("panel_a_response", ["lambda"] + [f"A{a.id}" for a in transport],
              [[float(x)] + [float(responses[a.id][i]) for a in transport] for i, x in enumerate(lam)])
+    out.data("panel_a_anchor_response", ["action", "anchor", "lambda", "response", "zero_crossing_lambda"],
+             [[f"A{a.id}", key, float(x), float(v), " ".join(repr(r) for r in crossings[a.id])]
+              for a in transport for key, x, v in zip(FS15_ANCHORS, anchors,
+                                                      spectral.action_response(a, np.asarray(anchors, dtype=float)))])
     out.data("panel_b_band_sensitivity", ["action", "band", "lambda_low", "lambda_high", "sensitivity_upper_bound"],
              [[f"A{a.id}", b, edges[b][0], edges[b][1], float(sensitivity[i, b])]
               for i, a in enumerate(transport[1:]) for b in range(len(edges))])
@@ -1403,6 +1455,11 @@ def figure_s15(ctx, out):
              [[f"A{a.id}", h, t, c] for a, h, t, c in zip(transport, ranges, reach, identity)])
     out.data("panel_d_headroom", ["dataset", "U_Delta_oracle_nats", "headroom_bound_mnats", "deployed_effect_nats",
                                   "unrealized_lower_bound_mnats", "per_run_U_Delta_oracle"], headroom)
+    out.provenance(source_document="supplementary", source_pages=[35], reference_contract=G_FS15,
+                   panel_a="registry responses compared at the six-band partition edges and at their zero crossings; "
+                           "the 401-point curve grid is renderer sampling",
+                   panel_d="headroom bound |U(Delta_oracle)| is the oracle's upper confidence limit (Table S4); the "
+                           "unrealized lower bound subtracts the deployed rule's paired test effect (Table 1)")
 
 
 # ---------------------------------------------------------------------------

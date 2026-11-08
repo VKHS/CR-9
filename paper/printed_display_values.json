@@ -3589,6 +3589,2371 @@
           "residual_label_percent": 10
         }
       }
+    },
+    "supplementary_figure_S15_spectral_fingerprint_and_headroom": {
+      "display_id": "supplementary:Figure S15",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          35
+        ]
+      },
+      "values": {
+        "panel_a": {
+          "series": [
+            "A0",
+            "A1",
+            "A2",
+            "A3",
+            "A4",
+            "A5",
+            "A6",
+            "A7"
+          ],
+          "nominal_series": "A0",
+          "truncation_order": 8,
+          "lambda_domain": [
+            {
+              "$value": 0.0,
+              "$decimals": 6
+            },
+            {
+              "$value": 2.0,
+              "$decimals": 6
+            }
+          ],
+          "anchor_lambdas": [
+            {
+              "$value": 0.0,
+              "$decimals": 6
+            },
+            {
+              "$value": 0.333333333,
+              "$decimals": 6
+            },
+            {
+              "$value": 0.666666667,
+              "$decimals": 6
+            },
+            {
+              "$value": 1.0,
+              "$decimals": 6
+            },
+            {
+              "$value": 1.333333333,
+              "$decimals": 6
+            },
+            {
+              "$value": 1.666666667,
+              "$decimals": 6
+            },
+            {
+              "$value": 2.0,
+              "$decimals": 6
+            }
+          ],
+          "zero_line": 0,
+          "curves": {
+            "A0": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.766666667,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.533333333,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.3,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": 0.066666667,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": -0.166666667,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": -0.4,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": {
+                "$value": 1.428571429,
+                "$decimals": 6
+              }
+            },
+            "A1": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.816666667,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.633333333,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.45,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": 0.266666667,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": 0.083333333,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": -0.1,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": {
+                "$value": 1.818181818,
+                "$decimals": 6
+              }
+            },
+            "A2": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.716666667,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.433333333,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.15,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": -0.133333333,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": -0.416666667,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": -0.7,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": {
+                "$value": 1.176470588,
+                "$decimals": 6
+              }
+            },
+            "A3": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.781585129,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.580341786,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.387841797,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": 0.200341804,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": 0.015970131,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": -0.166210937,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": {
+                "$value": 1.695740692,
+                "$decimals": 6
+              }
+            },
+            "A4": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.799956762,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.619047514,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.447880859,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": 0.28228563,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": 0.120176241,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": -0.039492187,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": {
+                "$value": 1.91711569,
+                "$decimals": 6
+              }
+            },
+            "A5": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.744538172,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.548791393,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.370185723,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": 0.19801051,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": 0.029005992,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": -0.135349197,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": {
+                "$value": 1.724432162,
+                "$decimals": 6
+              }
+            },
+            "A6": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.777871505,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.61545806,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.470185723,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": 0.331343844,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": 0.195672659,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": 0.064650803,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": null
+            },
+            "A7": {
+              "response": {
+                "lambda_0": {
+                  "$value": 1.0,
+                  "$decimals": 6
+                },
+                "lambda_1_3": {
+                  "$value": 0.834564601,
+                  "$decimals": 6
+                },
+                "lambda_2_3": {
+                  "$value": 0.698442901,
+                  "$decimals": 6
+                },
+                "lambda_1": {
+                  "$value": 0.56902017,
+                  "$decimals": 6
+                },
+                "lambda_4_3": {
+                  "$value": 0.441673415,
+                  "$decimals": 6
+                },
+                "lambda_5_3": {
+                  "$value": 0.315294646,
+                  "$decimals": 6
+                },
+                "lambda_2": {
+                  "$value": 0.191687678,
+                  "$decimals": 6
+                }
+              },
+              "zero_crossing_lambda": null
+            }
+          }
+        },
+        "panel_b": {
+          "reference_action": "A0",
+          "band_edges": [
+            {
+              "$value": 0.0,
+              "$decimals": 6
+            },
+            {
+              "$value": 0.333333333,
+              "$decimals": 6
+            },
+            {
+              "$value": 0.666666667,
+              "$decimals": 6
+            },
+            {
+              "$value": 1.0,
+              "$decimals": 6
+            },
+            {
+              "$value": 1.333333333,
+              "$decimals": 6
+            },
+            {
+              "$value": 1.666666667,
+              "$decimals": 6
+            },
+            {
+              "$value": 2.0,
+              "$decimals": 6
+            }
+          ],
+          "rows": [
+            "A1",
+            "A2",
+            "A3",
+            "A4",
+            "A5",
+            "A6",
+            "A7"
+          ],
+          "sensitivity": {
+            "A1": [
+              {
+                "$value": 0.05,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.1,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.15,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.2,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.25,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.3,
+                "$decimals": 2
+              }
+            ],
+            "A2": [
+              {
+                "$value": 0.05,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.1,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.15,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.2,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.25,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.3,
+                "$decimals": 2
+              }
+            ],
+            "A3": [
+              {
+                "$value": 0.01,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.05,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.09,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.13,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.18,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.23,
+                "$decimals": 2
+              }
+            ],
+            "A4": [
+              {
+                "$value": 0.03,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.09,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.15,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.22,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.29,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.36,
+                "$decimals": 2
+              }
+            ],
+            "A5": [
+              {
+                "$value": 0.03,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.02,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.07,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.13,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.2,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.26,
+                "$decimals": 2
+              }
+            ],
+            "A6": [
+              {
+                "$value": 0.01,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.08,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.17,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.26,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.36,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.46,
+                "$decimals": 2
+              }
+            ],
+            "A7": [
+              {
+                "$value": 0.07,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.17,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.27,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.38,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.48,
+                "$decimals": 2
+              },
+              {
+                "$value": 0.59,
+                "$decimals": 2
+              }
+            ]
+          }
+        },
+        "panel_c": {
+          "nominal_level": {
+            "$value": 0.7,
+            "$decimals": 6
+          },
+          "nominal_level_label": {
+            "$value": 0.7,
+            "$decimals": 2
+          },
+          "actions": {
+            "A0": {
+              "executed_range": {
+                "$value": 0.7,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.7,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.3,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.3,
+                "$decimals": 2
+              },
+              "max_reach": 1
+            },
+            "A1": {
+              "executed_range": {
+                "$value": 0.55,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.55,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.45,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.45,
+                "$decimals": 2
+              },
+              "max_reach": 1
+            },
+            "A2": {
+              "executed_range": {
+                "$value": 0.85,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.85,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.15,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.15,
+                "$decimals": 2
+              },
+              "max_reach": 1
+            },
+            "A3": {
+              "executed_range": {
+                "$value": 0.696582031,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.7,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.387841797,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.39,
+                "$decimals": 2
+              },
+              "max_reach": 8
+            },
+            "A4": {
+              "executed_range": {
+                "$value": 0.646191406,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.65,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.447880859,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.45,
+                "$decimals": 2
+              },
+              "max_reach": 8
+            },
+            "A5": {
+              "executed_range": {
+                "$value": 0.963585603,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.96,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.370185723,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.37,
+                "$decimals": 2
+              },
+              "max_reach": 8
+            },
+            "A6": {
+              "executed_range": {
+                "$value": 0.863585603,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.86,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.470185723,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.47,
+                "$decimals": 2
+              },
+              "max_reach": 8
+            },
+            "A7": {
+              "executed_range": {
+                "$value": 0.602586507,
+                "$decimals": 6
+              },
+              "executed_range_label": {
+                "$value": 0.6,
+                "$decimals": 2
+              },
+              "identity_coefficient": {
+                "$value": 0.56902017,
+                "$decimals": 6
+              },
+              "identity_label": {
+                "$value": 0.57,
+                "$decimals": 2
+              },
+              "max_reach": 8
+            }
+          }
+        },
+        "panel_d": {
+          "dataset_order": [
+            "ogbn-arxiv",
+            "ogbn-proteins",
+            "ogbn-products",
+            "Roman-empire",
+            "PascalVOC-SP",
+            "COCO-SP",
+            "Peptides-func"
+          ],
+          "datasets": {
+            "ogbn-arxiv": {
+              "headroom_bound_mnats": {
+                "$value": 5.0,
+                "$decimals": 1
+              },
+              "realized_effect_mnats": {
+                "$value": 4.5,
+                "$decimals": 2
+              },
+              "unrealized_lower_bound_mnats": {
+                "$value": 0.5,
+                "$decimals": 0
+              }
+            },
+            "ogbn-proteins": {
+              "headroom_bound_mnats": {
+                "$value": 4.5,
+                "$decimals": 1
+              },
+              "realized_effect_mnats": {
+                "$value": 3.8,
+                "$decimals": 2
+              },
+              "unrealized_lower_bound_mnats": {
+                "$value": 0.7,
+                "$decimals": 0
+              }
+            },
+            "ogbn-products": {
+              "headroom_bound_mnats": {
+                "$value": 3.2,
+                "$decimals": 1
+              },
+              "realized_effect_mnats": {
+                "$value": 0.0,
+                "$decimals": 2
+              },
+              "unrealized_lower_bound_mnats": {
+                "$value": 3.2,
+                "$decimals": 1
+              }
+            },
+            "Roman-empire": {
+              "headroom_bound_mnats": {
+                "$value": 21.0,
+                "$decimals": 1
+              },
+              "realized_effect_mnats": {
+                "$value": 5.72,
+                "$decimals": 2
+              },
+              "unrealized_lower_bound_mnats": {
+                "$value": 15.28,
+                "$decimals": 0
+              }
+            },
+            "PascalVOC-SP": {
+              "headroom_bound_mnats": {
+                "$value": 26.0,
+                "$decimals": 1
+              },
+              "realized_effect_mnats": {
+                "$value": 8.42,
+                "$decimals": 2
+              },
+              "unrealized_lower_bound_mnats": {
+                "$value": 17.58,
+                "$decimals": 0
+              }
+            },
+            "COCO-SP": {
+              "headroom_bound_mnats": {
+                "$value": 23.0,
+                "$decimals": 1
+              },
+              "realized_effect_mnats": {
+                "$value": 9.05,
+                "$decimals": 2
+              },
+              "unrealized_lower_bound_mnats": {
+                "$value": 13.95,
+                "$decimals": 0
+              }
+            },
+            "Peptides-func": {
+              "headroom_bound_mnats": {
+                "$value": 3.5,
+                "$decimals": 1
+              },
+              "realized_effect_mnats": {
+                "$value": 3.03,
+                "$decimals": 2
+              },
+              "unrealized_lower_bound_mnats": {
+                "$value": 0.47,
+                "$decimals": 0
+              }
+            }
+          }
+        }
+      },
+      "supporting_sources": [
+        {
+          "document": "supplementary",
+          "pages": [
+            4
+          ],
+          "label": "Table S6; rho, nu, mode, eta and the registered truncation order T = 8 of A0-A7"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            5
+          ],
+          "label": "Table S6b; executed range, maximum reach and executed identity coefficient with their formulas"
+        },
+        {
+          "document": "main",
+          "pages": [
+            4
+          ],
+          "label": "Eqs. (8)-(10); kernel mixture, mass-corrected truncated resolvent and executed range"
+        },
+        {
+          "document": "main",
+          "pages": [
+            6
+          ],
+          "label": "Proposition 4; Delta_sel(q_D) >= Delta_oracle and the U(Delta_oracle) gate"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            2
+          ],
+          "label": "Table S4; U(Delta_oracle) of the seven plants"
+        },
+        {
+          "document": "main",
+          "pages": [
+            10
+          ],
+          "label": "Table 1; paired test loss effect of the deployed rule against q_C"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            36
+          ],
+          "label": "Figure S17b; |Delta_sel(q_D)|/|U(Delta_oracle)| uses the same bound and the Table 1 effect (printed 0.90, 0.84, 0.00, 0.27, 0.32, 0.39, 0.87)"
+        }
+      ],
+      "evidence_kind": "exact registered-action functions (panels a-c) with a measured oracle confidence bound and measured deployed effects (panel d)",
+      "note": "Every panel is enumerated from the visible page-35 rendering and caption (the PDF text layer also carries a second, overlaid caption text that does not appear in the rendering; it is not used). Panel a: the eight transport-action curves A0-A7 (A8/A9 are hybrid resets without a spectral response), the printed domain [0, 2], T = 8, every curve at the seven edges of the uniform six-band partition that panel b names (g_a(0) = 1; g_a(1) equals the panel-c identity coefficient), every zero crossing in [0, 2] (none for A6 and A7: null) and the zero reference line. The function is g_a(lambda) = sum_t c_t (1 - lambda)^t for T_a = (1 - nu) I + nu[(1 - rho) P + rho K~], with K~_{eta,T} = eta sum_{t=0..T} (1 - eta)^t P^t + (1 - eta)^{T+1} I (main Eq. 9) for resolvent actions and K~ = P for the nominal and one-step modes, P = I - L_sym in the symmetric frame. Coordinates were evaluated in exact rational arithmetic from the Table S6 constants and are compared at six decimals as deterministic model coordinates; the 401-point plotting grid is renderer sampling and is not a target. Panel b: all 42 printed two-decimal cells, the reference action A0 and the exact band edges (the tick labels print them to two decimals). An independent exact maximization of |g_a - g_A0| on each band reproduces every printed cell within half a unit; the closest case is A7 on [1, 4/3], exact maximum 0.375006, printed 0.38. Panel c: executed range nu[(1 - rho) + rho sum_t t eta (1 - eta)^t] and identity coefficient (1 - nu) + nu rho[eta + (1 - eta)^{T+1}] (nu and 1 - nu for one-step actions) at six decimals, their printed bar and 'id' labels at two decimals, the maximum-reach squares and the dotted nominal level 0.70. Panel d: the white bar is |U(Delta_oracle)| of Table S4, an upper confidence limit, so the headroom denominator is the oracle confidence bound and not its point estimate; the realized part is |Delta(q_D)|, the deployed rule's paired test effect of Table 1 (zero for products, where q_C is returned), the same point estimate of |Delta_sel(q_D)| that Figure S17b divides by this bound; the blue bar is |U(Delta_oracle)| - |Delta(q_D)|, the lower bound on headroom the deployed rule leaves unrealized. The four-decimal S4 bound fixes the white bar to 0.05 mnats and the five-decimal Table 1 effect fixes the realized part to 0.005 mnats, so their difference can deviate by 0.055 mnats, more than half a unit at one decimal: blue bars are compared at whole mnats (products, with no effect term, at one decimal) while both components keep their printed precision. The rendered bar heights agree with these definitions on visual inspection; no coordinate was read from the image or from a generator output. Panels a-c are protocol identities; panel d still requires the original oracle search and test evaluations.",
+      "source_inputs": {
+        "actions": {
+          "A0": {
+            "rho": 0.0,
+            "nu": 0.7,
+            "mode": "nominal",
+            "eta": null,
+            "T": null
+          },
+          "A1": {
+            "rho": 0.2,
+            "nu": 0.55,
+            "mode": "one step",
+            "eta": null,
+            "T": null
+          },
+          "A2": {
+            "rho": 0.2,
+            "nu": 0.85,
+            "mode": "one step",
+            "eta": null,
+            "T": null
+          },
+          "A3": {
+            "rho": 0.25,
+            "nu": 0.7,
+            "mode": "resolvent",
+            "eta": 0.5,
+            "T": 8
+          },
+          "A4": {
+            "rho": 0.3,
+            "nu": 0.65,
+            "mode": "resolvent",
+            "eta": 0.5,
+            "T": 8
+          },
+          "A5": {
+            "rho": 0.3,
+            "nu": 0.7,
+            "mode": "resolvent",
+            "eta": 0.2,
+            "T": 8
+          },
+          "A6": {
+            "rho": 0.35,
+            "nu": 0.6,
+            "mode": "resolvent",
+            "eta": 0.2,
+            "T": 8
+          },
+          "A7": {
+            "rho": 0.25,
+            "nu": 0.5,
+            "mode": "resolvent",
+            "eta": 0.08,
+            "T": 8
+          }
+        },
+        "U_Delta_oracle_nats_table_S4": {
+          "ogbn-arxiv": -0.005,
+          "ogbn-proteins": -0.0045,
+          "ogbn-products": -0.0032,
+          "Roman-empire": -0.021,
+          "PascalVOC-SP": -0.026,
+          "COCO-SP": -0.023,
+          "Peptides-func": -0.0035
+        },
+        "deployed_loss_effect_nats_table_1": {
+          "ogbn-arxiv": -0.0045,
+          "ogbn-proteins": -0.0038,
+          "ogbn-products": 0.0,
+          "Roman-empire": -0.00572,
+          "PascalVOC-SP": -0.00842,
+          "COCO-SP": -0.00905,
+          "Peptides-func": -0.00303
+        },
+        "precision": {
+          "panel_a_and_c_formulas": "six decimals (exact rational evaluation of registered constants)",
+          "panel_b_and_labels": "printed two decimals",
+          "headroom_bound": "one decimal in mnats (S4 four decimals in nats)",
+          "realized_effect": "two decimals in mnats (Table 1 five decimals in nats)",
+          "unrealized_bar": "whole mnats: propagated rounding up to 0.055 mnats; products one decimal"
+        }
+      },
+      "review": {
+        "date": "2026-11-08",
+        "method": "AI-assisted, source-bound review of the rendered page 35 (160 and 400 dpi crops) and SI pp. 2, 4-5 and main pp. 4, 6, 10; independent exact-rational formula evaluation; no generator output used as a reference.",
+        "scope": "Independent full-figure reference contract; not an execution record or author certification."
+      }
+    },
+    "main_figure_5_deployment_economics": {
+      "display_id": "main:Figure 5",
+      "source": {
+        "document": "main",
+        "pages": [
+          12
+        ]
+      },
+      "values": {
+        "panel_a": {
+          "marker_roles": {
+            "qC": "strongest open-loop comparator q_C",
+            "deployed": "deployed rule at expected cost; tick: assurance cost",
+            "retrained": "retrained architecture, declared cost range"
+          },
+          "datasets": {
+            "ogbn-arxiv": {
+              "plant_serial_cost": {
+                "$value": 4.0,
+                "$decimals": 1
+              },
+              "plant_score_points": {
+                "$value": 72.93,
+                "$decimals": 2
+              },
+              "qC": {
+                "relative_cost": {
+                  "$value": 1.0,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 73.15,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.22,
+                  "$decimals": 1
+                }
+              },
+              "deployed": {
+                "returned_comparator": false,
+                "expected_relative_cost": {
+                  "$value": 1.15425,
+                  "$decimals": 3
+                },
+                "assurance_relative_cost": {
+                  "$value": 2.175,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 73.22,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.29,
+                  "$decimals": 1
+                }
+              },
+              "retrained": {
+                "AMP": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.05,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.2,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 73.06,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.13,
+                    "$decimals": 1
+                  }
+                },
+                "ADMP-GNN": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 0.6,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.0,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 73.02,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.09,
+                    "$decimals": 1
+                  }
+                }
+              }
+            },
+            "ogbn-proteins": {
+              "plant_serial_cost": {
+                "$value": 4.0,
+                "$decimals": 1
+              },
+              "plant_score_points": {
+                "$value": 87.02,
+                "$decimals": 2
+              },
+              "qC": {
+                "relative_cost": {
+                  "$value": 1.0,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 87.15,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.13,
+                  "$decimals": 1
+                }
+              },
+              "deployed": {
+                "returned_comparator": false,
+                "expected_relative_cost": {
+                  "$value": 1.1705,
+                  "$decimals": 3
+                },
+                "assurance_relative_cost": {
+                  "$value": 2.2,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 87.26,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.24,
+                  "$decimals": 1
+                }
+              },
+              "retrained": {
+                "AMP": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.05,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.2,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 87.05,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.03,
+                    "$decimals": 1
+                  }
+                },
+                "GRAMA": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.2,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.6,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 87.03,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.01,
+                    "$decimals": 1
+                  }
+                }
+              }
+            },
+            "ogbn-products": {
+              "plant_serial_cost": {
+                "$value": 2.0,
+                "$decimals": 1
+              },
+              "plant_score_points": {
+                "$value": 87.59,
+                "$decimals": 2
+              },
+              "qC": {
+                "relative_cost": {
+                  "$value": 1.05,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 87.74,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.15,
+                  "$decimals": 1
+                }
+              },
+              "deployed": {
+                "returned_comparator": true,
+                "expected_relative_cost": {
+                  "$value": 1.05,
+                  "$decimals": 3
+                },
+                "assurance_relative_cost": {
+                  "$value": 1.05,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 87.74,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.15,
+                  "$decimals": 1
+                }
+              },
+              "retrained": {
+                "ADMP-GNN": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 0.6,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.0,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 87.57,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": -0.02,
+                    "$decimals": 1
+                  }
+                },
+                "GRAMA": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.2,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.6,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 87.49,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": -0.1,
+                    "$decimals": 1
+                  }
+                }
+              }
+            },
+            "Roman-empire": {
+              "plant_serial_cost": {
+                "$value": 4.0,
+                "$decimals": 1
+              },
+              "plant_score_points": {
+                "$value": 91.76,
+                "$decimals": 2
+              },
+              "qC": {
+                "relative_cost": {
+                  "$value": 1.0,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 92.37,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.61,
+                  "$decimals": 1
+                }
+              },
+              "deployed": {
+                "returned_comparator": false,
+                "expected_relative_cost": {
+                  "$value": 1.30475,
+                  "$decimals": 3
+                },
+                "assurance_relative_cost": {
+                  "$value": 2.35,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 92.63,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.87,
+                  "$decimals": 1
+                }
+              },
+              "retrained": {
+                "Early-Exit GNN": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 0.5,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 0.9,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 92.24,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.48,
+                    "$decimals": 1
+                  }
+                },
+                "ADMP-GNN": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 0.6,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.0,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 92.18,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.42,
+                    "$decimals": 1
+                  }
+                }
+              }
+            },
+            "PascalVOC-SP": {
+              "plant_serial_cost": {
+                "$value": 8.0,
+                "$decimals": 1
+              },
+              "plant_score_points": {
+                "$value": 46.89,
+                "$decimals": 2
+              },
+              "qC": {
+                "relative_cost": {
+                  "$value": 1.0,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 47.61,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.72,
+                  "$decimals": 1
+                }
+              },
+              "deployed": {
+                "returned_comparator": false,
+                "expected_relative_cost": {
+                  "$value": 1.28725,
+                  "$decimals": 3
+                },
+                "assurance_relative_cost": {
+                  "$value": 2.3125,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 48.21,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 1.32,
+                  "$decimals": 1
+                }
+              },
+              "retrained": {
+                "Graph Mamba": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.1,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.4,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 47.41,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.52,
+                    "$decimals": 1
+                  }
+                },
+                "GRAMA": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.2,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.6,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 47.36,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.47,
+                    "$decimals": 1
+                  }
+                }
+              }
+            },
+            "COCO-SP": {
+              "plant_serial_cost": {
+                "$value": 8.0,
+                "$decimals": 1
+              },
+              "plant_score_points": {
+                "$value": 31.6,
+                "$decimals": 1
+              },
+              "qC": {
+                "relative_cost": {
+                  "$value": 1.0,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 32.38,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 0.78,
+                  "$decimals": 0
+                }
+              },
+              "deployed": {
+                "returned_comparator": false,
+                "expected_relative_cost": {
+                  "$value": 1.325125,
+                  "$decimals": 3
+                },
+                "assurance_relative_cost": {
+                  "$value": 2.35,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 33.03,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 1.43,
+                  "$decimals": 0
+                }
+              },
+              "retrained": {
+                "Graph Mamba": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.1,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.4,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 32.58,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.98,
+                    "$decimals": 0
+                  }
+                },
+                "GRAMA": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.2,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.6,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 32.51,
+                    "$decimals": 2
+                  },
+                  "score_gain_points": {
+                    "$value": 0.91,
+                    "$decimals": 0
+                  }
+                }
+              }
+            },
+            "Peptides-func": {
+              "plant_serial_cost": {
+                "$value": 4.0,
+                "$decimals": 1
+              },
+              "plant_score_points": {
+                "$value": 70.4,
+                "$decimals": 1
+              },
+              "qC": {
+                "relative_cost": {
+                  "$value": 1.0,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 71.4,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 1.0,
+                  "$decimals": 0
+                }
+              },
+              "deployed": {
+                "returned_comparator": false,
+                "expected_relative_cost": {
+                  "$value": 1.18275,
+                  "$decimals": 3
+                },
+                "assurance_relative_cost": {
+                  "$value": 2.225,
+                  "$decimals": 3
+                },
+                "score_points": {
+                  "$value": 72.0,
+                  "$decimals": 2
+                },
+                "score_gain_points": {
+                  "$value": 1.6,
+                  "$decimals": 0
+                }
+              },
+              "retrained": {
+                "Graph Mamba": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.1,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.4,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 71.4,
+                    "$decimals": 1
+                  },
+                  "score_gain_points": {
+                    "$value": 1.0,
+                    "$decimals": 0
+                  }
+                },
+                "GRAMA": {
+                  "relative_cost_range": [
+                    {
+                      "$value": 1.2,
+                      "$decimals": 2
+                    },
+                    {
+                      "$value": 1.6,
+                      "$decimals": 2
+                    }
+                  ],
+                  "score_points": {
+                    "$value": 71.3,
+                    "$decimals": 1
+                  },
+                  "score_gain_points": {
+                    "$value": 0.9,
+                    "$decimals": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "panel_b": {
+          "dataset_order": [
+            "ogbn-arxiv",
+            "ogbn-proteins",
+            "Roman-empire",
+            "PascalVOC-SP",
+            "COCO-SP",
+            "Peptides-func"
+          ],
+          "interval_role": "range from the 95% interval of Δ",
+          "rows": {
+            "ogbn-arxiv": {
+              "lambda_star_mnats": {
+                "$value": 7.29,
+                "$decimals": 2
+              },
+              "lambda_star_range_mnats": [
+                {
+                  "$value": 2.4,
+                  "$decimals": 1
+                },
+                {
+                  "$value": 12.2,
+                  "$decimals": 1
+                }
+              ],
+              "metric_points_per_unit": {
+                "$value": 0.11,
+                "$decimals": 2
+              }
+            },
+            "ogbn-proteins": {
+              "lambda_star_mnats": {
+                "$value": 5.57,
+                "$decimals": 2
+              },
+              "lambda_star_range_mnats": [
+                {
+                  "$value": 1.2,
+                  "$decimals": 1
+                },
+                {
+                  "$value": 10.0,
+                  "$decimals": 1
+                }
+              ],
+              "metric_points_per_unit": {
+                "$value": 0.16,
+                "$decimals": 2
+              }
+            },
+            "Roman-empire": {
+              "lambda_star_mnats": {
+                "$value": 4.69,
+                "$decimals": 2
+              },
+              "lambda_star_range_mnats": [
+                {
+                  "$value": 2.1,
+                  "$decimals": 1
+                },
+                {
+                  "$value": 7.3,
+                  "$decimals": 1
+                }
+              ],
+              "metric_points_per_unit": {
+                "$value": 0.21,
+                "$decimals": 2
+              }
+            },
+            "PascalVOC-SP": {
+              "lambda_star_mnats": {
+                "$value": 3.66,
+                "$decimals": 2
+              },
+              "lambda_star_range_mnats": [
+                {
+                  "$value": 1.8,
+                  "$decimals": 1
+                },
+                {
+                  "$value": 5.6,
+                  "$decimals": 1
+                }
+              ],
+              "metric_points_per_unit": {
+                "$value": 0.26,
+                "$decimals": 2
+              }
+            },
+            "COCO-SP": {
+              "lambda_star_mnats": {
+                "$value": 3.48,
+                "$decimals": 2
+              },
+              "lambda_star_range_mnats": [
+                {
+                  "$value": 2.1,
+                  "$decimals": 1
+                },
+                {
+                  "$value": 4.9,
+                  "$decimals": 1
+                }
+              ],
+              "metric_points_per_unit": {
+                "$value": 0.25,
+                "$decimals": 2
+              }
+            },
+            "Peptides-func": {
+              "lambda_star_mnats": {
+                "$value": 4.15,
+                "$decimals": 2
+              },
+              "lambda_star_range_mnats": [
+                {
+                  "$value": 1.8,
+                  "$decimals": 1
+                },
+                {
+                  "$value": 6.5,
+                  "$decimals": 1
+                }
+              ],
+              "metric_points_per_unit": {
+                "$value": 0.79,
+                "$decimals": 2
+              }
+            }
+          }
+        },
+        "panel_c": {
+          "price_domain_mnats": [
+            0,
+            10
+          ],
+          "zero_line_mnats": 0,
+          "dashed_role": "dashed: assurance cost C_assure (arxiv, Pascal)",
+          "expected_cost": {
+            "ogbn-arxiv": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 4.5,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 0.617,
+                "$decimals": 2
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -1.67,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 7.29,
+                "$decimals": 2
+              }
+            },
+            "ogbn-proteins": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 3.8,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 0.682,
+                "$decimals": 2
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -3.02,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 5.57,
+                "$decimals": 2
+              }
+            },
+            "Roman-empire": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 5.72,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 1.219,
+                "$decimals": 2
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -6.47,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 4.69,
+                "$decimals": 2
+              }
+            },
+            "PascalVOC-SP": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 8.42,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 2.298,
+                "$decimals": 2
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -14.56,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 3.66,
+                "$decimals": 2
+              }
+            },
+            "COCO-SP": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 9.05,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 2.601,
+                "$decimals": 2
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -16.96,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 3.48,
+                "$decimals": 2
+              }
+            },
+            "Peptides-func": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 3.03,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 0.731,
+                "$decimals": 2
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -4.28,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 4.15,
+                "$decimals": 2
+              }
+            }
+          },
+          "assurance_cost": {
+            "ogbn-arxiv": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 4.5,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 4.7,
+                "$decimals": 3
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -42.5,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 0.957446809,
+                "$decimals": 2
+              }
+            },
+            "PascalVOC-SP": {
+              "net_benefit_at_lambda_0_mnats": {
+                "$value": 8.42,
+                "$decimals": 2
+              },
+              "added_work": {
+                "$value": 10.5,
+                "$decimals": 3
+              },
+              "net_benefit_at_lambda_10_mnats": {
+                "$value": -96.58,
+                "$decimals": 1
+              },
+              "zero_crossing_lambda": {
+                "$value": 0.801904762,
+                "$decimals": 2
+              }
+            }
+          }
+        },
+        "panel_d": {
+          "theta": {
+            "$value": 0.1,
+            "$decimals": 1
+          },
+          "t_nom_domain_log10_seconds": [
+            -4,
+            2
+          ],
+          "marker_role": "hollow markers: operating points (Supplementary Table S23b)",
+          "curves": {
+            "ogbn-arxiv": {
+              "M_star_t_nom_thousand_input_seconds": {
+                "$value": 112.0,
+                "$decimals": 0
+              },
+              "log10_M_star_at_domain_start": {
+                "$value": 9.049318565,
+                "$decimals": 2
+              },
+              "log10_M_star_at_domain_end": {
+                "$value": 3.049318565,
+                "$decimals": 2
+              }
+            },
+            "ogbn-proteins": {
+              "M_star_t_nom_thousand_input_seconds": {
+                "$value": 106.0,
+                "$decimals": 0
+              },
+              "log10_M_star_at_domain_start": {
+                "$value": 9.025714184,
+                "$decimals": 2
+              },
+              "log10_M_star_at_domain_end": {
+                "$value": 3.025714184,
+                "$decimals": 2
+              }
+            },
+            "Roman-empire": {
+              "M_star_t_nom_thousand_input_seconds": {
+                "$value": 41.0,
+                "$decimals": 0
+              },
+              "log10_M_star_at_domain_start": {
+                "$value": 8.610177882,
+                "$decimals": 2
+              },
+              "log10_M_star_at_domain_end": {
+                "$value": 2.610177882,
+                "$decimals": 2
+              }
+            },
+            "PascalVOC-SP": {
+              "M_star_t_nom_thousand_input_seconds": {
+                "$value": 25.0,
+                "$decimals": 0
+              },
+              "log10_M_star_at_domain_start": {
+                "$value": 8.396349601,
+                "$decimals": 2
+              },
+              "log10_M_star_at_domain_end": {
+                "$value": 2.396349601,
+                "$decimals": 2
+              }
+            },
+            "COCO-SP": {
+              "M_star_t_nom_thousand_input_seconds": {
+                "$value": 25.0,
+                "$decimals": 0
+              },
+              "log10_M_star_at_domain_start": {
+                "$value": 8.398840723,
+                "$decimals": 2
+              },
+              "log10_M_star_at_domain_end": {
+                "$value": 2.398840723,
+                "$decimals": 2
+              }
+            },
+            "Peptides-func": {
+              "M_star_t_nom_thousand_input_seconds": {
+                "$value": 83.0,
+                "$decimals": 0
+              },
+              "log10_M_star_at_domain_start": {
+                "$value": 8.920271828,
+                "$decimals": 2
+              },
+              "log10_M_star_at_domain_end": {
+                "$value": 2.920271828,
+                "$decimals": 2
+              }
+            }
+          },
+          "operating_points": {
+            "ogbn-arxiv": {
+              "t_nom_seconds": {
+                "$value": 9.54,
+                "$decimals": 2
+              },
+              "t_nom_anchor_bracket_seconds": [
+                {
+                  "$value": 4.32,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 14.89,
+                  "$decimals": 2
+                }
+              ],
+              "log10_M_star_at_anchor_bracket": [
+                {
+                  "$value": 3.876423868,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 4.413834819,
+                  "$decimals": 2
+                }
+              ],
+              "M_star_label_mantissa": {
+                "$value": 1.2,
+                "$decimals": 1
+              },
+              "M_star_label_exponent": 4,
+              "label_datasets": [
+                "arxiv"
+              ]
+            },
+            "ogbn-proteins": {
+              "t_nom_seconds": {
+                "$value": 9.69,
+                "$decimals": 2
+              },
+              "t_nom_anchor_bracket_seconds": [
+                {
+                  "$value": 7.2,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 14.4,
+                  "$decimals": 2
+                }
+              ],
+              "log10_M_star_at_anchor_bracket": [
+                {
+                  "$value": 3.867351691,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 4.168381687,
+                  "$decimals": 2
+                }
+              ],
+              "M_star_label_mantissa": {
+                "$value": 1.1,
+                "$decimals": 1
+              },
+              "M_star_label_exponent": 4,
+              "label_datasets": [
+                "proteins"
+              ]
+            },
+            "Roman-empire": {
+              "t_nom_seconds": {
+                "$value": 1.16,
+                "$decimals": 2
+              },
+              "t_nom_anchor_bracket_seconds": [
+                {
+                  "$value": 0.68,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 1.4,
+                  "$decimals": 2
+                }
+              ],
+              "log10_M_star_at_anchor_bracket": [
+                {
+                  "$value": 4.464049846,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 4.777668969,
+                  "$decimals": 1
+                }
+              ],
+              "M_star_label_mantissa": {
+                "$value": 3.5,
+                "$decimals": 1
+              },
+              "M_star_label_exponent": 4,
+              "label_datasets": [
+                "Roman"
+              ]
+            },
+            "PascalVOC-SP": {
+              "t_nom_seconds": {
+                "$value": 0.00073,
+                "$decimals": 5
+              },
+              "t_nom_anchor_bracket_seconds": [
+                {
+                  "$value": 0.00052,
+                  "$decimals": 5
+                },
+                {
+                  "$value": 0.00104,
+                  "$decimals": 5
+                }
+              ],
+              "log10_M_star_at_anchor_bracket": [
+                {
+                  "$value": 7.379316261,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 7.680346257,
+                  "$decimals": 1
+                }
+              ],
+              "M_star_label_mantissa": {
+                "$value": 3.4,
+                "$decimals": 1
+              },
+              "M_star_label_exponent": 7,
+              "label_datasets": [
+                "Pascal",
+                "COCO"
+              ]
+            },
+            "COCO-SP": {
+              "t_nom_seconds": {
+                "$value": 0.00073,
+                "$decimals": 5
+              },
+              "t_nom_anchor_bracket_seconds": [
+                {
+                  "$value": 0.00052,
+                  "$decimals": 5
+                },
+                {
+                  "$value": 0.00104,
+                  "$decimals": 5
+                }
+              ],
+              "log10_M_star_at_anchor_bracket": [
+                {
+                  "$value": 7.381807384,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 7.68283738,
+                  "$decimals": 1
+                }
+              ],
+              "M_star_label_mantissa": {
+                "$value": 3.4,
+                "$decimals": 1
+              },
+              "M_star_label_exponent": 7,
+              "label_datasets": [
+                "Pascal",
+                "COCO"
+              ]
+            },
+            "Peptides-func": {
+              "t_nom_seconds": {
+                "$value": 0.00056,
+                "$decimals": 5
+              },
+              "t_nom_anchor_bracket_seconds": [
+                {
+                  "$value": 0.0004,
+                  "$decimals": 5
+                },
+                {
+                  "$value": 0.00079,
+                  "$decimals": 5
+                }
+              ],
+              "log10_M_star_at_anchor_bracket": [
+                {
+                  "$value": 8.022644737,
+                  "$decimals": 2
+                },
+                {
+                  "$value": 8.318211837,
+                  "$decimals": 1
+                }
+              ],
+              "M_star_label_mantissa": {
+                "$value": 1.5,
+                "$decimals": 1
+              },
+              "M_star_label_exponent": 8,
+              "label_datasets": [
+                "Peptides"
+              ]
+            }
+          }
+        }
+      },
+      "supporting_sources": [
+        {
+          "document": "supplementary",
+          "pages": [
+            11,
+            12
+          ],
+          "label": "Table S15; ensemble size, full-depth plant cost, official scores of the plant, q_C, the deployed rule and both retrained architectures, and the declared per-member serial-cost ranges (lines 155-159)"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            17,
+            18
+          ],
+          "label": "Table S26; Peptides official AP of q_C (0.7140) and of the deployed radius rule (0.7200)"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            16
+          ],
+          "label": "Tables S23 and S23b; controller, comparator, expected and assurance cost; t_nom, its anchor bracket and M*"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            24,
+            25
+          ],
+          "label": "Table S41; total qualification increment C_qual"
+        },
+        {
+          "document": "main",
+          "pages": [
+            10
+          ],
+          "label": "Table 1; paired loss effect Delta of the deployed rule"
+        },
+        {
+          "document": "main",
+          "pages": [
+            11
+          ],
+          "label": "Table 2; lambda* [range] (points per unit) and M* t_nom"
+        },
+        {
+          "document": "main",
+          "pages": [
+            7
+          ],
+          "label": "Definition 2; exchange rate, net benefit sign and amortization horizon"
+        }
+      ],
+      "evidence_kind": "measured scores, costs and effects with Definition 2 curves and S23b timing anchors",
+      "note": "All four panels are enumerated from the page-12 rendering, caption and legends. (a) For each of the seven datasets: the full-depth plant cost (E nominal executions, the cost unit of Table 2 and S15b) and score that normalize both axes; q_C at C_qC/C_plant; the deployed rule at its expected cost with the tick at its assurance cost (Table S23); both retrained architectures of S15 at their declared per-member cost-range endpoints (S15 lines 155-159, as the caption states); every score in points (AP x 100 for Peptides, with S26's four-decimal AP for Peptides' q_C and deployed rule); the three legend roles. For products the deployed rule is q_C itself (Tables 1-2: q_C returned; C_expected = C_assure = C_qC); the printed filled marker sits on the q_C diamond, so its coordinates equal q_C's. (b) The six deployed rules in printed order: lambda*, the range from the 95% interval of Delta and the points-per-unit rate of each label (Table 2, repeated by the annotations). (c) The six expected-cost lines and the two dashed assurance-cost lines (arxiv, Pascal) of U = |Delta| - lambda dEC on the printed domain lambda in [0, 10]: value at both domain ends, slope (added work) and zero crossing (Table 2's lambda* for the expected lines; |Delta|/C_ctrl for the assurance lines, because C_assure - C_qC = C_ctrl by the S23 definition), and the zero line; the dashed lines leave the printed y-window before lambda = 10, so their domain-end values check the function rather than a visible point. (d) theta = 0.1, the printed domain t_nom in [1e-4, 1e2] s, the six curves M* = 3600 C_qual/[theta (E C(q_D) - C(q_C)) t_nom] (their M* t_nom constant from Tables 2/S23b and log10 M* at both domain ends from S41 C_qual and S23 costs), and each S23b operating point: t_nom, the thick segment drawn on its curve over S23b's t_nom range (endpoints confirmed against the rendered axis; t range and log10 M* at its ends, ascending M*), and the printed label (mantissa, exponent and the shared Pascal, COCO label). Marker shapes (squares for Pascal and COCO) are presentation. Renderer sampling (101 prices, 61 times) is not a target. Roles: S23b's t_nom is the anchor-derived nominal time (geometric mean of the throughput and training-time anchors for arxiv, proteins and Roman; the launch-bound training-time anchor for Pascal and Peptides; COCO shares Pascal's anchor) and the brackets are those adopted anchors, not executed timing; a newly executed nominal_time measurement is compared with them as a separate quantity. Precision covers the propagated rounding of the printed inputs: relative costs to three decimals; score gains to one decimal, except whole points for COCO (plant printed 31.6) and Peptides (plant printed 0.704 AP, retrained 0.714/0.713), whose scores are compared at their printed precision; panel c intercepts, expected-cost slopes and crossings to two decimals, assurance slopes (C_ctrl) to three and domain-end values to one; log10 M* to two decimals, one at the low-t end of the Roman, Pascal, COCO and Peptides brackets. Table 2's range ends are compared as printed: Peptides' 6.5 needs an unrounded Table 1 lower endpoint at or below about -0.004715 (at dEC = 0.731), since the printed -0.0047 alone gives 6.43; no endpoint is inferred from it. Consistency was verified independently: Definition 2 at the printed inputs reproduces every Table 2 lambda* and M* t_nom and every S23b M* label within the inputs' printed precision. Main Figure 5's declared inputs do not include the timing_anchors record set; its generator reads that set when supplied, and the bracket targets otherwise remain missing comparisons.",
+      "source_inputs": {
+        "ensemble_E_table_S15": {
+          "ogbn-arxiv": 4,
+          "ogbn-proteins": 4,
+          "ogbn-products": 2,
+          "Roman-empire": 4,
+          "PascalVOC-SP": 8,
+          "COCO-SP": 8,
+          "Peptides-func": 4
+        },
+        "costs_table_S23": {
+          "ogbn-arxiv": {
+            "C_ctrl": 4.7,
+            "C_qC": 4.0,
+            "C_assure": 8.7,
+            "C_expected": 4.617
+          },
+          "ogbn-proteins": {
+            "C_ctrl": 4.8,
+            "C_qC": 4.0,
+            "C_assure": 8.8,
+            "C_expected": 4.682
+          },
+          "ogbn-products": {
+            "C_ctrl": 0.0,
+            "C_qC": 2.1,
+            "C_assure": 2.1,
+            "C_expected": 2.1
+          },
+          "Roman-empire": {
+            "C_ctrl": 5.4,
+            "C_qC": 4.0,
+            "C_assure": 9.4,
+            "C_expected": 5.219
+          },
+          "PascalVOC-SP": {
+            "C_ctrl": 10.5,
+            "C_qC": 8.0,
+            "C_assure": 18.5,
+            "C_expected": 10.298
+          },
+          "COCO-SP": {
+            "C_ctrl": 10.8,
+            "C_qC": 8.0,
+            "C_assure": 18.8,
+            "C_expected": 10.601
+          },
+          "Peptides-func": {
+            "C_ctrl": 4.9,
+            "C_qC": 4.0,
+            "C_assure": 8.9,
+            "C_expected": 4.731
+          }
+        },
+        "declared_serial_cost_per_member_table_S15": {
+          "AMP": [
+            1.05,
+            1.2
+          ],
+          "ADMP-GNN": [
+            0.6,
+            1.0
+          ],
+          "GRAMA": [
+            1.2,
+            1.6
+          ],
+          "Graph Mamba": [
+            1.1,
+            1.4
+          ],
+          "Early-Exit GNN": [
+            0.5,
+            0.9
+          ]
+        },
+        "loss_effect_nats_table_1": {
+          "ogbn-arxiv": -0.0045,
+          "ogbn-proteins": -0.0038,
+          "Roman-empire": -0.00572,
+          "PascalVOC-SP": -0.00842,
+          "COCO-SP": -0.00905,
+          "Peptides-func": -0.00303
+        },
+        "C_qual_gpu_hours_table_S41": {
+          "ogbn-arxiv": 1.92,
+          "ogbn-proteins": 2.01,
+          "Roman-empire": 1.38,
+          "PascalVOC-SP": 1.59,
+          "COCO-SP": 1.81,
+          "Peptides-func": 1.69
+        },
+        "theta": 0.1,
+        "formulas": {
+          "relative_cost": "C / (E x 1 nominal execution)",
+          "score_gain_points": "official score - full-depth plant score (points; AP x 100)",
+          "net_benefit": "U(lambda) = |Delta| - lambda (E C(q_D) - C(q_C)) in mnats",
+          "assurance_added_work": "C_assure - C_qC = C_ctrl",
+          "M_star": "3600 C_qual / [theta (E C(q_D) - C(q_C)) t_nom]"
+        }
+      },
+      "review": {
+        "date": "2026-11-08",
+        "method": "AI-assisted, source-bound review of the rendered page 12 (160, 400, 1200-3000 dpi crops) and of the cited table pages; independent formula evaluation with interval-propagated rounding; no generator output used as a reference.",
+        "scope": "Independent full-figure reference contract; not an execution record or author certification."
+      }
     }
   }
 }
