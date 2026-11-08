@@ -31,6 +31,65 @@ The analysis tier carries the complete inventory of its run. Verification checks
 every present file against the run's sealed stage manifests and every omitted file
 against its declared SHA-256 and size, so the two tiers describe the same run.
 
+## Check original local folders before upload
+
+The checked [input-map template](../release/templates/paper-artifacts.map.json)
+lists the canonical required artifacts. Copy it outside the checkout and fill
+the paths and `_relationships` with the original experiment folders and their
+documented relationship to the paper. A prepared template identifies inputs to
+provide; it does not represent measured evidence.
+
+```bash
+make paper-preflight \
+  PUBLISH_MAP=/abs/paper-artifacts.map.json \
+  PAPER_PREFLIGHT_ROOT=/abs/new-preflight
+```
+
+The local preflight verifies supplied lifecycle stage seals, all required Roman
+splits, raw-to-summary record traces, campaign contracts and the observed GPU
+environment with the same source verifiers used by publication. It then constructs
+a canonical input workspace, indexes the verified record sets and runs the real
+display reconstruction. Missing canonical artifacts are reported by name, including
+required inputs not consumed by an individual display. Invalid supplied artifacts
+remain errors even if other artifacts are missing.
+
+The workspace must be new and must not overlap a supplied input directory or the
+repository checkout. Input and workspace paths must not traverse symbolic links.
+By default it uses hard links on the same filesystem to avoid duplicating large
+checkpoints. Those links share the source bytes; they are not independent immutable
+copies. The preflight does not change permissions or modify the originals. For
+separate filesystems or a physically separate copy, use:
+
+```bash
+make paper-preflight \
+  PUBLISH_MAP=/abs/paper-artifacts.map.json \
+  PAPER_PREFLIGHT_ROOT=/abs/new-copied-preflight \
+  PAPER_PREFLIGHT_COPY=1
+```
+
+The equivalent Python option is `--copy-mode copy`. Source inventories, the input
+map, reconstruction code and materialized inputs are checked again after the build
+to detect changes during verification. An original run's own `source/` snapshot
+can resolve its historical runtime only when its files match the recorded runtime
+fingerprint; a mismatching or symlinked snapshot is rejected. Existing bundled
+snapshots remain available for the historical examples.
+
+`REPORT.md` provides the readable result, `report.json` records the identities,
+relationships and named gaps, `inventories/` records verified input files, and
+`reconstruction/` holds the generated outputs and comparisons.
+
+| Exit | Local verdict | Meaning |
+|---|---|---|
+| `0` | `READY_FOR_PUBLICATION` | Required local inputs verify and every required display comparison agrees. |
+| `1` | `INCOMPLETE` | Required inputs, display content or comparison definitions are absent, or computed values differ. |
+| `2` | `INVALID` | Input bytes, materialization, source verification or a generator failed. |
+
+This command performs no upload, submits no jobs and does not change the release
+inventory. `public_availability_verified` is always false in its report. A locally
+ready collection becomes publicly available only after upload and successful
+retrieval and verification. `make statement-fulfilled` remains the final public
+availability check.
+
 ## Publish from Arrhenius
 
 On a login node, in a checkout of this repository, after `bash run_cross_morse.sh reproduce`
@@ -70,6 +129,13 @@ bash hpc/publish_paper_artifacts_arrhenius.sh publish
   record set, both campaign evidence contracts and the captured GPU environment. Only
   full scientific runs are accepted. Archives are deterministic and content-addressed:
   packing identical inputs produces identical asset names and bytes.
+  If an original run depends on an external frozen runtime beside its folder,
+  packing includes that verified runtime's Python files under the run's `source/`
+  in both tiers and records their hashes. These are the files covered by the
+  runtime fingerprint, not a claim to include an entire unrelated checkout.
+  Heavy run files are streamed from their existing location; original folders
+  are not rewritten. Changed source bytes or conflicting source destinations
+  stop packing before the new assets and entry are installed.
 - `publish` creates the release if needed, uploads every part that is not already
   present with the same SHA-256. Existing assets are never deleted or replaced; a
   conflicting asset is an error. The manifest is updated only after all uploads verify.

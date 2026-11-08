@@ -6,10 +6,11 @@
 
 This review examines the author-supplied **CR-9 work report and remaining steps**,
 the main paper and supplementary file identified in
-[`paper/sources.json`](../paper/sources.json), and the repository beginning at
-`f34aa5a8f1d9c3d379fc0e6a288aa4373c1b980b`. The subsequent author-line change in
-`578837f9c165a3d1bbe4cc2d9fce3783ae5d5f03` is preserved. The changes described below
-are in the revision introducing this review.
+[`paper/sources.json`](../paper/sources.json), and the successive repository
+upgrades beginning at `f34aa5a8f1d9c3d379fc0e6a288aa4373c1b980b`. The current
+completion work was evaluated against published main
+`ba44e9a5d13cce6749514e46937dcc4cbfef5f53` on 8 November 2026. The author-line change
+in `578837f9c165a3d1bbe4cc2d9fce3783ae5d5f03` is preserved.
 
 The repository now carries a substantially stronger production, export,
 publication and reconstruction implementation. The full availability statement
@@ -24,6 +25,55 @@ The attempted connection failed at hostname resolution, before authentication.
 The original checkpoints, predictions, trajectories and historical experiment
 records were consequently not recovered during this revision. Existing sealed
 examples remain explicitly synthetic.
+
+## Progress in the current revision
+
+| Area | Previous behavior | Current behavior |
+|---|---|---|
+| Selected-strata qualification | S3's separate 1.00 criterion was not computed and enforced. | New runs audit A0 qualification in every registered Full-profile stratum and apply the gate before selection when the entry contract is enabled. Missing nominal cells remain in the denominator and fail. |
+| Historical runtime identity | The active source matched the preceding implementation. | The new runtime has its own fingerprint; the exact preceding 29-file runtime is preserved for historical replay. Old runs are not relabeled as having executed the new gate. |
+| S28/S28b and S17g | Observed support minima and rounded effects could replace the source-declared analytical coordinates. | Declared analytical counts, ESS and target scales are evaluated directly, with observed support and effects exported separately. S28b reconstructs without experiment archives. |
+| Figure 5a and Figure S4 cost ranges | Observed scalar costs could replace the declared method ranges shown in the source figures. | Render the declared endpoints and preserve measured costs as companions. Three additional S4 method points remain explicit source requirements. |
+| Independent figure contracts | Figure S11 was the only quantitative figure with a dedicated complete reference contract. | Add full contracts for Figures S1, S5, S8, S10 and S19, plus every cell of Table S29. Changed or missing empirical inputs still produce differences or incomplete results. |
+| Offline artifact completeness | A cached analysis tier or a missing environment artifact could escape the final completeness decision. | Requested tiers and every canonical artifact are checked independently of which inputs a display consumes. Missing manifest rows cannot remove a requirement. |
+| Original-folder preparation | Verification and reconstruction were coupled to packaging or a published manifest. | `make paper-preflight` verifies an original-folder map and reconstructs before upload, with a local-only verdict and pre/post input checks. |
+| Source snapshot discovery | Some consumers accepted a run's own snapshot while reconstruction required a bundled one. | Exact-source reconstruction can resolve a run's own verified source snapshot without adding it to this repository. |
+
+The source-only reconstruction now renders 21 displays, compared with 20 at the
+reviewed base. Twenty have complete content and required comparison coverage,
+compared with eighteen previously. Available comparisons increased from 437 to
+482 exact agreements; the unresolved computed cells decreased from four to three.
+The fifteen literal differences remain visible. These are software, protocol and
+analytical checks, not the recovery or reproduction of benchmark measurements.
+
+The independent reference sidecar now contains 29 groups. This revision adds
+540 required reference leaves: 110 for S28/S28b and 430 for Figures S1, S5, S8,
+S10 and S19 and Table S29. S28b's 72 leaves are covered by 44 comparison rows
+and agree without lifecycle artifacts. The five new figure contracts cover every
+specified panel, coordinate family, interval, boundary and numerical annotation.
+Positive tests use explicitly synthetic fixtures; the contracts do not supply
+missing measurements. Figure S17's related-table checks remain partial.
+
+### Figure-level evidence still needed
+
+The inventory contains 26 figures. One is classified as an illustration; six of
+the remaining 25 now have dedicated complete reference contracts: S1, S5, S8,
+S10, S11 and S19. Nineteen still require complete figure-specific coverage of
+their panels, coordinates and declared analytical assumptions. Some targets exist
+in the table registries and can be mapped explicitly; other panels need original
+plot data or scenario clarification. Depositing run archives alone cannot finish
+these definitions. The [figure reference coverage map](FIGURE_REFERENCE_COVERAGE.md)
+identifies completed contracts and each remaining figure's source pages and
+bounded requirements. A complete contract defines what must agree; reproduction
+additionally requires the original inputs to pass those comparisons.
+
+The current Figure S4 on supplementary page 32 contains three retrained external
+methods in each of its arxiv, Roman and Pascal panels. Its extra GRAMA/arxiv,
+AMP/Roman and AMP/Pascal points are not among the fourteen external dataset/method
+pairs tabulated in S15/S15b. Their precise scores and generating study records
+must be supplied separately; visual positions on the printed plot do not provide
+an exact numerical reference. The figure retains an incomplete result until those
+points and its complete comparison contract are available.
 
 ## Corrections implemented
 
@@ -48,13 +98,13 @@ release assets.
 
 ## Paper comparisons and remaining scientific decisions
 
-Twenty-one additional comparison groups are independently transcribed from the
+Twenty-nine additional comparison groups are independently transcribed from the
 identified supplementary PDF in
 [`paper/printed_display_values.json`](../paper/printed_display_values.json).
 They cover previously unreferenced protocol tables, the action registry and
-executed-action functions, the claim/restriction tables, and the analytical
-terminal-budget illustration. Generators do not read those targets as their
-computation inputs. The review is AI-assisted and is not an author certification.
+executed-action functions, the claim/restriction tables, the S28/S28b analytical
+scenario, the horizon/beam sweep and six quantitative figure contracts. Generators
+do not read those targets as their computation inputs. The review is AI-assisted and is not an author certification.
 
 Three of the work report's four unregistered source groups are recoverable from
 the supplied supplement and are now registered: S15's declared reference
@@ -80,9 +130,9 @@ separate repository metadata. All 2,349 pre-existing numerical leaves in the
 results registry are unchanged, and the source-review binding is refreshed
 without an author-certification claim.
 
-An offline build without measured deposits renders twenty displays from
-repository sources. Its 456 comparisons contain 437 agreements, fifteen literal
-differences and four missing computed values; none lacks a registered reference.
+An offline build without measured deposits renders twenty-one displays from
+repository sources. Its 500 comparisons contain 482 agreements, fifteen literal
+differences and three missing computed values; none lacks a registered reference.
 Those numbers describe the available protocol and analytical comparisons, not
 reproduction of the paper's benchmark results. The command correctly exits with
 an incomplete result. All ninety numbered displays remain registered.
@@ -97,7 +147,7 @@ The fifteen differences require different interpretations:
 | One S2 seed-column difference | Twelve controller-optimization replicates appear in the comparison controller-seed column where the PDF has a dash. The stage and seed terminology differs. |
 | Three S38 representation differences | Stage and statistical unit are not row keys in the mapped record schema; evaluation protocol is stored as a value rather than part of the observation key. |
 
-The four missing comparison cells are substantive evidence questions:
+The three missing comparison cells concern the seed hierarchy:
 
 - **S2 selection plant seeds:** selection uses precomputed frozen-ensemble losses;
   it does not record a separate plant refit or seed repetition inside each fold.
@@ -107,9 +157,14 @@ The four missing comparison cells are substantive evidence questions:
 - **S2 comparison plant seeds:** E3–E6 repeat controller optimization conditional
   on a fixed, paired parent ensemble. The displayed field does not demonstrate
   the printed plant-seed hierarchy.
-- **S3 selected-strata fraction:** aggregate registry support is checked, but a
-  separately computed and enforced selected-strata fraction of 1.00 is absent.
-  This does not mean that online support masking is absent.
+
+The previously absent **S3 selected-strata fraction** is implemented prospectively
+using Main Eq. (5), Table S3 and S35 convention C28. Its denominator is the Full
+controller's registered model-fit support strata; its numerator is those with
+qualified A0 cells. The existing support audit supplies the propensity, ESS and
+maximum-weight qualification. The new helper does not relax those thresholds or
+look at selection labels. Tests establish exclusion before label access even when
+the feedback candidate would otherwise have a clear paired improvement.
 
 These items require the original experiment records or an explicit scientific
 choice about the implementation and manuscript. Reference targets were not
@@ -145,7 +200,7 @@ an independent-graph population guarantee.
 | Source data and statistical outputs | Verified record exporters, campaign audits, all numbered display generators and PDF-bound comparisons | Actual raw records, campaign inputs and reconstructed CSV/JSON outputs matching the paper |
 | Splits, seeds and environment | Registered contracts, executed-membership export and observed-environment validation | The original run membership arrays, actual seed records and observed execution environments |
 | Checkpoints, predictions and trajectories | Complete-tier archives; repaired external/internal/factorial exports | The original trained files and propensity-logged trajectories, including the auxiliary studies |
-| One-command reconstruction | `make paper`, with complete content, comparison and integrity checks | All required artifacts publicly retrievable and every required comparison successful |
+| One-command reconstruction | `make paper`, with complete content, comparison and integrity checks; local `make paper-preflight` before upload | All required artifacts publicly retrievable, complete figure reference contracts and every required comparison successful |
 
 The preferred next input is the existing result-producing archive collection.
 It should be discovered and verified before starting expensive replacement runs.
@@ -176,12 +231,18 @@ cases include altered cached files, missing original model/prediction bytes,
 duplicate studies/splits, changed producer code, omitted comparisons, false
 completion flags, joint bootstrap covariance and publication failure handling.
 
-The core `cross_morse/` runtime, configurations, sealed examples and source
-snapshots remain unchanged relative to the reviewed base. Every pre-existing
-numerical value in the paper registries is preserved. The constants registry
-adds the three PDF-described protocol groups above; literal text corrections in
-the results registry retain explanatory qualifications as separate metadata.
-Auxiliary executors and reconstruction tools changed as described above and have
-their own recorded source identities.
+The current core runtime adds `cross_morse/qualification.py` and five integration
+lines in `pipeline.py`. Its identity is recorded in `docs/VALIDATION.json` and
+`release/release_scope.json`. All 29 files of the preceding runtime are preserved
+byte-for-byte under `examples/source_snapshots/0aba361b…/`, with their origin
+commit and file hashes. All 23 configuration files, 620 sealed-example files and
+the earlier `b5005fc…` source snapshot retain their bytes from the reviewed base.
+
+All 2,349 pre-existing numeric leaves in the results registry, all 582 in the
+constants registry and all 483 in the prior printed-reference sidecar are
+unchanged in this revision. Added values are explicitly source-declared
+analytical coordinates or independent comparison targets. The prior literal
+text corrections retain their explanatory qualifications as separate metadata.
+Historical validation events retain the source identities they actually tested.
 Public status headlines now use resource descriptions and named artifact states;
 the machine-readable checks retain the actual evidence status.

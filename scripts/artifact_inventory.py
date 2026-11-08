@@ -102,7 +102,9 @@ def verify_run_bytes(run_root):
     recomputation. Unlike an analysis-only review bundle, no sealed file may be
     missing. A per-call cache hashes repeated input references just once.
     """
-    root = Path(run_root).resolve()
+    root = Path(run_root).absolute()
+    require(not any(p.is_symlink() for p in (root, *root.parents)), "Run inventory must not traverse a symlink")
+    root = root.resolve()
     config = read_json(safe_file(root, "config.json"))
     expected = {pv.stage_manifest_path(root, s).name for s in pv.STAGES}
     actual = {p.name for p in (root / "provenance/stages").glob("*.json")}
@@ -119,7 +121,7 @@ def verify_run_bytes(run_root):
             for key, digest in ids.items():
                 require(isinstance(digest, str) and HEX.fullmatch(digest), f"Malformed {key}")
             try:
-                runtime_source = resolve_runtime_source(ids["source_sha256"], SOURCE)
+                runtime_source = resolve_runtime_source(ids["source_sha256"], SOURCE, run_root=root)
             except ValueError as exc:
                 raise InventoryError(str(exc)) from exc
             require(ids["config_sha256"] == pv._json_hash(config), "Configuration content changed")
@@ -460,7 +462,8 @@ def build_inventory(run_root):
         "schema_version": SCHEMA, "status": "PASS", "dataset": config["dataset"], "benchmark_dataset": benchmark,
         "profile": config["profile"], "scientific_run": bool(config["scientific_run"]),
         "evidence_class": "executed_synthetic_software_example" if synthetic else "submitted_benchmark_run",
-        "identities": identities, "source_resolution": source_resolution(identities["source_sha256"], SOURCE),
+        "identities": identities, "source_resolution": source_resolution(identities["source_sha256"], SOURCE,
+                                                                         run_root=root),
         "stages": [{"stage": m["stage"], "scientific_role": m["scientific_role"],
             "manifest_sha256": pv.sha256_file(pv.stage_manifest_path(root, m["stage"])), "outputs": len(m["outputs"])} for m in chain],
         "verification_scope": {"all_sealed_artifact_bytes": True, "complete_parent_chain": True,

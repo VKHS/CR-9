@@ -357,7 +357,8 @@ def _inventory(root: Path) -> list[dict]:
     return entries
 
 
-def _tar(output: Path, top: str, root: Path, files: list[str], extra: dict[str, dict]) -> None:
+def _tar(output: Path, top: str, root: Path, files: list[str], extra: dict[str, dict],
+         *, source_files: dict[str, Path] | None = None) -> None:
     """Deterministic gzip tar: identical inputs give identical bytes, so re-publishing uploads nothing."""
     import gzip
     with output.open("wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0,
@@ -369,7 +370,7 @@ def _tar(output: Path, top: str, root: Path, files: list[str], extra: dict[str, 
             info.size, info.mtime, info.mode = len(data), 0, 0o644
             tar.addfile(info, io.BytesIO(data))
         for relative in files:
-            source = root / relative
+            source = (source_files or {}).get(relative, root / relative)
             info = tar.gettarinfo(str(source), arcname=f"{top}/{relative}")
             info.mtime, info.uid, info.gid, info.uname, info.gname, info.mode = 0, 0, 0, "", "", 0o644
             info.pax_headers = {}
@@ -489,9 +490,62 @@ def split_parts(path: Path, part_bytes: int = PART_BYTES) -> list[dict]:
     return parts
 
 
+def _runtime_file_inventory(snapshot: Path, expected: str) -> list[dict]:
+    """Inventory only the Python files covered by the recorded runtime identity."""
+    from scripts._source_snapshots import runtime_files
+    require(not any(p.is_symlink() for p in (snapshot, *snapshot.parents))
+            and not any(p.is_symlink() for p in snapshot.rglob("*")),
+            f"Frozen runtime source must not traverse or contain a symlink: {snapshot}")
+    files = []
+    for path in runtime_files(snapshot):
+        relative = path.relative_to(snapshot).as_posix()
+        path = contained(snapshot, relative)
+        files.append({"path": relative, "sha256": sha256_file(path), "bytes": path.stat().st_size})
+    hashes = {row["path"]: row["sha256"] for row in files}
+    actual = hashlib.sha256(json.dumps(hashes, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    require("cross_morse/pipeline.py" in hashes and actual == expected,
+            f"Frozen runtime source changed or does not match {expected}: {snapshot}")
+    return files
+
+
+def _packing_runtime_sources(artifact_id: str, source: Path, identity: dict, out_dir: Path) -> list[dict]:
+    """Carry external run/campaign snapshots into portable run archives.
+
+    Current and bundled runtime sources travel with the checkout. A snapshot
+    already inside the artifact is inventoried normally. For other resolved
+    snapshots, add only the exact fingerprinted runtime files under the run's
+    own source/ directory; never copy a checkpoint tree or rewrite a run.
+    """
+    from scripts._source_snapshots import resolve_runtime_source
+    if _kind(artifact_id) != "run":
+        return []
+    runs = ([(source / name, value) for name, value in sorted(identity["splits"].items())]
+            if identity.get("campaign") else [(source, identity)])
+    dependencies = []
+    for run, value in runs:
+        expected = value["source_sha256"]
+        try:
+            snapshot = resolve_runtime_source(expected, ROOT, run_root=run)
+        except ValueError as exc:
+            raise ArtifactError(f"{artifact_id}: {exc}") from exc
+        if (snapshot.is_relative_to(source) or snapshot == ROOT.resolve()
+                or snapshot == (ROOT / "examples/source_snapshots" / expected).resolve()):
+            continue
+        require(not out_dir.resolve().is_relative_to(snapshot) and not snapshot.is_relative_to(out_dir.resolve()),
+                "Packing output must be separate from the external runtime source")
+        prefix = (run.relative_to(source) / "source").as_posix()
+        require(not (source / prefix).exists() and not (source / prefix).is_symlink(),
+                f"Conflicting frozen source folder: {source / prefix}; preserve or reconcile its original bytes first")
+        dependencies.append({"snapshot": snapshot, "prefix": prefix, "source_sha256": expected,
+                             "files": _runtime_file_inventory(snapshot, expected)})
+    return dependencies
+
+
 def pack_one(artifact_id: str, source: Path, out_dir: Path, *, relationship: str,
              part_bytes: int = PART_BYTES, scientific_only: bool = True) -> dict:
-    source = Path(source).resolve()
+    source = Path(source).absolute()
+    require(not any(p.is_symlink() for p in (source, *source.parents)), "Packing input traverses a symlink")
+    source = source.resolve()
     require(source.is_dir(), f"{artifact_id}: {source} is not a directory")
     require(relationship in RELATIONSHIPS, f"Explicit original/reproduction relationship is required: {artifact_id}")
     require(type(part_bytes) is int and 0 < part_bytes < 2 * 1024**3, "Part size must be positive and below 2 GiB")
@@ -504,16 +558,36 @@ def pack_one(artifact_id: str, source: Path, out_dir: Path, *, relationship: str
     require(not (relationship == "exact_result_producing_run" and identity.get("post_hoc") is True),
             "A post hoc confirmation campaign cannot be declared the original result-producing campaign")
     stem = asset_stem(artifact_id)
-    files = _inventory(source)
+    original_files = _inventory(source)
+    dependencies = _packing_runtime_sources(artifact_id, source, identity, out_dir)
+    additions = [{**row, "path": f"{dependency['prefix']}/{row['path']}"}
+                 for dependency in dependencies for row in dependency["files"]]
+    files = sorted(original_files + additions, key=lambda row: row["path"]) if additions else original_files
+    _files(files, artifact_id)
     require(bool(files), f"Artifact has no files: {artifact_id}")
     inventory = {"schema": "cross-morse-artifact-inventory-1", "artifact": artifact_id, "kind": kind,
                  "source_directory_name": source.name, "identity": identity, "files": files}
     inventory["inventory_sha256"] = hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
+    if dependencies:
+        inventory["runtime_source_additions"] = [
+            {"path": dependency["prefix"], "source_sha256": dependency["source_sha256"],
+             "scope": "Python files covered by the recorded runtime fingerprint"}
+            for dependency in dependencies]
     out_dir.mkdir(parents=True, exist_ok=True)
     # Build both tiers before changing the selected entry. Content-addressed names
     # preserve earlier release assets and make interrupted or repeated packs safe.
     with tempfile.TemporaryDirectory(prefix=f".pack-{stem}-", dir=out_dir) as temporary:
         stage = Path(temporary)
+        source_files = {}
+        for dependency in dependencies:
+            for row in dependency["files"]:
+                relative = f"{dependency['prefix']}/{row['path']}"
+                staged = stage / "runtime" / relative
+                staged.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(contained(dependency["snapshot"], row["path"]), staged)
+                require(staged.stat().st_size == row["bytes"] and sha256_file(staged) == row["sha256"],
+                        f"Frozen runtime source changed while staging: {relative}")
+                source_files[relative] = staged
         tiers = {}
         for tier in (("complete", "analysis") if kind == "run" else ("complete",)):
             selected = files if tier == "complete" else [f for f in files if not is_heavy(f["path"])]
@@ -524,13 +598,16 @@ def pack_one(artifact_id: str, source: Path, out_dir: Path, *, relationship: str
                     "rule": "Checkpoints and full prediction arrays are retained in the complete tier.",
                     "omitted": [f for f in files if is_heavy(f["path"])]}
             archive = stage / "archive.tar.gz"
-            _tar(archive, stem, source, [f["path"] for f in selected], extra)
+            _tar(archive, stem, source, [f["path"] for f in selected], extra, source_files=source_files)
             digest, size = sha256_file(archive), archive.stat().st_size
             named = stage / f"{stem}.{tier}-{digest}.tar.gz"
             archive.rename(named)
             tiers[tier] = {"archive": named.name, "bytes": size, "sha256": digest,
                            "parts": split_parts(named, part_bytes)}
-        require(_inventory(source) == files, f"{artifact_id}: input files changed while packing")
+        require(_inventory(source) == original_files, f"{artifact_id}: input files changed while packing")
+        for dependency in dependencies:
+            require(_runtime_file_inventory(dependency["snapshot"], dependency["source_sha256"]) == dependency["files"],
+                    f"{artifact_id}: runtime source files changed while packing")
         for tier in tiers.values():
             for part in tier["parts"]:
                 target = contained(out_dir, part["asset"], exists=False)
@@ -971,8 +1048,10 @@ def _verify_analysis_run(run_root: Path, omitted: dict[str, dict]) -> tuple[dict
     the identical SHA-256 and size. Returns the run identities and the source resolution.
     """
     from cross_morse import provenance as pv
-    from scripts._source_snapshots import resolve_runtime_source, runtime_source_fingerprint
-    root = Path(run_root).resolve()
+    from scripts._source_snapshots import resolve_runtime_source
+    root = Path(run_root).absolute()
+    require(not any(p.is_symlink() for p in (root, *root.parents)), "Run verification must not traverse a symlink")
+    root = root.resolve()
     require(not any(p.is_symlink() for p in root.rglob("*")), f"Run contains a symlink: {root}")
     config = read_json(contained(root, "config.json"))
     expected = {pv.stage_manifest_path(root, stage).name for stage in pv.STAGES}
@@ -1015,15 +1094,12 @@ def _verify_analysis_run(run_root: Path, omitted: dict[str, dict]) -> tuple[dict
                             f"{root}: {stage} input differs from its sealed output: {relative}")
         parent = pv._cached_artifact(root, manifest_path, cache)
     try:
-        runtime = resolve_runtime_source(identities["source_sha256"], ROOT)
-        resolution = "current or bundled runtime source"
-    except ValueError:
-        own = next((p for p in (root / "source", root.parent / "source")
-                    if p.is_dir() and runtime_source_fingerprint(p) == identities["source_sha256"]), None)
-        require(own is not None,
-                f"{root}: the runtime source {identities['source_sha256'][:12]} of this run is not available")
-        runtime = own
-        resolution = "the run's own frozen source snapshot"
+        runtime = resolve_runtime_source(identities["source_sha256"], ROOT, run_root=root)
+    except ValueError as exc:
+        raise ArtifactError(f"{root}: {exc}") from exc
+    resolution = ("current or bundled runtime source" if runtime == ROOT.resolve()
+                  or runtime == (ROOT / "examples/source_snapshots" / identities["source_sha256"]).resolve()
+                  else "the run's own frozen source snapshot")
     state = read_json(root / "run_state.json")
     require(state.get("status") == "COMPLETE" and state.get("last_complete_stage") == "evaluate",
             f"{root}: run bookkeeping is not complete")

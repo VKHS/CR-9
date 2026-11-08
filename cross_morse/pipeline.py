@@ -26,6 +26,7 @@ from .scoring import SCORE_VERSION
 from .data import prepare_data, load_data, role_labels
 from .exploration import explore, load_records
 from .learning import fit_controller, Controller
+from .qualification import selected_strata_support
 from .policies import make_registry, execute_policy, DonorBank, PolicyExecutionError
 from .provenance import (capture_frozen_models, verify_frozen_models, write_stage_manifest,
                          verify_stage_chain, stage_manifest_path, FINAL_EVALUATION_OUTPUTS)
@@ -553,6 +554,8 @@ class Pipeline:
     def entry_completion(self, candidates):
         initial = read_json(self.out / "train" / "entry_initial.json")
         full_support = self.controller("full").support_audit
+        selected_support = selected_strata_support(full_support)
+        selected_support["enforced"] = self.config["selection"]["enforce_entry_contract"]
         E = 1
         relevant = [i for i, c in enumerate(candidates) if c["ensemble"] == E and c["feasible"]]
         if independent_graphs(self.config):
@@ -574,8 +577,10 @@ class Pipeline:
         thresholds = self.config["entry"]
         passed = bool(initial["initial_entry_pass"] and
                       full_support["qualified_fraction"] >= thresholds["registry_fraction_min"] and
+                      selected_support["passed"] and
                       headroom["upper"] is not None and headroom["upper"] < -thresholds["headroom_margin"])
         obj = {"initial": initial, "registry_support_fraction": full_support["qualified_fraction"],
+               "selected_strata_support": selected_support,
                "headroom": headroom, "headroom_ensemble": E, "headroom_reference_index": reference,
                "headroom_definition": "D_explore best single global candidate at E=1; finite evaluated-family diagnostic, not exact sequence enumeration",
                "headroom_candidate_index": relevant[winner],

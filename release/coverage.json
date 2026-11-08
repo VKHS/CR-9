@@ -205,7 +205,7 @@
   "test_only_datasets": [
     "synthetic"
   ],
-  "validated_runtime_source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
-  "validation_date_utc": "2026-11-02",
+  "validated_runtime_source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "validation_date_utc": "2026-11-08",
   "validation_record": "docs/VALIDATION.json"
 }

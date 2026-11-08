@@ -26,6 +26,8 @@ BACKBONE_LABELS = {
 }
 S18_ORDER = ("p_min", "n_min", "max_normalized_weight", "epsilon_r", "epsilon_eq", "clip")
 DASH = "–"
+G_S29 = "supplementary_table_S29_horizon_beam_sweep"
+G_FIG_S5 = "supplementary_figure_S5_horizon_beam_sensitivity"
 
 
 # ---------------------------------------------------------------------------
@@ -223,6 +225,14 @@ def table_s29(ctx, out):
     for p in points["beam"]:
         rows.append([f"beam {p['beam_width']} (H = {p['horizon']})", num(p["effect"], 5), num(p["cost"], 1),
                      num(p["fraction"], 2)])
+    out.compare(G_S29, ("dataset",), points["dataset"])
+    out.compare(G_S29, ("policy",), "MPC-RH")
+    out.compare(G_S29, ("registered", "horizon"), points["registered_horizon"])
+    out.compare(G_S29, ("registered", "beam_width"), points["registered_beam"])
+    for index, (row, point) in enumerate(zip(rows, points["horizon"] + points["beam"])):
+        for key, value in (("configuration", row[0]), ("selection_effect_nats", point["effect"]),
+                           ("expected_serial_cost", point["cost"]), ("realized_fraction", point["fraction"])):
+            out.compare(G_S29, ("rows", index, key), value)
     out.table(["configuration", "selection effect (nats)", "expected serial cost", "realized fraction"], rows,
               notes=[f"MPC-RH on {points['dataset']}; registered configuration H = {points['registered_horizon']} at beam "
                      f"{points['registered_beam']}. Selection effect: nested D_select effect against the reconstructed q_C; "
@@ -237,6 +247,16 @@ def table_s29(ctx, out):
 def figure_s5(ctx, out):
     rec = ctx.require_records("horizon_beam_sweep")
     points = sweep_points(rec)
+    for key, value in (("dataset", points["dataset"]), ("policy", "MPC-RH"), ("reference", "qC"),
+                       ("stage", "D_select"), ("effect_unit", "nats"), ("cost_unit", "nominal executions")):
+        out.compare(G_FIG_S5, (key,), value)
+    out.compare(G_FIG_S5, ("registered", "horizon"), points["registered_horizon"])
+    out.compare(G_FIG_S5, ("registered", "beam_width"), points["registered_beam"])
+    out.compare(G_FIG_S5, ("panels", "a", "x_quantity"), "horizon")
+    out.compare(G_FIG_S5, ("panels", "a", "fixed_beam_width"), points["registered_beam"])
+    out.compare(G_FIG_S5, ("panels", "a", "registered_horizon_line"), points["registered_horizon"])
+    out.compare(G_FIG_S5, ("panels", "b", "x_quantity"), "expected_serial_cost")
+    out.compare(G_FIG_S5, ("panels", "b", "fixed_horizon"), points["registered_horizon"])
     plt = pyplot()
     fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(9.6, 3.4))
     horizon = points["horizon"]
@@ -249,34 +269,57 @@ def figure_s5(ctx, out):
     ax_a.text(points["registered_horizon"], max(ys), f" registered\n H={points['registered_horizon']}", fontsize=7,
               va="top", color="0.35")
     for p in horizon:
+        annotation = None if p["fraction"] is None else f"{p['fraction']:.2f} of headroom"
+        for key, value in (("horizon", p["horizon"]), ("selection_effect_nats", p["effect"]),
+                           ("realized_fraction", p["fraction"]), ("headroom_annotation", annotation)):
+            out.compare(G_FIG_S5, ("panels", "a", "points", f"H{p['horizon']}", key), value)
         if p["fraction"] is not None:
-            ax_a.annotate(f"{p['fraction']:.2f} of headroom", (p["horizon"], p["effect"]), textcoords="offset points",
-                          xytext=(4, 6), fontsize=7)
+            last = p is horizon[-1]
+            ax_a.annotate(annotation, (p["horizon"], p["effect"]), textcoords="offset points",
+                          xytext=(-4 if last else 4, 6), ha="right" if last else "left", fontsize=7)
+        else:
+            out.incomplete("Figure S5a requires the source-reported headroom fraction and its annotation",
+                           location=f"panel/a/H{p['horizon']}/headroom_annotation")
     ax_a.set_xlabel("horizon H")
     ax_a.set_ylabel("selection effect vs q_C (nats)")
     ax_a.set_title(f"a  Horizon sensitivity on {SHORT.get(points['dataset'], points['dataset'])} "
                    f"(beam {points['registered_beam']})",
-                   loc="left")
+                   loc="left", fontsize=9)
     beam = points["beam"]
     ax_b.plot([p["cost"] for p in beam], [p["effect"] for p in beam], "o-", color="#1b9e77",
               label=f"beam sweep at H={points['registered_horizon']}")
     for p in beam:
-        ax_b.annotate(f"beam {p['beam_width']}", (p["cost"], p["effect"]), textcoords="offset points", xytext=(4, 6),
+        annotation = f"beam {p['beam_width']}"
+        for key, value in (("beam_width", p["beam_width"]), ("expected_serial_cost", p["cost"]),
+                           ("selection_effect_nats", p["effect"]), ("annotation", annotation)):
+            out.compare(G_FIG_S5, ("panels", "b", "beam_sweep", f"beam{p['beam_width']}", key), value)
+        ax_b.annotate(annotation, (p["cost"], p["effect"]), textcoords="offset points", xytext=(4, 6),
                       fontsize=7)
     ax_b.plot([p["cost"] for p in horizon], [p["effect"] for p in horizon], "s--", color="0.55", ms=3,
               label="horizon sweep (panel a)")
+    for p in horizon:
+        for key, value in (("horizon", p["horizon"]), ("expected_serial_cost", p["cost"]),
+                           ("selection_effect_nats", p["effect"])):
+            out.compare(G_FIG_S5, ("panels", "b", "horizon_overlay", f"H{p['horizon']}", key), value)
     ax_b.set_xlabel("expected serial compute (one nominal execution = 1)")
     ax_b.set_ylabel("selection effect vs q_C (nats)")
-    ax_b.set_title(f"b  Beam-width sensitivity at H={points['registered_horizon']} and the horizon sweep", loc="left")
+    ax_b.set_title(f"b  Beam-width sensitivity at H={points['registered_horizon']} and the horizon sweep", loc="left", fontsize=9)
     ax_b.legend(frameon=False)
     for ax in (ax_a, ax_b):
         ax.grid(alpha=0.25)
         ax.margins(x=0.12, y=0.14)
+    if ctx.synthetic:
+        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
     fig.tight_layout()
     out.data("panel_a", SWEEP_COLUMNS, sweep_rows(points, "horizon"))
     out.data("panel_b", SWEEP_COLUMNS, sweep_rows(points, "beam") + sweep_rows(points, "horizon"))
     out.figure(fig)
     out.uses("records", "horizon_beam_sweep", sorted({p["source"][0] for k in ("horizon", "beam") for p in points[k]}))
+    out.provenance(source_document="supplementary", source_pages=[32], supporting_table_pages=[19],
+                   reference_scope="All horizon/beam point coordinates, headroom and beam labels, the registered "
+                                   "configuration, and both panel-b series; independent Table S29 transcription",
+                   evidence_scope="Original horizon_beam_sweep records remain required; no source values are "
+                                  "substituted for missing experiment observations")
 
 
 # ---------------------------------------------------------------------------

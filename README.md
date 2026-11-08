@@ -50,6 +50,18 @@ and checks the committed source-data and manifest views against those artifacts.
 The [paper-reference guide](docs/PAPER_REFERENCE_VALUES.md) explains how printed
 comparison targets are tied to the author's manuscript files.
 
+Existing experiment folders can be checked before publication:
+
+```bash
+make paper-preflight PUBLISH_MAP=/abs/paper-artifacts.map.json PAPER_PREFLIGHT_ROOT=/abs/new-preflight
+```
+
+This verifies the local inputs and reconstructs the available displays without
+uploading files or changing the release inventory. The [publication guide](docs/PUBLICATION.md)
+explains the input map and the distinction between local readiness and public
+availability. The [availability review](docs/AVAILABILITY_REVIEW.md) records the
+implemented improvements and the evidence still needed for the full statement.
+
 ## Regenerate the results on a Slurm cluster
 
 Independently of the published outputs, the Slurm launcher executes the registered eight-stage lifecycle on all seven
@@ -70,7 +82,7 @@ bash run_cross_morse.sh status        # progress
 | | |
 |---|---|
 | Site settings | One block at the top of `run_cross_morse.sh`, preset to the authors' cluster (NAISS Arrhenius, one NVIDIA GH200 per job); or a profile selected with `CM_ENV_FILE`, which keeps the launcher byte-identical |
-| Identity | `check` and `reproduce` verify the runtime fingerprint `0aba361b…` of the released Python code; every run seals it with its source snapshot, configuration, data-role membership, checkpoints and decision records |
+| Identity | `check` and `reproduce` verify the runtime fingerprint recorded in `release/release_scope.json`; every run seals it with its source snapshot, configuration, data-role membership, checkpoints and decision records |
 | Resilience | Jobs that reach their time limit checkpoint at a safe boundary and requeue themselves; a GPU or driver failure requeues the job on another node; `reproduce resume` continues a suite |
 | Report | `REPRODUCTION_REPORT.md` places each dataset's deployed policy and paired effect beside main Table 1, summarises the comparison of every readable quantity (exact, inside the printed 95% interval, or outside), embeds the rebuilt Tables 1–2 and records the GPU-hours used; a results ZIP holds every run's decision records |
 | First run | `bash run_cross_morse.sh reproduce smoke` exercises the complete orchestration on synthetic data in minutes; `pilot` uses the official data with reduced compute |

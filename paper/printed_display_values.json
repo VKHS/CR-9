@@ -5,10 +5,54 @@
     "supplementary": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"
   },
   "review": {
-    "date": "2026-11-07",
+    "date": "2026-11-08",
     "method": "AI-assisted contextual transcription from the author-supplied, SHA-256 identified supplementary PDF; text extraction and rendered-page inspection. Not an execution record or author certification.",
     "normalization": "Whitespace and LaTeX notation are normalized to the generator field vocabulary. A printed dash is null. Signed thresholds are stored as positive margin magnitudes where the field explicitly names epsilon. Recorded values are comparison targets only; generators do not read this file as an experiment input.",
-    "coverage": "Twenty-one PDF-bound comparison groups: previously unreferenced protocol and analytical displays, S15 declared accounting ranges, and S19 negative-control descriptions and measured targets. Comparison targets remain separate from execution inputs and from unresolved paper/code disagreements."
+    "coverage": "Twenty-nine PDF-bound reference groups, including five additional complete figure maps (S1, S5, S8, S10, S19) and the Table S29 sweep. Formula-derived reference coordinates retain explicit input, source and precision notes and are distinct from printed measurements. A complete reference definition does not verify an experiment or establish that its computed result agrees.",
+    "additional_checks": [
+      {
+        "date": "2026-11-08",
+        "document": "supplementary",
+        "pages": [
+          18,
+          19,
+          36
+        ],
+        "method": "AI-assisted text extraction and visual inspection of pages rendered from the SHA-256 identified author-supplied PDF.",
+        "groups": [
+          "supplementary_table_S28_one_step_regret_bound",
+          "supplementary_table_S28b_variance_aware_regret_bound"
+        ],
+        "scope": "All S28/S28b printed cells independently transcribed; Fig S17g checked for its illustrative ESS labels and the 53,257 / 2,716–3,529 requirement labels. Existing reported numeric values are unchanged."
+      },
+      {
+        "date": "2026-11-08",
+        "groups": [
+          "supplementary_table_S29_horizon_beam_sweep",
+          "supplementary_figure_S1_integrated_decision_surface",
+          "supplementary_figure_S5_horizon_beam_sensitivity"
+        ],
+        "method": "AI-assisted, source-bound visual and table review; no new benchmark measurements",
+        "scope": "Independent source-bound figure/table reference completion; original empirical inputs remain required. No new benchmark measurements or author certification."
+      },
+      {
+        "date": "2026-11-08",
+        "groups": [
+          "supplementary_figure_S19_guarantee_scope"
+        ],
+        "method": "Direct rendered-page and text review of supplementary PDF page 37, including every class-marker position. No generator output was used as a reference. Numerical admission counts and outcomes are printed integers; coverage is printed to whole percent. Main Table 1 and supplementary Table S13 corroborate admission outcomes and graph counts.",
+        "scope": "Independent source-bound figure/table reference completion; original empirical inputs remain required. No new benchmark measurements or author certification."
+      },
+      {
+        "date": "2026-11-08",
+        "groups": [
+          "supplementary_figure_S8_clipping_and_uncertainty",
+          "supplementary_figure_S10_sensing_cost"
+        ],
+        "method": "byte-matched PDFs, rendered visual inspection, source table transcription, independent standard-library formula evaluation",
+        "scope": "Independent source-bound figure/table reference completion; original empirical inputs remain required. No new benchmark measurements or author certification."
+      }
+    ]
   },
   "groups": {
     "supplementary_table_S1_statistical_design": {
@@ -1708,6 +1752,1843 @@
         }
       },
       "note": "Descriptions and all printed numerical cells transcribed directly from Table S19. Only descriptions are protocol inputs; activity, fallback and harm must come from verified measured records. CE is the literal printed unit label; mismatched units remain visible."
+    },
+    "supplementary_table_S28_one_step_regret_bound": {
+      "display_id": "supplementary:Table S28",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          18,
+          19
+        ],
+        "scope": "Listed analytical counts, separately reported qualified-cell reference ESS, derived bounds, and dataset-effect requirements. Reference ESS is not the minimum ESS over all cells of Table S7."
+      },
+      "values": {
+        "parameters": {
+          "B": {
+            "$value": 0.1,
+            "$decimals": 2
+          },
+          "actions": 10,
+          "delta_sup": {
+            "$value": 0.05,
+            "$decimals": 2
+          }
+        },
+        "datasets": {
+          "ogbn-arxiv": {
+            "minimum_count": 128,
+            "reference_ess": 91,
+            "two_e_minimum_count": {
+              "$value": 0.0612,
+              "$decimals": 4
+            },
+            "two_e_reference_ess": {
+              "$value": 0.0726,
+              "$decimals": 4
+            },
+            "n_for_effect_rounded": 23670
+          },
+          "ogbn-proteins": {
+            "minimum_count": 144,
+            "reference_ess": 96,
+            "two_e_minimum_count": {
+              "$value": 0.0577,
+              "$decimals": 4
+            },
+            "two_e_reference_ess": {
+              "$value": 0.0707,
+              "$decimals": 4
+            },
+            "n_for_effect_rounded": 33194
+          },
+          "ogbn-products": {
+            "minimum_count": 192,
+            "reference_ess": 132,
+            "two_e_minimum_count": {
+              "$value": 0.05,
+              "$decimals": 4
+            },
+            "two_e_reference_ess": {
+              "$value": 0.0603,
+              "$decimals": 4
+            },
+            "n_for_effect_rounded": null
+          },
+          "Roman-empire": {
+            "minimum_count": 96,
+            "reference_ess": 74,
+            "two_e_minimum_count": {
+              "$value": 0.0707,
+              "$decimals": 4
+            },
+            "two_e_reference_ess": {
+              "$value": 0.0805,
+              "$decimals": 4
+            },
+            "n_for_effect_rounded": 14650
+          },
+          "PascalVOC-SP": {
+            "minimum_count": 128,
+            "reference_ess": 88,
+            "two_e_minimum_count": {
+              "$value": 0.0612,
+              "$decimals": 4
+            },
+            "two_e_reference_ess": {
+              "$value": 0.0738,
+              "$decimals": 4
+            },
+            "n_for_effect_rounded": 6761
+          },
+          "COCO-SP": {
+            "minimum_count": 200,
+            "reference_ess": 142,
+            "two_e_minimum_count": {
+              "$value": 0.049,
+              "$decimals": 4
+            },
+            "two_e_reference_ess": {
+              "$value": 0.0581,
+              "$decimals": 4
+            },
+            "n_for_effect_rounded": 5852
+          },
+          "Peptides-func": {
+            "minimum_count": 150,
+            "reference_ess": 104,
+            "two_e_minimum_count": {
+              "$value": 0.0565,
+              "$decimals": 4
+            },
+            "two_e_reference_ess": {
+              "$value": 0.0679,
+              "$decimals": 4
+            },
+            "n_for_effect_rounded": 52208
+          }
+        }
+      }
+    },
+    "supplementary_table_S28b_variance_aware_regret_bound": {
+      "display_id": "supplementary:Table S28b",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          19
+        ],
+        "scope": "Both printed analytical blocks. Hoeffding n is the real equality rounded to the nearest unit; Bernstein n is the smallest satisfying integer. The explicitly printed COCO reference target is 0.0090 nats."
+      },
+      "values": {
+        "sigma1_grid": [
+          {
+            "$value": 0.005,
+            "$decimals": 3
+          },
+          {
+            "$value": 0.007,
+            "$decimals": 3
+          },
+          {
+            "$value": 0.01,
+            "$decimals": 3
+          }
+        ],
+        "count_rows": {
+          "64": {
+            "count": 64,
+            "hoeffding_two_e": {
+              "$value": 0.0865,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.1036,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.1054,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.1082,
+                "$decimals": 4
+              }
+            ]
+          },
+          "74": {
+            "count": 74,
+            "hoeffding_two_e": {
+              "$value": 0.0805,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.0897,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0914,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.094,
+                "$decimals": 4
+              }
+            ]
+          },
+          "91": {
+            "count": 91,
+            "hoeffding_two_e": {
+              "$value": 0.0726,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.0732,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0747,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.077,
+                "$decimals": 4
+              }
+            ]
+          },
+          "100": {
+            "count": 100,
+            "hoeffding_two_e": {
+              "$value": 0.0692,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.0667,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0681,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0703,
+                "$decimals": 4
+              }
+            ]
+          },
+          "142": {
+            "count": 142,
+            "hoeffding_two_e": {
+              "$value": 0.0581,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.0473,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0485,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0504,
+                "$decimals": 4
+              }
+            ]
+          },
+          "500": {
+            "count": 500,
+            "hoeffding_two_e": {
+              "$value": 0.031,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.0141,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0148,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0158,
+                "$decimals": 4
+              }
+            ]
+          },
+          "1000": {
+            "count": 1000,
+            "hoeffding_two_e": {
+              "$value": 0.0219,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.0074,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0079,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0086,
+                "$decimals": 4
+              }
+            ]
+          },
+          "3018": {
+            "count": 3018,
+            "hoeffding_two_e": {
+              "$value": 0.0126,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.0027,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.003,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0034,
+                "$decimals": 4
+              }
+            ]
+          },
+          "10000": {
+            "count": 10000,
+            "hoeffding_two_e": {
+              "$value": 0.0069,
+              "$decimals": 4
+            },
+            "bernstein_two_e": [
+              {
+                "$value": 0.001,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0011,
+                "$decimals": 4
+              },
+              {
+                "$value": 0.0014,
+                "$decimals": 4
+              }
+            ]
+          }
+        },
+        "targets": {
+          "smallest_admitted_effect": {
+            "label": "smallest admitted effect",
+            "target_nats": {
+              "$value": 0.003,
+              "$decimals": 4
+            },
+            "hoeffding_n_rounded": 53257,
+            "bernstein_n": [
+              2716,
+              3018,
+              3529
+            ]
+          },
+          "arxiv_effect": {
+            "label": "arxiv effect",
+            "target_nats": {
+              "$value": 0.0045,
+              "$decimals": 4
+            },
+            "hoeffding_n_rounded": 23670,
+            "bernstein_n": [
+              1725,
+              1881,
+              2139
+            ]
+          },
+          "Pascal_effect": {
+            "label": "Pascal effect",
+            "target_nats": {
+              "$value": 0.0084,
+              "$decimals": 4
+            },
+            "hoeffding_n_rounded": 6793,
+            "bernstein_n": [
+              873,
+              930,
+              1022
+            ]
+          },
+          "COCO_effect": {
+            "label": "COCO effect",
+            "target_nats": {
+              "$value": 0.009,
+              "$decimals": 4
+            },
+            "hoeffding_n_rounded": 5917,
+            "bernstein_n": [
+              810,
+              861,
+              944
+            ]
+          }
+        }
+      }
+    },
+    "supplementary_table_S29_horizon_beam_sweep": {
+      "display_id": "supplementary:Table S29",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          19
+        ]
+      },
+      "values": {
+        "dataset": "PascalVOC-SP",
+        "policy": "MPC-RH",
+        "registered": {
+          "horizon": 16,
+          "beam_width": 16
+        },
+        "rows": [
+          {
+            "configuration": "horizon H = 8 (beam 16)",
+            "selection_effect_nats": {
+              "$value": -0.0071,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 9.6,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.27,
+              "$decimals": 2
+            }
+          },
+          {
+            "configuration": "horizon H = 16 (beam 16)",
+            "selection_effect_nats": {
+              "$value": -0.00916,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 10.3,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.35,
+              "$decimals": 2
+            }
+          },
+          {
+            "configuration": "horizon H = 32 (beam 16)",
+            "selection_effect_nats": {
+              "$value": -0.0097,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 11.1,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.37,
+              "$decimals": 2
+            }
+          },
+          {
+            "configuration": "horizon H = 64 (beam 16)",
+            "selection_effect_nats": {
+              "$value": -0.0101,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 12.6,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.39,
+              "$decimals": 2
+            }
+          },
+          {
+            "configuration": "beam 4 (H = 16)",
+            "selection_effect_nats": {
+              "$value": -0.0079,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 9.1,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.3,
+              "$decimals": 2
+            }
+          },
+          {
+            "configuration": "beam 8 (H = 16)",
+            "selection_effect_nats": {
+              "$value": -0.0087,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 9.7,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.33,
+              "$decimals": 2
+            }
+          },
+          {
+            "configuration": "beam 16 (H = 16)",
+            "selection_effect_nats": {
+              "$value": -0.00916,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 10.3,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.35,
+              "$decimals": 2
+            }
+          },
+          {
+            "configuration": "beam 32 (H = 16)",
+            "selection_effect_nats": {
+              "$value": -0.0094,
+              "$decimals": 5
+            },
+            "expected_serial_cost": {
+              "$value": 11.4,
+              "$decimals": 1
+            },
+            "realized_fraction": {
+              "$value": 0.36,
+              "$decimals": 2
+            }
+          }
+        ]
+      },
+      "note": "Independent literal transcription of all eight rows and the registered configuration from rendered Table S29, SI PDF p19. Each configuration label, selection effect, expected cost and realized fraction is covered at the printed precision; no experiment output or hidden oracle denominator is supplied as a reference measurement."
+    },
+    "supplementary_figure_S1_integrated_decision_surface": {
+      "display_id": "supplementary:Figure S1",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          31
+        ]
+      },
+      "supporting_sources": [
+        {
+          "document": "main",
+          "pages": [
+            10
+          ],
+          "label": "Table 1; paired means, 95% intervals, units and rule identities"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            16
+          ],
+          "label": "Table S23; input fallback and expected serial work"
+        },
+        {
+          "document": "supplementary",
+          "pages": [
+            31
+          ],
+          "label": "Table S48 and Figure S1; display identities and categorical/marker roles"
+        }
+      ],
+      "values": {
+        "dataset_order": [
+          "ogbn-arxiv",
+          "ogbn-proteins",
+          "ogbn-products",
+          "Roman-empire",
+          "PascalVOC-SP",
+          "COCO-SP",
+          "Peptides-func"
+        ],
+        "panels": {
+          "a": {
+            "reference": "qC",
+            "zero_line": 0,
+            "rows": {
+              "ogbn-arxiv": {
+                "effect": {
+                  "$value": 0.07,
+                  "$decimals": 2
+                },
+                "low": {
+                  "$value": 0.01,
+                  "$decimals": 2
+                },
+                "high": {
+                  "$value": 0.13,
+                  "$decimals": 2
+                },
+                "unit": "pp",
+                "interval_kind": "95% paired test interval"
+              },
+              "ogbn-proteins": {
+                "effect": {
+                  "$value": 0.11,
+                  "$decimals": 2
+                },
+                "low": {
+                  "$value": 0.03,
+                  "$decimals": 2
+                },
+                "high": {
+                  "$value": 0.19,
+                  "$decimals": 2
+                },
+                "unit": "pp",
+                "interval_kind": "95% paired test interval"
+              },
+              "ogbn-products": {
+                "effect": {
+                  "$value": 0.0,
+                  "$decimals": 2
+                },
+                "low": null,
+                "high": null,
+                "unit": "pp",
+                "interval_kind": "comparator identity; no statistical interval"
+              },
+              "Roman-empire": {
+                "effect": {
+                  "$value": 0.26,
+                  "$decimals": 2
+                },
+                "low": {
+                  "$value": 0.1,
+                  "$decimals": 2
+                },
+                "high": {
+                  "$value": 0.42,
+                  "$decimals": 2
+                },
+                "unit": "pp",
+                "interval_kind": "95% paired test interval"
+              },
+              "PascalVOC-SP": {
+                "effect": {
+                  "$value": 0.6,
+                  "$decimals": 2
+                },
+                "low": {
+                  "$value": 0.38,
+                  "$decimals": 2
+                },
+                "high": {
+                  "$value": 0.82,
+                  "$decimals": 2
+                },
+                "unit": "pp",
+                "interval_kind": "95% paired test interval"
+              },
+              "COCO-SP": {
+                "effect": {
+                  "$value": 0.65,
+                  "$decimals": 2
+                },
+                "low": {
+                  "$value": 0.42,
+                  "$decimals": 2
+                },
+                "high": {
+                  "$value": 0.88,
+                  "$decimals": 2
+                },
+                "unit": "pp",
+                "interval_kind": "95% paired test interval"
+              },
+              "Peptides-func": {
+                "effect": {
+                  "$value": 0.0058,
+                  "$decimals": 4
+                },
+                "low": {
+                  "$value": 0.0009,
+                  "$decimals": 4
+                },
+                "high": {
+                  "$value": 0.0107,
+                  "$decimals": 4
+                },
+                "unit": "AP",
+                "interval_kind": "95% paired test interval"
+              }
+            }
+          },
+          "b": {
+            "reference": "qC",
+            "zero_line": 0,
+            "unit": "nats",
+            "rows": {
+              "ogbn-arxiv": {
+                "effect": {
+                  "$value": -0.0045,
+                  "$decimals": 5
+                },
+                "low": {
+                  "$value": -0.0075,
+                  "$decimals": 4
+                },
+                "high": {
+                  "$value": -0.0015,
+                  "$decimals": 4
+                },
+                "loss": "CE",
+                "interval_kind": "95% paired test interval"
+              },
+              "ogbn-proteins": {
+                "effect": {
+                  "$value": -0.0038,
+                  "$decimals": 5
+                },
+                "low": {
+                  "$value": -0.0068,
+                  "$decimals": 4
+                },
+                "high": {
+                  "$value": -0.0008,
+                  "$decimals": 4
+                },
+                "loss": "BCE",
+                "interval_kind": "95% paired test interval"
+              },
+              "ogbn-products": {
+                "effect": {
+                  "$value": 0.0,
+                  "$decimals": 5
+                },
+                "low": null,
+                "high": null,
+                "loss": "CE",
+                "interval_kind": "comparator identity; no statistical interval"
+              },
+              "Roman-empire": {
+                "effect": {
+                  "$value": -0.00572,
+                  "$decimals": 5
+                },
+                "low": {
+                  "$value": -0.0089,
+                  "$decimals": 4
+                },
+                "high": {
+                  "$value": -0.0026,
+                  "$decimals": 4
+                },
+                "loss": "CE",
+                "interval_kind": "95% paired test interval"
+              },
+              "PascalVOC-SP": {
+                "effect": {
+                  "$value": -0.00842,
+                  "$decimals": 5
+                },
+                "low": {
+                  "$value": -0.0128,
+                  "$decimals": 4
+                },
+                "high": {
+                  "$value": -0.0041,
+                  "$decimals": 4
+                },
+                "loss": "CE",
+                "interval_kind": "95% paired test interval"
+              },
+              "COCO-SP": {
+                "effect": {
+                  "$value": -0.00905,
+                  "$decimals": 5
+                },
+                "low": {
+                  "$value": -0.0127,
+                  "$decimals": 4
+                },
+                "high": {
+                  "$value": -0.0054,
+                  "$decimals": 4
+                },
+                "loss": "CE",
+                "interval_kind": "95% paired test interval"
+              },
+              "Peptides-func": {
+                "effect": {
+                  "$value": -0.00303,
+                  "$decimals": 5
+                },
+                "low": {
+                  "$value": -0.0047,
+                  "$decimals": 4
+                },
+                "high": {
+                  "$value": -0.0013,
+                  "$decimals": 4
+                },
+                "loss": "BCE",
+                "interval_kind": "95% paired test interval"
+              }
+            }
+          },
+          "c": {
+            "category_order": [
+              "MPC-RH",
+              "radius",
+              "comparator/phase"
+            ],
+            "marker_area_encoding": "proportional to expected serial cost",
+            "rows": {
+              "ogbn-arxiv": {
+                "mechanism": "radius",
+                "fallback_fraction": {
+                  "$value": 0.118,
+                  "$decimals": 3
+                },
+                "fallback_role": "input comparator fallback",
+                "comparator_returned": false,
+                "expected_serial_cost": {
+                  "$value": 4.617,
+                  "$decimals": 3
+                },
+                "marker_cost": {
+                  "$value": 4.617,
+                  "$decimals": 3
+                },
+                "annotation": "arxiv"
+              },
+              "ogbn-proteins": {
+                "mechanism": "radius",
+                "fallback_fraction": {
+                  "$value": 0.147,
+                  "$decimals": 3
+                },
+                "fallback_role": "input comparator fallback",
+                "comparator_returned": false,
+                "expected_serial_cost": {
+                  "$value": 4.682,
+                  "$decimals": 3
+                },
+                "marker_cost": {
+                  "$value": 4.682,
+                  "$decimals": 3
+                },
+                "annotation": "proteins"
+              },
+              "ogbn-products": {
+                "mechanism": "comparator/phase",
+                "fallback_fraction": {
+                  "$value": 1.0,
+                  "$decimals": 3
+                },
+                "fallback_role": "global comparator return",
+                "comparator_returned": true,
+                "expected_serial_cost": {
+                  "$value": 2.1,
+                  "$decimals": 3
+                },
+                "marker_cost": {
+                  "$value": 2.1,
+                  "$decimals": 3
+                },
+                "annotation": "products"
+              },
+              "Roman-empire": {
+                "mechanism": "MPC-RH",
+                "fallback_fraction": {
+                  "$value": 0.129,
+                  "$decimals": 3
+                },
+                "fallback_role": "input comparator fallback",
+                "comparator_returned": false,
+                "expected_serial_cost": {
+                  "$value": 5.219,
+                  "$decimals": 3
+                },
+                "marker_cost": {
+                  "$value": 5.219,
+                  "$decimals": 3
+                },
+                "annotation": "Roman"
+              },
+              "PascalVOC-SP": {
+                "mechanism": "MPC-RH",
+                "fallback_fraction": {
+                  "$value": 0.081,
+                  "$decimals": 3
+                },
+                "fallback_role": "input comparator fallback",
+                "comparator_returned": false,
+                "expected_serial_cost": {
+                  "$value": 10.298,
+                  "$decimals": 3
+                },
+                "marker_cost": {
+                  "$value": 10.298,
+                  "$decimals": 3
+                },
+                "annotation": "Pascal"
+              },
+              "COCO-SP": {
+                "mechanism": "MPC-RH",
+                "fallback_fraction": {
+                  "$value": 0.071,
+                  "$decimals": 3
+                },
+                "fallback_role": "input comparator fallback",
+                "comparator_returned": false,
+                "expected_serial_cost": {
+                  "$value": 10.601,
+                  "$decimals": 3
+                },
+                "marker_cost": {
+                  "$value": 10.601,
+                  "$decimals": 3
+                },
+                "annotation": "COCO"
+              },
+              "Peptides-func": {
+                "mechanism": "radius",
+                "fallback_fraction": {
+                  "$value": 0.188,
+                  "$decimals": 3
+                },
+                "fallback_role": "input comparator fallback",
+                "comparator_returned": false,
+                "expected_serial_cost": {
+                  "$value": 4.731,
+                  "$decimals": 3
+                },
+                "marker_cost": {
+                  "$value": 4.731,
+                  "$decimals": 3
+                },
+                "annotation": "Peptides"
+              }
+            }
+          }
+        }
+      },
+      "note": "Independent transcription from the rendered PDFs and tables. Every endpoint mean/interval/unit, loss mean/interval/unit, categorical route, fallback coordinate/role, expected-work marker encoding and dataset annotation is enumerated. Products is an exact comparator-identity point without a statistical interval; its x=1 marks global return, not a measured input-gate probability. Peptides retains the source's evaluated radius-arm results; this reference does not assert that it passed the registered confirmation gate. Category jitter and the common marker-area multiplier are presentation choices, not additional measured coordinates; marker_cost compares the actually plotted area divided by that common scale to the independently printed expected work. Existing result-registry numbers are unchanged."
+    },
+    "supplementary_figure_S5_horizon_beam_sensitivity": {
+      "display_id": "supplementary:Figure S5",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          32
+        ]
+      },
+      "supporting_sources": [
+        {
+          "document": "supplementary",
+          "pages": [
+            19
+          ],
+          "label": "Table S29; four horizon and four beam rows"
+        }
+      ],
+      "values": {
+        "dataset": "PascalVOC-SP",
+        "policy": "MPC-RH",
+        "reference": "qC",
+        "stage": "D_select",
+        "effect_unit": "nats",
+        "cost_unit": "nominal executions",
+        "registered": {
+          "horizon": 16,
+          "beam_width": 16
+        },
+        "panels": {
+          "a": {
+            "x_quantity": "horizon",
+            "fixed_beam_width": 16,
+            "registered_horizon_line": 16,
+            "points": {
+              "H8": {
+                "horizon": 8,
+                "selection_effect_nats": {
+                  "$value": -0.0071,
+                  "$decimals": 5
+                },
+                "realized_fraction": {
+                  "$value": 0.27,
+                  "$decimals": 2
+                },
+                "headroom_annotation": "0.27 of headroom"
+              },
+              "H16": {
+                "horizon": 16,
+                "selection_effect_nats": {
+                  "$value": -0.00916,
+                  "$decimals": 5
+                },
+                "realized_fraction": {
+                  "$value": 0.35,
+                  "$decimals": 2
+                },
+                "headroom_annotation": "0.35 of headroom"
+              },
+              "H32": {
+                "horizon": 32,
+                "selection_effect_nats": {
+                  "$value": -0.0097,
+                  "$decimals": 5
+                },
+                "realized_fraction": {
+                  "$value": 0.37,
+                  "$decimals": 2
+                },
+                "headroom_annotation": "0.37 of headroom"
+              },
+              "H64": {
+                "horizon": 64,
+                "selection_effect_nats": {
+                  "$value": -0.0101,
+                  "$decimals": 5
+                },
+                "realized_fraction": {
+                  "$value": 0.39,
+                  "$decimals": 2
+                },
+                "headroom_annotation": "0.39 of headroom"
+              }
+            }
+          },
+          "b": {
+            "x_quantity": "expected_serial_cost",
+            "fixed_horizon": 16,
+            "beam_sweep": {
+              "beam4": {
+                "beam_width": 4,
+                "expected_serial_cost": {
+                  "$value": 9.1,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.0079,
+                  "$decimals": 5
+                },
+                "annotation": "beam 4"
+              },
+              "beam8": {
+                "beam_width": 8,
+                "expected_serial_cost": {
+                  "$value": 9.7,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.0087,
+                  "$decimals": 5
+                },
+                "annotation": "beam 8"
+              },
+              "beam16": {
+                "beam_width": 16,
+                "expected_serial_cost": {
+                  "$value": 10.3,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.00916,
+                  "$decimals": 5
+                },
+                "annotation": "beam 16"
+              },
+              "beam32": {
+                "beam_width": 32,
+                "expected_serial_cost": {
+                  "$value": 11.4,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.0094,
+                  "$decimals": 5
+                },
+                "annotation": "beam 32"
+              }
+            },
+            "horizon_overlay": {
+              "H8": {
+                "horizon": 8,
+                "expected_serial_cost": {
+                  "$value": 9.6,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.0071,
+                  "$decimals": 5
+                }
+              },
+              "H16": {
+                "horizon": 16,
+                "expected_serial_cost": {
+                  "$value": 10.3,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.00916,
+                  "$decimals": 5
+                }
+              },
+              "H32": {
+                "horizon": 32,
+                "expected_serial_cost": {
+                  "$value": 11.1,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.0097,
+                  "$decimals": 5
+                }
+              },
+              "H64": {
+                "horizon": 64,
+                "expected_serial_cost": {
+                  "$value": 12.6,
+                  "$decimals": 1
+                },
+                "selection_effect_nats": {
+                  "$value": -0.0101,
+                  "$decimals": 5
+                }
+              }
+            }
+          }
+        }
+      },
+      "note": "Independent literal transcription from rendered Table S29 and the Figure S5 caption. Covers all four panel-a points and headroom labels, the registered H=16/beam=16 scenario, all four panel-b beam points/labels and all four repeated horizon-overlay coordinates, with source decimal precision. The two sweeps share the H=16, beam=16 observation. Oracle-headroom raw denominators are empirical companion data, not independently printed figure targets. No comparison target was obtained from a display generator output."
+    },
+    "supplementary_figure_S19_guarantee_scope": {
+      "display_id": "supplementary:Figure S19",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          37
+        ]
+      },
+      "values": {
+        "panel_a": {
+          "classes": {
+            "exact": "identity with no approximation",
+            "bound": "deterministic inequality",
+            "conditional": "holds on a registered coverage or invariance event",
+            "finite-sample": "holds with probability >= 1-delta for independent graphs",
+            "empirical": "a measurement with its declared statistical unit",
+            "protocol": "evaluation requirements and reporting definitions"
+          },
+          "statements": {
+            "lemma1": {
+              "statement": "Lemma 1 transport validity",
+              "class": "exact",
+              "holds_under": "nonnegative row-stochastic kernels; convex mixture weights"
+            },
+            "lemma2": {
+              "statement": "Lemma 2 resolvent correction",
+              "class": "exact",
+              "holds_under": "row-stochastic P; omitted tail mass 2(1-eta)^(T+1); T sparse products per step"
+            },
+            "prop1": {
+              "statement": "Prop. 1 deterministic replay",
+              "class": "exact",
+              "holds_under": "deterministic sensors, observer and policy"
+            },
+            "prop6ii": {
+              "statement": "Prop. 6(ii) alignment identity",
+              "class": "exact",
+              "holds_under": "exact finite-epsilon law of cosines per band with the measured c_lb"
+            },
+            "cor2": {
+              "statement": "Cor. 2 minimum admission J",
+              "class": "exact",
+              "holds_under": "algebra of the variance-free penalty term"
+            },
+            "prop4": {
+              "statement": "Prop. 4 value of state information",
+              "class": "exact",
+              "holds_under": "replay identity; clairvoyant oracle over the beam-restricted family: an upper bound, not an attainable value"
+            },
+            "executed_range": {
+              "statement": "Executed range; exchange rate lambda_star",
+              "class": "exact",
+              "holds_under": "registry functions; |Delta|/Delta_EC from the cost ledger of Table S23"
+            },
+            "prop10": {
+              "statement": "Prop. 10(i),(iii) decision boundary",
+              "class": "exact",
+              "holds_under": "risk comparison at the common ceiling (phi_star = 1 and r_B) and under priced work (lambda < lambda_pred_star); part (ii) is a sensitivity model with stated assumptions"
+            },
+            "prop11": {
+              "statement": "Prop. 11 advantage decomposition",
+              "class": "exact",
+              "holds_under": "telescoping identity with the comparator's continuation as reference; the critic's estimand, not a certificate"
+            },
+            "prop6i": {
+              "statement": "Prop. 6(i) band-limited sensitivity",
+              "class": "bound",
+              "holds_under": "polynomial adapter kernels; L_U-Lipschitz update; registered bands"
+            },
+            "prop2": {
+              "statement": "Prop. 2 fixed-mode perturbation",
+              "class": "bound",
+              "holds_under": "worst-case constants; the audit uses plug-in constants (tube)"
+            },
+            "props3_9": {
+              "statement": "Props. 3, 9 stability, sensing",
+              "class": "conditional",
+              "holds_under": "Lipschitz score; invariance on the region; the action-gap audit is a sensitivity statistic"
+            },
+            "prop7": {
+              "statement": "Prop. 7 one-step regret",
+              "class": "conditional",
+              "holds_under": "simultaneous per-action coverage; sigma_1 enters only the Bernstein radius"
+            },
+            "thm1": {
+              "statement": "Thm. 1 finite-family selection",
+              "class": "conditional",
+              "holds_under": "simultaneous coverage of the max-t intervals; not proven under dependence"
+            },
+            "props5_8": {
+              "statement": "Props. 5, 8 break-even, search",
+              "class": "conditional",
+              "holds_under": "ensemble-law fit on the grid E <= 20 (Table S26b); e_H, zeta_H from the enumeration of E9"
+            },
+            "thm2": {
+              "statement": "Thm. 2 clipped-loss admission",
+              "class": "finite-sample",
+              "holds_under": "i.i.d. admission graphs not used by any decision that fixed q_tilde_M (separated-data protocol, Table S39)"
+            },
+            "cor1": {
+              "statement": "Cor. 1 per-dataset statement",
+              "class": "finite-sample",
+              "holds_under": "union of the Thm. 1 and Thm. 2 events; one dataset at a time"
+            },
+            "improvement": {
+              "statement": "Improvement over qC (main Table 1)",
+              "class": "empirical",
+              "holds_under": "paired test-stage estimates with intervals; empirical class"
+            },
+            "mechanisms": {
+              "statement": "Mechanism labels (Table S14)",
+              "class": "empirical",
+              "holds_under": "held-out contrasts on D_confirm, Holm-corrected"
+            },
+            "cost_ledger": {
+              "statement": "Cost ledger, lambda_star (main Table 2)",
+              "class": "empirical",
+              "holds_under": "measured serial compute and input-fallback rates; C0.99 and the observed per-input maximum reported separately (E17)"
+            },
+            "budget": {
+              "statement": "Budget-matched comparison (main Section 4; Tables S46-S47)",
+              "class": "empirical",
+              "holds_under": "frozen arms E2-E6 on D_compare at the common ceiling (Tables S46-S46b)"
+            },
+            "identity_oracle": {
+              "statement": "Identity test E1 and oracle dispersion",
+              "class": "empirical",
+              "holds_under": "E1 identity entries and per-input oracle summaries (Tables S5c and S30)"
+            }
+          },
+          "boundary_notes": {
+            "priced_work": "The comparator-relative advantage decomposition (Proposition 11) and priced-work boundary (Proposition 10(iii)) are exact identities.",
+            "ensemble_spend": "The ensemble-spend crossovers (Proposition 10(ii)) are a sensitivity model."
+          }
+        },
+        "panel_b": {
+          "datasets": {
+            "ogbn-arxiv": {
+              "dataset": "arxiv",
+              "unit_count": 32,
+              "unit": "32 buffered cores",
+              "criterion": "cluster bootstrap (descriptive)",
+              "coverage": "none",
+              "G_admit": 1,
+              "outcome": "1"
+            },
+            "ogbn-proteins": {
+              "dataset": "proteins",
+              "unit_count": 32,
+              "unit": "32 buffered cores",
+              "criterion": "cluster bootstrap (descriptive)",
+              "coverage": "none",
+              "G_admit": 1,
+              "outcome": "1"
+            },
+            "ogbn-products": {
+              "dataset": "products",
+              "unit_count": 64,
+              "unit": "64 buffered cores",
+              "criterion": "cluster bootstrap (descriptive)",
+              "coverage": "none",
+              "G_admit": 0,
+              "outcome": "0 (qC)"
+            },
+            "Roman-empire": {
+              "dataset": "Roman",
+              "unit_count": 10,
+              "unit": "10 official splits",
+              "criterion": "paired repeated-split interval",
+              "coverage": "none",
+              "G_admit": 1,
+              "outcome": "1"
+            },
+            "PascalVOC-SP": {
+              "dataset": "Pascal",
+              "unit_count": 1428,
+              "unit": "1,428 i.i.d. graphs (validation split)",
+              "criterion": "emp. Bernstein U_a <= -epsilon_a (Theorem 2)",
+              "coverage": ">= 95%; policy fixed on D_confirm",
+              "G_admit": 1,
+              "outcome": "1",
+              "coverage_percent": {
+                "$value": 95,
+                "$decimals": 0
+              }
+            },
+            "COCO-SP": {
+              "dataset": "COCO",
+              "unit_count": 5000,
+              "unit": "5,000 i.i.d. graphs (validation split)",
+              "criterion": "emp. Bernstein U_a <= -epsilon_a (Theorem 2)",
+              "coverage": ">= 95%; policy fixed on D_confirm",
+              "G_admit": 1,
+              "outcome": "1",
+              "coverage_percent": {
+                "$value": 95,
+                "$decimals": 0
+              }
+            },
+            "Peptides-func": {
+              "dataset": "Peptides",
+              "unit_count": 2331,
+              "unit": "2,331 i.i.d. graphs (validation split)",
+              "criterion": "emp. Bernstein U_a <= -epsilon_a (Theorem 2)",
+              "coverage": ">= 95%; policy fixed on D_confirm",
+              "G_admit": 1,
+              "outcome": "1 (boundary; Note S26)",
+              "coverage_percent": {
+                "$value": 95,
+                "$decimals": 0
+              }
+            }
+          },
+          "printed_condition": "Theorem 2 requires independent admission graphs that no decision fixing q_tilde_M has used; the separated-data protocol fixes the policy on D_confirm and reads the validation split once at admission, so the three multigraph benchmarks are admitted under the finite-sample statement. Single-graph benchmarks apply the same clipped-loss statistic on their dependent unit under the descriptive rule (Table S27)."
+        },
+        "panel_c": {
+          "requirements": [
+            "hook access to the intermediate node states H_l",
+            "aggregation exposed as a nonnegative, row-normalizable, state-independent linear operator on node states",
+            "native update U_l Lipschitz in its message argument; weights, head and precision unchanged",
+            "nominal-identity test E1 required (Table S5c)"
+          ],
+          "tested": [
+            "seven frozen plants (Table S5): MLP-encoder transport plants, GraphGPS-style local branch, GINE-style linear-aggregation plant",
+            "inserted control sites between native blocks: a second mechanism (transport insertion) with a literal bypass as A0; its attribution is assessed by E13",
+            "substitutions (Table S25): GCNII, GINE-style; GPR-GNN enters through its per-step operator, its signed readout stays in the head"
+          ],
+          "not_covered": [
+            "prediction-only APIs and fused kernels that expose no hook",
+            "state-dependent kernels (attention weights) and signed per-step propagation operators",
+            "the standard GINE message phi(h_j + e_ij) and other edge-conditioned nonlinear messages",
+            "global-attention branch of hybrid models; topology-changing interventions"
+          ]
+        }
+      },
+      "corroborating_sources": [
+        {
+          "document": "main",
+          "display": "Table 1",
+          "pages": [
+            10
+          ]
+        },
+        {
+          "document": "supplementary",
+          "display": "Table S13",
+          "pages": [
+            10
+          ]
+        }
+      ],
+      "note": "Every panel-a statement/class/condition, six-class legend, explicit exact-identity-versus-sensitivity caption distinction, all seven panel-b unit counts/criterion/coverage/outcome cells, its printed scope condition, and all eleven panel-c model-scope bullets were independently enumerated from page 37. Source text is a protocol input; G_admit, unit counts and coverage are evaluated from supplied runs/configuration. Peptides boundary notation is a printed annotation, not a new statistical certification."
+    },
+    "supplementary_figure_S8_clipping_and_uncertainty": {
+      "display_id": "supplementary:Figure S8",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          32
+        ]
+      },
+      "values": {
+        "panel_a": {
+          "PascalVOC-SP": {
+            "clipped_fraction_percent": {
+              "$value": 2.84,
+              "$decimals": 2
+            }
+          },
+          "COCO-SP": {
+            "clipped_fraction_percent": {
+              "$value": 3.44,
+              "$decimals": 2
+            }
+          },
+          "Peptides-func": {
+            "clipped_fraction_percent": {
+              "$value": 1.36,
+              "$decimals": 2
+            }
+          }
+        },
+        "panel_b": {
+          "PascalVOC-SP": {
+            "graph_unit_half_width_mnats": {
+              "$value": 0.758750262,
+              "$decimals": 2
+            },
+            "test_stage_half_width_mnats": {
+              "$value": 4.35,
+              "$decimals": 1
+            },
+            "test_to_graph_ratio": {
+              "$value": 5.7,
+              "$decimals": 1
+            }
+          },
+          "COCO-SP": {
+            "graph_unit_half_width_mnats": {
+              "$value": 0.449519922,
+              "$decimals": 2
+            },
+            "test_stage_half_width_mnats": {
+              "$value": 3.65,
+              "$decimals": 1
+            },
+            "test_to_graph_ratio": {
+              "$value": 8.1,
+              "$decimals": 1
+            }
+          },
+          "Peptides-func": {
+            "graph_unit_half_width_mnats": {
+              "$value": 0.455690744,
+              "$decimals": 2
+            },
+            "test_stage_half_width_mnats": {
+              "$value": 1.7,
+              "$decimals": 1
+            },
+            "test_to_graph_ratio": {
+              "$value": 3.8,
+              "$decimals": 1
+            }
+          }
+        }
+      },
+      "supporting_sources": [
+        {
+          "document": "supplementary",
+          "pages": [
+            10
+          ],
+          "label": "Table S13"
+        },
+        {
+          "document": "main",
+          "pages": [
+            10
+          ],
+          "label": "Table 1"
+        }
+      ],
+      "evidence_kind": "moment-derived bound and comparison of two observed uncertainty sources",
+      "note": "All three bars of panel a and both half-width bars plus each ratio annotation of panel b are enumerated. The clipping percentages (2.84, 3.44, 1.36) and ratios (5.7, 8.1, 3.8) are transcribed from the rendered figure. Graph-width coordinates are independently evaluated from the displayed 1.96 sqrt(S2/J) formula and rounded S13 moments, with 0.005 mnats tolerance covering source rounding and the 1.96 approximation. Test-width coordinates use half the main Table 1 endpoint difference, with 0.05 mnats tolerance propagated from its four-decimal endpoints. The caption refers to Table 2; the numerical paired intervals are in Table 1. Ratio labels are one-decimal comparisons only: they must not be inverted to invent exact unrounded intervals or variance components. Actual generator inputs remain run-derived.",
+      "source_inputs": {
+        "PascalVOC-SP": {
+          "J": 1428,
+          "B": 0.1,
+          "D_bar": -0.00836,
+          "S2": 0.000214,
+          "interval": [
+            -0.0128,
+            -0.0041
+          ],
+          "clip_percent_label": 2.84,
+          "ratio_label": 5.7
+        },
+        "COCO-SP": {
+          "J": 5000,
+          "B": 0.1,
+          "D_bar": -0.00901,
+          "S2": 0.000263,
+          "interval": [
+            -0.0127,
+            -0.0054
+          ],
+          "clip_percent_label": 3.44,
+          "ratio_label": 8.1
+        },
+        "Peptides-func": {
+          "J": 2331,
+          "B": 0.1,
+          "D_bar": -0.00311,
+          "S2": 0.000126,
+          "interval": [
+            -0.0047,
+            -0.0013
+          ],
+          "clip_percent_label": 1.36,
+          "ratio_label": 3.8
+        }
+      }
+    },
+    "supplementary_figure_S10_sensing_cost": {
+      "display_id": "supplementary:Figure S10",
+      "source": {
+        "document": "supplementary",
+        "pages": [
+          33
+        ]
+      },
+      "values": {
+        "panel_a": {
+          "ogbn-arxiv": {
+            "controller_overhead_percent": {
+              "$value": 17.5,
+              "$decimals": 1
+            },
+            "full_state_sensing_share_percent": {
+              "$value": 10.617911655,
+              "$decimals": 6
+            }
+          },
+          "ogbn-proteins": {
+            "controller_overhead_percent": {
+              "$value": 20.0,
+              "$decimals": 1
+            },
+            "full_state_sensing_share_percent": {
+              "$value": 294.632251045,
+              "$decimals": 6
+            }
+          },
+          "Roman-empire": {
+            "controller_overhead_percent": {
+              "$value": 35.0,
+              "$decimals": 1
+            },
+            "full_state_sensing_share_percent": {
+              "$value": 3.015591631,
+              "$decimals": 6
+            }
+          },
+          "PascalVOC-SP": {
+            "controller_overhead_percent": {
+              "$value": 31.25,
+              "$decimals": 1
+            },
+            "full_state_sensing_share_percent": {
+              "$value": 33.842039352,
+              "$decimals": 6
+            }
+          },
+          "COCO-SP": {
+            "controller_overhead_percent": {
+              "$value": 35.0,
+              "$decimals": 1
+            },
+            "full_state_sensing_share_percent": {
+              "$value": 33.81123919,
+              "$decimals": 6
+            }
+          },
+          "Peptides-func": {
+            "controller_overhead_percent": {
+              "$value": 22.5,
+              "$decimals": 1
+            },
+            "full_state_sensing_share_percent": {
+              "$value": 12.525206826,
+              "$decimals": 6
+            }
+          }
+        },
+        "panel_b": {
+          "datasets": {
+            "ogbn-arxiv": {
+              "residual_share_percent": {
+                "$value": 6.882088345,
+                "$decimals": 1
+              },
+              "printed_residual_percent": {
+                "$value": 7,
+                "$decimals": 0
+              }
+            },
+            "ogbn-proteins": {
+              "residual_share_percent": {
+                "$value": -274.632251045,
+                "$decimals": 1
+              },
+              "printed_residual_percent": {
+                "$value": -275,
+                "$decimals": 0
+              }
+            },
+            "Roman-empire": {
+              "residual_share_percent": {
+                "$value": 31.984408369,
+                "$decimals": 1
+              },
+              "printed_residual_percent": {
+                "$value": 32,
+                "$decimals": 0
+              }
+            },
+            "PascalVOC-SP": {
+              "residual_share_percent": {
+                "$value": -2.592039352,
+                "$decimals": 1
+              },
+              "printed_residual_percent": {
+                "$value": -3,
+                "$decimals": 0
+              }
+            },
+            "COCO-SP": {
+              "residual_share_percent": {
+                "$value": 1.18876081,
+                "$decimals": 1
+              },
+              "printed_residual_percent": {
+                "$value": 1,
+                "$decimals": 0
+              }
+            },
+            "Peptides-func": {
+              "residual_share_percent": {
+                "$value": 9.974793174,
+                "$decimals": 1
+              },
+              "printed_residual_percent": {
+                "$value": 10,
+                "$decimals": 0
+              }
+            }
+          },
+          "zero_boundary_percent": {
+            "$value": 0,
+            "$decimals": 9
+          }
+        },
+        "panel_c": {
+          "points": {
+            "4": {
+              "sketch_width": 4,
+              "relative_sd_bound_percent": {
+                "$value": 70.710678119,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 2.301814461,
+                "$decimals": 6
+              }
+            },
+            "8": {
+              "sketch_width": 8,
+              "relative_sd_bound_percent": {
+                "$value": 50.0,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 4.603628923,
+                "$decimals": 6
+              }
+            },
+            "16": {
+              "sketch_width": 16,
+              "relative_sd_bound_percent": {
+                "$value": 35.355339059,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 9.207257845,
+                "$decimals": 6
+              }
+            },
+            "32": {
+              "sketch_width": 32,
+              "relative_sd_bound_percent": {
+                "$value": 25.0,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 18.41451569,
+                "$decimals": 6
+              }
+            },
+            "64": {
+              "sketch_width": 64,
+              "relative_sd_bound_percent": {
+                "$value": 17.67766953,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 36.829031381,
+                "$decimals": 6
+              }
+            },
+            "128": {
+              "sketch_width": 128,
+              "relative_sd_bound_percent": {
+                "$value": 12.5,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 73.658062761,
+                "$decimals": 6
+              }
+            },
+            "256": {
+              "sketch_width": 256,
+              "relative_sd_bound_percent": {
+                "$value": 8.838834765,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 147.316125522,
+                "$decimals": 6
+              }
+            },
+            "512": {
+              "sketch_width": 512,
+              "relative_sd_bound_percent": {
+                "$value": 6.25,
+                "$decimals": 6
+              },
+              "proteins_sensing_share_percent": {
+                "$value": 294.632251045,
+                "$decimals": 6
+              }
+            }
+          },
+          "sketch_width_domain": [
+            4,
+            512
+          ],
+          "proteins_overhead_ceiling_percent": {
+            "$value": 20,
+            "$decimals": 1
+          }
+        }
+      },
+      "supporting_sources": [
+        {
+          "document": "supplementary",
+          "pages": [
+            3,
+            5,
+            16
+          ],
+          "label": "Tables S5, S6c and S23"
+        }
+      ],
+      "evidence_kind": "observed controller costs with analytical sensing and precision identities",
+      "note": "Every admitted-dataset bar, residual coordinate and printed residual label, every point of both curves on the explicitly displayed width grid 4,8,16,32,64,128,256,512, and both horizontal boundaries are enumerated. Source formulas are r=E/(N*d), sensing_percent=800*r/(1+r), overhead_percent=100*(C_ctrl/C_qC-1), residual=overhead-sensing, precision_percent=100*sqrt(2/k), and proteins_sketch_sensing_percent=sensing_percent*k/512 at period one. Coordinates are independently evaluated from declared benchmark statistics/widths and S23 costs, not copied from a display build. Deterministic model coordinates use six-decimal comparison precision; cost-dependent coordinates use 0.05 percentage-point tolerance to retain the rounding of the three-decimal S23 costs. Reported r in S6c is rounded and is never used as hidden exact source data. Benchmark dimensions retain each provider's reported edge convention, separate from runtime adjacency counts or elapsed-work measurements.",
+      "dimension_sources": [
+        {
+          "url": "https://ogb.stanford.edu/docs/nodeprop/",
+          "datasets": [
+            "ogbn-arxiv",
+            "ogbn-proteins"
+          ],
+          "review": "Opened primary provider table on 2026-11-08; nodes/edges 169343/1166243 and 132534/39561252 verified. The provider states that loaded undirected graphs contain twice the reported count; these analytical coordinates retain the reported count."
+        },
+        {
+          "url": "https://github.com/yandex-research/heterophilous-graphs/blob/main/README.md",
+          "datasets": [
+            "Roman-empire"
+          ],
+          "review": "Opened primary dataset table on 2026-11-08; 22662 nodes and 32927 reported undirected edges verified."
+        },
+        {
+          "url": "https://github.com/vijaydwivedi75/lrgb/blob/main/README.md",
+          "datasets": [
+            "PascalVOC-SP",
+            "COCO-SP",
+            "Peptides-func"
+          ],
+          "review": "Opened primary Statistics of Datasets table on 2026-11-08; mean nodes/edges 479.40/2710.48, 476.88/2693.67 and 150.94/307.30 verified. These are the reported mean adjacency entries per graph, not a uniform undirected-pair convention."
+        }
+      ],
+      "analytical_inputs": {
+        "ogbn-arxiv": {
+          "N": 169343,
+          "E": 1166243,
+          "d": 512,
+          "C_ctrl": 4.7,
+          "C_qC": 4.0,
+          "residual_label_percent": 7
+        },
+        "ogbn-proteins": {
+          "N": 132534,
+          "E": 39561252,
+          "d": 512,
+          "C_ctrl": 4.8,
+          "C_qC": 4.0,
+          "residual_label_percent": -275
+        },
+        "Roman-empire": {
+          "N": 22662,
+          "E": 32927,
+          "d": 384,
+          "C_ctrl": 5.4,
+          "C_qC": 4.0,
+          "residual_label_percent": 32
+        },
+        "PascalVOC-SP": {
+          "N": 479.4,
+          "E": 2710.48,
+          "d": 128,
+          "C_ctrl": 10.5,
+          "C_qC": 8.0,
+          "residual_label_percent": -3
+        },
+        "COCO-SP": {
+          "N": 476.88,
+          "E": 2693.67,
+          "d": 128,
+          "C_ctrl": 10.8,
+          "C_qC": 8.0,
+          "residual_label_percent": 1
+        },
+        "Peptides-func": {
+          "N": 150.94,
+          "E": 307.3,
+          "d": 128,
+          "C_ctrl": 4.9,
+          "C_qC": 4.0,
+          "residual_label_percent": 10
+        }
+      }
     }
   }
 }

@@ -6,7 +6,8 @@ import json
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from cross_morse.review import EvidenceError, replay_results, evidence_markdown
+from cross_morse.review import EvidenceError, evidence_markdown
+from scripts._source_snapshots import replay_results_exact
 
 
 def main(argv=None):
@@ -19,7 +20,7 @@ def main(argv=None):
         if args.output and (args.output.resolve().is_relative_to(args.run_root.resolve()) or args.output.exists()
                             or args.output.with_suffix(".md").exists()):
             raise EvidenceError("Report destination must be new and outside the immutable run")
-        result = replay_results(args.run_root, selection=not args.skip_selection_replay)
+        result = replay_results_exact(args.run_root, selection=not args.skip_selection_replay)
         text = json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n"
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)

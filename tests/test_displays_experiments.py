@@ -13,11 +13,12 @@ import unittest
 from pathlib import Path
 
 from paper.build.displays import experiments
+from paper.build.displays import framework as fw
 from paper.build.displays.framework import DATASETS, GRAPH_LEVEL, DisplayInputError, RunView
 from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table
 
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = json.loads((ROOT / "paper/reported_results.json").read_text(encoding="utf-8"))
+REGISTRY = fw.load_references(ROOT)[0]
 
 
 def spec(name):
@@ -155,7 +156,7 @@ def sweep_records(points=SWEEP):
 class SweepDisplays(Workspace):
     def test_table_s29(self):
         ctx = context(records={"horizon_beam_sweep": sweep_records()})
-        writer, rows = build_one("supplementary:Table S29", ctx, self.out)
+        writer, rows = build_one("supplementary:Table S29", ctx, self.out, registry=REGISTRY)
         table = read_table(self.out, "S29")
         self.assertEqual([r["configuration"] for r in table],
                          ["horizon H = 8 (beam 16)", "horizon H = 16 (beam 16)", "horizon H = 32 (beam 16)",
@@ -166,7 +167,8 @@ class SweepDisplays(Workspace):
         self.assertEqual(table[0]["expected serial cost"], "9.6")
         self.assertEqual(table[0]["realized fraction"], "0.27")        # -0.00710 / -0.0262
         self.assertEqual(table[1]["realized fraction"], table[6]["realized fraction"])
-        self.assertEqual(rows, [])
+        self.assertEqual(len(rows), 36)
+        self.assertTrue(all(row["status"] == "exact" for row in rows))
         data = (self.out / "data/S29/sweep.csv").read_text().splitlines()
         self.assertEqual(len(data), 9)
 
@@ -179,13 +181,66 @@ class SweepDisplays(Workspace):
 
     def test_figure_s5(self):
         ctx = context(records={"horizon_beam_sweep": sweep_records()})
-        writer, _ = build_one("supplementary:Figure S5", ctx, self.out)
+        writer, comparisons = build_one("supplementary:Figure S5", ctx, self.out, registry=REGISTRY)
         for name in ("figures/FigS5.png", "figures/FigS5.svg", "data/FigS5/panel_a.csv", "data/FigS5/panel_b.csv"):
             self.assertIn(name, writer.files)
         panel_a = (self.out / "data/FigS5/panel_a.csv").read_text().splitlines()
         panel_b = (self.out / "data/FigS5/panel_b.csv").read_text().splitlines()
         self.assertEqual(len(panel_a), 1 + 4)
         self.assertEqual(len(panel_b), 1 + 4 + 4)
+        self.assertEqual(len(comparisons), 57)
+        self.assertTrue(all(row["status"] == "exact" for row in comparisons))
+
+    def test_sweep_reference_contracts_cover_both_figures_series_and_the_table(self):
+        ctx = context(records={"horizon_beam_sweep": sweep_records()})
+        result = fw.build_displays(ctx, self.out, only=["supplementary:Table S29", "supplementary:Figure S5"])
+        self.assertEqual(result["errors"], [])
+        for row in result["displays"]:
+            self.assertTrue(row["content_complete"])
+            self.assertTrue(row["comparison_complete"])
+            self.assertEqual(row["comparison"]["differs"], 0)
+            self.assertEqual(row["comparison_coverage"]["expected_values"], 36 if row["stem"] == "S29" else 57)
+        # A related S29 check cannot replace one missing Figure S5 annotation comparison.
+        writer, _ = build_one("supplementary:Figure S5", ctx, self.tmp / "omitted", registry=REGISTRY)
+        omitted = [c for c in writer.comparisons if c.path != ("panels", "a", "points", "H32", "headroom_annotation")]
+        registry, metadata, _ = fw.load_references(ROOT)
+        missing, coverage = fw.comparison_coverage("supplementary:Figure S5", omitted, registry, metadata, scope="measurement")
+        self.assertFalse(coverage["complete"])
+        self.assertEqual(coverage["missing_values"], 1)
+        self.assertEqual(missing[0]["path"], "panels/a/points/H32/headroom_annotation")
+
+    def test_sweep_source_perturbation_changes_both_plotted_occurrences(self):
+        modified = dict(SWEEP)
+        modified[(32, 16)] = (-0.00940, 11.6)
+        ctx = context(records={"horizon_beam_sweep": sweep_records(modified)})
+        _, comparisons = build_one("supplementary:Figure S5", ctx, self.out, registry=REGISTRY)
+        differs = {row["path"] for row in comparisons if row["status"] == "differs"}
+        self.assertIn("panels/a/points/H32/selection_effect_nats", differs)
+        self.assertIn("panels/b/horizon_overlay/H32/selection_effect_nats", differs)
+        self.assertIn("panels/b/horizon_overlay/H32/expected_serial_cost", differs)
+        self.assertEqual(REGISTRY[experiments.G_FIG_S5]["panels"]["a"]["points"]["H32"]["selection_effect_nats"]["$value"],
+                         -0.00970)
+
+    def test_sweep_missing_headroom_annotation_and_grid_point_are_incomplete(self):
+        original = sweep_records()
+        rows = [row for row in original.rows if not (row["quantity"] == "realized_fraction" and row["horizon"] == "32")]
+        records = fake_records("horizon_beam_sweep", rows, spec=spec("horizon_beam_sweep"))
+        result = fw.build_displays(context(records={"horizon_beam_sweep": records}), self.out,
+                                   only=["supplementary:Figure S5"])["displays"][0]
+        self.assertFalse(result["content_complete"])
+        self.assertFalse(result["comparison_complete"])
+        self.assertEqual(result["comparison"]["missing"], 2)
+        reduced_spec = spec("horizon_beam_sweep")
+        reduced_spec["grid"]["horizon"].remove(64)
+        reduced = fake_records("horizon_beam_sweep", original.rows, spec=reduced_spec)
+        result = fw.build_displays(context(records={"horizon_beam_sweep": reduced}), self.tmp / "reduced",
+                                   only=["supplementary:Figure S5"])["displays"][0]
+        self.assertFalse(result["comparison_complete"])
+        self.assertEqual(result["comparison_coverage"]["missing_values"], 7)  # panel-a point and panel-b overlay
+
+    def test_sweep_contracts_keep_empirical_records_required(self):
+        result = fw.build_displays(context(), self.out, only=["supplementary:Table S29", "supplementary:Figure S5"])
+        self.assertTrue(all(row["status"] == "awaiting_inputs" for row in result["displays"]))
 
 
 # ---------------------------------------------------------------------------

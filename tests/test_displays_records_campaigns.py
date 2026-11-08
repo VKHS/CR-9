@@ -18,6 +18,7 @@ from unittest import mock
 import numpy as np
 
 from paper.build.displays import records_campaigns as rc
+from paper.build.displays import framework as fw
 from paper.build.displays.framework import (DATASETS, GENERATORS, DisplayInputError, DisplayValidationError, RunView,
                                             load_references)
 from paper.build.displays.testing import build_one, context, fake_records, fake_run, read_table
@@ -675,6 +676,30 @@ class Figures(World):
             self.assertIn(panel, names)
         return names
 
+    def s1_source_context(self):
+        """Separate software fixtures from the independently inspected main Table 1 (PDF p10).
+
+        The older WORLD fixture is intentionally unchanged. These inputs test
+        source precision and roles; they are not deposited benchmark evidence.
+        """
+        source_intervals = {
+            "ogbn-arxiv": ((.07, .01, .13), (-.00450, -.0075, -.0015)),
+            "ogbn-proteins": ((.11, .03, .19), (-.00380, -.0068, -.0008)),
+            "ogbn-products": ((0., 0., 0.), (0., 0., 0.)),
+            "Roman-empire": ((.26, .10, .42), (-.00572, -.0089, -.0026)),
+            "PascalVOC-SP": ((.60, .38, .82), (-.00842, -.0128, -.0041)),
+            "COCO-SP": ((.65, .42, .88), (-.00905, -.0127, -.0054)),
+            "Peptides-func": ((.58, .09, 1.07), (-.00303, -.0047, -.0013)),
+        }
+        runs = {}
+        for dataset, original in self.runs.items():
+            evidence = json.loads(json.dumps(original.evidence))
+            gain, loss = source_intervals[dataset]
+            evidence["final"]["paired_metric_pp"] = dict(zip(("mean", "lower", "upper"), gain))
+            evidence["final"]["paired_loss"] = dict(zip(("mean", "lower", "upper"), loss))
+            runs[dataset] = RunView(dataset, original.root, splits=original.splits, evidence=evidence)
+        return context(runs=runs, records={"input_gate": self.records["input_gate"]})
+
     def test_figure_s1(self):
         out, _, rows = self.build("supplementary:Figure S1", self.ctx("input_gate"))
         self.assertFigure(out, "FigS1", ["panel_a_endpoint_effect", "panel_b_loss_effect", "panel_c_mechanism"])
@@ -683,7 +708,62 @@ class Figures(World):
         self.assertEqual(float(panel_c["ogbn-products"]["fallback_fraction"]), 1.0)
         peptides = next(r for r in data_rows(out, "FigS1", "panel_a_endpoint_effect") if r["dataset"] == "Peptides-func")
         self.assertAlmostEqual(float(peptides["effect"]), 0.0058)       # AP gain in AP units
+        loss = next(r for r in data_rows(out, "FigS1", "panel_b_loss_effect") if r["dataset"] == "Peptides-func")
+        self.assertEqual(loss["loss"], "BCE")       # native AP never labels the loss interval
         self.assertResolved(rows)
+
+    def test_figure_s1_full_contract_covers_all_panels_and_identity_roles(self):
+        ctx = self.s1_source_context()
+        out = Path(tempfile.mkdtemp(dir=self.tmp))
+        result = fw.build_displays(ctx, out, only=["supplementary:Figure S1"])["displays"][0]
+        self.assertEqual(result["status"], "built")
+        self.assertTrue(result["content_complete"])
+        self.assertTrue(result["comparison_complete"])
+        self.assertEqual(result["comparison_coverage"]["expected_values"], 135)
+        self.assertEqual(result["comparison"]["differs"], 0)
+        roles = {r["dataset"]: r for r in data_rows(out, "FigS1", "panel_c_roles")}
+        self.assertEqual(roles["ogbn-products"]["fallback_role"], "global comparator return")
+        self.assertEqual(roles["ogbn-arxiv"]["fallback_role"], "input comparator fallback")
+        identity = next(r for r in data_rows(out, "FigS1", "panel_a_endpoint_effect") if r["dataset"] == "ogbn-products")
+        self.assertEqual((identity["low"], identity["high"]), ("", ""))
+        self.assertEqual(identity["interval_kind"], "comparator identity; no statistical interval")
+        observed = next(r for r in data_rows(out, "FigS1", "observed_intervals")
+                        if r["dataset"] == "ogbn-products" and r["panel"] == "a")
+        self.assertEqual(float(observed["observed_low"]), 0.0)   # original supplied interval is retained
+
+    def test_figure_s1_omitted_interval_comparison_cannot_pass_full_coverage(self):
+        _, writer, _ = self.build("supplementary:Figure S1", self.s1_source_context())
+        omitted = [c for c in writer.comparisons if c.path != ("panels", "a", "rows", "ogbn-arxiv", "low")]
+        registry, metadata, _ = load_references(ROOT)
+        missing, coverage = fw.comparison_coverage("supplementary:Figure S1", omitted, registry, metadata, scope="measurement")
+        self.assertFalse(coverage["complete"])
+        self.assertEqual(coverage["missing_values"], 1)
+        self.assertEqual(missing[0]["path"], "panels/a/rows/ogbn-arxiv/low")
+
+    def test_figure_s1_source_perturbation_is_visible_in_independent_targets(self):
+        ctx = self.s1_source_context()
+        ctx.runs()["Peptides-func"].evidence["final"]["paired_metric_pp"]["mean"] = .68
+        changed_gate = records("input_gate", [
+            {**row, "value": .2} if row["dataset"] == "ogbn-arxiv" and row["quantity"] == "fallback_probability"
+            else dict(row) for row in self.records["input_gate"].rows])
+        ctx = context(runs=ctx.runs(), records={"input_gate": changed_gate})
+        _, _, comparisons = self.build("supplementary:Figure S1", ctx)
+        differs = {row["path"] for row in comparisons if row["group"] == rc.G_FIG_S1 and row["status"] == "differs"}
+        self.assertIn("panels/a/rows/Peptides-func/effect", differs)
+        self.assertIn("panels/c/rows/ogbn-arxiv/fallback_fraction", differs)
+        self.assertIn("panels/c/rows/ogbn-arxiv/marker_cost", differs)
+        self.assertEqual(REGISTRY[rc.G_FIG_S1]["panels"]["a"]["rows"]["Peptides-func"]["effect"]["$value"], .0058)
+
+    def test_figure_s1_missing_interval_and_absent_empirical_inputs_stay_incomplete(self):
+        ctx = self.s1_source_context()
+        ctx.runs()["Peptides-func"].evidence["final"]["paired_loss"]["upper"] = None
+        out = Path(tempfile.mkdtemp(dir=self.tmp))
+        result = fw.build_displays(ctx, out, only=["supplementary:Figure S1"])["displays"][0]
+        self.assertFalse(result["content_complete"])
+        self.assertFalse(result["comparison_complete"])
+        self.assertEqual(result["comparison"]["missing"], 1)
+        result = fw.build_displays(context(), out / "absent", only=["supplementary:Figure S1"])["displays"][0]
+        self.assertEqual(result["status"], "awaiting_inputs")
 
     def test_figure_s2(self):
         rows = [{"dataset": "ogbn-products", "instance": f"sub{i}", "quantity": q, "value": v}
@@ -707,12 +787,67 @@ class Figures(World):
         self.assertResolved(rows)
 
     def test_figure_s4(self):
-        out, _, rows = self.build("supplementary:Figure S4", self.ctx("baselines", "input_gate"))
-        self.assertFigure(out, "FigS4", ["panel_arxiv", "panel_roman", "panel_pascal"])
+        out, writer, rows = self.build("supplementary:Figure S4", self.ctx("baselines", "input_gate"))
+        self.assertFigure(out, "FigS4", ["panel_arxiv", "panel_roman", "panel_pascal", "observed_costs"])
         arxiv = {r["method"]: r for r in data_rows(out, "FigS4", "panel_arxiv")}
         self.assertAlmostEqual(float(arxiv["radius (deployed)"]["x_plotted"]), 4.6174)
         self.assertAlmostEqual(float(arxiv["best fixed depth"]["x_plotted"]), 3.0)
+        self.assertEqual((float(arxiv["AMP"]["cost_low"]), float(arxiv["AMP"]["cost_high"])), (4.2, 4.8))
+        missing = {row["location"] for row in writer.missing_content}
+        for dataset, methods in rc.FIGURE_S4_ADDITIONAL_METHODS.items():
+            self.assertTrue(all(f"panel/{dataset}/{method}" in missing for method in methods))
         self.assertResolved(rows)
+
+    def test_figure_s4_retains_observed_costs_without_changing_declared_ranges(self):
+        modified = records("baselines", [
+            {**row, "value": 33.0} if row["quantity"] == "serial_cost" and row["dataset"] == "ogbn-arxiv"
+            and row["method"] == "AMP" else dict(row) for row in self.records["baselines"].rows])
+        ctx = context(runs=self.runs, records={"baselines": modified, "input_gate": self.records["input_gate"]})
+        # Other internal routes also use declared ranges, not this measured configuration span.
+        with mock.patch.object(rc, "route_cost_range", return_value=(21.0, 22.0)):
+            out, _, rows = self.build("supplementary:Figure S4", ctx)
+        arxiv = {r["method"]: r for r in data_rows(out, "FigS4", "panel_arxiv")}
+        self.assertEqual((float(arxiv["AMP"]["cost_low"]), float(arxiv["AMP"]["cost_high"])), (4.2, 4.8))
+        self.assertEqual((float(arxiv["best fixed depth"]["cost_low"]),
+                          float(arxiv["best fixed depth"]["cost_high"])), (2.0, 4.0))
+        observed = {r["method"]: r for r in data_rows(out, "FigS4", "observed_costs") if r["dataset"] == "ogbn-arxiv"}
+        self.assertEqual(float(observed["AMP"]["observed_cost_low"]), 33.0)
+        self.assertEqual(float(observed["best fixed depth"]["observed_cost_high"]), 22.0)
+        ranges = [r for r in rows if r["group"] == rc.G_S15_REFERENCE]
+        self.assertTrue(ranges)
+        self.assertTrue(all(r["status"] == "exact" for r in ranges))
+
+    def test_figure_s4_accepts_additional_named_points_without_changing_s15(self):
+        # Deliberately arbitrary software fixtures, not values digitized from the PDF.
+        base = self.records["baselines"]
+        added = []
+        ctx = self.ctx("baselines", "input_gate")
+        for dataset in rc.FIGURE_S4_DATASETS:
+            _, entries = rc.method_rows(ctx, dataset, base, self.records["input_gate"])
+            methods = [r["key"] for r in entries if r["score"] is None] + list(rc.FIGURE_S4_ADDITIONAL_METHODS[dataset])
+            for method in methods:
+                added.extend({"dataset": dataset, "method": method, "seed": str(seed), "quantity": "score", "value": value}
+                             for seed, value in enumerate(seeded(60.0, .1), start=1))
+        augmented = records("baselines", base.rows + added)
+        ctx = context(runs=self.runs, records={"baselines": augmented, "input_gate": self.records["input_gate"]})
+        out, writer, _ = self.build("supplementary:Figure S4", ctx)
+        self.assertEqual(writer.missing_content, [])
+        for dataset, panel in zip(rc.FIGURE_S4_DATASETS, ("arxiv", "roman", "pascal")):
+            plotted = {r["method"]: r for r in data_rows(out, "FigS4", f"panel_{panel}")}
+            self.assertEqual(len(plotted), 10)
+            for method in rc.FIGURE_S4_ADDITIONAL_METHODS[dataset]:
+                self.assertAlmostEqual(float(plotted[method]["official_score"]), 60.0)
+            _, table_rows = rc.method_rows(ctx, dataset, augmented, self.records["input_gate"])
+            self.assertEqual(len(table_rows), 9)    # S15's fixed scientific scope is unchanged.
+
+    def test_declared_cost_range_rejects_missing_or_reversed_source_input(self):
+        ctx = context()
+        reference = ctx.constants["baseline_reference_ranges_table_S15"]
+        reference["external_methods"]["AMP"]["serial_cost_per_member"] = [1.2, 1.05]
+        with self.assertRaisesRegex(DisplayInputError, "finite positive ordered range"):
+            rc.s15_figure_cost_range(ctx, 4, method="AMP")
+        with self.assertRaisesRegex(DisplayInputError, "finite positive ordered range"):
+            rc.s15_figure_cost_range(ctx, 4, method="unknown architecture")
 
     def test_figure_s16(self):
         diag = [{"diagnostic": "coverage", "level": str(h), "quantity": q, "value": v}
