@@ -1385,20 +1385,41 @@ def method_map(ctx, deps, leds, baselines) -> list[dict]:
     return rows
 
 
+G_F5 = "main_figure_5_deployment_economics"
+# Role statements printed in the panels of main Figure 5 (p. 12), compared as plain text.
+F5_ROLES = {"qC": "strongest open-loop comparator q_C",
+            "deployed": "deployed rule at expected cost; tick: assurance cost",
+            "retrained": "retrained architecture, declared cost range",
+            "range": "range from the 95% interval of Δ",
+            "operating_points": "hollow markers: operating points (Supplementary Table S23b)"}
+
+
 @display("main:Figure 5", stem="Fig5", title="Deployment effect and cost",
          needs=("runs", "records:input_gate", "records:baselines", "records:nominal_time"))
 def figure_5(ctx, out):
     from cm_theory.economics import amortization_horizon, net_benefit
+    from .records_campaigns import anchor_reference
     deps = deployments(ctx)
     gate = ctx.require_records("input_gate")
     leds = ledgers(ctx, deps, gate)
     baselines = ctx.require_records("baselines")
     timing = ctx.require_records("nominal_time")
+    # The Table S23b timing anchors that bracket t_nom are drawn on each panel-d curve. The set is read when
+    # supplied; without it the printed brackets stay explicit missing comparisons and missing content.
+    anchors = ctx.records("timing_anchors")
     theta = _theta(ctx)
     panel_a = method_map(ctx, deps, leds, baselines)
+    for d in DATASETS:
+        if deps[d]["returned"]:
+            # A returned comparator is the deployed rule: its expected and assurance costs are C_qC.
+            qc = next(r for r in panel_a if r["dataset"] == d and r["policy"] == "qC")
+            low, high = leds[d]["C_expected"] / qc["nominal_cost"], leds[d]["C_assure"] / qc["nominal_cost"]
+            panel_a.append({**qc, "policy": "returned", "method": "q_C returned", "relative_cost": low,
+                            "relative_cost_high": high, "observed_relative_cost": low, "observed_relative_cost_high": high,
+                            "cost_basis": "returned comparator at its expected and assurance cost"})
     shown = [d for d in _deployed_datasets(deps) if leds[d]["lambda_star"] is not None]
     prices = np.linspace(0.0, 10.0, 101)
-    panel_c, panel_d, markers = [], [], []
+    panel_c, panel_d, markers, brackets = [], [], [], {}
     t_grid = np.logspace(-4, 2, 61)
     for d in shown:
         led, effect = leds[d], abs(deps[d]["loss_effect"]["mean"]) * 1000.0
@@ -1411,6 +1432,18 @@ def figure_5(ctx, out):
         for t in t_grid:
             panel_d.append([d, float(t), amortization_horizon(hours, theta, led["added_work"], float(t))])
         markers.append([d, t_nom, amortization_horizon(hours, theta, led["added_work"], t_nom), hours, led["added_work"]])
+        if anchors is not None:
+            reference = anchor_reference(ctx, d)
+            bracket = [_require_value(anchors, "training_anchor_low_seconds", dataset=reference),
+                       _require_value(anchors, "training_anchor_high_seconds", dataset=reference)]
+            through = _record_value(anchors, "throughput_anchor_seconds", dataset=reference)
+            bracket += [] if through is None else [through]
+            low, high = min(bracket), max(bracket)
+            brackets[d] = [d, reference, low, high, amortization_horizon(hours, theta, led["added_work"], high),
+                           amortization_horizon(hours, theta, led["added_work"], low)]
+    labels = {}
+    for d, t_nom, m_star, *_ in markers:
+        labels.setdefault((f"{t_nom:.3g}", f"{m_star:.1e}"), []).append(d)
     columns_a = ["dataset", "policy", "method", "relative_cost", "relative_cost_high", "score_gain_points", "score_points",
                  "seeds", "ensemble", "nominal_cost", "cost_basis"]
     out.data("panel_a", columns_a, [[r[c] for c in columns_a] for r in panel_a])
@@ -1425,6 +1458,12 @@ def figure_5(ctx, out):
     out.data("panel_d", ["dataset", "t_nom_seconds", "M_star_inputs"], panel_d)
     out.data("panel_d_operating_points", ["dataset", "t_nom_seconds", "M_star_inputs", "qualification_hours", "added_work"],
              markers)
+    if brackets:
+        out.data("panel_d_t_nom_brackets", ["dataset", "anchor_reference_dataset", "t_nom_low_seconds", "t_nom_high_seconds",
+                                            "M_star_at_t_nom_high", "M_star_at_t_nom_low"], list(brackets.values()))
+    else:
+        out.incomplete("The Table S23b t_nom brackets of panel d need the timing_anchors record set",
+                       location="data/Fig5/panel_d_t_nom_brackets")
     from cm_campaigns.contract import EXTERNAL
     from .records_campaigns import G_S15_REFERENCE
     for row in panel_a:
@@ -1436,7 +1475,7 @@ def figure_5(ctx, out):
             out.compare(G_S15_REFERENCE, ("external_methods", row["method"], "serial_cost_per_member"),
                         [row[k] * row["nominal_cost"] / row["ensemble"] for k in ("relative_cost", "relative_cost_high")],
                         note="Main Figure 5a p12 uses the declared range; executed scalar costs are exported separately")
-        else:
+        elif row["policy"] in ("qC", "deployed"):
             route = deps[d]["qC"]["route"] if row["policy"] == "qC" else deps[d]["deployed"]["route"]
             if route in S15_ROUTE_ROWS:
                 raw = _score_points(deps[d], "qC" if row["policy"] == "qC" else "qD")
@@ -1453,6 +1492,81 @@ def figure_5(ctx, out):
         else:
             out.compare(S23B_GROUP, (d, "t_nom_measured_s"), t_nom)
 
+    # Every panel of main Figure 5 (p. 12) against its independent reference contract; targets are compared only.
+    for role in ("qC", "deployed", "retrained"):
+        out.compare(G_F5, ("panel_a", "marker_roles", role), F5_ROLES[role])
+    for d in DATASETS:
+        rows = [r for r in panel_a if r["dataset"] == d]
+        qc = next(r for r in rows if r["policy"] == "qC")
+        marker = next(r for r in rows if r["policy"] in ("deployed", "returned"))
+        returned = marker["policy"] == "returned"
+        base = ("panel_a", "datasets", d)
+        out.compare(G_F5, base + ("plant_serial_cost",), qc["nominal_cost"])
+        out.compare(G_F5, base + ("plant_score_points",), _score_points(deps[d], "qN"))
+        for field, computed in (("relative_cost", qc["relative_cost"]), ("score_points", _score_points(deps[d], "qC")),
+                                ("score_gain_points", qc["score_gain_points"])):
+            out.compare(G_F5, base + ("qC", field), computed)
+        for field, computed in (("returned_comparator", returned), ("expected_relative_cost", marker["relative_cost"]),
+                                ("assurance_relative_cost", marker["relative_cost_high"]),
+                                ("score_points", _score_points(deps[d], "qC" if returned else "qD")),
+                                ("score_gain_points", marker["score_gain_points"])):
+            out.compare(G_F5, base + ("deployed", field), computed)
+        for r in (r for r in rows if r["policy"] == "retrained"):
+            for field, computed in (("relative_cost_range", [r["relative_cost"], r["relative_cost_high"]]),
+                                    ("score_points", r["score_points"]), ("score_gain_points", r["score_gain_points"])):
+                out.compare(G_F5, base + ("retrained", r["method"], field), computed,
+                            note="Declared S15 range endpoints; executed scalar costs are separate companion data")
+    out.compare(G_F5, ("panel_b", "dataset_order"), list(shown))
+    out.compare(G_F5, ("panel_b", "interval_role"), F5_ROLES["range"])
+    for d in shown:
+        for field, computed in (("lambda_star_mnats", leds[d]["lambda_star"]),
+                                ("lambda_star_range_mnats", leds[d]["lambda_range"]),
+                                ("metric_points_per_unit", leds[d]["metric_rate"])):
+            out.compare(G_F5, ("panel_b", "rows", d, field), computed)
+    dashed = ", ".join(SHORT[d] for d in ASSURANCE_ROWS if d in shown)
+    out.compare(G_F5, ("panel_c", "price_domain_mnats"), [float(prices[0]), float(prices[-1])])
+    out.compare(G_F5, ("panel_c", "zero_line_mnats"), 0.0)
+    out.compare(G_F5, ("panel_c", "dashed_role"), f"dashed: assurance cost C_assure ({dashed})")
+    for d in shown:
+        effect = abs(deps[d]["loss_effect"]["mean"]) * 1000.0
+        families = [("expected_cost", leds[d]["added_work"])]
+        if d in ASSURANCE_ROWS:
+            families.append(("assurance_cost", leds[d]["C_assure"] - leds[d]["C_qC"]))
+        for family, added in families:
+            start, end = net_benefit(effect, float(prices[0]), added), net_benefit(effect, float(prices[-1]), added)
+            slope = net_benefit(effect, 1.0, added) - net_benefit(effect, 0.0, added)
+            for field, computed in (("net_benefit_at_lambda_0_mnats", start), ("added_work", -slope),
+                                    ("net_benefit_at_lambda_10_mnats", end), ("zero_crossing_lambda", -start / slope)):
+                out.compare(G_F5, ("panel_c", family, d, field), computed,
+                            note="Definition 2 net benefit at the domain endpoints and its zero crossing")
+    out.compare(G_F5, ("panel_d", "theta"), theta)
+    out.compare(G_F5, ("panel_d", "t_nom_domain_log10_seconds"), [math.log10(t_grid[0]), math.log10(t_grid[-1])])
+    out.compare(G_F5, ("panel_d", "marker_role"), F5_ROLES["operating_points"])
+    for d, t_nom, m_star, hours, added in markers:
+        curve = ("panel_d", "curves", d)
+        out.compare(G_F5, curve + ("M_star_t_nom_thousand_input_seconds",),
+                    amortization_horizon(hours, theta, added, 1.0) / 1000.0)
+        for field, t in (("log10_M_star_at_domain_start", t_grid[0]), ("log10_M_star_at_domain_end", t_grid[-1])):
+            out.compare(G_F5, curve + (field,), math.log10(amortization_horizon(hours, theta, added, float(t))),
+                        note="Definition 2 curve at the printed axis-domain endpoint")
+        point = ("panel_d", "operating_points", d)
+        mantissa, exponent = f"{m_star:.1e}".split("e")
+        out.compare(G_F5, point + ("t_nom_seconds",), t_nom,
+                    note="Supplied nominal_time t_nom; the printed value is the S23b anchor-derived nominal time")
+        out.compare(G_F5, point + ("M_star_label_mantissa",), float(mantissa))
+        out.compare(G_F5, point + ("M_star_label_exponent",), int(exponent))
+        out.compare(G_F5, point + ("label_datasets",),
+                    [SHORT[i] for i in labels[(f"{t_nom:.3g}", f"{m_star:.1e}")]])
+        if d in brackets:
+            _, _, low, high, m_high, m_low = brackets[d]
+            out.compare(G_F5, point + ("t_nom_anchor_bracket_seconds",), [low, high],
+                        note="Timing-anchor bracket of Table S23b (adopted timing references, not executed timing)")
+            out.compare(G_F5, point + ("log10_M_star_at_anchor_bracket",), [math.log10(m_high), math.log10(m_low)])
+        else:
+            for field in ("t_nom_anchor_bracket_seconds", "log10_M_star_at_anchor_bracket"):
+                out.compare_missing(G_F5, point + (field,),
+                                    reason="The timing_anchors record set (Table S23b t_nom bracket) was not supplied")
+
     plt = pyplot()
     _style(plt)
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -1462,7 +1576,7 @@ def figure_5(ctx, out):
         color = COLORS[d]
         qc = next(r for r in rows if r["policy"] == "qC")
         ax.plot(qc["relative_cost"], qc["score_gain_points"], "D", mfc="white", mec=color, mew=1.6, ms=7, zorder=3)
-        deployed = next((r for r in rows if r["policy"] == "deployed"), None)
+        deployed = next((r for r in rows if r["policy"] in ("deployed", "returned")), None)
         if deployed is not None:
             ax.plot([qc["relative_cost"], deployed["relative_cost"]], [qc["score_gain_points"], deployed["score_gain_points"]],
                     color=color, lw=1.0, alpha=0.7)
@@ -1470,20 +1584,21 @@ def figure_5(ctx, out):
                     color=color, lw=1.0, alpha=0.7)
             ax.plot(deployed["relative_cost_high"], deployed["score_gain_points"], "|", color=color, ms=12, mew=2)
             ax.plot(deployed["relative_cost"], deployed["score_gain_points"], "o", color=color, ms=7, zorder=4)
-            ax.text(deployed["relative_cost"] + 0.02, deployed["score_gain_points"], SHORT[d], color=color, fontsize=7.5,
-                    va="center")
-        else:
-            ax.text(qc["relative_cost"], qc["score_gain_points"] - 0.06, SHORT[d], color=color, fontsize=7.5, ha="center",
-                    va="top")
+            if deployed["policy"] == "returned":
+                ax.text(deployed["relative_cost"] - 0.02, deployed["score_gain_points"] + 0.06, SHORT[d], color=color,
+                        fontsize=7.5, ha="right", va="bottom")
+            else:
+                ax.text(deployed["relative_cost"] + 0.02, deployed["score_gain_points"], SHORT[d], color=color,
+                        fontsize=7.5, va="center")
         for r in rows:
             if r["policy"] == "retrained":
                 ax.plot([r["relative_cost"], r["relative_cost_high"]], [r["score_gain_points"]] * 2,
                         color=color, ls="--", lw=1.2, alpha=0.75)
                 ax.plot(r["relative_cost"], r["score_gain_points"], "o", color=color, ms=6, alpha=0.75)
                 ax.plot(r["relative_cost_high"], r["score_gain_points"], ">", color=color, ms=5, alpha=0.75)
-    ax.plot([], [], "o", color=MUTED, label="deployed rule at expected cost; tick: assurance cost")
-    ax.plot([], [], "D", mfc="white", mec=MUTED, label="strongest open-loop comparator $q_C$")
-    ax.plot([], [], "--", color=MUTED, alpha=0.6, label="retrained architecture (declared cost range)")
+    ax.plot([], [], "o", color=MUTED, label=F5_ROLES["deployed"])
+    ax.plot([], [], "D", mfc="white", mec=MUTED, label=F5_ROLES["qC"].replace("q_C", "$q_C$"))
+    ax.plot([], [], "--", color=MUTED, alpha=0.6, label=F5_ROLES["retrained"])
     ax.axhline(0, color=INK, lw=0.6)
     ax.set_xlabel("serial compute relative to the full-depth plant")
     ax.set_ylabel("official score minus plant (points; AP in pp)")
@@ -1503,7 +1618,8 @@ def figure_5(ctx, out):
         ax.text(right * 1.03 + 0.2, y, f"{led['lambda_star']:.2f} mnats{rate}", va="center", fontsize=7, color=MUTED)
     ax.set_yticks(range(len(shown)), [SHORT[d] for d in shown])
     ax.set_ylim(len(shown) - 0.5, -0.5)
-    ax.set_xlabel("mnats of risk removed per nominal execution\nof added work (bars: range from the 95% interval of $\\Delta$)")
+    ax.set_xlabel("mnats of risk removed per nominal execution\nof added work (bars: "
+                  + F5_ROLES["range"].replace("Δ", "$\\Delta$") + ")")
     _panel(ax, "b", "Exchange rate $\\lambda^\\star = |\\Delta|/\\Delta\\mathbb{E}C$")
 
     ax = axes[1, 0]
@@ -1520,35 +1636,35 @@ def figure_5(ctx, out):
     ax.set_xlabel("$\\lambda$ (mnats a deployer pays per nominal execution)")
     ax.set_ylabel("net benefit over $q_C$ (mnats)")
     ax.legend(ncol=3, frameon=False, fontsize=7.5, loc="upper right")
-    ax.text(0.98, 0.03, "dashed: assurance cost $C_{assure}$ (" + ", ".join(SHORT[d] for d in ASSURANCE_ROWS) + ")",
-            transform=ax.transAxes, ha="right", fontsize=7, color=MUTED)
+    ax.text(0.98, 0.03, f"dashed: assurance cost $C_{{assure}}$ ({dashed})", transform=ax.transAxes, ha="right",
+            fontsize=7, color=MUTED)
     _panel(ax, "c", "Net benefit $U(q) = |\\Delta| - \\lambda\\,\\Delta\\mathbb{E}C$ against the conversion $\\lambda$")
 
     ax = axes[1, 1]
     for d in shown:
         series = [(row[1], row[2]) for row in panel_d if row[0] == d]
         ax.plot([s[0] for s in series], [s[1] for s in series], color=COLORS[d], label=SHORT[d])
-    groups = {}
+    for d, _, low, high, m_high, m_low in brackets.values():
+        ax.plot([low, high], [m_low, m_high], color=COLORS[d], lw=4.5, solid_capstyle="butt", zorder=3)
     for d, t_nom, m_star, *_ in markers:
-        ax.plot(t_nom, m_star, "o", mfc="none", mec=COLORS[d], mew=1.8, ms=9)
-        groups.setdefault((f"{t_nom:.3g}", f"{m_star:.1e}"), []).append((d, t_nom, m_star))
+        ax.plot(t_nom, m_star, "o", mfc="none", mec=COLORS[d], mew=1.8, ms=9, zorder=4)
     placed = []
-    for (_, label), items in sorted(groups.items(), key=lambda item: item[1][0][1]):
-        d, t_nom, m_star = items[0]
+    for (_, label), members in sorted(labels.items(), key=lambda item: next(m[1] for m in markers if m[0] == item[1][0])):
+        d, t_nom, m_star = next((m[0], m[1], m[2]) for m in markers if m[0] == members[0])
         mantissa, exponent = label.split("e")
         y = m_star
         if any(abs(math.log10(t_nom / t)) < 0.5 and abs(math.log10(m_star / m)) < 0.5 for t, m in placed):
             y = m_star / 3.0
         placed.append((t_nom, y))
-        ax.text(t_nom * 1.6, y, f"{', '.join(SHORT[i[0]] for i in items)} {mantissa} × $10^{{{int(exponent)}}}$",
+        ax.text(t_nom * 1.6, y, f"{', '.join(SHORT[i] for i in members)} {mantissa} × $10^{{{int(exponent)}}}$",
                 fontsize=7, color=COLORS[d], va="center")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("$t_{nom}$: wall time per nominal execution (s)")
     ax.set_ylabel("$M^\\star$: inputs served before $C_{qual}/M \\leq \\theta\\,\\Delta\\mathbb{E}C$")
     ax.legend(ncol=2, frameon=False, fontsize=7.5, loc="lower left")
-    ax.text(0.98, 0.97, "hollow markers: operating points at the measured $t_{nom}$", transform=ax.transAxes, ha="right",
-            va="top", fontsize=7, color=MUTED)
+    ax.text(0.98, 0.97, F5_ROLES["operating_points"].replace(" (Supplementary", "\n(Supplementary"),
+            transform=ax.transAxes, ha="right", va="top", fontsize=7, color=MUTED)
     _panel(ax, "d", f"Amortization horizon $M^\\star$ ($\\theta$ = {theta:g})")
     if ctx.synthetic:
         fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
@@ -1558,14 +1674,17 @@ def figure_5(ctx, out):
         out.uses("run", dataset, ["select/candidates.json", "admit/decision.json", "final/results_summary.json",
                                   "stages/explore.json", "stages/fit.json", "stages/select.json",
                                   "stages/confirm.json", "stages/admit.json"])
-    for name in ("input_gate", "baselines", "nominal_time"):
+    for name in ("input_gate", "baselines", "nominal_time") + (("timing_anchors",) if anchors is not None else ()):
         out.uses("records", name, ["summary.csv"])
     out.uses("protocol", "baseline_reference_ranges_table_S15", ["paper/registered_constants.json"])
-    out.provenance(source_document="main", source_pages=[12],
+    out.provenance(source_document="main", source_pages=[12], reference_contract=G_F5,
                    cost_basis="S15 declared retrained-architecture range endpoints relative to nominal cost",
                    observed_cost_companion="data/Fig5/panel_a_observed_costs.csv",
-                   limitation="This range correction does not establish an independently enumerated reference "
-                              "contract for all four panels; related-table checks alone do not certify the figure.")
+                   timing_roles="operating points use the supplied nominal_time t_nom, compared with the S23b "
+                                "anchor-derived nominal time; the drawn brackets are the timing_anchors references "
+                                "(adopted anchors, not executed timing)",
+                   limitation="Reference agreement checks the printed values; it does not certify that the "
+                              "supplied measurements are the original experiment records.")
 
 
 def _two_significant(value: float) -> float:
