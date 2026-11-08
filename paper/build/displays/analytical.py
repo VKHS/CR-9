@@ -887,6 +887,9 @@ def table_s44(ctx, out):
 # Supplementary Figure S6: cost model and admissible truncation order
 # ---------------------------------------------------------------------------
 
+G_FS6 = "supplementary_figure_S6_cost_model_truncation_order"
+
+
 @display("supplementary:Figure S6", stem="FigS6", title="Action-cost and sensing-work model", scope="measurement",
          needs=ADMITTED_RUNS)
 def figure_s6(ctx, out):
@@ -896,18 +899,35 @@ def figure_s6(ctx, out):
     grid = np.arange(1, TRUNCATION_AXIS + 1)
     data = {}
     curve, bars = [], []
+    model_note = ("Analytical coordinate of the Note S19 FLOP model at the declared dataset statistics, s and f_res; "
+                  "not an executed cost observation.")
+    bar_note = ("Admissible order at the run's measured multiplier through the Note S19 identity; a bound above the "
+                "axis is drawn at the axis limit and labelled >T.")
+    out.compare(G_FS6, ("model", "sensing_share_s"), SENSING_SHARE)
+    out.compare(G_FS6, ("panel_a", "resolvent_step_share_percent"), 100 * RESOLVENT_STEP_SHARES[-1])
+    out.compare(G_FS6, ("panel_a", "truncation_order_domain"), [int(grid[0]), int(grid[-1])])
+    out.compare(G_FS6, ("panel_b", "resolvent_step_shares_percent"), [100 * share for share in RESOLVENT_STEP_SHARES])
+    out.compare(G_FS6, ("panel_b", "registered_T_line"), order)
     for dataset in ADMITTED:
         dep = deployed(ctx, dataset)
         r = sparse_ratio(ctx, dataset)
         data[dataset] = (r, dep["m"])
-        values = [budget.per_member_multiplier(r, SENSING_SHARE, RESOLVENT_STEP_SHARES[-1], int(t)) for t in grid]
-        axes[0].plot(grid, values, color=COLORS[dataset], lw=1.6, label=SHORT[dataset])
+        values = {int(t): budget.per_member_multiplier(r, SENSING_SHARE, RESOLVENT_STEP_SHARES[-1], int(t)) for t in grid}
+        axes[0].plot(grid, list(values.values()), color=COLORS[dataset], lw=1.6, label=SHORT[dataset])
         axes[0].axhline(dep["m"], color=COLORS[dataset], ls=":", lw=1.0)
-        curve += [[dataset, int(t), v, dep["m"]] for t, v in zip(grid, values)]
+        curve += [[dataset, t, v, dep["m"]] for t, v in values.items()]
+        for t in (int(grid[0]), order, int(grid[-1])):     # domain start, registered order, domain end
+            out.compare(G_FS6, ("panel_a", "curves", dataset, f"T{t}"), values.get(t), note=model_note)
+        out.compare(G_FS6, ("panel_a", "measured_multipliers", dataset), dep["m"],
+                    note="Dotted line at the run's measured per-member multiplier C_ctrl/C_qC.")
         for share in RESOLVENT_STEP_SHARES:
             t_max = budget.admissible_truncation_order(dep["m"], r, SENSING_SHARE, share)
             label = f">{TRUNCATION_AXIS}" if t_max > TRUNCATION_AXIS else f"{t_max:.0f}"
-            bars.append([dataset, share, t_max, min(t_max, TRUNCATION_AXIS), label])
+            plotted = min(t_max, TRUNCATION_AXIS)
+            bars.append([dataset, share, t_max, plotted, label])
+            key = f"{100 * share:.0f}"
+            out.compare(G_FS6, ("panel_b", "bars", dataset, key, "bar_height_T"), plotted, note=bar_note)
+            out.compare(G_FS6, ("panel_b", "bars", dataset, key, "label"), label)
         out.compare(G_S6C, (dataset, "r"), r)
         out.compare(G_S6C, (dataset, "measured_multiplier_m"), dep["m"])
         out.uses("run", dataset, ["select/candidates.json"])
@@ -937,15 +957,31 @@ def figure_s6(ctx, out):
     ax.set_title("b  Admissible T by resolvent share")
     ax.legend(frameon=False, loc="upper left")
     ax = axes[2]
-    r, m = data["ogbn-proteins"]
+    proteins = "ogbn-proteins"
+    r, m = data[proteins]
     ts = np.arange(2, 2 * order + 1)
     fractions = [budget.max_resolvent_fraction(m, r, SENSING_SHARE, int(t)) for t in ts]
     bound = budget.max_resolvent_fraction(m, r, SENSING_SHARE, order)
-    ax.plot(ts, fractions, "o-", color=COLORS["ogbn-proteins"], ms=4)
+    out.compare(G_FS6, ("panel_c", "dataset"), proteins)
+    sensor = ctx.config(proteins, "full")["sensor"]       # the caption's reduced sensor, as registered (not executed)
+    out.compare(G_FS6, ("panel_c", "registered_reduced_sensor", "sketch_width_k"), sensor["sketch_dim"])
+    out.compare(G_FS6, ("panel_c", "registered_reduced_sensor", "sensing_period_P_s"), sensor["sensing_period"])
+    out.uses("configuration", "configs/proteins_full.json", ["sensor.sketch_dim", "sensor.sensing_period"])
+    out.compare(G_FS6, ("panel_c", "multiplier_m"), m)
+    out.compare(G_FS6, ("panel_c", "registered_T_line"), order)
+    out.compare(G_FS6, ("panel_c", "f_res_bound_label"), bound,
+                note="Analytical model bound at the registered order; the executed fraction is the f_res column of "
+                     "Table S6c and is not plotted.")
+    out.compare(G_FS6, ("panel_c", "truncation_order_domain"), [int(ts[0]), int(ts[-1])])
+    for t, f in zip(ts, fractions):
+        out.compare(G_FS6, ("panel_c", "points", str(int(t))), f,
+                    note="Largest resolvent fraction consistent with the measured multiplier at order T (analytical "
+                         "bound, not an executed fraction).")
+    ax.plot(ts, fractions, "o-", color=COLORS[proteins], ms=4)
     ax.axvline(order, color="#888888", ls="--", lw=1)
     ax.text(order + 0.3, max(fractions) * 0.55, f"registered T = {order}:\nf_res ≤ {bound:.3f} (model bound)", fontsize=7)
-    ax.text(0.97, 0.97, f"sensing share s = {SENSING_SHARE:g};\nT sparse products per\nresolvent step",
-            transform=ax.transAxes, ha="right", va="top", fontsize=7, color="#555555")
+    ax.text(0.97, 0.97, f"sensing share s = {SENSING_SHARE:g};\nT sparse products per\nresolvent step; f_res is read\n"
+            "from the executed action mix", transform=ax.transAxes, ha="right", va="top", fontsize=7, color="#555555")
     ax.set_xlabel("truncation order T (on-line powers)")
     ax.set_ylabel("executed resolvent fraction f_res")
     ax.set_title(f"c  proteins: f_res consistent with m = {m:.2f}")
@@ -963,44 +999,78 @@ def figure_s6(ctx, out):
 # Supplementary Figure S7: acquisition gate
 # ---------------------------------------------------------------------------
 
+G_FS7 = "supplementary_figure_S7_acquisition_gate"
+
+
 @display("supplementary:Figure S7", stem="FigS7", title="Acquisition gate", scope="measurement",
          needs=(f"records:{GAP_SET}",))
 def figure_s7(ctx, out):
     plt = pyplot()
     fig, axes = plt.subplots(1, 2, figsize=(12, 3.9))
     ax = axes[0]
+    slope = 2.0                          # Proposition 9: retain when the gap exceeds 2 L_J r
     radius = np.array([0.0, 1.0])
-    boundary = 2.0 * radius              # Proposition 9: retain when the gap exceeds 2 L_J r
+    boundary = slope * radius
     top = 2.2
-    ax.fill_between(radius, boundary, top, color="#cfe0f6")
-    ax.fill_between(radius, 0, boundary, color="#f8dccd")
+    regions = (("retain", "retain the action\n(support, mode and search\nprocedure invariant on the region)",
+                (0.1, 1.75), "#cfe0f6"),
+               ("acquire", "acquire a sensor profile\nand replan, or reserve q_C", (0.5, 0.25), "#f8dccd"))
+    for name, text, (x, y), color in regions:
+        side = "above" if y > slope * x else "below"     # the region is filled on the side its label occupies
+        low, high = (boundary, top) if side == "above" else (0.0, boundary)
+        ax.fill_between(radius, low, high, color=color)
+        ax.text(x, y, text, fontsize=7)
+        out.compare(G_FS7, ("panel_a", "regions", name, "label"), text)
+        out.compare(G_FS7, ("panel_a", "regions", name, "side"), side)
     ax.plot(radius, boundary, color="#2f7bd9", lw=2)
-    ax.text(0.1, 1.75, "retain the action\n(support, mode and search\nprocedure invariant on the region)", fontsize=7)
-    ax.text(0.5, 0.25, "acquire a sensor profile\nand replan, or reserve q_C", fontsize=7)
-    ax.set_xlim(0, 1)
+    x_label, y_label = "predicted-state region radius r_ℓ (units of 1/L_J)", "action-score gap m_ℓ/L_J"
+    ax.set_xlim(radius[0], radius[-1])
     ax.set_ylim(0, top)
-    ax.set_xlabel("predicted-state region radius r_l (units of 1/L_J)")
-    ax.set_ylabel("action-score gap m_l/L_J")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
     ax.set_title("a  Conditional action-gap certificate (Prop. 9)")
+    for field, computed in (("boundary_slope", slope), ("radius_domain", [float(v) for v in radius]),
+                            ("boundary_gap_at_domain_ends", [float(v) for v in boundary]),
+                            ("x_axis", x_label), ("y_axis", y_label)):
+        out.compare(G_FS7, ("panel_a", field), computed)
     ax = axes[1]
     gaps = np.geomspace(0.05, 50.0, 400)          # mnats
     curves = []
     tau = certificate_floor()
+    tau_mnats = 1e3 * tau
+
+    def log_gap_density(x_mnats, gap):
+        """Fitted log-normal density per unit natural-log gap at a gap in mnats (independent of the gap unit)."""
+        z = (math.log(x_mnats / 1e3) - gap["mu"]) / gap["sigma"]
+        return math.exp(-0.5 * z * z) / (gap["sigma"] * math.sqrt(2 * math.pi))
+
+    model_note = "Explicit log-normal model of the median and 5th-percentile gaps; not an empirical gap histogram."
     for dataset in ADMITTED:
         gap = gap_model(ctx, dataset)
-        density = [math.exp(-0.5 * ((math.log(x / 1e3) - gap["mu"]) / gap["sigma"]) ** 2)
-                   / (gap["sigma"] * math.sqrt(2 * math.pi)) for x in gaps]
-        ax.plot(gaps, density, color=COLORS[dataset], lw=1.6,
-                label=f"{SHORT[dataset]}: median {1e3 * gap['median']:.1f}, p5 {1e3 * gap['p5']:.1f}")
+        median, p5 = 1e3 * gap["median"], 1e3 * gap["p5"]
+        label = f"{SHORT[dataset]}: median {median:.1f}, p5 {p5:.1f}"
+        density = [log_gap_density(float(x), gap) for x in gaps]
+        ax.plot(gaps, density, color=COLORS[dataset], lw=1.6, label=label)
         curves += [[dataset, x, y, gap["mu"], gap["sigma"]] for x, y in zip(gaps, density)]
         out.compare(G_S21, (dataset, "median_gap"), gap["median"])
         out.compare(G_S21, (dataset, "p5_gap"), gap["p5"])
-    ax.axvline(1e3 * tau, color="#444444", ls="--", lw=1)
-    ax.text(1e3 * tau * 1.08, ax.get_ylim()[1] * 0.92, "τ", fontsize=8)
+        for field, computed in (("median_mnats", median), ("p5_mnats", p5), ("legend_label", label)):
+            out.compare(G_FS7, ("panel_b", "curves", dataset, field), computed)
+        for field, computed in (("mu_log_nats", gap["mu"]), ("sigma_log", gap["sigma"]),
+                                ("density_at_median", log_gap_density(median, gap)),
+                                ("density_at_tau", log_gap_density(tau_mnats, gap))):
+            out.compare(G_FS7, ("panel_b", "curves", dataset, field), computed, note=model_note)
+    x_label, y_label, tau_label = "action-score gap (mnats)", "density per log-gap", "τ"
+    ax.axvline(tau_mnats, color="#444444", ls="--", lw=1)
+    ax.text(tau_mnats * 1.08, ax.get_ylim()[1] * 0.92, tau_label, fontsize=8)
     ax.set_xscale("log")
-    ax.set_xlabel("action-score gap (mnats)")
-    ax.set_ylabel("density per log-gap")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
     ax.set_title("b  Log-normal fit of the action-gap quantiles (Table S21)")
+    for field, computed in (("x_axis", x_label), ("y_axis", y_label), ("p5_standard_normal_quantile", Z95),
+                            ("threshold_tau_mnats", tau_mnats), ("threshold_label", tau_label),
+                            ("gap_domain_mnats", [float(gaps[0]), float(gaps[-1])])):
+        out.compare(G_FS7, ("panel_b", field), computed)
     ax.legend(frameon=False, fontsize=6.5, loc="upper left")
     for a in axes:
         a.grid(alpha=0.25)
