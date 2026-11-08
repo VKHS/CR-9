@@ -526,7 +526,15 @@
         "status": "PASS",
         "steps": 17,
         "verdict": "SOFTWARE-ONLY",
-        "scope": "Bundled synthetic examples; executed before the final bounded reference corrections. No public benchmark deposit verification."
+        "scope": "Bundled synthetic examples; executed before the final bounded reference corrections. No public benchmark deposit verification.",
+        "step_counts": {
+          "PASS": 16,
+          "WARN": 1,
+          "FAIL": 0
+        },
+        "warnings": [
+          "printed decision-rule consistency"
+        ]
       },
       "pdf_sources": {
         "command": "scripts/check_manuscript_sources.py with both supplied local PDFs",
@@ -544,6 +552,14 @@
         "tests_run": 6,
         "seconds": 0.15,
         "scope": "After the final 195-test suite, the generated README link was changed to use the Releases listing until an artifact is published; availability regressions and freshness checks passed."
+      },
+      "publication_input_template": {
+        "status": "PASS",
+        "command": "scripts/paper_artifacts.py map-template and exact artifact/relationship-key comparison",
+        "artifact_slots": 37,
+        "all_paths_and_relationships_require_user_input": true,
+        "template": "release/templates/paper-artifacts.map.json",
+        "scope": "A preparation template; it contains no measured results and is not accepted as a populated publication map."
       }
     },
     "environment": {
@@ -700,8 +716,51 @@
       ]
     },
     "hosted_ci": {
-      "status": "RECORDED_BY_GITHUB_ACTIONS",
-      "scope": "Fresh-clone and CPU-container workflows run on the proposed commit before merge; consult the checks attached to that Git revision. No hosted result is pre-attested in this local record."
+      "status": "PASS",
+      "tested_commit": "6fb49c55730c29088ad11ce5395660965703e9c8",
+      "tested_tree": "91824c242713562930c351fa525abacae59a6220",
+      "fresh_clone": {
+        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42428992534",
+        "status": "PASS",
+        "numeric_suite": {
+          "tests_run": 1413,
+          "passed": 1362,
+          "skipped": 51,
+          "seconds": 310.803
+        },
+        "full_cpu_suite": {
+          "tests_run": 1706,
+          "passed": 1704,
+          "skipped": 2,
+          "seconds": 834.235
+        },
+        "fresh_synthetic_lifecycle": "PASS",
+        "checkpoint_reexecution": "PASS",
+        "archive_ingestion": "PASS",
+        "synthetic_tables_built": 11,
+        "synthetic_figures_built": 6,
+        "record_exports": [
+          "sensor_parameters",
+          "nominal_time"
+        ]
+      },
+      "cpu_container": {
+        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42428992481",
+        "status": "PASS",
+        "network_during_verification": "disabled",
+        "tests_run": 1706,
+        "passed": 1704,
+        "skipped": 2,
+        "seconds": 567.506,
+        "offline_review": {
+          "verdict": "SOFTWARE-ONLY",
+          "PASS": 16,
+          "WARN": 1,
+          "FAIL": 0,
+          "warning": "printed decision-rule consistency"
+        }
+      },
+      "scope": "Both push and pull-request instances of the fresh-clone and CPU-container workflows passed. These are software and synthetic-execution checks; original benchmark observations remain separate evidence inputs."
     },
     "remaining_evidence": {
       "full_availability_statement_verified": false,
@@ -725,6 +784,13 @@
       "credentials_used": false,
       "cluster_files_accessed": false,
       "cluster_jobs_submitted": false
+    },
+    "documentation_followup": {
+      "scope": "Ready-to-fill publication map, publication instructions, exact hosted validation results and refreshed release checksums.",
+      "executable_and_builder_source_inventory_unchanged": true,
+      "source_inventory_sha256": "72f2e69903f683db73e4e67be628cf0da049337467c253b20c9b176989764672",
+      "source_files_in_release_inventory": 1230,
+      "template": "release/templates/paper-artifacts.map.json"
     }
   }
 }

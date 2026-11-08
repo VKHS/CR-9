@@ -86,9 +86,26 @@ change in `578837f`. Earlier dated sections below remain historical records.
 | Final focused suite after the source-reference corrections | 195 passed, no skips; 39.318 seconds |
 | Source and release verification | `make verify verify-manifest` passed; 1,229 source files in the release inventory |
 | CPU environment | Python 3.12.14, PyTorch 2.10.0+cpu; all 53 recorded package versions match |
-| Offline reviewer workflow | 17 steps passed; verdict `SOFTWARE-ONLY` |
+| Offline reviewer workflow | 16 checks passed, one printed-decision consistency warning, no failures; verdict `SOFTWARE-ONLY` |
 | Supplied paper and supplement | Both PDF byte identities verified; 34 registry groups checked |
 | Offline paper reconstruction | 20 repository-source displays rendered, no generator errors; the command correctly returns incomplete while measured artifacts await publication |
+
+The final code revision `6fb49c5` subsequently passed both hosted workflows:
+
+| Hosted check | Final result |
+|---|---|
+| [Fresh-clone numeric suite](https://github.com/VKHS/CR-9/actions/runs/42428992534) | 1,413 tests: 1,362 passed, 51 skipped |
+| [Fresh-clone full CPU suite](https://github.com/VKHS/CR-9/actions/runs/42428992534) | 1,706 tests: 1,704 passed, 2 skipped; 834.235 seconds |
+| Fresh synthetic execution in the same workflow | Training, checkpoint replay, archive ingestion, 11 tables, six figures and two record exports passed |
+| [CPU container](https://github.com/VKHS/CR-9/actions/runs/42428992481) | 1,706 tests: 1,704 passed, 2 skipped; 567.506 seconds; verification ran without networking |
+| Container reviewer | 16 PASS checks, one printed-decision consistency WARN, no failed checks; `SOFTWARE-ONLY` |
+
+The later publication-map and validation-documentation follow-up preserves the
+exact experimental and reconstruction source inventory tested by those workflows.
+Its [input template](../release/templates/paper-artifacts.map.json) has a checked
+slot and explicit relationship field for each required artifact. Empty fields
+require actual experiment paths; this template does not contain measurements.
+The refreshed release inventory contains 1,230 source files.
 
 The integrated suites and offline reviewer ran before the final bounded S15/S19,
 S17d and textual source-reference corrections. The final focused suite covers

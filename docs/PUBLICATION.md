@@ -48,7 +48,13 @@ make statement-fulfilled                                          # verify the f
 [Producing the outputs](PRODUCTION.md) describes the job graph that the first command
 submits; its final job writes the named artifact map and records each verification outcome.
 `all` runs `pack` and `publish` below in one step. Directories produced outside that
-workflow are published with a map written by hand:
+workflow are published with a completed input map. The checked
+[publication-map template](../release/templates/paper-artifacts.map.json) already
+lists every required artifact and its relationship field. Copy it to your work
+directory, fill the absolute paths and explicit relationships, then run `pack`
+and `publish`. Empty fields are preparation inputs, not experimental records; the
+validator requires actual artifacts before publication. Regenerate the template
+with the command below if the artifact inventory changes.
 
 ```bash
 bash hpc/publish_paper_artifacts_arrhenius.sh template           # writes paper-artifacts.map.json

@@ -847,10 +847,10 @@
       "sha256": "1ad0ac27b0ac49a40b6fa399589adbc4842667585bf6c6f00fbfc809e37697c4"
     },
     {
-      "bytes": 7989,
+      "bytes": 8461,
       "executable": false,
       "path": "docs/PUBLICATION.md",
-      "sha256": "ae2d3fc5f2ce934394c518cf049a7600798b03595da33f10c577b1a2905400c8"
+      "sha256": "29544065d3ffe25b13e9358d14ec1f68d29ee62f8dabf8f165350c4cb03fb047"
     },
     {
       "bytes": 4658,
@@ -901,16 +901,16 @@
       "sha256": "bd1cc3e5fc524d49194b9be8c97cf52921b72f1ccb4065d722d3afc18ccb0533"
     },
     {
-      "bytes": 33480,
+      "bytes": 35933,
       "executable": false,
       "path": "docs/VALIDATION.json",
-      "sha256": "2c659663790b3236ede6463c331a83764e3e6f534661ea58333aba9a359f6226"
+      "sha256": "8ea0eda3e8ccfc0391684eacda5ae78d68307583c6258991ec0152496913d786"
     },
     {
-      "bytes": 9989,
+      "bytes": 11334,
       "executable": false,
       "path": "docs/VALIDATION.md",
-      "sha256": "579b9b14ad1e01aae48ef9763a2d66119d057f1015cf7c65f6fba98789bc750f"
+      "sha256": "92dd4a32e967d9d359070fb46b91540eb68d3bddf23ee541324d76ec18b1a19f"
     },
     {
       "bytes": 10579,
@@ -6199,6 +6199,12 @@
       "sha256": "a9b455e70f1099d1719279836fd1858b870941262062804074c456818f166d9e"
     },
     {
+      "bytes": 3175,
+      "executable": false,
+      "path": "release/templates/paper-artifacts.map.json",
+      "sha256": "98947aeef883cfa75881f93c5ab1383c4991329924d80a1a6dfa86484968d8a6"
+    },
+    {
       "bytes": 161,
       "executable": false,
       "path": "requirements-review.txt",
@@ -7378,5 +7384,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "867499209f06481e9a56c3a7959c815e46551835c1158ecb0bef1247bc374c08"
+  "tree_sha256": "2743b5e748c6ef8d2d3509c6a1e74349ac01c85fc9deb4e200054455af2fa7f5"
 }
