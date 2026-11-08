@@ -1372,6 +1372,10 @@ def table_s48(ctx, out):
 # Supplementary Figure S9: mechanism contrasts and confirmation-size sensitivity
 # ---------------------------------------------------------------------------
 
+# The figure's independently reviewed printed-value contract (paper/printed_display_values.json).
+S9_FIGURE_GROUP = "supplementary_figure_S9_mechanism_contrast_sensitivity"
+
+
 @display("supplementary:Figure S9", stem="FigS9", title="Mechanism contrasts and confirmation-size sensitivity",
          needs=("campaign:confirmation", "records:confirmation_sensitivity"))
 def figure_s9(ctx, out):
@@ -1380,13 +1384,21 @@ def figure_s9(ctx, out):
     The rescaling is the two-way variance model of Note S24 (Table S14b): only the graph
     share g of the variance scales with the graph count, so each side of the J_old
     interval widens by [(1 - g) + g J_old/J_new]^(1/2) about the fixed point estimate.
+    Green ticks mark the practical margin of Table S11 at its registered value; a contrast
+    read for equivalence (no feedback label; Table S14 prints its margin as ±m) carries
+    both ticks.
     """
     from cm_campaigns.confirmation import FAMILY
     checked, _ = joint_confirmation(ctx)
     confirmation_scope(out, checked)
+    out.provenance(rescaled_intervals="Blue intervals rescale the J_old intervals of the confirmation_sensitivity "
+                                      "records under the two-way variance model of Note S24 (Table S14b) with fixed "
+                                      "means: an analytical sensitivity, not an observed replication. The "
+                                      "confirmation campaign's own D_confirm intervals stay in the source data "
+                                      "(campaign_*) and are neither drawn nor compared as rescaled intervals.")
     sizes = ctx.require_records("confirmation_sensitivity")
     by_id = {row["contrast_id"]: row for row in checked["rows"]}
-    data, changed, unchanged = [], 0, 0
+    data, ticks, changed, unchanged = [], [], 0, 0
     for key in FAMILY:
         row = by_id[key]
         j_new, observed = row["unit_count"], (row["effect_nats"], *row["interval_nats"])
@@ -1403,8 +1415,11 @@ def figure_s9(ctx, out):
         moved = j_old != j_new
         holm = row["holm_p_value_zero"]
         note = (f"J: {j_old} → {j_new}; Holm P {p_text(holm, 1e-3)}" if moved else f"unit unchanged (n={j_new})")
+        margin = row["practical_margin_nats"]
+        equivalence = not row["retained"] and not row["tested_policy_selected"]
+        ticks.append([-margin, margin] if equivalence else [margin])
         data.append([key, row["dataset"], j_old, j_new, *old, *new, share, *observed,
-                     row["beneficial_direction"] * row["practical_margin_nats"], holm, note])
+                     row["beneficial_direction"] * margin, holm, note, " ".join(f"{t:g}" for t in ticks[-1])])
         if moved:
             for field, value in (("J_old", j_old), ("J_new", j_new), ("effect", old[0]),
                                  ("interval_old", list(old[1:])), ("interval", list(new[1:])),
@@ -1418,11 +1433,12 @@ def figure_s9(ctx, out):
     out.data("panel_a", ["contrast", "dataset", "units_old", "units_new", "effect_old_nats", "low_old_nats",
                          "high_old_nats", "effect_new_nats", "low_new_nats", "high_new_nats", "graph_variance_share",
                          "campaign_effect_nats", "campaign_low_nats", "campaign_high_nats", "signed_margin_nats",
-                         "joint_holm_P", "annotation"], data)
+                         "joint_holm_P", "annotation", "margin_ticks_nats"], data)
     out.uses("campaign", "confirmation", ["campaign.json", "raw/*/test.json"])
     out.uses("records", "confirmation_sensitivity", sorted({r["source_file"] for r in sizes.rows}))
     plt = pyplot()
     fig, ax = plt.subplots(figsize=(7.2, 4.6))
+    annotations = []
     for y, row in enumerate(data):
         moved = row[2] != row[3]
         ax.plot(row[5:7], [y, y], color="0.35", lw=1.2)
@@ -1430,19 +1446,45 @@ def figure_s9(ctx, out):
         if moved:
             ax.plot(row[8:10], [y + 0.22, y + 0.22], color="#2864a5", lw=1.6)
             ax.plot(row[7], y + 0.22, "o", color="#2864a5", ms=4.5)
-        ax.plot(row[14], y, "|", color="#2a9d6a", ms=11, mew=1.6)
-        ax.text(1.02, y, row[16], transform=ax.get_yaxis_transform(), va="center", fontsize=7,
-                color="#2864a5" if moved else "0.3")
-    ax.axvline(0, color="0.2", lw=0.8)
+        for tick in ticks[y]:
+            ax.plot(tick, y, "|", color="#2a9d6a", ms=11, mew=1.6)
+        annotations.append(ax.text(1.02, y, row[16], transform=ax.get_yaxis_transform(), va="center", fontsize=7,
+                                   color="#2864a5" if moved else "0.3"))
+    zero = ax.axvline(0, color="0.2", lw=0.8)
     ax.set_yticks(range(len(data)), [row[0] for row in data])
     ax.invert_yaxis()
     ax.set_xlabel("contrast (nats); green tick: practical margin of Table S11")
     ax.set_title("Held-out mechanism contrasts and confirmation-size sensitivity")
+    letter = ax.text(-0.3, 1.02, "a", transform=ax.transAxes, fontsize=11, fontweight="bold", va="bottom")
     ax.plot([], [], "o-", color="0.25", label="contrasts at J_old (95% intervals)")
     ax.plot([], [], "o-", color="#2864a5", label="rescaled to the D_confirm sizes (Table S14b)")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.14), frameon=False, ncol=2)
+    legend = ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.14), frameon=False, ncol=2)
     ax.grid(axis="x", alpha=0.2)
     fig.subplots_adjust(right=0.72)
+    # Every drawn element against the independent figure contract: labels, both interval families,
+    # the margin ticks and each annotation, read back from what was drawn.
+    panel = ("panel_a",)
+    out.compare(S9_FIGURE_GROUP, (*panel, "label"), letter.get_text())
+    out.compare(S9_FIGURE_GROUP, (*panel, "title"), ax.get_title())
+    out.compare(S9_FIGURE_GROUP, (*panel, "x_label"), ax.get_xlabel())
+    out.compare(S9_FIGURE_GROUP, (*panel, "legend"), [text.get_text() for text in legend.get_texts()])
+    out.compare(S9_FIGURE_GROUP, (*panel, "zero_line_nats"), float(zero.get_xdata()[0]))
+    labels = [text.get_text() for text in ax.get_yticklabels()]
+    for y, row in enumerate(data):
+        path = (*panel, "rows", y)
+        for field, value in (("label", labels[y]), ("J_old", row[2]), ("J_new", row[3]), ("effect_nats", row[4]),
+                             ("original_interval_nats", list(row[5:7])), ("margin_ticks_nats", ticks[y]),
+                             ("annotation", annotations[y].get_text())):
+            out.compare(S9_FIGURE_GROUP, (*path, field), value)
+        if row[2] != row[3]:
+            out.compare(S9_FIGURE_GROUP, (*path, "rescaled", "effect_nats"), row[7])
+            out.compare(S9_FIGURE_GROUP, (*path, "rescaled", "interval_nats"), list(row[8:10]),
+                        note="Two-way variance rescaling of the J_old interval with fixed means (Note S24): an "
+                             "analytical sensitivity, not the confirmation campaign's own D_confirm interval.")
+            out.compare(S9_FIGURE_GROUP, (*path, "holm_P"), p_compare(row[15], 1e-3))
+        else:
+            out.compare(S9_FIGURE_GROUP, (*path, "rescaled"), None,
+                        note="The unit is unchanged; no rescaled interval is drawn.")
     out.figure(fig)
     out.note("J_old side and graph-variance share: confirmation_sensitivity record set (multigraph contrasts); the "
              "other contrasts keep their unit and are drawn from the joint confirmation campaign, whose joint Holm P "
@@ -1453,10 +1495,25 @@ def figure_s9(ctx, out):
 # Supplementary Figure S13: motivating settings and schedule adequacy
 # ---------------------------------------------------------------------------
 
+# The figure's independently reviewed printed-value contract (paper/printed_display_values.json).
+S13_FIGURE_GROUP = "supplementary_figure_S13_motivating_settings_and_schedule_adequacy"
+
+
 @display("supplementary:Figure S13", stem="FigS13", title="Motivating settings and schedule adequacy",
          needs=("runs",))
 def figure_s13(ctx, out):
-    measured = []
+    """a, b: illustrations (frozen-backbone settings; stylized risk-depth families); c: measured from the runs.
+
+    The family titles of panel b name the datasets of panel c whose deployed rule retains the
+    open-loop schedule or uses feedback, so the illustration cannot disagree with the measurements
+    unnoticed. A returned comparator is the exact comparator identity and carries no interval.
+    """
+    import textwrap
+    from matplotlib.patches import FancyBboxPatch
+    retained_schedule = "open-loop schedule retained"
+    categories = {"qC": retained_schedule, "radius": "uncertainty-radius feedback",
+                  "one_step": "one-step feedback", "mpc_rh": "receding-horizon replanning"}
+    measured, shown = [], []
     for dataset in DATASETS:
         view = ctx.require_run(dataset)
         recs = records(view)
@@ -1468,71 +1525,154 @@ def figure_s13(ctx, out):
         else:
             effect, low, high, method = split[0]["mean"], split[0]["lower"], split[0]["upper"], split[0]["method"]
         route = tally(["qC" if rec.deployed == rec.qc else rec.candidates[rec.deployed]["route"] for rec in recs])
-        category = {"qC": "open-loop schedule retained", "radius": "uncertainty-radius feedback",
-                    "one_step": "one-step feedback", "mpc_rh": "receding-horizon replanning"}.get(route, route)
-        rule = tally(["qC returned" if rec.deployed == rec.qc else
+        category = categories.get(route, route)
+        rule = tally(["returns q_C" if rec.deployed == rec.qc else
                       f"{rec.label(rec.deployed)}, E={rec.candidates[rec.deployed]['ensemble']}" for rec in recs])
-        measured.append([dataset, rule, category, effect, low, high, method])
+        interval = None if route == "qC" or low is None or high is None else [low, high]
+        measured.append([dataset, rule, category, effect, low, high, method, interval is not None])
+        shown.append(interval)
         out.compare(GROUP["T1"], (dataset, "loss_effect_nats"), effect)
         out.compare(GROUP["T1"], (dataset, "loss_effect_interval_nats"),
                     None if low is None or effect == 0 else [low, high])
         out.uses("run", dataset, ["final/results_summary.json", "select/decision.json", "admit/decision.json"])
-    settings = [["compiled or certified backbone", "weights, update, head and precision fixed; the adapter reads H_l "
-                 "and wraps the aggregation call A_l"],
-                ["shared pretrained backbone", "one frozen model reused by downstream users (the evaluated setting)"],
-                ["one backbone, heterogeneous inputs", "graphs of different size and degree served by one model"]]
+    backbone = ("frozen backbone", "θ, update, head,\nprecision unchanged")
+    adapter = ("adapter", "reads H_ℓ\nwraps A_ℓ")
+    settings = [("Compiled or certified backbone",
+                 "quantized and synthesized to an accelerator, or validated under a release process. Retraining "
+                 "forces re-synthesis and re-validation; a runtime wrapper on the aggregation call does not."),
+                ("Shared pretrained backbone",
+                 "one checkpoint served to downstream users who hold neither the training data nor the right to "
+                 "retrain it."),
+                ("One backbone, heterogeneous inputs",
+                 "graphs of different size, degree and homophily reach one model; the useful amount of transport "
+                 "varies per input, so one schedule cannot track it.")]
     depth = np.linspace(0.0, 1.0, 101)
+    families = (("schedule adequate", (0.5, 0.5, 0.5)), ("feedback valuable", (0.25, 0.5, 0.78)))
     curves = []
-    for family, minima in (("schedule adequate", (0.5, 0.5, 0.5)), ("feedback valuable", (0.25, 0.5, 0.78))):
+    for family, minima in families:
         for k, centre in enumerate(minima):
             curves += [[family, k, float(d), float(0.4 + 0.15 * k + 2.0 * (d - centre) ** 2)] for d in depth]
-    out.data("panel_a", ["setting", "description"], settings)
+    schedule = [SHORT[row[0]] for row in measured if row[2] == retained_schedule]
+    feedback = len(measured) - len(schedule)
+    count = ("no", "one", "two", "three", "four", "five", "six", "seven")[feedback]
+    titles = (f"schedule adequate ({', '.join(schedule) or 'no dataset'})",
+              f"feedback valuable ({count} dataset{'' if feedback == 1 else 's'})")
+    notes = ((("one open-loop\ndepth serves\nevery input", "#e8673a", 0.53),),
+             (("state feedback\npicks the next\ntransport per input", "#2864a5", 0.03),
+              ("best fixed\nschedule misses\ninput-dependent\nminima", "#e8673a", 0.55)))
+    out.data("panel_a", ["setting", "description", "backbone", "backbone_text", "adapter", "adapter_text"],
+             [[name, text, *backbone, *adapter] for name, text in settings])
     out.data("panel_b", ["family", "curve", "relative_depth", "risk"], curves)
     out.data("panel_c", ["dataset", "evaluated_rule", "category", "paired_loss_nats", "low_nats", "high_nats",
-                         "interval_method"], measured)
+                         "interval_method", "interval_drawn"], measured)
     plt = pyplot()
     fig = plt.figure(figsize=(11.0, 4.0))
     grid = fig.add_gridspec(2, 3, width_ratios=(1.25, 0.75, 1.15), wspace=0.45, hspace=0.6)
+    group = S13_FIGURE_GROUP
+    # a: frozen-backbone settings (illustration)
     ax = fig.add_subplot(grid[:, 0])
     ax.axis("off")
-    ax.set_title("a  Deployment settings in which the backbone stays frozen", loc="left")
+    letter = ax.text(-0.02, 1.08, "a", transform=ax.transAxes, fontsize=10, fontweight="bold", va="bottom")
+    ax.set_title("Deployment settings in which the backbone stays frozen", loc="left", fontsize=8)
+    out.compare(group, ("panel_a", "label"), letter.get_text())
+    out.compare(group, ("panel_a", "title"), ax.get_title(loc="left"))
     for k, (name, text) in enumerate(settings):
-        y = 0.83 - 0.33 * k
-        ax.text(0.0, y, "frozen\nbackbone", transform=ax.transAxes, fontsize=6.5, va="center", ha="left",
-                bbox={"boxstyle": "round", "fc": "#f7d9c4", "ec": "#c46a2c"})
-        ax.text(0.2, y, "adapter", transform=ax.transAxes, fontsize=6.5, va="center", ha="left",
-                bbox={"boxstyle": "round", "fc": "#d6e4f2", "ec": "#2864a5"})
-        ax.text(0.37, y + 0.07, name, transform=ax.transAxes, fontsize=7, fontweight="bold", va="center")
-        ax.text(0.37, y - 0.05, wrap(text, 46), transform=ax.transAxes, fontsize=6, va="center")
-    for row, family in enumerate(("schedule adequate", "feedback valuable")):
-        ax = fig.add_subplot(grid[row, 1])
+        y = 0.80 - 0.32 * k
+        boxes = []
+        for x, width, (head, body), face, edge in ((0.02, 0.24, backbone, "#f7d9c4", "#e8673a"),
+                                                   (0.29, 0.15, adapter, "#d6e4f2", "#2864a5")):
+            ax.add_patch(FancyBboxPatch((x, y - 0.1), width, 0.2, boxstyle="round,pad=0.005,rounding_size=0.015",
+                                        transform=ax.transAxes, fc=face, ec=edge, lw=1.0))
+            boxes.append([ax.text(x + width / 2, y + 0.05, head, transform=ax.transAxes, fontsize=5.5,
+                                  fontweight="bold", ha="center", va="center"),
+                          ax.text(x + width / 2, y - 0.035, body, transform=ax.transAxes, fontsize=5,
+                                  ha="center", va="center", color="0.25")])
+        ax.plot([0.26, 0.29], [y, y], transform=ax.transAxes, color="0.3", lw=1.0)
+        heading = ax.text(0.47, y + 0.08, name, transform=ax.transAxes, fontsize=7, fontweight="bold", va="center")
+        description = ax.text(0.47, y + 0.04, textwrap.fill(text, 40, break_on_hyphens=False),
+                              transform=ax.transAxes, fontsize=6, va="top", color="0.25")
+        path = ("panel_a", "settings", k)
+        out.compare(group, (*path, "name"), heading.get_text())
+        out.compare(group, (*path, "description"), description.get_text())
+        out.compare(group, (*path, "backbone_box"), [item.get_text() for item in boxes[0]])
+        out.compare(group, (*path, "adapter_box"), [item.get_text() for item in boxes[1]])
+    # b: stylized risk-depth families (illustration); the coordinates are drawing choices
+    markers = []
+    for index, (family, _) in enumerate(families):
+        ax = fig.add_subplot(grid[index, 1])
+        values = np.array([[c[3] for c in curves if c[0] == family and c[1] == k] for k in range(3)])
+        lowest = np.argmin(values, axis=1)
+        minimizers = depth[lowest]
+        fixed = float(depth[np.argmin(values.mean(axis=0))])      # the best single depth for every input
         for k in range(3):
-            values = [c[3] for c in curves if c[0] == family and c[1] == k]
-            ax.plot(depth, values, color="#2864a5" if row else "0.4", lw=1)
-        ax.set_title(f"{'b  ' if row == 0 else ''}{family} (illustration)", loc="left", fontsize=7)
+            ax.plot(depth, values[k], color="#2864a5" if index else "0.55", lw=1)
+        ax.axvline(fixed, color="#e8673a", ls="--", lw=1.2)
+        markers.append([family, "best fixed depth", None, fixed, None])
+        if index:
+            ax.plot(minimizers, values[np.arange(3), lowest], "o", color="#2864a5", ms=3)
+            markers += [[family, "input minimum", k, float(minimizers[k]), float(values[k, lowest[k]])]
+                        for k in range(3)]
+        texts = [ax.text(x, 0.96, note, transform=ax.transAxes, fontsize=5.5, color=color, va="top",
+                         bbox={"fc": "white", "ec": "none", "alpha": 0.8, "pad": 0.5})
+                 for note, color, x in notes[index]]
+        ax.set_xlim(0.0, 1.0)
+        ax.set_ylim(0.3, 2.6)
+        ax.set_xticks([0.0, 1.0], ["0", "L"])
         ax.set_yticks([])
-        ax.set_ylabel("risk", fontsize=7)
-        if row:
-            ax.set_xlabel("propagation depth (relative)")
+        ax.set_ylabel("risk (illustrative)", fontsize=7)
+        ax.set_title(titles[index], loc="left", fontsize=7)
+        if index == 0:
+            letter = ax.text(-0.3, 1.18, "b", transform=ax.transAxes, fontsize=10, fontweight="bold", va="bottom")
+            out.compare(group, ("panel_b", "label"), letter.get_text())
+        else:
+            ax.set_xlabel("propagation depth ℓ")
+            out.compare(group, ("panel_b", "x_label"), ax.get_xlabel())
+        path = ("panel_b", "families", index)
+        out.compare(group, (*path, "title"), ax.get_title(loc="left"))
+        out.compare(group, (*path, "y_label"), ax.get_ylabel())
+        out.compare(group, (*path, "x_tick_labels"), [item.get_text() for item in ax.get_xticklabels()])
+        out.compare(group, (*path, "annotations"), [item.get_text() for item in texts])
+        out.compare(group, (*path, "common_risk_minimizer"), bool(np.all(minimizers == minimizers[0])),
+                    note="Read from the stylized curves; a structural property of the illustration, not a measurement.")
+    out.data("panel_b_markers", ["family", "marker", "curve", "relative_depth", "risk"], markers)
+    # c: measured paired effects of the deployed rules
     ax = fig.add_subplot(grid[:, 2])
-    colors = {"open-loop schedule retained": "#d37a18", "uncertainty-radius feedback": "#2864a5",
+    colors = {retained_schedule: "#d37a18", "uncertainty-radius feedback": "#2864a5",
               "receding-horizon replanning": "#2a9d6a"}
-    for y, row in enumerate(measured):
+    for y, (row, interval) in enumerate(zip(measured, shown)):
         color = colors.get(row[2], "0.4")
-        if row[4] is not None and row[5] is not None:
-            ax.plot([row[4], row[5]], [y, y], color=color, lw=1.2)
+        if interval is not None:
+            ax.plot(interval, [y, y], color=color, lw=1.2)
         ax.plot(row[3], y, "o", color=color, ms=4)
     for name, color in colors.items():
         ax.plot([], [], "o", color=color, label=name)
-    ax.axvline(0, color="0.5", lw=0.8)
+    zero = ax.axvline(0, color="0.5", lw=0.8)
+    ax.xaxis.set_major_locator(plt.MultipleLocator(0.005))
     ax.set_yticks(range(len(measured)), [f"{SHORT[r[0]]}\n{r[1]}" for r in measured], fontsize=6)
     ax.invert_yaxis()
     ax.set_xlabel("paired CE or BCE effect vs q_C on D_test (nats, 95%)")
-    ax.set_title("c  Measured: deployed rule versus q_C", loc="left")
-    ax.legend(fontsize=6, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2)
+    ax.set_title("Measured: deployed rule versus q_C (Table 2)", loc="left")
+    letter = ax.text(-0.36, 1.03, "c", transform=ax.transAxes, fontsize=10, fontweight="bold", va="bottom")
+    legend = ax.legend(fontsize=6, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2)
+    out.compare(group, ("panel_c", "label"), letter.get_text())
+    out.compare(group, ("panel_c", "title"), ax.get_title(loc="left"))
+    out.compare(group, ("panel_c", "legend"), [item.get_text() for item in legend.get_texts()])
+    out.compare(group, ("panel_c", "x_label"), ax.get_xlabel())
+    out.compare(group, ("panel_c", "zero_line_nats"), float(zero.get_xdata()[0]))
+    labels = [item.get_text() for item in ax.get_yticklabels()]
+    for y, (row, interval) in enumerate(zip(measured, shown)):
+        path = ("panel_c", "rows", y)
+        out.compare(group, (*path, "label"), labels[y].split("\n"))
+        out.compare(group, (*path, "category"), row[2])
+        out.compare(group, (*path, "effect_nats"), row[3])
+        out.compare(group, (*path, "interval_nats"), interval,
+                    note="A returned comparator is the exact comparator identity; no statistical interval is drawn.")
     out.figure(fig)
-    out.note("Panels a and b are illustrations (settings and stylized risk-depth curves); panel c is measured from the "
-             "runs. Roman-empire: mean over the ten splits with the small-sample t interval.")
+    out.note("Panels a and b are illustrations (settings and stylized risk-depth curves whose shapes are drawing "
+             "choices); the family titles of panel b name the datasets of panel c whose deployed rule retains the "
+             "open-loop schedule or uses feedback. Panel c is measured from the runs; a returned comparator is the "
+             "exact comparator identity without an interval. Roman-empire: mean over the ten splits with the "
+             "small-sample t interval.")
 
 
 # ---------------------------------------------------------------------------
