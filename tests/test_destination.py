@@ -90,8 +90,33 @@ class Tree(unittest.TestCase):
             self.assertEqual(train + valid + test, shape[0], dataset)
         for dataset in fd.INDEPENDENT:
             splits = self.tree[f"manifests/published/{fd.STEMS[dataset]}.json"]["splits"]
-            self.assertEqual(splits["graph_split_sizes"], self.doc["preregistered_roles"][dataset]["sizes"])
+            self.assertNotIn("graph_split_sizes", splits)                 # not a field of the executed manifest
             self.assertEqual(splits["graph_role_hashes"], self.doc["preregistered_roles"][dataset]["graph_role_hashes"])
+            if dataset in destination.GRAPH_LABELS:
+                self.assertEqual(splits["sizes"], self.doc["preregistered_roles"][dataset]["sizes"])
+            else:
+                self.assertTrue(destination.is_pending(splits["sizes"]))
+
+    def test_compared_paths_exist_in_the_files_publication_writes(self):
+        """Every exact or registered value names a field that the real writers emit (bundled runs)."""
+        from scripts import run_manifests
+        for stem in ("arxiv", "peptides_func"):
+            run = ROOT / "examples" / "runs" / stem
+            with tempfile.TemporaryDirectory() as tmp:
+                real = destination.normalize(run_manifests.run_manifest(run, with_indices=False, out_dir=Path(tmp), stem=stem))
+            projected = self.tree[f"manifests/published/{stem}.json"]
+            classes = projected[destination.MARK]["classes"]
+            body = destination.normalize({k: v for k, v in projected.items() if k != destination.MARK})
+            checked = 0
+            for path, value in destination.leaves(body):
+                if destination.classify(path, classes) in ("exact", "registered"):
+                    self.assertIsNot(destination.lookup(real, path), destination.MISSING, (stem, path))
+                    checked += 1
+            self.assertGreater(checked, 25)
+            environment = json.loads((run / "environment.json").read_text(encoding="utf-8"))
+            observed = self.tree[f"environment/observed/{stem}.json"]
+            for key in observed["members"][0]["environment"]:
+                self.assertIn(key, environment, key)
 
     def test_lrgb_official_split_hashes_are_those_of_the_official_file_order(self):
         import numpy as np

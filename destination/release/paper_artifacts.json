@@ -1024,8 +1024,15 @@
     "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
     "rows": "pending: rows of the exported summary",
     "coverage": {
-     "internal_datasets": 7,
-     "external_comparisons": 14
+     "keys": [
+      "dataset",
+      "method",
+      "seed"
+     ],
+     "datasets": 7,
+     "internal_rows": "pending: internal method rows of the seven runs",
+     "external_comparisons": 14,
+     "seeds_per_row": "pending: seeds per method row"
     }
    },
    "files": "pending: files of the packed set",

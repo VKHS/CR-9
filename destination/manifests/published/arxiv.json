@@ -25,7 +25,6 @@
     "splits/unit",
     "splits/rule",
     "splits/sizes/*",
-    "splits/graph_split_sizes/*",
     "splits/role_hashes/*",
     "splits/graph_role_hashes/*",
     "splits/official_split_hashes/*",
@@ -115,7 +114,6 @@
    "admit": 29799,
    "test": 48603
   },
-  "graph_split_sizes": null,
   "role_hashes": "pending: node role hashes; follow from the official node identifiers",
   "graph_role_hashes": null,
   "official_split_hashes": "pending: hashes of the official node splits",

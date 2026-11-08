@@ -25,7 +25,6 @@
     "splits/unit",
     "splits/rule",
     "splits/sizes/*",
-    "splits/graph_split_sizes/*",
     "splits/role_hashes/*",
     "splits/graph_role_hashes/*",
     "splits/official_split_hashes/*",
@@ -105,17 +104,6 @@
   "unit": "graph",
   "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
   "sizes": "pending: node-row role sizes; follow from the official graph sizes",
-  "graph_split_sizes": {
-   "fit_train": 4589,
-   "fit_val": 509,
-   "fit": 5098,
-   "explore": 1700,
-   "select": 850,
-   "confirm": 425,
-   "compare": 425,
-   "admit": 1428,
-   "test": 1429
-  },
   "role_hashes": "pending: node-row role hashes",
   "graph_role_hashes": {
    "fit_train": "422c4e208b8329a51c13ca22eb624b361ee1babd0f5cc06d4ee1cbebb913579e",

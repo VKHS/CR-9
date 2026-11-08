@@ -246,8 +246,11 @@ def record_identity(ctx: Context, name: str) -> dict:
     if contract is None:
         return identity
     if contract.get("analyzer") == "baselines":
-        identity["coverage"] = {"internal_datasets": len(contract["datasets"]),
-                                "external_comparisons": sum(len(v) for v in EXTERNAL.values())}
+        # cm_campaigns/baselines.py::check_coverage
+        identity["coverage"] = {"keys": ["dataset", "method", "seed"], "datasets": len(contract["datasets"]),
+                                "internal_rows": pending("internal method rows of the seven runs"),
+                                "external_comparisons": sum(len(v) for v in EXTERNAL.values()),
+                                "seeds_per_row": pending("seeds per method row")}
     elif contract.get("coverage_keys") is None:
         identity["coverage"] = {"keys": ["dataset"], "rows": len(contract["datasets"])}
     else:
@@ -333,7 +336,6 @@ def manifest_part(ctx: Context, dataset: str, config: dict, run_name: str) -> di
     if dataset in INDEPENDENT:
         roles = ctx.roles[dataset]
         sizes = roles["sizes"] if dataset in GRAPH_LABELS else pending("node-row role sizes; follow from the official graph sizes")
-        graph_sizes = roles["sizes"]
         role_hashes = roles["graph_role_hashes"] if dataset in GRAPH_LABELS else pending("node-row role hashes")
         graph_hashes = roles["graph_role_hashes"]
         counts = roles["official_split_hashes"]
@@ -344,7 +346,7 @@ def manifest_part(ctx: Context, dataset: str, config: dict, run_name: str) -> di
         unit, statistical = "graph", "complete graph"
     else:
         sizes = node_roles(ctx.functions, dataset, config)
-        graph_sizes, graph_hashes = None, None
+        graph_hashes = None
         role_hashes = pending("node role hashes; follow from the official node identifiers")
         counts = pending("hashes of the official node splits")
         n, features, outputs = expected[dataset]
@@ -362,7 +364,7 @@ def manifest_part(ctx: Context, dataset: str, config: dict, run_name: str) -> di
                   "bootstrap_seeds": {"selection": seed + 4, "admission": seed + 6, "final": seed + 7},
                   "split_index": split_index},
         "splits": {"split_protocol": split_contract.DATA_ROLE_PROTOCOL, "comparison_reserved_at": "prepare",
-                   "unit": unit, "rule": ctx.shapes["split_rule"], "sizes": sizes, "graph_split_sizes": graph_sizes, "role_hashes": role_hashes,
+                   "unit": unit, "rule": ctx.shapes["split_rule"], "sizes": sizes, "role_hashes": role_hashes,
                    "graph_role_hashes": graph_hashes, "official_split_hashes": counts,
                    "official_split_axis": unit, "independent_graphs": dataset in INDEPENDENT,
                    "statistical_unit": statistical,
@@ -400,7 +402,7 @@ def run_manifest(ctx: Context, dataset: str) -> dict:
         "exact": ["schema", "dataset", "benchmark_dataset", "data_kind", "is_benchmark_data", "profile", "scientific_run",
                   "identities/source_sha256", "identities/config_sha256", "seeds/partition_seed", "seeds/training_seeds",
                   "seeds/bootstrap_seeds/*", "seeds/split_index", "splits/split_protocol", "splits/comparison_reserved_at",
-                  "splits/unit", "splits/rule", "splits/sizes/*", "splits/graph_split_sizes/*", "splits/role_hashes/*",
+                  "splits/unit", "splits/rule", "splits/sizes/*", "splits/role_hashes/*",
                   "splits/graph_role_hashes/*", "splits/official_split_hashes/*", "splits/official_split_axis",
                   "splits/independent_graphs", "splits/statistical_unit", "source_data/num_*",
                   "campaign/splits", "campaign/per_split/*/split_index", "campaign/per_split/*/identities/source_sha256",
