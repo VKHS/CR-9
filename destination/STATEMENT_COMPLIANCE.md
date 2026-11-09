@@ -54,7 +54,7 @@ Each open question between the printed methods or values and the code is decided
 | K5 | Settings of the budget-matched comparison (Tables S46b and S47, main Figure 6) | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
 | K6 | Failure responses of the target-regime gates (Table S3) | awaiting original records | $\color{red}{\textsf{decided by the original records}}$ |
 | K7 | Table S20 \|Q\|: the feasible family, not the registry | resolved | resolved |
-| K8 | Literal wording and representation differences of the protocol displays | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
+| K8 | Literal cells of the protocol displays | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
 | K9 | Manuscript corrections found while registering the figure contracts | needs an author declaration | $\color{red}{\textsf{decided by the author's declaration}}$ |
 
 ## The printed availability text

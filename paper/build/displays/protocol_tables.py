@@ -305,7 +305,7 @@ def table_s1(ctx, out):
     text = protocol_text(ctx, "S1")["rows"]
     sources = {row["dataset"]: row for row in ctx.source_json("data/sources.json")["datasets"]}
     counts = ctx.constants["data_roles_table_S2"]["multi_graph_counts"]
-    rows, source = [], []
+    rows, source, split_cores = [], [], {}
     for dataset in DATASETS:
         cfg = ctx.config(dataset, PROFILE)
         data, adm = cfg["data"], cfg["admission"]
@@ -321,20 +321,24 @@ def table_s1(ctx, out):
             criterion = (f"Theorem 2: U_a ≤ −ε_a ({margin}) with B = {adm['clip']:.2f}, δ_a = {adm['alpha']:g}; "
                          f"{metric}; policy fixed on D_confirm before D_admit is read")
         else:
-            cores = (f"{data['num_clusters']} {PARTITIONERS[data['partitioner']]} cores; "
-                     f"{data['buffer_hops']}-hop buffer")
+            partitioner = PARTITIONERS[data["partitioner"]]
             rule = (f"clipped-{loss} mean ≤ −ε_a and cluster-bootstrap upper < 0 on D_admit "
                     f"({margin}, B = {adm['clip']:.2f}); {metric}")
             if UNITS[dataset] == "official_split":
-                primary, repeated = "official split", f"{splits} splits ({cores} per split)"
+                # The repeated unit is the split; each split run's cores are given in the table note.
+                primary, repeated = "official split", f"{splits} splits"
+                split_cores[dataset] = (f"{data['num_clusters']} {partitioner} cores with a "
+                                        f"{data['buffer_hops']}-hop buffer")
                 treatment = "paired small-sample split analysis; cluster bootstrap within each split"
-                role = "descriptive (repeated splits)"
+                role = "repeated-split empirical"
                 criterion = (f"descriptive per split: {rule}; campaign G_admit = 1 only if all {splits} splits "
                              f"admit; paired t interval over the {splits} splits reported")
             else:
                 primary = ("degree-stratified buffered cluster" if data["partitioner"] == "degree_stratified"
                            else "buffered graph cluster")
-                repeated = cores
+                # The partitioner is named here only when the primary unit does not already name it.
+                named = "" if partitioner in primary else f"{partitioner} "
+                repeated = f"{data['num_clusters']} {named}cores; {data['buffer_hops']}-hop buffer"
                 treatment = "cluster bootstrap" + (f" and {text[dataset]['sensitivity']}" if dataset in text else "")
                 role, criterion = "descriptive", f"descriptive: {rule}"
         gate = "yes" if independent else "no"
@@ -355,9 +359,10 @@ def table_s1(ctx, out):
                "interval role", "admission criterion for G_admit", "formal gate?"], rows,
               notes=["Rows are read from configs/<dataset>_full.json (data, admission), the statistical units of "
                      "cm_campaigns/contract.py and the admission rule of cross_morse.statistics.admission; J is the "
-                     "official validation count of paper/registered_constants.json.",
-                     "Roman-empire: every split run admits with the cluster-bootstrap rule on its own cores; the "
-                     "campaign record (paper/build/evidence.py) admits only when every split admits."])
+                     "official validation count of paper/registered_constants.json."]
+              + [f"{d}: every split run admits with the cluster-bootstrap rule on its own {cores}; the campaign "
+                 "record (paper/build/evidence.py) admits only when every split admits."
+                 for d, cores in split_cores.items()])
     out.data("design", ["dataset", "independent_graphs", "unit", "partitioner", "num_clusters", "buffer_hops",
                         "official_splits", "J_admit", "admission_rule", "clip_B", "delta_a", "epsilon_a",
                         "epsilon_metric", "bootstrap_reps", "loss"], source)
@@ -502,7 +507,9 @@ def table_s3(ctx, out):
                              f"selected strata = {selected_fraction:.2f}"),
         "residual_headroom": minus(f"U(Δ_oracle) {op['headroom_margin']} -{entry['headroom_margin']:.3f} nats"),
     }
-    action = ("feedback candidates made infeasible; strongest open-loop q_C retained" if enforced
+    # Every gate has the same executed response: the feedback candidates become infeasible and the strongest
+    # open-loop configuration q_C is retained, which is the printed response of the residual-headroom gate.
+    action = ("retain strongest open loop" if enforced
               else "recorded only (selection.enforce_entry_contract is false)")
     rows = [[text[g]["gate"], text[g]["quantity"], criteria[g], action] for g in criteria]
     numbers = {("nominal_graph_value", "epsilon_plant_nats"): entry["plant_margin"],
@@ -529,7 +536,8 @@ def table_s3(ctx, out):
                      "missing A0 cells fail. New runs record the versioned gate in select/entry_complete.json; "
                      "older source-bound entry records do not demonstrate enforcement of this added gate.",
                      "Failure action: with selection.enforce_entry_contract, any failed gate makes every feedback "
-                     "candidate infeasible before selection (cross_morse/pipeline.py, _stage_select)."])
+                     "candidate infeasible before selection, so the strongest open-loop configuration q_C is retained "
+                     "(cross_morse/pipeline.py, _stage_select)."])
     out.data("thresholds", ["gate", "key", "operator", "value"],
              [[g, k, op[k], v] for g, k, v in (("nominal_graph_value", "plant_margin", entry["plant_margin"]),
                                                 ("depth_qualification", "pdd_max", entry["pdd_max"]),
@@ -893,7 +901,7 @@ def table_s8(ctx, out):
                for d, c in cfgs.items()}
     widest = max(schemas.values(), key=len)
     periods = {"cheap": "every depth", "spectral": "sensing period P_s", "reach": "every depth; powers at P_s",
-               "age": "every depth", "observer": f"every update (observer period r = {observer_period})"}
+               "age": "every depth", "observer": "every update"}
     rows, mapping = [], []
     kind_of: dict[str, str] = {}
     for key, spec in text.items():
@@ -930,7 +938,8 @@ def table_s8(ctx, out):
                      "Sensing periods P_s of the full configurations: " +
                      ", ".join(f"{SHORT[d]} {c['sensor']['sensing_period']}" for d, c in cfgs.items()) + ".",
                      f"Robust normalization (cross_morse/learning.py): {normalization}. Innovation and NIS are "
-                     f"computed by the observer ({observer_dim} coordinates) and are not sensor coordinates."])
+                     f"computed by the observer ({observer_dim} coordinates) at every update, with observer period "
+                     f"r = {observer_period} in every full configuration, and are not sensor coordinates."])
     out.data("coordinates", ["row", "kind", "dim", "coordinates"], mapping)
     out.data("schemas", ["dataset", "sensing_period", "dimension", "coordinates"],
              [[d, cfgs[d]["sensor"]["sensing_period"], len(s), " ".join(s)] for d, s in schemas.items()])

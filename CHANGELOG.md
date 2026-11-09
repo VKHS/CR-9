@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-09 — Protocol tables in the printed wording
+
+- Five cells of Supplementary Tables S1, S3 and S8 whose printed wording describes what the code executes are
+  generated in that wording, with the detail kept in the table notes and source data: the ogbn-proteins repeated
+  units (`32 cores; 2-hop buffer`; the primary unit already names the degree-stratified partition), the
+  Roman-empire repeated units (`10 splits`; each split run's 32 METIS cores with a 2-hop buffer are in the note)
+  and interval role (`repeated-split empirical`), the period of the innovation row (`every update`; observer
+  period r = 2 in the note) and the response of the entry gates (`retain strongest open loop`, the printed
+  response of the residual-headroom gate). The offline build without measured outputs now reproduces 487
+  printed values exactly (482 before), with 10 literal differences (15 before) and 3 missing seed-hierarchy
+  fields; Table S8 is exact. Item K8 of the consistency ledger lists the six cells that remain, each a
+  statement about behavior or schema: the Peptides-func boundary annotation of S1, the Full and state fallback
+  descriptions of S11, and the stage, unit and protocol roles of S38. No reference value changes, and the
+  runtime is unchanged.
+
 ## 2026-11-08 — Algorithm S4 in the runtime, the scientific-consistency ledger and figure contracts
 
 - The selection's studentized maximum follows Supplementary Algorithm S4: `nested_selection` takes it over

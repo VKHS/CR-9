@@ -2781,9 +2781,9 @@
               "sha256": "ad4a3efbda847c2b046704f6ff0b55ca7e8647184fa204c893dc5516ea34c49c"
             },
             {
-              "bytes": 102649,
+              "bytes": 103437,
               "path": "paper/build/displays/protocol_tables.py",
-              "sha256": "926f3a6e45abea8d9d9fc3d89c9d9fbd60d9f93192056ef71201656f5c57733a"
+              "sha256": "39dea8b4bb0f29b233a08547c4dc4b9e92086b338df9fcb7e785794715ce8829"
             },
             {
               "bytes": 121526,

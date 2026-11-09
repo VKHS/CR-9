@@ -13,7 +13,7 @@ Questions on which the printed methods or printed values and the released code (
 | K5 | Settings of the budget-matched comparison (Tables S46b and S47, main Figure 6) | Needs an author declaration | the declared settings of the S47 decoding-cost scenario (decoding cost, ceiling, ensemble spend) and the campaign:budget records |
 | K6 | Failure responses of the target-regime gates (Table S3) | Awaiting original records | train/entry_initial.json and select/entry_complete.json of every original run |
 | K7 | Table S20 \|Q\|: the feasible family, not the registry | Resolved | nothing further: the definition is fixed by Algorithm S4 |
-| K8 | Literal wording and representation differences of the protocol displays | Needs an author declaration | the author's choice of wording for each cell (manuscript or generator) |
+| K8 | Literal cells of the protocol displays | Needs an author declaration | the author, cell by cell: the manuscript cell is corrected, or the runtime or record schema is changed before the records are exported |
 | K9 | Manuscript corrections found while registering the figure contracts | Needs an author declaration | the author's correction of the manuscript |
 
 On the cluster, after the seven lifecycles have run:
@@ -102,15 +102,15 @@ Each check reports `consistent`, `needs correction` (the rule names what changes
 - **Decided by:** nothing further: the definition is fixed by Algorithm S4
 - **Rule:** The realized |Q_feas| of each run is compared with the printed |Q| by make paper.
 
-## K8. Literal wording and representation differences of the protocol displays
+## K8. Literal cells of the protocol displays
 
-**Displays:** supplementary:Table S1, supplementary:Table S3, supplementary:Table S8, supplementary:Table S11, supplementary:Table S38. **Status:** Needs an author declaration.
+**Displays:** supplementary:Table S1, supplementary:Table S11, supplementary:Table S38. **Status:** Needs an author declaration.
 
-- **Printed** (supplementary, p. 1, 2): Literal cells of the protocol tables (degree and split detail, repeated-split terminology, the Peptides boundary annotation, the observer-period annotation, fallback descriptions, stage and unit keys).
-- **Code before:** The offline build compares these cells literally and reports each difference (docs/AVAILABILITY_REVIEW.md).
-- **Code now:** Unchanged: literal comparisons are retained; none is rewritten to force equality.
-- **Decided by:** the author's choice of wording for each cell (manuscript or generator)
-- **Rule:** Each remaining difference is listed in paper/source_data/compare/ after make paper; the manuscript cell or the generator wording is aligned by the author.
+- **Printed** (supplementary, p. 1, 8, 23, 24): Table S1 annotates the Peptides-func interval role 'inferential; boundary'; Table S11 prints Lean as the fail output of the Full profile and 'strongest open-loop predecessor or q_C' for the state-conditioned route; Table S38 lists stage, unit and protocol as keys of the results record.
+- **Code before:** The offline build reported fifteen literal differences. Five were wording cells of Tables S1, S3 and S8 whose printed wording describes the executed behavior: the partitioner named twice for ogbn-proteins, the per-split cores and the 'descriptive (repeated splits)' role of Roman-empire, the observer-period annotation of the innovation row and the gate response written as 'feedback candidates made infeasible; strongest open-loop q_C retained'.
+- **Code now:** The generators print those five cells in the printed wording and keep the detail in the table notes and source data (paper/build/displays/protocol_tables.py), so Table S8 and the residual-headroom row of Table S3 reproduce exactly. Six cells remain, each a statement about behavior or schema rather than wording: the Peptides-func boundary annotation is an admission outcome, not a protocol constant; for a failed Full confirmation the runtime returns Lean only when Lean belongs to Q_s (q_C otherwise), and for a failed state confirmation it always returns q_C; the records carry no stage or unit column and store the protocol as a value. The S3 gate responses and the S2 seed columns are items K6 and K4.
+- **Decided by:** the author, cell by cell: the manuscript cell is corrected, or the runtime or record schema is changed before the records are exported
+- **Rule:** Each remaining difference is listed in paper/source_data/compare/ after make paper. Changing the runtime (S11) or the record schema (S38) after the records are sealed is not allowed: the change precedes the export, or the manuscript cell is corrected.
 
 ## K9. Manuscript corrections found while registering the figure contracts
 

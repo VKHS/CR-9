@@ -31,6 +31,25 @@
     "pytorch_suite_and_smoke_lifecycle": {
       "status": "HOSTED_CI",
       "scope": "PyTorch is not installed in this environment. The full suite and one synthetic end-to-end lifecycle on this runtime execute in the hosted quality workflow for the exact commit (hosted_ci); this record does not predict their outcome."
+    },
+    "source_only_reconstruction": {
+      "date": "2026-11-09",
+      "command": "make paper-offline (scripts/reconstruct_paper.py --offline --tier analysis)",
+      "status": "INCOMPLETE",
+      "program_exit_code": 1,
+      "expected": "Exit 1 is the expected result while measured outputs are unpublished.",
+      "registered_displays": 90,
+      "rendered_displays": 21,
+      "complete_content_and_comparison_coverage": 20,
+      "comparison_counts": {
+        "exact": 487,
+        "differs": 10,
+        "missing": 3,
+        "no_reference": 0,
+        "not_comparable": 0
+      },
+      "artifacts_awaiting_publication": 37,
+      "scope": "Executed on the revision that generates five protocol-table cells of Tables S1, S3 and S8 in the printed wording (paper/build/displays/protocol_tables.py); the runtime is unchanged. No measured archives supplied: protocol and analytical reconstruction only. The ten differences and three missing fields are items K4, K6 and K8 of docs/CONSISTENCY.md."
     }
   },
   "live_zenodo_operations": "not performed",
@@ -129,7 +148,7 @@
       "predictor_comparisons": 8
     }
   },
-  "validation_record_updated": "2026-11-08",
+  "validation_record_updated": "2026-11-09",
   "availability_reconstruction_validation": {
     "date": "2026-11-07",
     "base_commit": "5c1399eabb64f58926e7a28d171c4c2cfb771b38",

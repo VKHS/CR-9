@@ -14,6 +14,14 @@ their earlier-source scope. Selection records sealed by earlier runtimes carry n
 family and replay exactly with every executed configuration; a test reproduces the
 selection of both preserved runtimes on identical inputs.
 
+Without measured outputs, `make paper-offline` renders 21 displays from repository
+sources; 20 have complete content and comparison coverage, and the printed values
+compare as 487 exact, 10 literal differences and 3 missing seed-hierarchy fields
+(9 November 2026, after five protocol-table cells of Tables S1, S3 and S8 were
+generated in the printed wording; items K4, K6 and K8 of the
+[consistency ledger](CONSISTENCY.md) name the rest). The command exits 1 until the
+measured outputs are published.
+
 A source fingerprint identifies runtime code; a Git commit additionally identifies
 documentation, examples and packaging. Historical fixture validation does not
 establish that the current runtime produced those observations. Current-source

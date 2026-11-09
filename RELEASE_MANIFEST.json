@@ -79,10 +79,10 @@
       "sha256": "6ad6ecdbbce0e4db5388052246cf6b85b7f6e4a947b08eb07baf5bc8373ba2da"
     },
     {
-      "bytes": 40732,
+      "bytes": 42004,
       "executable": false,
       "path": "CHANGELOG.md",
-      "sha256": "71d9b5f9e1d7b9f026871ed9c72ff6c036670a39850098bd085290a8ad16d672"
+      "sha256": "358f7af57ad39462848185cb699efb9f0173e9404753ee464a0f7517801a11d1"
     },
     {
       "bytes": 2319,
@@ -787,10 +787,10 @@
       "sha256": "6598a07c0693f60d0ff3937b1fc1efe5eba2761990e367383f26d9397c974d51"
     },
     {
-      "bytes": 9046,
+      "bytes": 9013,
       "executable": false,
       "path": "destination/STATEMENT_COMPLIANCE.md",
-      "sha256": "fe288fc0e6f30c3cb17545bc23dc22c83762fb9745590e2a2c9e08e78aa86971"
+      "sha256": "ad82ba3e9e0821ce701952b4e9077f2f5a9207d116ba707a63e2882cc5712514"
     },
     {
       "bytes": 2049,
@@ -913,10 +913,10 @@
       "sha256": "177dcabf3689e984e4eded95196810bc9a70c782ba81c92c663081bba651187a"
     },
     {
-      "bytes": 15023,
+      "bytes": 16191,
       "executable": false,
       "path": "docs/CONSISTENCY.md",
-      "sha256": "19d5de584841a64749af44f51f193280aaecaccf4f17d11955276a9dee6c73a6"
+      "sha256": "7d465c52b9c9f0921d53606326000dcbc80aa5567bc229a0373bdb83e6d165bc"
     },
     {
       "bytes": 8921,
@@ -1039,16 +1039,16 @@
       "sha256": "bd1cc3e5fc524d49194b9be8c97cf52921b72f1ccb4065d722d3afc18ccb0533"
     },
     {
-      "bytes": 56331,
+      "bytes": 57339,
       "executable": false,
       "path": "docs/VALIDATION.json",
-      "sha256": "c6a08934313421ce82790e84424c2a800bad2902c986c47df20715ce1fd269a8"
+      "sha256": "3954451ae095b75b269637387177c058e37a9b0729254421f59c9bcd04538b2c"
     },
     {
-      "bytes": 16431,
+      "bytes": 16933,
       "executable": false,
       "path": "docs/VALIDATION.md",
-      "sha256": "3aa0ec821d034f279204b181ad670e103912a107e10990513feaeee20f77f28c"
+      "sha256": "86ae82f3a214633041f95bbea50dd04975994f3f3c745e1a4f35afd0d94fbd15"
     },
     {
       "bytes": 10579,
@@ -6073,10 +6073,10 @@
       "sha256": "ad4a3efbda847c2b046704f6ff0b55ca7e8647184fa204c893dc5516ea34c49c"
     },
     {
-      "bytes": 102649,
+      "bytes": 103437,
       "executable": false,
       "path": "paper/build/displays/protocol_tables.py",
-      "sha256": "926f3a6e45abea8d9d9fc3d89c9d9fbd60d9f93192056ef71201656f5c57733a"
+      "sha256": "39dea8b4bb0f29b233a08547c4dc4b9e92086b338df9fcb7e785794715ce8829"
     },
     {
       "bytes": 121526,
@@ -6133,10 +6133,10 @@
       "sha256": "176fad302e1bc0d8ef8cfd80f6122dcf0ec966e6a9c0237163d473e7881ce669"
     },
     {
-      "bytes": 14557,
+      "bytes": 15694,
       "executable": false,
       "path": "paper/consistency_ledger.json",
-      "sha256": "0960c34d08a1070df652cf519b81bf7c098ad500d05cb7b47eca26e7dc88ea21"
+      "sha256": "1d96a63dd111d313b3b035145b25679c60132a6b6e5fb2016c14b91003a4f848"
     },
     {
       "bytes": 98699,
@@ -6646,7 +6646,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "3277dd846227e1989f3fe5179f15c0938bd90e6a83cf6eb600b517a29be89968"
+      "sha256": "b147368bccf56f47383487d08685e6b59588938829a8ed69ef16dd9c3952a56a"
     },
     {
       "bytes": 35593,
@@ -7531,10 +7531,10 @@
       "sha256": "3a5e503891f24eba61b551b8dd0dfedab6e7523bd878bec8aa05b396d41a6408"
     },
     {
-      "bytes": 30067,
+      "bytes": 30801,
       "executable": false,
       "path": "tests/test_displays_protocol_tables.py",
-      "sha256": "ff83c004ec2cdb4ccfcb5cad010ed8b0dd2433096332322b6d0c86ec2c8eb48b"
+      "sha256": "0cd579b7dd3c260fe2a94aae6f5f6daa5577642be5dcf2ab261fbc6c722ae965"
     },
     {
       "bytes": 60624,
@@ -8032,5 +8032,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "99d505d41e733a10750ee12d6a794b1e8006c421934817e86489c2854e078c8b"
+  "tree_sha256": "d07d36bd4664afdc83fb65a63aecfdf0677fa17807a66b5c5a8627075eee8f88"
 }

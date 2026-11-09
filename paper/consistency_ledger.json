@@ -199,11 +199,9 @@
   },
   {
    "id": "K8",
-   "title": "Literal wording and representation differences of the protocol displays",
+   "title": "Literal cells of the protocol displays",
    "displays": [
     "supplementary:Table S1",
-    "supplementary:Table S3",
-    "supplementary:Table S8",
     "supplementary:Table S11",
     "supplementary:Table S38"
    ],
@@ -212,15 +210,17 @@
      "document": "supplementary",
      "pages": [
       1,
-      2
+      8,
+      23,
+      24
      ],
-     "text": "Literal cells of the protocol tables (degree and split detail, repeated-split terminology, the Peptides boundary annotation, the observer-period annotation, fallback descriptions, stage and unit keys)."
+     "text": "Table S1 annotates the Peptides-func interval role 'inferential; boundary'; Table S11 prints Lean as the fail output of the Full profile and 'strongest open-loop predecessor or q_C' for the state-conditioned route; Table S38 lists stage, unit and protocol as keys of the results record."
     }
    ],
-   "code_before": "The offline build compares these cells literally and reports each difference (docs/AVAILABILITY_REVIEW.md).",
-   "code_now": "Unchanged: literal comparisons are retained; none is rewritten to force equality.",
-   "decided_by": "the author's choice of wording for each cell (manuscript or generator)",
-   "rule": "Each remaining difference is listed in paper/source_data/compare/ after make paper; the manuscript cell or the generator wording is aligned by the author.",
+   "code_before": "The offline build reported fifteen literal differences. Five were wording cells of Tables S1, S3 and S8 whose printed wording describes the executed behavior: the partitioner named twice for ogbn-proteins, the per-split cores and the 'descriptive (repeated splits)' role of Roman-empire, the observer-period annotation of the innovation row and the gate response written as 'feedback candidates made infeasible; strongest open-loop q_C retained'.",
+   "code_now": "The generators print those five cells in the printed wording and keep the detail in the table notes and source data (paper/build/displays/protocol_tables.py), so Table S8 and the residual-headroom row of Table S3 reproduce exactly. Six cells remain, each a statement about behavior or schema rather than wording: the Peptides-func boundary annotation is an admission outcome, not a protocol constant; for a failed Full confirmation the runtime returns Lean only when Lean belongs to Q_s (q_C otherwise), and for a failed state confirmation it always returns q_C; the records carry no stage or unit column and store the protocol as a value. The S3 gate responses and the S2 seed columns are items K6 and K4.",
+   "decided_by": "the author, cell by cell: the manuscript cell is corrected, or the runtime or record schema is changed before the records are exported",
+   "rule": "Each remaining difference is listed in paper/source_data/compare/ after make paper. Changing the runtime (S11) or the record schema (S38) after the records are sealed is not allowed: the change precedes the export, or the manuscript cell is corrected.",
    "status": "needs_declaration",
    "check": null
   },
