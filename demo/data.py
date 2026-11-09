@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Reduced official-split graphs for the CPU demonstration.
 
-The full ogbn-products and COCO-SP graphs exceed a hosted runner (4 CPUs, 16 GB). For
-those datasets the demonstration runs on a deterministic subset of the official data:
+Except Roman-empire, the official graphs exceed what a hosted runner (4 CPUs, 16 GB) completes
+in a few hours for the 24-trajectory exploration and the repeated selection and admission
+statistics of every lifecycle. The demonstration runs those datasets on a deterministic
+subset of the official data:
 
 * node-level graphs: the nodes of the first ``keep`` parts of a ``parts``-way METIS
   partition of the symmetrized official graph (pymetis, fixed seed) with every induced
@@ -36,11 +38,12 @@ if str(ROOT) not in sys.path:
 SCHEMA = "cross-morse-demo-graph-1"
 # Selection rules. Node-level: METIS parts kept of a partition; graph-level: graphs kept per official split.
 RULES = {
-    "ogbn-arxiv": {"kind": "metis_parts", "parts": 4, "keep": 1, "seed": 0},
-    "ogbn-products": {"kind": "metis_parts", "parts": 16, "keep": 1, "seed": 0},
-    "ogbn-proteins": {"kind": "metis_parts", "parts": 4, "keep": 1, "seed": 0},
-    "COCO-SP": {"kind": "first_graphs", "keep": {"train": 8000, "valid": 1000, "test": 1000}},
-    "PascalVOC-SP": {"kind": "first_graphs", "keep": {"train": 8498, "valid": 1428, "test": 1429}},
+    "ogbn-arxiv": {"kind": "metis_parts", "parts": 8, "keep": 1, "seed": 0},
+    "ogbn-proteins": {"kind": "metis_parts", "parts": 32, "keep": 1, "seed": 0},
+    "ogbn-products": {"kind": "metis_parts", "parts": 128, "keep": 1, "seed": 0},
+    "PascalVOC-SP": {"kind": "first_graphs", "keep": {"train": 480, "valid": 60, "test": 60}},
+    "COCO-SP": {"kind": "first_graphs", "keep": {"train": 480, "valid": 60, "test": 60}},
+    "Peptides-func": {"kind": "first_graphs", "keep": {"train": 1200, "valid": 150, "test": 150}},
 }
 
 

@@ -6,7 +6,10 @@ CPU at reduced scale. Each demonstration configuration is the dataset's pilot
 configuration (configs/<stem>_pilot.json) with the overrides of VARIANTS applied and
 nothing else changed. CPU execution requires the fp32 plant (cross_morse/common.py,
 precision_context). The configurations keep profile "pilot" and scientific_run false,
-so no demonstration run can be mistaken for a full scientific run.
+so no demonstration run can be mistaken for a full scientific run. A dataset that runs
+on a reduced official-split graph (demo/data.py, ``--graph-npz``) is declared as the
+runtime requires for anything but the complete benchmark: dataset "synthetic" with
+benchmark_dataset routing and profile "smoke".
 
     python -B demo/configure.py --variant demo --output DIR      # DIR/<stem>_demo.json
     python -B demo/configure.py --variant probe --dataset ogbn-arxiv --output DIR
@@ -55,6 +58,11 @@ def demo_config(dataset: str, variant: str, *, graph_npz: str | None = None, spl
     for dotted, value in VARIANTS[variant] + DATASET_OVERRIDES[variant].get(dataset, ()):
         _set(config, dotted, value)
     if graph_npz is not None:
+        # The runtime admits a benchmark run only on the complete official graph
+        # (cross_morse/data.py); a subset runs as a declared fixture routed to the benchmark.
+        config["dataset"] = "synthetic"
+        config["benchmark_dataset"] = dataset
+        config["profile"] = "smoke"
         config["data"]["graph_npz"] = graph_npz
         config["data"]["download"] = False
     if split_index is not None:

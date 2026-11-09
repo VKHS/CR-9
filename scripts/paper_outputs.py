@@ -1276,12 +1276,31 @@ def command_plan(args, executor=_subprocess_executor) -> int:
     for dataset in (options["negative_controls_dataset"], options["band_audit_dataset"], *options["provisional"]):
         if dataset not in DATASETS:
             raise PlanError(f"unknown dataset {dataset!r}; canonical names: {list(DATASETS)}")
+    if args.device != "cuda":
+        if not args.allow_fixture:
+            raise PlanError("--device cpu executes the runners on a CPU: a demonstration, planned with --allow-fixture")
+        options["device"] = args.device
     work.mkdir(parents=True, exist_ok=True)
     plan = build_plan(work, runs, options, required=required_artifact_ids(), suite=suite, executor=executor,
                       repository=dict(repository_identity(), runtime_sha256=runtime))
+    if options.get("device"):
+        plan["nodes"] = with_device(plan["nodes"], options["device"])
     write_json(work / "plan.json", plan)
     print("\n".join(plan_summary(plan)))
     return 0
+
+
+def with_device(value, device: str):
+    """Every runner argument vector with ``--device cuda`` rewritten to ``--device <device>``."""
+    if isinstance(value, dict):
+        return {key: with_device(item, device) for key, item in value.items()}
+    if isinstance(value, list):
+        items = [with_device(item, device) for item in value]
+        if all(isinstance(item, str) for item in items):
+            items = [device if index and items[index - 1] == "--device" and item == "cuda" else item
+                     for index, item in enumerate(items)]
+        return items
+    return value
 
 
 def plan_summary(plan: dict) -> list[str]:
@@ -2359,6 +2378,8 @@ def parser() -> argparse.ArgumentParser:
                         "the outputs can never be published")
     p.add_argument("--allow-subset", action="store_true",
                    help="plan experiments on the runs present when some datasets are missing (outputs are partial)")
+    p.add_argument("--device", choices=("cuda", "cpu"), default="cuda",
+                   help="device of every runner command; cpu is a CPU demonstration (requires --allow-fixture)")
     p = sub.add_parser("submit", help="write the batch scripts and submit the job graph with afterok dependencies")
     p.add_argument("--work", type=Path, required=True)
     p.add_argument("--dry-run", action="store_true", help="print the sbatch commands; submit nothing")
