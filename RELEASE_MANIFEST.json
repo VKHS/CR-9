@@ -55,10 +55,10 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 22669,
+      "bytes": 27726,
       "executable": false,
       "path": ".github/workflows/demo-continue.yml",
-      "sha256": "38d1480f2ceb9bc870211bad7fea345aa462ff33e4b47d745dfd32f19e84f04d"
+      "sha256": "8e7502819a7c5bc03146ce287199f0be39e17497cb593c949a5b512b0f2a9a2f"
     },
     {
       "bytes": 22934,
@@ -847,10 +847,10 @@
       "sha256": "7808eb958716a99b0c580a0f3f1b06bb003f0d5b6debc016e47b757a50af9913"
     },
     {
-      "bytes": 10255,
+      "bytes": 11158,
       "executable": false,
       "path": "demo/execute.py",
-      "sha256": "f2fe99b2f793b32cb630da47a398770720b166f6874c55904721f14ec4d6815c"
+      "sha256": "2ed90484268a4404f3111effefb59ff1fed4e997e15fc6788fce3189b580c0e3"
     },
     {
       "bytes": 1304,
@@ -8152,5 +8152,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "2c2836b6941559eed0a427131a6aa3eabd2e341c0561ac52c23f309674f3aded"
+  "tree_sha256": "44a94e6a938349b966c136a3623ce805eae975cda385c0f016a8f465a8398f2c"
 }

@@ -52,13 +52,23 @@ def levels(plan: dict) -> dict[str, int]:
     return level
 
 
+TRUST_MARKERS = {"value": False}
+
+
 def task_state(work: Path, node: dict, index: int) -> str:
+    """COMPLETE when the task's completion seals verify; with --trust-markers, when its marker says so.
+
+    Trusting the marker serves a job that holds the markers but not the outputs of finished tasks (it
+    executes only the tasks that never finished); it is never used to decide a dependency's completion."""
     if po.task_complete(work, node, index):
         return "COMPLETE"
     try:
-        return po.read_json(po.task_marker(work, node["id"], index)).get("status") or "PENDING"
+        status = po.read_json(po.task_marker(work, node["id"], index)).get("status") or "PENDING"
     except (OSError, ValueError):
         return "PENDING"
+    if TRUST_MARKERS["value"] and status in ("COMPLETE", "SKIPPED") and not node.get("dependencies"):
+        return "COMPLETE"
+    return status
 
 
 def node_state(work: Path, node: dict) -> str:
@@ -131,10 +141,13 @@ def main(argv=None) -> int:
     parser.add_argument("--retries", type=int, default=12, help="resumptions of a checkpointed task")
     parser.add_argument("--summary", type=Path, default=None)
     parser.add_argument("--status", action="store_true")
+    parser.add_argument("--trust-markers", action="store_true",
+                        help="count a dependency-free task as complete when its marker says so (outputs absent)")
     parser.add_argument("--matrix", type=int, default=None, metavar="MAX_SHARDS",
                         help="print, per dependency level, the shard numbers to run (at most MAX_SHARDS) as JSON")
     args = parser.parse_args(argv)
     work = args.work.expanduser().resolve()
+    TRUST_MARKERS["value"] = bool(args.trust_markers)
     plan = po.load_plan(work)
     nodes = {n["id"]: n for n in plan["nodes"]}
     level = levels(plan)
@@ -142,7 +155,10 @@ def main(argv=None) -> int:
         counts: dict[int, int] = {}
         for node_id, node in nodes.items():
             if not node.get("blocked"):
-                counts[level[node_id]] = counts.get(level[node_id], 0) + max(1, len(node["tasks"]))
+                pending = sum(task_state(work, node, k) not in ("COMPLETE", "SKIPPED")
+                              for k in range(max(1, len(node["tasks"]))))
+                if pending:
+                    counts[level[node_id]] = counts.get(level[node_id], 0) + pending
         top = max(level.values(), default=-1)
         print(json.dumps({f"l{k}": list(range(1, min(args.matrix, counts[k]) + 1))
                           for k in range(top + 1) if counts.get(k)}))

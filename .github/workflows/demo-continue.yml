@@ -48,35 +48,99 @@ jobs:
           python3 -c "import json; r=json.load(open('demo/continue-request.json')); print('graph=%s' % r['graph_run_id']); print('runs=%s' % ' '.join([str(r['runs_run_id'])] + ['%s=%s' % kv for kv in sorted((r.get('overrides') or {}).items())]))" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - id: matrix
-        name: Tasks per level and exports of the plan
+        name: Pending tasks per level and exports of the plan
         run: |
-          bash demo/artifact.sh demo-work-base "$RUNNER_TEMP/base" "${{ steps.request.outputs.graph }}"
-          tar -xzf "$RUNNER_TEMP/base/base.tar.gz" -C /
+          python3 -B demo/restore.py --work "$WORK" --run "${{ steps.request.outputs.graph }}" --prefix demo-work-base --all
+          python3 -B demo/restore.py --work "$WORK" --node __markers_only__ --run "${{ steps.request.outputs.graph }}" --prefix demo-work-L0-
+          python3 -B demo/execute.py --work "$WORK" --trust-markers --status | grep -v COMPLETE | head -60 || true
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
-          import importlib.util, json, os
-          spec = importlib.util.spec_from_file_location("execute", "demo/execute.py")
+          import json, os, subprocess
+          matrix = json.loads(subprocess.check_output(["python3", "-B", "demo/execute.py", "--work", os.environ["WORK"],
+                                                       "--trust-markers", "--matrix", "16"]))
           plan = json.load(open(os.environ["WORK"] + "/plan.json"))
-          counts = {}
-          nodes = {n["id"]: n for n in plan["nodes"]}
-          # levels without importing the repository's modules (the setup job installs nothing)
-          level = {}
-          def depth(n):
-              if n not in level:
-                  deps = [d["node"] for d in nodes[n].get("dependencies") or [] if d["node"] in nodes]
-                  level[n] = 0 if not deps else 1 + max(depth(d) for d in deps)
-              return level[n]
-          for n, node in nodes.items():
-              if not node.get("blocked"):
-                  counts[depth(n)] = counts.get(depth(n), 0) + max(1, len(node["tasks"]))
-          matrix = {f"l{k}": min(16, v) for k, v in counts.items()}
-          matrix["exports"] = [e["id"] for e in plan["exports"]]
-          print("matrix=" + json.dumps(matrix))
+          out = {key: len(value) for key, value in matrix.items()}
+          out["exports"] = [e["id"] for e in plan["exports"]]
+          print("matrix=" + json.dumps(out))
           EOF
           cat "$GITHUB_OUTPUT"
 
+  level0:
+    name: Level 0 shard ${{ matrix.shard }}
+    needs: [setup]
+    if: ${{ always() && needs.setup.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) <= m.get('l0', 0) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Inputs and the outputs this level depends on
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          if [ 0 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0-
+          else
+            python -B demo/restore.py --work "$WORK" --level 0 \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
+          python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute this shard
+        if: steps.work.outputs.here == '1'
+        run: |
+          python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" \
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 0 = 0 ] && echo --trust-markers )
+      - name: Task logs of failures
+        if: always() && steps.work.outputs.here == '1'
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "summary.json"
+          if p.is_file():
+              for r in json.loads(p.read_text())["results"]:
+                  if r.get("state") not in ("COMPLETE", "SKIPPED"):
+                      print("=" * 30, r["node"], r["task"], r.get("state"))
+                      print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
+          EOF
+      - name: Save this shard's outputs
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L0-${{ matrix.shard }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-work-L0-${{ matrix.shard }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
   level1:
     name: Level 1 shard ${{ matrix.shard }}
-    needs: [setup]
+    needs: [setup, level0]
     if: ${{ always() && needs.setup.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
@@ -109,16 +173,23 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          python -B demo/restore.py --work "$WORK" --level 1 \
-            --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
-            --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          if [ 1 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0-
+          else
+            python -B demo/restore.py --work "$WORK" --level 1 \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
           python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
           python -B demo/execute.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" \
-            --parallel 2 --threads 4 --budget-minutes 280 --summary "$RUNNER_TEMP/summary.json"
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 1 = 0 ] && echo --trust-markers )
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -176,16 +247,23 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          python -B demo/restore.py --work "$WORK" --level 2 \
-            --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
-            --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          if [ 2 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0-
+          else
+            python -B demo/restore.py --work "$WORK" --level 2 \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
           python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
           python -B demo/execute.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" \
-            --parallel 2 --threads 4 --budget-minutes 280 --summary "$RUNNER_TEMP/summary.json"
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 2 = 0 ] && echo --trust-markers )
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -243,16 +321,23 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          python -B demo/restore.py --work "$WORK" --level 3 \
-            --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
-            --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          if [ 3 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0-
+          else
+            python -B demo/restore.py --work "$WORK" --level 3 \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
           python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
           python -B demo/execute.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" \
-            --parallel 2 --threads 4 --budget-minutes 280 --summary "$RUNNER_TEMP/summary.json"
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 3 = 0 ] && echo --trust-markers )
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -310,16 +395,23 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          python -B demo/restore.py --work "$WORK" --level 4 \
-            --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
-            --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          if [ 4 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0-
+          else
+            python -B demo/restore.py --work "$WORK" --level 4 \
+              --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-L0- \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
           python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
           python -B demo/execute.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" \
-            --parallel 2 --threads 4 --budget-minutes 280 --summary "$RUNNER_TEMP/summary.json"
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 4 = 0 ] && echo --trust-markers )
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -344,7 +436,7 @@ jobs:
 
   export:
     name: Export ${{ matrix.slot }}
-    needs: [setup, level1, level2, level3, level4]
+    needs: [setup, level0, level1, level2, level3, level4]
     if: ${{ always() && needs.setup.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 240
