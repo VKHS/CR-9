@@ -55,6 +55,18 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
+      "bytes": 5809,
+      "executable": false,
+      "path": ".github/workflows/demo-probe.yml",
+      "sha256": "720fb890e79784e9c5153a40ef2287b8a50c66e9550d181397f21ca2d909262c"
+    },
+    {
+      "bytes": 999,
+      "executable": false,
+      "path": ".github/workflows/demo-source.yml",
+      "sha256": "f99e793bb749d34e7f80661050fb17a336331592af4587fcf9bed9e3f88bb760"
+    },
+    {
       "bytes": 7708,
       "executable": false,
       "path": ".github/workflows/quality.yml",
@@ -779,6 +791,12 @@
       "executable": false,
       "path": "data/sources.json",
       "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
+    },
+    {
+      "bytes": 3959,
+      "executable": false,
+      "path": "demo/configure.py",
+      "sha256": "8ec55c97e3cdee5d1bdf6135e58a020566008c2dfaad986138e20d93c7de4616"
     },
     {
       "bytes": 4935,
@@ -8032,5 +8050,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "d07d36bd4664afdc83fb65a63aecfdf0677fa17807a66b5c5a8627075eee8f88"
+  "tree_sha256": "ec1e1259f8cfb92261809df51d4dd685567260c3cef587cb6d1f99aa960f9fc6"
 }
