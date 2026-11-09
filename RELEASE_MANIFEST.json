@@ -55,6 +55,12 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
+      "bytes": 21075,
+      "executable": false,
+      "path": ".github/workflows/demo-graph.yml",
+      "sha256": "b1220c36c486592818b82dd54edd289e3107b520e6597e3da3ee5f47cdd5ff36"
+    },
+    {
       "bytes": 6944,
       "executable": false,
       "path": ".github/workflows/demo-runs.yml",
@@ -121,10 +127,10 @@
       "sha256": "560aa1d50814f35adf6c8b86e2b8bd9ad0c7f3f17f1d532b4cdfa31f59bb390e"
     },
     {
-      "bytes": 45092,
+      "bytes": 46277,
       "executable": false,
       "path": "Makefile",
-      "sha256": "2e1d8e1e00c00ace4080ff0894cd0bce4c0ef73a3d5795a858846b9f1c03df8f"
+      "sha256": "df79ff9e055a366260a607c854815909721fe1117ee16b5d5735c56b63885731"
     },
     {
       "bytes": 872,
@@ -799,6 +805,12 @@
       "sha256": "9203a00056e42e0358a16a64ecc0af50dad73c6fe3cdcdc05e3e527bd2108e2d"
     },
     {
+      "bytes": 1453,
+      "executable": false,
+      "path": "demo/artifacts.sh",
+      "sha256": "378f422d961848f87fa36e0ea4ebd567048fc8c1531430d5d33267bf4794be4b"
+    },
+    {
       "bytes": 4491,
       "executable": false,
       "path": "demo/configure.py",
@@ -811,10 +823,28 @@
       "sha256": "a7b964246379b8dd0c668e25d327924a25ee7590270ed1a6b8b4ec454e648444"
     },
     {
-      "bytes": 9590,
+      "bytes": 10255,
       "executable": false,
       "path": "demo/execute.py",
-      "sha256": "c6c79bde28909d80dbf22e2dd9e8f8df11c618b546e7bb87fb4aef1f0a64203b"
+      "sha256": "f2fe99b2f793b32cb630da47a398770720b166f6874c55904721f14ec4d6815c"
+    },
+    {
+      "bytes": 892,
+      "executable": false,
+      "path": "demo/fetch_inputs.sh",
+      "sha256": "14e2d5a0439743a3586ea95f4abe2b0176cd7e65afb88b3fee105e573b5d9ebd"
+    },
+    {
+      "bytes": 6261,
+      "executable": false,
+      "path": "demo/report.py",
+      "sha256": "60fb432e75f9047ec391f19b1e12a981d01d7810eb4ef70bcd1a089f0065380c"
+    },
+    {
+      "bytes": 1000,
+      "executable": false,
+      "path": "demo/work_delta.sh",
+      "sha256": "66828f0f9bc2eabba14ce9084c9c59c0ceb02020dba14fd759d06dec990cdbe4"
     },
     {
       "bytes": 4935,
@@ -6682,7 +6712,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "c25338fa950ee9b3fecf91ca504613a851209a607538363cf834c4121e123e5a"
+      "sha256": "ba3073513cd4bc32e9b734ff2fa51ee20cfd8385460b5b22f058857a76e59afe"
     },
     {
       "bytes": 35593,
@@ -7165,10 +7195,10 @@
       "sha256": "bc123217f31f5eb694442749292f7f2c6a2f850edffae952f53d4b5561fbb87d"
     },
     {
-      "bytes": 93996,
+      "bytes": 94771,
       "executable": false,
       "path": "scripts/paper_artifacts.py",
-      "sha256": "67b91f5453a47af4a87c31c17dc2bf3f43f6c7e4d994f650e3df7b6f045a1fe1"
+      "sha256": "de781ad0525335f16111042cfb8b0311c9a6eeef3a8dc900a4ef9dca3f5f992e"
     },
     {
       "bytes": 139506,
@@ -7225,10 +7255,10 @@
       "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
     },
     {
-      "bytes": 10386,
+      "bytes": 12229,
       "executable": false,
       "path": "scripts/reconstruct_paper.py",
-      "sha256": "d77937effb3a11ac17980608eb773955b544e1af685bf98dc6cc450f5339f5a6"
+      "sha256": "8446b67611f1943c4618b86d2b7d96c9bdeca77136191e29fc62eeff90c18241"
     },
     {
       "bytes": 31729,
@@ -7369,10 +7399,10 @@
       "sha256": "d88ad8ea4e8974d3d0192f53602357eef4ae71a85f5deca0e90ccdc31e155d40"
     },
     {
-      "bytes": 21737,
+      "bytes": 25890,
       "executable": false,
       "path": "scripts/statement_check.py",
-      "sha256": "c276ca40c28770a15d1e799610b3b52d361f58c9f2e7af7df7b26e2654b57e9e"
+      "sha256": "43b8dc6039fcfedf5da7f0d77fe4780614cf28b9863918fede072c000e21001a"
     },
     {
       "bytes": 30283,
@@ -8068,5 +8098,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "00c1341e2ef63f20e41c0c681c1219d9af93d2c2abcf567d4a7b226590c94739"
+  "tree_sha256": "9b00a5295c818e706023a706f8ddb80b322026d147309950d69fee381efd7c20"
 }

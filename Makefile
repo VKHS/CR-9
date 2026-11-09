@@ -37,6 +37,9 @@ RECONSTRUCTION_ROOT ?= $(REPORT_ROOT)/reconstruction
 ARTIFACTS_ROOT ?= ../cm-artifacts
 PAPER_ROOT ?= ../cm-paper
 PAPER_TIER ?= analysis
+# The CPU demonstration (demo/README.md): its own release, manifest and workspace; not the paper's measurements.
+DEMO_ARTIFACTS_ROOT ?= ../cm-demo-artifacts
+DEMO_PAPER_ROOT ?= ../cm-demo-paper
 PUBLISH_MAP ?=
 PAPER_PREFLIGHT_ROOT ?= $(REPORT_ROOT)/publication-preflight
 PAPER_PREFLIGHT_COPY ?= 0
@@ -115,6 +118,7 @@ endef
  paper-artifacts-plan paper-artifacts-check statement statement-check statement-fulfilled example-paper example-paper-check \
  printed-statement-check final-destination final-destination-check final-destination-runs final-destination-converge availability-fulfilled \
  consistency consistency-check consistency-audit independent-verification \
+ demo-paper demo-paper-offline demo-fetch demo-status \
  paper-outputs paper-outputs-plan paper-outputs-submit paper-outputs-status paper-outputs-collect \
  manifests manifests-check availability availability-check \
  records-index records-check records-tables example-records example-records-check \
@@ -180,6 +184,10 @@ help:
 	  '  make independent-verification VERIFY_WORK=<new dir>  the acceptance test from a fresh clone' \
 	  '  make availability-fulfilled  the registered statement and every printed claim fulfilled' \
 	  '' \
+	  'CPU demonstration (demo/README.md; reduced scale, not the paper'"'"'s measurements):' \
+	  '  make demo-paper           download the demonstration release and rebuild every table and figure from it' \
+	  '  make demo-status          what the demonstration release holds' \
+	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
 	  '  make paper                build supported tables/figures from official archives and records' \
 	  '  make reconstruct          build a traced workspace from registered runs, records and optional campaigns' \
@@ -235,6 +243,21 @@ paper:
 
 paper-offline:
 	"$(PYTHON)" -B scripts/reconstruct_paper.py --offline --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)" --tier "$(PAPER_TIER)"
+
+# The CPU demonstration: the same reconstruction on the release demo-artifacts (release/demo_artifacts.json).
+demo-paper:
+	"$(PYTHON)" -B scripts/reconstruct_paper.py --demo --artifacts "$(DEMO_ARTIFACTS_ROOT)" --output-dir "$(DEMO_PAPER_ROOT)" \
+	  --tier "$(PAPER_TIER)"
+
+demo-paper-offline:
+	"$(PYTHON)" -B scripts/reconstruct_paper.py --demo --offline --artifacts "$(DEMO_ARTIFACTS_ROOT)" \
+	  --output-dir "$(DEMO_PAPER_ROOT)" --tier "$(PAPER_TIER)"
+
+demo-fetch:
+	"$(PYTHON)" -B scripts/paper_artifacts.py fetch --demo --dest "$(DEMO_ARTIFACTS_ROOT)" --tier "$(PAPER_TIER)"
+
+demo-status:
+	"$(PYTHON)" -B scripts/paper_artifacts.py status --demo
 
 .PHONY: paper-preflight
 paper-preflight:

@@ -1346,13 +1346,19 @@ def _verify_reconstruction_inputs(result: dict, fetched: Path, verified: dict) -
 
 
 def derive(fetched: Path, *, workspace: Path | None = None, checkout: Path = ROOT,
-           manifest_path: Path = MANIFEST) -> dict:
-    """Verify the release and workspace, stage every small view, then install them together."""
+           manifest_path: Path = MANIFEST, install_root: Path | None = None) -> dict:
+    """Verify the release and workspace, stage every small view, then install them together.
+
+    ``install_root`` (default: the checkout) is where the views are installed; the CPU demonstration's
+    views go under demo/published/ so that they never replace the paper's views."""
     from scripts.reconstruct import source_inventory, verify_workspace
     from scripts.reconstruct_paper import summarize
     from scripts import run_manifests
     fetched, checkout = Path(fetched).resolve(), Path(checkout).resolve()
+    install_root = checkout if install_root is None else Path(install_root).resolve()
     manifest = load_manifest(manifest_path)
+    require((manifest.get("channel") == DEMO_CHANNEL) == (install_root != checkout),
+            "Demonstration views are installed under demo/published/ and the paper's views in the checkout")
     verified = verify_fetched(fetched, manifest_path=manifest_path)
     links = [artifact_identity(entry, row["tier"]) for row in verified["artifacts"]
              for entry in manifest["artifacts"] if entry["id"] == row["id"]]
@@ -1368,7 +1374,8 @@ def derive(fetched: Path, *, workspace: Path | None = None, checkout: Path = ROO
                 "Reconstruction tools or registered inputs changed; rebuild the workspace before deriving")
         _verify_reconstruction_inputs(result, fetched, verified)
     written, names = {}, []
-    with tempfile.TemporaryDirectory(prefix=".cm-published-views-", dir=checkout.parent) as temporary:
+    install_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".cm-published-views-", dir=install_root.parent) as temporary:
         stage = Path(temporary)
         studies = _baseline_view(fetched / "records", stage / BASELINE_STUDIES, provenance)
         if studies:
@@ -1431,7 +1438,7 @@ def derive(fetched: Path, *, workspace: Path | None = None, checkout: Path = ROO
             written["source_data_files"] = len(index["files"])
         require(sha256_file(manifest_path) == provenance["artifact_manifest_sha256"], "Artifact manifest changed during derive")
         require(builder_source_inventory(checkout) == builders, "Builder sources changed during derive")
-        _install_views(stage, checkout, names)
+        _install_views(stage, install_root, names)
     return written
 
 
@@ -1489,11 +1496,12 @@ def main(argv=None) -> int:
     p = sub.add_parser("derive")
     p.add_argument("--fetched", type=Path, required=True, help="a directory filled by `fetch`")
     p.add_argument("--workspace", type=Path, help="the reconstruction workspace written by scripts/reconstruct_paper.py")
-    p.add_argument("--manifest", type=Path, default=MANIFEST)
+    p.add_argument("--manifest", type=Path, default=None)
+    p.add_argument("--demo", action="store_true", help="the CPU demonstration: views under demo/published/")
     p = sub.add_parser("verify")
     p.add_argument("directory", type=Path)
     args = parser.parse_args(argv)
-    if args.command in ("publish", "fetch", "status"):
+    if args.command in ("publish", "fetch", "status", "derive"):
         if args.manifest is None:
             args.manifest = DEMO_MANIFEST if args.demo else MANIFEST
     if args.command == "publish" and args.tag is None:
@@ -1569,7 +1577,8 @@ def main(argv=None) -> int:
             print(f"wrote {args.output}: {sum(not k.startswith("_") for k in template)} artifacts to locate")
             return 0
         if args.command == "derive":
-            print(json.dumps(derive(args.fetched, workspace=args.workspace, manifest_path=args.manifest), indent=1))
+            print(json.dumps(derive(args.fetched, workspace=args.workspace, manifest_path=args.manifest,
+                                    install_root=ROOT / "demo" / "published" if args.demo else None), indent=1))
             return 0
         if args.command == "verify":
             print(json.dumps(verify_unpacked(args.directory), indent=1))

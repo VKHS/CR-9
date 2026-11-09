@@ -131,11 +131,22 @@ def main(argv=None) -> int:
     parser.add_argument("--retries", type=int, default=12, help="resumptions of a checkpointed task")
     parser.add_argument("--summary", type=Path, default=None)
     parser.add_argument("--status", action="store_true")
+    parser.add_argument("--matrix", type=int, default=None, metavar="MAX_SHARDS",
+                        help="print, per dependency level, the shard numbers to run (at most MAX_SHARDS) as JSON")
     args = parser.parse_args(argv)
     work = args.work.expanduser().resolve()
     plan = po.load_plan(work)
     nodes = {n["id"]: n for n in plan["nodes"]}
     level = levels(plan)
+    if args.matrix is not None:
+        counts: dict[int, int] = {}
+        for node_id, node in nodes.items():
+            if not node.get("blocked"):
+                counts[level[node_id]] = counts.get(level[node_id], 0) + max(1, len(node["tasks"]))
+        top = max(level.values(), default=-1)
+        print(json.dumps({f"l{k}": list(range(1, min(args.matrix, counts[k]) + 1))
+                          for k in range(top + 1) if counts.get(k)}))
+        return 0
     if args.status:
         for node_id in sorted(nodes, key=lambda n: (level[n], n)):
             node = nodes[node_id]

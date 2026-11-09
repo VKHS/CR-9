@@ -268,7 +268,53 @@ def evaluate(root: Path = ROOT) -> dict:
             "artifacts_required": len(required), "artifacts_published": len(published & {a["id"] for a in required})}
 
 
-def render(evaluation: dict, printed: dict | None = None) -> str:
+DEMO_ITEMS = {  # statement item -> what the CPU demonstration supplies for it
+    "experiment_code": "the lifecycle and every runner executed from this checkout (the E12 adapters excepted)",
+    "configurations": "the effective configuration sealed in every demonstration run",
+    "source_data": "the source data written by the demonstration reconstruction",
+    "split_seed_manifests": "the executed split and seed manifests of the demonstration runs",
+    "environment": "the observed CPU environment of the demonstration runs",
+    "checkpoints": "the plant and controller checkpoints of the demonstration runs",
+    "predictions": "the member and deployed predictions of the demonstration runs",
+    "trajectories": "the propensity-logged exploration trajectories of the demonstration runs",
+    "statistical_outputs": "the selection, confirmation and admission statistics, record sets and campaigns",
+    "generators": "every table and figure generator run on the demonstration artifacts",
+    "one_command": "make demo-paper",
+    "guidance": "the same checklist mapping",
+}
+DEMO_KINDS = {"source_data": None, "generators": None, "one_command": None, "guidance": None,
+              "experiment_code": ("run",), "configurations": ("run",), "split_seed_manifests": ("run",),
+              "environment": ("run", "environment"), "checkpoints": ("run",), "predictions": ("run", "campaign"),
+              "trajectories": ("run",), "statistical_outputs": ("run", "records", "campaign")}
+
+
+def demonstration(evaluation: dict, root: Path = ROOT) -> dict | None:
+    """What the separately published CPU demonstration (release/demo_artifacts.json) shows for each item.
+
+    It never changes an item's status: the demonstration's values are not the paper's measurements."""
+    manifest = _json(root / "release" / "demo_artifacts.json")
+    if not manifest or manifest.get("channel") != "demonstration":
+        return None
+    published = [a for a in manifest.get("artifacts", []) if a.get("status") == "published"]
+    source = _json(root / "demo" / "published" / "paper" / "source_data" / "INDEX.json") or {}
+    rebuilt = (source.get("reconstruction") or {}).get("displays")
+    rows = []
+    for item in evaluation["items"]:
+        kinds = DEMO_KINDS[item["id"]]
+        if kinds is None:
+            shown = bool(published) and (item["id"] == "guidance" or bool(source))
+            evidence = (f"{rebuilt} displays rebuilt" if item["id"] in ("one_command", "generators", "source_data")
+                        and rebuilt else ("demo/published/paper/source_data" if source else ""))
+        else:
+            ids = [a["id"] for a in published if a.get("kind") in kinds]
+            shown, evidence = bool(ids), f"{len(ids)} artifact(s)" if ids else ""
+        rows.append({"id": item["id"], "phrase": item["phrase"], "demonstrated": shown,
+                     "what": DEMO_ITEMS[item["id"]], "evidence": evidence})
+    return {"release": manifest.get("release_url"), "scope": manifest.get("scope"), "published": len(published),
+            "artifacts": len(manifest.get("artifacts", [])), "rows": rows}
+
+
+def render(evaluation: dict, printed: dict | None = None, demo: dict | None = None) -> str:
     """STATEMENT_COMPLIANCE.md: the registered statement, then (when given) the printed manuscript text."""
     counts = evaluation["counts"]
     if counts[MISSING]:
@@ -306,6 +352,18 @@ def render(evaluation: dict, printed: dict | None = None) -> str:
               "holds every file that publication writes into the checkout, projected, with the twelve items "
               "evaluated on them ([at the destination](destination/STATEMENT_COMPLIANCE.md)); "
               "`make final-destination-converge` compares each published file with its projection.", ""]
+    if demo is not None:
+        lines += ["## CPU demonstration (separate from the statement)", "",
+                  f"{demo['scope']} It is published as the release [`demo-artifacts`]({demo['release']}) "
+                  f"({demo['published']} of {demo['artifacts']} artifacts) and listed in "
+                  "[release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` rebuilds every "
+                  "table and figure from it ([demo/README.md](demo/README.md)). It shows each item working end to end; "
+                  "it does not change any status above.", "",
+                  "| Statement item | Demonstrated | What the demonstration supplies | Evidence |", "|---|---|---|---|"]
+        for row in demo["rows"]:
+            lines.append(f"| {row['phrase']} | {'yes' if row['demonstrated'] else 'no'} | {row['what']} | "
+                         f"{row['evidence'] or '—'} |")
+        lines.append("")
     if printed is not None:
         from scripts import printed_statement_check
         lines += printed_statement_check.render_section(printed, None)
@@ -334,9 +392,10 @@ def main(argv=None) -> int:
     except (OSError, ValueError, KeyError, TypeError, SyntaxError) as exc:
         print(f"Invalid availability evidence: {exc}", file=sys.stderr)
         return 2
-    text = render(evaluation, printed)
+    demo = demonstration(evaluation, ROOT)
+    text = render(evaluation, printed, demo)
     if args.json:
-        print(json.dumps({**evaluation, "printed": printed}, indent=1, ensure_ascii=False))
+        print(json.dumps({**evaluation, "printed": printed, "demonstration": demo}, indent=1, ensure_ascii=False))
     else:
         for row in evaluation["items"]:
             print(f"{LABEL[row['status']]:<27} {row['phrase']}" + (f" — {row['remaining']}" if row["remaining"] else ""))
