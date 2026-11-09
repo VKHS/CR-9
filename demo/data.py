@@ -8,7 +8,9 @@ subset of the official data:
 
 * node-level graphs: the nodes of the first ``keep`` parts of a ``parts``-way METIS
   partition of the symmetrized official graph (pymetis, fixed seed) with every induced
-  edge; every kept node keeps its official role (train, valid or test);
+  edge; every kept node keeps its official role (train, valid or test). For ogbn-proteins,
+  whose official roles are species, the kept parts are, for each role, the part holding
+  most of that role's nodes;
 * graph-level datasets: the first ``keep`` graphs of each official split, in the
   official order.
 
@@ -39,7 +41,9 @@ SCHEMA = "cross-morse-demo-graph-1"
 # Selection rules. Node-level: METIS parts kept of a partition; graph-level: graphs kept per official split.
 RULES = {
     "ogbn-arxiv": {"kind": "metis_parts", "parts": 8, "keep": 1, "seed": 0},
-    "ogbn-proteins": {"kind": "metis_parts", "parts": 32, "keep": 1, "seed": 0},
+    # Species define the official roles of ogbn-proteins, so one part can miss a role: keep, for each
+    # official role, the part holding most of its nodes.
+    "ogbn-proteins": {"kind": "metis_parts_per_role", "parts": 96, "seed": 0},
     "ogbn-products": {"kind": "metis_parts", "parts": 128, "keep": 1, "seed": 0},
     "PascalVOC-SP": {"kind": "first_graphs", "keep": {"train": 480, "valid": 60, "test": 60}},
     "COCO-SP": {"kind": "first_graphs", "keep": {"train": 480, "valid": 60, "test": 60}},
@@ -76,7 +80,15 @@ def node_subset(raw, rule: dict) -> tuple[dict, dict]:
     edges = np.asarray(raw.edge_index, dtype=np.int64)
     n = int(len(raw.x))
     membership = _metis_parts(edges, n, int(rule["parts"]), int(rule["seed"]))
-    keep_mask = membership < int(rule["keep"])
+    if rule["kind"] == "metis_parts_per_role":
+        chosen = set()
+        for role in ("train", "valid", "test"):
+            counts = np.bincount(membership[np.asarray(raw.official_splits[role], dtype=np.int64)],
+                                 minlength=int(rule["parts"]))
+            chosen.add(int(np.argmax(counts)))
+        keep_mask = np.isin(membership, sorted(chosen))
+    else:
+        keep_mask = membership < int(rule["keep"])
     kept = np.flatnonzero(keep_mask)
     remap = np.full(n, -1, dtype=np.int64)
     remap[kept] = np.arange(len(kept), dtype=np.int64)
@@ -89,6 +101,9 @@ def node_subset(raw, rule: dict) -> tuple[dict, dict]:
         arrays["edge_attr"] = np.asarray(raw.edge_attr)[inside]
     if raw.edge_weight is not None:
         arrays["edge_weight"] = np.asarray(raw.edge_weight, dtype=np.float32)[inside]
+    for role in ("train", "valid", "test"):
+        if not len(arrays[f"{role}_idx"]):
+            raise ValueError(f"the reduced graph has no official {role} node; choose another selection rule")
     sizes = {"nodes": int(len(kept)), "directed_edges": int(inside.sum()), "full_nodes": n,
              "full_directed_edges": int(edges.shape[1]),
              "official_roles": {role: int(len(arrays[f"{role}_idx"])) for role in ("train", "valid", "test")},
@@ -126,7 +141,7 @@ def build(dataset: str, data_root: Path, output: Path) -> dict:
     from cross_morse import datasets
     rule = RULES[dataset]
     started = time.time()
-    if rule["kind"] == "metis_parts":
+    if rule["kind"] in ("metis_parts", "metis_parts_per_role"):
         raw = datasets.load_benchmark(data_root, dataset, allow_download=True)
         source = {k: v for k, v in raw.metadata.items() if k.startswith("source") or k in ("ogb_dataset_version", "official_split")}
         arrays, sizes = node_subset(raw, rule)

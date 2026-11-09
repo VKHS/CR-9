@@ -55,8 +55,10 @@ def run_rows(runs: Path, graphs: Path) -> list[str]:
                     data = (f"first {sum(sizes['graphs'].values()):,} of {sum(sizes['full_graphs'].values()):,} "
                             f"official graphs ({sizes['nodes']:,} nodes)")
                 else:
+                    parts = ("one part per official role" if built["rule"]["kind"] == "metis_parts_per_role"
+                             else f"{built['rule']['keep']} part")
                     data = (f"{sizes['nodes']:,} of {sizes['full_nodes']:,} nodes "
-                            f"(METIS part 1 of {built['rule']['parts']})")
+                            f"({parts} of a {built['rule']['parts']}-way METIS partition)")
             else:
                 data = "complete official graph"
             name = dataset + (f" {member.name}" if member is not base else "")

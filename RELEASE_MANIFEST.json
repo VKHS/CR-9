@@ -55,16 +55,16 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 21075,
+      "bytes": 21182,
       "executable": false,
       "path": ".github/workflows/demo-graph.yml",
-      "sha256": "b1220c36c486592818b82dd54edd289e3107b520e6597e3da3ee5f47cdd5ff36"
+      "sha256": "0d851e2a1bb9e24d56442239daf5fd18dcf3b262e4d56c6af2bcee5f82242b53"
     },
     {
-      "bytes": 6944,
+      "bytes": 7320,
       "executable": false,
       "path": ".github/workflows/demo-runs.yml",
-      "sha256": "856976d110b0a8a6314c22ce16abd1da23266f61156821aecb06a0ff83e961f5"
+      "sha256": "ffcad8bc01b8b87433c17d044f2bd59fa03f83ecdc33b0e78f744180f097f104"
     },
     {
       "bytes": 999,
@@ -817,10 +817,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 8004,
+      "bytes": 8918,
       "executable": false,
       "path": "demo/data.py",
-      "sha256": "a7b964246379b8dd0c668e25d327924a25ee7590270ed1a6b8b4ec454e648444"
+      "sha256": "dce84fe6813ec9001bd1649483ce8b058d16e4cd9751550808e3d1e3e099d937"
     },
     {
       "bytes": 10255,
@@ -829,16 +829,22 @@
       "sha256": "f2fe99b2f793b32cb630da47a398770720b166f6874c55904721f14ec4d6815c"
     },
     {
-      "bytes": 892,
+      "bytes": 1139,
       "executable": false,
       "path": "demo/fetch_inputs.sh",
-      "sha256": "14e2d5a0439743a3586ea95f4abe2b0176cd7e65afb88b3fee105e573b5d9ebd"
+      "sha256": "bbd3b404e7b98e9bd75fc3fc6c49006d4ca30e1385df17729be8c712849c3fd7"
     },
     {
-      "bytes": 6261,
+      "bytes": 6454,
       "executable": false,
       "path": "demo/report.py",
-      "sha256": "60fb432e75f9047ec391f19b1e12a981d01d7810eb4ef70bcd1a089f0065380c"
+      "sha256": "b86d7812d338f480a2b577938753ed1efeef6152f2448d23811743c41d7415ed"
+    },
+    {
+      "bytes": 25,
+      "executable": false,
+      "path": "demo/runs-request.json",
+      "sha256": "5977990dd1c33c0880f9185d1ffeb77015c8307a4448fb42edbe53114334f235"
     },
     {
       "bytes": 1000,
@@ -8098,5 +8104,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "9b00a5295c818e706023a706f8ddb80b322026d147309950d69fee381efd7c20"
+  "tree_sha256": "01746357868c52c56cec200ab7992aa840e18256d38af1d377ebbe81a54f8095"
 }

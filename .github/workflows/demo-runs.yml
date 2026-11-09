@@ -8,30 +8,63 @@ on:
   workflow_dispatch:
   push:
     branches: [expanded-demo-2026-11-09]
-    paths: [.github/workflows/demo-runs.yml]
+    paths: [.github/workflows/demo-runs.yml, demo/runs-request.json]
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: demo-runs-${{ github.ref }}
-  cancel-in-progress: true
+  group: demo-runs-${{ github.sha }}
+  cancel-in-progress: false
 
 env:
   PYTHONDONTWRITEBYTECODE: "1"
   PYTHONUNBUFFERED: "1"
   DEMO: /home/runner/demo
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
+  select:
+    name: Select the runs
+    runs-on: ubuntu-latest
+    outputs:
+      runs: ${{ steps.select.outputs.runs }}
+      graphs: ${{ steps.select.outputs.graphs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: select
+        # demo/runs-request.json may name a subset of the labels below ({"labels": [...]}); default all.
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, pathlib
+          runs = [{"dataset": d, "label": l, "split": ""} for d, l in (
+              ("ogbn-arxiv", "arxiv"), ("ogbn-proteins", "proteins"), ("ogbn-products", "products"),
+              ("PascalVOC-SP", "pascalvoc_sp"), ("COCO-SP", "coco_sp"), ("Peptides-func", "peptides_func"))]
+          runs += [{"dataset": "Roman-empire", "label": f"roman_empire_split_{i:02d}", "split": str(i)} for i in range(10)]
+          request = pathlib.Path("demo/runs-request.json")
+          labels = json.loads(request.read_text())["labels"] if request.is_file() else [r["label"] for r in runs]
+          chosen = [r for r in runs if r["label"] in labels]
+          print("runs=" + json.dumps(chosen))
+          print("graphs=" + json.dumps(sorted({r["dataset"] for r in chosen if not r["split"]})))
+          EOF
+          cat "$GITHUB_OUTPUT"
+
   graphs:
     name: Reduced graph ${{ matrix.dataset }}
+    needs: select
+    if: ${{ needs.select.outputs.graphs != '[]' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        dataset: [ogbn-arxiv, ogbn-proteins, ogbn-products, PascalVOC-SP, COCO-SP, Peptides-func]
+        dataset: ${{ fromJSON(needs.select.outputs.graphs) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -65,8 +98,8 @@ jobs:
 
   runs:
     name: Run ${{ matrix.label }}
-    needs: graphs
-    if: ${{ always() }}
+    needs: [select, graphs]
+    if: ${{ always() && needs.select.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     env:
@@ -74,23 +107,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - {dataset: ogbn-arxiv, label: arxiv, split: ""}
-          - {dataset: ogbn-proteins, label: proteins, split: ""}
-          - {dataset: ogbn-products, label: products, split: ""}
-          - {dataset: PascalVOC-SP, label: pascalvoc_sp, split: ""}
-          - {dataset: COCO-SP, label: coco_sp, split: ""}
-          - {dataset: Peptides-func, label: peptides_func, split: ""}
-          - {dataset: Roman-empire, label: roman_empire_split_00, split: "0"}
-          - {dataset: Roman-empire, label: roman_empire_split_01, split: "1"}
-          - {dataset: Roman-empire, label: roman_empire_split_02, split: "2"}
-          - {dataset: Roman-empire, label: roman_empire_split_03, split: "3"}
-          - {dataset: Roman-empire, label: roman_empire_split_04, split: "4"}
-          - {dataset: Roman-empire, label: roman_empire_split_05, split: "5"}
-          - {dataset: Roman-empire, label: roman_empire_split_06, split: "6"}
-          - {dataset: Roman-empire, label: roman_empire_split_07, split: "7"}
-          - {dataset: Roman-empire, label: roman_empire_split_08, split: "8"}
-          - {dataset: Roman-empire, label: roman_empire_split_09, split: "9"}
+        include: ${{ fromJSON(needs.select.outputs.runs) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
