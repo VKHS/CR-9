@@ -55,10 +55,10 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 21182,
+      "bytes": 21678,
       "executable": false,
       "path": ".github/workflows/demo-graph.yml",
-      "sha256": "0d851e2a1bb9e24d56442239daf5fd18dcf3b262e4d56c6af2bcee5f82242b53"
+      "sha256": "8870698675fe4eff8ba2b88d9883522ad8b3171e29af390bb8d69173d51b00f5"
     },
     {
       "bytes": 7320,
@@ -799,6 +799,12 @@
       "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
     },
     {
+      "bytes": 5598,
+      "executable": false,
+      "path": "demo/README.md",
+      "sha256": "1d3dd9bb2ebae2dcfa7ed21cd3993114c7b606b9ff7d475beb1d73cc2ea529d2"
+    },
+    {
       "bytes": 1096,
       "executable": false,
       "path": "demo/artifact.sh",
@@ -817,10 +823,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 8918,
+      "bytes": 9640,
       "executable": false,
       "path": "demo/data.py",
-      "sha256": "dce84fe6813ec9001bd1649483ce8b058d16e4cd9751550808e3d1e3e099d937"
+      "sha256": "7808eb958716a99b0c580a0f3f1b06bb003f0d5b6debc016e47b757a50af9913"
     },
     {
       "bytes": 10255,
@@ -844,7 +850,7 @@
       "bytes": 25,
       "executable": false,
       "path": "demo/runs-request.json",
-      "sha256": "5977990dd1c33c0880f9185d1ffeb77015c8307a4448fb42edbe53114334f235"
+      "sha256": "8dd8bed262a69c38e3b1c44e30c61112b721dbf26a5fff5a6a1a0a407b520e86"
     },
     {
       "bytes": 1000,
@@ -8104,5 +8110,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "01746357868c52c56cec200ab7992aa840e18256d38af1d377ebbe81a54f8095"
+  "tree_sha256": "e4531d1cca05d78eaade2cc045a811571ea87132d4c096f7c1651fe02c47d5a7"
 }

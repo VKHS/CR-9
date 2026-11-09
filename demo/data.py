@@ -6,9 +6,11 @@ in a few hours for the 24-trajectory exploration and the repeated selection and 
 statistics of every lifecycle. The demonstration runs those datasets on a deterministic
 subset of the official data:
 
-* node-level graphs: the nodes of the first ``keep`` parts of a ``parts``-way METIS
-  partition of the symmetrized official graph (pymetis, fixed seed) with every induced
-  edge; every kept node keeps its official role (train, valid or test). For ogbn-proteins,
+* node-level graphs: the nodes of ``keep`` parts of a ``parts``-way METIS partition of the
+  symmetrized official graph (pymetis, fixed seed) with every induced edge; every kept node
+  keeps its official role (train, valid or test). The parts are the first one (in part order)
+  that holds the largest class label, then the lowest-numbered others, so that the subset
+  declares the benchmark's number of classes. For ogbn-proteins,
   whose official roles are species, the kept parts are, for each role, the part holding
   most of that role's nodes;
 * graph-level datasets: the first ``keep`` graphs of each official split, in the
@@ -88,7 +90,15 @@ def node_subset(raw, rule: dict) -> tuple[dict, dict]:
             chosen.add(int(np.argmax(counts)))
         keep_mask = np.isin(membership, sorted(chosen))
     else:
-        keep_mask = membership < int(rule["keep"])
+        parts = list(range(int(rule["parts"])))
+        y = np.asarray(raw.y)
+        if y.ndim == 1 or (y.ndim == 2 and y.shape[1] == 1):
+            # A fixture's class count is its largest label plus one (cross_morse/data.py), so the kept parts
+            # must hold the benchmark's largest class: the first part (in part order) that does, then the lowest.
+            top = np.unique(membership[y.reshape(-1) == y.max()])
+            first = int(top.min())
+            parts = [first] + [part for part in parts if part != first]
+        keep_mask = np.isin(membership, parts[: int(rule["keep"])])
     kept = np.flatnonzero(keep_mask)
     remap = np.full(n, -1, dtype=np.int64)
     remap[kept] = np.arange(len(kept), dtype=np.int64)
