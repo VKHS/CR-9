@@ -55,10 +55,10 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 20467,
+      "bytes": 22934,
       "executable": false,
       "path": ".github/workflows/demo-graph.yml",
-      "sha256": "d77398e7dc7fc1bbf2bd4a976f388d144f5d0ce46ce91b5231836eb1d420d3ef"
+      "sha256": "e5e48c1e4268661eb394ee6bfb9601ad3641db0ec8376b0bd09d77012d3cd5c9"
     },
     {
       "bytes": 4139,
@@ -856,7 +856,7 @@
       "bytes": 114,
       "executable": false,
       "path": "demo/graph-request.json",
-      "sha256": "7ee6fe18203b6a0da5917835199fb030f07b3414553e87b6bfa836592c91d9a6"
+      "sha256": "dec12e732f681bde37cbb2870461b921bfcf7db0715456357adbc07b759cf477"
     },
     {
       "bytes": 8051,
@@ -8140,5 +8140,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "90cc7b29e036113ab9c4096f4d24396ef3cb0cc9cb1c5a7183687f112274e9a2"
+  "tree_sha256": "7574492cdb23b0c8276cd897759c48e1f06b037d1c5f528498d104099fff4d76"
 }

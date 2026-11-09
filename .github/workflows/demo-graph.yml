@@ -94,26 +94,35 @@ jobs:
 
   level0:
     name: Level 0 shard ${{ matrix.shard }}
-    needs: plan
-    if: ${{ always() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l0 != null }}
+    needs: [plan]
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.plan.outputs.matrix).l0 }}
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[3]) <= len(m.get('l' + sys.argv[2], [])) else '0'))" '${{ needs.plan.outputs.matrix }}' "${GITHUB_JOB#level}" "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
         with:
           python-version: "3.12"
       - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
         run: |
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
       - name: Inputs and earlier levels
+        if: steps.work.outputs.here == '1'
         run: |
           bash demo/fetch_inputs.sh ${{ needs.plan.outputs.runs }} > /dev/null
           bash demo/artifacts.sh demo-work- "$RUNNER_TEMP/deltas"
@@ -121,14 +130,14 @@ jobs:
             $(ls "$RUNNER_TEMP"/deltas/demo-work-L*/*.tar.gz 2>/dev/null | sort)
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
+        if: steps.work.outputs.here == '1'
         run: |
           level="${GITHUB_JOB#level}"
-          shards=$(python -c "import json,sys; print(len(json.loads(sys.argv[1])['l$level']))" '${{ needs.plan.outputs.matrix }}')
-          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/$shards" \
+          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 290 --summary "$RUNNER_TEMP/summary.json"
           echo "LEVEL=$level" >> "$GITHUB_ENV"
       - name: Task logs of failures
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: |
           python - <<'EOF'
           import json, os, pathlib
@@ -140,10 +149,10 @@ jobs:
                       print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
           EOF
       - name: Save this shard's outputs
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L${LEVEL:-x}-${{ matrix.shard }}.tar.gz"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         with:
           name: demo-work-L${{ env.LEVEL }}-${{ matrix.shard }}
           path: ${{ runner.temp }}/delta/
@@ -152,25 +161,34 @@ jobs:
   level1:
     name: Level 1 shard ${{ matrix.shard }}
     needs: [plan, level0]
-    if: ${{ always() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l1 != null }}
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.plan.outputs.matrix).l1 }}
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[3]) <= len(m.get('l' + sys.argv[2], [])) else '0'))" '${{ needs.plan.outputs.matrix }}' "${GITHUB_JOB#level}" "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
         with:
           python-version: "3.12"
       - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
         run: |
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
       - name: Inputs and earlier levels
+        if: steps.work.outputs.here == '1'
         run: |
           bash demo/fetch_inputs.sh ${{ needs.plan.outputs.runs }} > /dev/null
           bash demo/artifacts.sh demo-work- "$RUNNER_TEMP/deltas"
@@ -178,14 +196,14 @@ jobs:
             $(ls "$RUNNER_TEMP"/deltas/demo-work-L*/*.tar.gz 2>/dev/null | sort)
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
+        if: steps.work.outputs.here == '1'
         run: |
           level="${GITHUB_JOB#level}"
-          shards=$(python -c "import json,sys; print(len(json.loads(sys.argv[1])['l$level']))" '${{ needs.plan.outputs.matrix }}')
-          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/$shards" \
+          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 290 --summary "$RUNNER_TEMP/summary.json"
           echo "LEVEL=$level" >> "$GITHUB_ENV"
       - name: Task logs of failures
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: |
           python - <<'EOF'
           import json, os, pathlib
@@ -197,10 +215,10 @@ jobs:
                       print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
           EOF
       - name: Save this shard's outputs
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L${LEVEL:-x}-${{ matrix.shard }}.tar.gz"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         with:
           name: demo-work-L${{ env.LEVEL }}-${{ matrix.shard }}
           path: ${{ runner.temp }}/delta/
@@ -209,25 +227,34 @@ jobs:
   level2:
     name: Level 2 shard ${{ matrix.shard }}
     needs: [plan, level1]
-    if: ${{ always() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l2 != null }}
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.plan.outputs.matrix).l2 }}
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[3]) <= len(m.get('l' + sys.argv[2], [])) else '0'))" '${{ needs.plan.outputs.matrix }}' "${GITHUB_JOB#level}" "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
         with:
           python-version: "3.12"
       - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
         run: |
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
       - name: Inputs and earlier levels
+        if: steps.work.outputs.here == '1'
         run: |
           bash demo/fetch_inputs.sh ${{ needs.plan.outputs.runs }} > /dev/null
           bash demo/artifacts.sh demo-work- "$RUNNER_TEMP/deltas"
@@ -235,14 +262,14 @@ jobs:
             $(ls "$RUNNER_TEMP"/deltas/demo-work-L*/*.tar.gz 2>/dev/null | sort)
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
+        if: steps.work.outputs.here == '1'
         run: |
           level="${GITHUB_JOB#level}"
-          shards=$(python -c "import json,sys; print(len(json.loads(sys.argv[1])['l$level']))" '${{ needs.plan.outputs.matrix }}')
-          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/$shards" \
+          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 290 --summary "$RUNNER_TEMP/summary.json"
           echo "LEVEL=$level" >> "$GITHUB_ENV"
       - name: Task logs of failures
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: |
           python - <<'EOF'
           import json, os, pathlib
@@ -254,10 +281,10 @@ jobs:
                       print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
           EOF
       - name: Save this shard's outputs
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L${LEVEL:-x}-${{ matrix.shard }}.tar.gz"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         with:
           name: demo-work-L${{ env.LEVEL }}-${{ matrix.shard }}
           path: ${{ runner.temp }}/delta/
@@ -266,25 +293,34 @@ jobs:
   level3:
     name: Level 3 shard ${{ matrix.shard }}
     needs: [plan, level2]
-    if: ${{ always() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l3 != null }}
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.plan.outputs.matrix).l3 }}
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[3]) <= len(m.get('l' + sys.argv[2], [])) else '0'))" '${{ needs.plan.outputs.matrix }}' "${GITHUB_JOB#level}" "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
         with:
           python-version: "3.12"
       - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
         run: |
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
       - name: Inputs and earlier levels
+        if: steps.work.outputs.here == '1'
         run: |
           bash demo/fetch_inputs.sh ${{ needs.plan.outputs.runs }} > /dev/null
           bash demo/artifacts.sh demo-work- "$RUNNER_TEMP/deltas"
@@ -292,14 +328,14 @@ jobs:
             $(ls "$RUNNER_TEMP"/deltas/demo-work-L*/*.tar.gz 2>/dev/null | sort)
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
+        if: steps.work.outputs.here == '1'
         run: |
           level="${GITHUB_JOB#level}"
-          shards=$(python -c "import json,sys; print(len(json.loads(sys.argv[1])['l$level']))" '${{ needs.plan.outputs.matrix }}')
-          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/$shards" \
+          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 290 --summary "$RUNNER_TEMP/summary.json"
           echo "LEVEL=$level" >> "$GITHUB_ENV"
       - name: Task logs of failures
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: |
           python - <<'EOF'
           import json, os, pathlib
@@ -311,10 +347,10 @@ jobs:
                       print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
           EOF
       - name: Save this shard's outputs
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L${LEVEL:-x}-${{ matrix.shard }}.tar.gz"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         with:
           name: demo-work-L${{ env.LEVEL }}-${{ matrix.shard }}
           path: ${{ runner.temp }}/delta/
@@ -323,25 +359,34 @@ jobs:
   level4:
     name: Level 4 shard ${{ matrix.shard }}
     needs: [plan, level3]
-    if: ${{ always() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l4 != null }}
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.plan.outputs.matrix).l4 }}
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[3]) <= len(m.get('l' + sys.argv[2], [])) else '0'))" '${{ needs.plan.outputs.matrix }}' "${GITHUB_JOB#level}" "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
         with:
           python-version: "3.12"
       - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
         run: |
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
       - name: Inputs and earlier levels
+        if: steps.work.outputs.here == '1'
         run: |
           bash demo/fetch_inputs.sh ${{ needs.plan.outputs.runs }} > /dev/null
           bash demo/artifacts.sh demo-work- "$RUNNER_TEMP/deltas"
@@ -349,14 +394,14 @@ jobs:
             $(ls "$RUNNER_TEMP"/deltas/demo-work-L*/*.tar.gz 2>/dev/null | sort)
           bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
       - name: Execute this shard
+        if: steps.work.outputs.here == '1'
         run: |
           level="${GITHUB_JOB#level}"
-          shards=$(python -c "import json,sys; print(len(json.loads(sys.argv[1])['l$level']))" '${{ needs.plan.outputs.matrix }}')
-          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/$shards" \
+          python -B demo/execute.py --work "$WORK" --level "$level" --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 290 --summary "$RUNNER_TEMP/summary.json"
           echo "LEVEL=$level" >> "$GITHUB_ENV"
       - name: Task logs of failures
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: |
           python - <<'EOF'
           import json, os, pathlib
@@ -368,10 +413,10 @@ jobs:
                       print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
           EOF
       - name: Save this shard's outputs
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L${LEVEL:-x}-${{ matrix.shard }}.tar.gz"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
+        if: always() && steps.work.outputs.here == '1'
         with:
           name: demo-work-L${{ env.LEVEL }}-${{ matrix.shard }}
           path: ${{ runner.temp }}/delta/
