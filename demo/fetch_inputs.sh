@@ -18,4 +18,6 @@ for split in 00 01 02 03 04 05 06 07 08 09; do
   bash "${here}/artifact.sh" "demo-run-roman_empire_split_${split}" "${DEMO}/runs/roman_empire/split_${split}" \
     "$(run_of roman_empire)"
 done
+# A workflow artifact drops hidden files; restore the empty ones the seals declare (demo/restore_hidden.py).
+python3 -B "${here}/restore_hidden.py" "${DEMO}"/runs/*
 du -sh "${DEMO}/runs"/* "${DEMO}/graphs"

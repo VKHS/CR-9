@@ -159,5 +159,6 @@ jobs:
         with:
           name: demo-run-${{ matrix.label }}
           path: ${{ env.OUT }}
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
