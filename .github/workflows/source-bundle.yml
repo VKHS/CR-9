@@ -1,0 +1,36 @@
+name: Source audit bundle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [reproduction-handoff-2026-11-09]
+    paths: ['.github/workflows/source-bundle.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Export the exact tracked source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source-bundle"
+          git archive --format=tar.gz --prefix=CR-9/ HEAD > "$RUNNER_TEMP/source-bundle/CR-9-source.tar.gz"
+          git rev-parse HEAD > "$RUNNER_TEMP/source-bundle/COMMIT.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/source-bundle/TREE.txt"
+          printf '%s\n' 'Tracked source and bundled software fixtures only. This archive is not a measured benchmark deposit.' > "$RUNNER_TEMP/source-bundle/SCOPE.txt"
+          cd "$RUNNER_TEMP/source-bundle"
+          sha256sum CR-9-source.tar.gz COMMIT.txt TREE.txt SCOPE.txt > SHA256SUMS.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: source-audit-${{ github.sha }}
+          path: ${{ runner.temp }}/source-bundle/
+          if-no-files-found: error
+          retention-days: 14
