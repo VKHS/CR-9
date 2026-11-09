@@ -1,0 +1,55 @@
+name: Demo reconstruction from a fresh clone
+
+# make demo-paper on a fresh clone: download and verify the release demo-artifacts, rebuild every table
+# and figure from it and compare with the installed views (demo/published/). The demonstration is
+# reduced-scale CPU evidence, not the paper's measurements (demo/README.md).
+on:
+  push:
+    paths: [release/demo_artifacts.json, .github/workflows/demo-verify.yml]
+  workflow_dispatch:
+  schedule:
+    - cron: "37 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  demo-paper:
+    name: make demo-paper
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the numeric-review dependencies from the recorded lock
+        run: python -m pip install -c environment/requirements-cpu.lock -r requirements-review.txt 'matplotlib>=3.8,<4' scipy
+      - name: Demonstration release status
+        run: make demo-status PYTHON=python || true
+      - name: Rebuild every table and figure from the demonstration release
+        run: |
+          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$RUNNER_TEMP/demo-artifacts" DEMO_PAPER_ROOT="$RUNNER_TEMP/demo-paper"
+          python - <<'EOF'
+          import json, os
+          status = json.load(open(os.environ["RUNNER_TEMP"] + "/demo-paper.status.json"))
+          assert status.get("channel") == "demonstration", status.get("channel")
+          print({k: status[k] for k in ("displays", "complete", "values_exact", "values_differ", "values_missing")})
+          EOF
+      - name: Derive the views again from the release (the differences, if any, are listed)
+        run: |
+          python -B scripts/paper_artifacts.py derive --demo --fetched "$RUNNER_TEMP/demo-artifacts" --workspace "$RUNNER_TEMP/demo-paper" > /dev/null
+          git status --porcelain demo/published | head -50

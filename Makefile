@@ -596,7 +596,7 @@ source-id:
 test:
 	"$(PYTHON)" -B -m unittest discover -s tests -v
 
-NUMPY_TESTS := test_paper_registry test_textual_source_references test_entry_qualification test_records test_export_records test_availability test_paper_build test_run_archives \
+NUMPY_TESTS := test_demo test_paper_registry test_textual_source_references test_entry_qualification test_records test_export_records test_availability test_paper_build test_run_archives \
  test_artifact_inventory test_reproduce_examples test_reproduce_results_cli test_statistics test_evaluation test_compare_with_manuscript \
  test_release_tooling test_release_launcher test_source_fingerprint_cli test_draw_diagrams test_make_workflows \
  test_dataset_entrypoints test_environment_spec \

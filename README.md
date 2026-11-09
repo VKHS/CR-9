@@ -75,6 +75,24 @@ explains the input map and the distinction between local readiness and public
 availability. The [availability review](docs/AVAILABILITY_REVIEW.md) records the
 implemented improvements and the evidence still needed for the full statement.
 
+### CPU demonstration
+
+A separately published demonstration runs the whole pipeline end to end on public data with
+this repository's code on GitHub-hosted CPU runners: the seven lifecycle runs (Roman-empire on
+its complete official graph, all ten splits; the other datasets on deterministic subsets of their
+official data), the record sets and campaigns that the production graph derives from them, and
+their checkpoints, predictions, propensity-logged trajectories, manifests, environment and
+statistics, published as the release `demo-artifacts`.
+
+```bash
+make demo-paper                # download the demonstration release and rebuild every table and figure from it
+```
+
+The demonstration is not the paper's evidence: its values come from reduced-scale CPU runs, and
+no status in [Statement compliance](STATEMENT_COMPLIANCE.md) depends on it.
+[demo/README.md](demo/README.md) describes its scale and production, and
+[demo/RESULTS.md](demo/RESULTS.md) what it contains.
+
 ## Regenerate the results on a Slurm cluster
 
 Independently of the published outputs, the Slurm launcher executes the registered eight-stage lifecycle on all seven
