@@ -75,6 +75,20 @@ python -B demo/execute.py --work WORK --parallel 2
 python -B scripts/paper_outputs.py collect --work WORK
 ```
 
+## Declared demonstration choices
+
+The production graph records these in its plan (`declared_choices`):
+
+- **S14 family without Roman-empire** (`--s14-exclude Roman-empire`). The joint S14 family needs
+  the ten Roman-empire split runs to share one route, and it cannot join benchmark and fixture
+  parents. The ten demonstration splits selected different routes, and Roman-empire is the only
+  dataset run on its complete official graph, so the demonstration's S14 campaign and its E10
+  analysis cover the six reduced datasets (a partial family, which the planner admits only for
+  fixture plans).
+- **Swept configuration of Table S29** (`--horizon-sweep-profile full --horizon-sweep-ensemble 1`).
+  The demonstration's PascalVOC-SP run deploys no MPC-RH rule, so the horizon and beam sweep
+  names the configuration it sweeps.
+
 ## What the demonstration cannot show
 
 [RESULTS.md](RESULTS.md) lists every artifact the demonstration did not produce, with the

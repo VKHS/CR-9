@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-11-09 — CPU demonstration of the complete pipeline
+
+- A separately published demonstration ([demo/README.md](demo/README.md)) runs the whole pipeline with the
+  repository's own code on GitHub-hosted CPU runners: the seven lifecycle runs (Roman-empire on its complete
+  official graph, all ten splits; the other datasets on deterministic subsets of their official data built by
+  `demo/data.py` with the runtime's own adapters), the production graph's record sets, campaigns and observed
+  environment (`scripts/paper_outputs.py plan --allow-fixture --device cpu`, executed without Slurm by
+  `demo/execute.py`), and every table and figure rebuilt from the release `demo-artifacts` with
+  `make demo-paper`. [demo/RESULTS.md](demo/RESULTS.md) records what it contains and what it could not produce.
+- The demonstration has its own channel: `release/demo_artifacts.json`, the release `demo-artifacts`, the
+  relationship `reduced_scale_demonstration` and views under `demo/published/`. The paper's manifest refuses
+  demonstration artifacts, `reconstruct_paper.py` refuses to mix the two manifests, and no status in
+  `STATEMENT_COMPLIANCE.md` depends on the demonstration; its separate section reports what the demonstration
+  shows for each item.
+- The production planner gains `--device cpu`, `--s14-exclude` and `--horizon-sweep-profile/-ensemble`
+  (fixture plans; recorded among the plan's declared choices). `scripts/paper_artifacts.py` gains
+  `pack/publish/fetch/status/derive --demo`; `make demo-paper`, `demo-fetch` and `demo-status` use them.
+- Workflows: `demo-runs.yml` (the runs), `demo-graph.yml` (the production graph, sixteen shards per dependency
+  level), `demo-publish.yml` (pack, publish, rebuild, record) and `demo-verify.yml` (`make demo-paper` from a
+  fresh clone). Tests: `tests/test_demo.py`.
+
 ## 2026-11-09 — Protocol tables in the printed wording
 
 - Five cells of Supplementary Tables S1, S3 and S8 whose printed wording describes what the code executes are
