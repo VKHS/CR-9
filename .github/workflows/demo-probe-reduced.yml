@@ -1,0 +1,79 @@
+name: Demo probe on reduced graphs
+
+# Builds the reduced official-split graphs of demo/data.py on a hosted runner (with swap for the
+# full official load) and measures every lifecycle stage on them with few epochs. Nothing is published.
+on:
+  workflow_dispatch:
+  push:
+    branches: [expanded-demo-2026-11-09]
+    paths: [.github/workflows/demo-probe-reduced.yml, demo/data.py]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-probe-reduced-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  reduced:
+    name: Reduced ${{ matrix.dataset }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        dataset: [ogbn-products, COCO-SP, ogbn-arxiv]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free disk space and add swap
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo swapoff -a || true
+          sudo fallocate -l 48G /swapfile2 && sudo chmod 600 /swapfile2 && sudo mkswap /swapfile2 && sudo swapon /swapfile2
+          df -h / ; free -g
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+          python -m pip check
+      - name: Build the reduced graph
+        run: |
+          ( while true; do echo "[mem] $(date -u +%H:%M:%S) $(free -m | awk '/Mem:/{print "used",$3,"avail",$7} /Swap:/{print "swap",$3}' | tr '\n' ' ') disk $(df -h / | awk 'NR==2{print $4}')"; sleep 30; done ) &
+          stem=$(python -c "import sys;sys.path.insert(0,'demo');import configure;print(configure.STEMS['${{ matrix.dataset }}'])")
+          echo "STEM=$stem" >> "$GITHUB_ENV"
+          /usr/bin/time -v python -B demo/data.py --dataset "${{ matrix.dataset }}" --data-root "$RUNNER_TEMP/data" \
+            --output "$RUNNER_TEMP/graphs/${stem}_demo.npz" 2>&1 | grep --line-buffered -v -E '^\s+[A-Z].*: 0$'
+          ls -la "$RUNNER_TEMP/graphs"
+      - name: Run the eight stages on the reduced graph
+        run: |
+          ( while true; do echo "[mem] $(date -u +%H:%M:%S) $(free -m | awk '/Mem:/{print "used",$3,"avail",$7} /Swap:/{print "swap",$3}' | tr '\n' ' ')"; sleep 60; done ) &
+          python -B demo/configure.py --variant probe --dataset "${{ matrix.dataset }}" \
+            --graph-npz "$RUNNER_TEMP/graphs/${STEM}_demo.npz" --output "$RUNNER_TEMP/configs"
+          timeout 280m /usr/bin/time -v python -B run_cross_morse.py --config "$RUNNER_TEMP/configs/${STEM}_probe.json" \
+            --dataset "${{ matrix.dataset }}" --data-root "$RUNNER_TEMP/data" --output-dir "$RUNNER_TEMP/run" \
+            --device cpu --threads 4 2>&1 | grep --line-buffered -v -E '^\s+[A-Z].*: 0$' || true
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          run = pathlib.Path(os.environ["RUNNER_TEMP"]) / "run"
+          for p in sorted((run / "stages").glob("*.json")) if (run / "stages").is_dir() else []:
+              d = json.loads(p.read_text())
+              print(f"STAGE {d.get('stage'):9s} {d.get('status'):9s} {d.get('seconds_this_attempt', 0):10.1f} s")
+          for name in ("run_state.json", "failure_summary.json"):
+              if (run / name).is_file():
+                  print(name, json.dumps(json.loads((run / name).read_text()))[:1500])
+          EOF
+          du -sh "$RUNNER_TEMP/run"/* 2>/dev/null | sort -h | tail -12 || true
+          cat "$RUNNER_TEMP"/graphs/*.json 2>/dev/null || true

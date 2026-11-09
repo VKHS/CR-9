@@ -55,6 +55,12 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
+      "bytes": 3975,
+      "executable": false,
+      "path": ".github/workflows/demo-probe-reduced.yml",
+      "sha256": "487d288472bd7960c04e3668440b5eebfe4e48efc7d62dec6cbf8c47eec7b7cd"
+    },
+    {
       "bytes": 5809,
       "executable": false,
       "path": ".github/workflows/demo-probe.yml",
@@ -797,6 +803,12 @@
       "executable": false,
       "path": "demo/configure.py",
       "sha256": "8ec55c97e3cdee5d1bdf6135e58a020566008c2dfaad986138e20d93c7de4616"
+    },
+    {
+      "bytes": 7783,
+      "executable": false,
+      "path": "demo/data.py",
+      "sha256": "6d6364230d8f9dc9b7472441ca3b160477d91a88da4685486d8afed50f1a7163"
     },
     {
       "bytes": 4935,
@@ -8050,5 +8062,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "ec1e1259f8cfb92261809df51d4dd685567260c3cef587cb6d1f99aa960f9fc6"
+  "tree_sha256": "80589dd077de519cbacb4541c3bcbc68d3fd2758c3dc6dbac9003f946fbc691c"
 }
