@@ -102,7 +102,9 @@ class MakeWorkflowTests(unittest.TestCase):
                                   "--output-dir", str(out), "--tier", "complete"]])
         self.capture.unlink()
         calls = self.invoke("statement-check")
-        self.assertEqual(calls, [["-B", "scripts/statement_check.py", "--check"]])
+        self.assertEqual(calls, [["-B", "scripts/statement_check.py", "--check"],
+                                 ["-B", "scripts/final_destination.py", "--check"],
+                                 ["-B", "scripts/consistency_audit.py", "--check"]])
         self.assertFalse(any("reported_results" in arg for call in calls for arg in call))
 
     def test_paper_targets_build_from_run_archives_not_from_the_registry(self):
@@ -111,15 +113,56 @@ class MakeWorkflowTests(unittest.TestCase):
         calls = self.invoke("paper-from-index", RUNS_INDEX=index, PAPER_OFFICIAL_ROOT=out)
         self.assertEqual(calls, [["-B", "scripts/build_paper.py", "all", "--index", str(index), "--label", "official",
                                   "--output-dir", str(out)],
-                                 ["-B", "scripts/records.py", "tables", "--output-dir", str(out / "records")]])
+                                 ["-B", "scripts/records.py", "tables", "--root", "records", "--specs",
+                                  "records/specs.json", "--output-dir", str(out / "records")]])
         self.capture.unlink()
         calls = self.invoke("tables", RUNS_INDEX=index, PAPER_OFFICIAL_ROOT=out)
         self.assertEqual(calls[0][1:3], ["scripts/build_paper.py", "tables"])
+        self.assertEqual(calls[0][3:5], ["--index", str(index)])
         self.capture.unlink()
         calls = self.invoke("example-paper-check", EXAMPLE_RUNS_ROOT=self.root / "ex runs", PAPER_EXAMPLES_ROOT=out)
         self.assertEqual(calls, [["-B", "scripts/build_paper.py", "all", "--runs-root", str(self.root / "ex runs"),
                                   "--label", "examples", "--output-dir", str(out), "--check"]])
         self.assertFalse(any("render_reported_results" in arg or "reported_results" in arg for call in calls for arg in call))
+
+    def test_manuscript_commands_read_completed_runs_and_published_record_sets(self):
+        runs = self.root / "completed suite" / "runs"
+        out = self.root / "paper output"
+        for target in ("tables", "figures"):
+            calls = self.invoke(target, RUNS_ROOT=runs, PAPER_OFFICIAL_ROOT=out)
+            self.assertEqual(calls, [["-B", "scripts/build_paper.py", target, "--runs-root", str(runs),
+                                      "--label", "official", "--output-dir", str(out)]])
+            self.capture.unlink()
+        artifacts = self.root / "published artifacts"
+        (artifacts / "records").mkdir(parents=True)
+        (artifacts / "records" / "index.json").write_text('{"sets": [{"set": "factorials"}]}\n')
+        (self.project / "records").mkdir()
+        (self.project / "records" / "index.json").write_text('{\n "sets": [],\n "sets_defined": []\n}\n')
+        calls = self.invoke("records-tables", ARTIFACTS_ROOT=artifacts, PAPER_OFFICIAL_ROOT=out)
+        self.assertEqual(calls, [["-B", "scripts/records.py", "tables", "--root", str(artifacts / "records"),
+                                  "--specs", "records/specs.json", "--output-dir", str(out / "records")]])
+        self.capture.unlink()
+        (self.project / "records" / "index.json").write_text('{\n "sets": [\n  {"set": "factorials"}\n ]\n}\n')
+        calls = self.invoke("records-tables", ARTIFACTS_ROOT=artifacts, PAPER_OFFICIAL_ROOT=out)
+        self.assertEqual(calls[0][3:5], ["--root", "records"])
+        self.capture.unlink()
+        explicit = self.root / "other records"
+        calls = self.invoke("records-tables", RECORDS_ROOT=explicit, ARTIFACTS_ROOT=artifacts, PAPER_OFFICIAL_ROOT=out)
+        self.assertEqual(calls[0][3:5], ["--root", str(explicit)])
+
+    def test_final_destination_targets(self):
+        self.assertEqual(self.invoke("final-destination"), [["-B", "scripts/final_destination.py", "--write"]])
+        self.capture.unlink()
+        runs = self.root / "completed suite" / "runs"
+        self.assertEqual(self.invoke("final-destination-runs", RUNS_ROOT=runs),
+                         [["-B", "scripts/final_destination.py", "--runs-root", str(runs)]])
+        self.capture.unlink()
+        self.assertEqual(self.invoke("final-destination-converge"), [["-B", "scripts/final_destination.py", "--converge"]])
+        self.capture.unlink()
+        self.assertEqual(self.invoke("consistency-audit", RUNS_ROOT=runs),
+                         [["-B", "scripts/consistency_audit.py", "--runs-root", str(runs)]])
+        self.capture.unlink()
+        self.assertEqual(self.invoke("printed-statement-check"), [["-B", "scripts/printed_statement_check.py"]])
 
     def test_reconstruction_preserves_input_paths_and_explicit_completeness(self):
         index = self.root / "original runs" / "index.json"
@@ -211,3 +254,35 @@ class MakeWorkflowTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IndependentVerificationTests(unittest.TestCase):
+    """The acceptance test from a fresh clone: its plan, and its refusal to reuse earlier work."""
+
+    SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "independent_verification.sh"
+
+    def run_script(self, *args):
+        return subprocess.run(["bash", str(self.SCRIPT), *args], capture_output=True, text=True,
+                              env={**os.environ, "PYTHON": "python3"})
+
+    def test_plan_clones_one_revision_and_builds_from_published_artifacts_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp) / "verification"
+            result = self.run_script("--work", str(work), "--revision", "0123abc", "--dry-run")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            steps = result.stdout.splitlines()
+            self.assertEqual(steps[0], f"git clone --quiet https://github.com/VKHS/CR-9.git {work}/checkout")
+            self.assertEqual(steps[1], f"git -C {work}/checkout checkout --quiet 0123abc")
+            self.assertIn(f"paper PYTHON=python3 PAPER_TIER=complete ARTIFACTS_ROOT={work}/artifacts PAPER_ROOT={work}/paper", steps[2])
+            self.assertIn("statement-fulfilled", steps[3])
+            self.assertIn("final-destination-converge", steps[4])
+            self.assertTrue(all(str(work) in step for step in steps[:4]))
+            self.assertFalse(work.exists())
+
+    def test_existing_work_and_relative_paths_are_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "left-over").write_text("x")
+            refused = self.run_script("--work", tmp, "--revision", "0123abc")
+            self.assertEqual(refused.returncode, 2)
+            self.assertIn("must be new or empty", refused.stderr)
+        self.assertEqual(self.run_script("--work", "relative/dir", "--dry-run").returncode, 2)

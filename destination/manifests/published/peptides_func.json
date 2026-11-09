@@ -1,0 +1,175 @@
+{
+ "projection": {
+  "projected": true,
+  "schema": "cross-morse-destination-1",
+  "replaces": "manifests/published/peptides_func.json",
+  "generated_by": "scripts/final_destination.py --write",
+  "about": "The executed split and seed manifest of the reported run: identities, seeds and role sizes from the released runtime and the effective configuration; graph-level role hashes of the LRGB benchmarks from the official file order (section B of docs/FINAL_DESTINATION.md).",
+  "classes": {
+   "exact": [
+    "schema",
+    "dataset",
+    "benchmark_dataset",
+    "data_kind",
+    "is_benchmark_data",
+    "profile",
+    "scientific_run",
+    "identities/source_sha256",
+    "identities/config_sha256",
+    "seeds/partition_seed",
+    "seeds/training_seeds",
+    "seeds/bootstrap_seeds/*",
+    "seeds/split_index",
+    "splits/split_protocol",
+    "splits/comparison_reserved_at",
+    "splits/unit",
+    "splits/rule",
+    "splits/sizes/*",
+    "splits/role_hashes/*",
+    "splits/graph_role_hashes/*",
+    "splits/official_split_hashes/*",
+    "splits/official_split_axis",
+    "splits/independent_graphs",
+    "splits/statistical_unit",
+    "source_data/num_*",
+    "campaign/splits",
+    "campaign/per_split/*/split_index",
+    "campaign/per_split/*/identities/source_sha256",
+    "campaign/per_split/*/identities/config_sha256",
+    "campaign/per_split/*/sizes/*",
+    "environment/precision",
+    "environment/device",
+    "environment/cudnn_deterministic",
+    "environment/tf32_matmul"
+   ],
+   "registered": [
+    "environment/python",
+    "environment/python_implementation",
+    "environment/torch",
+    "environment/cuda_runtime",
+    "environment/gpu",
+    "environment/machine"
+   ],
+   "pending": [
+    "identities/prepared_fingerprint",
+    "identities/unit_sha256",
+    "seeds/ensemble_seeds",
+    "campaign/per_split/*/identities/prepared_fingerprint",
+    "campaign/per_split/*/identities/unit_sha256"
+   ]
+  },
+  "rule": "Every value in this file is a projection of the file that publication writes at `replaces`. Real loaders refuse it. `make final-destination-converge` compares the realized file with it: exact values must be identical, registered values follow the registered site profile, sizes must fall within a factor of 2 and counts within 25%, minimums must be reached, and pending values are supplied by the realized output."
+ },
+ "schema": "cross-morse-run-manifest-1",
+ "dataset": "Peptides-func",
+ "benchmark_dataset": "Peptides-func",
+ "data_kind": "Peptides-func",
+ "is_benchmark_data": true,
+ "profile": "full",
+ "scientific_run": true,
+ "run_name": "peptides_func",
+ "identities": {
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+  "config_sha256": "b1b502ef492410e645fe6d58844c050f2087b4e092a3e2405c793e08d6f21436",
+  "prepared_fingerprint": "pending: prepared-data fingerprint",
+  "unit_sha256": "pending: SHA-256 of prepared/splits.npz"
+ },
+ "seeds": {
+  "partition_seed": 314159,
+  "training_seeds": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "ensemble_seeds": "pending: seeds of the selected ensembles",
+  "bootstrap_seeds": {
+   "selection": 314163,
+   "admission": 314165,
+   "final": 314166
+  },
+  "split_index": null
+ },
+ "splits": {
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "comparison_reserved_at": "prepare",
+  "unit": "graph",
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": {
+   "fit_train": 5871,
+   "fit_val": 652,
+   "fit": 6523,
+   "explore": 2175,
+   "select": 1087,
+   "confirm": 544,
+   "compare": 544,
+   "admit": 2331,
+   "test": 2331
+  },
+  "role_hashes": {
+   "fit_train": "a3e068d8db7c814b4a9383f68e31bf5ad30cdc549f57e608c4a4de56f6786448",
+   "fit_val": "664eb1c8cf47309cab014cb096b6daa7c96464d61d05621f8657d88f2ae17629",
+   "fit": "12e5f5019678dcb07192eaacfa189610d0e68200421badfdd00fb9b35232ef84",
+   "explore": "d51eddabdab1a814c49adc3a7602775740e514f2d03c500bc765b6f5948bde15",
+   "select": "ca2015d75720ae093e3fd98c65d48d8b42c72165ff796a0b9798fffca88508ff",
+   "confirm": "2b33e54e57ff0bc845f4d9a3df4d4693cca17bf0a3332f3a31fb17f4c883ad2e",
+   "compare": "5141703ce741e9e663ba6613ac26491242e3b3741a7ccb31b0b2ac33ad6fbf7f",
+   "admit": "b79ec814006b8c3ba782312a62b2ca4df9f41a2ac4f1d18d47a189053a1f7afe",
+   "test": "c32c29425c46bb9f8f859c2cb777193afd63b43f921e6a7187c103201bd4ba43"
+  },
+  "graph_role_hashes": {
+   "fit_train": "a3e068d8db7c814b4a9383f68e31bf5ad30cdc549f57e608c4a4de56f6786448",
+   "fit_val": "664eb1c8cf47309cab014cb096b6daa7c96464d61d05621f8657d88f2ae17629",
+   "fit": "12e5f5019678dcb07192eaacfa189610d0e68200421badfdd00fb9b35232ef84",
+   "explore": "d51eddabdab1a814c49adc3a7602775740e514f2d03c500bc765b6f5948bde15",
+   "select": "ca2015d75720ae093e3fd98c65d48d8b42c72165ff796a0b9798fffca88508ff",
+   "confirm": "2b33e54e57ff0bc845f4d9a3df4d4693cca17bf0a3332f3a31fb17f4c883ad2e",
+   "compare": "5141703ce741e9e663ba6613ac26491242e3b3741a7ccb31b0b2ac33ad6fbf7f",
+   "admit": "b79ec814006b8c3ba782312a62b2ca4df9f41a2ac4f1d18d47a189053a1f7afe",
+   "test": "c32c29425c46bb9f8f859c2cb777193afd63b43f921e6a7187c103201bd4ba43"
+  },
+  "official_split_hashes": {
+   "train": "cc731862dc7a30745283615ad20bed73ab102d320a8aa196dd8362b815cbac7e",
+   "valid": "b79ec814006b8c3ba782312a62b2ca4df9f41a2ac4f1d18d47a189053a1f7afe",
+   "test": "c32c29425c46bb9f8f859c2cb777193afd63b43f921e6a7187c103201bd4ba43"
+  },
+  "official_split_axis": "graph",
+  "independent_graphs": true,
+  "statistical_unit": "complete graph",
+  "arrays": "pending: splits.npz, official_splits.npz and clusters.npz with SHA-256 and bytes"
+ },
+ "source_data": {
+  "source": "pending: provider record of the LRGB archive",
+  "source_array_hashes": "pending: provider array hashes",
+  "num_nodes": "pending: total nodes of the official graphs",
+  "num_graphs": 15535,
+  "num_features": 174,
+  "num_outputs": 10
+ },
+ "policy_lock": "pending: comparator, deployed-rule and frozen-model hashes of policy_lock.json",
+ "environment": {
+  "python": "3.13.5",
+  "python_implementation": "CPython",
+  "torch": "2.12.1+cu130",
+  "cuda_runtime": "13.0",
+  "gpu": "NVIDIA GH200",
+  "device": "cuda",
+  "platform": "pending: platform string of the compute node",
+  "machine": "aarch64",
+  "numpy": "pending: NumPy of the run environment",
+  "precision": "bf16",
+  "deterministic_algorithms_enabled": "pending: recorded by the run",
+  "cudnn_deterministic": true,
+  "tf32_matmul": false
+ },
+ "packages": "pending: installed distributions of the run environment",
+ "index_arrays_copied": "pending: membership arrays copied next to this manifest"
+}

@@ -1,0 +1,151 @@
+{
+ "projection": {
+  "projected": true,
+  "schema": "cross-morse-destination-1",
+  "replaces": "manifests/published/arxiv.json",
+  "generated_by": "scripts/final_destination.py --write",
+  "about": "The executed split and seed manifest of the reported run: identities, seeds and role sizes from the released runtime and the effective configuration; graph-level role hashes of the LRGB benchmarks from the official file order (section B of docs/FINAL_DESTINATION.md).",
+  "classes": {
+   "exact": [
+    "schema",
+    "dataset",
+    "benchmark_dataset",
+    "data_kind",
+    "is_benchmark_data",
+    "profile",
+    "scientific_run",
+    "identities/source_sha256",
+    "identities/config_sha256",
+    "seeds/partition_seed",
+    "seeds/training_seeds",
+    "seeds/bootstrap_seeds/*",
+    "seeds/split_index",
+    "splits/split_protocol",
+    "splits/comparison_reserved_at",
+    "splits/unit",
+    "splits/rule",
+    "splits/sizes/*",
+    "splits/role_hashes/*",
+    "splits/graph_role_hashes/*",
+    "splits/official_split_hashes/*",
+    "splits/official_split_axis",
+    "splits/independent_graphs",
+    "splits/statistical_unit",
+    "source_data/num_*",
+    "campaign/splits",
+    "campaign/per_split/*/split_index",
+    "campaign/per_split/*/identities/source_sha256",
+    "campaign/per_split/*/identities/config_sha256",
+    "campaign/per_split/*/sizes/*",
+    "environment/precision",
+    "environment/device",
+    "environment/cudnn_deterministic",
+    "environment/tf32_matmul"
+   ],
+   "registered": [
+    "environment/python",
+    "environment/python_implementation",
+    "environment/torch",
+    "environment/cuda_runtime",
+    "environment/gpu",
+    "environment/machine"
+   ],
+   "pending": [
+    "identities/prepared_fingerprint",
+    "identities/unit_sha256",
+    "seeds/ensemble_seeds",
+    "campaign/per_split/*/identities/prepared_fingerprint",
+    "campaign/per_split/*/identities/unit_sha256"
+   ]
+  },
+  "rule": "Every value in this file is a projection of the file that publication writes at `replaces`. Real loaders refuse it. `make final-destination-converge` compares the realized file with it: exact values must be identical, registered values follow the registered site profile, sizes must fall within a factor of 2 and counts within 25%, minimums must be reached, and pending values are supplied by the realized output."
+ },
+ "schema": "cross-morse-run-manifest-1",
+ "dataset": "ogbn-arxiv",
+ "benchmark_dataset": "ogbn-arxiv",
+ "data_kind": "ogbn-arxiv",
+ "is_benchmark_data": true,
+ "profile": "full",
+ "scientific_run": true,
+ "run_name": "arxiv",
+ "identities": {
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+  "config_sha256": "7dd8538ac6774e66c4b79e1566e75ec3eb52a7c0ac03b53a9cf8d87abc2ab466",
+  "prepared_fingerprint": "pending: prepared-data fingerprint",
+  "unit_sha256": "pending: SHA-256 of prepared/splits.npz"
+ },
+ "seeds": {
+  "partition_seed": 314159,
+  "training_seeds": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "ensemble_seeds": "pending: seeds of the selected ensembles",
+  "bootstrap_seeds": {
+   "selection": 314163,
+   "admission": 314165,
+   "final": 314166
+  },
+  "split_index": null
+ },
+ "splits": {
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "comparison_reserved_at": "prepare",
+  "unit": "node",
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": {
+   "fit_train": 49108,
+   "fit_val": 5456,
+   "fit": 54564,
+   "explore": 18188,
+   "select": 9094,
+   "confirm": 4547,
+   "compare": 4548,
+   "admit": 29799,
+   "test": 48603
+  },
+  "role_hashes": "pending: node role hashes; follow from the official node identifiers",
+  "graph_role_hashes": null,
+  "official_split_hashes": "pending: hashes of the official node splits",
+  "official_split_axis": "node",
+  "independent_graphs": false,
+  "statistical_unit": "METIS core",
+  "arrays": "pending: splits.npz, official_splits.npz and clusters.npz with SHA-256 and bytes"
+ },
+ "source_data": {
+  "source": "pending: provider record of the official release",
+  "source_array_hashes": "pending: provider array hashes",
+  "num_nodes": 169343,
+  "num_graphs": 1,
+  "num_features": 128,
+  "num_outputs": 40
+ },
+ "policy_lock": "pending: comparator, deployed-rule and frozen-model hashes of policy_lock.json",
+ "environment": {
+  "python": "3.13.5",
+  "python_implementation": "CPython",
+  "torch": "2.12.1+cu130",
+  "cuda_runtime": "13.0",
+  "gpu": "NVIDIA GH200",
+  "device": "cuda",
+  "platform": "pending: platform string of the compute node",
+  "machine": "aarch64",
+  "numpy": "pending: NumPy of the run environment",
+  "precision": "bf16",
+  "deterministic_algorithms_enabled": "pending: recorded by the run",
+  "cudnn_deterministic": true,
+  "tf32_matmul": false
+ },
+ "packages": "pending: installed distributions of the run environment",
+ "index_arrays_copied": "pending: membership arrays copied next to this manifest"
+}

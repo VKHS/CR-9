@@ -54,6 +54,24 @@ To reconstruct from original local experiment folders before upload, use
 The [publication guide](PUBLICATION.md) describes the verified input workspace and
 its local-only readiness verdict.
 
+### The commands named in the manuscript on the published outputs
+
+After `make paper` (or `make fetch-artifacts`), the verified artifacts are under `ARTIFACTS_ROOT`:
+`runs/<dataset>/` (Roman-empire: `split_00` to `split_09`), `records/<set>/` with its
+`records/index.json`, `campaigns/` and `environment/`. The other commands that the manuscript
+names read them directly:
+
+```bash
+make records-tables                                  # record-derived supplementary tables, every value traced to its raw file
+make tables  RUNS_ROOT=../cm-artifacts/runs          # run-derived tables from completed run directories
+make figures RUNS_ROOT=../cm-artifacts/runs          # run-derived figures
+make tables  RUNS_ROOT=<suite>/runs                  # the same builders on a reproduction suite
+```
+
+`make records-tables` reads `records/` when it registers record sets and otherwise the record
+sets that `make paper` downloaded and verified (`RECORDS_ROOT=` selects another directory).
+`make fingerprint` prints the runtime source identity that every stage seal of a run carries.
+
 ## Display generators
 
 Each numbered display has a generator registered with

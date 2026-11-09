@@ -35,7 +35,7 @@ released file.
 bash run_cross_morse.sh check
 ```
 
-Expect `ok` for the runtime fingerprint (`0aba361b…`, the released runtime),
+Expect `ok` for the runtime fingerprint (`9f7393f7…`, the released runtime),
 the seven full-profile configurations, `sbatch`, the account, the `gpu`
 partition, the project disk and the two modules, and the plan of nine jobs:
 setup, seven runs (Roman-empire as an array of ten) and the report. The

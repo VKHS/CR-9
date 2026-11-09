@@ -88,6 +88,9 @@ publish_here() {
     local statement_status=0
     "${PYTHON}" -B scripts/statement_check.py --write || statement_status=$?
     [[ "${statement_status}" -le 1 ]] || die "statement check failed to execute; inspect the error before committing"
+    "${PYTHON}" -B scripts/final_destination.py --write
+    note "comparing every published file with its projection in destination/"
+    "${PYTHON}" -B scripts/final_destination.py --converge || note "a published value differs from its projection; see the report above"
     "${PYTHON}" -B scripts/availability.py
     "${PYTHON}" -B scripts/claims_ledger.py
     "${PYTHON}" -B scripts/manuscript_availability.py
@@ -95,7 +98,8 @@ publish_here() {
     "${PYTHON}" -B scripts/artifact_catalog.py
     "${PYTHON}" -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
     local changed=(release/paper_artifacts.json release/release_scope.json manifests/published environment/observed
-                   paper/source_data STATEMENT_COMPLIANCE.md AVAILABILITY.md README.md paper/CLAIMS.md
+                   paper/source_data STATEMENT_COMPLIANCE.md release/final_destination.json docs/FINAL_DESTINATION.md destination
+                   AVAILABILITY.md README.md paper/CLAIMS.md
                    paper/AVAILABILITY_STATEMENT.txt paper/PAPER_SUPPORT.md paper/RESULTS.md docs/badges/evidence.json
                    release/artifact_catalog.json docs/ARTIFACT_CATALOG.md RELEASE_MANIFEST.json SHA256SUMS.txt)
     # E12 study plans and adapter code, copied from the published baselines record set by derive.

@@ -1,5 +1,134 @@
 # Changelog
 
+## 2026-11-09 — Protocol tables in the printed wording
+
+- Five cells of Supplementary Tables S1, S3 and S8 whose printed wording describes what the code executes are
+  generated in that wording, with the detail kept in the table notes and source data: the ogbn-proteins repeated
+  units (`32 cores; 2-hop buffer`; the primary unit already names the degree-stratified partition), the
+  Roman-empire repeated units (`10 splits`; each split run's 32 METIS cores with a 2-hop buffer are in the note)
+  and interval role (`repeated-split empirical`), the period of the innovation row (`every update`; observer
+  period r = 2 in the note) and the response of the entry gates (`retain strongest open loop`, the printed
+  response of the residual-headroom gate). The offline build without measured outputs now reproduces 487
+  printed values exactly (482 before), with 10 literal differences (15 before) and 3 missing seed-hierarchy
+  fields; Table S8 is exact. Item K8 of the consistency ledger lists the six cells that remain, each a
+  statement about behavior or schema: the Peptides-func boundary annotation of S1, the Full and state fallback
+  descriptions of S11, and the stage, unit and protocol roles of S38. No reference value changes, and the
+  runtime is unchanged.
+
+## 2026-11-08 — Algorithm S4 in the runtime, the scientific-consistency ledger and figure contracts
+
+- The selection's studentized maximum follows Supplementary Algorithm S4: `nested_selection` takes it over
+  the feasible family Q_feas of main Eq. (18) (support, resource and official-metric bounds) instead of every
+  executed registered configuration, a superset whose radius is at least as wide. `select/decision.json`
+  records the family (`max_t_family`), `feasible_family_size` and `max_t_family_size`; r_max is the largest
+  radius over Q_feas. Records sealed by earlier runtimes carry no family and replay exactly with every executed
+  configuration (`cross_morse/review.py`, `paper/build/displays/run_audits.py::screened_radius`,
+  `cm_experiments/backbones.py`); a test reproduces the complete selection record of each preserved runtime on
+  identical inputs. The Table S20 finalist radius is evaluated on the same resamples through
+  `diagnostic_max_t` instead of replacing a module function. The runtime fingerprint is now
+  `9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c`; the previous runtime `d9687652…` is
+  preserved under `examples/source_snapshots/`, and `docs/VALIDATION.json` records the new validation event.
+- The scientific-consistency ledger (`paper/consistency_ledger.json`, `docs/CONSISTENCY.md`) lists every open
+  question between the printed methods or values and the code: the studentized-maximum family (K1), the
+  Peptides-func confirmation at Holm P = 0.070 (K2), the complete-ledger selection on Roman-empire,
+  PascalVOC-SP and COCO-SP (K3), the Table S2 seed hierarchy (K4), the budget-comparison settings (K5), the
+  Table S3 failure responses (K6), Table S20 |Q| (K7, resolved), the literal protocol-table differences (K8)
+  and the manuscript corrections found in the figure contracts (K9), each with the original record and the rule that decides it. `make consistency-audit RUNS_ROOT=<runs>`
+  (`scripts/consistency_audit.py`) evaluates K1, K2, K3, K4 and K6 on completed runs; on the bundled runs it
+  finds that their selections used every executed configuration, as sealed. No reference value is changed.
+- Eight more quantitative figures carry complete, independently reviewed printed-value contracts: main Figure 5
+  (268 targets) and supplementary Figures S6 (78), S7 (60), S9 (97), S12 (128), S13 (83), S15 (211) and S20
+  (310), 1,235 targets in all, from the printed tables, captions and formulas evaluated in scratch code that
+  imports no repository module. Each generator compares every target, and omission and perturbation tests guard
+  each panel (`tests/test_figure_contracts_*.py`). Fourteen of the 25 quantitative figures now have contracts; the
+  other eleven need original plotted data or a scenario declaration (`docs/FIGURE_REFERENCE_COVERAGE.md`).
+  Figure 5 declares the `timing_anchors` record set it reads; the S9 margin ticks are drawn at the printed
+  positive margins (products ±0.002) with the signed thresholds kept in the source data; S13 and S7 use the printed
+  labels. Registering the contracts surfaced manuscript corrections (the Figure S6 sensing share, the S6b labels,
+  the S7b/S21 p5 units, the Table 2 references of S8 and S13c, an overlay hiding part of Figure S20a), now ledger
+  item K9.
+- `make independent-verification VERIFY_WORK=<new directory>` (`scripts/independent_verification.sh`) is the
+  acceptance test as a reviewer runs it: a fresh clone of the published repository at one revision, the complete
+  tier retrieved there, `make paper`, `make statement-fulfilled` and `make final-destination-converge`, never
+  reusing a local checkout or artifact cache. The final destination's close-out sequence runs it, after
+  `make consistency-audit`.
+- The destination's compliance page lists the consistency items, each decided at the destination by the
+  original records or the author's declaration.
+
+## 2026-11-08 — The destination tree at twelve of twelve, and Table S20 |Q| as the feasible family
+
+- Table S20 reports |Q| as the paper defines it: the size of the feasible family Q_feas of main
+  Eq. (18), over which Supplementary Algorithm S4 runs and whose size its line 10 reports. The
+  generator (`paper/build/displays/run_audits.py::feasible_family_size`) counts the registered
+  configurations that satisfy dynamic support, the resource bounds and the official-metric bound
+  (`select/decision.json` `joint_feasible`), verifies that count against its Algorithm S4 replay, and
+  lists the registered family size beside it in the source data; Figure S17c uses the same count.
+  It previously reported the registry size (`candidate_count`), which bounds |Q| from above and
+  could never equal the printed values. The design forecast now treats |Q| as a measured quantity
+  with the registry as its bound: the printed 180, 180, 144, 216, 240, 240 and 180 lie within the
+  registered 270, 265, 260, 270, 265, 265 and 260; no design-determined printed value conflicts
+  with the released code.
+- `destination/` holds every file that publication writes into the checkout, projected now at the
+  path it will occupy (`scripts/destination.py`, written by `make final-destination`): the release
+  manifest with all 37 required artifacts published, the seven executed split and seed manifests
+  (runtime fingerprint, the configuration identity of every run and Roman split, seeds, role sizes
+  from the registered floors and the providers' official split sizes, the pre-registered graph-role
+  and official-split hashes of the LRGB benchmarks), the observed environments of the registered
+  GH200 site, the E12 study view of the fourteen external comparisons and the source data of a
+  complete reconstruction (90 displays, the 3747 printed values registered now, and the 19 figure
+  contracts still to be registered with the input that closes each). The twelve registered items,
+  evaluated on that tree with the checks of `scripts/statement_check.py`, are all fulfilled
+  (`destination/STATEMENT_COMPLIANCE.md`); `STATEMENT_COMPLIANCE.md` keeps reporting the checkout.
+- Every projected file carries a `projection` block that classifies its values (exact, registered,
+  size, count, minimum, pending). `scripts/paper_artifacts.py` and `scripts/statement_evidence.py`
+  refuse any file carrying it. `make final-destination-converge` compares every realized file of the
+  checkout with its projection and exits non-zero when an exact value differs;
+  `make final-destination-runs` additionally checks completed runs against the registered
+  configurations, the released runtime, the role floors and the printed |Q|.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged by this entry: source fingerprint
+  `d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651`.
+
+## 2026-11-08 — The printed availability text, the final destination and the commands on published outputs
+
+- The availability text printed in the manuscript is registered and checked claim by claim.
+  `release/printed_availability.json` holds the main-text paragraph (page 15), the two
+  repository sentences of the Methods and the Supplementary paragraph (page 30), bound to
+  the PDF identities of `paper/sources.json`, as 39 claims. `scripts/printed_statement_check.py`
+  (`make printed-statement-check`) evaluates them with the vocabulary of the registered
+  statement: symbols located with the Python AST, Make targets, the sealed bundled runs,
+  the record contracts, `runs/index.json`, `records/index.json` and the release manifest.
+  `STATEMENT_COMPLIANCE.md` lists them below the registered items; 29 are fulfilled by the
+  checkout, 8 await the measured outputs, and the two sentences that place the measurement
+  records at deposit DOIs in `records/index.json` are not supported by the record contract.
+  `make availability-fulfilled` requires both texts.
+- The final destination (`scripts/final_destination.py`, `make final-destination`,
+  `docs/FINAL_DESTINATION.md`, `release/final_destination.json`) draws the repository after
+  publication from what it already fixes:
+  - a design forecast of the printed values that the released code determines before any
+    measurement: 64 agree with the paper, and the printed |Q| of Table S20 lies within the
+    registered candidate family of every dataset (next entry);
+    `make final-destination-runs RUNS_ROOT=<runs>` checks completed runs against it before
+    publication, and the registry formula reproduces both bundled runs route by route;
+  - the data roles of PascalVOC-SP, COCO-SP and Peptides-func, pre-registered with the
+    runtime's own role functions lifted from `cross_morse/data.py` without PyTorch; the same
+    functions reproduce every role hash the bundled runs recorded at preparation;
+  - the projected release: files, checkpoints, prediction and trajectory files, tier sizes
+    and release parts of every run archive, counted with `content_counts`, `is_heavy` and the
+    part size of `scripts/paper_artifacts.py` (about 29 GB in the analysis tier and 1.9 TB in
+    the complete tier, dominated by the full-graph prediction arrays of COCO-SP and
+    ogbn-products, whose complete tiers exceed one Zenodo record);
+  - compliance at publication and the close-out sequence, including the two routes for the
+    printed sentences on deposit DOIs.
+  Projected values are marked, never enter a comparison and are replaced by the published
+  values; publication refreshes the page.
+- `make tables` and `make figures` read completed run directories with `RUNS_ROOT=` (a
+  reproduction suite or the runs that `make paper` verified); `make records-tables` reads
+  `RECORDS_ROOT`, and when `records/` registers no set, the record sets that `make paper`
+  downloaded and verified.
+- `records/index.json` declares all 31 record contracts of `records/specs.json`.
+- The runtime (`run_cross_morse*.py`, `cross_morse/`) is unchanged by this entry: source
+  fingerprint `d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651`.
+
 ## 2026-11-08 — Local publication preflight and source-backed completion
 
 - Enforce nominal A0 support in every registered Full-profile stratum before

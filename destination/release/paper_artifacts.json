@@ -1,0 +1,2146 @@
+{
+ "projection": {
+  "projected": true,
+  "schema": "cross-morse-destination-1",
+  "replaces": "release/paper_artifacts.json",
+  "generated_by": "scripts/final_destination.py --write",
+  "about": "The release paper-artifacts with every required artifact published: run archives sized from the runtime's file layout at the registered scale (docs/FINAL_DESTINATION.md, section C), identities from the released runtime and the effective configurations. `parts` is summarized as a count; the realized manifest lists one entry per release asset.",
+  "classes": {
+   "exact": [
+    "schema",
+    "repository",
+    "release_tag",
+    "release_url",
+    "part_bytes",
+    "statement",
+    "status",
+    "artifacts/*/id",
+    "artifacts/*/kind",
+    "artifacts/*/name",
+    "artifacts/*/asset_stem",
+    "artifacts/*/status",
+    "artifacts/*/relationship",
+    "artifacts/*/scientific_only_verification",
+    "artifacts/*/identity/source_sha256",
+    "artifacts/*/identity/config_sha256",
+    "artifacts/*/identity/profile",
+    "artifacts/*/identity/scientific_run",
+    "artifacts/*/identity/campaign",
+    "artifacts/*/identity/splits/*/source_sha256",
+    "artifacts/*/identity/splits/*/config_sha256",
+    "artifacts/*/identity/splits/*/profile",
+    "artifacts/*/identity/splits/*/scientific_run",
+    "artifacts/*/identity/coverage/*",
+    "artifacts/*/identity/verification_status",
+    "artifacts/*/identity/post_hoc",
+    "artifacts/run:*/contents/propensity_logged_trajectories"
+   ],
+   "registered": [
+    "artifacts/environment:gpu/identity/gpu",
+    "artifacts/environment:gpu/identity/python",
+    "artifacts/environment:gpu/identity/torch"
+   ],
+   "size": [
+    "artifacts/run:*/bytes",
+    "artifacts/run:*/tiers/*/bytes"
+   ],
+   "count": [
+    "artifacts/run:*/files",
+    "artifacts/run:*/contents/*",
+    "artifacts/run:*/tiers/*/parts/count",
+    "artifacts/environment:gpu/files"
+   ],
+   "pending": [
+    "artifacts/*/inventory_sha256",
+    "artifacts/*/published_utc",
+    "artifacts/*/tiers/*/archive",
+    "artifacts/*/tiers/*/sha256",
+    "artifacts/*/identity/unit_sha256",
+    "artifacts/*/identity/splits/*/unit_sha256",
+    "artifacts/*/identity/manifest_sha256",
+    "artifacts/*/identity/rows"
+   ]
+  },
+  "rule": "Every value in this file is a projection of the file that publication writes at `replaces`. Real loaders refuse it. `make final-destination-converge` compares the realized file with it: exact values must be identical, registered values follow the registered site profile, sizes must fall within a factor of 2 and counts within 25%, minimums must be reached, and pending values are supplied by the realized output."
+ },
+ "schema": "cross-morse-paper-artifacts-1",
+ "repository": "VKHS/CR-9",
+ "release_tag": "paper-artifacts",
+ "release_url": "https://github.com/VKHS/CR-9/releases/tag/paper-artifacts",
+ "part_bytes": 1992294400,
+ "statement": "release/availability_statement.json",
+ "status": "published",
+ "artifacts": [
+  {
+   "id": "run:ogbn-arxiv",
+   "kind": "run",
+   "name": "ogbn-arxiv",
+   "asset_stem": "run-arxiv",
+   "statement_items": [
+    "configurations",
+    "split and seed manifests",
+    "environment specification",
+    "checkpoints",
+    "predictions",
+    "propensity-logged trajectories",
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S10",
+    "supplementary:Figure S12",
+    "supplementary:Figure S13",
+    "supplementary:Figure S14",
+    "supplementary:Figure S15",
+    "supplementary:Figure S17",
+    "supplementary:Figure S19",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Figure S4",
+    "supplementary:Figure S6",
+    "supplementary:Table S12",
+    "supplementary:Table S12b",
+    "supplementary:Table S12c",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S20",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S25",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S28",
+    "supplementary:Table S30",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S4",
+    "supplementary:Table S41",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S44",
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S48",
+    "supplementary:Table S5",
+    "supplementary:Table S5c",
+    "supplementary:Table S5d",
+    "supplementary:Table S6c",
+    "supplementary:Table S7"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "campaign": false,
+    "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+    "config_sha256": "7dd8538ac6774e66c4b79e1566e75ec3eb52a7c0ac03b53a9cf8d87abc2ab466",
+    "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+    "profile": "full",
+    "scientific_run": true
+   },
+   "files": 27659,
+   "bytes": 29161103132,
+   "contents": {
+    "checkpoints": 110,
+    "predictions": 1843,
+    "propensity_logged_trajectories": 25600,
+    "statistical_outputs": 15,
+    "split_and_seed_manifests": 4,
+    "environment": 1,
+    "configurations": 2
+   },
+   "tiers": {
+    "analysis": {
+     "archive": "pending: run-arxiv.analysis-<SHA-256>.tar.gz, named by its content",
+     "bytes": 1185889153,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 1,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-arxiv.analysis-<SHA-256>.tar.gz",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    },
+    "complete": {
+     "archive": "pending: run-arxiv.complete-<SHA-256>.tar.gz, named by its content",
+     "bytes": 24083815230,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 13,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-arxiv.complete-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    }
+   }
+  },
+  {
+   "id": "run:ogbn-proteins",
+   "kind": "run",
+   "name": "ogbn-proteins",
+   "asset_stem": "run-proteins",
+   "statement_items": [
+    "configurations",
+    "split and seed manifests",
+    "environment specification",
+    "checkpoints",
+    "predictions",
+    "propensity-logged trajectories",
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S10",
+    "supplementary:Figure S12",
+    "supplementary:Figure S13",
+    "supplementary:Figure S14",
+    "supplementary:Figure S15",
+    "supplementary:Figure S17",
+    "supplementary:Figure S19",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Figure S6",
+    "supplementary:Table S12",
+    "supplementary:Table S12b",
+    "supplementary:Table S12c",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S20",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S28",
+    "supplementary:Table S30",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S4",
+    "supplementary:Table S41",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S44",
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S48",
+    "supplementary:Table S5",
+    "supplementary:Table S5c",
+    "supplementary:Table S5d",
+    "supplementary:Table S6c",
+    "supplementary:Table S7"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "campaign": false,
+    "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+    "config_sha256": "5d9c33e44e2e40b3a1b3d374c29c63d161af75cfb72d4ff98381b7f6712a7175",
+    "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+    "profile": "full",
+    "scientific_run": true
+   },
+   "files": 30825,
+   "bytes": 60795876969,
+   "contents": {
+    "checkpoints": 110,
+    "predictions": 1809,
+    "propensity_logged_trajectories": 28800,
+    "statistical_outputs": 15,
+    "split_and_seed_manifests": 4,
+    "environment": 1,
+    "configurations": 2
+   },
+   "tiers": {
+    "analysis": {
+     "archive": "pending: run-proteins.analysis-<SHA-256>.tar.gz, named by its content",
+     "bytes": 3353278067,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 2,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-proteins.analysis-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    },
+    "complete": {
+     "archive": "pending: run-proteins.complete-<SHA-256>.tar.gz, named by its content",
+     "bytes": 50764613350,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 26,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-proteins.complete-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    }
+   }
+  },
+  {
+   "id": "run:ogbn-products",
+   "kind": "run",
+   "name": "ogbn-products",
+   "asset_stem": "run-products",
+   "statement_items": [
+    "configurations",
+    "split and seed manifests",
+    "environment specification",
+    "checkpoints",
+    "predictions",
+    "propensity-logged trajectories",
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S13",
+    "supplementary:Figure S14",
+    "supplementary:Figure S15",
+    "supplementary:Figure S17",
+    "supplementary:Figure S19",
+    "supplementary:Table S12",
+    "supplementary:Table S12b",
+    "supplementary:Table S12c",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S20",
+    "supplementary:Table S23",
+    "supplementary:Table S28",
+    "supplementary:Table S30",
+    "supplementary:Table S4",
+    "supplementary:Table S41",
+    "supplementary:Table S43",
+    "supplementary:Table S48",
+    "supplementary:Table S5",
+    "supplementary:Table S5c",
+    "supplementary:Table S5d",
+    "supplementary:Table S7"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "campaign": false,
+    "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+    "config_sha256": "6675def8c2dc20540051943c388721d4d13322f129b93f9acfe93bdecddef06d",
+    "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+    "profile": "full",
+    "scientific_run": true
+   },
+   "files": 40391,
+   "bytes": 415090906296,
+   "contents": {
+    "checkpoints": 110,
+    "predictions": 1775,
+    "propensity_logged_trajectories": 38400,
+    "statistical_outputs": 15,
+    "split_and_seed_manifests": 4,
+    "environment": 1,
+    "configurations": 2
+   },
+   "tiers": {
+    "analysis": {
+     "archive": "pending: run-products.analysis-<SHA-256>.tar.gz, named by its content",
+     "bytes": 2585163919,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 2,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-products.analysis-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    },
+    "complete": {
+     "archive": "pending: run-products.complete-<SHA-256>.tar.gz, named by its content",
+     "bytes": 352143535350,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 177,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-products.complete-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    }
+   }
+  },
+  {
+   "id": "run:Roman-empire",
+   "kind": "run",
+   "name": "Roman-empire",
+   "asset_stem": "run-roman_empire",
+   "statement_items": [
+    "configurations",
+    "split and seed manifests",
+    "environment specification",
+    "checkpoints",
+    "predictions",
+    "propensity-logged trajectories",
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S10",
+    "supplementary:Figure S12",
+    "supplementary:Figure S13",
+    "supplementary:Figure S14",
+    "supplementary:Figure S15",
+    "supplementary:Figure S17",
+    "supplementary:Figure S19",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Figure S4",
+    "supplementary:Figure S6",
+    "supplementary:Table S12",
+    "supplementary:Table S12b",
+    "supplementary:Table S12c",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S20",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S25",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S28",
+    "supplementary:Table S30",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S4",
+    "supplementary:Table S41",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S44",
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S48",
+    "supplementary:Table S5",
+    "supplementary:Table S5c",
+    "supplementary:Table S5d",
+    "supplementary:Table S6c",
+    "supplementary:Table S7"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "campaign": true,
+    "splits": {
+     "split_00": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "f74931452d97128ed37f0c17a643ed6fa0e002ab8e4ff0ba2b000dcd9bee2a95",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_01": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "f332dd087089f55a21d342b6d98fc012abb60e639c1069542173031d96a3d2ab",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_02": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "5563edba826dcd5410b7657a1097f5e2e29fbf097de43576b629e23ed92fa446",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_03": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "ecb9c6d3a7188fe2a81455783c2aa76f5b53fe8091a96fccf3c9b555291050c2",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_04": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "0c66d7c3afb3e37fbd84672caf44c51c9e469fdef7b9dd7bdae83496ef9a09e6",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_05": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "f43d129128c5879cb355c3d7775a36810e61127cd974c780f56ce6b6dc599f0e",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_06": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "49356b7cc400d35324af6069bcf5c78f6897ef57ed8eb6bd540f2dc7965f37d1",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_07": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "eac3592170147ec41882f1055b51a8e10725f05b76d90fcdda520a289cd6aa37",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_08": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "80e9e94250569ed550921d496aec059af5c2a976c3f677fe58a36003f07558bb",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     },
+     "split_09": {
+      "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+      "config_sha256": "170a90d22453e01565b5422c0ecac1d5c0d670f39e4547d4c2ea4c5c8cf70369",
+      "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+      "profile": "full",
+      "scientific_run": true
+     }
+    }
+   },
+   "files": 212590,
+   "bytes": 47329486664,
+   "contents": {
+    "checkpoints": 1100,
+    "predictions": 18430,
+    "propensity_logged_trajectories": 192000,
+    "statistical_outputs": 150,
+    "split_and_seed_manifests": 40,
+    "environment": 10,
+    "configurations": 20
+   },
+   "tiers": {
+    "analysis": {
+     "archive": "pending: run-roman_empire.analysis-<SHA-256>.tar.gz, named by its content",
+     "bytes": 8429000657,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 5,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-roman_empire.analysis-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    },
+    "complete": {
+     "archive": "pending: run-roman_empire.complete-<SHA-256>.tar.gz, named by its content",
+     "bytes": 34405930869,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 18,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-roman_empire.complete-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    }
+   }
+  },
+  {
+   "id": "run:PascalVOC-SP",
+   "kind": "run",
+   "name": "PascalVOC-SP",
+   "asset_stem": "run-pascalvoc_sp",
+   "statement_items": [
+    "configurations",
+    "split and seed manifests",
+    "environment specification",
+    "checkpoints",
+    "predictions",
+    "propensity-logged trajectories",
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S10",
+    "supplementary:Figure S12",
+    "supplementary:Figure S13",
+    "supplementary:Figure S14",
+    "supplementary:Figure S15",
+    "supplementary:Figure S17",
+    "supplementary:Figure S19",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Figure S4",
+    "supplementary:Figure S6",
+    "supplementary:Figure S8",
+    "supplementary:Table S12",
+    "supplementary:Table S12b",
+    "supplementary:Table S12c",
+    "supplementary:Table S13",
+    "supplementary:Table S14b",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S20",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S25",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S28",
+    "supplementary:Table S30",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S37",
+    "supplementary:Table S4",
+    "supplementary:Table S41",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S44",
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S48",
+    "supplementary:Table S5",
+    "supplementary:Table S5c",
+    "supplementary:Table S5d",
+    "supplementary:Table S6c",
+    "supplementary:Table S7"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "campaign": false,
+    "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+    "config_sha256": "a050ca47eacf49c753f768e171750bfff534499112000d5a8df9dcff9c93166f",
+    "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+    "profile": "full",
+    "scientific_run": true
+   },
+   "files": 43183,
+   "bytes": 37930933670,
+   "contents": {
+    "checkpoints": 110,
+    "predictions": 2005,
+    "propensity_logged_trajectories": 40960,
+    "statistical_outputs": 16,
+    "split_and_seed_manifests": 5,
+    "environment": 1,
+    "configurations": 2
+   },
+   "tiers": {
+    "analysis": {
+     "archive": "pending: run-pascalvoc_sp.analysis-<SHA-256>.tar.gz, named by its content",
+     "bytes": 1744585795,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 1,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-pascalvoc_sp.analysis-<SHA-256>.tar.gz",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    },
+    "complete": {
+     "archive": "pending: run-pascalvoc_sp.complete-<SHA-256>.tar.gz, named by its content",
+     "bytes": 31598663058,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 16,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-pascalvoc_sp.complete-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    }
+   }
+  },
+  {
+   "id": "run:COCO-SP",
+   "kind": "run",
+   "name": "COCO-SP",
+   "asset_stem": "run-coco_sp",
+   "statement_items": [
+    "configurations",
+    "split and seed manifests",
+    "environment specification",
+    "checkpoints",
+    "predictions",
+    "propensity-logged trajectories",
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S10",
+    "supplementary:Figure S12",
+    "supplementary:Figure S13",
+    "supplementary:Figure S14",
+    "supplementary:Figure S15",
+    "supplementary:Figure S17",
+    "supplementary:Figure S19",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Figure S6",
+    "supplementary:Figure S8",
+    "supplementary:Table S12",
+    "supplementary:Table S12b",
+    "supplementary:Table S12c",
+    "supplementary:Table S13",
+    "supplementary:Table S14b",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S20",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S28",
+    "supplementary:Table S30",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S37",
+    "supplementary:Table S4",
+    "supplementary:Table S41",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S44",
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S48",
+    "supplementary:Table S5",
+    "supplementary:Table S5c",
+    "supplementary:Table S5d",
+    "supplementary:Table S6c",
+    "supplementary:Table S7"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "campaign": false,
+    "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+    "config_sha256": "314d03d5ee3eb895aa0e3994404a5614be3eb1c3683e975def9b1765245b41d5",
+    "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+    "profile": "full",
+    "scientific_run": true
+   },
+   "files": 66223,
+   "bytes": 1683686718969,
+   "contents": {
+    "checkpoints": 110,
+    "predictions": 2005,
+    "propensity_logged_trajectories": 64000,
+    "statistical_outputs": 16,
+    "split_and_seed_manifests": 5,
+    "environment": 1,
+    "configurations": 2
+   },
+   "tiers": {
+    "analysis": {
+     "archive": "pending: run-coco_sp.analysis-<SHA-256>.tar.gz, named by its content",
+     "bytes": 10330558259,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 6,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-coco_sp.analysis-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    },
+    "complete": {
+     "archive": "pending: run-coco_sp.complete-<SHA-256>.tar.gz, named by its content",
+     "bytes": 1427871306187,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 717,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-coco_sp.complete-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    }
+   }
+  },
+  {
+   "id": "run:Peptides-func",
+   "kind": "run",
+   "name": "Peptides-func",
+   "asset_stem": "run-peptides_func",
+   "statement_items": [
+    "configurations",
+    "split and seed manifests",
+    "environment specification",
+    "checkpoints",
+    "predictions",
+    "propensity-logged trajectories",
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S10",
+    "supplementary:Figure S12",
+    "supplementary:Figure S13",
+    "supplementary:Figure S14",
+    "supplementary:Figure S15",
+    "supplementary:Figure S17",
+    "supplementary:Figure S19",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Figure S6",
+    "supplementary:Figure S8",
+    "supplementary:Table S12",
+    "supplementary:Table S12b",
+    "supplementary:Table S12c",
+    "supplementary:Table S13",
+    "supplementary:Table S14b",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S20",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S28",
+    "supplementary:Table S30",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S37",
+    "supplementary:Table S4",
+    "supplementary:Table S41",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S44",
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S48",
+    "supplementary:Table S5",
+    "supplementary:Table S5c",
+    "supplementary:Table S5d",
+    "supplementary:Table S6c",
+    "supplementary:Table S7"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "campaign": false,
+    "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+    "config_sha256": "b1b502ef492410e645fe6d58844c050f2087b4e092a3e2405c793e08d6f21436",
+    "unit_sha256": "pending: SHA-256 of prepared/splits.npz",
+    "profile": "full",
+    "scientific_run": true
+   },
+   "files": 50189,
+   "bytes": 4302455170,
+   "contents": {
+    "checkpoints": 110,
+    "predictions": 1971,
+    "propensity_logged_trajectories": 48000,
+    "statistical_outputs": 16,
+    "split_and_seed_manifests": 5,
+    "environment": 1,
+    "configurations": 2
+   },
+   "tiers": {
+    "analysis": {
+     "archive": "pending: run-peptides_func.analysis-<SHA-256>.tar.gz, named by its content",
+     "bytes": 1851860456,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 1,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-peptides_func.analysis-<SHA-256>.tar.gz",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    },
+    "complete": {
+     "archive": "pending: run-peptides_func.complete-<SHA-256>.tar.gz, named by its content",
+     "bytes": 3165033493,
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": 2,
+      "each_at_most_bytes": 1992294400,
+      "asset": "pending: run-peptides_func.complete-<SHA-256>.tar.gz.partNNN",
+      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+     }
+    }
+   }
+  },
+  {
+   "id": "records:action_gap_audit",
+   "kind": "records",
+   "name": "action_gap_audit",
+   "asset_stem": "records-action-gap-audit",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S17",
+    "supplementary:Figure S7",
+    "supplementary:Table S21",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S47"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-action-gap-audit.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:band_bound_tightness",
+   "kind": "records",
+   "name": "band_bound_tightness",
+   "asset_stem": "records-band-bound-tightness",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S18",
+    "supplementary:Table S43"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-band-bound-tightness.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:baselines",
+   "kind": "records",
+   "name": "baselines",
+   "asset_stem": "records-baselines",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 4",
+    "main:Figure 5",
+    "supplementary:Figure S4",
+    "supplementary:Table S15",
+    "supplementary:Table S15b",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S43"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset",
+      "method",
+      "seed"
+     ],
+     "datasets": 7,
+     "internal_rows": "pending: internal method rows of the seven runs",
+     "external_comparisons": 14,
+     "seeds_per_row": "pending: seeds per method row"
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-baselines.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:budget_matched",
+   "kind": "records",
+   "name": "budget_matched",
+   "asset_stem": "records-budget-matched",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 6",
+    "supplementary:Figure S12",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Table S33",
+    "supplementary:Table S34",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S46",
+    "supplementary:Table S46b",
+    "supplementary:Table S47"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset"
+     ],
+     "rows": 6
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-budget-matched.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:buffer_sensitivity",
+   "kind": "records",
+   "name": "buffer_sensitivity",
+   "asset_stem": "records-buffer-sensitivity",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S27"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-buffer-sensitivity.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:confirmation_contrasts",
+   "kind": "records",
+   "name": "confirmation_contrasts",
+   "asset_stem": "records-confirmation-contrasts",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S14b"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-confirmation-contrasts.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:confirmation_sensitivity",
+   "kind": "records",
+   "name": "confirmation_sensitivity",
+   "asset_stem": "records-confirmation-sensitivity",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S18",
+    "supplementary:Figure S9",
+    "supplementary:Table S43"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-confirmation-sensitivity.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:cross_backbone",
+   "kind": "records",
+   "name": "cross_backbone",
+   "asset_stem": "records-cross-backbone",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S25"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "regime",
+      "model"
+     ],
+     "rows": 6,
+     "quantities_per_row": 3
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-cross-backbone.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:decision_traces",
+   "kind": "records",
+   "name": "decision_traces",
+   "asset_stem": "records-decision-traces",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 3"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-decision-traces.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:depth_diagnostics",
+   "kind": "records",
+   "name": "depth_diagnostics",
+   "asset_stem": "records-depth-diagnostics",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S14"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-depth-diagnostics.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:ensemble_grid",
+   "kind": "records",
+   "name": "ensemble_grid",
+   "asset_stem": "records-ensemble-grid",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S42",
+    "supplementary:Table S43"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset"
+     ],
+     "rows": 6
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-ensemble-grid.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:ensemble_grid_scores",
+   "kind": "records",
+   "name": "ensemble_grid_scores",
+   "asset_stem": "records-ensemble-grid-scores",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S26"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-ensemble-grid-scores.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:factorials",
+   "kind": "records",
+   "name": "factorials",
+   "asset_stem": "records-factorials",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 4",
+    "supplementary:Figure S17",
+    "supplementary:Table S16",
+    "supplementary:Table S16b",
+    "supplementary:Table S43"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset"
+     ],
+     "rows": 2
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-factorials.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:horizon_beam_sweep",
+   "kind": "records",
+   "name": "horizon_beam_sweep",
+   "asset_stem": "records-horizon-beam-sweep",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S5",
+    "supplementary:Table S29"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-horizon-beam-sweep.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:input_gate",
+   "kind": "records",
+   "name": "input_gate",
+   "asset_stem": "records-input-gate",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 4",
+    "main:Figure 5",
+    "main:Figure 6",
+    "main:Table 1",
+    "main:Table 2",
+    "supplementary:Figure S1",
+    "supplementary:Figure S17",
+    "supplementary:Figure S20",
+    "supplementary:Figure S3",
+    "supplementary:Figure S4",
+    "supplementary:Table S15",
+    "supplementary:Table S23",
+    "supplementary:Table S23b",
+    "supplementary:Table S26",
+    "supplementary:Table S26b",
+    "supplementary:Table S34",
+    "supplementary:Table S37",
+    "supplementary:Table S42",
+    "supplementary:Table S43",
+    "supplementary:Table S46",
+    "supplementary:Table S47",
+    "supplementary:Table S48"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset"
+     ],
+     "rows": 6
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-input-gate.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:inserted_site",
+   "kind": "records",
+   "name": "inserted_site",
+   "asset_stem": "records-inserted-site",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S18",
+    "supplementary:Table S43",
+    "supplementary:Table S45"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset"
+     ],
+     "rows": 3
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-inserted-site.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:mechanism_contrasts",
+   "kind": "records",
+   "name": "mechanism_contrasts",
+   "asset_stem": "records-mechanism-contrasts",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 3"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-mechanism-contrasts.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:module_ablations",
+   "kind": "records",
+   "name": "module_ablations",
+   "asset_stem": "records-module-ablations",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S17"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-module-ablations.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:negative_controls",
+   "kind": "records",
+   "name": "negative_controls",
+   "asset_stem": "records-negative-controls",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S16",
+    "supplementary:Table S19"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "control"
+     ],
+     "rows": 4,
+     "quantities_per_row": 3
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-negative-controls.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:nominal_time",
+   "kind": "records",
+   "name": "nominal_time",
+   "asset_stem": "records-nominal-time",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 5",
+    "supplementary:Table S23b",
+    "supplementary:Table S43"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset"
+     ],
+     "rows": 6
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-nominal-time.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:oracle_dispersion",
+   "kind": "records",
+   "name": "oracle_dispersion",
+   "asset_stem": "records-oracle-dispersion",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S30",
+    "supplementary:Table S43"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-oracle-dispersion.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:reliability_diagnostics",
+   "kind": "records",
+   "name": "reliability_diagnostics",
+   "asset_stem": "records-reliability-diagnostics",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S16"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-reliability-diagnostics.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:runtime_scaling",
+   "kind": "records",
+   "name": "runtime_scaling",
+   "asset_stem": "records-runtime-scaling",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Figure S2"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-runtime-scaling.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:sensitivity_grids",
+   "kind": "records",
+   "name": "sensitivity_grids",
+   "asset_stem": "records-sensitivity-grids",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S18"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-sensitivity-grids.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:sensor_parameters",
+   "kind": "records",
+   "name": "sensor_parameters",
+   "asset_stem": "records-sensor-parameters",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "supplementary:Table S6c"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary",
+    "coverage": {
+     "keys": [
+      "dataset"
+     ],
+     "rows": 6
+    }
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-sensor-parameters.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:timing_anchors",
+   "kind": "records",
+   "name": "timing_anchors",
+   "asset_stem": "records-timing-anchors",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 5",
+    "supplementary:Table S23b"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-timing-anchors.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "records:tube_audit",
+   "kind": "records",
+   "name": "tube_audit",
+   "asset_stem": "records-tube-audit",
+   "statement_items": [
+    "statistical outputs",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "supplementary:Figure S17",
+    "supplementary:Table S22"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "manifest_sha256": "pending: SHA-256 of the record set MANIFEST.json",
+    "rows": "pending: rows of the exported summary"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: records-tube-audit.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "campaign:budget",
+   "kind": "campaign",
+   "name": "budget",
+   "asset_stem": "campaign-budget",
+   "statement_items": [
+    "statistical outputs",
+    "predictions",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 6",
+    "supplementary:Figure S3",
+    "supplementary:Table S41",
+    "supplementary:Table S46",
+    "supplementary:Table S46b"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "verification_status": "PASS",
+    "coverage": "pending: dataset-arm contrasts of the verified campaign"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: campaign-budget.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "campaign:confirmation",
+   "kind": "campaign",
+   "name": "confirmation",
+   "asset_stem": "campaign-confirmation",
+   "statement_items": [
+    "statistical outputs",
+    "predictions",
+    "source data"
+   ],
+   "displays": [
+    "main:Figure 2",
+    "main:Figure 3",
+    "supplementary:Figure S9",
+    "supplementary:Table S14"
+   ],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "verification_status": "PASS",
+    "post_hoc": false,
+    "input_identity": "pending: identity of the verified campaign inputs"
+   },
+   "files": "pending: files of the packed set",
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: campaign-confirmation.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  },
+  {
+   "id": "environment:gpu",
+   "kind": "environment",
+   "name": "gpu",
+   "asset_stem": "environment-gpu",
+   "statement_items": [
+    "environment specification"
+   ],
+   "displays": [],
+   "status": "published",
+   "relationship": "exact_result_producing_run",
+   "scientific_only_verification": true,
+   "inventory_sha256": "pending: SHA-256 of the packed file inventory",
+   "published_utc": "pending: time of upload",
+   "identity": {
+    "observed_environment_sha256": "pending: SHA-256 of observed_environment.json",
+    "gpu": "NVIDIA GH200",
+    "python": "3.13.5",
+    "torch": "2.12.1+cu130"
+   },
+   "files": 4,
+   "bytes": "pending: bytes of the packed set",
+   "contents": "pending: statement categories of the packed set (scripts/paper_artifacts.py::content_counts)",
+   "tiers": {
+    "complete": {
+     "archive": "pending: environment-gpu.complete-<SHA-256>.tar.gz",
+     "bytes": "pending: bytes of the archive",
+     "sha256": "pending: SHA-256 of the archive",
+     "parts": {
+      "count": "pending: parts of the archive",
+      "each_at_most_bytes": 1992294400
+     }
+    }
+   }
+  }
+ ]
+}

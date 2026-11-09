@@ -249,10 +249,16 @@ def replay_results(run_root, *, selection=True):
                     values.append(p)
             metric_evaluator = MetricEvidence(values, raw["labels"], raw["sample_units"],
                                               data["core_ids"], data["counts"], c)
+        # Records sealed before the studentized maximum followed Algorithm S4 carry no max_t_family: they used
+        # every executed configuration and replay with that family and without the fields added since.
+        family = selected.get("max_t_family", "executed")
         recomputed = nested_selection(data["loss"], data.get("accuracy"), candidates, data["outer_fold"],
             inner_fold_ids=data["inner_fold"], reps=sc["bootstrap_reps"], alpha=sc["alpha"],
             epsilon_r=sc["epsilon_r"], epsilon_eq=sc["epsilon_eq"], epsilon_metric=sc["epsilon_metric"],
-            weights=data["counts"], seed=c["seed"]+4, metric_evaluator=metric_evaluator)
+            weights=data["counts"], seed=c["seed"]+4, metric_evaluator=metric_evaluator, max_t_family=family)
+        if "max_t_family" not in selected:
+            for key in ("max_t_family", "feasible_family_size", "max_t_family_size"):
+                recomputed.pop(key, None)
         assert_matches(recomputed, selected, "selection")
     contrasts = e.json("confirm/paired_contrasts.json")
     confirmed = confirmation(selected["provisional_index"], selected["comparator_index"], selected["eligible_indices"],

@@ -104,7 +104,12 @@ class StaticLayoutTests(unittest.TestCase):
         self.assertEqual(rows["ogbn-products"]["J or repeated units"], "64 METIS cores; 2-hop buffer")
         self.assertEqual(rows["ogbn-proteins"]["primary unit"], "degree-stratified buffered cluster")
         self.assertEqual(rows["Roman-empire"]["primary unit"], "official split")
-        self.assertTrue(rows["Roman-empire"]["J or repeated units"].startswith("10 splits"))
+        self.assertEqual(rows["Roman-empire"]["J or repeated units"], "10 splits")
+        # The primary unit already names the degree-stratified partition; the printed cell names only the cores.
+        self.assertEqual(rows["ogbn-proteins"]["J or repeated units"], "32 cores; 2-hop buffer")
+        self.assertEqual(rows["Roman-empire"]["interval role"], "repeated-split empirical")
+        self.assertEqual([rows[d]["interval role"] for d in ("ogbn-arxiv", "ogbn-proteins", "ogbn-products")],
+                         ["descriptive"] * 3)
         self.assertEqual([rows[d]["J or repeated units"] for d in GRAPH_LEVEL], ["J = 1428", "J = 5000", "J = 2331"])
         self.assertEqual([rows[d]["formal gate?"] for d in DATASETS], ["no"] * 4 + ["yes"] * 3)
         self.assertIn("B = 0.10, δ_a = 0.025", rows["COCO-SP"]["admission criterion for G_admit"])
@@ -130,6 +135,8 @@ class StaticLayoutTests(unittest.TestCase):
         self.assertEqual(rows["depth qualification"]["prespecified criterion"], "PDD ≤ 1.0 pp; DIL gap ≤ 0.020")
         self.assertEqual(rows["registry support"]["prespecified criterion"], "ϕ_registry ≥ 0.80; selected strata = 1.00")
         self.assertEqual(rows["residual headroom"]["prespecified criterion"], "U(Δ_oracle) < −0.003 nats")
+        # One executed response for every gate: feedback candidates become infeasible and q_C is retained.
+        self.assertEqual({r["failure action"] for r in rows.values()}, {"retain strongest open loop"})
         strata = [c for c in self.writers["S3"].comparisons if c.path == ("registry_support", "selected_strata")]
         self.assertEqual([c.computed for c in strata], [1.0])
         thresholds = {r["key"]: r for r in read_data(self.out, "S3", "thresholds")}
@@ -152,6 +159,7 @@ class StaticLayoutTests(unittest.TestCase):
         self.assertEqual(rows["innovation/NIS"]["dim."], "3")
         self.assertEqual(rows["entropy"]["normalization"], "training-fold median/MAD; clip [−5, 5]")
         self.assertEqual(rows["band power"]["period"], "sensing period P_s")
+        self.assertEqual(rows["innovation/NIS"]["period"], "every update")
         cheap = sum(int(r["dim."]) for r in rows.values() if r["period"] == "every depth"
                     and not r["measurement"].startswith("spectral age"))
         spectral = sum(int(r["dim."]) for r in rows.values() if "P_s" in r["period"])

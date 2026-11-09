@@ -84,7 +84,7 @@ builder and the manifest extraction for every completed run.
 ## Read the statuses precisely
 
 - **Identical runtime:** the fingerprint of `run_cross_morse*.py` and
-  `cross_morse/*.py` equals the released `0aba361b…`; `check` and `reproduce`
+  `cross_morse/*.py` equals the released `9f7393f7…`; `check` and `reproduce`
   verify it and every run seals the identity it ran with.
 - **Exact / interval / outside:** a regenerated quantity equals the printed
   value at the printed precision, lies inside the printed 95% interval, or

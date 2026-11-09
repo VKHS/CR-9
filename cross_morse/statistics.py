@@ -195,12 +195,26 @@ def _reconstruct_comparator(
     )
 
 
-def _max_t_interval(point: np.ndarray, draws: np.ndarray, alpha: float):
+# Configurations over which the studentized maximum of the selection bootstrap runs.
+# "feasible": the feasible family Q_feas of main Eq. (18), as Supplementary Algorithm S4 specifies (lines 5
+# and 7: every q in Q_feas against the nested comparator, the maximum over q). "executed": every executed
+# registered configuration, the family of selection records sealed before the maximum followed Algorithm S4;
+# it is kept so that those records replay exactly. select/decision.json records which family a run used.
+MAX_T_FAMILIES = ("feasible", "executed")
+
+
+def _max_t_interval(point: np.ndarray, draws: np.ndarray, alpha: float, columns: Any = None):
+    """Simultaneous intervals from the studentized maximum over ``columns`` (default: every column).
+
+    Every configuration receives the radius se * critical; the simultaneous guarantee covers the
+    configurations inside the maximum, and the others carry the same critical value descriptively.
+    """
     se = np.std(draws, axis=0, ddof=1)
     nonzero = se > 1e-12
+    use = nonzero if columns is None else (nonzero & np.asarray(columns, dtype=bool))
     maxima = np.zeros(len(draws), dtype=np.float64)
-    if nonzero.any():
-        maxima = np.max(np.abs(draws[:, nonzero] - point[nonzero]) / se[nonzero], axis=1)
+    if use.any():
+        maxima = np.max(np.abs(draws[:, use] - point[use]) / se[use], axis=1)
     critical = float(np.quantile(maxima, 1 - alpha))
     radius = se * critical
     radius[~nonzero] = 0.0
@@ -246,6 +260,9 @@ def _restore_candidate_indices(result: Mapping[str, Any], observed_ids: np.ndarr
     for key in ("metric_feasible", "joint_feasible"):
         out[key] = expand(result[key], False)
     out["bootstrap_final_comparator_counts"] = expand(result["bootstrap_final_comparator_counts"], 0)
+    if "diagnostic_max_t" in result:
+        out["diagnostic_max_t"] = {name: dict(value, indices=[indices[j] for j in value["indices"]])
+                                   for name, value in result["diagnostic_max_t"].items()}
     out["nested_comparator_fold_choices"] = [restore_trace(row)
                                                 for row in result["nested_comparator_fold_choices"]]
     out["final_comparator_selection"] = restore_trace(result["final_comparator_selection"])
@@ -269,8 +286,17 @@ def nested_selection(
     seed: int = 0,
     weights: Any = None,
     metric_evaluator: Any = None,
+    max_t_family: str = "feasible",
+    diagnostic_max_t: Mapping[str, Sequence[int]] | None = None,
 ) -> dict[str, Any]:
     """Main Eq.(19), with nested qC reconstruction in each core resample.
+
+    The selection intervals come from the studentized maximum of Supplementary Algorithm S4 over
+    ``max_t_family`` (MAX_T_FAMILIES): by default the feasible family Q_feas of main Eq. (18), the
+    configurations that pass support and resource feasibility (``feasible``) and the official-metric bound
+    L_met >= -epsilon_metric. Its size is |Q| of Supplementary Table S20 and the largest radius over it is
+    r_max. ``diagnostic_max_t`` names further registry index sets whose studentized maximum is evaluated
+    on the same resamples (e.g. the twelve finalists of Table S20); they never change the decision.
 
     Arrays have shape [cores, fixed registered candidates]. The caller computes
     support and componentwise resource feasibility before selection. Official
@@ -292,6 +318,8 @@ def nested_selection(
     constraints. No failed candidate is assigned fabricated comparator scores.
     """
     _check_bootstrap(reps, alpha)
+    if max_t_family not in MAX_T_FAMILIES:
+        raise ValueError(f"max_t_family must be one of {MAX_T_FAMILIES}")
     loss = np.asarray(losses, dtype=np.float64)
     acc = np.zeros_like(loss) if accuracies is None and metric_evaluator is not None else np.asarray(accuracies, dtype=np.float64)
     if loss.ndim != 2 or acc.shape != loss.shape or loss.shape[1] != len(candidates):
@@ -314,6 +342,7 @@ def nested_selection(
         # Remove failed columns, rather than carrying NaNs or synthetic losses
         # into cross-fitting or max-t. With the same seed, adding a failed
         # registry entry leaves every surviving numerical calculation intact.
+        position = {int(j): k for k, j in enumerate(observed_ids)}
         result = nested_selection(
             loss[:, observed_ids].copy(), acc[:, observed_ids].copy(),
             [candidates[j] for j in observed_ids], fold_ids, inner_fold_ids,
@@ -322,6 +351,10 @@ def nested_selection(
             metric_evaluator=(None if metric_evaluator is None else
                 lambda candidate_ids, comparators, effective_weights: metric_evaluator(
                     observed_ids[candidate_ids], observed_ids[comparators], effective_weights)),
+            max_t_family=max_t_family,
+            diagnostic_max_t=(None if diagnostic_max_t is None else
+                              {name: [position[int(j)] for j in ids if int(j) in position]
+                               for name, ids in diagnostic_max_t.items()}),
         )
         return _restore_candidate_indices(result, observed_ids, q)
     w = _weights(weights, n)
@@ -400,10 +433,21 @@ def nested_selection(
         loss_draws[completed], acc_draws[completed] = d, a
         choices_count[boot_c] += 1
         completed += 1
-    lower, upper, se, critical = _max_t_interval(point, loss_draws, alpha)
     metric_lower, metric_upper, metric_se, metric_critical = _max_t_interval(metric_point, acc_draws, alpha)
     metric_ok = metric_lower >= -epsilon_metric
     joint_feasible = feasible & metric_ok
+    # Algorithm S4: the studentized maximum runs over Q_feas (main Eq. 18), fixed before the loss intervals.
+    family_columns = joint_feasible if max_t_family == "feasible" else np.ones(q, dtype=bool)
+    lower, upper, se, critical = _max_t_interval(point, loss_draws, alpha, columns=family_columns)
+    radii = upper - point
+    max_radius = float(np.max(radii[family_columns])) if family_columns.any() else 0.0
+    diagnostics = {}
+    for name, ids in (diagnostic_max_t or {}).items():
+        columns = np.zeros(q, dtype=bool)
+        columns[[int(j) for j in ids]] = True
+        _, d_upper, _, d_critical = _max_t_interval(point, loss_draws, alpha, columns=columns)
+        diagnostics[name] = {"indices": [int(j) for j in ids], "max_t_critical": float(d_critical),
+                             "max_radius": float(np.max((d_upper - point)[columns])) if columns.any() else 0.0}
     # qC has zero paired contrast to itself; including its implicit zero in the
     # near-best reference handles the no-benefit case without a fake candidate.
     feedback_feasible = joint_feasible & np.asarray([
@@ -431,7 +475,9 @@ def nested_selection(
         "metric_feasible": metric_ok.tolist(), "joint_feasible": joint_feasible.tolist(),
         "minimum_upper": float(minimum_upper),
         "max_t_critical": float(critical), "metric_max_t_critical": float(metric_critical),
-        "max_radius": float(np.max(upper - point)),
+        "max_radius": max_radius, "max_t_family": max_t_family,
+        "feasible_family_size": int(joint_feasible.sum()), "max_t_family_size": int(family_columns.sum()),
+        **({"diagnostic_max_t": diagnostics} if diagnostics else {}),
         "epsilon_r": float(epsilon_r), "epsilon_eq": float(epsilon_eq),
         "epsilon_metric": float(epsilon_metric), "alpha": float(alpha),
         "outer_folds": folds.tolist(), "inner_folds": inner.tolist(),

@@ -1,340 +1,72 @@
 {
   "date": "2026-11-08",
-  "base_commit": "ba44e9a5d13cce6749514e46937dcc4cbfef5f53",
-  "base_commit_note": "Current-source qualification and pre-publication reconstruction upgrade based on the published main revision. The previous top-level event is preserved under prior_runtime_validation; other dated historical events retain their own source identities.",
-  "scope": "Prospective selected-strata support enforcement, source-backed analytical scenarios, complete independent contracts for five additional figures and Table S29, complete-tier materialization and local pre-publication reconstruction. Original benchmark artifact availability remains a separate requirement.",
-  "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+  "base_commit": "89dedcbe1432b4e9580fa4cabcd0923f9f28f6c6",
+  "base_commit_note": "Pull request #6 revision preceding this runtime change. The checks below were executed on the working tree that changes the runtime to the fingerprint in source_sha256; the hosted workflows identify their own exact commit.",
+  "scope": "Supplementary Algorithm S4 in the runtime: the selection's studentized maximum runs over the feasible family Q_feas of main Eq. (18) and every selection decision records the family; records sealed by earlier runtimes replay exactly with every executed configuration. Display contracts, the destination tree and the scientific-consistency audit are outside the runtime and are identified by the Git revision. Original benchmark observations were not available and were not reproduced.",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
   "source_fingerprint_scope": "cross_morse/ and runtime Python entry points; the experiment executor, campaign audit, paper tooling, documentation and tests are additionally identified by the Git revision and release checksums.",
   "software_checks": {
-    "status": "COMPLETED_LOCAL_VALIDATION",
-    "targeted_qualification_tests": {
+    "status": "PASS",
+    "no_torch_tests": {
+      "command": "make test-no-torch (interpreter without PyTorch)",
       "status": "PASS",
-      "tests_run": 52,
-      "passed": 52,
-      "skipped": 0,
-      "scope": "Selected-strata helper, actual nested selection, pipeline guardrails and protocol displays."
+      "tests_run": 1614,
+      "passed": 1559,
+      "skipped": 55,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 437.614,
+      "skip_scope": "PyTorch-dependent cases; exercised by the hosted quality workflow"
     },
-    "environment": {
-      "status": "PINNED_PACKAGES_MATCH",
-      "package_count": 53,
-      "differences": [],
-      "python": "3.12.14",
-      "observed_python": "3.12.14",
-      "python_patch_matches": true,
-      "scope": "package versions and Python major/minor/platform; not wheel hashes, native-library identity or GPU compatibility"
-    },
-    "thread_limits": {
-      "OMP_NUM_THREADS": 2,
-      "OPENBLAS_NUM_THREADS": 2,
-      "MKL_NUM_THREADS": 2
-    },
-    "current_source_lifecycle": {
+    "selection_replay_equivalence": {
       "status": "PASS",
-      "dataset": "Peptides-func",
-      "profile": "smoke",
-      "scientific_run": false,
-      "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
-      "selection_support": {
-        "data_role": "D_explore model-fit trajectories",
-        "definition": "fraction of registered strata with qualified A0; Supplementary Table S35, C28",
-        "enforced": false,
-        "failed_strata": [],
-        "missing_cells": [],
-        "nominal_action": 0,
-        "observed_fraction": 1.0,
-        "passed": true,
-        "profile": "full",
-        "qualified_strata": [
-          2,
-          5
-        ],
-        "registered_strata": [
-          2,
-          5
-        ],
-        "required_fraction": 1.0,
-        "schema": "cross-morse-selected-strata-support-1",
-        "support_source": "fit/full/audit.json#/support"
-      },
-      "checkpoint_reexecution": {
-        "status": "PASS",
-        "models": [
-          {
-            "predictor": "q0",
-            "agrees": true,
-            "max_absolute_probability_error": 0.0,
-            "threshold_disagreements": 0
-          },
-          {
-            "predictor": "qN",
-            "agrees": true,
-            "max_absolute_probability_error": 0.0,
-            "threshold_disagreements": 0
-          },
-          {
-            "predictor": "qC",
-            "agrees": true,
-            "max_absolute_probability_error": 0.0,
-            "threshold_disagreements": 0
-          },
-          {
-            "predictor": "qD",
-            "agrees": true,
-            "max_absolute_probability_error": 0.0,
-            "threshold_disagreements": 0
-          }
-        ]
-      },
-      "scope": "Fresh synthetic eight-stage lifecycle, sealed new support audit and checkpoint reexecution; not paper evidence."
+      "command": "python -m unittest tests.test_statistics.AlgorithmS4FamilyTests",
+      "scope": "With every executed configuration, the current nested_selection reproduces the complete selection record of each preserved runtime (examples/source_snapshots: b5005fc5, 0aba361b, d9687652) on identical inputs, including an execution failure; with Q_feas an infeasible noisy configuration no longer widens the radius."
     },
-    "previous_runtime_compatibility": {
+    "bundled_runs": {
       "status": "PASS",
-      "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
-      "scientific_run": false,
-      "selection_replayed": true,
-      "confirmation_replayed": true,
-      "admission_replayed": true,
-      "scope": "Fresh synthetic run generated with preserved previous runtime and replayed through current public CLI under exact original source; no retrospective selected-strata record."
+      "command": "make verify (fingerprint check excepted until this record) and make example-paper-check",
+      "scope": "The two bundled runs, sealed before the change, replay their selections with every executed configuration."
     },
-    "preflight_targeted_tests": {
-      "status": "PASS",
-      "tests_run": 47,
-      "duration_seconds": 35.4,
-      "scope": "Local preflight, source snapshots, one-command materialization and display gates; fixture-based software validation.",
-      "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
-    },
-    "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
-    "preflight_public_cli": {
-      "status": "EXPECTED_INCOMPLETE",
-      "program_exit_code": 1,
-      "make_exit_code": 2,
-      "verdict": "INCOMPLETE",
-      "invalid_issues": 0,
-      "public_availability_verified": false,
-      "scope": "Actual command with unfilled canonical template; renders available source-based displays and names every original input requirement.",
-      "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
-      "builder_sources_unchanged": true
-    },
-    "repository_verification": {
-      "status": "PASS",
-      "command": "make verify verify-manifest",
-      "scope": "Source identities, generated views, theoretical/supplementary checks, example and release contracts.",
-      "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
-      "release_manifest_files": 1269
-    },
-    "portable_archive_regressions": {
-      "status": "PASS",
-      "independent_tests_run": 33,
-      "scope": "Independent combined review of portable archive, local preflight and historical source resolution.",
-      "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
+    "pytorch_suite_and_smoke_lifecycle": {
+      "status": "HOSTED_CI",
+      "scope": "PyTorch is not installed in this environment. The full suite and one synthetic end-to-end lifecycle on this runtime execute in the hosted quality workflow for the exact commit (hosted_ci); this record does not predict their outcome."
     },
     "source_only_reconstruction": {
+      "date": "2026-11-09",
+      "command": "make paper-offline (scripts/reconstruct_paper.py --offline --tier analysis)",
+      "status": "INCOMPLETE",
       "program_exit_code": 1,
+      "expected": "Exit 1 is the expected result while measured outputs are unpublished.",
       "registered_displays": 90,
       "rendered_displays": 21,
       "complete_content_and_comparison_coverage": 20,
       "comparison_counts": {
-        "exact": 482,
-        "differs": 15,
+        "exact": 487,
+        "differs": 10,
         "missing": 3,
         "no_reference": 0,
         "not_comparable": 0
       },
-      "generator_errors": {},
-      "module_errors": {},
-      "scope": "No measured archives supplied; protocol and analytical reconstruction only.",
-      "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
-      "requested_tier": "complete"
-    },
-    "full_cpu_local": {
-      "status": "COMPLETED_WITH_EXPECTATION_FIX",
-      "tests_run": 1764,
-      "passed_initially": 1761,
-      "skipped": 2,
-      "failed_initially": 1,
-      "duration_seconds": 671.957,
-      "failure": "An existing Makefile test expected the old offline command without --tier. The implementation correctly passes the requested tier.",
-      "resolution": "Updated the expectation and explicitly checked both analysis and complete offline modes. The test_make_workflows module passed after the fix. Runtime and reconstruction code did not change.",
-      "final_integrated_gate": "Full suite on the proposed Git commit in GitHub Actions.",
-      "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922",
-      "corrected_module": {
-        "status": "PASS",
-        "tests_run": 12,
-        "duration_seconds": 0.759
-      }
-    },
-    "reviewer_workflow": {
-      "status": "PASS_WITH_ADVISORY",
-      "verdict": "SOFTWARE-ONLY",
-      "pass": 16,
-      "warn": 1,
-      "fail": 0,
-      "warning_scope": "Printed manuscript decision consistency remains advisory; no benchmark-evidence certification.",
-      "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
-    },
-    "numeric_initial_attempt": {
-      "status": "INTERRUPTED_WITHOUT_SUMMARY",
-      "duration_seconds": 380.205,
-      "last_test": "test_parallel_pack_attempts_do_not_replace_each_others_archive",
-      "isolated_test": {
-        "status": "PASS",
-        "tests_run": 1,
-        "duration_seconds": 3.158
-      },
-      "resolution": "The isolated test passed; the complete sequential numeric rerun passed 1,471 tests with 55 expected skips. No success is inferred from this interrupted attempt.",
-      "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
-    },
-    "source_inventory_scope": "Final reconstruction/runtime sources and paper registries, before publication; documentation and tests are identified by the containing Git revision and release manifest.",
-    "numeric_local": {
-      "status": "PASS",
-      "tests_run": 1471,
-      "passed": 1416,
-      "skipped": 55,
-      "duration_seconds": 360.536,
-      "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922",
-      "source_unchanged_during_run": true,
-      "scope": "Complete numeric suite before the final five-figure reference extension. Final changed display modules and reference gates are covered by final_display_integration; the containing Git revision is also checked in hosted CI."
-    },
-    "final_display_integration": {
-      "status": "PASS",
-      "tests_run": 268,
-      "passed": 268,
-      "skipped": 0,
-      "duration_seconds": 66.472,
-      "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
-      "source_unchanged_during_run": true,
-      "modules": [
-        "test_displays_main_paper",
-        "test_displays_run_audits",
-        "test_displays_records_campaigns",
-        "test_displays_protocol_tables",
-        "test_displays_analytical",
-        "test_displays_experiments",
-        "test_display_integrity",
-        "test_paper_registry",
-        "test_textual_source_references",
-        "test_paper_support_report",
-        "test_supplement_build",
-        "test_make_workflows"
-      ],
-      "scope": "All six display modules, display integrity, PDF-bound registry/reference checks, support report, supplement build and Make workflows after the final figure extension."
+      "artifacts_awaiting_publication": 37,
+      "scope": "Executed on the revision that generates five protocol-table cells of Tables S1, S3 and S8 in the printed wording (paper/build/displays/protocol_tables.py); the runtime is unchanged. No measured archives supplied: protocol and analytical reconstruction only. The ten differences and three missing fields are items K4, K6 and K8 of docs/CONSISTENCY.md."
     }
   },
-  "preserved_scientific_inputs": {
-    "comparison_base": "ba44e9a5d13cce6749514e46937dcc4cbfef5f53",
-    "runtime_modified": true,
-    "runtime_changes": [
-      "cross_morse/qualification.py",
-      "cross_morse/pipeline.py"
-    ],
-    "prior_runtime_snapshot": "examples/source_snapshots/0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
-    "unchanged_trees": [
-      "configs/",
-      "examples/runs/",
-      "examples/source_snapshots/b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e/"
-    ],
-    "reported_numerical_targets_changed": false,
-    "existing_numerical_constants_changed": false
+  "live_zenodo_operations": "not performed",
+  "local_container_execution": {
+    "performed": false,
+    "scope": "This revision is verified by the hosted container workflow."
   },
-  "manuscript_review": {
-    "reviewed_by": "ChatGPT: AI-assisted contextual review requested by author",
-    "main_sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
-    "supplementary_sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
-    "local_pdf_bytes_verified": true,
-    "reviewed_registry_groups": 34,
-    "numbered_displays": 90,
-    "numerical_targets_changed": false,
-    "personal_author_cell_review_attested": false,
-    "review": "paper/transcription_check.json",
-    "notes": "paper/MANUSCRIPT_REVIEW.md",
-    "inventory": "paper/display_manifest.json",
-    "additional_printed_reference_groups": 29,
-    "current_figure_review": {
-      "main_pages": [
-        12
-      ],
-      "supplementary_pages": [
-        18,
-        19,
-        31,
-        32,
-        33,
-        34,
-        36,
-        37
-      ],
-      "scope": "Declared analytical ESS/target grids and cost ranges; complete independent contracts for S1, S5, S8, S10, S19 and Table S29. Three additional Figure S4 method points require original sources. No measured coordinates were inferred from pixels and no new author certification."
-    },
-    "reference_contract_extension": {
-      "added_groups": 8,
-      "added_required_leaves": 540,
-      "latest_groups": {
-        "Figure S1": 135,
-        "Figure S5": 57,
-        "Figure S8": 12,
-        "Figure S10": 52,
-        "Figure S19": 138,
-        "Table S29": 36
-      },
-      "previously_added_groups": {
-        "Table S28": 38,
-        "Table S28b": 72
-      },
-      "dedicated_quantitative_figure_contracts": [
-        "S1",
-        "S5",
-        "S8",
-        "S10",
-        "S11",
-        "S19"
-      ],
-      "remaining_quantitative_figure_contracts": 19,
-      "validation_scope": "Explicitly synthetic full-framework fixtures, omitted-comparison and actual-input perturbation tests. These do not establish reproduction of original measurements."
-    }
-  },
-  "scientific_audit": {
-    "status": "INCOMPLETE_OR_INVALID",
-    "publication_ready": false,
-    "manuscript_documents": {
-      "status": "PASS",
-      "pdf_bytes_verified": {
-        "main": true,
-        "supplementary": true
-      },
-      "pdf_sha256": {
-        "main": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
-        "supplementary": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"
-      }
-    },
-    "software_validation": [
-      {
-        "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
-        "status": "PASS",
-        "evidence_kind": "synthetic_software_validation",
-        "counts_toward_official_completeness": false
-      },
-      {
-        "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
-        "status": "PASS",
-        "evidence_kind": "synthetic_software_validation",
-        "counts_toward_official_completeness": false
-      },
-      {
-        "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
-        "status": "PASS",
-        "evidence_kind": "synthetic_software_validation",
-        "counts_toward_official_completeness": false
-      }
+  "hosted_ci": {
+    "status": "REVISION_SCOPED",
+    "quality_workflow": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
+    "container_workflow": "https://github.com/VKHS/CR-9/actions/workflows/container.yml",
+    "required_checks": [
+      "Source and example verification (no downloads or training)",
+      "Full test suite and one synthetic end-to-end run (CPU PyTorch)",
+      "Build the CPU image and verify the source, tests and offline review"
     ],
-    "original_measurements_added": false,
-    "blocker_categories": [
-      "budget_campaign_missing",
-      "confirmation_campaign_missing",
-      "manuscript_numbers_unlinked",
-      "missing_auxiliary_set",
-      "missing_official_archive"
-    ],
-    "scope": "Supplied PDF byte identities and software examples checked; original benchmark archives and campaign evidence remain required."
+    "scope": "Results are attached to the exact Git revision in GitHub Actions and the upgrade pull request. This local record does not predict hosted success or reuse the previous revision's checks."
   },
   "smoke_runs": [
     {
@@ -416,111 +148,7 @@
       "predictor_comparisons": 8
     }
   },
-  "reproduction_launcher_validation": {
-    "date": "2026-11-06",
-    "base_commit": "fa9691d8f232cd3763bc1850ab9ff40fcafe7a46",
-    "validated_tree": "the commit that adds this record",
-    "scope": "Reproduction launcher run_cross_morse.sh, scripts/reproduction.py, the code-release scope of the generated views and the hpc/ drivers' use of the launcher's site settings. Slurm, the GPU and the Python runtime of a job are simulated; no benchmark data, training or GPU execution.",
-    "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
-    "runtime_unchanged": true,
-    "environment": {
-      "python": "3.13.18",
-      "numpy": "2.5.3",
-      "scipy": "1.18.1",
-      "matplotlib": "3.11.2",
-      "pytorch": "absent",
-      "scope": "development sandbox, not the recorded CPU environment; PyTorch-dependent tests were not executed in this revision"
-    },
-    "checks": {
-      "package_verification": {
-        "command": "make verify",
-        "status": "PASS",
-        "source_files": 1121,
-        "registered_arithmetic_checks": 798,
-        "analytical_statements": {
-          "PASS": 91,
-          "FAIL": 0,
-          "INFO": 4,
-          "battery": "quick, seed 20261104"
-        },
-        "supplementary_arithmetic": {
-          "PASS": 657,
-          "ADVISORY": 5,
-          "FAIL": 0,
-          "INFO": 26
-        }
-      },
-      "no_torch_tests": {
-        "command": "make test-no-torch",
-        "status": "PASS",
-        "tests_run": 777,
-        "passed": 762,
-        "skipped": 15,
-        "failures": 0,
-        "errors": 0,
-        "seconds": 115.847
-      },
-      "launcher_tests": {
-        "modules": [
-          "tests/test_reproduction_launcher.py",
-          "tests/test_reproduction.py"
-        ],
-        "tests": 19,
-        "status": "PASS",
-        "simulated_cluster": "stub sbatch, squeue, sacct, scontrol (requeue, node exclusion), sinfo, module and nvidia-smi; a runner stub that writes complete runs, checkpoints, fails or returns without its artifact",
-        "scenarios": [
-          "check: runtime identity, configurations and the job plan with the paper's GPU-hours; nothing written or submitted; an empty account is refused",
-          "a modified runtime is refused by check and reproduce unless CM_ALLOW_SOURCE_CHANGE=1, which the suite manifest records",
-          "reproduce: numbered suite, frozen run sources, the Roman-empire campaign and the setup -> runs (afterok) -> report (afterany) job graph with its job table",
-          "a dataset wrapper reproduces only its dataset",
-          "setup, single runs and the ten Roman-empire array tasks executed; status, report, GPU-hours from accounting, run registry, live log and a redacted results ZIP",
-          "checkpointed requeue of the same job at the time limit; a continuation job where requeue is refused; continuation budget exhausted (exit 75, TIME_BUDGET)",
-          "GPU or driver failure: node excluded and job requeued; GPU health failure",
-          "runtime failure and missing artifact (exit 74)",
-          "report deferred while runs are queued; reproduce resume skips complete and queued runs",
-          "site-env prints the effective settings that the hpc/ drivers read; help and usage",
-          "scripts/reproduction.py: fingerprint, compute reference, dataset selection, run state, scheduler parsing, suite creation, report beside the paper, tables rebuilt from a suite, refused comparison reported, status"
-        ]
-      },
-      "release_audit": {
-        "command": "make audit",
-        "status": "PASS"
-      },
-      "scientific_audit": {
-        "command": "make scientific-audit",
-        "status": "INCOMPLETE_OR_INVALID",
-        "blockers": 26,
-        "unchanged_from": "scientific_audit above"
-      }
-    },
-    "preserved_scientific_inputs": {
-      "comparison_base": "fa9691d8f232cd3763bc1850ab9ff40fcafe7a46",
-      "files_compared": 734,
-      "files_changed": 2,
-      "changed": [
-        "configs/arrhenius-site.env.example",
-        "configs/public.env.example"
-      ],
-      "changed_scope": "site profiles of the launcher; no configuration, runtime, example or registry file changed"
-    }
-  },
-  "live_zenodo_operations": "not performed",
-  "local_container_execution": {
-    "performed": false,
-    "scope": "This revision uses the recorded local CPU environment and will be verified by the hosted container workflow."
-  },
-  "hosted_ci": {
-    "status": "REVISION_SCOPED",
-    "quality_workflow": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
-    "container_workflow": "https://github.com/VKHS/CR-9/actions/workflows/container.yml",
-    "required_checks": [
-      "Source and example verification (no downloads or training)",
-      "Full test suite and one synthetic end-to-end run (CPU PyTorch)",
-      "Build the CPU image and verify the source, tests and offline review"
-    ],
-    "scope": "Results are attached to the exact Git revision in GitHub Actions and the upgrade pull request. This local record does not predict hosted success or reuse the previous revision's checks."
-  },
-  "validation_record_updated": "2026-11-08",
+  "validation_record_updated": "2026-11-09",
   "availability_reconstruction_validation": {
     "date": "2026-11-07",
     "base_commit": "5c1399eabb64f58926e7a28d171c4c2cfb771b38",
@@ -1005,37 +633,20 @@
     }
   },
   "prior_runtime_validation": {
-    "date": "2026-11-06",
-    "base_commit": "89bbd136625d581027a84755cef0715cf2231a5f",
-    "base_commit_note": "Development revision that preceded the published history; the published history begins at fa9691d8f232cd3763bc1850ab9ff40fcafe7a46. The checks below were executed on that revision with the runtime fingerprint recorded in source_sha256.",
-    "scope": "Current-source software, mathematics, printed arithmetic, source correspondence and evidence-import validation. Original benchmark observations were not available and were not reproduced.",
-    "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+    "date": "2026-11-08",
+    "base_commit": "ba44e9a5d13cce6749514e46937dcc4cbfef5f53",
+    "base_commit_note": "Current-source qualification and pre-publication reconstruction upgrade based on the published main revision. The previous top-level event is preserved under prior_runtime_validation; other dated historical events retain their own source identities.",
+    "scope": "Prospective selected-strata support enforcement, source-backed analytical scenarios, complete independent contracts for five additional figures and Table S29, complete-tier materialization and local pre-publication reconstruction. Original benchmark artifact availability remains a separate requirement.",
+    "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
     "source_fingerprint_scope": "cross_morse/ and runtime Python entry points; the experiment executor, campaign audit, paper tooling, documentation and tests are additionally identified by the Git revision and release checksums.",
     "software_checks": {
-      "status": "PASS",
-      "unit_tests": {
-        "command": "make test (recorded CPU environment)",
+      "status": "COMPLETED_LOCAL_VALIDATION",
+      "targeted_qualification_tests": {
         "status": "PASS",
-        "tests_run": 1051,
-        "passed": 1050,
-        "skipped": 1,
-        "failures": 0,
-        "errors": 0,
-        "seconds": 135.021
-      },
-      "no_torch_tests": {
-        "command": "make test-no-torch (interpreter without PyTorch)",
-        "status": "PASS",
-        "tests_run": 758,
-        "passed": 743,
-        "skipped": 15,
-        "failures": 0,
-        "errors": 0,
-        "seconds": 114.353
-      },
-      "skip_scope": {
-        "full_suite": "Private cluster profile excluded from the public package",
-        "no_torch": "PyTorch-dependent cases; exercised separately by the full CPU suite"
+        "tests_run": 52,
+        "passed": 52,
+        "skipped": 0,
+        "scope": "Selected-strata helper, actual nested selection, pipeline guardrails and protocol displays."
       },
       "environment": {
         "status": "PINNED_PACKAGES_MATCH",
@@ -1051,66 +662,213 @@
         "OPENBLAS_NUM_THREADS": 2,
         "MKL_NUM_THREADS": 2
       },
-      "package_verification": {
-        "command": "make verify",
+      "current_source_lifecycle": {
         "status": "PASS",
-        "source_files": 1118,
-        "registered_arithmetic_checks": 798
-      },
-      "analytical_statements": {
-        "command": "make theory-full",
-        "counts": {
-          "PASS": 91,
-          "FAIL": 0,
-          "ADVISORY": 0,
-          "INFO": 4
+        "dataset": "Peptides-func",
+        "profile": "smoke",
+        "scientific_run": false,
+        "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+        "selection_support": {
+          "data_role": "D_explore model-fit trajectories",
+          "definition": "fraction of registered strata with qualified A0; Supplementary Table S35, C28",
+          "enforced": false,
+          "failed_strata": [],
+          "missing_cells": [],
+          "nominal_action": 0,
+          "observed_fraction": 1.0,
+          "passed": true,
+          "profile": "full",
+          "qualified_strata": [
+            2,
+            5
+          ],
+          "registered_strata": [
+            2,
+            5
+          ],
+          "required_fraction": 1.0,
+          "schema": "cross-morse-selected-strata-support-1",
+          "support_source": "fit/full/audit.json#/support"
         },
-        "statement_groups": 25,
-        "check_generators": 43,
-        "seed": 20261104,
-        "scope": "Seeded numerical checks under stated hypotheses, not a formal proof"
-      },
-      "supplementary_arithmetic": {
-        "command": "make si-report",
-        "counts": {
-          "PASS": 657,
-          "ADVISORY": 5,
-          "FAIL": 0,
-          "INFO": 26
+        "checkpoint_reexecution": {
+          "status": "PASS",
+          "models": [
+            {
+              "predictor": "q0",
+              "agrees": true,
+              "max_absolute_probability_error": 0.0,
+              "threshold_disagreements": 0
+            },
+            {
+              "predictor": "qN",
+              "agrees": true,
+              "max_absolute_probability_error": 0.0,
+              "threshold_disagreements": 0
+            },
+            {
+              "predictor": "qC",
+              "agrees": true,
+              "max_absolute_probability_error": 0.0,
+              "threshold_disagreements": 0
+            },
+            {
+              "predictor": "qD",
+              "agrees": true,
+              "max_absolute_probability_error": 0.0,
+              "threshold_disagreements": 0
+            }
+          ]
         },
-        "scope": "Relationships among printed inputs; advisory interpretations and rounding are retained"
+        "scope": "Fresh synthetic eight-stage lifecycle, sealed new support audit and checkpoint reexecution; not paper evidence."
       },
-      "model_inventory": {
-        "command": "make model-inventory",
-        "profiles": 7,
-        "source_records_match": true,
-        "table_S5_counts_agree": true,
-        "scope": "Full-profile model instantiation and parameter counts; not historical checkpoint equivalence"
+      "previous_runtime_compatibility": {
+        "status": "PASS",
+        "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+        "scientific_run": false,
+        "selection_replayed": true,
+        "confirmation_replayed": true,
+        "admission_replayed": true,
+        "scope": "Fresh synthetic run generated with preserved previous runtime and replayed through current public CLI under exact original source; no retrospective selected-strata record."
       },
-      "experiment_execution": {
-        "tests": 126,
+      "preflight_targeted_tests": {
+        "status": "PASS",
+        "tests_run": 47,
+        "duration_seconds": 35.4,
+        "scope": "Local preflight, source snapshots, one-command materialization and display gates; fixture-based software validation.",
+        "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
+      },
+      "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
+      "preflight_public_cli": {
+        "status": "EXPECTED_INCOMPLETE",
+        "program_exit_code": 1,
+        "make_exit_code": 2,
+        "verdict": "INCOMPLETE",
+        "invalid_issues": 0,
+        "public_availability_verified": false,
+        "scope": "Actual command with unfilled canonical template; renders available source-based displays and names every original input requirement.",
+        "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
+        "builder_sources_unchanged": true
+      },
+      "repository_verification": {
+        "status": "PASS",
+        "command": "make verify verify-manifest",
+        "scope": "Source identities, generated views, theoretical/supplementary checks, example and release contracts.",
+        "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
+        "release_manifest_files": 1269
+      },
+      "portable_archive_regressions": {
+        "status": "PASS",
+        "independent_tests_run": 33,
+        "scope": "Independent combined review of portable archive, local preflight and historical source resolution.",
+        "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
+      },
+      "source_only_reconstruction": {
+        "program_exit_code": 1,
+        "registered_displays": 90,
+        "rendered_displays": 21,
+        "complete_content_and_comparison_coverage": 20,
+        "comparison_counts": {
+          "exact": 482,
+          "differs": 15,
+          "missing": 3,
+          "no_reference": 0,
+          "not_comparable": 0
+        },
+        "generator_errors": {},
+        "module_errors": {},
+        "scope": "No measured archives supplied; protocol and analytical reconstruction only.",
+        "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
+        "requested_tier": "complete"
+      },
+      "full_cpu_local": {
+        "status": "COMPLETED_WITH_EXPECTATION_FIX",
+        "tests_run": 1764,
+        "passed_initially": 1761,
+        "skipped": 2,
+        "failed_initially": 1,
+        "duration_seconds": 671.957,
+        "failure": "An existing Makefile test expected the old offline command without --tier. The implementation correctly passes the requested tier.",
+        "resolution": "Updated the expectation and explicitly checked both analysis and complete offline modes. The test_make_workflows module passed after the fix. Runtime and reconstruction code did not change.",
+        "final_integrated_gate": "Full suite on the proposed Git commit in GitHub Actions.",
+        "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922",
+        "corrected_module": {
+          "status": "PASS",
+          "tests_run": 12,
+          "duration_seconds": 0.759
+        }
+      },
+      "reviewer_workflow": {
+        "status": "PASS_WITH_ADVISORY",
+        "verdict": "SOFTWARE-ONLY",
+        "pass": 16,
+        "warn": 1,
+        "fail": 0,
+        "warning_scope": "Printed manuscript decision consistency remains advisory; no benchmark-evidence certification.",
+        "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
+      },
+      "numeric_initial_attempt": {
+        "status": "INTERRUPTED_WITHOUT_SUMMARY",
+        "duration_seconds": 380.205,
+        "last_test": "test_parallel_pack_attempts_do_not_replace_each_others_archive",
+        "isolated_test": {
+          "status": "PASS",
+          "tests_run": 1,
+          "duration_seconds": 3.158
+        },
+        "resolution": "The isolated test passed; the complete sequential numeric rerun passed 1,471 tests with 55 expected skips. No success is inferred from this interrupted attempt.",
+        "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922"
+      },
+      "source_inventory_scope": "Final reconstruction/runtime sources and paper registries, before publication; documentation and tests are identified by the containing Git revision and release manifest.",
+      "numeric_local": {
+        "status": "PASS",
+        "tests_run": 1471,
+        "passed": 1416,
+        "skipped": 55,
+        "duration_seconds": 360.536,
+        "source_inventory_sha256": "e4c2e2d642956a250d6fc2b6a82afff16660bba68d6bdbf8a8f3e2184152b922",
+        "source_unchanged_during_run": true,
+        "scope": "Complete numeric suite before the final five-figure reference extension. Final changed display modules and reference gates are covered by final_display_integration; the containing Git revision is also checked in hosted CI."
+      },
+      "final_display_integration": {
+        "status": "PASS",
+        "tests_run": 268,
+        "passed": 268,
         "skipped": 0,
-        "scope": "Includes actual trained synthetic E6 execution, immutable operation-bound replay, exact-cap comparator fallback and infeasibility; no benchmark performance inference"
-      },
-      "diagram_checks": {
-        "figures": 7,
-        "status": "PASS",
-        "scope": "SVG and PNG-source fingerprints; revised evidence-chain layout visually inspected"
+        "duration_seconds": 66.472,
+        "source_inventory_sha256": "fc9fe04754e915c006625874adc80817522eef4f420346afa266eace3c51da1a",
+        "source_unchanged_during_run": true,
+        "modules": [
+          "test_displays_main_paper",
+          "test_displays_run_audits",
+          "test_displays_records_campaigns",
+          "test_displays_protocol_tables",
+          "test_displays_analytical",
+          "test_displays_experiments",
+          "test_display_integrity",
+          "test_paper_registry",
+          "test_textual_source_references",
+          "test_paper_support_report",
+          "test_supplement_build",
+          "test_make_workflows"
+        ],
+        "scope": "All six display modules, display integrity, PDF-bound registry/reference checks, support report, supplement build and Make workflows after the final figure extension."
       }
     },
     "preserved_scientific_inputs": {
-      "comparison_base": "89bbd136625d581027a84755cef0715cf2231a5f",
-      "files_compared": 734,
-      "files_changed": 0,
-      "paths": [
-        "cross_morse/",
-        "configs/",
-        "examples/",
-        "source_snapshots/",
-        "paper/reported_results.json",
-        "paper/registered_constants.json"
+      "comparison_base": "ba44e9a5d13cce6749514e46937dcc4cbfef5f53",
+      "runtime_modified": true,
+      "runtime_changes": [
+        "cross_morse/qualification.py",
+        "cross_morse/pipeline.py"
       ],
-      "experiment_executor_and_auditors_changed": true
+      "prior_runtime_snapshot": "examples/source_snapshots/0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+      "unchanged_trees": [
+        "configs/",
+        "examples/runs/",
+        "examples/source_snapshots/b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e/"
+      ],
+      "reported_numerical_targets_changed": false,
+      "existing_numerical_constants_changed": false
     },
     "manuscript_review": {
       "reviewed_by": "ChatGPT: AI-assisted contextual review requested by author",
@@ -1123,30 +881,345 @@
       "personal_author_cell_review_attested": false,
       "review": "paper/transcription_check.json",
       "notes": "paper/MANUSCRIPT_REVIEW.md",
-      "inventory": "paper/display_manifest.json"
+      "inventory": "paper/display_manifest.json",
+      "additional_printed_reference_groups": 29,
+      "current_figure_review": {
+        "main_pages": [
+          12
+        ],
+        "supplementary_pages": [
+          18,
+          19,
+          31,
+          32,
+          33,
+          34,
+          36,
+          37
+        ],
+        "scope": "Declared analytical ESS/target grids and cost ranges; complete independent contracts for S1, S5, S8, S10, S19 and Table S29. Three additional Figure S4 method points require original sources. No measured coordinates were inferred from pixels and no new author certification."
+      },
+      "reference_contract_extension": {
+        "added_groups": 8,
+        "added_required_leaves": 540,
+        "latest_groups": {
+          "Figure S1": 135,
+          "Figure S5": 57,
+          "Figure S8": 12,
+          "Figure S10": 52,
+          "Figure S19": 138,
+          "Table S29": 36
+        },
+        "previously_added_groups": {
+          "Table S28": 38,
+          "Table S28b": 72
+        },
+        "dedicated_quantitative_figure_contracts": [
+          "S1",
+          "S5",
+          "S8",
+          "S10",
+          "S11",
+          "S19"
+        ],
+        "remaining_quantitative_figure_contracts": 19,
+        "validation_scope": "Explicitly synthetic full-framework fixtures, omitted-comparison and actual-input perturbation tests. These do not establish reproduction of original measurements."
+      }
     },
     "scientific_audit": {
       "status": "INCOMPLETE_OR_INVALID",
-      "expected_exit_code": 1,
-      "blockers": 26,
-      "blocker_counts": {
-        "budget_campaign_missing": 1,
-        "confirmation_campaign_missing": 1,
-        "manuscript_numbers_unlinked": 7,
-        "missing_auxiliary_set": 10,
-        "missing_official_archive": 7
-      },
-      "official_archives": 0,
-      "required_official_archives": 7,
-      "auxiliary_record_sets": 0,
-      "required_auxiliary_record_sets": 10,
-      "original_measurements_added": false,
-      "confirmation_scope": "Original unrounded heterogeneous test outputs, paired means, joint nine-test Holm decisions and native-run links; original test programs are preserved and hashed but their raw P values are not recomputed by this gate.",
       "publication_ready": false,
-      "release_scope": "This release distributes code and regenerates its results (release/release_scope.json: result_distribution = regenerate). The gate's blockers are the registrations of a release that publishes archives; run_cross_morse.sh reproduce regenerates the lifecycle runs, and its report compares them with the paper."
+      "manuscript_documents": {
+        "status": "PASS",
+        "pdf_bytes_verified": {
+          "main": true,
+          "supplementary": true
+        },
+        "pdf_sha256": {
+          "main": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+          "supplementary": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e"
+        }
+      },
+      "software_validation": [
+        {
+          "source_sha256": "d96876520ad80478dddcc71f8fdc1c1f277b7734da87681f047f4192f037c651",
+          "status": "PASS",
+          "evidence_kind": "synthetic_software_validation",
+          "counts_toward_official_completeness": false
+        },
+        {
+          "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+          "status": "PASS",
+          "evidence_kind": "synthetic_software_validation",
+          "counts_toward_official_completeness": false
+        },
+        {
+          "source_sha256": "b5005fc53d31dfcb430c3b8f82a1fcbb7f97c2e8cb41eefbcb4a1f87e7a4bb5e",
+          "status": "PASS",
+          "evidence_kind": "synthetic_software_validation",
+          "counts_toward_official_completeness": false
+        }
+      ],
+      "original_measurements_added": false,
+      "blocker_categories": [
+        "budget_campaign_missing",
+        "confirmation_campaign_missing",
+        "manuscript_numbers_unlinked",
+        "missing_auxiliary_set",
+        "missing_official_archive"
+      ],
+      "scope": "Supplied PDF byte identities and software examples checked; original benchmark archives and campaign evidence remain required."
+    },
+    "reproduction_launcher_validation": {
+      "date": "2026-11-06",
+      "base_commit": "fa9691d8f232cd3763bc1850ab9ff40fcafe7a46",
+      "validated_tree": "the commit that adds this record",
+      "scope": "Reproduction launcher run_cross_morse.sh, scripts/reproduction.py, the code-release scope of the generated views and the hpc/ drivers' use of the launcher's site settings. Slurm, the GPU and the Python runtime of a job are simulated; no benchmark data, training or GPU execution.",
+      "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+      "runtime_unchanged": true,
+      "environment": {
+        "python": "3.13.18",
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "matplotlib": "3.11.2",
+        "pytorch": "absent",
+        "scope": "development sandbox, not the recorded CPU environment; PyTorch-dependent tests were not executed in this revision"
+      },
+      "checks": {
+        "package_verification": {
+          "command": "make verify",
+          "status": "PASS",
+          "source_files": 1121,
+          "registered_arithmetic_checks": 798,
+          "analytical_statements": {
+            "PASS": 91,
+            "FAIL": 0,
+            "INFO": 4,
+            "battery": "quick, seed 20261104"
+          },
+          "supplementary_arithmetic": {
+            "PASS": 657,
+            "ADVISORY": 5,
+            "FAIL": 0,
+            "INFO": 26
+          }
+        },
+        "no_torch_tests": {
+          "command": "make test-no-torch",
+          "status": "PASS",
+          "tests_run": 777,
+          "passed": 762,
+          "skipped": 15,
+          "failures": 0,
+          "errors": 0,
+          "seconds": 115.847
+        },
+        "launcher_tests": {
+          "modules": [
+            "tests/test_reproduction_launcher.py",
+            "tests/test_reproduction.py"
+          ],
+          "tests": 19,
+          "status": "PASS",
+          "simulated_cluster": "stub sbatch, squeue, sacct, scontrol (requeue, node exclusion), sinfo, module and nvidia-smi; a runner stub that writes complete runs, checkpoints, fails or returns without its artifact",
+          "scenarios": [
+            "check: runtime identity, configurations and the job plan with the paper's GPU-hours; nothing written or submitted; an empty account is refused",
+            "a modified runtime is refused by check and reproduce unless CM_ALLOW_SOURCE_CHANGE=1, which the suite manifest records",
+            "reproduce: numbered suite, frozen run sources, the Roman-empire campaign and the setup -> runs (afterok) -> report (afterany) job graph with its job table",
+            "a dataset wrapper reproduces only its dataset",
+            "setup, single runs and the ten Roman-empire array tasks executed; status, report, GPU-hours from accounting, run registry, live log and a redacted results ZIP",
+            "checkpointed requeue of the same job at the time limit; a continuation job where requeue is refused; continuation budget exhausted (exit 75, TIME_BUDGET)",
+            "GPU or driver failure: node excluded and job requeued; GPU health failure",
+            "runtime failure and missing artifact (exit 74)",
+            "report deferred while runs are queued; reproduce resume skips complete and queued runs",
+            "site-env prints the effective settings that the hpc/ drivers read; help and usage",
+            "scripts/reproduction.py: fingerprint, compute reference, dataset selection, run state, scheduler parsing, suite creation, report beside the paper, tables rebuilt from a suite, refused comparison reported, status"
+          ]
+        },
+        "release_audit": {
+          "command": "make audit",
+          "status": "PASS"
+        },
+        "scientific_audit": {
+          "command": "make scientific-audit",
+          "status": "INCOMPLETE_OR_INVALID",
+          "blockers": 26,
+          "unchanged_from": "scientific_audit above"
+        }
+      },
+      "preserved_scientific_inputs": {
+        "comparison_base": "fa9691d8f232cd3763bc1850ab9ff40fcafe7a46",
+        "files_compared": 734,
+        "files_changed": 2,
+        "changed": [
+          "configs/arrhenius-site.env.example",
+          "configs/public.env.example"
+        ],
+        "changed_scope": "site profiles of the launcher; no configuration, runtime, example or registry file changed"
+      }
     },
     "live_zenodo_operations": "not performed",
-    "local_container_execution": "not performed; inspect the hosted container workflow for the published commit",
-    "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml"
-  }
+    "local_container_execution": {
+      "performed": false,
+      "scope": "This revision uses the recorded local CPU environment and will be verified by the hosted container workflow."
+    },
+    "hosted_ci": {
+      "status": "REVISION_SCOPED",
+      "quality_workflow": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
+      "container_workflow": "https://github.com/VKHS/CR-9/actions/workflows/container.yml",
+      "required_checks": [
+        "Source and example verification (no downloads or training)",
+        "Full test suite and one synthetic end-to-end run (CPU PyTorch)",
+        "Build the CPU image and verify the source, tests and offline review"
+      ],
+      "scope": "Results are attached to the exact Git revision in GitHub Actions and the upgrade pull request. This local record does not predict hosted success or reuse the previous revision's checks."
+    }
+  },
+  "earlier_runtime_validations": [
+    {
+      "date": "2026-11-06",
+      "base_commit": "89bbd136625d581027a84755cef0715cf2231a5f",
+      "base_commit_note": "Development revision that preceded the published history; the published history begins at fa9691d8f232cd3763bc1850ab9ff40fcafe7a46. The checks below were executed on that revision with the runtime fingerprint recorded in source_sha256.",
+      "scope": "Current-source software, mathematics, printed arithmetic, source correspondence and evidence-import validation. Original benchmark observations were not available and were not reproduced.",
+      "source_sha256": "0aba361b54f6561f407f097af257cf27e4bf7f85d1ff5f47a4bcdd8bcda3a4fb",
+      "source_fingerprint_scope": "cross_morse/ and runtime Python entry points; the experiment executor, campaign audit, paper tooling, documentation and tests are additionally identified by the Git revision and release checksums.",
+      "software_checks": {
+        "status": "PASS",
+        "unit_tests": {
+          "command": "make test (recorded CPU environment)",
+          "status": "PASS",
+          "tests_run": 1051,
+          "passed": 1050,
+          "skipped": 1,
+          "failures": 0,
+          "errors": 0,
+          "seconds": 135.021
+        },
+        "no_torch_tests": {
+          "command": "make test-no-torch (interpreter without PyTorch)",
+          "status": "PASS",
+          "tests_run": 758,
+          "passed": 743,
+          "skipped": 15,
+          "failures": 0,
+          "errors": 0,
+          "seconds": 114.353
+        },
+        "skip_scope": {
+          "full_suite": "Private cluster profile excluded from the public package",
+          "no_torch": "PyTorch-dependent cases; exercised separately by the full CPU suite"
+        },
+        "environment": {
+          "status": "PINNED_PACKAGES_MATCH",
+          "package_count": 53,
+          "differences": [],
+          "python": "3.12.14",
+          "observed_python": "3.12.14",
+          "python_patch_matches": true,
+          "scope": "package versions and Python major/minor/platform; not wheel hashes, native-library identity or GPU compatibility"
+        },
+        "thread_limits": {
+          "OMP_NUM_THREADS": 2,
+          "OPENBLAS_NUM_THREADS": 2,
+          "MKL_NUM_THREADS": 2
+        },
+        "package_verification": {
+          "command": "make verify",
+          "status": "PASS",
+          "source_files": 1118,
+          "registered_arithmetic_checks": 798
+        },
+        "analytical_statements": {
+          "command": "make theory-full",
+          "counts": {
+            "PASS": 91,
+            "FAIL": 0,
+            "ADVISORY": 0,
+            "INFO": 4
+          },
+          "statement_groups": 25,
+          "check_generators": 43,
+          "seed": 20261104,
+          "scope": "Seeded numerical checks under stated hypotheses, not a formal proof"
+        },
+        "supplementary_arithmetic": {
+          "command": "make si-report",
+          "counts": {
+            "PASS": 657,
+            "ADVISORY": 5,
+            "FAIL": 0,
+            "INFO": 26
+          },
+          "scope": "Relationships among printed inputs; advisory interpretations and rounding are retained"
+        },
+        "model_inventory": {
+          "command": "make model-inventory",
+          "profiles": 7,
+          "source_records_match": true,
+          "table_S5_counts_agree": true,
+          "scope": "Full-profile model instantiation and parameter counts; not historical checkpoint equivalence"
+        },
+        "experiment_execution": {
+          "tests": 126,
+          "skipped": 0,
+          "scope": "Includes actual trained synthetic E6 execution, immutable operation-bound replay, exact-cap comparator fallback and infeasibility; no benchmark performance inference"
+        },
+        "diagram_checks": {
+          "figures": 7,
+          "status": "PASS",
+          "scope": "SVG and PNG-source fingerprints; revised evidence-chain layout visually inspected"
+        }
+      },
+      "preserved_scientific_inputs": {
+        "comparison_base": "89bbd136625d581027a84755cef0715cf2231a5f",
+        "files_compared": 734,
+        "files_changed": 0,
+        "paths": [
+          "cross_morse/",
+          "configs/",
+          "examples/",
+          "source_snapshots/",
+          "paper/reported_results.json",
+          "paper/registered_constants.json"
+        ],
+        "experiment_executor_and_auditors_changed": true
+      },
+      "manuscript_review": {
+        "reviewed_by": "ChatGPT: AI-assisted contextual review requested by author",
+        "main_sha256": "7c4b5145035d5873057a510a84077ee54ea9dbb2af49e2c7cb7306305a9a15e2",
+        "supplementary_sha256": "120ce46ec1b4e4a14000c90d0f7ef64bad4c6b3d7a3800739b8153703675552e",
+        "local_pdf_bytes_verified": true,
+        "reviewed_registry_groups": 34,
+        "numbered_displays": 90,
+        "numerical_targets_changed": false,
+        "personal_author_cell_review_attested": false,
+        "review": "paper/transcription_check.json",
+        "notes": "paper/MANUSCRIPT_REVIEW.md",
+        "inventory": "paper/display_manifest.json"
+      },
+      "scientific_audit": {
+        "status": "INCOMPLETE_OR_INVALID",
+        "expected_exit_code": 1,
+        "blockers": 26,
+        "blocker_counts": {
+          "budget_campaign_missing": 1,
+          "confirmation_campaign_missing": 1,
+          "manuscript_numbers_unlinked": 7,
+          "missing_auxiliary_set": 10,
+          "missing_official_archive": 7
+        },
+        "official_archives": 0,
+        "required_official_archives": 7,
+        "auxiliary_record_sets": 0,
+        "required_auxiliary_record_sets": 10,
+        "original_measurements_added": false,
+        "confirmation_scope": "Original unrounded heterogeneous test outputs, paired means, joint nine-test Holm decisions and native-run links; original test programs are preserved and hashed but their raw P values are not recomputed by this gate.",
+        "publication_ready": false,
+        "release_scope": "This release distributes code and regenerates its results (release/release_scope.json: result_distribution = regenerate). The gate's blockers are the registrations of a release that publishes archives; run_cross_morse.sh reproduce regenerates the lifecycle runs, and its report compares them with the paper."
+      },
+      "live_zenodo_operations": "not performed",
+      "local_container_execution": "not performed; inspect the hosted container workflow for the published commit",
+      "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml"
+    }
+  ]
 }

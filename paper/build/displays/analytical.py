@@ -887,6 +887,9 @@ def table_s44(ctx, out):
 # Supplementary Figure S6: cost model and admissible truncation order
 # ---------------------------------------------------------------------------
 
+G_FS6 = "supplementary_figure_S6_cost_model_truncation_order"
+
+
 @display("supplementary:Figure S6", stem="FigS6", title="Action-cost and sensing-work model", scope="measurement",
          needs=ADMITTED_RUNS)
 def figure_s6(ctx, out):
@@ -896,18 +899,35 @@ def figure_s6(ctx, out):
     grid = np.arange(1, TRUNCATION_AXIS + 1)
     data = {}
     curve, bars = [], []
+    model_note = ("Analytical coordinate of the Note S19 FLOP model at the declared dataset statistics, s and f_res; "
+                  "not an executed cost observation.")
+    bar_note = ("Admissible order at the run's measured multiplier through the Note S19 identity; a bound above the "
+                "axis is drawn at the axis limit and labelled >T.")
+    out.compare(G_FS6, ("model", "sensing_share_s"), SENSING_SHARE)
+    out.compare(G_FS6, ("panel_a", "resolvent_step_share_percent"), 100 * RESOLVENT_STEP_SHARES[-1])
+    out.compare(G_FS6, ("panel_a", "truncation_order_domain"), [int(grid[0]), int(grid[-1])])
+    out.compare(G_FS6, ("panel_b", "resolvent_step_shares_percent"), [100 * share for share in RESOLVENT_STEP_SHARES])
+    out.compare(G_FS6, ("panel_b", "registered_T_line"), order)
     for dataset in ADMITTED:
         dep = deployed(ctx, dataset)
         r = sparse_ratio(ctx, dataset)
         data[dataset] = (r, dep["m"])
-        values = [budget.per_member_multiplier(r, SENSING_SHARE, RESOLVENT_STEP_SHARES[-1], int(t)) for t in grid]
-        axes[0].plot(grid, values, color=COLORS[dataset], lw=1.6, label=SHORT[dataset])
+        values = {int(t): budget.per_member_multiplier(r, SENSING_SHARE, RESOLVENT_STEP_SHARES[-1], int(t)) for t in grid}
+        axes[0].plot(grid, list(values.values()), color=COLORS[dataset], lw=1.6, label=SHORT[dataset])
         axes[0].axhline(dep["m"], color=COLORS[dataset], ls=":", lw=1.0)
-        curve += [[dataset, int(t), v, dep["m"]] for t, v in zip(grid, values)]
+        curve += [[dataset, t, v, dep["m"]] for t, v in values.items()]
+        for t in (int(grid[0]), order, int(grid[-1])):     # domain start, registered order, domain end
+            out.compare(G_FS6, ("panel_a", "curves", dataset, f"T{t}"), values.get(t), note=model_note)
+        out.compare(G_FS6, ("panel_a", "measured_multipliers", dataset), dep["m"],
+                    note="Dotted line at the run's measured per-member multiplier C_ctrl/C_qC.")
         for share in RESOLVENT_STEP_SHARES:
             t_max = budget.admissible_truncation_order(dep["m"], r, SENSING_SHARE, share)
             label = f">{TRUNCATION_AXIS}" if t_max > TRUNCATION_AXIS else f"{t_max:.0f}"
-            bars.append([dataset, share, t_max, min(t_max, TRUNCATION_AXIS), label])
+            plotted = min(t_max, TRUNCATION_AXIS)
+            bars.append([dataset, share, t_max, plotted, label])
+            key = f"{100 * share:.0f}"
+            out.compare(G_FS6, ("panel_b", "bars", dataset, key, "bar_height_T"), plotted, note=bar_note)
+            out.compare(G_FS6, ("panel_b", "bars", dataset, key, "label"), label)
         out.compare(G_S6C, (dataset, "r"), r)
         out.compare(G_S6C, (dataset, "measured_multiplier_m"), dep["m"])
         out.uses("run", dataset, ["select/candidates.json"])
@@ -937,15 +957,31 @@ def figure_s6(ctx, out):
     ax.set_title("b  Admissible T by resolvent share")
     ax.legend(frameon=False, loc="upper left")
     ax = axes[2]
-    r, m = data["ogbn-proteins"]
+    proteins = "ogbn-proteins"
+    r, m = data[proteins]
     ts = np.arange(2, 2 * order + 1)
     fractions = [budget.max_resolvent_fraction(m, r, SENSING_SHARE, int(t)) for t in ts]
     bound = budget.max_resolvent_fraction(m, r, SENSING_SHARE, order)
-    ax.plot(ts, fractions, "o-", color=COLORS["ogbn-proteins"], ms=4)
+    out.compare(G_FS6, ("panel_c", "dataset"), proteins)
+    sensor = ctx.config(proteins, "full")["sensor"]       # the caption's reduced sensor, as registered (not executed)
+    out.compare(G_FS6, ("panel_c", "registered_reduced_sensor", "sketch_width_k"), sensor["sketch_dim"])
+    out.compare(G_FS6, ("panel_c", "registered_reduced_sensor", "sensing_period_P_s"), sensor["sensing_period"])
+    out.uses("configuration", "configs/proteins_full.json", ["sensor.sketch_dim", "sensor.sensing_period"])
+    out.compare(G_FS6, ("panel_c", "multiplier_m"), m)
+    out.compare(G_FS6, ("panel_c", "registered_T_line"), order)
+    out.compare(G_FS6, ("panel_c", "f_res_bound_label"), bound,
+                note="Analytical model bound at the registered order; the executed fraction is the f_res column of "
+                     "Table S6c and is not plotted.")
+    out.compare(G_FS6, ("panel_c", "truncation_order_domain"), [int(ts[0]), int(ts[-1])])
+    for t, f in zip(ts, fractions):
+        out.compare(G_FS6, ("panel_c", "points", str(int(t))), f,
+                    note="Largest resolvent fraction consistent with the measured multiplier at order T (analytical "
+                         "bound, not an executed fraction).")
+    ax.plot(ts, fractions, "o-", color=COLORS[proteins], ms=4)
     ax.axvline(order, color="#888888", ls="--", lw=1)
     ax.text(order + 0.3, max(fractions) * 0.55, f"registered T = {order}:\nf_res ≤ {bound:.3f} (model bound)", fontsize=7)
-    ax.text(0.97, 0.97, f"sensing share s = {SENSING_SHARE:g};\nT sparse products per\nresolvent step",
-            transform=ax.transAxes, ha="right", va="top", fontsize=7, color="#555555")
+    ax.text(0.97, 0.97, f"sensing share s = {SENSING_SHARE:g};\nT sparse products per\nresolvent step; f_res is read\n"
+            "from the executed action mix", transform=ax.transAxes, ha="right", va="top", fontsize=7, color="#555555")
     ax.set_xlabel("truncation order T (on-line powers)")
     ax.set_ylabel("executed resolvent fraction f_res")
     ax.set_title(f"c  proteins: f_res consistent with m = {m:.2f}")
@@ -963,44 +999,78 @@ def figure_s6(ctx, out):
 # Supplementary Figure S7: acquisition gate
 # ---------------------------------------------------------------------------
 
+G_FS7 = "supplementary_figure_S7_acquisition_gate"
+
+
 @display("supplementary:Figure S7", stem="FigS7", title="Acquisition gate", scope="measurement",
          needs=(f"records:{GAP_SET}",))
 def figure_s7(ctx, out):
     plt = pyplot()
     fig, axes = plt.subplots(1, 2, figsize=(12, 3.9))
     ax = axes[0]
+    slope = 2.0                          # Proposition 9: retain when the gap exceeds 2 L_J r
     radius = np.array([0.0, 1.0])
-    boundary = 2.0 * radius              # Proposition 9: retain when the gap exceeds 2 L_J r
+    boundary = slope * radius
     top = 2.2
-    ax.fill_between(radius, boundary, top, color="#cfe0f6")
-    ax.fill_between(radius, 0, boundary, color="#f8dccd")
+    regions = (("retain", "retain the action\n(support, mode and search\nprocedure invariant on the region)",
+                (0.1, 1.75), "#cfe0f6"),
+               ("acquire", "acquire a sensor profile\nand replan, or reserve q_C", (0.5, 0.25), "#f8dccd"))
+    for name, text, (x, y), color in regions:
+        side = "above" if y > slope * x else "below"     # the region is filled on the side its label occupies
+        low, high = (boundary, top) if side == "above" else (0.0, boundary)
+        ax.fill_between(radius, low, high, color=color)
+        ax.text(x, y, text, fontsize=7)
+        out.compare(G_FS7, ("panel_a", "regions", name, "label"), text)
+        out.compare(G_FS7, ("panel_a", "regions", name, "side"), side)
     ax.plot(radius, boundary, color="#2f7bd9", lw=2)
-    ax.text(0.1, 1.75, "retain the action\n(support, mode and search\nprocedure invariant on the region)", fontsize=7)
-    ax.text(0.5, 0.25, "acquire a sensor profile\nand replan, or reserve q_C", fontsize=7)
-    ax.set_xlim(0, 1)
+    x_label, y_label = "predicted-state region radius r_ℓ (units of 1/L_J)", "action-score gap m_ℓ/L_J"
+    ax.set_xlim(radius[0], radius[-1])
     ax.set_ylim(0, top)
-    ax.set_xlabel("predicted-state region radius r_l (units of 1/L_J)")
-    ax.set_ylabel("action-score gap m_l/L_J")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
     ax.set_title("a  Conditional action-gap certificate (Prop. 9)")
+    for field, computed in (("boundary_slope", slope), ("radius_domain", [float(v) for v in radius]),
+                            ("boundary_gap_at_domain_ends", [float(v) for v in boundary]),
+                            ("x_axis", x_label), ("y_axis", y_label)):
+        out.compare(G_FS7, ("panel_a", field), computed)
     ax = axes[1]
     gaps = np.geomspace(0.05, 50.0, 400)          # mnats
     curves = []
     tau = certificate_floor()
+    tau_mnats = 1e3 * tau
+
+    def log_gap_density(x_mnats, gap):
+        """Fitted log-normal density per unit natural-log gap at a gap in mnats (independent of the gap unit)."""
+        z = (math.log(x_mnats / 1e3) - gap["mu"]) / gap["sigma"]
+        return math.exp(-0.5 * z * z) / (gap["sigma"] * math.sqrt(2 * math.pi))
+
+    model_note = "Explicit log-normal model of the median and 5th-percentile gaps; not an empirical gap histogram."
     for dataset in ADMITTED:
         gap = gap_model(ctx, dataset)
-        density = [math.exp(-0.5 * ((math.log(x / 1e3) - gap["mu"]) / gap["sigma"]) ** 2)
-                   / (gap["sigma"] * math.sqrt(2 * math.pi)) for x in gaps]
-        ax.plot(gaps, density, color=COLORS[dataset], lw=1.6,
-                label=f"{SHORT[dataset]}: median {1e3 * gap['median']:.1f}, p5 {1e3 * gap['p5']:.1f}")
+        median, p5 = 1e3 * gap["median"], 1e3 * gap["p5"]
+        label = f"{SHORT[dataset]}: median {median:.1f}, p5 {p5:.1f}"
+        density = [log_gap_density(float(x), gap) for x in gaps]
+        ax.plot(gaps, density, color=COLORS[dataset], lw=1.6, label=label)
         curves += [[dataset, x, y, gap["mu"], gap["sigma"]] for x, y in zip(gaps, density)]
         out.compare(G_S21, (dataset, "median_gap"), gap["median"])
         out.compare(G_S21, (dataset, "p5_gap"), gap["p5"])
-    ax.axvline(1e3 * tau, color="#444444", ls="--", lw=1)
-    ax.text(1e3 * tau * 1.08, ax.get_ylim()[1] * 0.92, "τ", fontsize=8)
+        for field, computed in (("median_mnats", median), ("p5_mnats", p5), ("legend_label", label)):
+            out.compare(G_FS7, ("panel_b", "curves", dataset, field), computed)
+        for field, computed in (("mu_log_nats", gap["mu"]), ("sigma_log", gap["sigma"]),
+                                ("density_at_median", log_gap_density(median, gap)),
+                                ("density_at_tau", log_gap_density(tau_mnats, gap))):
+            out.compare(G_FS7, ("panel_b", "curves", dataset, field), computed, note=model_note)
+    x_label, y_label, tau_label = "action-score gap (mnats)", "density per log-gap", "τ"
+    ax.axvline(tau_mnats, color="#444444", ls="--", lw=1)
+    ax.text(tau_mnats * 1.08, ax.get_ylim()[1] * 0.92, tau_label, fontsize=8)
     ax.set_xscale("log")
-    ax.set_xlabel("action-score gap (mnats)")
-    ax.set_ylabel("density per log-gap")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
     ax.set_title("b  Log-normal fit of the action-gap quantiles (Table S21)")
+    for field, computed in (("x_axis", x_label), ("y_axis", y_label), ("p5_standard_normal_quantile", Z95),
+                            ("threshold_tau_mnats", tau_mnats), ("threshold_label", tau_label),
+                            ("gap_domain_mnats", [float(gaps[0]), float(gaps[-1])])):
+        out.compare(G_FS7, ("panel_b", field), computed)
     ax.legend(frameon=False, fontsize=6.5, loc="upper left")
     for a in axes:
         a.grid(alpha=0.25)
@@ -1256,13 +1326,33 @@ def figure_s11(ctx, out):
 # Supplementary Figure S12: power of the budget-matched test
 # ---------------------------------------------------------------------------
 
+G_FS12 = "supplementary_figure_S12_budget_matched_test_power"
+
+
 @display("supplementary:Figure S12", stem="FigS12", title="Comparison-test power", scope="analytical",
          needs=ADMITTED_RUNS + ("records:budget_matched",))
 def figure_s12(ctx, out):
     margins = np.linspace(0.0, 8.0, 321)
+    reference = 80.0                      # dashed reference power of both panels (%)
+    anchor_note = ("Functional value of the plotted power curve at a named anchor (domain endpoint); the "
+                   "reference evaluates the stated power formula with printed inputs, not a measurement.")
+    crossing_note = ("True margin at which the plotted curve reaches the 80% line, found on the plotted function; "
+                     "printed as the minimum detectable effect (Tables S42 and S47).")
+
+    def reference_crossing(se, family=1):
+        """True margin at which the plotted power curve reaches the reference power (bisection)."""
+        low, high = 0.0, 20.0 * se
+        for _ in range(100):
+            middle = 0.5 * (low + high)
+            if power(middle, se, family) < reference:
+                low = middle
+            else:
+                high = middle
+        return 0.5 * (low + high)
+
     plt = pyplot()
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.2))
-    curves, points = [], []
+    curves, points, seed_counts = [], [], set()
     for dataset in ADMITTED:
         x = power_inputs(ctx, dataset)
         color = COLORS[dataset]
@@ -1282,17 +1372,45 @@ def figure_s12(ctx, out):
         axes[1].plot(x["margin"], p_opt, "o", mfc="white", color=color, ms=6)
         curves += [[dataset, m, u, c, o] for m, u, c, o in zip(margins, unit, cons, opt)]
         points.append([dataset, x["se"], x["margin"], *x["margin_range"], central, p_cons, p_opt, x["seeds"], x["share"]])
+        seed_counts.add(x["seeds"])
         out.compare(G_S42, (dataset, "paired_SE_nats"), x["se"] / 1e3)
         out.compare(G_S42, (dataset, "reported_margin_mnats"), x["margin"])
         out.compare(G_S42, (dataset, "margin_range"), list(x["margin_range"]))
         out.compare(G_S42, (dataset, "power_at_unit_pct"), central)
         out.compare(G_S42, (dataset, "power_seed_paired_pct"), [p_cons, p_opt])
+        low, high = x["margin_range"]
+        for field, computed, note in (
+                ("legend_label", label, ""), ("central_margin_mnats", x["margin"], ""),
+                ("power_at_central_margin_percent", central, ""), ("margin_range_mnats", [low, high], ""),
+                ("power_at_range_endpoints_percent", [power(low, x["se"]), power(high, x["se"])], ""),
+                ("power_at_zero_margin_percent", unit[0], anchor_note),
+                ("power_at_domain_end_percent", unit[-1], anchor_note),
+                ("margin_at_reference_power_mnats", reference_crossing(x["se"]), crossing_note)):
+            out.compare(G_FS12, ("panel_a", "datasets", dataset, field), computed, note=note)
+        for field, computed, note in (
+                ("pairable_share", x["share"], ""), ("marker_margin_mnats", x["margin"], ""),
+                ("conservative_power_at_central_margin_percent", p_cons, ""),
+                ("optimistic_power_at_central_margin_percent", p_opt, ""),
+                ("conservative_power_at_zero_margin_percent", cons[0], anchor_note),
+                ("optimistic_power_at_zero_margin_percent", opt[0], anchor_note),
+                ("conservative_power_at_domain_end_percent", cons[-1], anchor_note),
+                ("optimistic_power_at_domain_end_percent", opt[-1], anchor_note),
+                ("conservative_margin_at_reference_power_mnats", reference_crossing(x["se_cons"], ARM_FAMILY),
+                 crossing_note),
+                ("optimistic_margin_at_reference_power_mnats", reference_crossing(x["se_opt"]), crossing_note)):
+            out.compare(G_FS12, ("panel_b", "datasets", dataset, field), computed, note=note)
         out.uses("run", dataset, ["final/results_summary.json", "select/decision.json"])
+    seeds = next(iter(seed_counts)) if len(seed_counts) == 1 else sorted(seed_counts)
+    for panel in ("panel_a", "panel_b"):
+        out.compare(G_FS12, (panel, "margin_domain_mnats"), [float(margins[0]), float(margins[-1])])
+        out.compare(G_FS12, (panel, "reference_power_percent"), reference)
+    out.compare(G_FS12, ("panel_b", "paired_seeds"), seeds)
+    out.compare(G_FS12, ("panel_b", "holm_family_size"), ARM_FAMILY)
     for ax in axes:
-        ax.axhline(80, color="#444444", ls="--", lw=0.8)
+        ax.axhline(reference, color="#444444", ls="--", lw=0.8)
         ax.set_ylim(0, 103)
         ax.grid(alpha=0.25)
-    axes[0].text(7.9, 81.5, "80%", ha="right", fontsize=7)
+    axes[0].text(7.9, reference + 1.5, f"{reference:.0f}%", ha="right", fontsize=7)
     axes[0].set_xlabel("true margin of the feedback rule over the E3 predictor (mnats)")
     axes[0].set_ylabel("power of the two-sided paired test (%)")
     axes[0].set_title("a  Power at the registered unit; dots: central margin of the E2 grid, bars: its range")
@@ -1301,8 +1419,8 @@ def figure_s12(ctx, out):
     axes[1].set_ylabel("power (%)")
     axes[1].set_title("b  Seed-paired design: conservative (solid, Holm step) to optimistic (dotted)")
     axes[1].plot([], [], color="#444444", label="conservative: pairable share 0.5 (single-graph units) or 0 "
-                                                "(fixed-ensemble graph units), level α/4")
-    axes[1].plot([], [], color="#444444", ls=":", label="optimistic: σ/√S, level 0.05")
+                                                f"(fixed-ensemble graph units), level α/{ARM_FAMILY}")
+    axes[1].plot([], [], color="#444444", ls=":", label=f"optimistic: σ/√{seeds}, level 0.05")
     axes[1].legend(frameon=False, fontsize=6.5, loc="lower right")
     fig.tight_layout()
     out.figure(fig)
@@ -1316,6 +1434,11 @@ def figure_s12(ctx, out):
 # Supplementary Figure S15: spectral fingerprint, executed range and headroom
 # ---------------------------------------------------------------------------
 
+G_FS15 = "supplementary_figure_S15_spectral_fingerprint_and_headroom"
+# Panel a is checked at the edges of the uniform six-band partition of [0, 2] that panel b names.
+FS15_ANCHORS = ("lambda_0", "lambda_1_3", "lambda_2_3", "lambda_1", "lambda_4_3", "lambda_5_3", "lambda_2")
+
+
 @display("supplementary:Figure S15", stem="FigS15", title="Spectral fingerprint, action range and headroom",
          scope="measurement", needs=("runs",))
 def figure_s15(ctx, out):
@@ -1326,7 +1449,38 @@ def figure_s15(ctx, out):
     lam = np.linspace(0.0, 2.0, 401)
     responses = {a.id: spectral.action_response(a, lam) for a in transport}
     edges = spectral.band_edges(6)
+    anchors = [edges[0][0]] + [hi for _, hi in edges]
     sensitivity = np.array([spectral.band_sensitivity(a, nominal) for a in transport[1:]])
+
+    def zero_crossings(action):
+        """lambda in [0, 2] where g_a vanishes: real roots x = 1 - lambda in [-1, 1] of sum_t c_t x^t."""
+        roots = np.polynomial.polynomial.polyroots(operators.operator_polynomial(action))
+        real = sorted(1.0 - float(r.real) for r in roots if abs(r.imag) <= 1e-9 and -1.0 <= r.real <= 1.0)
+        return real
+
+    note = "Exact registry function evaluated at a source-named anchor, not a renderer sample."
+    out.compare(G_FS15, ("panel_a", "series"), [f"A{a.id}" for a in transport])
+    out.compare(G_FS15, ("panel_a", "nominal_series"), f"A{nominal.id}")
+    out.compare(G_FS15, ("panel_a", "truncation_order"), order)
+    out.compare(G_FS15, ("panel_a", "lambda_domain"), [float(lam[0]), float(lam[-1])])
+    out.compare(G_FS15, ("panel_a", "anchor_lambdas"), anchors)
+    zero_line = 0.0
+    out.compare(G_FS15, ("panel_a", "zero_line"), zero_line)
+    crossings = {}
+    for a in transport:
+        values = spectral.action_response(a, np.asarray(anchors, dtype=float))
+        for key, value in zip(FS15_ANCHORS, values):
+            out.compare(G_FS15, ("panel_a", "curves", f"A{a.id}", "response", key), float(value), note=note)
+        found = zero_crossings(a)
+        crossings[a.id] = found
+        out.compare(G_FS15, ("panel_a", "curves", f"A{a.id}", "zero_crossing_lambda"),
+                    None if not found else (found[0] if len(found) == 1 else found), note=note)
+    out.compare(G_FS15, ("panel_b", "reference_action"), f"A{nominal.id}")
+    out.compare(G_FS15, ("panel_b", "band_edges"), anchors)
+    out.compare(G_FS15, ("panel_b", "rows"), [f"A{a.id}" for a in transport[1:]])
+    for i, a in enumerate(transport[1:]):
+        out.compare(G_FS15, ("panel_b", "sensitivity", f"A{a.id}"), [float(v) for v in sensitivity[i]],
+                    note="Conservative bandwise bound of cm_theory.spectral; the figure prints two decimals.")
     headroom = []
     for dataset in DATASETS:
         dep = deployment(ctx, dataset)
@@ -1338,14 +1492,20 @@ def figure_s15(ctx, out):
                          " ".join(f"{m['run']}:{m['headroom_upper']!r}" for m in dep["members"])])
         out.compare(G_S4, (dataset, "U_Delta_oracle"), upper)
         out.compare(G_T1, (dataset, "loss_effect_nats"), dep["effect"])
+        for field, computed in (("headroom_bound_mnats", bound), ("realized_effect_mnats", 1e3 * abs(dep["effect"])),
+                                ("unrealized_lower_bound_mnats", bound - 1e3 * abs(dep["effect"]))):
+            out.compare(G_FS15, ("panel_d", "datasets", dataset, field), computed,
+                        note="The headroom denominator is the oracle's upper confidence limit U(Delta_oracle), "
+                             "not its point estimate; the realized part is the deployed rule's paired test effect.")
         out.uses("run", dataset, ["select/entry_complete.json", "final/results_summary.json"])
+    out.compare(G_FS15, ("panel_d", "dataset_order"), [row[0] for row in headroom])
     plt = pyplot()
     fig, axes = plt.subplots(2, 2, figsize=(12, 8.4))
     ax = axes[0, 0]
     for a in transport:
         ax.plot(lam, responses[a.id], color=ACTION_COLORS[a.id], lw=2.4 if a.id == 0 else 1.4,
                 label="A0 (nominal)" if a.id == 0 else f"A{a.id}")
-    ax.axhline(0, color="#555555", lw=0.7)
+    ax.axhline(zero_line, color="#555555", lw=0.7)
     ax.set_xlim(0, 2)
     ax.set_xlabel("graph frequency λ of L_sym")
     ax.set_ylabel("response g_a(λ)")
@@ -1365,6 +1525,12 @@ def figure_s15(ctx, out):
     ranges = [operators.executed_range(a) for a in transport]
     reach = [operators.maximum_reach(a) for a in transport]
     identity = [operators.identity_coefficient(a) for a in transport]
+    out.compare(G_FS15, ("panel_c", "nominal_level"), ranges[0])
+    out.compare(G_FS15, ("panel_c", "nominal_level_label"), float(f"{ranges[0]:.2f}"))
+    for a, h, t, c in zip(transport, ranges, reach, identity):
+        for field, computed in (("executed_range", h), ("executed_range_label", float(f"{h:.2f}")),
+                                ("identity_coefficient", c), ("identity_label", float(f"{c:.2f}")), ("max_reach", t)):
+            out.compare(G_FS15, ("panel_c", "actions", f"A{a.id}", field), computed)
     xs = np.arange(len(transport))
     ax.bar(xs, ranges, 0.6, color=[ACTION_COLORS[a.id] for a in transport])
     for x, h, c in zip(xs, ranges, identity):
@@ -1396,6 +1562,10 @@ def figure_s15(ctx, out):
     out.figure(fig)
     out.data("panel_a_response", ["lambda"] + [f"A{a.id}" for a in transport],
              [[float(x)] + [float(responses[a.id][i]) for a in transport] for i, x in enumerate(lam)])
+    out.data("panel_a_anchor_response", ["action", "anchor", "lambda", "response", "zero_crossing_lambda"],
+             [[f"A{a.id}", key, float(x), float(v), " ".join(repr(r) for r in crossings[a.id])]
+              for a in transport for key, x, v in zip(FS15_ANCHORS, anchors,
+                                                      spectral.action_response(a, np.asarray(anchors, dtype=float)))])
     out.data("panel_b_band_sensitivity", ["action", "band", "lambda_low", "lambda_high", "sensitivity_upper_bound"],
              [[f"A{a.id}", b, edges[b][0], edges[b][1], float(sensitivity[i, b])]
               for i, a in enumerate(transport[1:]) for b in range(len(edges))])
@@ -1403,6 +1573,11 @@ def figure_s15(ctx, out):
              [[f"A{a.id}", h, t, c] for a, h, t, c in zip(transport, ranges, reach, identity)])
     out.data("panel_d_headroom", ["dataset", "U_Delta_oracle_nats", "headroom_bound_mnats", "deployed_effect_nats",
                                   "unrealized_lower_bound_mnats", "per_run_U_Delta_oracle"], headroom)
+    out.provenance(source_document="supplementary", source_pages=[35], reference_contract=G_FS15,
+                   panel_a="registry responses compared at the six-band partition edges and at their zero crossings; "
+                           "the 401-point curve grid is renderer sampling",
+                   panel_d="headroom bound |U(Delta_oracle)| is the oracle's upper confidence limit (Table S4); the "
+                           "unrealized lower bound subtracts the deployed rule's paired test effect (Table 1)")
 
 
 # ---------------------------------------------------------------------------
@@ -1433,13 +1608,19 @@ def reach_curves(actions, scales, grid=4001):
     return rows
 
 
+G_FS20 = "supplementary_figure_S20_analytical_panels"
+
+
 @display("supplementary:Figure S20", stem="FigS20", title="Break-even, resampling and seed-design power",
          scope="analytical",
          needs=ADMITTED_RUNS + ("records:ensemble_grid", "records:input_gate", "records:budget_matched"))
 def figure_s20(ctx, out):
     actions, _ = registry_actions(ctx)
     kappa = ctx.constants[BUDGET]["ensemble_law_kappa_band"]
-    plane, design = [], []
+    reference = 80.0                      # dotted reference power of panel d (%)
+    analytical_note = ("Analytical coordinate of the plotted function at a named anchor; the reference evaluates "
+                       "the stated formula with printed inputs and is not an observation.")
+    plane, design, shares = [], [], {}
     for dataset in ADMITTED:
         dep = deployed(ctx, dataset)
         cost = overheads(ctx, dep)
@@ -1455,6 +1636,7 @@ def figure_s20(ctx, out):
         out.compare(G_S23, (dataset, "expected_serial_cost"), cost["expected"])
         out.compare(G_S23, (dataset, "assurance_serial_cost"), cost["assurance"])
         x = power_inputs(ctx, dataset)
+        shares[dataset] = x["share"]
         for count in range(1, x["seeds"] + 1):
             cons, opt = seed_paired_se(x["se"], x["share"], count)
             design.append([dataset, count, power(x["margin"], cons, ARM_FAMILY), power(x["margin"], opt)])
@@ -1469,17 +1651,68 @@ def figure_s20(ctx, out):
         units.append([dataset, 1e3 * s["hw_graph"], 1e3 * s["hw_test"], s["ratio"], 1.0 - s["ratio"] ** -2])
     sizes = sorted({e for e in ctx.config(ADMITTED[0], "full")["registry"]["ensemble_sizes"]
                     if 1 < e <= max(row[1] for row in plane)})
-    reach = reach_curves(actions, np.geomspace(0.05, 2.0, 60))
+    # The plotted lambda_0 grid contains the E18 audit densities, so the anchors are points of the plotted curves.
+    scales = np.unique(np.r_[np.geomspace(0.05, 2.0, 60), E18_DENSITIES])
+    reach = reach_curves(actions, scales)
     plt = pyplot()
     fig, axes = plt.subplots(2, 2, figsize=(13, 9))
     ax = axes[0, 0]
-    o_grid = np.geomspace(0.08, 2.0, 200)
+    o_grid = np.unique(np.r_[np.geomspace(0.08, 2.0, 200), 1.0])
     styles = (":", "-", "--", "-.")
     curves = []
     for size, style in zip(sizes, styles):
         threshold = [economics.break_even_effect(1.0, o, size) for o in o_grid]
         ax.plot(o_grid, threshold, color="#444444", ls=style, lw=1.2, label=f"break-even g/D∞ = o/[E(1+o)], E = {size}")
         curves += [[size, o, t] for o, t in zip(o_grid, threshold)]
+        plotted = dict(zip(o_grid.tolist(), threshold))
+        for field, o in (("at_domain_start", o_grid[0]), ("at_unit_overhead", 1.0), ("at_domain_end", o_grid[-1])):
+            out.compare(G_FS20, ("panel_a", "break_even_curves", f"E{size}", field), plotted[float(o)],
+                        note=analytical_note)
+    out.compare(G_FS20, ("panel_a", "ensemble_law_kappa_band"), list(kappa))
+    out.compare(G_FS20, ("panel_a", "break_even_ensemble_sizes"), list(sizes))
+    out.compare(G_FS20, ("panel_a", "overhead_domain"), [float(o_grid[0]), float(o_grid[-1])])
+    for dataset, size, o, o_assure, _, _, ratio, kappa_high, kappa_low, _ in plane:
+        for field, computed, note in (
+                ("ensemble_size", size, ""), ("expected_overhead", o, analytical_note),
+                ("assurance_overhead", o_assure, analytical_note), ("gain_over_D_inf", ratio, analytical_note),
+                ("whisker_gain_over_D_inf", [kappa_high, kappa_low], analytical_note),
+                ("break_even_at_expected_overhead", economics.break_even_effect(1.0, o, size), analytical_note),
+                ("break_even_at_assurance_overhead", economics.break_even_effect(1.0, o_assure, size),
+                 analytical_note)):
+            out.compare(G_FS20, ("panel_a", "datasets", dataset, field), computed, note=note)
+    anchors = {float(scales[0]), *map(float, E18_DENSITIES), float(scales[-1])}
+    ratios = {}
+    for name, scale, bound, exact in reach:
+        if scale in anchors:
+            for field, computed in (("upper_bound", bound), ("exact_displacement", exact)):
+                out.compare(G_FS20, ("panel_b", "actions", name, f"{scale:g}", field), computed, note=analytical_note)
+            ratios.setdefault(scale, []).append(exact / bound)
+    out.compare(G_FS20, ("panel_b", "printed_ratio_extremes", "minimum_at_lambda0_0.1"), min(ratios[0.1]),
+                note="Ratio of the two plotted families of the declared exponential-density scenario (SI p. 20); "
+                     "not the plant-specific E18 audit.")
+    out.compare(G_FS20, ("panel_b", "printed_ratio_extremes", "maximum_at_lambda0_1"), max(ratios[1.0]),
+                note="Ratio of the two plotted families of the declared exponential-density scenario (SI p. 20); "
+                     "not the plant-specific E18 audit.")
+    out.compare(G_FS20, ("panel_b", "registered_band_count"), len(spectral.band_edges(6)))
+    out.compare(G_FS20, ("panel_b", "e18_audit_densities"), list(E18_DENSITIES))
+    out.compare(G_FS20, ("panel_b", "spectral_scale_domain"), [float(scales[0]), float(scales[-1])])
+    out.compare(G_FS20, ("panel_c", "graph_unit_z_multiplier"), Z975)
+    for dataset, hw_graph, hw_test, ratio, seed_share in units:
+        for field, computed in (("graph_unit_half_width_mnats", hw_graph), ("test_stage_half_width_mnats", hw_test),
+                                ("ratio_label", ratio), ("seed_share_lower_bound_percent", 100.0 * seed_share)):
+            out.compare(G_FS20, ("panel_c", "datasets", dataset, field), computed)
+    for dataset in ADMITTED:
+        out.compare(G_FS20, ("panel_d", "datasets", dataset, "pairable_share"), shares[dataset])
+        for _, count, cons, opt in (row for row in design if row[0] == dataset):
+            out.compare(G_FS20, ("panel_d", "datasets", dataset, "conservative_power_percent", str(count)), cons)
+            out.compare(G_FS20, ("panel_d", "datasets", dataset, "optimistic_power_percent", str(count)), opt)
+    counts = [row[1] for row in design]
+    out.compare(G_FS20, ("panel_d", "seed_count_domain"), [min(counts), max(counts)])
+    out.compare(G_FS20, ("panel_d", "reference_power_percent"), reference)
+    out.compare(G_FS20, ("panel_d", "conservative_level"), power(0.0, 1.0, ARM_FAMILY) / 100.0,
+                note="Level of the plotted conservative power function: its value at zero margin.")
+    out.compare(G_FS20, ("panel_d", "optimistic_level"), power(0.0, 1.0) / 100.0,
+                note="Level of the plotted optimistic power function: its value at zero margin.")
     for row in plane:
         color = COLORS[row[0]]
         ax.plot([row[2], row[3]], [row[6], row[6]], ":", color=color, lw=1)
@@ -1534,7 +1767,7 @@ def figure_s20(ctx, out):
         ax.plot(counts, [row[2] for row in rows], "o-", color=COLORS[dataset], ms=4, label=SHORT[dataset])
         ax.plot(counts, [row[3] for row in rows], ":", color=COLORS[dataset])
         ax.fill_between(counts, [row[2] for row in rows], [row[3] for row in rows], color=COLORS[dataset], alpha=0.08)
-    ax.axhline(80, color="#444444", ls=":", lw=0.8)
+    ax.axhline(reference, color="#444444", ls=":", lw=0.8)
     ax.set_ylim(0, 103)
     ax.set_xlabel("optimization seeds paired as replicates of every evaluation unit, S")
     ax.set_ylabel("power of E3 at the central margin (%)")
