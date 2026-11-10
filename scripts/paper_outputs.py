@@ -2127,6 +2127,9 @@ def derive_provenance(spec: dict | None) -> tuple[str | None, str | None]:
         for path in sorted(campaign.glob("studies/**/environment.json")):
             environments.append(read_json(path))
         stamps = _sacct_times(sorted(campaign.glob("execution/**/accounting-*")))
+        if not stamps:
+            # studies run without a scheduler (scripts/run_budget_study.py) have no accounting: their own records
+            stamps = [read_json(path).get("created_utc") for path in sorted(campaign.glob("studies/**/experiment.json"))]
     elif kind == "baselines":
         for study in map(Path, spec["studies"]):
             for invocation in study.glob("**/invocation.json"):

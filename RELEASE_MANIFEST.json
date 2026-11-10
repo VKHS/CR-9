@@ -127,10 +127,10 @@
       "sha256": "6ad6ecdbbce0e4db5388052246cf6b85b7f6e4a947b08eb07baf5bc8373ba2da"
     },
     {
-      "bytes": 45342,
+      "bytes": 46357,
       "executable": false,
       "path": "CHANGELOG.md",
-      "sha256": "3196cb11438c93d52a1bcab6003bcca5f18497a126405f1666d5185d4037d923"
+      "sha256": "418e112180d0e6b8714a1d48b290eb0a4caabc3ceae3385ed66feca73f857a16"
     },
     {
       "bytes": 2319,
@@ -880,7 +880,7 @@
       "bytes": 229,
       "executable": false,
       "path": "demo/graph-request.json",
-      "sha256": "e3cda30c69429cc45cbde51c9c9308387e71535036b8f6f91eeca51f77ddf9f2"
+      "sha256": "02815cc0cbcce062f1ff463c3aabc17028724856441c27df1c7c92ce1818cbd2"
     },
     {
       "bytes": 292,
@@ -7303,10 +7303,10 @@
       "sha256": "de781ad0525335f16111042cfb8b0311c9a6eeef3a8dc900a4ef9dca3f5f992e"
     },
     {
-      "bytes": 145711,
+      "bytes": 145970,
       "executable": false,
       "path": "scripts/paper_outputs.py",
-      "sha256": "22afd60815277075804c4f1f2e80c873028e722c9e7daf3390207279a14f9fc8"
+      "sha256": "54b26e8b5a43fe644ef89ec23ff282a42f8fbd4f5c8888ae8f52eadee1e73cca"
     },
     {
       "bytes": 21648,
@@ -7669,10 +7669,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 26779,
+      "bytes": 27684,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "2355816f39345d27506b2c921de91f26e6b9ddf23b923b7109a3a2a013eaf2a0"
+      "sha256": "fb636d8eeec7a7a0bf6c0781da2703e06a039a452aa6dd47c449de49423b37a5"
     },
     {
       "bytes": 23965,
@@ -8212,5 +8212,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "aaff8479d25f83b64e5374deef3ce02a4d274440119bfde896ca89c5b4da5c93"
+  "tree_sha256": "f09c720f53a5541fb14f5526c39b091a5476be8914562ef7439f85f030a17542"
 }

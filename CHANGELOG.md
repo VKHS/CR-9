@@ -23,9 +23,13 @@
 - Execution without Slurm on the CPU device: each E3-E6 study runs through `scripts/run_budget_study.py`
   (the study command of `hpc/run_budget_arms_arrhenius.sh`, with the same job-evidence directory and a
   `scheduler.json` recording that no allocation and no accounting exist); the accounting step skips such
-  studies, a fixture plan exports the partial campaign, and the budget-matched record set is marked synthetic
-  when a study is a software fixture. The E17 exports of a CPU plan skip the sacct capture and write the
-  declared partial sets (`--allow-partial`).
+  studies, the campaign manifest attaches the logs that hold something, the export takes the period of such a
+  campaign from the studies' own records instead of the accounting, a fixture plan exports the partial
+  campaign, and the budget-matched record set is marked synthetic when a study is a software fixture. The E17
+  exports of a CPU plan skip the sacct capture and write the declared partial sets (`--allow-partial`).
+- In a fixture plan, every exporter that can write the measured part of an incomplete set is given
+  `--allow-partial` (never into `records/`; the set lists the cells it lacks), and `collect` keeps a set whose
+  own provenance declares partial coverage; a paper artifact is refused as before.
 - Workflows: `demo-runs.yml` (the runs), `demo-graph.yml` (the plan and its first dependency level, sixteen
   runners), `demo-continue.yml` (the later levels and the exports; each job restores from earlier archives
   only the outputs its tasks depend on, `demo/restore.py`, with the producer code pinned to the planned
@@ -33,8 +37,13 @@
   with the job's own training call, `demo/grid_seeds.py`), `demo-sweep.yml` (Table S29 as a graph of its own),
   `demo-publish.yml` (merge the maps, pack each artifact, publish, rebuild, record: `demo/merge_maps.py`,
   `demo/pack_each.py`, `demo/report.py`) and `demo-verify.yml` (`make demo-paper` from a fresh clone).
-  `demo/execute.py` shares only unfinished tasks among runners and leaves named nodes to another workflow
-  (`--skip-node`). Tests: `tests/test_demo.py`, `tests/test_sweeps.py`.
+  `demo/execute.py` gives every runner of a level the same assignment, counted over all of the level's tasks
+  in an order drawn from the workflow run (`--salt`), so that tasks one run leaves unfinished spread over the
+  next run's runners; it leaves named nodes to another workflow (`--skip-node`) together with the nodes
+  waiting on them. The work archives keep every file a job wrote, including copies that preserve their
+  source's time; a restore can leave paths out (`--exclude`, `--exclude-pattern`), extract named files
+  (`--path`), keeps a study's job evidence with it, and a measurement level restores only the lifecycle runs
+  its tasks read (`demo/task_inputs.py`). Tests: `tests/test_demo.py`, `tests/test_sweeps.py`.
 
 ## 2026-11-09 — Protocol tables in the printed wording
 

@@ -218,6 +218,20 @@ class BudgetStudiesWithoutScheduler(unittest.TestCase):
             self.assertEqual(again.returncode, 2)                                       # never overwrites a study
 
 
+class BudgetProvenance(unittest.TestCase):
+    def test_a_campaign_without_accounting_takes_its_period_from_the_studies(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            campaign = Path(temporary)
+            for i, stamp in enumerate(("2026-11-10T09:55:00+00:00", "2026-11-10T10:40:00+00:00")):
+                study = campaign / "studies" / "ogbn-arxiv" / f"seed-{i}" / "split-0"
+                study.mkdir(parents=True)
+                (study / "experiment.json").write_text(json.dumps({"created_utc": stamp}), encoding="utf-8")
+                (study / "environment.json").write_text(json.dumps({"device": "cpu", "python": "3.12"}), encoding="utf-8")
+            hardware, period = po.derive_provenance({"kind": "budget", "campaign": str(campaign)})
+        self.assertEqual(period, "2026-11-10T09:55:00+00:00/2026-11-10T10:40:00+00:00")
+        self.assertTrue(hardware)
+
+
 class TimingWithoutScheduler(unittest.TestCase):
     """E17 on a CPU plan: no scheduler accounting to capture, and a partial measurement to declare."""
 
