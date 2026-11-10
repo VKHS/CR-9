@@ -70,7 +70,7 @@ jobs:
           python -B demo/execute.py --work "$WORK" --status
       - id: matrix
         run: |
-          echo "matrix=$(python -B demo/execute.py --work "$WORK" --matrix 16)" >> "$GITHUB_OUTPUT"
+          echo "matrix=$(python -B demo/execute.py --work "$WORK" --matrix 16 --salt "$GITHUB_RUN_ID")" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - name: Save the planned work directory
         run: |
@@ -96,7 +96,7 @@ jobs:
       - id: work
         name: Work for this runner
         run: |
-          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) <= len(m.get('l0', [])) else '0'))" '${{ needs.plan.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l0', []) else '0'))" '${{ needs.plan.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.work.outputs.here == '1'
@@ -122,7 +122,7 @@ jobs:
       - name: Execute this runner's variant
         if: steps.work.outputs.here == '1'
         run: |
-          python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" \
+          python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" --salt "$GITHUB_RUN_ID" \
             --parallel 1 --threads 4 --budget-minutes 300 --summary "$RUNNER_TEMP/summary.json"
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'

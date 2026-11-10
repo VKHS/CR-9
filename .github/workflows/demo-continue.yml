@@ -73,10 +73,10 @@ jobs:
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
           import json, os, subprocess
           matrix = json.loads(subprocess.check_output(["python3", "-B", "demo/execute.py", "--work", os.environ["WORK"],
-                                                       "--trust-markers", "--matrix", "16",
+                                                       "--trust-markers", "--matrix", "16", "--salt", "${{ github.run_id }}",
                                                        *"${{ steps.request.outputs.skip }}".split()]))
           plan = json.load(open(os.environ["WORK"] + "/plan.json"))
-          out = {key: len(value) for key, value in matrix.items()}
+          out = dict(matrix)        # per level, the shares that hold an unfinished task
           out["exports"] = [e["id"] for e in plan["exports"]]
           print("matrix=" + json.dumps(out))
           EOF
@@ -96,7 +96,7 @@ jobs:
       - id: work
         name: Work for this shard
         run: |
-          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) <= m.get('l0', 0) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l0', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.work.outputs.here == '1'
@@ -135,7 +135,7 @@ jobs:
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
-          python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" \
+          python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
             $( [ 0 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
@@ -174,7 +174,7 @@ jobs:
       - id: work
         name: Work for this shard
         run: |
-          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) <= m.get('l1', 0) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l1', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.work.outputs.here == '1'
@@ -213,7 +213,7 @@ jobs:
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
-          python -B demo/execute.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" \
+          python -B demo/execute.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
             $( [ 1 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
@@ -252,7 +252,7 @@ jobs:
       - id: work
         name: Work for this shard
         run: |
-          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) <= m.get('l2', 0) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l2', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.work.outputs.here == '1'
@@ -291,7 +291,7 @@ jobs:
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
-          python -B demo/execute.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" \
+          python -B demo/execute.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
             $( [ 2 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
@@ -330,7 +330,7 @@ jobs:
       - id: work
         name: Work for this shard
         run: |
-          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) <= m.get('l3', 0) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l3', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.work.outputs.here == '1'
@@ -369,7 +369,7 @@ jobs:
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
-          python -B demo/execute.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" \
+          python -B demo/execute.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
             $( [ 3 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
@@ -408,7 +408,7 @@ jobs:
       - id: work
         name: Work for this shard
         run: |
-          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) <= m.get('l4', 0) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l4', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.work.outputs.here == '1'
@@ -447,7 +447,7 @@ jobs:
       - name: Execute this shard
         if: steps.work.outputs.here == '1'
         run: |
-          python -B demo/execute.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" \
+          python -B demo/execute.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
             $( [ 4 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures

@@ -14,12 +14,21 @@
   demonstration artifacts, `reconstruct_paper.py` refuses to mix the two manifests, and no status in
   `STATEMENT_COMPLIANCE.md` depends on the demonstration; its separate section reports what the demonstration
   shows for each item.
-- The production planner gains `--device cpu`, `--s14-exclude` and `--horizon-sweep-profile/-ensemble`
-  (fixture plans; recorded among the plan's declared choices). `scripts/paper_artifacts.py` gains
-  `pack/publish/fetch/status/derive --demo`; `make demo-paper`, `demo-fetch` and `demo-status` use them.
-- Workflows: `demo-runs.yml` (the runs), `demo-graph.yml` (the production graph, sixteen shards per dependency
-  level), `demo-publish.yml` (pack, publish, rebuild, record) and `demo-verify.yml` (`make demo-paper` from a
-  fresh clone). Tests: `tests/test_demo.py`.
+- The production planner gains `--device cpu`, `--s14-exclude`, `--horizon-sweep-profile/-ensemble` and
+  `--horizon-sweep-beam` (fixture plans; recorded among the plan's declared choices). The Table S29 sweep can
+  hold a beam width its parent was not planned with (`run_sweep.py plan --beam`): every point outside the
+  parent's planner registry is then a variant lifecycle and no replicate of the parent's configuration is
+  planned. `scripts/paper_artifacts.py` gains `pack/publish/fetch/status/derive --demo`; `make demo-paper`,
+  `demo-fetch` and `demo-status` use them.
+- Workflows: `demo-runs.yml` (the runs), `demo-graph.yml` (the plan and its first dependency level, sixteen
+  runners), `demo-continue.yml` (the later levels and the exports; each job restores from earlier archives
+  only the outputs its tasks depend on, `demo/restore.py`, with the producer code pinned to the planned
+  commit), `demo-grid.yml` (the PascalVOC-SP E14 job, whose eighteen additional plants train on several runners
+  with the job's own training call, `demo/grid_seeds.py`), `demo-sweep.yml` (Table S29 as a graph of its own),
+  `demo-publish.yml` (merge the maps, pack each artifact, publish, rebuild, record: `demo/merge_maps.py`,
+  `demo/pack_each.py`, `demo/report.py`) and `demo-verify.yml` (`make demo-paper` from a fresh clone).
+  `demo/execute.py` shares only unfinished tasks among runners and leaves named nodes to another workflow
+  (`--skip-node`). Tests: `tests/test_demo.py`, `tests/test_sweeps.py`.
 
 ## 2026-11-09 — Protocol tables in the printed wording
 

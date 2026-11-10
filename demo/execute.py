@@ -13,11 +13,18 @@ finished). A runner that checkpointed (exit 75) is resumed by running its task a
 
 ``--budget-minutes`` stops starting tasks after that time so that a time-limited job can save
 its work; a later call continues where it stopped.
+
+``--shard i/n`` takes every n-th task of a level, counted over all of its tasks (complete or not), so
+every share agrees on the assignment whatever it has restored. With ``--salt`` the tasks are counted in
+an order drawn from the salt (every job of one workflow run passes the same): the tasks that one call
+left unfinished then spread over every share of the next call instead of falling to one share.
+``--matrix`` prints, per level, the shares that hold an unfinished task under the same assignment.
 """
 from __future__ import annotations
 
 import argparse
 import concurrent.futures as futures
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -32,6 +39,14 @@ if str(ROOT) not in sys.path:
 from scripts import paper_outputs as po  # noqa: E402
 
 CHECKPOINTED = 75
+
+
+def shares(tasks: list, shards: int, salt: str | None) -> dict:
+    """The share (1..shards) of every (node, task): every shards-th task, in an order drawn from the salt."""
+    order = list(tasks)
+    if salt:
+        order.sort(key=lambda t: hashlib.sha256(f"{salt}:{t[0]}:{t[1]}".encode()).hexdigest())
+    return {task: index % shards + 1 for index, task in enumerate(order)}
 
 
 def levels(plan: dict) -> dict[str, int]:
@@ -136,6 +151,8 @@ def main(argv=None) -> int:
     parser.add_argument("--node", action="append", default=None, help="only these nodes (repeatable)")
     parser.add_argument("--skip-node", action="append", default=[], metavar="NODE",
                         help="leave this node's tasks to another job (repeatable); --matrix does not count them")
+    parser.add_argument("--salt", default=None,
+                        help="count the tasks of a level in an order drawn from this value (the same in every share)")
     parser.add_argument("--shard", default="1/1", help="i/n: the i-th of n interleaved shares of the selected tasks")
     parser.add_argument("--parallel", type=int, default=1, help="tasks run at once (threads are shared)")
     parser.add_argument("--threads", type=int, default=os.cpu_count() or 1)
@@ -153,17 +170,17 @@ def main(argv=None) -> int:
     plan = po.load_plan(work)
     nodes = {n["id"]: n for n in plan["nodes"]}
     level = levels(plan)
+    ordered = [n for n in sorted(nodes, key=lambda n: (level[n], list(nodes).index(n))) if n not in args.skip_node]
     if args.matrix is not None:
-        counts: dict[int, int] = {}
-        for node_id, node in nodes.items():
-            if not node.get("blocked") and node_id not in args.skip_node:
-                pending = sum(task_state(work, node, k) not in ("COMPLETE", "SKIPPED")
-                              for k in range(max(1, len(node["tasks"]))))
-                if pending:
-                    counts[level[node_id]] = counts.get(level[node_id], 0) + pending
-        top = max(level.values(), default=-1)
-        print(json.dumps({f"l{k}": list(range(1, min(args.matrix, counts[k]) + 1))
-                          for k in range(top + 1) if counts.get(k)}))
+        matrix = {}
+        for current in sorted({level[n] for n in ordered}):
+            tasks = [(n, k) for n in ordered if level[n] == current for k in range(max(1, len(nodes[n]["tasks"])))]
+            share = shares(tasks, args.matrix, args.salt)
+            busy = sorted({share[(n, k)] for n, k in tasks if not nodes[n].get("blocked")
+                           and task_state(work, nodes[n], k) not in ("COMPLETE", "SKIPPED")})
+            if busy:
+                matrix[f"l{current}"] = busy
+        print(json.dumps(matrix))
         return 0
     if args.status:
         for node_id in sorted(nodes, key=lambda n: (level[n], n)):
@@ -173,19 +190,16 @@ def main(argv=None) -> int:
                   f"{sum(s in ('COMPLETE', 'SKIPPED') for s in states)}/{len(states)}")
         return 0
     shard, shards = (int(x) for x in args.shard.split("/"))
-    selected = [n for n in sorted(nodes, key=lambda n: (level[n], list(nodes).index(n)))
-                if (args.level is None or level[n] == args.level) and (not args.node or n in args.node)
-                and n not in args.skip_node]
+    selected = [n for n in ordered if (args.level is None or level[n] == args.level) and (not args.node or n in args.node)]
     deadline = None if args.budget_minutes is None else time.time() + 60 * args.budget_minutes
     threads = max(1, args.threads // max(1, args.parallel))
     results, skipped = [], []
     for current in sorted({level[n] for n in selected}):
         tasks = [(n, k) for n in selected if level[n] == current
                  for k in range(max(1, len(nodes[n]["tasks"])))]
-        # Shares are taken over the unfinished tasks only, so that the tasks one share left unfinished
-        # are spread over every share of a later call.
-        tasks = [t for t in tasks if task_state(work, nodes[t[0]], t[1]) not in ("COMPLETE", "SKIPPED")]
-        tasks = [t for i, t in enumerate(tasks) if i % shards == shard - 1]
+        share = shares(tasks, shards, args.salt)
+        tasks = [t for t in tasks if share[t] == shard
+                 and task_state(work, nodes[t[0]], t[1]) not in ("COMPLETE", "SKIPPED")]
         pending = []
         for node_id, index in tasks:
             ok, why = runnable(work, nodes, nodes[node_id])

@@ -55,16 +55,16 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 30404,
+      "bytes": 30615,
       "executable": false,
       "path": ".github/workflows/demo-continue.yml",
-      "sha256": "ff15e80f0068fdf268a8af8a8551aad87767a52f9153f76c3761453fd9c0ea69"
+      "sha256": "955bbcfa5b7c76bb73827f6581d17caa03aa99eaf19061533fe6a75ea04ae33e"
     },
     {
-      "bytes": 22963,
+      "bytes": 23082,
       "executable": false,
       "path": ".github/workflows/demo-graph.yml",
-      "sha256": "cb71b875f8069c4f080aa8e5265720862280ab4b44c4b98b3694b614540cc1ff"
+      "sha256": "9cb06a4e91f2eb63c8c7f004fd47033a8b475d8d15eebc89e0209cd1d5dbd17e"
     },
     {
       "bytes": 10494,
@@ -91,10 +91,10 @@
       "sha256": "f99e793bb749d34e7f80661050fb17a336331592af4587fcf9bed9e3f88bb760"
     },
     {
-      "bytes": 9246,
+      "bytes": 9289,
       "executable": false,
       "path": ".github/workflows/demo-sweep.yml",
-      "sha256": "70ed034bc6a30a65dc83180d5b398242edf1fdc44b4f049baddbd57447bcf1c9"
+      "sha256": "33db85c5d628191e31719659d2e8285958ca49b9586a37fffaf846dec7e01e83"
     },
     {
       "bytes": 2220,
@@ -127,10 +127,10 @@
       "sha256": "6ad6ecdbbce0e4db5388052246cf6b85b7f6e4a947b08eb07baf5bc8373ba2da"
     },
     {
-      "bytes": 43835,
+      "bytes": 44769,
       "executable": false,
       "path": "CHANGELOG.md",
-      "sha256": "eceefb9240cefde4c5fecc803a9e7b427bf8beca10cce5f8bb1f1c49b07b37ca"
+      "sha256": "526b7f159566be8a48b0bc123ddc766528b854a9437f6527a3d4ec120356b247"
     },
     {
       "bytes": 2319,
@@ -829,10 +829,10 @@
       "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
     },
     {
-      "bytes": 6429,
+      "bytes": 8910,
       "executable": false,
       "path": "demo/README.md",
-      "sha256": "2e873cdcf9c802f3f3ba38f57f045a1f1af2b0a07b9ca9400d469feb6779433b"
+      "sha256": "2a36c93d29cc91bb3b36260fe722fc8c1773761c55bbb2203b37af27fe393db9"
     },
     {
       "bytes": 1188,
@@ -853,10 +853,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 426,
+      "bytes": 1023,
       "executable": false,
       "path": "demo/continue-request.json",
-      "sha256": "a79256fd19e738bef598ed6d39a10c210b1ff9148c2c672d9bc7de7d31eeaed2"
+      "sha256": "536e5ee088c83078db896130d8fe32974b745b92a0a58609a9626dcf82298d30"
     },
     {
       "bytes": 9640,
@@ -865,10 +865,10 @@
       "sha256": "7808eb958716a99b0c580a0f3f1b06bb003f0d5b6debc016e47b757a50af9913"
     },
     {
-      "bytes": 11626,
+      "bytes": 12460,
       "executable": false,
       "path": "demo/execute.py",
-      "sha256": "565dee9e754606da7dd0a462916837a002259c55fb295ae8dc53a3a98633423a"
+      "sha256": "fa9e8aedd6477f03bfc515086e6268c3ffbd2ffff586806691f5d0e9c4f29691"
     },
     {
       "bytes": 1304,
@@ -7657,10 +7657,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 13467,
+      "bytes": 14266,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "55af84ecf6ce4eecc9a5576c2f0bea8411693b61e53368b582fcf31a702f3f29"
+      "sha256": "8143a46a0647a979702d6b2d1640909660ed1f052d0336ee5e2cde169d9de577"
     },
     {
       "bytes": 23965,
@@ -8200,5 +8200,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "25248830d093a7c819b7138520913f1fc671673a940ea53f56d0cc69850f1aa1"
+  "tree_sha256": "078c9ec9fe94c4a87cbbcc56350f468fbd3f9acb15d77aa8a720d5a216d99b40"
 }

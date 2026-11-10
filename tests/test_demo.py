@@ -115,6 +115,18 @@ class Executor(unittest.TestCase):
         self.assertEqual(execute.levels(plan), {"a": 0, "b": 1, "c": 2, "d": 0})
 
 
+    def test_every_share_agrees_and_leftovers_spread_under_a_new_salt(self):
+        execute = module("execute")
+        tasks = [("n%d" % (i // 10), i % 10) for i in range(64)]
+        plain = execute.shares(tasks, 16, None)
+        self.assertEqual([plain[t] for t in tasks[:17]], list(range(1, 17)) + [1])
+        first = execute.shares(tasks, 16, "run-1")
+        self.assertEqual(first, execute.shares(list(reversed(tasks)), 16, "run-1"))   # independent of any state
+        self.assertEqual(sorted(list(first.values()).count(k) for k in range(1, 17)), [4] * 16)
+        left = [t for t in tasks if first[t] == 16]                                    # one share ran out of time
+        second = execute.shares(tasks, 16, "run-2")
+        self.assertGreater(len({second[t] for t in left}), 1)
+
     def test_a_skipped_node_is_left_out_of_the_matrix_and_the_shares(self):
         import contextlib
         import io

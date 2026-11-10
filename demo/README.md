@@ -55,12 +55,25 @@ execution requires.
    dataset's eight stages (`run_cross_morse.py --device cpu`), Roman-empire as its ten split
    runs. Each sealed run is kept as a workflow artifact.
 2. [demo-graph.yml](../.github/workflows/demo-graph.yml) plans the repository's production graph
-   on those runs (`scripts/paper_outputs.py plan --allow-fixture --device cpu`), executes it
-   level by level ([execute.py](execute.py), the same `execute` entry point as the Slurm
-   workflow), collects the record sets, campaigns and environment, packs them
-   (`scripts/paper_artifacts.py pack --demo`), publishes the release `demo-artifacts`
-   (`publish --demo`), rebuilds every display from the release (`make demo-paper`), installs the
-   views under [published/](published/) (`derive --demo`) and writes [RESULTS.md](RESULTS.md).
+   on those runs (`scripts/paper_outputs.py plan --allow-fixture --device cpu`) and executes its first
+   dependency level on sixteen runners ([execute.py](execute.py), the same `execute` entry point as
+   the Slurm workflow; tasks are shared among runners by interleaving the unfinished ones).
+3. [demo-continue.yml](../.github/workflows/demo-continue.yml) executes the later levels and the
+   exports. The work directory outgrows one runner's disk, so every job restores from the earlier
+   jobs' archives only the outputs its own tasks depend on ([restore.py](restore.py)); the producer
+   code is pinned to the commit the graph was planned at, which `execute` and `collect` verify.
+4. [demo-grid.yml](../.github/workflows/demo-grid.yml) completes the one task longer than a runner's
+   six hours: the PascalVOC-SP job of E14 trains eighteen additional plants. Its unfinished seeds
+   train on several runners with the job's own training call ([grid_seeds.py](grid_seeds.py)), and
+   the graph task then finds them complete and computes the member predictions.
+5. [demo-sweep.yml](../.github/workflows/demo-sweep.yml) plans and runs the Table S29 sweep as a
+   graph of its own (`--only horizon_beam_sweep`, below).
+6. [demo-publish.yml](../.github/workflows/demo-publish.yml) adds the sweep's record set to the main
+   map ([merge_maps.py](merge_maps.py)), packs every artifact on its own
+   ([pack_each.py](pack_each.py), `scripts/paper_artifacts.py pack --demo`), publishes the release
+   `demo-artifacts` (`publish --demo`), rebuilds every display from the release (`make demo-paper`),
+   installs the views under [published/](published/) (`derive --demo`) and writes
+   [RESULTS.md](RESULTS.md).
 
 The same steps run on any machine with the recorded CPU environment:
 
@@ -70,10 +83,18 @@ python -B demo/configure.py --variant demo --dataset ogbn-arxiv --graph-npz GRAP
 python -B run_cross_morse.py --config CONFIGS/arxiv_demo.json --dataset ogbn-arxiv --data-root DATA \
     --output-dir RUNS/arxiv --device cpu --threads 4
 # ... every dataset; Roman-empire: --split-index 0..9 into RUNS/roman_empire/split_NN, no subset
-python -B scripts/paper_outputs.py plan --runs RUNS --work WORK --allow-fixture --device cpu --data-root DATA
+python -B scripts/paper_outputs.py plan --runs RUNS --work WORK --allow-fixture --device cpu --data-root DATA \
+    --s14-exclude Roman-empire --horizon-sweep-profile full --horizon-sweep-ensemble 1
 python -B demo/execute.py --work WORK --parallel 2
 python -B scripts/paper_outputs.py collect --work WORK
+# Table S29, as a graph of its own
+python -B scripts/paper_outputs.py plan --runs RUNS --work WORK_S29 --allow-fixture --device cpu --data-root DATA \
+    --only horizon_beam_sweep --horizon-sweep-profile full --horizon-sweep-ensemble 1 --horizon-sweep-beam 16
+python -B demo/execute.py --work WORK_S29 && python -B scripts/paper_outputs.py collect --work WORK_S29
+python -B demo/merge_maps.py WORK/paper-artifacts.map.json WORK_S29/paper-artifacts.map.json
 ```
+
+On one machine no task needs to be split: `demo/execute.py` runs the long E14 job like any other.
 
 ## Declared demonstration choices
 
@@ -82,19 +103,25 @@ The production graph records these in its plan (`declared_choices`):
 - **S14 family without Roman-empire** (`--s14-exclude Roman-empire`). The joint S14 family needs
   the ten Roman-empire split runs to share one route, and it cannot join benchmark and fixture
   parents. The ten demonstration splits selected different routes, and Roman-empire is the only
-  dataset run on its complete official graph, so the demonstration's S14 campaign and its E10
-  analysis cover the six reduced datasets (a partial family, which the planner admits only for
-  fixture plans).
-- **Swept configuration of Table S29** (`--horizon-sweep-profile full --horizon-sweep-ensemble 1`).
-  The demonstration's PascalVOC-SP run deploys no MPC-RH rule, so the horizon and beam sweep
-  names the configuration it sweeps.
+  dataset run on its complete official graph, so the family's test jobs run on the six reduced
+  datasets. The campaign is not assembled from them: `assemble_s14` refuses a partial family and
+  `check_campaign` admits only a non-synthetic campaign of all seven datasets
+  (`cm_campaigns/s14_builder.py`, `cm_campaigns/confirmation.py`).
+- **Swept configuration of Table S29** (`--horizon-sweep-profile full --horizon-sweep-ensemble 1
+  --horizon-sweep-beam 16`). The demonstration's PascalVOC-SP run deploys no MPC-RH rule, so the
+  sweep names the configuration it sweeps. That run was planned with the pilot planner (beam 4,
+  horizons 1 and 4), which holds neither the registered horizon 16 nor the registered beam width
+  16, so the sweep holds the registered beam width: each of its seven points is a variant
+  lifecycle of the run's configuration, and no replicate of the run's own configuration is
+  planned.
 
 ## What the demonstration cannot show
 
-[RESULTS.md](RESULTS.md) lists every artifact the demonstration did not produce, with the
-production graph's reason. Three need the author's resources by design: the fourteen external
-comparisons of E12 (`records:baselines`: the pinned upstream studies and adapters the author
-supplies), the E17 timing records (`records:runtime_scaling`, `records:timing_anchors`: Slurm
-accounting of GPU allocations, which hosted runners do not have; the repository does not
-emulate scheduler records) and a GPU environment (the demonstration records its CPU
-environment).
+[RESULTS.md](RESULTS.md) lists every artifact the demonstration does not hold, with the production
+graph's reason. By design they need the author's resources or benchmark runs: the fourteen
+external comparisons of E12 (`records:baselines`: the pinned upstream studies and adapters the
+author supplies), the E17 timing records (`records:runtime_scaling`, `records:timing_anchors`:
+Slurm accounting of GPU allocations, which hosted runners do not have; the repository does not
+emulate scheduler records), the S14 campaign and the confirmation record sets that read it
+(`campaign:confirmation`, `records:confirmation_contrasts`, `records:confirmation_sensitivity`;
+above) and a GPU environment (`environment:gpu` holds the capture of the CPU runner).
