@@ -181,10 +181,10 @@
       "sha256": "eea93895f5451636ddad948944ab05731634332beb88d240fcd3c62750926121"
     },
     {
-      "bytes": 18493,
+      "bytes": 20627,
       "executable": false,
       "path": "STATEMENT_COMPLIANCE.md",
-      "sha256": "db5168b7e0b78cfdc8e092ada1d5b09728e2c358abbdf9b9fe062994500d652e"
+      "sha256": "56b8066920b70500caf37dc8c5fb24ae268ca8278ca27eda24ce332d2d529a70"
     },
     {
       "bytes": 395,
@@ -835,6 +835,12 @@
       "sha256": "45583b0ea6481a22fa00b51ae7905f7a60b834c83af0efca8eea482469663c4d"
     },
     {
+      "bytes": 15119,
+      "executable": false,
+      "path": "demo/RESULTS.md",
+      "sha256": "4ac7b99a8e93b5d68256f8dd853031cd4efd759abf361eba34dfac5756cda9f3"
+    },
+    {
       "bytes": 1188,
       "executable": false,
       "path": "demo/artifact.sh",
@@ -911,6 +917,42 @@
       "executable": false,
       "path": "demo/publish-request.json",
       "sha256": "ee8e1c8594ffe83164719b0ce42dca2da1043c45bbaacb3118c3b1ac4e33adc4"
+    },
+    {
+      "bytes": 962,
+      "executable": false,
+      "path": "demo/published/graphs/arxiv_demo.json",
+      "sha256": "83e022068ed064e45aa10696a330e70776042d094d2dde1db698577652f75850"
+    },
+    {
+      "bytes": 1185,
+      "executable": false,
+      "path": "demo/published/graphs/coco_sp_demo.json",
+      "sha256": "dce690e9bd0e62d4520ae609761754e4b247c4cd516e87aad1f5daa227358ad7"
+    },
+    {
+      "bytes": 1197,
+      "executable": false,
+      "path": "demo/published/graphs/pascalvoc_sp_demo.json",
+      "sha256": "69c0a18b2f37c9bad536ea576a1d4a1b6d776b69437f576511b59ceae0c43554"
+    },
+    {
+      "bytes": 1195,
+      "executable": false,
+      "path": "demo/published/graphs/peptides_func_demo.json",
+      "sha256": "473ff37e01fed670843e9bc52d4c4f72a7767c81d4f168f8edf4060c93334dbd"
+    },
+    {
+      "bytes": 985,
+      "executable": false,
+      "path": "demo/published/graphs/products_demo.json",
+      "sha256": "01cdc15bc26ac2ef0787b23df92ae1bc54d65f0c5530ce9d36299904354510ac"
+    },
+    {
+      "bytes": 967,
+      "executable": false,
+      "path": "demo/published/graphs/proteins_demo.json",
+      "sha256": "fdfccced5c9e827eb60c46367267f92d928024408bce39a0162cc336dd332568"
     },
     {
       "bytes": 10586,
@@ -6841,6 +6883,12 @@
       "sha256": "fb908600c6587d332e6b2e9c8a1f7895cb159bc144f9e21aaa2ebc82651a2aa2"
     },
     {
+      "bytes": 87303,
+      "executable": false,
+      "path": "release/demo_artifacts.json",
+      "sha256": "f9561f74e9c0640ef5b8081eafe9ddc0381fb284c7885e8d18f832a7af12fb12"
+    },
+    {
       "bytes": 1618,
       "executable": false,
       "path": "release/experiment-map.md",
@@ -8218,5 +8266,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "b3ad440835f4602e3f8b64d477d4a7b319a889edee1c249a7d38d8be962b703b"
+  "tree_sha256": "2b8875e43b9ffaa78158ab0783bf39e27d2540203589e2bc882ec3b68f8af3dc"
 }

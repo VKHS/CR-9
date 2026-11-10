@@ -1,0 +1,41 @@
+{
+  "schema": "cross-morse-demo-graph-1",
+  "dataset": "Peptides-func",
+  "rule": {
+    "kind": "first_graphs",
+    "keep": {
+      "train": 1200,
+      "valid": 150,
+      "test": 150
+    }
+  },
+  "sizes": {
+    "graphs": {
+      "train": 1200,
+      "valid": 150,
+      "test": 150
+    },
+    "full_graphs": {
+      "train": 10873,
+      "valid": 2331,
+      "test": 2331
+    },
+    "nodes": 223414,
+    "directed_edges": 454732
+  },
+  "official_source": {
+    "source": "official_lrgb_raw_tensor_tuples",
+    "source_url": "https://www.dropbox.com/s/ycsq37q8sxs1ou8/peptidesfunc.zip?dl=1",
+    "source_files_sha256": {
+      "train.pt": "f79896a52fd153d75925d5975b7298b57bdf72f0250d9e4bddf1f976174f1a6e",
+      "val.pt": "14eb498022cefbabb7ca32a8220f0997469f6be40c438c3a1f94d1f1595c5b0f",
+      "test.pt": "49943419a7c3c301ccceeab76adbb3e84d9881920c6574eff573a57eb990e28d"
+    }
+  },
+  "npz": "peptides_func_demo.npz",
+  "npz_sha256": "f4596434ed5bc6bad38920456be12e43f5ae2cf81a03bd3f0034e8185f2877d9",
+  "npz_bytes": 170146076,
+  "builder": "demo/data.py",
+  "seconds": 13.8,
+  "scope": "Deterministic subset of the official data for the CPU demonstration; not the paper's dataset scale."
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "cross-morse-demo-graph-1",
+  "dataset": "ogbn-products",
+  "rule": {
+    "kind": "metis_parts",
+    "parts": 128,
+    "keep": 1,
+    "seed": 0
+  },
+  "sizes": {
+    "nodes": 18575,
+    "directed_edges": 718684,
+    "full_nodes": 2449029,
+    "full_directed_edges": 123718280,
+    "official_roles": {
+      "train": 852,
+      "valid": 277,
+      "test": 17446
+    },
+    "full_official_roles": {
+      "train": 196615,
+      "valid": 39323,
+      "test": 2213091
+    }
+  },
+  "official_source": {
+    "source": "official_ogb_raw",
+    "ogb_dataset_version": "1",
+    "official_split": "sales_ranking",
+    "source_url": "https://ogb.stanford.edu/docs/nodeprop/"
+  },
+  "npz": "products_demo.npz",
+  "npz_sha256": "0b71a23f5649fb3c862cb936e809633d3dba6a03bf6fff80e38991b6eb93f952",
+  "npz_bytes": 19227634,
+  "builder": "demo/data.py",
+  "seconds": 197.3,
+  "scope": "Deterministic subset of the official data for the CPU demonstration; not the paper's dataset scale."
+}
