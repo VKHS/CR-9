@@ -6337,10 +6337,10 @@
       "sha256": "d04a861678235474598964a7a6c206f79e74c21375a9434983ef961fd0a43969"
     },
     {
-      "bytes": 38839,
+      "bytes": 42060,
       "executable": false,
       "path": "paper/build/supplement.py",
-      "sha256": "e3943f127ecfc23ebc0db691fa767fe658cf885142a22b08311a2bad4a8db1b7"
+      "sha256": "3e641e58fe3afa5789b973b433239cd6f9633bcef478dd2bda9a9d48565215c1"
     },
     {
       "bytes": 28920,
@@ -6862,7 +6862,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "e173b683b5c82ef42fb1d110db6182d064d630d0d8ea7d1b117ab2bd82f662eb"
+      "sha256": "de5822349dfa48e9145d5c1a8b26d213ce8521befbabb0ec55a85edd8b44fc75"
     },
     {
       "bytes": 35593,
@@ -7405,16 +7405,16 @@
       "sha256": "e382688191772c068211254dfbf882e02a63c51ce5d3ce8df3d147f7ef44dd18"
     },
     {
-      "bytes": 35562,
+      "bytes": 36267,
       "executable": false,
       "path": "scripts/reconstruct.py",
-      "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
+      "sha256": "fce8a626d9cf17af85f668a7d234b5f18bd4cc64a62bb286a774ca677f1e7adb"
     },
     {
-      "bytes": 12229,
+      "bytes": 12254,
       "executable": false,
       "path": "scripts/reconstruct_paper.py",
-      "sha256": "8446b67611f1943c4618b86d2b7d96c9bdeca77136191e29fc62eeff90c18241"
+      "sha256": "81718be97568e004f67d40f05249836c8b4fa25c015b146839bfbdff9fe2088c"
     },
     {
       "bytes": 31729,
@@ -8173,10 +8173,10 @@
       "sha256": "3e7dc90eca271b76f5128e3c15331840df6ec305468ad58af2d093ae700e37d7"
     },
     {
-      "bytes": 16718,
+      "bytes": 21375,
       "executable": false,
       "path": "tests/test_supplement_build.py",
-      "sha256": "3fcb617594ac8ca5c7f38321ec5f579877aeb89975afa92306faa0e313b6b28e"
+      "sha256": "7b19ddb589177dfb3309925ad5a5a766b7421db3a40dab64d169d4886d690073"
     },
     {
       "bytes": 54018,
@@ -8266,5 +8266,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "2b8875e43b9ffaa78158ab0783bf39e27d2540203589e2bc882ec3b68f8af3dc"
+  "tree_sha256": "f04cded3a1997115beae74635081b92cf6f5c54d44ab22d991b603a145252685"
 }

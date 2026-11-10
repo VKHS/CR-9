@@ -143,7 +143,7 @@ def main(argv=None) -> int:
         result = reconstruct(args.output_dir, runs_root=found["runs_root"], records_index=found["records_index"],
                              confirmation_campaign=campaigns.pop("confirmation", None),
                              budget_campaign=campaigns.pop("budget", None), campaigns=campaigns,
-                             label=label)
+                             label=label, demonstration=args.demo)
     except (artifacts.ArtifactError, ReconstructionError, OSError, ValueError, KeyError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2

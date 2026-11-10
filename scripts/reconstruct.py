@@ -369,8 +369,12 @@ def verify_workspace(directory: Path) -> dict:
 
 def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=None,
                 confirmation_campaign=None, budget_campaign=None, campaigns=None,
-                label="reconstruction", root=ROOT) -> dict:
-    """Build in a new staging directory, then atomically publish a managed workspace."""
+                label="reconstruction", root=ROOT, demonstration=False) -> dict:
+    """Build in a new staging directory, then atomically publish a managed workspace.
+
+    ``demonstration`` (scripts/reconstruct_paper.py --demo) builds the supplementary displays of the CPU
+    demonstration from its fixture-derived record sets and campaign, labelled as such; a supplementary input that
+    still cannot be built is then reported among the generator errors instead of stopping the reconstruction."""
     root, output_dir = Path(root).resolve(), Path(output_dir).absolute()
     if not isinstance(label, str) or not label.strip() or "\n" in label or "|" in label:
         raise ReconstructionError("Build label must be nonempty text on one line, without a table separator")
@@ -441,15 +445,18 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
                            "display_ids": displays, "coverage": "columns",
                            "input_kind": "synthetic_examples" if entry["synthetic"] else "traced_measurement_records",
                            "note": "Set-level table; exact manuscript field and layout coverage is not inferred."}, ids)
-        supplementary = None
+        supplementary, supplementary_errors = None, {}
         if confirmation_campaign or budget_campaign or any(entry["set"] in {"factorials", "ensemble_grid"}
-                                                           and not entry["synthetic"] for entry in record_entries):
+                                                           and (demonstration or not entry["synthetic"])
+                                                           for entry in record_entries):
             from paper.build.supplement import build_supplement
             supplementary = build_supplement(stage / "supplement", records_index=records_index,
                                              confirmation_campaign=confirmation_campaign,
-                                             budget_campaign=budget_campaign, manuscript_root=root)
-            if supplementary.get("errors"):
+                                             budget_campaign=budget_campaign, manuscript_root=root,
+                                             demonstration=demonstration)
+            if supplementary.get("errors") and not demonstration:
                 raise ReconstructionError("Supplementary build failed: " + str(supplementary["errors"]))
+            supplementary_errors = {f"supplement:{row['input']}": row["error"] for row in supplementary.get("errors", [])}
             for entry in supplementary.get("outputs", []):
                 entry = {**entry, "files": ["supplement/" + name for name in entry["files"]]}
                 add_output(outputs, stage, entry, ids)
@@ -488,8 +495,8 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
                                                                 if r["status"] == "awaiting_inputs"),
                                          "without_generator": sum(1 for r in generated["displays"]
                                                                   if r["status"] == "no_generator"),
-                                         "errors": {r["id"]: r["error"] for r in generated["displays"]
-                                                    if r["status"] == "error"},
+                                         "errors": {**{r["id"]: r["error"] for r in generated["displays"]
+                                                       if r["status"] == "error"}, **supplementary_errors},
                                          "module_errors": generated.get("module_errors", {}),
                                          "comparison_sources": generated.get("comparison_sources", []),
                                          "comparison_coverage_complete": all(d["comparison_complete"] for d in displays),

@@ -155,6 +155,34 @@ class SupplementBuildTests(unittest.TestCase):
             self.assertEqual(report["status"], "FAIL")
             self.assertEqual(report["outputs"], [])
 
+    def test_the_demonstration_builds_from_its_fixture_sets_and_labels_every_output(self):
+        self.record("factorials", self.factorial_values(), synthetic=True)
+        self.record("ensemble_grid", self.ensemble_values(), synthetic=True)
+        refused = build_supplement(self.base / "paper", records_index=self.index)
+        self.assertEqual(refused["status"], "FAIL")
+        self.assertEqual(refused["outputs"], [])
+        out = self.base / "demonstration"
+        report = build_supplement(out, records_index=self.index, demonstration=True)
+        self.assertEqual(report["status"], "PASS", report["errors"])
+        self.assertTrue(report["demonstration"] and report["synthetic"] and report["synthetic_examples"])
+        self.assertTrue(report["outputs"])
+        for output in report["outputs"]:
+            self.assertTrue(output["synthetic"] and output["demonstration"])
+            self.assertEqual(output["input_kind"], "synthetic_examples")
+            self.assertTrue(output["note"].startswith("CPU DEMONSTRATION"))
+        self.assertIn("CPU DEMONSTRATION", (out / "tables/S16.md").read_text())
+        self.assertIn("CPU DEMONSTRATION", (out / "figures/ensemble_fit.svg").read_text())
+        self.assertEqual(sorted((row["record_set"], row["input_kind"], row["synthetic"]) for row in report["inputs"]
+                                if "record_set" in row),
+                         [("ensemble_grid", "demonstration_record_set", True), ("factorials", "demonstration_record_set", True)])
+        # an example set stays refused in the demonstration, and the paper's build carries no banner afterwards
+        self.record("ensemble_grid", self.ensemble_values(), synthetic=True, example="toy CPU worked example")
+        report = build_supplement(self.base / "example", records_index=self.index, demonstration=True)
+        self.assertIn("ensemble_grid", [row["input"] for row in report["errors"]])
+        self.record("factorials", self.factorial_values())
+        report = build_supplement(self.base / "after", records_index=self.index)
+        self.assertNotIn("CPU DEMONSTRATION", (self.base / "after/tables/S16.md").read_text())
+
     def test_ensemble_law_is_fit_to_original_points_with_exact_csv_plot_sources(self):
         self.record("ensemble_grid", self.ensemble_values())
         out = self.base / "ensemble"
@@ -192,6 +220,23 @@ class SupplementBuildTests(unittest.TestCase):
         self.assertEqual(sentinel.read_text(), "unchanged")
         with self.assertRaisesRegex(ValueError, "separate from all input"):
             build_supplement(self.records / "generated", records_index=self.index)
+
+    def test_the_demonstration_reconstruction_reports_a_supplementary_input_it_cannot_build(self):
+        from scripts.reconstruct import reconstruct
+        values = [row for row in self.factorial_values() if not (row[0]["dataset"] == "ogbn-arxiv" and row[0]["cell"] == "111")]
+        self.record("factorials", values, synthetic=True)
+        self.record("ensemble_grid", self.ensemble_values(), synthetic=True)
+        with contextlib.redirect_stdout(io.StringIO()):
+            paper = reconstruct(self.base / "paper_workspace", records_index=self.index, label="paper")
+            demonstration = reconstruct(self.base / "demonstration_workspace", records_index=self.index,
+                                        label="demonstration", demonstration=True)
+        # the paper's reconstruction does not build supplementary displays from synthetic sets
+        self.assertIsNone(paper["supplementary_build"])
+        errors = demonstration["display_generators"]["errors"]
+        self.assertIn("incomplete registered row", errors["supplement:factorials"])
+        self.assertNotIn("supplement:ensemble_grid", errors)
+        self.assertTrue(any(row["id"] == "ensemble_law_fit" and row["input_kind"] == "synthetic_examples"
+                            for row in demonstration["outputs"]))
 
     def test_record_symlinks_cannot_supply_values(self):
         path = self.record("ensemble_grid", self.ensemble_values())
@@ -278,6 +323,19 @@ class SupplementBuildTests(unittest.TestCase):
         rejected = build_supplement(self.base / "bad_campaign", budget_campaign=campaign)
         self.assertEqual(rejected["status"], "FAIL")
         self.assertEqual(rejected["outputs"], [])
+        # the CPU demonstration's campaign is replayed without the strict qualification, and labelled
+        with patch("cm_campaigns.arm_campaign.check_campaign", return_value=self.budget_fixture()) as check:
+            report = build_supplement(self.base / "budget_demonstration", budget_campaign=campaign, demonstration=True)
+        check.assert_called_once_with(campaign, study, strict=False)
+        self.assertEqual(report["status"], "PASS", report["errors"])
+        self.assertTrue(all(item["synthetic"] and item["input_kind"] == "synthetic_examples"
+                            and item["source_input_kind"] == "strict_budget_campaign" for item in report["outputs"]))
+        self.assertEqual([row["input_kind"] for row in report["inputs"]], ["demonstration_budget_campaign"])
+        short = dict(self.budget_fixture(), summary=self.budget_fixture()["summary"][:20])
+        with patch("cm_campaigns.arm_campaign.check_campaign", return_value=short):
+            report = build_supplement(self.base / "budget_short", budget_campaign=campaign, demonstration=True)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertIn("24 replayed contrasts", report["errors"][0]["error"])
 
     def test_missing_campaign_paths_are_errors_but_omitted_inputs_are_skipped(self):
         with contextlib.redirect_stdout(io.StringIO()):
