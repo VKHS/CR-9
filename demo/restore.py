@@ -74,7 +74,7 @@ def artifacts(run: str, prefix: str) -> list[tuple[int, str]]:
     found, page = [], 1
     while True:
         listing = json.loads(subprocess.check_output(
-            ["curl", "-fsSL", "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}", "-H",
+            ["curl", "-fsSL", "--retry", "8", "--retry-delay", "15", "--retry-all-errors", "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}", "-H",
              "Accept: application/vnd.github+json", f"{api}/actions/runs/{run}/artifacts?per_page=100&page={page}"]))
         rows = listing["artifacts"]
         found += [(a["id"], a["name"]) for a in rows if a["name"].startswith(prefix) and not a["expired"]]
@@ -127,7 +127,7 @@ def main(argv=None) -> int:
         for artifact_id, name in artifacts(run, prefix):
             with tempfile.TemporaryDirectory(prefix="restore-", dir=os.environ.get("RUNNER_TEMP")) as temporary:
                 archive = Path(temporary) / "artifact.zip"
-                subprocess.run(["curl", "-fsSL", "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}", "-o",
+                subprocess.run(["curl", "-fsSL", "--retry", "8", "--retry-delay", "15", "--retry-all-errors", "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}", "-o",
                                 str(archive), f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}"
                                 f"/actions/artifacts/{artifact_id}/zip"], check=True)
                 with zipfile.ZipFile(archive) as bundle:

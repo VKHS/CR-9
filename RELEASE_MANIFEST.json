@@ -823,16 +823,16 @@
       "sha256": "2e873cdcf9c802f3f3ba38f57f045a1f1af2b0a07b9ca9400d469feb6779433b"
     },
     {
-      "bytes": 1096,
+      "bytes": 1188,
       "executable": false,
       "path": "demo/artifact.sh",
-      "sha256": "9203a00056e42e0358a16a64ecc0af50dad73c6fe3cdcdc05e3e527bd2108e2d"
+      "sha256": "b518bf76410610c7f2a712875aef32f6100498b4d0e0533f114f3e9097d47bf2"
     },
     {
-      "bytes": 1453,
+      "bytes": 1545,
       "executable": false,
       "path": "demo/artifacts.sh",
-      "sha256": "378f422d961848f87fa36e0ea4ebd567048fc8c1531430d5d33267bf4794be4b"
+      "sha256": "7c7695dee46e3275bc1d505d54066fd5dd9fc910bd7cc5b777f7e385f8fe3a94"
     },
     {
       "bytes": 4491,
@@ -841,10 +841,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 131,
+      "bytes": 145,
       "executable": false,
       "path": "demo/continue-request.json",
-      "sha256": "b82d0ae27100653536abfb90a342364567bf1250830399df2b4f62750cf3e6dd"
+      "sha256": "ffbf3b77dccfda50d66f7758a42ee8521645c2721f141bba36be1b8b7c796b4b"
     },
     {
       "bytes": 9640,
@@ -877,10 +877,10 @@
       "sha256": "1c4631fcb3724a77f12f855f6078863c6165fbabf703a434b6c77e16b1095232"
     },
     {
-      "bytes": 6764,
+      "bytes": 6886,
       "executable": false,
       "path": "demo/restore.py",
-      "sha256": "3be6d532053c7d31adef9ae61136d209f19f5da4f7a8b1a0b9f84241fd525017"
+      "sha256": "62c810b50e5ab3f6455b9150a3393139716fb7b060a0ef1aeb3f839ad6b3cb20"
     },
     {
       "bytes": 2258,
@@ -8158,5 +8158,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "cc3514f1241f9e3527c14c82e5935070d934fc9e2100ffd11810864efe5405a7"
+  "tree_sha256": "56c36b8dc4c30088a9a7e488e2c18e83dcec5b04b8c42a0fdcaba02ce49a4ae6"
 }

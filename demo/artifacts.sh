@@ -8,7 +8,7 @@ auth=(-H "Authorization: Bearer ${GH_TOKEN:?}" -H "Accept: application/vnd.githu
 mkdir -p "${dest}"
 page=1
 while :; do
-  listing="$(curl -fsSL "${auth[@]}" "${api}/actions/runs/${run}/artifacts?per_page=100&page=${page}")"
+  listing="$(curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors "${auth[@]}" "${api}/actions/runs/${run}/artifacts?per_page=100&page=${page}")"
   rows="$(printf '%s' "${listing}" | python3 -c 'import json,sys
 p=sys.argv[1]
 for a in json.load(sys.stdin)["artifacts"]:
@@ -17,7 +17,7 @@ for a in json.load(sys.stdin)["artifacts"]:
   while read -r id name; do
     [[ -n "${id:-}" ]] || continue
     mkdir -p "${dest}/${name}"
-    curl -fsSL "${auth[@]}" -o "${dest}/${name}/.artifact.zip" "${api}/actions/artifacts/${id}/zip"
+    curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors "${auth[@]}" -o "${dest}/${name}/.artifact.zip" "${api}/actions/artifacts/${id}/zip"
     python3 -c 'import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])' "${dest}/${name}/.artifact.zip" "${dest}/${name}"
     rm -f "${dest}/${name}/.artifact.zip"
     echo "downloaded ${name}"
