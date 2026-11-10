@@ -85,6 +85,7 @@ def artifacts(run: str, prefix: str) -> list[tuple[int, str]]:
 
 
 EXCLUDED: list[str] = []      # path prefixes (relative to /) left out of every extraction (--exclude)
+PATTERNS: list[str] = []      # wildcard patterns of member names left out (--exclude-pattern)
 
 
 def extract(archive_zip: Path, prefixes: list[str] | None) -> str:
@@ -92,6 +93,8 @@ def extract(archive_zip: Path, prefixes: list[str] | None) -> str:
     members = subprocess.check_output(["unzip", "-Z1", str(archive_zip)], text=True).split()
     report = []
     exclude = ["--anchored", *(f"--exclude={p.rstrip('/')}" for p in EXCLUDED)] if EXCLUDED else []
+    if PATTERNS:
+        exclude += ["--no-anchored", "--wildcards", *(f"--exclude={p}" for p in PATTERNS)]
     for member in (m for m in members if m.endswith(".tar.gz")):
         names = [p.rstrip("/") for p in prefixes] if prefixes is not None else []
         unzip = subprocess.Popen(["unzip", "-p", str(archive_zip), member], stdout=subprocess.PIPE)
@@ -113,7 +116,7 @@ def level_of(name: str) -> str:
 
 
 def fetch_and_extract(artifact_id: int, name: str, prefixes) -> str:
-    with tempfile.TemporaryDirectory(prefix="restore-", dir=os.environ.get("RUNNER_TEMP")) as temporary:
+    with tempfile.TemporaryDirectory(prefix="restore-", dir=os.environ.get("DEMO_TEMP") or os.environ.get("RUNNER_TEMP")) as temporary:
         archive = Path(temporary) / "artifact.zip"
         subprocess.run(["curl", "-fsSL", "--retry", "8", "--retry-delay", "15", "--retry-all-errors", "-H",
                         f"Authorization: Bearer {os.environ['GH_TOKEN']}", "-o", str(archive),
@@ -136,7 +139,10 @@ def main(argv=None) -> int:
     parser.add_argument("--exclude", action="append", default=[], metavar="PATH",
                         help="leave this path (and everything below it) out of the extraction (repeatable)")
     parser.add_argument("--exclude-from", type=Path, default=None, help="a file of such paths, one per line")
+    parser.add_argument("--exclude-pattern", action="append", default=[], metavar="GLOB",
+                        help="leave out every member whose name matches this wildcard (repeatable), e.g. '*.pt'")
     args = parser.parse_args(argv)
+    PATTERNS[:] = list(args.exclude_pattern)
     EXCLUDED[:] = [p.lstrip("/") for p in args.exclude]
     if args.exclude_from is not None and args.exclude_from.is_file():
         EXCLUDED.extend(line.strip().lstrip("/") for line in args.exclude_from.read_text().splitlines() if line.strip())

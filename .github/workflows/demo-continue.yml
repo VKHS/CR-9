@@ -50,6 +50,7 @@ jobs:
       skip: ${{ steps.request.outputs.skip }}
       work: ${{ steps.request.outputs.work }}
       excludes: ${{ steps.request.outputs.excludes }}
+      patterns: ${{ steps.request.outputs.patterns }}
       previous_exports: ${{ steps.request.outputs.previous_exports }}
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
@@ -70,6 +71,7 @@ jobs:
           print("skip=" + " ".join("--skip-node %s" % node for node in r.get("skip_nodes") or []))
           print("work=" + (r.get("work") or "/home/runner/demo/work"))
           print("excludes=" + json.dumps(r.get("export_excludes") or {}))
+          print("patterns=" + json.dumps(r.get("export_exclude_patterns") or {}))
           print("previous_exports=" + " ".join("--run %s --prefix %s" % (run, prefix)
                                                for run, prefix in r.get("previous_exports") or []))
           EOF
@@ -132,6 +134,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
       - name: Inputs and the outputs this level depends on
         if: steps.work.outputs.here == '1'
         run: |
@@ -213,6 +227,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
       - name: Inputs and the outputs this level depends on
         if: steps.work.outputs.here == '1'
         run: |
@@ -297,6 +323,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
       - name: Inputs and the outputs this level depends on
         if: steps.work.outputs.here == '1'
         run: |
@@ -381,6 +419,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
       - name: Inputs and the outputs this level depends on
         if: steps.work.outputs.here == '1'
         run: |
@@ -465,6 +515,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
       - name: Inputs and the outputs this level depends on
         if: steps.work.outputs.here == '1'
         run: |
@@ -548,6 +610,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.export != ''
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
       - name: Inputs and the outputs this export reads
         if: steps.work.outputs.export != ''
         run: |
@@ -555,7 +629,10 @@ jobs:
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
           python3 -c "import json,os,sys; e=json.loads(sys.argv[1]).get(sys.argv[2]) or []; print('\n'.join(os.path.join(os.environ['WORK'], p).lstrip('/') for p in e))" \
             '${{ needs.setup.outputs.excludes }}' "${{ steps.work.outputs.export }}" > "$RUNNER_TEMP/excludes.txt"
-          python -B demo/restore.py --work "$WORK" --export "${{ steps.work.outputs.export }}" --exclude-from "$RUNNER_TEMP/excludes.txt" \
+          patterns=$(python3 -c "import json,shlex,sys; print(' '.join('--exclude-pattern ' + shlex.quote(p) for p in json.loads(sys.argv[1]).get(sys.argv[2]) or []))" \
+            '${{ needs.setup.outputs.patterns }}' "${{ steps.work.outputs.export }}")
+          echo "left out of this restore: $(cat "$RUNNER_TEMP/excludes.txt" | wc -l) path(s); $patterns"
+          eval python -B demo/restore.py --work "\"$WORK\"" --export "${{ steps.work.outputs.export }}" --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" $patterns \
             ${{ needs.setup.outputs.previous }} \
             --run "$GITHUB_RUN_ID" --prefix demo-work-L
       - name: Export
@@ -599,6 +676,17 @@ jobs:
         run: |
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
       - name: Runs, plan, markers and every export
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
