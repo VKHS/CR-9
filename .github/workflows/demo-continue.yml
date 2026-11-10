@@ -57,6 +57,7 @@ jobs:
       previous_exports: ${{ steps.request.outputs.previous_exports }}
       plan_sources: ${{ steps.request.outputs.plan_sources }}
       matrix: ${{ steps.matrix.outputs.matrix }}
+      collect_only: ${{ steps.matrix.outputs.collect_only }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -91,6 +92,10 @@ jobs:
       - id: matrix
         name: Pending tasks per level and exports of the plan
         run: |
+          if python3 -c "import json,sys; sys.exit(0 if json.load(open('demo/continue-request.json')).get('collect_only') else 1)"; then
+            # the publication map from the exports of earlier runs alone: no level and no export runs here
+            echo 'matrix={"exports": []}' >> "$GITHUB_OUTPUT"; echo "collect_only=1" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           python3 -B demo/restore.py --work "$WORK" --run "${{ steps.request.outputs.graph }}" --prefix demo-work-base --all
           python3 -B demo/restore.py --work "$WORK" --node __markers_only__ ${{ steps.request.outputs.previous }}
           python3 -B demo/execute.py --work "$WORK" --trust-markers --status | grep -v COMPLETE | head -60 || true
@@ -604,7 +609,8 @@ jobs:
   export:
     name: Export ${{ matrix.slot }}
     needs: [setup, level0, level1, level2, level3, level4]
-    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    # no runner for an empty list of exports
+    if: ${{ !cancelled() && needs.setup.result == 'success' && toJSON(fromJSON(needs.setup.outputs.matrix).exports) != '[]' }}
     env:
       WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
@@ -718,8 +724,10 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          python -B demo/restore.py --work "$WORK" --node __markers_only__ \
-            ${{ needs.setup.outputs.previous }} --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          if [ "${{ needs.setup.outputs.collect_only }}" != 1 ]; then
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              ${{ needs.setup.outputs.previous }} --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
           python -B demo/restore.py --work "$WORK" --all ${{ needs.setup.outputs.previous_exports }} --run "$GITHUB_RUN_ID" --prefix demo-export-
       - name: Collect the publication map
         run: |
