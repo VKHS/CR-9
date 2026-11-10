@@ -51,6 +51,7 @@ jobs:
       work: ${{ steps.request.outputs.work }}
       excludes: ${{ steps.request.outputs.excludes }}
       patterns: ${{ steps.request.outputs.patterns }}
+      includes: ${{ steps.request.outputs.includes }}
       level_patterns: ${{ steps.request.outputs.level_patterns }}
       parallel: ${{ steps.request.outputs.parallel }}
       previous_exports: ${{ steps.request.outputs.previous_exports }}
@@ -75,6 +76,7 @@ jobs:
           print("work=" + (r.get("work") or "/home/runner/demo/work"))
           print("excludes=" + json.dumps(r.get("export_excludes") or {}))
           print("patterns=" + json.dumps(r.get("export_exclude_patterns") or {}))
+          print("includes=" + json.dumps(r.get("export_include_patterns") or {}))
           # members left out of every level's restore, e.g. the exploration trajectories the measurements do not read
           print("level_patterns=" + " ".join("--exclude-pattern '%s'" % g for g in r.get("level_exclude_patterns") or []))
           print("parallel=%d" % int(r.get("restore_parallel") or 4))
@@ -654,8 +656,8 @@ jobs:
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
           python3 -c "import json,os,sys; e=json.loads(sys.argv[1]).get(sys.argv[2]) or []; print('\n'.join(os.path.join(os.environ['WORK'], p).lstrip('/') for p in e))" \
             '${{ needs.setup.outputs.excludes }}' "${{ steps.work.outputs.export }}" > "$RUNNER_TEMP/excludes.txt"
-          patterns=$(python3 -c "import json,shlex,sys; print(' '.join('--exclude-pattern ' + shlex.quote(p) for p in json.loads(sys.argv[1]).get(sys.argv[2]) or []))" \
-            '${{ needs.setup.outputs.patterns }}' "${{ steps.work.outputs.export }}")
+          patterns=$(python3 -c "import json,shlex,sys; print(' '.join('--exclude-pattern ' + shlex.quote(p) for p in json.loads(sys.argv[1]).get(sys.argv[2]) or []) + ' ' + ' '.join('--include-pattern ' + shlex.quote(p) for p in json.loads(sys.argv[3]).get(sys.argv[2]) or []))" \
+            '${{ needs.setup.outputs.patterns }}' "${{ steps.work.outputs.export }}" '${{ needs.setup.outputs.includes }}')
           echo "left out of this restore: $(cat "$RUNNER_TEMP/excludes.txt" | wc -l) path(s); $patterns"
           eval python -B demo/restore.py --work "\"$WORK\"" --export "${{ steps.work.outputs.export }}" --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" $patterns \
             ${{ needs.setup.outputs.previous }} \

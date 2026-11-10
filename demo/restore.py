@@ -88,6 +88,7 @@ def artifacts(run: str, prefix: str) -> list[tuple[int, str]]:
 
 EXCLUDED: list[str] = []      # path prefixes (relative to /) left out of every extraction (--exclude)
 PATTERNS: list[str] = []      # wildcard patterns of member names left out (--exclude-pattern)
+WILDCARD_SLASH = [False]      # '*' of the selected names matches across '/' (--include-pattern)
 
 
 def extract(archive_zip: Path, prefixes: list[str] | None) -> str:
@@ -102,7 +103,9 @@ def extract(archive_zip: Path, prefixes: list[str] | None) -> str:
         unzip = subprocess.Popen(["unzip", "-p", str(archive_zip), member], stdout=subprocess.PIPE)
         # A directory name extracts everything below it; a name absent from this archive is not an error here.
         tar = subprocess.run(["tar", "-xzf", "-", "-C", "/", "--no-same-owner", *exclude,
-                              *(["--anchored", "--wildcards"] if names else []), *names], stdin=unzip.stdout,
+                              *(["--anchored", "--wildcards"] if names else []),
+                              *(["--wildcards-match-slash"] if names and WILDCARD_SLASH[0] else []), *names],
+                             stdin=unzip.stdout,
                              capture_output=True, text=True)
         unzip.stdout.close()
         unzip.wait()
@@ -142,6 +145,9 @@ def main(argv=None) -> int:
     parser.add_argument("--exclude", action="append", default=[], metavar="PATH",
                         help="leave this path (and everything below it) out of the extraction (repeatable)")
     parser.add_argument("--exclude-from", type=Path, default=None, help="a file of such paths, one per line")
+    parser.add_argument("--include-pattern", action="append", default=[], metavar="GLOB",
+                        help="below each selected output, extract only the members matching this wildcard (repeatable; "
+                             "'*' matches across '/'), e.g. '*.json' for an export that reads only the runs' records")
     parser.add_argument("--path", action="append", default=[], metavar="FILE",
                         help="extract exactly this file (repeatable); instead of the selection of --level/--node/--export")
     parser.add_argument("--exclude-pattern", action="append", default=[], metavar="GLOB",
@@ -167,6 +173,11 @@ def main(argv=None) -> int:
         plan = read_json(args.work / "plan.json")
         needed, prefixes = selection(plan, args.work, level=args.level, nodes=args.node, export=args.export)
         print(f"nodes needed: {len(needed)}: {', '.join(sorted(needed))[:2000]}")
+        if args.include_pattern:
+            state = str(args.work / "state").lstrip("/") + "/"
+            outputs = sorted({p.rstrip("/") for p in prefixes if p != state and "*" not in p})
+            prefixes = [state] + [f"{o}/{g}" for o in outputs for g in args.include_pattern]
+            WILDCARD_SLASH[0] = True
         if args.plan_only:
             print("\n".join(prefixes))
             return 0

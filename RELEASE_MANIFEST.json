@@ -55,10 +55,10 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 42993,
+      "bytes": 43279,
       "executable": false,
       "path": ".github/workflows/demo-continue.yml",
-      "sha256": "7de29a556cee21055a33b06504f9e2b2169d364e8fba5918f8e7b5ddebe64cbd"
+      "sha256": "b06ea9e04698a8f1048a57737b4b1d0a22185167001dc5d187a56d7f9a679188"
     },
     {
       "bytes": 24834,
@@ -853,10 +853,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 1565,
+      "bytes": 1659,
       "executable": false,
       "path": "demo/continue-request.json",
-      "sha256": "840f1c28cf454e05e9bb25f705004e400ccbba8d361ce260437cf193786c73c7"
+      "sha256": "beeb386f5deec8e46b5c7d67324866a646bb23329d917d721b60a9800d187dfc"
     },
     {
       "bytes": 9640,
@@ -913,10 +913,10 @@
       "sha256": "9655c9523f3dfe580f53085e64606c9eab17e14aa11a20111b70313b51349647"
     },
     {
-      "bytes": 9900,
+      "bytes": 10778,
       "executable": false,
       "path": "demo/restore.py",
-      "sha256": "5707fac3aa34047917596e7356cce9262bb606125f788232ee41dd5544936f40"
+      "sha256": "174836b4cffb4cd3dd21e0dac363bd90d2f87f0700ad6130c61ddd4f97609fe4"
     },
     {
       "bytes": 2258,
@@ -7669,10 +7669,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 27684,
+      "bytes": 29546,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "fb636d8eeec7a7a0bf6c0781da2703e06a039a452aa6dd47c449de49423b37a5"
+      "sha256": "2348dc30647065c7663f720ffa69af8b79da8c0d22370a834b9d11aca05ca9ef"
     },
     {
       "bytes": 23965,
@@ -8212,5 +8212,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "036c989c8435191c1d95a2706aa8d8243d96484a648c9a3d3a2cb470bd6acee8"
+  "tree_sha256": "8627ad7113ffad2f873ee6c974302f5dadfdf1d24dc0879caa7e3353d5d0c757"
 }

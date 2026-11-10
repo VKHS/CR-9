@@ -340,6 +340,40 @@ class Restore(unittest.TestCase):
         self.assertEqual(got, ["budget/studies/a/seed-0.job-local-1/process_exit_code.txt",
                                "budget/studies/a/seed-0/ARTIFACT_MANIFEST.json", "state/n/task-0.json"])
 
+    def test_an_include_pattern_extracts_only_the_matching_members(self):
+        import shutil
+        import subprocess
+        import zipfile
+        if not (shutil.which("unzip") and shutil.which("tar")):
+            self.skipTest("unzip and GNU tar are required")
+        restore = module("restore")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            work = root / "w"
+            files = {"exp/plan.json": "{}", "exp/runs/a/select/decision.json": "{}", "exp/runs/a/train/p.pt": "x",
+                     "exp/runs/a/prepared/splits.npz": "s", "exp/runs/a/prepared/graph.npz": "g",
+                     "state/n/task-0.json": "{}"}
+            for name, text in files.items():
+                (work / name).parent.mkdir(parents=True, exist_ok=True)
+                (work / name).write_text(text)
+            archive = root / "delta.tar.gz"
+            subprocess.run(["tar", "-czf", str(archive), "-C", "/", *[str(work / n).lstrip("/") for n in files]],
+                           check=True)
+            shutil.rmtree(work)
+            bundle = root / "artifact.zip"
+            with zipfile.ZipFile(bundle, "w") as handle:
+                handle.write(archive, "delta.tar.gz")
+            output = str(work / "exp").lstrip("/")
+            restore.WILDCARD_SLASH[0] = True
+            try:
+                restore.extract(bundle, [str(work / "state").lstrip("/") + "/", f"{output}/*.json",
+                                         f"{output}/*/prepared/splits.npz"])
+            finally:
+                restore.WILDCARD_SLASH[0] = False
+            got = sorted(str(p.relative_to(work)) for p in work.rglob("*") if p.is_file())
+        self.assertEqual(got, ["exp/plan.json", "exp/runs/a/prepared/splits.npz", "exp/runs/a/select/decision.json",
+                               "state/n/task-0.json"])
+
 
 class PartialExports(unittest.TestCase):
     def test_a_fixture_plan_lets_partial_exporters_write_the_measured_part(self):
