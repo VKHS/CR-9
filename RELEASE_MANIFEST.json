@@ -853,10 +853,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 1023,
+      "bytes": 292,
       "executable": false,
       "path": "demo/continue-request.json",
-      "sha256": "536e5ee088c83078db896130d8fe32974b745b92a0a58609a9626dcf82298d30"
+      "sha256": "6d7a562a384bd4d4b53264cf1eb8794b2f732524b030ed4ade580bfd52464439"
     },
     {
       "bytes": 9640,
@@ -937,10 +937,10 @@
       "sha256": "056af152c10f38470d3c0bda34d52f8ed60542fcd3fb07a1a0c74e6838836afc"
     },
     {
-      "bytes": 1000,
+      "bytes": 1174,
       "executable": false,
       "path": "demo/work_delta.sh",
-      "sha256": "66828f0f9bc2eabba14ce9084c9c59c0ceb02020dba14fd759d06dec990cdbe4"
+      "sha256": "61615b6f047ec731d02ebfc5734fd4163b6c022f2804e53ff774e52b3a844e68"
     },
     {
       "bytes": 4935,
@@ -8206,5 +8206,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "fefb13028d1e37d1d84e7ab192ed298a620d054185892ced11c103945e06185e"
+  "tree_sha256": "95d3233df240eefb733c3f707590d39c8799546db27b6dbebcc7fc6139687e18"
 }
