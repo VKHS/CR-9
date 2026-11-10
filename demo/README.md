@@ -66,9 +66,15 @@ execution requires.
    six hours: the PascalVOC-SP job of E14 trains eighteen additional plants. Its unfinished seeds
    train on several runners with the job's own training call ([grid_seeds.py](grid_seeds.py)), and
    the graph task then finds them complete and computes the member predictions.
-5. [demo-sweep.yml](../.github/workflows/demo-sweep.yml) plans and runs the Table S29 sweep as a
-   graph of its own (`--only horizon_beam_sweep`, below).
-6. [demo-publish.yml](../.github/workflows/demo-publish.yml) adds the sweep's record set to the main
+5. Three record sets come from graphs of their own, each planned for its artifacts alone (`--only`)
+   in its own work directory, because the main graph was planned before the CPU paths below existed:
+   the Table S29 sweep ([demo-sweep.yml](../.github/workflows/demo-sweep.yml), below), the E3-E6
+   campaign and the E17 timing records ([demo-graph.yml](../.github/workflows/demo-graph.yml) with
+   `plan_options`). On the CPU device the planner runs each E3-E6 study through
+   `scripts/run_budget_study.py` (the study command of the Slurm batch script, with the same job
+   evidence, recording that no scheduler allocation exists) and exports the timings as declared
+   partial measurements.
+6. [demo-publish.yml](../.github/workflows/demo-publish.yml) adds those graphs' artifacts to the main
    map ([merge_maps.py](merge_maps.py)), packs every artifact on its own
    ([pack_each.py](pack_each.py), `scripts/paper_artifacts.py pack --demo`), publishes the release
    `demo-artifacts` (`publish --demo`), rebuilds every display from the release (`make demo-paper`),
@@ -120,8 +126,14 @@ The production graph records these in its plan (`declared_choices`):
 [RESULTS.md](RESULTS.md) lists every artifact the demonstration does not hold, with the production
 graph's reason. By design they need the author's resources or benchmark runs: the fourteen
 external comparisons of E12 (`records:baselines`: the pinned upstream studies and adapters the
-author supplies), the E17 timing records (`records:runtime_scaling`, `records:timing_anchors`:
-Slurm accounting of GPU allocations, which hosted runners do not have; the repository does not
-emulate scheduler records), the S14 campaign and the confirmation record sets that read it
+author supplies), the S14 campaign and the confirmation record sets that read it
 (`campaign:confirmation`, `records:confirmation_contrasts`, `records:confirmation_sensitivity`;
 above) and a GPU environment (`environment:gpu` holds the capture of the CPU runner).
+
+Two groups are present in a declared partial form. The E3-E6 campaign (`campaign:budget`,
+`records:budget_matched`) is the partial campaign export: its studies ran on fixture parents
+without scheduler allocations, so `cm_experiments/campaign.export_campaign` records each study's
+qualification blockers (software fixture, missing accounting) and the record set is marked
+synthetic. The E17 timing records (`records:runtime_scaling`, `records:timing_anchors`) time the
+deployed rule on CPU without GPU allocations; each set records why its measurement is incomplete
+(`incomplete_measurement`). The repository does not emulate scheduler records.

@@ -246,6 +246,19 @@ class TimingWithoutScheduler(unittest.TestCase):
         self.assertFalse(any("--allow-partial" in step for step in gpu_steps))
 
 
+class PartialCoverage(unittest.TestCase):
+    def test_only_a_fixture_plan_admits_a_set_that_declares_partial_coverage(self):
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "runtime_scaling"
+            path.mkdir()
+            (path / "provenance.json").write_text(json.dumps({"coverage_complete": False}), encoding="utf-8")
+            with mock.patch("scripts.records.verify_set", return_value={"synthetic": True}):
+                self.assertEqual(po.verify_record_set(path, allow_fixture=True), {"synthetic": True})
+                with self.assertRaises(po.PlanError):
+                    po.verify_record_set(path, allow_fixture=False)
+
+
 class Channels(unittest.TestCase):
     def published(self, relationship: str, scientific: bool) -> dict:
         part = {"asset": "x.complete-0.tar.gz", "bytes": 10, "sha256": "0" * 64,

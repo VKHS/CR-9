@@ -2229,7 +2229,9 @@ def verify_record_set(path: Path, *, allow_fixture: bool) -> dict:
     if entry.get("synthetic") and not allow_fixture:
         raise PlanError(f"{path.name}: a synthetic record set is not a paper artifact")
     provenance = read_json(path / "provenance.json")
-    if provenance.get("coverage_complete") is False:
+    # A fixture plan (a software check or the CPU demonstration) may hold a set whose own provenance declares
+    # partial coverage, e.g. timings without a peak-memory reading on CPU; a paper artifact never does.
+    if provenance.get("coverage_complete") is False and not allow_fixture:
         raise PlanError(f"{path.name}: partial coverage (provenance coverage_complete = false)")
     if not allow_fixture:
         from scripts.paper_artifacts import _verify_source

@@ -20,6 +20,12 @@
   parent's planner registry is then a variant lifecycle and no replicate of the parent's configuration is
   planned. `scripts/paper_artifacts.py` gains `pack/publish/fetch/status/derive --demo`; `make demo-paper`,
   `demo-fetch` and `demo-status` use them.
+- Execution without Slurm on the CPU device: each E3-E6 study runs through `scripts/run_budget_study.py`
+  (the study command of `hpc/run_budget_arms_arrhenius.sh`, with the same job-evidence directory and a
+  `scheduler.json` recording that no allocation and no accounting exist); the accounting step skips such
+  studies, a fixture plan exports the partial campaign, and the budget-matched record set is marked synthetic
+  when a study is a software fixture. The E17 exports of a CPU plan skip the sacct capture and write the
+  declared partial sets (`--allow-partial`).
 - Workflows: `demo-runs.yml` (the runs), `demo-graph.yml` (the plan and its first dependency level, sixteen
   runners), `demo-continue.yml` (the later levels and the exports; each job restores from earlier archives
   only the outputs its tasks depend on, `demo/restore.py`, with the producer code pinned to the planned
