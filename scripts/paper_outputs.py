@@ -2213,10 +2213,14 @@ def write_budget_manifest(step: dict, repository: dict) -> None:
     rows = []
     for study in step["studies"]:
         evidence = budget_evidence(Path(study["study"]))
+        logs = [evidence / "stdout.log", evidence / "stderr.log"]
+        if unscheduled(evidence):
+            # outside a scheduler an empty stream is not written over: there is nothing to attach
+            logs = [log for log in logs if log.is_file() and log.stat().st_size]
         rows.append({"dataset": study["dataset"], "seed": int(study["seed"]), "split": int(study["split"]),
                      "parent": study["parent"], "study": study["study"],
                      "accounting": [] if unscheduled(evidence) else [str(evidence / "sacct.tsv")],
-                     "job_log": [str(evidence / "stdout.log"), str(evidence / "stderr.log")]})
+                     "job_log": [str(log) for log in logs]})
     value.update(seed_ids=[int(s) for s in step["seeds"]], studies=rows,
                  source={"repository": "https://github.com/VKHS/CR-9", "git_commit": commit,
                          "tree_sha256": inventory(ROOT)["tree_sha256"]})

@@ -194,6 +194,15 @@ class BudgetStudiesWithoutScheduler(unittest.TestCase):
             self.assertEqual(argv[argv.index("--device") + 1], "cpu")
             po.finalize_budget_accounting({"studies": [{"study": str(study)}]})     # nothing to finalize
             self.assertFalse((evidence / "sacct.tsv").exists())
+            (evidence / "stdout.log").write_text("arm results\n")          # the fake runner printed nothing
+            manifest = Path(temporary) / "campaign.json"
+            po.write_budget_manifest({"manifest": str(manifest), "seeds": [3],
+                                      "studies": [{"dataset": "ogbn-arxiv", "seed": 3, "split": 0, "parent": str(base),
+                                                   "study": str(study)}]},
+                                     {"git_commit": "0" * 40, "dirty": False})
+            row, = json.loads(manifest.read_text())["studies"]
+            self.assertEqual(row["accounting"], [])
+            self.assertEqual(row["job_log"], [str(evidence / "stdout.log")])        # the empty stderr is not attached
             again = subprocess.run([sys.executable, "-B", str(ROOT / "scripts" / "run_budget_study.py")], env=env,
                                    capture_output=True, text=True)
             self.assertEqual(again.returncode, 2)                                       # never overwrites a study

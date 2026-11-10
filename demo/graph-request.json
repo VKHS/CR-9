@@ -1,1 +1,1 @@
-{"runs_run_id": "42649674781", "overrides": {"proteins": "42651551849", "products": "42656980716"}, "work": "/home/runner/demo/work-audits", "plan_options": ["--only", "records:decision_traces", "records:reliability_diagnostics", "records:mechanism_contrasts"], "attempt": 9}
+{"runs_run_id": "42649674781", "overrides": {"proteins": "42651551849", "products": "42656980716"}, "work": "/home/runner/demo/work-budget", "plan_options": ["--only", "campaign:budget", "records:budget_matched"], "attempt": 10}
