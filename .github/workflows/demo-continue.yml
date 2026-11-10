@@ -91,7 +91,8 @@ jobs:
   level0:
     name: Level 0 shard ${{ matrix.shard }}
     needs: [setup]
-    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l0 != null }}
     env:
       WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
@@ -171,7 +172,8 @@ jobs:
   level1:
     name: Level 1 shard ${{ matrix.shard }}
     needs: [setup, level0]
-    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l1 != null }}
     env:
       WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
@@ -251,7 +253,8 @@ jobs:
   level2:
     name: Level 2 shard ${{ matrix.shard }}
     needs: [setup, level1]
-    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l2 != null }}
     env:
       WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
@@ -331,7 +334,8 @@ jobs:
   level3:
     name: Level 3 shard ${{ matrix.shard }}
     needs: [setup, level2]
-    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l3 != null }}
     env:
       WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
@@ -411,7 +415,8 @@ jobs:
   level4:
     name: Level 4 shard ${{ matrix.shard }}
     needs: [setup, level3]
-    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l4 != null }}
     env:
       WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest

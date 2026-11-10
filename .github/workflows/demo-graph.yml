@@ -104,7 +104,8 @@ jobs:
   level0:
     name: Level 0 shard ${{ matrix.shard }}
     needs: [plan]
-    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l0 != null }}
     env:
       WORK: ${{ needs.plan.outputs.work }}
     runs-on: ubuntu-latest
@@ -172,7 +173,8 @@ jobs:
   level1:
     name: Level 1 shard ${{ matrix.shard }}
     needs: [plan, level0]
-    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l1 != null }}
     env:
       WORK: ${{ needs.plan.outputs.work }}
     runs-on: ubuntu-latest
@@ -240,7 +242,8 @@ jobs:
   level2:
     name: Level 2 shard ${{ matrix.shard }}
     needs: [plan, level1]
-    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l2 != null }}
     env:
       WORK: ${{ needs.plan.outputs.work }}
     runs-on: ubuntu-latest
@@ -308,7 +311,8 @@ jobs:
   level3:
     name: Level 3 shard ${{ matrix.shard }}
     needs: [plan, level2]
-    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l3 != null }}
     env:
       WORK: ${{ needs.plan.outputs.work }}
     runs-on: ubuntu-latest
@@ -376,7 +380,8 @@ jobs:
   level4:
     name: Level 4 shard ${{ matrix.shard }}
     needs: [plan, level3]
-    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.plan.result == 'success' && fromJSON(needs.plan.outputs.matrix).l4 != null }}
     env:
       WORK: ${{ needs.plan.outputs.work }}
     runs-on: ubuntu-latest
