@@ -1,0 +1,19 @@
+source,target,label
+q0,qN,
+qN,explore,
+explore,measure,
+measure,models,
+models,families,
+families,select,
+select,confirm,
+state,support,
+support,policy,
+policy,transport,
+support,recovery,unsupported / empty set
+transport,state,advance to $s_{\ell+1}$
+input,gate,
+gate,controller,compatible
+controller,admit,
+admit,deployed,
+admit,fallback,
+gate,comparator,incompatible

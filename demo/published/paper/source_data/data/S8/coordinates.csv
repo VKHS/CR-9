@@ -1,0 +1,14 @@
+row,kind,dim,coordinates
+entropy,cheap,1,entropy
+margin,cheap,1,margin
+source_disagreement,cheap,1,source_js
+effective_rank,cheap,1,effective_rank_entropy
+dirichlet,cheap,1,log1p_dirichlet
+band_power,spectral,3,band_power_0 band_power_2 band_power_5
+source_alignment,spectral,3,source_alignment_0 source_alignment_2 source_alignment_5
+innovation,observer,3,observer innovation (external to the sensor)
+transport_history,cheap,3,normalized_mass normalized_hops relative_depth
+degree_weighted,spectral,3,degree_weighted_power_0 degree_weighted_power_2 degree_weighted_power_5
+spectral_age,age,1,spectral_age_fraction
+state_energy,cheap,1,log_state_energy
+reachability,reach,7,reachability_A1 reachability_A2 reachability_A3 reachability_A4 reachability_A5 reachability_A6 reachability_A7

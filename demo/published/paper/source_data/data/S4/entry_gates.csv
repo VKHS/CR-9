@@ -1,0 +1,17 @@
+dataset,split,Delta_plant,U_Delta_plant,PDD_pp,DIL_gap,phi_registry,phi_selected,U_Delta_oracle,identity_pass,passed,runtime_entry_passed,failed_gates
+ogbn-arxiv,,-0.9200090229783429,-0.8283507411815147,0.0,-0.015109038352966397,0.0,0.0,0.0,True,False,False,registry support selected strata residual headroom
+ogbn-proteins,,-0.007027992683337856,-0.0030067379376830256,2.9195840372143955,0.004955505523626003,0.0,0.0,0.0,True,False,False,nominal graph value peak-depth deterioration registry support selected strata residual headroom
+ogbn-products,,0.22160870888653925,0.3287906361208375,0.0,0.6267535209655763,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,0,0.2725971628183469,0.3054963813383059,0.0,0.36967685222625724,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,1,0.2577136623315151,0.29964677418078717,0.0,0.3316283464431762,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,2,0.25017017275314446,0.29297193463393023,0.0,0.3916785955429076,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,3,0.2820111300703001,0.32926795911681805,0.0,0.3810313940048218,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,4,0.2469321111867284,0.2823445707862055,0.0,0.34905068874359113,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,5,0.14800205760922103,0.18216411614477768,0.0,0.3035594701766966,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,6,0.2516426852244516,0.28762774700131755,0.0,0.2928812026977541,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,7,0.25074501574829505,0.29193460492591017,0.0,0.3686401128768919,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,8,0.24842524774295768,0.29131799070262476,0.0,0.3125163793563841,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+Roman-empire,9,0.38127279509851963,0.448726131428699,0.0,0.4434756755828859,0.0,0.0,0.0,True,False,False,nominal graph value depth-integrated gap registry support selected strata residual headroom
+PascalVOC-SP,,-0.21547696709877975,-0.1283888120884634,0.5966028942613506,2.753863610892222,0.0,0.0,0.0,True,False,False,depth-integrated gap registry support selected strata residual headroom
+COCO-SP,,-0.7600758966293562,-0.11357024779590892,0.0,3.7050577840174244,0.0,0.0,0.0,True,False,False,depth-integrated gap registry support selected strata residual headroom
+Peptides-func,,-0.02168718046012918,-0.008110023786920176,0.0,0.11204994082289077,0.0,0.0,0.0,True,False,False,depth-integrated gap registry support selected strata residual headroom

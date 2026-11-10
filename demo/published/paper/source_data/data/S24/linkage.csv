@@ -1,0 +1,35 @@
+object,kind,item
+plant,artifact,train/model_inventory.json
+plant,artifact,train/manifest.json
+plant,artifact,prepared/metadata.json
+plant,artifact,provenance/frozen_models.json
+plant,check,make reexecute
+models,artifact,fit/full/audit.json
+models,artifact,fit/lean/audit.json
+models,artifact,fit/full/oof_predictions.npz
+models,artifact,fit/frozen_models.json
+models,artifact,fit/exploration_hashes.json
+models,check,make test
+models,check,make replay
+comparator,artifact,select/decision.json
+comparator,artifact,select/candidates.json
+comparator,artifact,select/unit_scores.npz
+comparator,check,make replay
+selected,artifact,select/candidate_ledger.csv
+selected,artifact,confirm/contrast_registry.json
+selected,artifact,confirm/decision.json
+selected,artifact,confirm/paired_contrasts.json
+selected,check,make replay
+selected,check,make decision-check
+executable,artifact,admit/pre_admission_lock.json
+executable,artifact,member_predictions/
+executable,check,make reexecute
+deployed,artifact,admit/decision.json
+deployed,artifact,policy_lock.json
+deployed,artifact,final/test_predictions.npz
+deployed,check,make replay
+deployed,check,make decision-check
+displays,artifact,paper/build/displays/framework.py
+displays,artifact,paper/display_manifest.json
+displays,check,make paper
+displays,check,make diagrams-check

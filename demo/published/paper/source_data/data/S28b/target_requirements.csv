@@ -1,0 +1,5 @@
+target_id,label,target_nats,hoeffding_n_at_equality,hoeffding_n_rounded,hoeffding_minimum_integer_n,bernstein_n_sigma1_0.005,bernstein_n_sigma1_0.007,bernstein_n_sigma1_0.010
+smallest_admitted_effect,smallest admitted effect,0.003,53257.46264095985,53257,53258,2716,3018,3529
+arxiv_effect,arxiv effect,0.0045,23669.98339598216,23670,23670,1725,1881,2139
+Pascal_effect,Pascal effect,0.0084,6793.043704204064,6793,6794,873,930,1022
+COCO_effect,COCO effect,0.009,5917.49584899554,5917,5918,810,861,944

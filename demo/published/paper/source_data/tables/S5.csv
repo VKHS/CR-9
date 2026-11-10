@@ -1,0 +1,8 @@
+Dataset,architecture / head,depth,hidden,params (M),precision,optimizer and schedule,checkpoint rule,hardware / time per seed
+ogbn-arxiv,MLP4 encoder (128→128); shared transport step; softmax head,32,128,0.09,fp32 plant,"AdamW 3e-4, wd 1e-4, cosine; 30 epochs, patience 8",minimum internal-D_fit validation CE; 2 seeds,cpu; 0.03 h/seed
+ogbn-proteins,MLP4 encoder (128→128); edge-weighted transport step; sigmoid mean-BCE head,32,128,0.08,fp32 plant,"AdamW 2e-4, wd 1e-5, cosine; 30 epochs, patience 8",minimum internal-D_fit validation BCE; 2 seeds,cpu; 0.01 h/seed
+ogbn-products,MLP4 encoder (128→128); shared transport step; softmax head,32,128,0.09,fp32 plant,"AdamW 5e-4, wd 1e-5, cosine; 30 epochs, patience 8",minimum internal-D_fit validation CE; 2 seeds,cpu; 0.02 h/seed
+Roman-empire,MLP4 encoder (128→128); heterophily-aware transport step; softmax head,32,128,0.12,fp32 plant,"AdamW 1e-3, wd 5e-4, constant; 30 epochs, patience 8",minimum internal-D_fit validation CE; 2 seeds per split,cpu; 0.03 h/seed
+PascalVOC-SP,"GraphGPS-style 6×64 backbone (feed-forward 128, 4 heads); softmax head",32,64,0.25,fp32 plant,"AdamW 5e-4, wd 1e-5, constant; batch 8; 30 epochs, patience 8",minimum internal-D_fit validation CE; 2 seeds,cpu; 0.44 h/seed
+COCO-SP,"GraphGPS-style 6×64 backbone (feed-forward 128, 4 heads); softmax head",32,64,0.26,fp32 plant,"AdamW 5e-4, wd 1e-5, constant; batch 8; 30 epochs, patience 8",minimum internal-D_fit validation CE; 2 seeds,cpu; 0.14 h/seed
+Peptides-func,GINE-style 8×64 backbone with degree-normalized linear aggregation (2-layer update MLP 64); sigmoid AP head,32,64,0.08,fp32 plant,"AdamW 1e-3, wd 1e-5, constant; batch 8; 30 epochs, patience 8",maximum internal-D_fit validation AP with BCE tie-break; 2 seeds,cpu; 0.06 h/seed

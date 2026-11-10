@@ -1,0 +1,8 @@
+Dataset,Delta_plant,U(Delta_plant),PDD (pp),DIL gap,phi_registry,selected strata,U(Delta_oracle),decision
+ogbn-arxiv,-0.9200,-0.8284,0.00,-0.015,0.00,0.00,0.0000,fail
+ogbn-proteins,-0.0070,-0.0030,2.92,0.005,0.00,0.00,0.0000,fail
+ogbn-products,0.2216,0.3288,0.00,0.627,0.00,0.00,0.0000,fail
+Roman-empire,0.2590,0.4487,0.00,0.443,0.00,0.00,0.0000,fail
+PascalVOC-SP,-0.2155,-0.1284,0.60,2.754,0.00,0.00,0.0000,fail
+COCO-SP,-0.7601,-0.1136,0.00,3.705,0.00,0.00,0.0000,fail
+Peptides-func,-0.0217,-0.0081,0.00,0.112,0.00,0.00,0.0000,fail

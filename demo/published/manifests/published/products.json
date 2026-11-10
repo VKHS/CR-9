@@ -1,0 +1,190 @@
+{
+ "benchmark_dataset": "ogbn-products",
+ "data_kind": "synthetic",
+ "dataset": "ogbn-products",
+ "environment": {
+  "cuda_runtime": null,
+  "cudnn_deterministic": false,
+  "deterministic_algorithms_enabled": false,
+  "device": "cpu",
+  "gpu": null,
+  "machine": "x86_64",
+  "numpy": "2.3.5",
+  "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+  "precision": "fp32",
+  "python": "3.12.16",
+  "python_implementation": "CPython",
+  "tf32_matmul": false,
+  "torch": "2.10.0+cpu"
+ },
+ "identities": {
+  "config_sha256": "cc58f8f0b743b4e6e702c28c254301848fba57642954da7538d5dce0a58caebb",
+  "prepared_fingerprint": "81cedc6f2ac37af4e624af5b9ff914030f40cd3b61568d1883bdf1a55fa59c0c",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+  "unit_sha256": "4871fb2a3cfcb944cacc772c29fec1215656c7c121c95883e2fa3cd09371ea14"
+ },
+ "index_arrays_copied": [
+  "products_splits.npz",
+  "products_official_splits.npz",
+  "products_clusters.npz"
+ ],
+ "is_benchmark_data": false,
+ "packages": {
+  "CairoSVG": "2.9.1",
+  "Jinja2": "3.1.6",
+  "MarkupSafe": "3.0.3",
+  "attrs": "26.1.0",
+  "cairocffi": "1.7.1",
+  "certifi": "2026.10.19",
+  "cffi": "2.1.1",
+  "charset-normalizer": "3.5.2",
+  "cloudpickle": "3.1.2",
+  "contourpy": "1.3.3",
+  "cssselect2": "0.10.1",
+  "cycler": "0.12.1",
+  "defusedxml": "0.7.1",
+  "filelock": "4.2.4",
+  "fonttools": "4.61.1",
+  "fsspec": "2026.9.0",
+  "idna": "3.19",
+  "joblib": "1.5.3",
+  "jsonschema": "4.26.0",
+  "jsonschema-specifications": "2025.9.1",
+  "kiwisolver": "1.4.9",
+  "littleutils": "0.2.4",
+  "matplotlib": "3.10.8",
+  "mpmath": "1.3.0",
+  "narwhals": "2.28.0",
+  "networkx": "3.7",
+  "numpy": "2.3.5",
+  "ogb": "1.3.6",
+  "outdated": "0.2.2",
+  "packaging": "26.3",
+  "pandas": "2.2.3",
+  "pillow": "12.3.0",
+  "pip": "25.0.1",
+  "pycparser": "3.11",
+  "pymetis": "2025.2.2",
+  "pyparsing": "3.3.2",
+  "python-dateutil": "2.9.0.post0",
+  "pytz": "2026.6",
+  "referencing": "0.37.0",
+  "requests": "2.34.2",
+  "rpds-py": "2026.9.1",
+  "scikit-learn": "1.8.0",
+  "scipy": "1.17.0",
+  "setuptools": "84.1.0",
+  "six": "1.17.0",
+  "sympy": "1.14.0",
+  "threadpoolctl": "3.6.0",
+  "tinycss2": "1.5.1",
+  "torch": "2.10.0+cpu",
+  "tqdm": "4.70.1",
+  "typing_extensions": "4.16.0",
+  "tzdata": "2026.5",
+  "urllib3": "2.8.0",
+  "webencodings": "0.6.1"
+ },
+ "policy_lock": {
+  "comparator_hash": "c2567e6071ebe146a3eb1bf44243a41596abc67cf3ee5d6537eb75d3aa629520",
+  "deployed_hash": "c2567e6071ebe146a3eb1bf44243a41596abc67cf3ee5d6537eb75d3aa629520",
+  "model_hashes": {
+   "fit/full/controller.pt": "86375560d8a97cd46dcfab159fe30635bd111f128fb845d02fce8179ff7ae597",
+   "fit/lean/controller.pt": "ab2752237c92e5d630bf2f7e8bea387176c92a8e193fd37b007a287affe2c1c4",
+   "train/plant_seed1_best.pt": "8fa14db3d7b004a6ebc784edd032509c1515dee9fb97586942f5e5b455a20503",
+   "train/plant_seed2_best.pt": "955bcfe79ea84fef7333cfcd8991b9ce5c2e1232b7504f0ad308df8feb47bded",
+   "train/q0_seed1_best.pt": "c86490f11312e1613fd10d1da19fce13141fd1b67d8ed6aa7c2aba771cb796fc",
+   "train/q0_seed2_best.pt": "ca84d0e1f859c3b6d978f1e5c79c92c057521394628ec2704f8916be9db102fe"
+  }
+ },
+ "profile": "smoke",
+ "run_name": "products",
+ "schema": "cross-morse-run-manifest-1",
+ "scientific_run": false,
+ "seeds": {
+  "bootstrap_seeds": {
+   "admission": 314165,
+   "final": 314166,
+   "selection": 314163
+  },
+  "ensemble_seeds": {
+   "qC": [
+    1,
+    2
+   ],
+   "qD": [
+    1,
+    2
+   ]
+  },
+  "partition_seed": 314159,
+  "split_index": null,
+  "training_seeds": [
+   1,
+   2
+  ]
+ },
+ "source_data": {
+  "num_features": 100,
+  "num_graphs": 1,
+  "num_nodes": 18575,
+  "num_outputs": 47,
+  "source": "trusted_raw_npz",
+  "source_array_hashes": {
+   "edge_index": "2ab0342a0ee40c760bf34043bd21ab70fe925699c9217b9e0307cddd4727cdca",
+   "x": "8f33885e24c8b80002f51b78ea0e6ddfabc31b54e4b6ec425bb35bcf65c8200e",
+   "y": "eca4ae5084f828978ff08458c7cbe54003f05889bf54f6122ba8cb35c155aa3c"
+  }
+ },
+ "splits": {
+  "arrays": {
+   "clusters.npz": {
+    "bytes": 148876,
+    "sha256": "8284da66f621ac0bd7eee3e822e6c815104d2b609f4c4b29bbec7bbf6267a248"
+   },
+   "official_splits.npz": {
+    "bytes": 149346,
+    "sha256": "f830a0614ae0f17b255e35b4b7e27c4b399732051f680861498cb07f32f4c200"
+   },
+   "splits.npz": {
+    "bytes": 154908,
+    "sha256": "4871fb2a3cfcb944cacc772c29fec1215656c7c121c95883e2fa3cd09371ea14"
+   }
+  },
+  "comparison_reserved_at": "prepare",
+  "graph_role_hashes": null,
+  "independent_graphs": false,
+  "official_split_axis": "node",
+  "official_split_hashes": {
+   "test": "a601f16aa9b99a874aa22d5e6e3304b14cca22599c7c77f0b4f0d7d4ea7eec83",
+   "train": "4f939da9ec71910dbdb7ec7f2bb7857279672a2a21ae581491aeee600e912a79",
+   "valid": "a263772deca330964d524bc0ae420e1273d43ef06b191556ba69bad3dd019ba3"
+  },
+  "role_hashes": {
+   "admit": "a263772deca330964d524bc0ae420e1273d43ef06b191556ba69bad3dd019ba3",
+   "compare": "07ac9b01d64e640448615dcee9a2bb1dfa3141b0f68faacd583b912cc5382d3a",
+   "confirm": "20b74638b70d925a3dfa09bdd72429e48beb4fa60db13a0c5803880106830d56",
+   "explore": "31cb36335e38ce44b8a5283627def611e90939912a406a26a76816df3efb4e8c",
+   "fit": "6967bb232301a6e76b908dda3c3bc23e1429f7a7256844a7864063d295219131",
+   "fit_train": "7e2b431a35fa6aeed5fd0457711ccfe80c067995c223f23ed8f3fc22cd59150a",
+   "fit_val": "7d05eee0d510807f112947a5160f027b1aefd163a28374a5ca1ff94a4fb7bbea",
+   "select": "1eb552e15d2e00261ba107b3514cf1517f48c0fc89ac10d329b29e92905af368",
+   "test": "a601f16aa9b99a874aa22d5e6e3304b14cca22599c7c77f0b4f0d7d4ea7eec83"
+  },
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": {
+   "admit": 277,
+   "compare": 43,
+   "confirm": 43,
+   "explore": 170,
+   "fit": 511,
+   "fit_train": 460,
+   "fit_val": 51,
+   "select": 85,
+   "test": 17446
+  },
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "statistical_unit": "METIS core",
+  "unit": "node"
+ }
+}

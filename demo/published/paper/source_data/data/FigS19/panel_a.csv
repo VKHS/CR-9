@@ -1,0 +1,23 @@
+statement,class,holds_under
+Lemma 1 transport validity,exact,nonnegative row-stochastic kernels; convex mixture weights
+Lemma 2 resolvent correction,exact,row-stochastic P; omitted tail mass 2(1-eta)^(T+1); T sparse products per step
+Prop. 1 deterministic replay,exact,"deterministic sensors, observer and policy"
+Prop. 6(ii) alignment identity,exact,exact finite-epsilon law of cosines per band with the measured c_lb
+Cor. 2 minimum admission J,exact,algebra of the variance-free penalty term
+Prop. 4 value of state information,exact,"replay identity; clairvoyant oracle over the beam-restricted family: an upper bound, not an attainable value"
+Executed range; exchange rate lambda_star,exact,registry functions; |Delta|/Delta_EC from the cost ledger of Table S23
+"Prop. 10(i),(iii) decision boundary",exact,risk comparison at the common ceiling (phi_star = 1 and r_B) and under priced work (lambda < lambda_pred_star); part (ii) is a sensitivity model with stated assumptions
+Prop. 11 advantage decomposition,exact,"telescoping identity with the comparator's continuation as reference; the critic's estimand, not a certificate"
+Prop. 6(i) band-limited sensitivity,bound,polynomial adapter kernels; L_U-Lipschitz update; registered bands
+Prop. 2 fixed-mode perturbation,bound,worst-case constants; the audit uses plug-in constants (tube)
+"Props. 3, 9 stability, sensing",conditional,Lipschitz score; invariance on the region; the action-gap audit is a sensitivity statistic
+Prop. 7 one-step regret,conditional,simultaneous per-action coverage; sigma_1 enters only the Bernstein radius
+Thm. 1 finite-family selection,conditional,simultaneous coverage of the max-t intervals; not proven under dependence
+"Props. 5, 8 break-even, search",conditional,"ensemble-law fit on the grid E <= 20 (Table S26b); e_H, zeta_H from the enumeration of E9"
+Thm. 2 clipped-loss admission,finite-sample,"i.i.d. admission graphs not used by any decision that fixed q_tilde_M (separated-data protocol, Table S39)"
+Cor. 1 per-dataset statement,finite-sample,union of the Thm. 1 and Thm. 2 events; one dataset at a time
+Improvement over qC (main Table 1),empirical,paired test-stage estimates with intervals; empirical class
+Mechanism labels (Table S14),empirical,"held-out contrasts on D_confirm, Holm-corrected"
+"Cost ledger, lambda_star (main Table 2)",empirical,measured serial compute and input-fallback rates; C0.99 and the observed per-input maximum reported separately (E17)
+Budget-matched comparison (main Section 4; Tables S46-S47),empirical,frozen arms E2-E6 on D_compare at the common ceiling (Tables S46-S46b)
+Identity test E1 and oracle dispersion,empirical,E1 identity entries and per-input oracle summaries (Tables S5c and S30)

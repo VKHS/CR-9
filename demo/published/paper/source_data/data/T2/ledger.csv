@@ -1,0 +1,8 @@
+dataset,C_qC,C_controller,p_fallback,C_expected,expected_overhead,r,f_bar,C_099_low,C_099_central,C_099_high,C_assure,assure_overhead,added_work,lambda_star_mnats,lambda_low_mnats,lambda_high_mnats,metric_points_per_unit,qualification_hours,M_star_t_nom_input_seconds,loss_effect_nats,official_gain_pp
+ogbn-arxiv,1.0,,,1.0,0.0,,,,,,1.0,0.0,0.0,,,,,0.15763428844583333,,0.0,0.0
+ogbn-proteins,1.1671080487513767,,,1.1671080487513767,0.0,,,,,,1.1671080487513767,0.0,0.0,,,,,0.11821017311527776,,0.0,0.0
+ogbn-products,1.9901596977294511,,,1.9901596977294511,0.0,,,,,,1.9901596977294511,0.0,0.0,,,,,0.3321625704833334,,0.0,0.0
+Roman-empire,2.0,,,2.0,0.0,,,,,,2.0,0.0,0.0,,,,,0.9551655290108334,,0.0,0.0
+PascalVOC-SP,1.0,,,1.0,0.0,,,,,,1.0,0.0,0.0,,,,,0.09127303396722217,,0.0,0.0
+COCO-SP,2.0,,,2.0,0.0,,,,,,2.0,0.0,0.0,,,,,0.12528987968305552,,0.0,0.0
+Peptides-func,2.0,,,2.0,0.0,,,,,,2.0,0.0,0.0,,,,,0.10857192660416669,,0.0,0.0

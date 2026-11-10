@@ -1,0 +1,8 @@
+Dataset,"q_C identity, E","deployed route, E",C_qC,C_expected (overhead),C_0.99 [tail scenarios] (overhead),C_assure (overhead),lambda* [range] (mnats; pt per unit),M* t_nom (10^3 input s),effect over q_C
+arxiv,"nominal, 1","q_C returned, 1",1.0,1.0 (0%),,1.0 (0%),,,exactly 0
+proteins,"learned stop, 2","q_C returned, 2",1.2,1.2 (0%),,1.2 (0%),,,exactly 0
+products,"learned stop, 2","q_C returned, 2",2.0,2.0 (0%),,2.0 (0%),,,exactly 0
+Roman,"nominal, 2","q_C returned, 2",2.0,2.0 (0%),,2.0 (0%),,,exactly 0
+Pascal,"nominal, 1","q_C returned, 1",1.0,1.0 (0%),,1.0 (0%),,,exactly 0
+COCO,"nominal, 2","q_C returned, 2",2.0,2.0 (0%),,2.0 (0%),,,exactly 0
+Peptides,"nominal, 2","q_C returned, 2",2.0,2.0 (0%),,2.0 (0%),,,exactly 0

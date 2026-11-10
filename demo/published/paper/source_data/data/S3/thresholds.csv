@@ -1,0 +1,7 @@
+gate,key,operator,value
+nominal_graph_value,plant_margin,<,0.004
+depth_qualification,pdd_max,≤,0.01
+depth_qualification,dil_gap_max,≤,0.02
+registry_support,registry_fraction_min,≥,0.8
+residual_headroom,headroom_margin,<,0.003
+registry_support,selected_strata_fraction,=,1.0

@@ -1,0 +1,17 @@
+dataset,sketch_dim,sensing_period,observer_period
+ogbn-arxiv,0,1,2
+ogbn-proteins,32,4,2
+ogbn-products,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+Roman-empire,0,1,2
+PascalVOC-SP,64,2,2
+COCO-SP,0,1,2
+Peptides-func,0,1,2

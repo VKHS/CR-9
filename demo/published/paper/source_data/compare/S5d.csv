@@ -1,0 +1,14 @@
+group,path,computed,reported,status,note
+supplementary_table_S5d_model_inventory,ogbn-arxiv/released_default_parameters,1138216,1138216,exact,
+supplementary_table_S5d_model_inventory,ogbn-arxiv/benchmark_parameters_M,0.087976,3.1,differs,
+supplementary_table_S5d_model_inventory,ogbn-arxiv/benchmark_architecture,MLP4-128 encoder; 32 unrolled transport steps,MLP4-512 encoder; 256 unrolled transport steps,differs,
+supplementary_table_S5d_model_inventory,ogbn-arxiv/inventory_artifact,train/model_inventory.json,train/model_inventory.json,exact,
+supplementary_table_S5d_model_inventory,ogbn-arxiv/comparison_command,make compare-runs,make compare-runs,exact,
+supplementary_table_S5d_model_inventory,ogbn-arxiv/evidence_status,instantiated_source_count,instantiated_source_count,exact,
+supplementary_table_S5d_model_inventory,ogbn-arxiv/full_profile_parameters,87976,3116632,differs,
+supplementary_table_S5d_model_inventory,ogbn-arxiv/released_default_scope,"plant built with the default widths (encoder width = hidden width, linear head) at 128 inputs and 40 outputs","plant built with the default widths (encoder width = hidden width, linear head) at 128 inputs and 40 outputs",exact,generated prose; wording is not transcribed
+supplementary_table_S5d_model_inventory,ogbn-arxiv/full_profile_scope,configs/arxiv_full.json (encoder width 128),"configs/arxiv_full.json (encoder width 1,040); agrees with the 3.1 M of Table S5 at the printed precision",differs,generated prose; wording is not transcribed
+supplementary_table_S5d_model_inventory,other_plants,"Shared, edge-weighted, heterophily-aware, GraphGPS-style local branch and linear-GINE families","Shared, edge-weighted, heterophily-aware, GraphGPS-style local branch and linear-GINE families; exact configurations are identified by archived inventories.",differs,generated prose; wording is not transcribed
+supplementary_table_S5d_model_inventory,sensor_fields,"[""sensing_period"", ""sketch_dim""]","[""sensing_period"", ""sketch_dim""]",exact,
+supplementary_table_S5d_model_inventory,observer_period,Explicit sensing_period and sketch_dim; observer update period (controller.observer_period = 2) logged separately,recorded separately from sensing cadence,differs,generated prose; wording is not transcribed
+supplementary_table_S5d_model_inventory,execution_identity,Native step versus A0 on identical internal D_fit validation inputs,"native model versus A0 on identical inputs, with state/prediction deviation, dtype and tolerance",differs,generated prose; wording is not transcribed

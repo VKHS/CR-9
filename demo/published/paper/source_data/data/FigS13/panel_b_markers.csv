@@ -1,0 +1,6 @@
+family,marker,curve,relative_depth,risk
+schedule adequate,best fixed depth,,0.5,
+feedback valuable,best fixed depth,,0.51,
+feedback valuable,input minimum,0,0.25,0.4
+feedback valuable,input minimum,1,0.5,0.55
+feedback valuable,input minimum,2,0.78,0.7

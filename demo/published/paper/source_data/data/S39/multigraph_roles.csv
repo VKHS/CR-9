@@ -1,0 +1,4 @@
+dataset,official_train,fit,explore,select,confirm,compare,admit
+PascalVOC-SP,8498,5098,1700,850,425,425,1428
+COCO-SP,113286,67971,22657,11329,5664,5665,5000
+Peptides-func,10873,6523,2175,1087,544,544,2331

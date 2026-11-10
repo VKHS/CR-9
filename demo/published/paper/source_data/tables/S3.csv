@@ -1,0 +1,5 @@
+Gate,operational quantity,prespecified criterion,failure action
+nominal graph value,paired loss of q_N^ctrl − q_0,U(Δ_plant) < −0.004 nats,retain strongest open loop
+depth qualification,PDD and log-depth-integrated loss gap,PDD ≤ 1.0 pp; DIL gap ≤ 0.020,retain strongest open loop
+registry support,passing action/stratum fraction,ϕ_registry ≥ 0.80; selected strata = 1.00,retain strongest open loop
+residual headroom,supported training-only oracle,U(Δ_oracle) < −0.003 nats,retain strongest open loop

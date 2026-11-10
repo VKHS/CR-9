@@ -1,0 +1,41 @@
+{
+  "schema": "cross-morse-demo-graph-1",
+  "dataset": "PascalVOC-SP",
+  "rule": {
+    "kind": "first_graphs",
+    "keep": {
+      "train": 480,
+      "valid": 60,
+      "test": 60
+    }
+  },
+  "sizes": {
+    "graphs": {
+      "train": 480,
+      "valid": 60,
+      "test": 60
+    },
+    "full_graphs": {
+      "train": 8498,
+      "valid": 1428,
+      "test": 1429
+    },
+    "nodes": 287918,
+    "directed_edges": 1628132
+  },
+  "official_source": {
+    "source": "official_lrgb_raw_tensor_tuples",
+    "source_url": "https://www.dropbox.com/s/8x722ai272wqwl4/pascalvocsp.zip?dl=1",
+    "source_files_sha256": {
+      "train.pickle": "bfeeb7135479f35e588d4a23d6290c760af1d1c70134568230fb207bbb10ce7c",
+      "val.pickle": "6f595c22fae23886579924022566081a991a17283a266890a9a42e1b3093dfc8",
+      "test.pickle": "b488a408ffd813e2e5a6af22e7da1db431c37cae5c785926c8a195e05c970a73"
+    }
+  },
+  "npz": "pascalvoc_sp_demo.npz",
+  "npz_sha256": "62e26fd606d0bc365f249e623dbadfcade4d5f39af347cece3a7d9bb55da15d8",
+  "npz_bytes": 56366902,
+  "builder": "demo/data.py",
+  "seconds": 27.5,
+  "scope": "Deterministic subset of the official data for the CPU demonstration; not the paper's dataset scale."
+}

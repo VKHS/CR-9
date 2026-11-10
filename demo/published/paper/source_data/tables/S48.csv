@@ -1,0 +1,8 @@
+Dataset,evaluated rule,paired loss over qC,official metric change,expected work,admission
+ogbn-arxiv,qC returned,0,0,1.00,comparator returned
+ogbn-proteins,qC returned,0,0,1.17,comparator returned
+ogbn-products,qC returned,0,0,1.99,comparator returned
+Roman-empire,qC returned,0,0,1.12,comparator returned
+PascalVOC-SP,qC returned,0,0,1.00,comparator returned
+COCO-SP,qC returned,0,0,2.00,comparator returned
+Peptides-func,qC returned,0,0,2.00,comparator returned

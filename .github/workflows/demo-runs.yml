@@ -1,0 +1,164 @@
+name: Demo runs
+
+# The seven sealed lifecycle runs of the CPU demonstration (demo/README.md): every dataset's eight
+# stages at the pilot settings on a hosted CPU runner, Roman-empire as its ten split runs on the
+# complete official graph and the other datasets on the reduced official-split graphs of demo/data.py.
+# Each run is kept as a workflow artifact for the production graph (demo-graph.yml).
+on:
+  workflow_dispatch:
+  push:
+    branches: [expanded-demo-2026-11-09]
+    paths: [.github/workflows/demo-runs.yml, demo/runs-request.json]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: demo-runs-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  DEMO: /home/runner/demo
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  select:
+    name: Select the runs
+    runs-on: ubuntu-latest
+    outputs:
+      runs: ${{ steps.select.outputs.runs }}
+      graphs: ${{ steps.select.outputs.graphs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: select
+        # demo/runs-request.json may name a subset of the labels below ({"labels": [...]}); default all.
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, pathlib
+          runs = [{"dataset": d, "label": l, "split": ""} for d, l in (
+              ("ogbn-arxiv", "arxiv"), ("ogbn-proteins", "proteins"), ("ogbn-products", "products"),
+              ("PascalVOC-SP", "pascalvoc_sp"), ("COCO-SP", "coco_sp"), ("Peptides-func", "peptides_func"))]
+          runs += [{"dataset": "Roman-empire", "label": f"roman_empire_split_{i:02d}", "split": str(i)} for i in range(10)]
+          request = pathlib.Path("demo/runs-request.json")
+          labels = json.loads(request.read_text())["labels"] if request.is_file() else [r["label"] for r in runs]
+          chosen = [r for r in runs if r["label"] in labels]
+          print("runs=" + json.dumps(chosen))
+          print("graphs=" + json.dumps(sorted({r["dataset"] for r in chosen if not r["split"]})))
+          EOF
+          cat "$GITHUB_OUTPUT"
+
+  graphs:
+    name: Reduced graph ${{ matrix.dataset }}
+    needs: select
+    if: ${{ needs.select.outputs.graphs != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dataset: ${{ fromJSON(needs.select.outputs.graphs) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Disk space and swap for the complete official load
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo swapoff -a || true
+          sudo fallocate -l 40G /swapfile2 && sudo chmod 600 /swapfile2 && sudo mkswap /swapfile2 && sudo swapon /swapfile2
+          df -h / ; free -g
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+          python -m pip check
+      - name: Build the reduced official-split graph
+        run: |
+          stem=$(python -c "import sys;sys.path.insert(0,'demo');import configure;print(configure.STEMS['${{ matrix.dataset }}'])")
+          echo "STEM=$stem" >> "$GITHUB_ENV"
+          /usr/bin/time -v python -B demo/data.py --dataset "${{ matrix.dataset }}" --data-root "$DEMO/data" \
+            --output "$DEMO/graphs/${stem}_demo.npz" 2>&1 | grep --line-buffered -v -E '^\s+[A-Z].*: 0$'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: demo-graph-${{ env.STEM }}
+          path: /home/runner/demo/graphs/
+          if-no-files-found: error
+          retention-days: 30
+
+  runs:
+    name: Run ${{ matrix.label }}
+    needs: [select, graphs]
+    if: ${{ always() && needs.select.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    env:
+      GH_TOKEN: ${{ github.token }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.select.outputs.runs) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+          python -m pip check
+      - name: Demonstration configuration
+        run: |
+          stem=$(python -c "import sys;sys.path.insert(0,'demo');import configure;print(configure.STEMS['${{ matrix.dataset }}'])")
+          echo "STEM=$stem" >> "$GITHUB_ENV"
+          if [ -z "${{ matrix.split }}" ]; then
+            bash demo/artifact.sh "demo-graph-$stem" "$DEMO/graphs"
+            python -B demo/configure.py --variant demo --dataset "${{ matrix.dataset }}" \
+              --graph-npz "$DEMO/graphs/${stem}_demo.npz" --output "$DEMO/configs"
+            echo "OUT=$DEMO/runs/$stem" >> "$GITHUB_ENV"
+          else
+            python -B demo/configure.py --variant demo --dataset "${{ matrix.dataset }}" \
+              --split-index "${{ matrix.split }}" --output "$DEMO/configs"
+            echo "OUT=$DEMO/runs/$stem/split_0${{ matrix.split }}" >> "$GITHUB_ENV"
+          fi
+      - name: Run the eight stages
+        run: |
+          ( while true; do echo "[mem] $(date -u +%H:%M:%S) $(free -m | awk '/Mem:/{print "used",$3} /Swap:/{print "swap",$3}' | tr '\n' ' ')"; sleep 120; done ) &
+          /usr/bin/time -v python -B run_cross_morse.py --config "$DEMO/configs/${STEM}_demo.json" \
+            --dataset "${{ matrix.dataset }}" --data-root "$DEMO/data" --output-dir "$OUT" \
+            --device cpu --threads 4 2>&1 | grep --line-buffered -v -E '^\s+[A-Z].*: 0$'
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          run = pathlib.Path(os.environ["OUT"])
+          for p in sorted((run / "stages").glob("*.json")) if (run / "stages").is_dir() else []:
+              d = json.loads(p.read_text())
+              print(f"STAGE {d.get('stage'):9s} {d.get('status'):9s} {d.get('seconds_this_attempt', 0):10.1f} s")
+          for name in ("run_state.json", "failure_summary.json"):
+              if (run / name).is_file():
+                  print(name, json.dumps(json.loads((run / name).read_text()))[:1500])
+          EOF
+          du -sh "$OUT" || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: demo-run-${{ matrix.label }}
+          path: ${{ env.OUT }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

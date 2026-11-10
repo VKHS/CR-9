@@ -1,0 +1,5 @@
+requirement,tested,not_covered
+hook access to the intermediate node states H_l,"seven frozen plants (Table S5): MLP-encoder transport plants, GraphGPS-style local branch, GINE-style linear-aggregation plant",prediction-only APIs and fused kernels that expose no hook
+"aggregation exposed as a nonnegative, row-normalizable, state-independent linear operator on node states",inserted control sites between native blocks: a second mechanism (transport insertion) with a literal bypass as A0; its attribution is assessed by E13,state-dependent kernels (attention weights) and signed per-step propagation operators
+"native update U_l Lipschitz in its message argument; weights, head and precision unchanged","substitutions (Table S25): GCNII, GINE-style; GPR-GNN enters through its per-step operator, its signed readout stays in the head",the standard GINE message phi(h_j + e_ij) and other edge-conditioned nonlinear messages
+nominal-identity test E1 required (Table S5c),,global-attention branch of hybrid models; topology-changing interventions

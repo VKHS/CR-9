@@ -1,0 +1,759 @@
+name: Demo production graph continuation
+
+# Continues a "Demo production graph" run whose first level completed: executes the later dependency
+# levels and the exports without moving the whole work directory between jobs. Each job restores only the
+# outputs that its own tasks depend on (demo/restore.py), one archive at a time. The collected outputs are
+# kept as the artifact demo-collected, which demo-publish.yml publishes. Request: demo/continue-request.json
+# {"graph_run_id": ..., "runs_run_id": ..., "overrides": {...}, "previous": [[run_id, artifact_prefix], ...]}.
+# "previous" lists, oldest first, the work archives of earlier runs; by default the first level of the graph run.
+# "source_sha" pins the producer code of the jobs to the commit the graph was planned at: execute and collect
+# refuse producer code that changed after planning (scripts/paper_outputs.py verify_plan_source); demo/ comes
+# from this commit. "skip_nodes" leaves those nodes' tasks to another workflow (demo-grid.yml). "work" is the
+# graph's work directory (default /home/runner/demo/work; a graph planned by a demo-graph.yml request with
+# its own "work" is continued in that directory).
+on:
+  push:
+    branches: [expanded-demo-2026-11-09]
+    paths: [demo/continue-request.json]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  # each request continues its own graph: continuations of different graphs run side by side
+  group: demo-continue-${{ github.run_id }}
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  DEMO: /home/runner/demo
+  WORK: /home/runner/demo/work
+  GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    outputs:
+      graph: ${{ steps.request.outputs.graph }}
+      runs: ${{ steps.request.outputs.runs }}
+      previous: ${{ steps.request.outputs.previous }}
+      source: ${{ steps.request.outputs.source }}
+      skip: ${{ steps.request.outputs.skip }}
+      work: ${{ steps.request.outputs.work }}
+      excludes: ${{ steps.request.outputs.excludes }}
+      patterns: ${{ steps.request.outputs.patterns }}
+      includes: ${{ steps.request.outputs.includes }}
+      level_patterns: ${{ steps.request.outputs.level_patterns }}
+      parallel: ${{ steps.request.outputs.parallel }}
+      previous_exports: ${{ steps.request.outputs.previous_exports }}
+      plan_sources: ${{ steps.request.outputs.plan_sources }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      collect_only: ${{ steps.matrix.outputs.collect_only }}
+      markers_from: ${{ steps.request.outputs.markers_from }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: request
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json
+          r = json.load(open("demo/continue-request.json"))
+          graph = str(r["graph_run_id"])
+          previous = r.get("previous") or [[graph, "demo-work-L0-"], [graph, "demo-work-L-16"]]
+          print("graph=" + graph)
+          print("runs=" + " ".join([str(r["runs_run_id"])] + ["%s=%s" % kv for kv in sorted((r.get("overrides") or {}).items())]))
+          print("previous=" + " ".join("--run %s --prefix %s" % (run, prefix) for run, prefix in previous))
+          print("source=" + (r.get("source_sha") or "${{ github.sha }}"))
+          print("skip=" + " ".join("--skip-node %s" % node for node in r.get("skip_nodes") or []))
+          print("work=" + (r.get("work") or "/home/runner/demo/work"))
+          print("excludes=" + json.dumps(r.get("export_excludes") or {}))
+          print("patterns=" + json.dumps(r.get("export_exclude_patterns") or {}))
+          print("includes=" + json.dumps(r.get("export_include_patterns") or {}))
+          # members left out of every level's restore, e.g. the exploration trajectories the measurements do not read
+          print("level_patterns=" + " ".join("--exclude-pattern '%s'" % g for g in r.get("level_exclude_patterns") or []))
+          print("parallel=%d" % int(r.get("restore_parallel") or 4))
+          print("previous_exports=" + " ".join("--run %s --prefix %s" % (run, prefix)
+                                               for run, prefix in r.get("previous_exports") or []))
+          # where the runner plans of measurement tasks are (default: every earlier archive)
+          print("plan_sources=" + " ".join("--run %s --prefix %s" % (run, prefix)
+                                           for run, prefix in r.get("plan_sources") or previous))
+          # collect_only: the task markers of an earlier collect ([run, artifact]), which the results page reads
+          print("markers_from=" + " ".join(str(x) for x in r.get("markers_from") or []))
+          EOF
+          cat "$GITHUB_OUTPUT"
+          grep '^work=' "$GITHUB_OUTPUT" | sed 's/^work=/WORK=/' >> "$GITHUB_ENV"
+      - id: matrix
+        name: Pending tasks per level and exports of the plan
+        run: |
+          if python3 -c "import json,sys; sys.exit(0 if json.load(open('demo/continue-request.json')).get('collect_only') else 1)"; then
+            # the publication map from the exports of earlier runs alone: no level and no export runs here
+            echo 'matrix={"exports": []}' >> "$GITHUB_OUTPUT"; echo "collect_only=1" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          python3 -B demo/restore.py --work "$WORK" --run "${{ steps.request.outputs.graph }}" --prefix demo-work-base --all
+          python3 -B demo/restore.py --work "$WORK" --node __markers_only__ ${{ steps.request.outputs.previous }}
+          python3 -B demo/execute.py --work "$WORK" --trust-markers --status | grep -v COMPLETE | head -60 || true
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os, subprocess
+          matrix = json.loads(subprocess.check_output(["python3", "-B", "demo/execute.py", "--work", os.environ["WORK"],
+                                                       "--trust-markers", "--matrix", "16", "--salt", "${{ github.run_id }}",
+                                                       *"${{ steps.request.outputs.skip }}".split()]))
+          plan = json.load(open(os.environ["WORK"] + "/plan.json"))
+          out = dict(matrix)        # per level, the shares that hold an unfinished task
+          request = json.load(open("demo/continue-request.json"))
+          only = request.get("export_only")
+          out["exports"] = [e["id"] for e in plan["exports"] if not only or e["id"] in only]
+          print("matrix=" + json.dumps(out))
+          EOF
+          cat "$GITHUB_OUTPUT"
+
+  level0:
+    name: Level 0 shard ${{ matrix.shard }}
+    needs: [setup]
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l0 != null }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l0', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
+      - name: Inputs and the outputs this level depends on
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          if [ 0 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              ${{ needs.setup.outputs.previous }}
+          else
+            python -B demo/restore.py --work "$WORK" --level 0 \
+              ${{ needs.setup.outputs.previous }} \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
+          python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute this shard
+        if: steps.work.outputs.here == '1'
+        run: |
+          python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 0 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
+      - name: Task logs of failures
+        if: always() && steps.work.outputs.here == '1'
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "summary.json"
+          if p.is_file():
+              for r in json.loads(p.read_text())["results"]:
+                  if r.get("state") not in ("COMPLETE", "SKIPPED"):
+                      print("=" * 30, r["node"], r["task"], r.get("state"))
+                      print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
+          EOF
+      - name: Save this shard's outputs
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L0-${{ matrix.shard }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-work-L0-${{ matrix.shard }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
+  level1:
+    name: Level 1 shard ${{ matrix.shard }}
+    needs: [setup, level0]
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l1 != null }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l1', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
+      - name: Inputs and the outputs this level depends on
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
+          python -B demo/task_inputs.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
+          if [ 1 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              ${{ needs.setup.outputs.previous }}
+          else
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 1 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
+              ${{ needs.setup.outputs.previous }} \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
+          python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute this shard
+        if: steps.work.outputs.here == '1'
+        run: |
+          python -B demo/execute.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 1 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
+      - name: Task logs of failures
+        if: always() && steps.work.outputs.here == '1'
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "summary.json"
+          if p.is_file():
+              for r in json.loads(p.read_text())["results"]:
+                  if r.get("state") not in ("COMPLETE", "SKIPPED"):
+                      print("=" * 30, r["node"], r["task"], r.get("state"))
+                      print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
+          EOF
+      - name: Save this shard's outputs
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L1-${{ matrix.shard }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-work-L1-${{ matrix.shard }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
+  level2:
+    name: Level 2 shard ${{ matrix.shard }}
+    needs: [setup, level1]
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l2 != null }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l2', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
+      - name: Inputs and the outputs this level depends on
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
+          python -B demo/task_inputs.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
+          if [ 2 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              ${{ needs.setup.outputs.previous }}
+          else
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 2 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
+              ${{ needs.setup.outputs.previous }} \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
+          python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute this shard
+        if: steps.work.outputs.here == '1'
+        run: |
+          python -B demo/execute.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 2 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
+      - name: Task logs of failures
+        if: always() && steps.work.outputs.here == '1'
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "summary.json"
+          if p.is_file():
+              for r in json.loads(p.read_text())["results"]:
+                  if r.get("state") not in ("COMPLETE", "SKIPPED"):
+                      print("=" * 30, r["node"], r["task"], r.get("state"))
+                      print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
+          EOF
+      - name: Save this shard's outputs
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L2-${{ matrix.shard }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-work-L2-${{ matrix.shard }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
+  level3:
+    name: Level 3 shard ${{ matrix.shard }}
+    needs: [setup, level2]
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l3 != null }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l3', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
+      - name: Inputs and the outputs this level depends on
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
+          python -B demo/task_inputs.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
+          if [ 3 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              ${{ needs.setup.outputs.previous }}
+          else
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 3 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
+              ${{ needs.setup.outputs.previous }} \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
+          python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute this shard
+        if: steps.work.outputs.here == '1'
+        run: |
+          python -B demo/execute.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 3 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
+      - name: Task logs of failures
+        if: always() && steps.work.outputs.here == '1'
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "summary.json"
+          if p.is_file():
+              for r in json.loads(p.read_text())["results"]:
+                  if r.get("state") not in ("COMPLETE", "SKIPPED"):
+                      print("=" * 30, r["node"], r["task"], r.get("state"))
+                      print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
+          EOF
+      - name: Save this shard's outputs
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L3-${{ matrix.shard }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-work-L3-${{ matrix.shard }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
+  level4:
+    name: Level 4 shard ${{ matrix.shard }}
+    needs: [setup, level3]
+    # a level without an unfinished task starts no runner
+    if: ${{ !cancelled() && needs.setup.result == 'success' && fromJSON(needs.setup.outputs.matrix).l4 != null }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - id: work
+        name: Work for this shard
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l4', []) else '0'))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.here == '1'
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
+      - name: Inputs and the outputs this level depends on
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
+          python -B demo/task_inputs.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
+          if [ 4 = 0 ]; then
+            # the first level's unfinished tasks: their finished siblings are known from the markers alone
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              ${{ needs.setup.outputs.previous }}
+          else
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 4 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
+              ${{ needs.setup.outputs.previous }} \
+              --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          fi
+          python -B demo/execute.py --work "$WORK" --status | grep -v " 0/" | head -80 || true
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute this shard
+        if: steps.work.outputs.here == '1'
+        run: |
+          python -B demo/execute.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" --salt "${{ github.run_id }}" \
+            --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
+            $( [ 4 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
+      - name: Task logs of failures
+        if: always() && steps.work.outputs.here == '1'
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "summary.json"
+          if p.is_file():
+              for r in json.loads(p.read_text())["results"]:
+                  if r.get("state") not in ("COMPLETE", "SKIPPED"):
+                      print("=" * 30, r["node"], r["task"], r.get("state"))
+                      print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
+          EOF
+      - name: Save this shard's outputs
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L4-${{ matrix.shard }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-work-L4-${{ matrix.shard }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
+  export:
+    name: Export ${{ matrix.slot }}
+    needs: [setup, level0, level1, level2, level3, level4]
+    # no runner for an empty list of exports
+    if: ${{ !cancelled() && needs.setup.result == 'success' && toJSON(fromJSON(needs.setup.outputs.matrix).exports) != '[]' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        slot: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+    steps:
+      - id: work
+        name: The export of this slot
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); e=m['exports']; i=int(sys.argv[2]); print('export=' + (e[i] if i < len(e) else ''))" '${{ needs.setup.outputs.matrix }}' "${{ matrix.slot }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.export != ''
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.export != ''
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.export != ''
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.export != ''
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        if: steps.work.outputs.export != ''
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
+      - name: Inputs and the outputs this export reads
+        if: steps.work.outputs.export != ''
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          python3 -c "import json,os,sys; e=json.loads(sys.argv[1]).get(sys.argv[2]) or []; print('\n'.join(os.path.join(os.environ['WORK'], p).lstrip('/') for p in e))" \
+            '${{ needs.setup.outputs.excludes }}' "${{ steps.work.outputs.export }}" > "$RUNNER_TEMP/excludes.txt"
+          patterns=$(python3 -c "import json,shlex,sys; print(' '.join('--exclude-pattern ' + shlex.quote(p) for p in json.loads(sys.argv[1]).get(sys.argv[2]) or []) + ' ' + ' '.join('--include-pattern ' + shlex.quote(p) for p in json.loads(sys.argv[3]).get(sys.argv[2]) or []))" \
+            '${{ needs.setup.outputs.patterns }}' "${{ steps.work.outputs.export }}" '${{ needs.setup.outputs.includes }}')
+          echo "left out of this restore: $(cat "$RUNNER_TEMP/excludes.txt" | wc -l) path(s); $patterns"
+          eval python -B demo/restore.py --work "\"$WORK\"" --export "${{ steps.work.outputs.export }}" --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" $patterns \
+            ${{ needs.setup.outputs.previous }} \
+            --run "$GITHUB_RUN_ID" --prefix demo-work-L
+      - name: Export
+        if: steps.work.outputs.export != ''
+        run: |
+          artifacts=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); e=next(x for x in p['exports'] if x['id']==sys.argv[1]); print(' '.join(e['artifacts']))" "${{ steps.work.outputs.export }}")
+          echo "artifacts: $artifacts"
+          python -B scripts/paper_outputs.py collect --work "$WORK" --only $artifacts || true
+          python3 -c "import json,os; c=json.load(open(os.environ['WORK']+'/collect.json')); print(json.dumps({k: v for k, v in c['exports'].items() if v.get('status') != 'AWAITING' or 'not collected' not in str(v.get('reason'))}, indent=1)[:4000])"
+          paths=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); e=next(x for x in p['exports'] if x['id']==sys.argv[1]); print(' '.join(v.lstrip('/') for v in e['outputs'].values() if os.path.exists(v)))" "${{ steps.work.outputs.export }}")
+          mkdir -p "$RUNNER_TEMP/out"
+          if [ -n "$paths" ]; then (cd / && tar -czf "$RUNNER_TEMP/out/export.tar.gz" $paths); fi
+          ls -la "$RUNNER_TEMP/out"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: steps.work.outputs.export != ''
+        with:
+          name: demo-export-${{ matrix.slot }}
+          path: ${{ runner.temp }}/out/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  collect:
+    name: Collect
+    needs: [setup, export]
+    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            echo "DEMO_TEMP=/mnt/demo-tmp" >> "$GITHUB_ENV"
+            echo "work directory on /mnt"
+          fi
+      - name: Runs, plan, markers and every export
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          if [ "${{ needs.setup.outputs.collect_only }}" != 1 ]; then
+            python -B demo/restore.py --work "$WORK" --node __markers_only__ \
+              ${{ needs.setup.outputs.previous }} --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          elif [ -n "${{ needs.setup.outputs.markers_from }}" ]; then
+            read -r run artifact <<< "${{ needs.setup.outputs.markers_from }}"
+            bash demo/artifact.sh "$artifact" "$RUNNER_TEMP/markers" "$run"
+            tar -xzf "$RUNNER_TEMP/markers/collected.tar.gz" -C / "${WORK#/}/state"
+            echo "task markers of run $run ($artifact): $(find "$WORK/state" -type f | wc -l) file(s)"
+          fi
+          python -B demo/restore.py --work "$WORK" --all ${{ needs.setup.outputs.previous_exports }} --run "$GITHUB_RUN_ID" --prefix demo-export-
+      - name: Collect the publication map
+        run: |
+          python -B scripts/paper_outputs.py collect --work "$WORK" || true
+          python - <<'EOF'
+          import json, os
+          m = json.load(open(os.environ["WORK"] + "/paper-artifacts.map.json"))
+          for k, v in sorted(m.items()):
+              if not k.startswith("_"):
+                  print("PRODUCED " if v else "AWAITING ", k, (m.get("_awaiting") or {}).get(k, "")[:300])
+          EOF
+      - name: Save the collected outputs, the plan and its task markers
+        run: |
+          cd / && tar -czf "$RUNNER_TEMP/collected.tar.gz" "${WORK#/}/paper-artifacts.map.json" "${WORK#/}/plan.json" \
+            "${WORK#/}/collect.json" $(for d in state records campaigns environment; do [ -e "$WORK/$d" ] && echo "${WORK#/}/$d"; done)
+          ls -la "$RUNNER_TEMP/collected.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: demo-collected
+          path: ${{ runner.temp }}/collected.tar.gz
+          retention-days: 30

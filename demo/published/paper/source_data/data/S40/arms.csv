@@ -1,0 +1,8 @@
+row,arm,implementation
+comparator,,cross_morse/policies.py
+mpc_ol,,cross_morse/policies.py
+predictor,E3,cm_experiments/execution.py
+distilled,E4,cm_experiments/execution.py
+replanning,E5,cm_experiments/execution.py
+feedback,,cross_morse/policies.py
+budget,E6,cm_experiments/budget.py

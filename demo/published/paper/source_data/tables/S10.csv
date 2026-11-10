@@ -1,0 +1,10 @@
+route,input,decision time,objective,constraints/failure,output,feedback?
+nominal,none,all depths,nominal action,model-valid execution,frozen nominal output,no
+best depth,initial input,once,cross-fitted risk over registered depths,depth/resource,terminal depth,no
+learned stop,initial input only,once,predict complete stopping depth,depth/resource,terminal depth,no
+phase,depth index,before execution,joint boundaries and phase actions,support/resource,fixed schedule,no
+fixed sequence,initial input,once,best complete supported sequence,support/search/resource,fixed sequence,no
+MPC-OL,initial estimated state,once at ℓ = 0,"finite-horizon risk, uncertainty, cost and terminal value",support/barrier/resource; fixed budget,planned sequence,no
+one-step,current state,every depth,minimum predicted one-action loss effect,dynamic support/barrier,one action,yes
+radius,current state,every depth,one-action mean plus uncertainty and cost,dynamic support/barrier,one action,yes
+MPC-RH,current state/history,every depth,"finite-horizon risk plus uncertainty, transport and terminal cost",dynamic support/barrier/resource,first action of replanned sequence,yes

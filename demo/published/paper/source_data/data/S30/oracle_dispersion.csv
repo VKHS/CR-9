@@ -1,0 +1,8 @@
+dataset,median_oracle_depth,oracle_depth_q25,oracle_depth_q75,fraction_differs_from_qC,per_input_SD_clipped_effect,qC_route,phi_x_grid
+ogbn-arxiv,32.0,32.0,32.0,0.0,,nominal,
+ogbn-proteins,24.0,24.0,24.0,0.0,,learned_stop,
+ogbn-products,29.0,29.0,29.0,0.2203389831,,learned_stop,
+Roman-empire,28.0,10.0,32.0,0.48125,,nominal,
+PascalVOC-SP,32.0,22.0,32.0,0.2833333333,0.0,nominal,
+COCO-SP,32.0,22.0,32.0,0.35,0.0,nominal,
+Peptides-func,29.0,25.0,32.0,0.5066666667,0.0,nominal,

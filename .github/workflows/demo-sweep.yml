@@ -1,0 +1,187 @@
+name: Demo Table S29 sweep
+
+# The planning-horizon and beam-width sweep of Table S29 and Figure S5 for the CPU demonstration
+# (demo/README.md). The demonstration's PascalVOC-SP run was planned with the pilot planner (beam 4,
+# horizons 1 and 4), which holds neither the registered horizon 16 nor the registered beam width 16, so the
+# sweep holds the registered beam width (--horizon-sweep-beam 16) and each of its seven points is a variant
+# lifecycle of that run's configuration. The production graph is planned for this record set alone
+# (--only horizon_beam_sweep) in its own work directory, one variant per runner; the collected record set is
+# kept as the artifact demo-collected-s29, which demo-publish.yml adds to the main graph's map.
+# Request: demo/sweep-request.json {"runs_run_id": ..., "overrides": {...}}.
+on:
+  push:
+    branches: [expanded-demo-2026-11-09]
+    paths: [demo/sweep-request.json]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: demo-sweep-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  DEMO: /home/runner/demo
+  WORK: /home/runner/demo/work-s29
+  GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      runs: ${{ steps.request.outputs.runs }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - id: request
+        run: |
+          python -c "import json; r=json.load(open('demo/sweep-request.json')); print('runs=%s' % ' '.join([str(r['runs_run_id'])] + ['%s=%s' % kv for kv in sorted((r.get('overrides') or {}).items())]))" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - name: Sealed demonstration runs and reduced graphs
+        run: bash demo/fetch_inputs.sh ${{ steps.request.outputs.runs }} > /dev/null
+      - name: Plan the Table S29 sweep alone
+        run: |
+          # Declared demonstration choices: the PascalVOC-SP run deploys no MPC-RH rule, so the sweep names the
+          # configuration it sweeps; its planner registry lacks the registered horizon and beam width, so the
+          # sweep holds the registered beam width 16 and every point is a variant lifecycle.
+          python -B scripts/paper_outputs.py plan --runs "$DEMO/runs" --work "$WORK" --allow-fixture --device cpu \
+            --data-root "$DEMO/data" --only horizon_beam_sweep \
+            --horizon-sweep-profile full --horizon-sweep-ensemble 1 --horizon-sweep-beam 16
+          python -c "import json,os; p=json.load(open(os.environ['WORK']+'/plan.json')); print(json.dumps(p['declared_choices'], indent=1)); print(json.dumps(p['artifacts']['records:horizon_beam_sweep'], indent=1))"
+          python -B demo/execute.py --work "$WORK" --status
+      - id: matrix
+        run: |
+          echo "matrix=$(python -B demo/execute.py --work "$WORK" --matrix 16 --salt "$GITHUB_RUN_ID")" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - name: Save the planned work directory
+        run: |
+          touch "$RUNNER_TEMP/epoch" -d '2000-01-01'
+          bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/epoch" "$RUNNER_TEMP/delta/base.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: demo-s29-base
+          path: ${{ runner.temp }}/delta/base.tar.gz
+          retention-days: 30
+
+  variants:
+    name: Variant ${{ matrix.shard }}
+    needs: [plan]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - id: work
+        name: Work for this runner
+        run: |
+          python3 -c "import json,sys; m=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in m.get('l0', []) else '0'))" '${{ needs.plan.outputs.matrix }}' "${{ matrix.shard }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Inputs and the plan
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.plan.outputs.runs }} > /dev/null
+          bash demo/artifact.sh demo-s29-base "$RUNNER_TEMP/base"
+          bash demo/work_delta.sh restore "$RUNNER_TEMP/base/base.tar.gz"
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute this runner's variant
+        if: steps.work.outputs.here == '1'
+        run: |
+          python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" --salt "$GITHUB_RUN_ID" \
+            --parallel 1 --threads 4 --budget-minutes 300 --summary "$RUNNER_TEMP/summary.json"
+      - name: Task logs of failures
+        if: always() && steps.work.outputs.here == '1'
+        run: |
+          python - <<'EOF'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "summary.json"
+          if p.is_file():
+              for r in json.loads(p.read_text())["results"]:
+                  if r.get("state") not in ("COMPLETE", "SKIPPED"):
+                      print("=" * 30, r["node"], r["task"], r.get("state"))
+                      print(pathlib.Path(r["log"]).read_text(errors="replace")[-6000:])
+          EOF
+      - name: Save this runner's outputs
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/L0-${{ matrix.shard }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-s29-L0-${{ matrix.shard }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
+  collect:
+    name: Collect
+    needs: [plan, variants]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Inputs, the plan and every variant
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.plan.outputs.runs }} > /dev/null
+          bash demo/artifacts.sh demo-s29- "$RUNNER_TEMP/deltas"
+          bash demo/work_delta.sh restore "$RUNNER_TEMP/deltas/demo-s29-base/base.tar.gz" \
+            $(ls "$RUNNER_TEMP"/deltas/demo-s29-L0-*/*.tar.gz 2>/dev/null | sort)
+          python -B demo/execute.py --work "$WORK" --status
+      - name: Collect the record set
+        run: |
+          python -B scripts/paper_outputs.py collect --work "$WORK" || true
+          python -c "import json,os; m=json.load(open(os.environ['WORK']+'/paper-artifacts.map.json')); k='records:horizon_beam_sweep'; print(k, m.get(k) or 'AWAITING: ' + str((m.get('_awaiting') or {}).get(k)))"
+      - name: Save the record set, the plan and its task markers
+        run: |
+          cd / && tar -czf "$RUNNER_TEMP/collected.tar.gz" "${WORK#/}/paper-artifacts.map.json" "${WORK#/}/plan.json" \
+            "${WORK#/}/collect.json" "${WORK#/}/state" $([ -e "$WORK/records" ] && echo "${WORK#/}/records")
+          ls -la "$RUNNER_TEMP/collected.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: demo-collected-s29
+          path: ${{ runner.temp }}/collected.tar.gz
+          retention-days: 30

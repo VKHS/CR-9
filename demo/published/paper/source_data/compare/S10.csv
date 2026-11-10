@@ -1,0 +1,10 @@
+group,path,computed,reported,status,note
+supplementary_table_S10_policy_definitions,nominal/feedback,no,no,exact,
+supplementary_table_S10_policy_definitions,best_depth/feedback,no,no,exact,
+supplementary_table_S10_policy_definitions,learned_stop/feedback,no,no,exact,
+supplementary_table_S10_policy_definitions,phase/feedback,no,no,exact,
+supplementary_table_S10_policy_definitions,fixed_sequence/feedback,no,no,exact,
+supplementary_table_S10_policy_definitions,mpc_ol/feedback,no,no,exact,
+supplementary_table_S10_policy_definitions,one_step/feedback,yes,yes,exact,
+supplementary_table_S10_policy_definitions,radius/feedback,yes,yes,exact,
+supplementary_table_S10_policy_definitions,mpc_rh/feedback,yes,yes,exact,

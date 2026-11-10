@@ -1,0 +1,7 @@
+dataset,ceiling,feedback_effect_mnats,E3_mnats,E4_mnats,E5_mnats,E6_mnats,E6_overhead_percent,present_overhead_percent,C_expected,C_qC
+ogbn-arxiv,1.15,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0
+ogbn-proteins,1.17,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.1671080487513767,1.1671080487513767
+Roman-empire,1.3,0.0,4.1683251189999995,0.0,0.0,0.0,0.0,0.0,1.1175428176120379,1.1175428176120379
+PascalVOC-SP,1.29,0.0,4.727080069,0.0,0.0,0.0,0.0,0.0,1.0,1.0
+COCO-SP,1.33,0.0,53.12970366,0.0,0.0,0.0,0.0,0.0,2.0,2.0
+Peptides-func,1.18,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,2.0

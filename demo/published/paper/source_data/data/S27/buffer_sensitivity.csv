@@ -1,0 +1,11 @@
+dataset,buffer_hops,clipped_effect_nats,half_width_nats,upper_nats,admitted,resampling_units,epsilon_a,source_file,locator
+ogbn-arxiv,2,0.0,0.0,0.0,0.0,32.0,0.003,raw/computed/buffer_sensitivity/ogbn-arxiv_buffer_2.json,json:/values/upper_nats
+ogbn-arxiv,4,0.0,0.0,0.0,0.0,29.0,0.003,raw/computed/buffer_sensitivity/ogbn-arxiv_buffer_4.json,json:/values/upper_nats
+ogbn-arxiv,8,0.0,0.0,0.0,0.0,12.0,0.003,raw/computed/buffer_sensitivity/ogbn-arxiv_buffer_8.json,json:/values/upper_nats
+ogbn-arxiv,16,0.0,,,0.0,1.0,0.003,raw/computed/buffer_sensitivity/ogbn-arxiv_buffer_16.json,json:/values/clipped_effect_nats
+ogbn-arxiv,32,0.0,,,0.0,1.0,0.003,raw/computed/buffer_sensitivity/ogbn-arxiv_buffer_32.json,json:/values/clipped_effect_nats
+ogbn-proteins,2,0.0,0.0,0.0,0.0,32.0,0.0015,raw/computed/buffer_sensitivity/ogbn-proteins_buffer_2.json,json:/values/upper_nats
+ogbn-proteins,4,0.0,,,0.0,1.0,0.0015,raw/computed/buffer_sensitivity/ogbn-proteins_buffer_4.json,json:/values/clipped_effect_nats
+ogbn-proteins,8,0.0,,,0.0,1.0,0.0015,raw/computed/buffer_sensitivity/ogbn-proteins_buffer_8.json,json:/values/clipped_effect_nats
+ogbn-proteins,16,0.0,,,0.0,1.0,0.0015,raw/computed/buffer_sensitivity/ogbn-proteins_buffer_16.json,json:/values/clipped_effect_nats
+ogbn-proteins,32,0.0,,,0.0,1.0,0.0015,raw/computed/buffer_sensitivity/ogbn-proteins_buffer_32.json,json:/values/clipped_effect_nats

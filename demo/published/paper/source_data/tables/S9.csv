@@ -1,0 +1,10 @@
+object,implemented primary value,required sensitivity or failure rule
+trajectory folds,5,compare 3/5/10 where sample size permits
+observer state/covariance,"Robust PCA observation, conditioned ridge dynamics, low-rank Kalman filter; 16 dimensions, rank 4","raw, EMA, global and conditioned filters; retain simplest calibrated"
+filters,"6 candidates, 3 active, degree 8","band deletion, scrambling and rank-only controls"
+action critic,"MLP 128–128–64, SiLU; dropout 0.10 after the first two hidden layers; mean and log-scale outputs, log-scale clipped to [−7, 3]",shared versus depth/action-conditioned alternatives
+sequence models,"128-wide input, two 128-wide residual layers, SiLU and a linear output layer",horizon and terminal-model deletion
+horizons / beam / top-k,"{1, 4, 8, 16, 32}/16/2",beam 4/8/16/32; top-k 1/2/3
+observer period,r=2,"r ∈ {1, 2, 4}"
+ensemble sizes,"E ∈ {1, 2, 4, 8, 12}","single, equal-ensemble and equal-compute reports"
+loss clipping,"primary B = 0.10; sensitivity B ∈ {0.05, 0.20}",report clipped fractions and maximum unclipped harm

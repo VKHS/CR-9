@@ -1,0 +1,4 @@
+location,text
+priced_work,The comparator-relative advantage decomposition (Proposition 11) and priced-work boundary (Proposition 10(iii)) are exact identities.
+ensemble_spend,The ensemble-spend crossovers (Proposition 10(ii)) are a sensitivity model.
+panel_b,"Theorem 2 requires independent admission graphs that no decision fixing q_tilde_M has used; the separated-data protocol fixes the policy on D_confirm and reads the validation split once at admission, so the three multigraph benchmarks are admitted under the finite-sample statement. Single-graph benchmarks apply the same clipped-loss statistic on their dependent unit under the descriptive rule (Table S27)."

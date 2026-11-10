@@ -1,0 +1,37 @@
+{
+  "schema": "cross-morse-demo-graph-1",
+  "dataset": "ogbn-proteins",
+  "rule": {
+    "kind": "metis_parts_per_role",
+    "parts": 96,
+    "seed": 0
+  },
+  "sizes": {
+    "nodes": 4266,
+    "directed_edges": 966078,
+    "full_nodes": 132534,
+    "full_directed_edges": 79122504,
+    "official_roles": {
+      "train": 1423,
+      "valid": 1422,
+      "test": 1421
+    },
+    "full_official_roles": {
+      "train": 86619,
+      "valid": 21236,
+      "test": 24679
+    }
+  },
+  "official_source": {
+    "source": "official_ogb_raw",
+    "ogb_dataset_version": "1",
+    "official_split": "species",
+    "source_url": "https://ogb.stanford.edu/docs/nodeprop/"
+  },
+  "npz": "proteins_demo.npz",
+  "npz_sha256": "30ffb761e85276ddbb121b99d62caa13827aa7610072710e1ac9c80845b4a72c",
+  "npz_bytes": 54231026,
+  "builder": "demo/data.py",
+  "seconds": 111.1,
+  "scope": "Deterministic subset of the official data for the CPU demonstration; not the paper's dataset scale."
+}

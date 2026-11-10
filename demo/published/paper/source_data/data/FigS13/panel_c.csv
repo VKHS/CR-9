@@ -1,0 +1,8 @@
+dataset,evaluated_rule,category,paired_loss_nats,low_nats,high_nats,interval_method,interval_drawn
+ogbn-arxiv,returns q_C,open-loop schedule retained,0.0,0.0,0.0,paired whole-unit bootstrap; descriptive when units are dependent,False
+ogbn-proteins,returns q_C,open-loop schedule retained,0.0,0.0,0.0,paired whole-unit bootstrap; descriptive when units are dependent,False
+ogbn-products,returns q_C,open-loop schedule retained,0.0,0.0,0.0,paired whole-unit bootstrap; descriptive when units are dependent,False
+Roman-empire,returns q_C,open-loop schedule retained,0.0,0.0,0.0,paired split effects; small-sample t interval over official splits,False
+PascalVOC-SP,returns q_C,open-loop schedule retained,0.0,0.0,0.0,paired whole-unit bootstrap; descriptive when units are dependent,False
+COCO-SP,returns q_C,open-loop schedule retained,0.0,0.0,0.0,paired whole-unit bootstrap; descriptive when units are dependent,False
+Peptides-func,returns q_C,open-loop schedule retained,0.0,0.0,0.0,paired whole-unit bootstrap; descriptive when units are dependent,False

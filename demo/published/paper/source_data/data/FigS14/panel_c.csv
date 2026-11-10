@@ -1,0 +1,3 @@
+dataset,first_intervention_q25,first_intervention_median,first_intervention_q75,supported_deterioration_depth
+ogbn-proteins,,,,4.0
+ogbn-products,,,,16.0

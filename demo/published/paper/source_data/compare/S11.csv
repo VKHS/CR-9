@@ -1,0 +1,9 @@
+group,path,computed,reported,status,note
+supplementary_table_S11_confirmation_map,state/margin,0.002,"{""$value"": 0.002, ""$decimals"": 3}",exact,
+supplementary_table_S11_confirmation_map,state/fail_output,strongest open-loop predecessor (q_C),strongest open-loop predecessor or q_C,differs,
+supplementary_table_S11_confirmation_map,radius/margin,0.0015,"{""$value"": 0.0015, ""$decimals"": 4}",exact,
+supplementary_table_S11_confirmation_map,radius/fail_output,"one-step if one-step ∈ Q_s, otherwise q_C","one-step if one-step ∈ Q_s, otherwise q_C",exact,
+supplementary_table_S11_confirmation_map,mpc/margin,0.002,"{""$value"": 0.002, ""$decimals"": 3}",exact,
+supplementary_table_S11_confirmation_map,mpc/fail_output,"MPC-OL if MPC-OL ∈ Q_s, otherwise q_C","MPC-OL if MPC-OL ∈ Q_s, otherwise q_C",exact,
+supplementary_table_S11_confirmation_map,full/margin,0.02,"{""$value"": 0.02, ""$decimals"": 2}",exact,
+supplementary_table_S11_confirmation_map,full/fail_output,"Lean if Lean ∈ Q_s, otherwise q_C",Lean,differs,

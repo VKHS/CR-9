@@ -1,0 +1,8 @@
+dataset,unit_count,G_admit,conditional_coverage_percent,comparator_returned,printed_outcome_annotation
+ogbn-arxiv,32,0,,True,
+ogbn-proteins,32,0,,True,
+ogbn-products,59,0,,True,
+Roman-empire,10,0,,True,
+PascalVOC-SP,60,0,95.0,True,
+COCO-SP,60,0,95.0,True,
+Peptides-func,150,0,95.0,True,boundary; Note S26

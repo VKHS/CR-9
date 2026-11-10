@@ -1,0 +1,10 @@
+row,arm,implementation
+open_loop,,cross_morse/policies.py
+ensemble,,cross_morse/policies.py
+predictor,E3,cm_experiments/schedules.py
+distillation,E4,cm_experiments/schedules.py
+mpc_ol,,cross_morse/policies.py
+replanning,E5,cm_experiments/execution.py
+feedback,,cross_morse/policies.py
+budget,E6,cm_experiments/budget.py
+oracle,,cm_experiments/execution.py

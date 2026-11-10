@@ -1,0 +1,14 @@
+measurement,exact formula/source,dim.,normalization,period,failure targeted
+entropy,−Σ_c p_c log p_c / log C or mean binary entropy,1,"training-fold median/MAD; clip [−5, 5]",every depth,low confidence
+margin,p(1) − p(2) or mean 2|p_c − 0.5|,1,robust z-score,every depth,ambiguity
+source-current disagreement,Jensen–Shannon divergence of frozen/current predictions,1,divide by log 2; robust z-score,every depth,representation drift
+effective rank,entropy of normalized singular values; frozen randomized-SVD seed,1,"[0, 1]",every depth,global collapse
+Dirichlet energy,tr(Hᵀ L_sym H)/(‖H‖_F² + ε),1,log(1 + x); robust z-score,every depth,local variation loss
+band power,p_ℓb from main Eq. (11),3,six fixed windows; three retained bands,sensing period P_s,spectral relocation
+source alignment,c_ℓb from main Eq. (11),3,zero-denominator floor ε,sensing period P_s,task-band attenuation
+innovation/NIS,e_ℓᵀ S_ℓ⁻¹ e_ℓ and residual moments,3,training-fold calibration,every update,observer inconsistency
+transport history,"accumulated mass, expected range and relative depth",3,registered depth normalization,every depth,exposure ambiguity
+degree-weighted band power,p_ℓb of main Eq. (11) evaluated on D^1/2 H_ℓ (the quantity of Proposition 6 for the row-stochastic realization),3,as band power,sensing period P_s,"bound quantity on irregular graphs (E7, E18)"
+spectral age (when P_s > 1),(ℓ − ℓ_last)/P_s,1,explicit observed age,every depth,stale-feature identification
+total state energy,‖H_ℓ‖_F²,1,log; robust z-score,every depth,required by the displacement bound
+reachability statistic,"ŝ_a(H_ℓ) = [Σ_b s_ab² ‖G_b H_ℓ‖_F²]^1/2 per registered action, with s_ab from the registry (Fig. S15b)",7,robust z-score,every depth; powers at P_s,action-specific reachable displacement (E18)

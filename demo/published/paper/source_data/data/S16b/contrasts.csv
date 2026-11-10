@@ -1,0 +1,13 @@
+contrast,kind,value_nats,interval_low_nats,interval_high_nats,interval_method
+S,effect-coded,-0.5021712554999986,-0.5501978066369417,-0.4556314440219307,paired whole-unit bootstrap; one shared resampling stream
+O,effect-coded,0.35257471400000284,0.31395837444177344,0.39761051525310354,paired whole-unit bootstrap; one shared resampling stream
+X,effect-coded,39.9255615975,38.39417882019929,41.436735075824096,paired whole-unit bootstrap; one shared resampling stream
+SO,effect-coded,-0.30838722200000035,-0.34856755916691645,-0.2723026625662814,paired whole-unit bootstrap; one shared resampling stream
+SX,effect-coded,0.5021712554999986,0.4556314440219307,0.5501978066369417,paired whole-unit bootstrap; one shared resampling stream
+OX,effect-coded,-0.35257471400000284,-0.39761051525310354,-0.3139583744417735,paired whole-unit bootstrap; one shared resampling stream
+SOX,effect-coded,0.30838722200000035,0.2723026625662814,0.34856755916691645,paired whole-unit bootstrap; one shared resampling stream
+SO,baseline-anchored,-1.2335488880000005,,,point contrast
+SX,baseline-anchored,0.3875680670000037,,,point contrast
+OX,baseline-anchored,-1.3219238719999993,,,point contrast
+SOX,baseline-anchored,1.2335488880000014,,,point contrast
+full minus none,difference,40.084352278000004,,,point contrast

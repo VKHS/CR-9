@@ -1,0 +1,5 @@
+control,construction,residual activity,input fallback,worst pre-fallback harm,expected conclusion
+graph irrelevant,Y ⟂ A | X on independent realizations,0.000,1.000,0.0000 nats,comparator equivalence and nonvacuous fallback
+misleading graph,role/edge structure anti-aligned with labels,0.000,0.967,0.0000 nats,detect confidently wrong graph evidence
+sensor bias,offset/heteroskedastic innovation corruption,0.000,1.000,0.0000 nats,NIS/fallback respond before large harm
+support shift,unseen degree/size/action strata,0.000,1.000,0.0000 nats,dynamic support prevents extrapolation

@@ -1,0 +1,19 @@
+object,key,value
+trajectory_folds,value,5
+observer,state_dim,16
+observer,rank,4
+filters,candidates,6
+filters,active,3
+filters,degree,8
+critic,hidden_widths,"[128, 128, 64]"
+critic,dropout,0.1
+critic,log_scale_clip,"[-7, 3]"
+sequence_models,width,128
+sequence_models,residual_layers,2
+search,horizons,"[1, 4, 8, 16, 32]"
+search,beam,16
+search,top_k,2
+observer_period,r,2
+ensemble,sizes,"[1, 2, 4, 8, 12]"
+clipping,B,0.1
+clipping,sensitivity,"[0.05, 0.2]"

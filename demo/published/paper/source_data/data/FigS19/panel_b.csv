@@ -1,0 +1,8 @@
+dataset,unit_J_or_repeats,criterion,coverage,G_admit
+arxiv,32 buffered cores,cluster bootstrap (descriptive),none,0 (qC)
+proteins,32 buffered cores,cluster bootstrap (descriptive),none,0 (qC)
+products,59 buffered cores,cluster bootstrap (descriptive),none,0 (qC)
+Roman,10 official splits,paired repeated-split interval,none,0 (qC)
+Pascal,60 i.i.d. graphs (validation split),emp. Bernstein U_a <= -epsilon_a (Theorem 2),>= 95%; policy fixed on D_confirm,0 (qC)
+COCO,60 i.i.d. graphs (validation split),emp. Bernstein U_a <= -epsilon_a (Theorem 2),>= 95%; policy fixed on D_confirm,0 (qC)
+Peptides,150 i.i.d. graphs (validation split),emp. Bernstein U_a <= -epsilon_a (Theorem 2),>= 95%; policy fixed on D_confirm,0 (qC)

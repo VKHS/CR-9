@@ -269,7 +269,9 @@ def export_budget_matched(args) -> Path:
         "protocol": ("development-selected arms evaluated on independent D_compare against the confirmed policy q_M at the registered "
                      "common ceiling; crossed seed-by-unit bootstrap intervals and Holm-adjusted paired sign-flip tests "
                      "within each dataset's family of four arms (cm_campaigns.arm_campaign.check_campaign)"),
-        "synthetic": False, "complete_campaign": complete,
+        "synthetic": any("software_fixture" in (entry.get("qualification_blockers") or [])
+                         for entry in study.get("studies") or []),
+        "complete_campaign": complete,
         "campaign_archive": {"doi": args.archive_doi, "sha256": args.archive_sha256},
     }
     finish_set(root, target, keys=["dataset", "arm", "configuration"], rows=rows, provenance=provenance,

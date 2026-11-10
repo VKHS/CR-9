@@ -1,0 +1,27 @@
+Dataset,configuration,E or E',serial cost,official score,break-even threshold (nats),paired loss effect of deployed rule vs this row (nats),verdict
+arxiv,qC: nominal,1,1.0,50.83,,"+0.0000 [+0.0000, +0.0000] (main Table 1)",
+arxiv,qC at E = 2 (registered grid),2,2.0,50.83,,-0.1335,deployed rule retained at lower cost
+arxiv,qC at E = 4 (registered grid),4,4.0,50.83,,-0.3855,deployed rule retained at lower cost
+arxiv,qC at E = 8 (registered grid),8,8.0,50.83,,-0.4773,deployed rule retained at lower cost
+arxiv,qC at E = 12 (registered grid),12,12.0,50.83,,-0.4107,deployed rule retained at lower cost
+proteins,qC: learned stop,2,1.2,49.72,,"+0.0000 [+0.0000, +0.0000] (main Table 1)",
+proteins,qC at E = 4 (registered grid),4,2.3,48.46,,-0.0185,deployed rule retained at lower cost
+proteins,qC at E = 8 (registered grid),8,4.7,48.16,,-0.0340,deployed rule retained at lower cost
+proteins,qC at E = 12 (registered grid),12,7.0,48.32,,-0.0370,deployed rule retained at lower cost
+Roman,qC: nominal,2,1.1,20.03,,"+0.0000 [+0.0000, +0.0000] (main Table 1)",
+Roman,qC at E = 4 (registered grid),4,2.2,17.09,,-0.0190,deployed rule retained at lower cost
+Roman,qC at E = 8 (registered grid),8,4.5,17.29,,-0.0222,deployed rule retained at lower cost
+Roman,qC at E = 12 (registered grid),12,6.7,20.68,,-0.0252,deployed rule retained at lower cost
+Pascal,qC: nominal,1,1.0,4.68,,"+0.0000 [+0.0000, +0.0000] (main Table 1)",
+Pascal,qC at E = 2 (registered grid),2,2.0,4.48,,-0.0004,deployed rule retained at lower cost
+Pascal,qC at E = 4 (registered grid),4,4.0,4.57,,+0.0019,comparator ahead at this size; cost 4.0× the deployed expected cost
+Pascal,qC at E = 8 (registered grid),8,8.0,4.51,,+0.0064,comparator ahead at this size; cost 8.0× the deployed expected cost
+Pascal,qC at E = 12 (registered grid),12,12.0,4.45,,+0.0075,comparator ahead at this size; cost 12.0× the deployed expected cost
+COCO,qC: nominal,2,2.0,1.08,,"+0.0000 [+0.0000, +0.0000] (main Table 1)",
+COCO,qC at E = 4 (registered grid),4,4.0,1.08,,+0.0076,comparator ahead at this size; cost 2.0× the deployed expected cost
+COCO,qC at E = 8 (registered grid),8,8.0,1.08,,+0.0126,comparator ahead at this size; cost 4.0× the deployed expected cost
+COCO,qC at E = 12 (registered grid),12,12.0,1.08,,+0.0130,comparator ahead at this size; cost 6.0× the deployed expected cost
+Peptides,qC: nominal,2,2.0,0.3128,,"+0.0000 [+0.0000, +0.0000] (main Table 1)",
+Peptides,qC at E = 4 (registered grid),4,4.0,0.3187,,-0.0004,deployed rule retained at lower cost
+Peptides,qC at E = 8 (registered grid),8,8.0,0.3251,,+0.0018,comparator ahead at this size; cost 4.0× the deployed expected cost
+Peptides,qC at E = 12 (registered grid),12,12.0,0.3177,,-0.0004,deployed rule retained at lower cost

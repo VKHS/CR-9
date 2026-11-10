@@ -1,5 +1,80 @@
 # Changelog
 
+## 2026-11-10 — The CPU demonstration published; reconstruction corrections
+
+- The release `demo-artifacts` holds 31 of the 37 artifacts (the seven lifecycle runs, 22 record sets, the
+  E3-E6 campaign and the runner's environment capture; 38.55 GiB). `make demo-paper` builds 56 of the 90
+  displays from it, 35 from the release and 21 from the repository's own sources; 1,263 printed values are
+  equal, 1,202 differ and 248 are missing. [demo/RESULTS.md](demo/RESULTS.md) lists each display that waits
+  for an input and each artifact the demonstration does not hold, with its reason: the external comparisons
+  of E12, the S14 campaign and the two record sets that read it, the action-gap audit (every demonstration
+  run deployed an open-loop rule) and the module ablations (one of their sixteen measurement jobs reads more
+  sealed variant runs than a hosted runner's disk holds).
+- `scripts/reconstruct.py` paired the discovered runs with the dataset records by position, while
+  `build_paper.collect` returns the records in the paper's dataset order: runs discovered in another order
+  reached the display generators under other datasets. Each run is now paired with its sealed benchmark
+  dataset (regression test with the example runs in reverse order).
+- `paper/build/displays/factorial_data.py` compared raw factorial values with summary values at a relative
+  1e-10, tighter than the summary's ten printed significant digits (up to 5e-10); a comparison with a summary
+  value now allows 1e-9, and values replayed from the raw arrays keep 1e-10.
+- The demonstration's reconstruction (`reconstruct_paper.py --demo`) builds the supplementary displays of
+  the factorials, the ensemble grid and the E3-E6 campaign from its fixture-derived inputs, labelled as the
+  demonstration, and its display context replays the campaign without the scheduler and fixture
+  qualifications (all 24 contrasts still required); a supplementary input it cannot build is reported among
+  the generator errors. The paper's build and context are unchanged. The scope note opens the report before
+  the file manifest is written, so the workspace verifies and a second run replaces it.
+- `scripts/paper_artifacts.py publish --target` names the commit a new release tag is created on.
+  `demo/report.py` lists the displays built and waiting (`--workspace`), states the cause of an absence that
+  the publication request notes (`--notes`) and marks a main-graph node that a further graph completed.
+  `demo-continue.yml` collects a map from earlier exports alone (`collect_only`, with the task markers of an
+  earlier collect, `markers_from`); `demo-publish.yml` can rebuild and record without publishing again
+  (`report_only`).
+
+## 2026-11-09 — CPU demonstration of the complete pipeline
+
+- A separately published demonstration ([demo/README.md](demo/README.md)) runs the whole pipeline with the
+  repository's own code on GitHub-hosted CPU runners: the seven lifecycle runs (Roman-empire on its complete
+  official graph, all ten splits; the other datasets on deterministic subsets of their official data built by
+  `demo/data.py` with the runtime's own adapters), the production graph's record sets, campaigns and observed
+  environment (`scripts/paper_outputs.py plan --allow-fixture --device cpu`, executed without Slurm by
+  `demo/execute.py`), and every table and figure rebuilt from the release `demo-artifacts` with
+  `make demo-paper`. [demo/RESULTS.md](demo/RESULTS.md) records what it contains and what it could not produce.
+- The demonstration has its own channel: `release/demo_artifacts.json`, the release `demo-artifacts`, the
+  relationship `reduced_scale_demonstration` and views under `demo/published/`. The paper's manifest refuses
+  demonstration artifacts, `reconstruct_paper.py` refuses to mix the two manifests, and no status in
+  `STATEMENT_COMPLIANCE.md` depends on the demonstration; its separate section reports what the demonstration
+  shows for each item.
+- The production planner gains `--device cpu`, `--s14-exclude`, `--horizon-sweep-profile/-ensemble` and
+  `--horizon-sweep-beam` (fixture plans; recorded among the plan's declared choices). The Table S29 sweep can
+  hold a beam width its parent was not planned with (`run_sweep.py plan --beam`): every point outside the
+  parent's planner registry is then a variant lifecycle and no replicate of the parent's configuration is
+  planned. `scripts/paper_artifacts.py` gains `pack/publish/fetch/status/derive --demo`; `make demo-paper`,
+  `demo-fetch` and `demo-status` use them.
+- Execution without Slurm on the CPU device: each E3-E6 study runs through `scripts/run_budget_study.py`
+  (the study command of `hpc/run_budget_arms_arrhenius.sh`, with the same job-evidence directory and a
+  `scheduler.json` recording that no allocation and no accounting exist); the accounting step skips such
+  studies, the campaign manifest attaches the logs that hold something, the export takes the period of such a
+  campaign from the studies' own records instead of the accounting, a fixture plan exports the partial
+  campaign, and the budget-matched record set is marked synthetic when a study is a software fixture. The E17
+  exports of a CPU plan skip the sacct capture and write the declared partial sets (`--allow-partial`).
+- In a fixture plan, every exporter that can write the measured part of an incomplete set is given
+  `--allow-partial` (never into `records/`; the set lists the cells it lacks), and `collect` keeps a set whose
+  own provenance declares partial coverage; a paper artifact is refused as before.
+- Workflows: `demo-runs.yml` (the runs), `demo-graph.yml` (the plan and its first dependency level, sixteen
+  runners), `demo-continue.yml` (the later levels and the exports; each job restores from earlier archives
+  only the outputs its tasks depend on, `demo/restore.py`, with the producer code pinned to the planned
+  commit), `demo-grid.yml` (the PascalVOC-SP E14 job, whose eighteen additional plants train on several runners
+  with the job's own training call, `demo/grid_seeds.py`), `demo-sweep.yml` (Table S29 as a graph of its own),
+  `demo-publish.yml` (merge the maps, pack each artifact, publish, rebuild, record: `demo/merge_maps.py`,
+  `demo/pack_each.py`, `demo/report.py`) and `demo-verify.yml` (`make demo-paper` from a fresh clone).
+  `demo/execute.py` gives every runner of a level the same assignment, counted over all of the level's tasks
+  in an order drawn from the workflow run (`--salt`), so that tasks one run leaves unfinished spread over the
+  next run's runners; it leaves named nodes to another workflow (`--skip-node`) together with the nodes
+  waiting on them. The work archives keep every file a job wrote, including copies that preserve their
+  source's time; a restore can leave paths out (`--exclude`, `--exclude-pattern`), extract named files
+  (`--path`), keeps a study's job evidence with it, and a measurement level restores only the lifecycle runs
+  its tasks read (`demo/task_inputs.py`). Tests: `tests/test_demo.py`, `tests/test_sweeps.py`.
+
 ## 2026-11-09 — Protocol tables in the printed wording
 
 - Five cells of Supplementary Tables S1, S3 and S8 whose printed wording describes what the code executes are

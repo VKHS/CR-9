@@ -369,14 +369,21 @@ class Collector:
 # ----------------------------------------------------------------------------- plan
 def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | None = None,
                horizons=None, beams=None, profile: str | None = None, ensemble: int | None = None,
-               grids: dict | None = None, variants: bool = True, replicate: bool = True,
-               allow_source_change: bool = False, ablations=None, buffers=None) -> Path:
+               beam: int | None = None, grids: dict | None = None, variants: bool = True,
+               replicate: bool = True, allow_source_change: bool = False, ablations=None,
+               buffers=None) -> Path:
     """Write ``plan.json`` and the variant configurations of one sweep.
 
     ``horizon``, ``horizons`` and ``beams`` replace the registered horizon and the two
     grids of the horizon/beam contract, and ``grids`` the Table S18 grids, for
     example to exercise the sweep on the synthetic smoke runs; ``variants=False``
     plans only the rows that are recomputed from the parents.
+
+    ``beam`` is the beam width that the horizon sweep holds when it is not the
+    parent's own (the registered 16 on a parent planned with another width): every
+    point that the parent's planner registry does not hold is then a variant, and
+    no replicate of the parent's configuration is planned, since the registered
+    configuration is not the parent's.
 
     ``ablations`` (module_ablations only) attaches collected experiment directories of
     ``scripts/run_ablation.py modules`` (results/module_ablations.json): their seven
@@ -418,13 +425,13 @@ def plan_sweep(sweep: str, parents: list[Path], output: Path, *, horizon: int | 
             raise SweepError("the horizon and beam sweep takes exactly one sealed run")
         run = SealedRun(Path(entries[0]["members"][0]))
         settings = horizon_beam_settings(run, spec, horizon=horizon, horizons=horizons, beams=beams,
-                                         profile=profile, ensemble=ensemble)
+                                         profile=profile, ensemble=ensemble, beam=beam)
         for point in settings["points"]:
             if point["source"] == "variant" and variants:
                 planned.append(_variant(output, run, f"H{point['horizon']}_B{point['beam_width']}",
                                         point["patch"], {"horizon": point["horizon"],
                                                          "beam_width": point["beam_width"]}))
-        if planned and replicate:
+        if planned and replicate and settings["registered_in_parent"]:
             planned.append(_variant(output, run, "replicate", {}, {"horizon": settings["registered_horizon"],
                                                                    "beam_width": settings["registered_beam_width"],
                                                                    "replicate": True}))
@@ -604,7 +611,12 @@ def reference_candidate(run: SealedRun) -> dict:
 
 
 def horizon_beam_settings(run: SealedRun, spec: dict, *, horizon=None, horizons=None, beams=None,
-                          profile=None, ensemble=None) -> dict:
+                          profile=None, ensemble=None, beam=None) -> dict:
+    """The points of the horizon and beam sweep on one parent run.
+
+    The horizon sweep holds the registered beam width: the parent's own, or ``beam``
+    when given (a parent planned with another width; the registered configuration is
+    then itself a variant, since the parent's planner never ran it)."""
     controller = run.config["controller"]
     depth = int(run.config["model"]["depth"])
     if profile is None or ensemble is None:
@@ -612,7 +624,8 @@ def horizon_beam_settings(run: SealedRun, spec: dict, *, horizon=None, horizons=
         profile = reference["profile"] if profile is None else profile
         ensemble = reference["ensemble"] if ensemble is None else int(ensemble)
     registered_h = int(spec["registered"]["horizon"] if horizon is None else horizon)
-    registered_b = int(controller["beam_width"])
+    parent_b = int(controller["beam_width"])
+    registered_b = parent_b if beam is None else int(beam)
     horizon_grid = [int(h) for h in (spec["grid"]["horizon"] if horizons is None else horizons)]
     beam_grid = [int(b) for b in (spec["grid"]["beam_width"] if beams is None else beams)]
     if beams is None and registered_b != int(spec["registered"]["beam_width"]):
@@ -621,21 +634,23 @@ def horizon_beam_settings(run: SealedRun, spec: dict, *, horizon=None, horizons=
     if registered_b not in beam_grid or registered_h not in horizon_grid:
         raise SweepError("the registered horizon and beam width must lie on their grids")
     parent_horizons = sorted({min(int(h), depth) for h in controller["horizons"]})
-    if min(registered_h, depth) not in parent_horizons:
+    registered_in_parent = registered_b == parent_b and min(registered_h, depth) in parent_horizons
+    if beam is None and not registered_in_parent:
         raise SweepError(f"{run.root.name}: the registered horizon is not in the parent's registry")
     points = []
     wanted = [(h, registered_b) for h in horizon_grid] + [(registered_h, b) for b in beam_grid]
     for h, b in dict.fromkeys(wanted):
-        inside = b == registered_b and min(h, depth) in parent_horizons
+        inside = b == parent_b and min(h, depth) in parent_horizons
         patch = {}
-        if b != registered_b:
+        if b != parent_b:
             patch["/controller/beam_width"] = b
         if min(h, depth) not in parent_horizons:
             patch["/controller/horizons"] = sorted(set(int(x) for x in controller["horizons"]) | {h})
         points.append({"horizon": h, "beam_width": b, "source": "parent" if inside else "variant",
                        "patch": patch})
     return {"profile": profile, "ensemble": int(ensemble), "registered_horizon": registered_h,
-            "registered_beam_width": registered_b, "depth": depth, "points": points}
+            "registered_beam_width": registered_b, "parent_beam_width": parent_b,
+            "registered_in_parent": registered_in_parent, "depth": depth, "points": points}
 
 
 def _mpc_rh(run: SealedRun, horizon: int, profile: str, ensemble: int) -> tuple[int, dict, float]:

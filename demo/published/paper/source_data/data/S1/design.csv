@@ -1,0 +1,8 @@
+dataset,independent_graphs,unit,partitioner,num_clusters,buffer_hops,official_splits,J_admit,admission_rule,clip_B,delta_a,epsilon_a,epsilon_metric,bootstrap_reps,loss
+ogbn-arxiv,False,cluster,metis,32,2,,,cluster_bootstrap,0.1,0.025,0.003,0.001,10000,CE
+ogbn-proteins,False,cluster,degree_stratified,32,2,,,cluster_bootstrap,0.1,0.025,0.0015,0.001,10000,BCE
+ogbn-products,False,cluster,metis,64,2,,,cluster_bootstrap,0.1,0.025,0.003,0.001,10000,CE
+Roman-empire,False,official_split,metis,32,2,10,,cluster_bootstrap,0.1,0.025,0.003,0.001,10000,CE
+PascalVOC-SP,True,graph,graphs,,,,1428,empirical_bernstein,0.1,0.025,0.003,0.001,10000,CE
+COCO-SP,True,graph,graphs,,,,5000,empirical_bernstein,0.1,0.025,0.003,0.001,10000,CE
+Peptides-func,True,graph,graphs,,,,2331,empirical_bernstein,0.1,0.025,0.0015,0.001,10000,BCE

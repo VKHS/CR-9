@@ -1,0 +1,5 @@
+control,residual_activity,input_fallback,worst_pre_fallback_harm,harm_unit
+graph irrelevant,0.0,1.0,0.0,nats
+misleading graph,0.0,0.9666666667,0.0,nats
+sensor bias,0.0,1.0,0.0,nats
+support shift,0.0,1.0,0.0,nats

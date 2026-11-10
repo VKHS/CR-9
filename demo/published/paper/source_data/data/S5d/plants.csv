@@ -1,0 +1,8 @@
+dataset,parameters,native_sites,inserted_sites,plant_checkpoints
+ogbn-arxiv,87976,32,0,2
+ogbn-proteins,81904,32,0,2
+ogbn-products,85295,32,0,2
+Roman-empire,123666,32,0,20
+PascalVOC-SP,253845,6,26,2
+COCO-SP,257745,6,26,2
+Peptides-func,79442,8,24,2

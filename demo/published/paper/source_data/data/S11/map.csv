@@ -1,0 +1,5 @@
+kind,practical_margin,beneficial_direction,unit,predecessor
+state,0.002,1,nats,comparator
+radius,0.0015,-1,nats,one_step
+mpc,0.002,-1,nats,mpc_ol
+full,0.02,1,fraction,lean

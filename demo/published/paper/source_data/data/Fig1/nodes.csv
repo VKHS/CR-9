@@ -1,0 +1,30 @@
+panel,node,title,content
+1. Offline development and qualification,q0,Frozen graph model $q_0$,
+1. Offline development and qualification,qN,Controlled nominal process $q_N^{ctrl}$,
+1. Offline development and qualification,explore,Exploration and logging,"9,600–32,000 trajectories | 10 actions (A0–A9) | losses | support: p ≥ 0.05, ESS ≥ 64"
+1. Offline development and qualification,measure,State measurements,entropy | margin | source-current disagreement | effective rank | Dirichlet energy | band power | source alignment | transport history | degree-weighted band power | total state energy
+1. Offline development and qualification,models,Observer and risk models,"state observer (16-dim, rank 4) | one-step / sequence risk predictors"
+1. Offline development and qualification,families,Candidate policy families,"Open-loop: best depth, learned stop, phase, fixed sequence, MPC-OL | Feedback: one-step, radius, MPC-RH"
+1. Offline development and qualification,select,Select strongest open-loop comparator $q_C$ and provisional $\hat{q}_s$,5 outer × 4 inner folds; $\epsilon_{eq}$ = 0.002
+1. Offline development and qualification,confirm,Held-out confirmation: confirmed policy $q_M$,Holm α = 0.05
+2. Executable deployment logic,input,Input graph $x$,
+2. Executable deployment logic,gate,"Static
+compatibility
+gate $g_{input}(x)$",
+2. Executable deployment logic,controller,Executable controller q̃_M,internal control loop
+2. Executable deployment logic,state,state $s_\ell$,
+2. Executable deployment logic,support,supported action set $A_{sup}(s_\ell)$,
+2. Executable deployment logic,policy,policy $\pi_q(s_\ell)$,
+2. Executable deployment logic,transport,controlled transport / update,
+2. Executable deployment logic,recovery,recovery actions,"nominal (A0), source reset (A8), last safe reset (A9)"
+2. Executable deployment logic,admit,"Deployment
+admission
+$G_{admit}$",
+2. Executable deployment logic,deployed,Deployed predictor $q_D$,$G_{admit}$ = 1 (admit)
+2. Executable deployment logic,fallback,Exact comparator fallback,$G_{admit}$ = 0: returns $q_C$ exactly
+2. Executable deployment logic,comparator,Comparator $q_C$ (strongest open loop),
+3. Evidence and reporting,qualification,Target-regime qualification,nominal graph value | depth qualification | registry support | residual headroom
+3. Evidence and reporting,mechanism,Mechanism tests,conditional state destruction | radius minus deterministic one-step | MPC-RH minus MPC-OL
+3. Evidence and reporting,admission,Admission statistics,"$U_a = \bar{D} + \sqrt{2 S^2 \log(2/\delta_a)/J} + 14 B \log(2/\delta_a)/(3(J-1))$ | B = 0.10, $\delta_a$ = 0.025"
+3. Evidence and reporting,cost,Ablation and cost,factorial | within-block ablations | expected / worst-case cost
+3. Evidence and reporting,outputs,Final outputs,official metric | clipped loss | calibration | fallback rate

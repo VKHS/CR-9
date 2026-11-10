@@ -1,0 +1,8 @@
+Dataset (backbone),precision,max. relative state deviation,test-loss deviation (nats),inserted sites,reporting scope
+ogbn-arxiv (MLP4-128 transport plant),fp32,0 (limit 10^-5),0 (limit 10^-4),none,E1 record
+"ogbn-proteins (MLP4-128, edge-weighted)",fp32,0 (limit 10^-5),0 (limit 10^-4),none,E1 record
+ogbn-products (MLP4-128 transport plant),fp32,0 (limit 10^-5),0 (limit 10^-4),none,E1 record
+Roman-empire (heterophily encoder4-128),fp32,0 (limit 10^-5),0 (limit 10^-6),none,E1 record
+PascalVOC-SP (GraphGPS-style local branch),fp32,0 at the 6 designated sites (limit 10^-5),0 (limit 10^-4),26 inserted (4 per block plus 2 boundary sites; 32 controlled sites with the 6 native sites); zero deviation by construction,E1 record; inserted-site action mix recorded separately
+COCO-SP (GraphGPS-style local branch),fp32,0 at the 6 designated sites (limit 10^-5),0 (limit 10^-4),26 inserted (4 per block plus 2 boundary sites; 32 controlled sites with the 6 native sites); zero deviation by construction,E1 record; inserted-site action mix recorded separately
+"Peptides-func (GINE-style, linear aggregation)",fp32,0 at the 8 designated sites (limit 10^-5),0 (limit 10^-4),24 inserted (3 per native layer; 32 controlled sites with the 8 native sites); zero deviation by construction,E1 record; nonlinear messages excluded

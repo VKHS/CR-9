@@ -1,0 +1,9 @@
+stage,"single-graph benchmarks (arxiv, proteins, products, Roman)","multigraph benchmarks (Pascal, COCO, Peptides)",role reserved at preparation
+target-regime gates (main Eq. (5)),buffered cores of D_fit/D_explore,training graphs of D_fit/D_explore,evaluated before controller selection (Table S4)
+fitting of observer and consequence models,D_explore (20% of official training),D_explore,D_explore
+exploration logging,D_explore,D_explore,D_explore
+selection (main Eq. (19)),D_select; buffered clusters,D_select; complete graphs,D_select; trace exported (E15)
+confirmation (main Eq. (20)),D_confirm; buffered clusters,"D_confirm (425, 5,664 and 544 graphs)",D_confirm (5%; manifest IDs)
+admission (Theorem 2 or descriptive),descriptive on buffered cores or official splits,"official validation split (1,428, 5,000 and 2,331 graphs), read once",D_admit: untouched by every decision that fixed q̃_M (Theorem 2)
+independent E3–E6 comparison,D_compare; buffered clusters,"D_compare (425, 5,665 and 544 graphs)","D_compare (5%), disjoint from all teacher decisions; no automatic policy replacement"
+test,D_test,D_test,"D_test, read once"

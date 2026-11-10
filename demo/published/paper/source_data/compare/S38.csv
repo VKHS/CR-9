@@ -1,0 +1,13 @@
+group,path,computed,reported,status,note
+supplementary_table_S38_results_record_schema,dataset/role,key,key,exact,
+supplementary_table_S38_results_record_schema,backbone/role,key,key,exact,
+supplementary_table_S38_results_record_schema,checkpoint/role,key,key,exact,
+supplementary_table_S38_results_record_schema,policy/role,key,key,exact,
+supplementary_table_S38_results_record_schema,profile/role,key,key,exact,
+supplementary_table_S38_results_record_schema,stage/role,not a record column,key,differs,
+supplementary_table_S38_results_record_schema,unit/role,not a record column,key,differs,
+supplementary_table_S38_results_record_schema,protocol/role,value,key,differs,
+supplementary_table_S38_results_record_schema,score/role,value,value,exact,
+supplementary_table_S38_results_record_schema,uncertainty/role,value,value,exact,
+supplementary_table_S38_results_record_schema,cost/role,value,value,exact,
+supplementary_table_S38_results_record_schema,identifier/role,provenance,provenance,exact,

@@ -1,0 +1,27 @@
+dataset,row,E_or_E_prime,serial_cost,official_score,threshold_low,threshold_high,effect_or_low,effect_high_or_ci_low,ci_high,verdict
+ogbn-arxiv,qC,1,1.0,50.831730225189546,,,0.0,0.0,0.0,
+ogbn-arxiv,grid E = 2,2,2.0,50.83173023,,,-0.13354832400000038,,,deployed rule retained at lower cost
+ogbn-arxiv,grid E = 4,4,4.0,50.83173023,,,-0.38546099000000034,,,deployed rule retained at lower cost
+ogbn-arxiv,grid E = 8,8,8.0,50.83173023,,,-0.4772830680000002,,,deployed rule retained at lower cost
+ogbn-arxiv,grid E = 12,12,12.0,50.83173023,,,-0.41072878400000024,,,deployed rule retained at lower cost
+ogbn-proteins,qC,2,1.1671080487513767,49.71853960492564,,,0.0,0.0,0.0,
+ogbn-proteins,grid E = 4,4,2.3342160975027535,48.46380705,,,-0.018463011899999993,,,deployed rule retained at lower cost
+ogbn-proteins,grid E = 8,8,4.668432195005507,48.16263596,,,-0.03399746319999997,,,deployed rule retained at lower cost
+ogbn-proteins,grid E = 12,12,7.00264829250826,48.31877855,,,-0.036991006199999954,,,deployed rule retained at lower cost
+Roman-empire,qC,2,1.1175428176120379,20.030003529827038,,,0.0,0.0,0.0,
+Roman-empire,grid E = 4,4,2.2350856352240758,17.09495235,,,-0.019045352000000015,,,deployed rule retained at lower cost
+Roman-empire,grid E = 8,8,4.4701712704481515,17.28909283,,,-0.022170628000000026,,,deployed rule retained at lower cost
+Roman-empire,grid E = 12,12,6.705256905672227,20.68302153,,,-0.025159300999999967,,,deployed rule retained at lower cost
+PascalVOC-SP,qC,1,1.0,4.679835198992763,,,0.0,0.0,0.0,
+PascalVOC-SP,grid E = 2,2,2.0,4.478061828,,,-0.00041305500000010653,,,deployed rule retained at lower cost
+PascalVOC-SP,grid E = 4,4,4.0,4.572060453,,,0.0018976399999999227,,,comparator ahead at this size; cost 4.0× the deployed expected cost
+PascalVOC-SP,grid E = 8,8,8.0,4.512154484,,,0.006432274000000016,,,comparator ahead at this size; cost 8.0× the deployed expected cost
+PascalVOC-SP,grid E = 12,12,12.0,4.44905078,,,0.007518410999999947,,,comparator ahead at this size; cost 12.0× the deployed expected cost
+COCO-SP,qC,2,2.0,1.0808265229235494,,,0.0,0.0,0.0,
+COCO-SP,grid E = 4,4,4.0,1.080826523,,,0.007621170999999816,,,comparator ahead at this size; cost 2.0× the deployed expected cost
+COCO-SP,grid E = 8,8,8.0,1.080826523,,,0.012630033999999846,,,comparator ahead at this size; cost 4.0× the deployed expected cost
+COCO-SP,grid E = 12,12,12.0,1.080826523,,,0.013030273999999897,,,comparator ahead at this size; cost 6.0× the deployed expected cost
+Peptides-func,qC,2,2.0,0.31277464883729,,,0.0,0.0,0.0,
+Peptides-func,grid E = 4,4,4.0,0.3187284308,,,-0.0004197704000000191,,,deployed rule retained at lower cost
+Peptides-func,grid E = 8,8,8.0,0.325102275,,,0.0017545769999999794,,,comparator ahead at this size; cost 4.0× the deployed expected cost
+Peptides-func,grid E = 12,12,12.0,0.3176869634,,,-0.00037721769999998767,,,deployed rule retained at lower cost

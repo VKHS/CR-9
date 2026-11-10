@@ -1,0 +1,8 @@
+role,allocation_percent,outer_folds,inner_folds,plant_seeds,controller_seeds
+fit,60.0,,,12,
+explore,20.0,,5,,12
+select,10.0,5,4,,
+confirm,5.0,,,,
+compare,5.0,,,,12
+admit,,,,,
+test,,,,,

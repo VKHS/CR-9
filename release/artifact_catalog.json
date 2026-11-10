@@ -114,9 +114,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 69769,
+          "bytes": 69907,
           "path": "scripts/export_records.py",
-          "sha256": "72c10f3d2e4bf9806315c576587a4ee6c3b05ef978f2beb18940e4c648a3b3c8"
+          "sha256": "0b908a345118875fa1d20f1d541a7adeac7060bae8138d3bf9c3d541a8259eed"
         },
         {
           "bytes": 31729,
@@ -239,14 +239,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 45092,
+          "bytes": 46291,
           "path": "Makefile",
-          "sha256": "2e1d8e1e00c00ace4080ff0894cd0bce4c0ef73a3d5795a858846b9f1c03df8f"
+          "sha256": "079da187004f7cefc9557546045565810f2e41d3e9bc88d6f04fc56dc3c8ed15"
         },
         {
-          "bytes": 10386,
+          "bytes": 12213,
           "path": "scripts/reconstruct_paper.py",
-          "sha256": "d77937effb3a11ac17980608eb773955b544e1af685bf98dc6cc450f5339f5a6"
+          "sha256": "ca817e976ca4a27d113dd95ca1c3982d143ad0e4af3a43c399bfc7ef2a9af20d"
         }
       ],
       "entrypoints": [
@@ -274,9 +274,9 @@
           "sha256": "125fae95eaa28c1aa897237f3c9075021623ca18b32d16b3a5febd9f7862edd0"
         },
         {
-          "bytes": 89930,
+          "bytes": 95352,
           "path": "scripts/paper_artifacts.py",
-          "sha256": "f643645e291cc3667cde2b1890a576bf3e90a3dedd1aaf737eb2098657a84b38"
+          "sha256": "628201cea6c77ecc581ff2ee953bc1777fa871b2e053e75d427b7800ae96e697"
         }
       ],
       "entrypoints": [
@@ -298,9 +298,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 35562,
+          "bytes": 37624,
           "path": "scripts/reconstruct.py",
-          "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
+          "sha256": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470"
         }
       ],
       "entrypoints": [
@@ -321,9 +321,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 35562,
+          "bytes": 37624,
           "path": "scripts/reconstruct.py",
-          "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
+          "sha256": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470"
         }
       ],
       "entrypoints": [
@@ -455,14 +455,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 45092,
+          "bytes": 46291,
           "path": "Makefile",
-          "sha256": "2e1d8e1e00c00ace4080ff0894cd0bce4c0ef73a3d5795a858846b9f1c03df8f"
+          "sha256": "079da187004f7cefc9557546045565810f2e41d3e9bc88d6f04fc56dc3c8ed15"
         },
         {
-          "bytes": 21737,
+          "bytes": 26527,
           "path": "scripts/statement_check.py",
-          "sha256": "c276ca40c28770a15d1e799610b3b52d361f58c9f2e7af7df7b26e2654b57e9e"
+          "sha256": "8769d423dacc4da233fb353dbef1951b27cb8d3be3aca935d78fe528863be371"
         }
       ],
       "entrypoints": [
@@ -496,9 +496,9 @@
           "sha256": "35684bbb1b5b9659fff750af3f30623896a5ed9c5ebc81daf5892844bf0bd587"
         },
         {
-          "bytes": 38839,
+          "bytes": 42313,
           "path": "paper/build/supplement.py",
-          "sha256": "e3943f127ecfc23ebc0db691fa767fe658cf885142a22b08311a2bad4a8db1b7"
+          "sha256": "9ffd69b3e831e682e58a50e4ac1a64a9ca4fe76f301cea3581c9258372542338"
         }
       ],
       "entrypoints": [
@@ -603,9 +603,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 45092,
+          "bytes": 46291,
           "path": "Makefile",
-          "sha256": "2e1d8e1e00c00ace4080ff0894cd0bce4c0ef73a3d5795a858846b9f1c03df8f"
+          "sha256": "079da187004f7cefc9557546045565810f2e41d3e9bc88d6f04fc56dc3c8ed15"
         }
       ],
       "entrypoints": [
@@ -829,9 +829,9 @@
               "sha256": "07b434c60bbf0e62a38ea9d14ec68e791f90279e8fa93202582123b50bcb9cee"
             },
             {
-              "bytes": 51427,
+              "bytes": 52430,
               "path": "cm_experiments/sweeps.py",
-              "sha256": "2093e205103fd1a30cf13fe10f37050cde88bf079fa83e3abcc6737386ac83d0"
+              "sha256": "9f6d7db89bd4cdc9df678ddec0526139cfa324bc7bb11d3b187d438e50f08f67"
             },
             {
               "bytes": 91615,
@@ -2766,14 +2766,14 @@
               "sha256": "debd3a5ebe9bba09a8b63f066eca945e168e28019c598b32bfeeaa6d0aec113f"
             },
             {
-              "bytes": 7969,
+              "bytes": 8407,
               "path": "paper/build/displays/factorial_data.py",
-              "sha256": "ea5fdce3fa107df3421a10d303e02c604e74b0f4cfb9868ad1b999c09e0d080b"
+              "sha256": "fe8a7d26ff183c40dfcf08f6fb0c1f1580fb93e147642d72f05ebfb5f1e77736"
             },
             {
-              "bytes": 37396,
+              "bytes": 37576,
               "path": "paper/build/displays/framework.py",
-              "sha256": "79d8c9c676433b307600ed2598cae2195c807f99e45f4ef49fcea791b4cc2609"
+              "sha256": "470930016d1540d68035535a913a1654b689f47734ceffb227023e4e4b456cc9"
             },
             {
               "bytes": 121431,
@@ -2786,9 +2786,9 @@
               "sha256": "39dea8b4bb0f29b233a08547c4dc4b9e92086b338df9fcb7e785794715ce8829"
             },
             {
-              "bytes": 121526,
+              "bytes": 121863,
               "path": "paper/build/displays/records_campaigns.py",
-              "sha256": "56635812cb183fea2f3a907151ebf24d3ff040039059cc38232963b01a091e12"
+              "sha256": "3b91eae9f032643d79ca8ccd71ca0f95fd302cd157139354bc2f28149f936a92"
             },
             {
               "bytes": 6396,
@@ -2821,9 +2821,9 @@
               "sha256": "d04a861678235474598964a7a6c206f79e74c21375a9434983ef961fd0a43969"
             },
             {
-              "bytes": 38839,
+              "bytes": 42313,
               "path": "paper/build/supplement.py",
-              "sha256": "e3943f127ecfc23ebc0db691fa767fe658cf885142a22b08311a2bad4a8db1b7"
+              "sha256": "9ffd69b3e831e682e58a50e4ac1a64a9ca4fe76f301cea3581c9258372542338"
             },
             {
               "bytes": 28920,
@@ -2851,14 +2851,14 @@
               "sha256": "91f51168e4557974dc7fcc6ec0e88669230ad403e259bb9c3f20acc9531fa91c"
             },
             {
-              "bytes": 35562,
+              "bytes": 37624,
               "path": "scripts/reconstruct.py",
-              "sha256": "64b47c2860d2f6c1a84785bb73b4dc6497f8ca6956b65599e3d2c79a2f814e41"
+              "sha256": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470"
             },
             {
-              "bytes": 10386,
+              "bytes": 12213,
               "path": "scripts/reconstruct_paper.py",
-              "sha256": "d77937effb3a11ac17980608eb773955b544e1af685bf98dc6cc450f5339f5a6"
+              "sha256": "ca817e976ca4a27d113dd95ca1c3982d143ad0e4af3a43c399bfc7ef2a9af20d"
             }
           ],
           "patterns": [
