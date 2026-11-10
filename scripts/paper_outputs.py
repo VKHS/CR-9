@@ -904,12 +904,24 @@ def build_from_runs(p, set_name):
                                     *repeat("--run", runs), "--root", p.records)}])
 
 
+def budget_study_command(p) -> list:
+    """The batch script of a GPU allocation; outside Slurm (CPU plans) scripts/run_budget_study.py, which keeps
+    the same job evidence and records that no scheduler accounting exists."""
+    if p.opts.get("device") == "cpu":
+        return py("scripts/run_budget_study.py", "--device", "cpu", "--threads", "{threads}",
+                  *(["--allow-fixture"] if p.opts.get("allow_fixture") else []))
+    return ["bash", "hpc/run_budget_arms_arrhenius.sh"]
+
+
 def build_budget(p, export):
     """E3-E6: twelve controller seeds per admitted run (each Roman split) on fresh pre-admission parents."""
     if not p.repository.get("git_commit") or p.repository.get("dirty"):
         raise PlanError("the E3-E6 campaign names the source commit that executed it; plan from a clean git "
                         "checkout (or give --budget-campaign DIR)")
     seeds = [int(s) for s in p.opts["arm_seeds"]]
+    # A fixture plan's studies cannot form the original campaign (cm_experiments/campaign.export_campaign
+    # refuses software fixtures and missing accounting): its export is the partial campaign.
+    complete = not p.opts.get("allow_fixture")
     studies, last = [], []
     for dataset in p.present(EXPERIMENT_DATASETS["budget"]):
         for member in p.members(dataset):
@@ -929,7 +941,7 @@ def build_budget(p, export):
             tasks = []
             for seed in seeds:
                 study = p.work / "budget" / "studies" / label / f"seed-{seed}"
-                tasks.append({"commands": [["bash", "hpc/run_budget_arms_arrhenius.sh"]], "requeue": False,
+                tasks.append({"commands": [budget_study_command(p)], "requeue": False,
                               "env": {"CM_SOURCE_ROOT": str(ROOT), "CM_BASE_RUN": str(parent),
                                       "CM_ARM_OUTPUT": str(study), "CM_TRUST_CHECKPOINTS": "1",
                                       "CM_ARM_SEED": str(seed)},
@@ -954,9 +966,11 @@ def build_budget(p, export):
                             {"internal": "budget_manifest", "manifest": str(manifest), "studies": studies,
                              "seeds": seeds},
                             {"argv": py("scripts/arm_campaign.py", "export", "--manifest", manifest, "--output",
-                                        campaign, "--complete"), "skip_if": str(campaign / "analysis.json")},
+                                        campaign, *(["--complete"] if complete else [])),
+                             "skip_if": str(campaign / ("analysis.json" if complete else "partial_analysis.json"))},
                             {"argv": py("scripts/export_records.py", "budget-matched", "--campaign", campaign,
-                                        "--root", p.records, "--hardware", "{hardware}", "--period", "{period}")}])
+                                        "--root", p.records, *([] if complete else ["--allow-partial"]),
+                                        "--hardware", "{hardware}", "--period", "{period}")}])
 
 
 def build_budget_provided(p, campaign: Path):
@@ -2121,11 +2135,19 @@ def _baseline_evidence(invocation: Path) -> dict:
     return {}
 
 
+def unscheduled(evidence: Path) -> bool:
+    """A study executed without a scheduler allocation (scripts/run_budget_study.py): it has no accounting."""
+    try:
+        return read_json(evidence / "scheduler.json").get("scheduler") == "none"
+    except (OSError, ValueError):
+        return False
+
+
 def finalize_budget_accounting(step: dict) -> None:
     """The terminal sacct record of every E3-E6 study job (hpc/finalize_arm_accounting.sh)."""
     for study in step["studies"]:
         evidence = budget_evidence(Path(study["study"]))
-        if (evidence / "sacct.tsv").is_file():
+        if (evidence / "sacct.tsv").is_file() or unscheduled(evidence):
             continue
         job = (evidence / "job_id.txt").read_text(encoding="utf-8").strip()
         code = run_command(["bash", "hpc/finalize_arm_accounting.sh", job, str(evidence)])
@@ -2165,7 +2187,7 @@ def write_budget_manifest(step: dict, repository: dict) -> None:
         evidence = budget_evidence(Path(study["study"]))
         rows.append({"dataset": study["dataset"], "seed": int(study["seed"]), "split": int(study["split"]),
                      "parent": study["parent"], "study": study["study"],
-                     "accounting": [str(evidence / "sacct.tsv")],
+                     "accounting": [] if unscheduled(evidence) else [str(evidence / "sacct.tsv")],
                      "job_log": [str(evidence / "stdout.log"), str(evidence / "stderr.log")]})
     value.update(seed_ids=[int(s) for s in step["seeds"]], studies=rows,
                  source={"repository": "https://github.com/VKHS/CR-9", "git_commit": commit,

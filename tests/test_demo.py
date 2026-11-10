@@ -148,6 +148,57 @@ class Executor(unittest.TestCase):
             self.assertEqual(json.loads(printed.getvalue()), {"l0": [1, 2, 3, 4, 5], "l1": [1]})
 
 
+class BudgetStudiesWithoutScheduler(unittest.TestCase):
+    """E3-E6 studies of CPU plans run through scripts/run_budget_study.py instead of the Slurm batch script."""
+
+    def test_cpu_plans_use_the_portable_runner(self):
+        class Planner:
+            opts = {"device": "cpu", "allow_fixture": True}
+        command = po.budget_study_command(Planner())
+        self.assertIn("scripts/run_budget_study.py", [str(c) for c in command])
+        self.assertIn("--allow-fixture", command)
+        Planner.opts = {}
+        self.assertEqual(po.budget_study_command(Planner()), ["bash", "hpc/run_budget_arms_arrhenius.sh"])
+
+    def test_the_runner_keeps_the_job_evidence_and_records_no_scheduler(self):
+        import os
+        import subprocess
+        with tempfile.TemporaryDirectory() as temporary:
+            source, base = Path(temporary) / "source", Path(temporary) / "parent"
+            (source / "scripts").mkdir(parents=True)
+            (source / "environment" / "arrhenius").mkdir(parents=True)
+            base.mkdir()
+            (source / "environment" / "arrhenius" / "capture_environment.sh").write_text(
+                'mkdir -p "$2" && echo captured > "$2/observed_environment.json"\n', encoding="utf-8")
+            (source / "scripts" / "run_budget_arms.py").write_text(
+                "import json, sys\nfrom pathlib import Path\nargs = sys.argv[1:]\n"
+                "if '--verify' in args:\n    Path(args[args.index('--report') + 1]).write_text('{}')\n    sys.exit(0)\n"
+                "out = Path(args[args.index('--output') + 1]); out.mkdir()\n"
+                "(out / 'ARTIFACT_MANIFEST.json').write_text(json.dumps(args))\n", encoding="utf-8")
+            study = Path(temporary) / "studies" / "seed-3"
+            study.parent.mkdir()
+            env = dict(os.environ, CM_SOURCE_ROOT=str(source), CM_BASE_RUN=str(base), CM_ARM_OUTPUT=str(study),
+                       CM_TRUST_CHECKPOINTS="1", CM_ARM_SEED="3")
+            result = subprocess.run([sys.executable, "-B", str(ROOT / "scripts" / "run_budget_study.py"), "--device",
+                                     "cpu", "--threads", "2", "--allow-fixture"], env=env, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            evidence = po.budget_evidence(study)
+            self.assertTrue(evidence.name.startswith("seed-3.job-local-"))
+            self.assertTrue(po.unscheduled(evidence))
+            for name in ("job_id.txt", "command.txt", "stdout.log", "stderr.log", "pip-freeze.txt",
+                         "numerical_replay.json", "environment/observed_environment.json"):
+                self.assertTrue((evidence / name).is_file(), name)
+            argv = json.loads((study / "ARTIFACT_MANIFEST.json").read_text())
+            self.assertEqual(argv[argv.index("--seed") + 1], "3")
+            self.assertIn("--allow-fixture", argv)
+            self.assertEqual(argv[argv.index("--device") + 1], "cpu")
+            po.finalize_budget_accounting({"studies": [{"study": str(study)}]})     # nothing to finalize
+            self.assertFalse((evidence / "sacct.tsv").exists())
+            again = subprocess.run([sys.executable, "-B", str(ROOT / "scripts" / "run_budget_study.py")], env=env,
+                                   capture_output=True, text=True)
+            self.assertEqual(again.returncode, 2)                                       # never overwrites a study
+
+
 class Channels(unittest.TestCase):
     def published(self, relationship: str, scientific: bool) -> dict:
         part = {"asset": "x.complete-0.tar.gz", "bytes": 10, "sha256": "0" * 64,

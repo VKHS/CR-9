@@ -114,9 +114,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 69769,
+          "bytes": 69907,
           "path": "scripts/export_records.py",
-          "sha256": "72c10f3d2e4bf9806315c576587a4ee6c3b05ef978f2beb18940e4c648a3b3c8"
+          "sha256": "0b908a345118875fa1d20f1d541a7adeac7060bae8138d3bf9c3d541a8259eed"
         },
         {
           "bytes": 31729,

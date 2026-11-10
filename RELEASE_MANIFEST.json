@@ -61,10 +61,10 @@
       "sha256": "955bbcfa5b7c76bb73827f6581d17caa03aa99eaf19061533fe6a75ea04ae33e"
     },
     {
-      "bytes": 23082,
+      "bytes": 24198,
       "executable": false,
       "path": ".github/workflows/demo-graph.yml",
-      "sha256": "9cb06a4e91f2eb63c8c7f004fd47033a8b475d8d15eebc89e0209cd1d5dbd17e"
+      "sha256": "f73bf60ef0f60901a5db982186ce880ecd4b5ceb738b73d13262be9cf8559898"
     },
     {
       "bytes": 10494,
@@ -877,10 +877,10 @@
       "sha256": "29843284eed8d3410dedc86e7716c02e7dfb3372b0802d64630d45fde5546c84"
     },
     {
-      "bytes": 114,
+      "bytes": 228,
       "executable": false,
       "path": "demo/graph-request.json",
-      "sha256": "dec12e732f681bde37cbb2870461b921bfcf7db0715456357adbc07b759cf477"
+      "sha256": "721e560c5897b2f1b7bd16a4eab576576b7e761eceddef4ab5272a56d18dca24"
     },
     {
       "bytes": 292,
@@ -6808,7 +6808,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "395862aedac1dfae38ff2acdaa8d63efa517fee5cffac9f7dc5cdffc97192064"
+      "sha256": "92ffdcfa695873d825b0182e71baa462069ab95ddf0e190ad6c846d9651982fe"
     },
     {
       "bytes": 35593,
@@ -7243,10 +7243,10 @@
       "sha256": "d6997071af8dee10b3980d1366113c977c7807dd1bf548c48b26182ad91c4dd1"
     },
     {
-      "bytes": 69769,
+      "bytes": 69907,
       "executable": false,
       "path": "scripts/export_records.py",
-      "sha256": "72c10f3d2e4bf9806315c576587a4ee6c3b05ef978f2beb18940e4c648a3b3c8"
+      "sha256": "0b908a345118875fa1d20f1d541a7adeac7060bae8138d3bf9c3d541a8259eed"
     },
     {
       "bytes": 12485,
@@ -7297,10 +7297,10 @@
       "sha256": "de781ad0525335f16111042cfb8b0311c9a6eeef3a8dc900a4ef9dca3f5f992e"
     },
     {
-      "bytes": 142100,
+      "bytes": 143361,
       "executable": false,
       "path": "scripts/paper_outputs.py",
-      "sha256": "f078c1e6278d0e1ee477a0c165520ce9172b296c521eb20b2cda0b3028d154b3"
+      "sha256": "49777097bfc4498ee4f3bf9bcb5e38631bdb144e1a3652d39785306910b5efab"
     },
     {
       "bytes": 21648,
@@ -7421,6 +7421,12 @@
       "executable": false,
       "path": "scripts/run_budget_arms.py",
       "sha256": "04b5de04180f9b49272060d81fce26ac272832c838a981d581bf806134d6cf2b"
+    },
+    {
+      "bytes": 6509,
+      "executable": false,
+      "path": "scripts/run_budget_study.py",
+      "sha256": "9f55e82fed1b6a023b7741a0ee60804aa42b95b998306ea180ec476afbccfd4e"
     },
     {
       "bytes": 10339,
@@ -7657,10 +7663,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 14266,
+      "bytes": 17693,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "8143a46a0647a979702d6b2d1640909660ed1f052d0336ee5e2cde169d9de577"
+      "sha256": "9eb616bb161af98df7bb49de92e4d175a69e09adcbe45082578a8d55490ee68a"
     },
     {
       "bytes": 23965,
@@ -8200,5 +8206,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "078c9ec9fe94c4a87cbbcc56350f468fbd3f9acb15d77aa8a720d5a216d99b40"
+  "tree_sha256": "bcd6bf4865b4194f0d3ad6ed97c98502aff0620521305659bc8b4af02e2f2fb7"
 }
