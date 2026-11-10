@@ -193,14 +193,16 @@ def main(argv=None) -> int:
     plan = po.load_plan(work)
     nodes = {n["id"]: n for n in plan["nodes"]}
     level = levels(plan)
+    # The assignment counts the tasks of every node not left to another job (the same in every share, whatever it
+    # has restored); the nodes that wait on an unfinished skipped node hold shares but run nothing.
+    ordered = [n for n in sorted(nodes, key=lambda n: (level[n], list(nodes).index(n))) if n not in args.skip_node]
     left = left_out(work, nodes, args.skip_node)
-    ordered = [n for n in sorted(nodes, key=lambda n: (level[n], list(nodes).index(n))) if n not in left]
     if args.matrix is not None:
         matrix = {}
         for current in sorted({level[n] for n in ordered}):
             tasks = [(n, k) for n in ordered if level[n] == current for k in range(max(1, len(nodes[n]["tasks"])))]
             share = shares(tasks, args.matrix, args.salt)
-            busy = sorted({share[(n, k)] for n, k in tasks if not nodes[n].get("blocked")
+            busy = sorted({share[(n, k)] for n, k in tasks if not nodes[n].get("blocked") and n not in left
                            and task_state(work, nodes[n], k) not in ("COMPLETE", "SKIPPED")})
             if busy:
                 matrix[f"l{current}"] = busy
@@ -222,7 +224,7 @@ def main(argv=None) -> int:
         tasks = [(n, k) for n in selected if level[n] == current
                  for k in range(max(1, len(nodes[n]["tasks"])))]
         share = shares(tasks, shards, args.salt)
-        tasks = [t for t in tasks if share[t] == shard
+        tasks = [t for t in tasks if share[t] == shard and t[0] not in left
                  and task_state(work, nodes[t[0]], t[1]) not in ("COMPLETE", "SKIPPED")]
         pending = []
         for node_id, index in tasks:

@@ -66,14 +66,15 @@ execution requires.
    six hours: the PascalVOC-SP job of E14 trains eighteen additional plants. Its unfinished seeds
    train on several runners with the job's own training call ([grid_seeds.py](grid_seeds.py)), and
    the graph task then finds them complete and computes the member predictions.
-5. Three record sets come from graphs of their own, each planned for its artifacts alone (`--only`)
-   in its own work directory, because the main graph was planned before the CPU paths below existed:
-   the Table S29 sweep ([demo-sweep.yml](../.github/workflows/demo-sweep.yml), below), the E3-E6
-   campaign and the E17 timing records ([demo-graph.yml](../.github/workflows/demo-graph.yml) with
-   `plan_options`). On the CPU device the planner runs each E3-E6 study through
-   `scripts/run_budget_study.py` (the study command of the Slurm batch script, with the same job
-   evidence, recording that no scheduler allocation exists) and exports the timings as declared
-   partial measurements.
+5. Four groups of artifacts come from graphs of their own, each planned for its artifacts alone
+   (`--only`) in its own work directory, because the main graph was planned before the code paths
+   below existed: the Table S29 sweep ([demo-sweep.yml](../.github/workflows/demo-sweep.yml), below),
+   the E3-E6 campaign, the E17 timing records, and the decision-log and mechanism record sets
+   ([demo-graph.yml](../.github/workflows/demo-graph.yml) with `plan_options`). On the CPU device
+   the planner runs each E3-E6 study through `scripts/run_budget_study.py` (the study command of the
+   Slurm batch script, with the same job evidence, recording that no scheduler allocation exists),
+   and in a fixture plan every exporter that can write the measured part of an incomplete set does
+   so (`--allow-partial`, never into `records/`), the set stating the cells it lacks.
 6. [demo-publish.yml](../.github/workflows/demo-publish.yml) adds those graphs' artifacts to the main
    map ([merge_maps.py](merge_maps.py)), packs every artifact on its own
    ([pack_each.py](pack_each.py), `scripts/paper_artifacts.py pack --demo`), publishes the release
@@ -128,12 +129,18 @@ graph's reason. By design they need the author's resources or benchmark runs: th
 external comparisons of E12 (`records:baselines`: the pinned upstream studies and adapters the
 author supplies), the S14 campaign and the confirmation record sets that read it
 (`campaign:confirmation`, `records:confirmation_contrasts`, `records:confirmation_sensitivity`;
-above) and a GPU environment (`environment:gpu` holds the capture of the CPU runner).
+above) and a GPU environment (`environment:gpu` holds the capture of the CPU runner). The
+action-gap audit (`records:action_gap_audit`) scores the decisions of a closed-loop deployed rule;
+every demonstration run deployed an open-loop rule, so the audit has no decision to score and the
+exporter writes no set.
 
-Two groups are present in a declared partial form. The E3-E6 campaign (`campaign:budget`,
+Several sets are present in a declared partial form. The E3-E6 campaign (`campaign:budget`,
 `records:budget_matched`) is the partial campaign export: its studies ran on fixture parents
 without scheduler allocations, so `cm_experiments/campaign.export_campaign` records each study's
 qualification blockers (software fixture, missing accounting) and the record set is marked
 synthetic. The E17 timing records (`records:runtime_scaling`, `records:timing_anchors`) time the
 deployed rule on CPU without GPU allocations; each set records why its measurement is incomplete
-(`incomplete_measurement`). The repository does not emulate scheduler records.
+(`incomplete_measurement`). The mechanism contrasts and the decision-log sets hold the cells the
+demonstration's runs measure; a cell without a valid measurement (e.g. a state contrast without
+matched donors) is listed in the set instead of a value. The repository does not emulate scheduler
+records.

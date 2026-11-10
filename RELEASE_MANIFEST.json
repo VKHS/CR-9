@@ -55,10 +55,10 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 39776,
+      "bytes": 42083,
       "executable": false,
       "path": ".github/workflows/demo-continue.yml",
-      "sha256": "998ebd52cfa33630a8b7b80e4852ec3db0051c58be0c4bcd170b8ed4569dbfeb"
+      "sha256": "ccf57661e0124bdac45bc9dee7b464c6779fcbfa0289777e499f84df09fea0d0"
     },
     {
       "bytes": 24834,
@@ -829,10 +829,10 @@
       "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
     },
     {
-      "bytes": 9896,
+      "bytes": 10523,
       "executable": false,
       "path": "demo/README.md",
-      "sha256": "33183c3b74a9dceba303e2874b7098c2c6361789be14038a11aea57cffa1b305"
+      "sha256": "45583b0ea6481a22fa00b51ae7905f7a60b834c83af0efca8eea482469663c4d"
     },
     {
       "bytes": 1188,
@@ -853,10 +853,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 1367,
+      "bytes": 1419,
       "executable": false,
       "path": "demo/continue-request.json",
-      "sha256": "afc75a6db10b01ec7609582c564526803d3d08102e5f8f6ce1ba5626b6f97cf4"
+      "sha256": "3b7b7d602d81f1daef6634e46d7d0d32e0fbd26c5518c2162f3546648c544d12"
     },
     {
       "bytes": 9640,
@@ -865,10 +865,10 @@
       "sha256": "7808eb958716a99b0c580a0f3f1b06bb003f0d5b6debc016e47b757a50af9913"
     },
     {
-      "bytes": 13526,
+      "bytes": 13789,
       "executable": false,
       "path": "demo/execute.py",
-      "sha256": "e6e515c233756e645821f09f44f1b72f7cf16c050bdc7f674535eef3520b9b6c"
+      "sha256": "0a5e90148f4f6e1eb508ad9922ed900118ff083700a505197c748ddbb0c69d8b"
     },
     {
       "bytes": 1304,
@@ -913,10 +913,10 @@
       "sha256": "9655c9523f3dfe580f53085e64606c9eab17e14aa11a20111b70313b51349647"
     },
     {
-      "bytes": 9606,
+      "bytes": 9900,
       "executable": false,
       "path": "demo/restore.py",
-      "sha256": "7dd0ec8deaa4aacb1c4a42574a9cb703dd4bd99e353759c701c18bd6bdd6297e"
+      "sha256": "5707fac3aa34047917596e7356cce9262bb606125f788232ee41dd5544936f40"
     },
     {
       "bytes": 2258,
@@ -937,10 +937,10 @@
       "sha256": "056af152c10f38470d3c0bda34d52f8ed60542fcd3fb07a1a0c74e6838836afc"
     },
     {
-      "bytes": 3615,
+      "bytes": 3561,
       "executable": false,
       "path": "demo/task_inputs.py",
-      "sha256": "52ba5a63240bfb868145ab5176bd03a678b226b693f085f47cc781ac80f6ffb1"
+      "sha256": "9974767eddeac3a03f1f0656f0711bec79ad9c52caa923b9c39f62a363c0232a"
     },
     {
       "bytes": 1174,
@@ -7669,10 +7669,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 26736,
+      "bytes": 26779,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "50880ddf3467c1ee46a682ca33f01a78dcce6586e9a58744b6f5f03537facdff"
+      "sha256": "2355816f39345d27506b2c921de91f26e6b9ddf23b923b7109a3a2a013eaf2a0"
     },
     {
       "bytes": 23965,
@@ -8212,5 +8212,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "ef8ec41c6e6a63848d919dedc14ab11921af6b21f26cf38afbeec63895357138"
+  "tree_sha256": "aaff8479d25f83b64e5374deef3ce02a4d274440119bfde896ca89c5b4da5c93"
 }

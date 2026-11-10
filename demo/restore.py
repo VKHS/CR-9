@@ -142,6 +142,8 @@ def main(argv=None) -> int:
     parser.add_argument("--exclude", action="append", default=[], metavar="PATH",
                         help="leave this path (and everything below it) out of the extraction (repeatable)")
     parser.add_argument("--exclude-from", type=Path, default=None, help="a file of such paths, one per line")
+    parser.add_argument("--path", action="append", default=[], metavar="FILE",
+                        help="extract exactly this file (repeatable); instead of the selection of --level/--node/--export")
     parser.add_argument("--exclude-pattern", action="append", default=[], metavar="GLOB",
                         help="leave out every member whose name matches this wildcard (repeatable), e.g. '*.pt'")
     args = parser.parse_args(argv)
@@ -159,7 +161,9 @@ def main(argv=None) -> int:
     sys.modules["demo_levels"] = module
     spec.loader.exec_module(module)
     prefixes = None
-    if not args.all:
+    if args.path:
+        prefixes = sorted(str(Path(p)).lstrip("/") for p in args.path)
+    elif not args.all:
         plan = read_json(args.work / "plan.json")
         needed, prefixes = selection(plan, args.work, level=args.level, nodes=args.node, export=args.export)
         print(f"nodes needed: {len(needed)}: {', '.join(sorted(needed))[:2000]}")

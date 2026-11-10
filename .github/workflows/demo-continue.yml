@@ -52,6 +52,7 @@ jobs:
       excludes: ${{ steps.request.outputs.excludes }}
       patterns: ${{ steps.request.outputs.patterns }}
       previous_exports: ${{ steps.request.outputs.previous_exports }}
+      plan_sources: ${{ steps.request.outputs.plan_sources }}
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -74,6 +75,9 @@ jobs:
           print("patterns=" + json.dumps(r.get("export_exclude_patterns") or {}))
           print("previous_exports=" + " ".join("--run %s --prefix %s" % (run, prefix)
                                                for run, prefix in r.get("previous_exports") or []))
+          # where the runner plans of measurement tasks are (default: every earlier archive)
+          print("plan_sources=" + " ".join("--run %s --prefix %s" % (run, prefix)
+                                           for run, prefix in r.get("plan_sources") or previous))
           EOF
           cat "$GITHUB_OUTPUT"
           grep '^work=' "$GITHUB_OUTPUT" | sed 's/^work=/WORK=/' >> "$GITHUB_ENV"
@@ -244,7 +248,10 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
           python -B demo/task_inputs.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" \
             --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 1 = 0 ]; then
@@ -340,7 +347,10 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
           python -B demo/task_inputs.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" \
             --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 2 = 0 ]; then
@@ -436,7 +446,10 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
           python -B demo/task_inputs.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" \
             --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 3 = 0 ]; then
@@ -532,7 +545,10 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py),
+          # which reads the measurement tasks' runner plans first
+          plans=$(python3 -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); print(' '.join(sorted({'--path ' + t['job_in']['plan'] for n in p['nodes'] for t in n['tasks'] if (t.get('job_in') or {}).get('kind') == 'measure' and not os.path.exists(t['job_in']['plan'])})))")
+          if [ -n "$plans" ]; then python -B demo/restore.py --work "$WORK" $plans ${{ needs.setup.outputs.plan_sources }}; fi
           python -B demo/task_inputs.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" \
             --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 4 = 0 ]; then

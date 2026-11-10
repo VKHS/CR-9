@@ -150,7 +150,7 @@ class Executor(unittest.TestCase):
             printed = io.StringIO()
             with contextlib.redirect_stdout(printed):
                 execute.main(["--work", str(work), "--matrix", "16", "--skip-node", "other"])
-            self.assertEqual(json.loads(printed.getvalue()), {"l0": [1, 2, 3]})
+            self.assertEqual(json.loads(printed.getvalue()), {"l0": [1, 2, 3]})      # "later" holds a share, runs nothing
             for k in range(2):
                 marker = work / "state" / "other" / f"task-{k}.json"
                 marker.parent.mkdir(parents=True, exist_ok=True)
