@@ -179,13 +179,16 @@ def main(argv=None) -> int:
     for current in sorted({level[n] for n in selected}):
         tasks = [(n, k) for n in selected if level[n] == current
                  for k in range(max(1, len(nodes[n]["tasks"])))]
+        # Shares are taken over the unfinished tasks only, so that the tasks one share left unfinished
+        # are spread over every share of a later call.
+        tasks = [t for t in tasks if task_state(work, nodes[t[0]], t[1]) not in ("COMPLETE", "SKIPPED")]
         tasks = [t for i, t in enumerate(tasks) if i % shards == shard - 1]
         pending = []
         for node_id, index in tasks:
             ok, why = runnable(work, nodes, nodes[node_id])
             if not ok:
                 skipped.append({"node": node_id, "task": index, "reason": why})
-            elif task_state(work, nodes[node_id], index) not in ("COMPLETE", "SKIPPED"):
+            else:
                 pending.append((node_id, index))
         with futures.ThreadPoolExecutor(max_workers=max(1, args.parallel)) as pool:
             running = {}
