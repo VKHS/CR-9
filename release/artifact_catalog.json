@@ -496,9 +496,9 @@
           "sha256": "35684bbb1b5b9659fff750af3f30623896a5ed9c5ebc81daf5892844bf0bd587"
         },
         {
-          "bytes": 42060,
+          "bytes": 42313,
           "path": "paper/build/supplement.py",
-          "sha256": "3e641e58fe3afa5789b973b433239cd6f9633bcef478dd2bda9a9d48565215c1"
+          "sha256": "9ffd69b3e831e682e58a50e4ac1a64a9ca4fe76f301cea3581c9258372542338"
         }
       ],
       "entrypoints": [
@@ -2821,9 +2821,9 @@
               "sha256": "d04a861678235474598964a7a6c206f79e74c21375a9434983ef961fd0a43969"
             },
             {
-              "bytes": 42060,
+              "bytes": 42313,
               "path": "paper/build/supplement.py",
-              "sha256": "3e641e58fe3afa5789b973b433239cd6f9633bcef478dd2bda9a9d48565215c1"
+              "sha256": "9ffd69b3e831e682e58a50e4ac1a64a9ca4fe76f301cea3581c9258372542338"
             },
             {
               "bytes": 28920,

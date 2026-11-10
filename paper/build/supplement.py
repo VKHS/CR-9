@@ -598,6 +598,9 @@ def _build_supplement(output_dir, *, records_index, confirmation_campaign, budge
                     report["synthetic"] = report["synthetic_examples"] = True
                 report["inputs"].append(identity)
                 report["outputs"].extend(outputs)
+        except ImportError as exc:
+            # the campaign replays verify the parents' checkpoints with the PyTorch runtime
+            report["errors"].append({"input": identifier, "error": f"the replay needs the recorded CPU environment ({exc})"})
         except (OSError, ValueError, KeyError, TypeError, IndexError, RuntimeError) as exc:
             report["errors"].append({"input": identifier, "error": str(exc)})
     for name, prepare, render in (("factorials", _factorial_data, _factorial_displays), ("ensemble_grid", _ensemble_data, _ensemble_displays)):

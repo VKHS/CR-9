@@ -337,6 +337,10 @@ class SupplementBuildTests(unittest.TestCase):
         self.assertTrue(all(item["synthetic"] and item["input_kind"] == "synthetic_examples"
                             and item["source_input_kind"] == "strict_budget_campaign" for item in report["outputs"]))
         self.assertEqual([row["input_kind"] for row in report["inputs"]], ["demonstration_budget_campaign"])
+        with patch("cm_campaigns.arm_campaign.check_campaign", side_effect=ModuleNotFoundError("No module named 'torch'")):
+            report = build_supplement(self.base / "budget_without_runtime", budget_campaign=campaign, demonstration=True)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertIn("recorded CPU environment", report["errors"][0]["error"])
         short = dict(self.budget_fixture(), summary=self.budget_fixture()["summary"][:20])
         with patch("cm_campaigns.arm_campaign.check_campaign", return_value=short):
             report = build_supplement(self.base / "budget_short", budget_campaign=campaign, demonstration=True)

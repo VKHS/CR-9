@@ -28,7 +28,7 @@ jobs:
   demo-paper:
     name: make demo-paper
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,8 +36,12 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
-      - name: Install the numeric-review dependencies from the recorded lock
-        run: python -m pip install -c environment/requirements-cpu.lock -r requirements-review.txt 'matplotlib>=3.8,<4' scipy
+      - name: Install the recorded CPU environment
+        # the E3-E6 campaign replay verifies the parents' checkpoints with the PyTorch runtime
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
       - name: Demonstration release status
         run: make demo-status PYTHON=python || true
       - name: Rebuild every table and figure from the demonstration release

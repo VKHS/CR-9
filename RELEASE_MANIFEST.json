@@ -97,10 +97,10 @@
       "sha256": "33db85c5d628191e31719659d2e8285958ca49b9586a37fffaf846dec7e01e83"
     },
     {
-      "bytes": 2220,
+      "bytes": 2502,
       "executable": false,
       "path": ".github/workflows/demo-verify.yml",
-      "sha256": "11ff152207943c6552219543e56ddf15233779e24d92f78676a2f9325e512077"
+      "sha256": "882433042676e1673cca269d626b7f0bdccc1c48aa61489d844ac125fdfcea40"
     },
     {
       "bytes": 7708,
@@ -6337,10 +6337,10 @@
       "sha256": "d04a861678235474598964a7a6c206f79e74c21375a9434983ef961fd0a43969"
     },
     {
-      "bytes": 42060,
+      "bytes": 42313,
       "executable": false,
       "path": "paper/build/supplement.py",
-      "sha256": "3e641e58fe3afa5789b973b433239cd6f9633bcef478dd2bda9a9d48565215c1"
+      "sha256": "9ffd69b3e831e682e58a50e4ac1a64a9ca4fe76f301cea3581c9258372542338"
     },
     {
       "bytes": 28920,
@@ -6862,7 +6862,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "c49e72f9a570fb557769fac4e9383a3781e9fc8322690c63f246dc817fe1b9bd"
+      "sha256": "ea8aa605f79a03bf5ac6529d4e915dee000f7f10257aed2ead3f02f0610ee350"
     },
     {
       "bytes": 35593,
@@ -8173,10 +8173,10 @@
       "sha256": "3e7dc90eca271b76f5128e3c15331840df6ec305468ad58af2d093ae700e37d7"
     },
     {
-      "bytes": 21973,
+      "bytes": 22350,
       "executable": false,
       "path": "tests/test_supplement_build.py",
-      "sha256": "7fa7917dfde3ae4d06500a53bf1d64e0e5aa393aa5f4945d8bde77b27d977e27"
+      "sha256": "60e3a8363462838123719c4475f7bac9b96efecb1214fb74e3c6c3ce7eb442b5"
     },
     {
       "bytes": 54018,
@@ -8266,5 +8266,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "7d6c59fca3451567cafcd414d966aa59778fb2389c20f31b198843fe4dd6fe80"
+  "tree_sha256": "a7d275ddd144d0dedd956dfd050e32debf281d08b4f9a88c054f0ee67f0ff119"
 }
