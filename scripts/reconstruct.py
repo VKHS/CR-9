@@ -204,7 +204,7 @@ def _benchmark_dataset(path: Path) -> str:
 
 
 def display_context(root: Path, found: list, collected: list, record_entries: list, records_index,
-                    campaigns: dict, synthetic: bool):
+                    campaigns: dict, synthetic: bool, demonstration: bool = False):
     """Inputs of the display generators: verified runs, verified record sets and campaign exports.
 
     ``collected`` is in the paper's dataset order (build_paper.collect), ``found`` in discovery order; each run
@@ -231,7 +231,7 @@ def display_context(root: Path, found: list, collected: list, record_entries: li
                                                   synthetic=bool(entry.get("synthetic")))
     return DisplayContext(root=root, runs=runs, records=records,
                           campaigns={k: Path(v).resolve() for k, v in campaigns.items() if v is not None},
-                          synthetic=synthetic)
+                          synthetic=synthetic, demonstration=demonstration)
 
 
 def add_display_outputs(outputs: list, stage: Path, result: dict, ids: set, synthetic: bool) -> None:
@@ -478,7 +478,8 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
                 entry = {**entry, "files": ["supplement/" + name for name in entry["files"]]}
                 add_output(outputs, stage, entry, ids)
         from paper.build.displays.framework import build_displays
-        context = display_context(root, found, collected, record_entries, records_index, campaigns, synthetic)
+        context = display_context(root, found, collected, record_entries, records_index, campaigns, synthetic,
+                                  demonstration=demonstration)
         generated = build_displays(context, stage / "displays")
         add_display_outputs(outputs, stage, generated, ids, synthetic)
         displays = display_status(manifest, outputs)

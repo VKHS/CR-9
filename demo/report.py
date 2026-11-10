@@ -38,6 +38,39 @@ def size(path: Path) -> int:
     return sum(p.stat().st_size for p in Path(path).rglob("*") if p.is_file())
 
 
+def display_rows(workspace: Path | None, status: dict) -> list[str]:
+    """What ``make demo-paper`` built, from its workspace (reconstruction.json): the display generators that ran on
+    the release or on the repository's own sources, each display still waiting for an input with what it lacks,
+    and the printed-value comparison; without a workspace, the status counts alone."""
+    result = read(workspace / "reconstruction.json") if workspace is not None else None
+    comparison = (f"- Printed values: {status.get('values_exact', 0)} equal, {status.get('values_differ', 0)} "
+                  f"different, {status.get('values_missing', 0)} missing. Differences are expected: these are "
+                  "reduced-scale CPU runs, not the runs the paper reports.")
+    if not result:
+        return [f"- Displays: {status.get('complete', 0)} of {status.get('displays', 0)} complete in content and "
+                "comparison coverage; the others name the artifact or printed-value contract they lack.", comparison]
+    generators = result.get("display_generators") or {}
+    displays = result.get("displays") or []
+    kinds = {}
+    for output in result.get("outputs") or []:
+        for display in output.get("display_ids") or []:
+            if str(output.get("id", "")).startswith("display:"):
+                kinds[display] = output.get("input_kind")
+    built = [d for d in displays if d.get("generator") == "built"]
+    own = [d for d in built if kinds.get(d["id"]) == "repository_sources"]
+    waiting = [d for d in displays if d.get("generator") == "awaiting_inputs"]
+    supplement = result.get("supplementary_build") or {}
+    lines = [f"- Display generators: {len(built)} of {len(displays)} built, {len(built) - len(own)} of them from the "
+             f"release and {len(own)} from the repository's own sources (protocol and analytical displays); "
+             f"{len(waiting)} wait for an input (below). Every display built from the release is labelled as the "
+             "demonstration (synthetic software example).",
+             f"- Supplementary builds from the release's record sets and campaign: "
+             f"{len(supplement.get('outputs') or [])} output(s), status {supplement.get('status', 'not run')}.",
+             comparison, "", "Displays waiting for an input, with what they lack:", ""]
+    lines += [f"- `{d['id']}`: {'; '.join(str(x) for x in d.get('awaiting') or [])[:300]}" for d in waiting]
+    return lines
+
+
 def run_rows(runs: Path, graphs: Path) -> list[str]:
     lines = ["| Dataset | Data | Profile | Seconds per stage (" + ", ".join(STAGES) + ") | Size |",
              "|---|---|---|---|---|"]
@@ -141,6 +174,8 @@ def main(argv=None) -> int:
                         help="the artifacts demo/pack_each.py could not pack, with the packer's reasons")
     parser.add_argument("--notes", type=Path, default=None,
                         help="JSON {artifact: text}: the cause of an absence the graph's reason does not state")
+    parser.add_argument("--workspace", type=Path, default=None,
+                        help="the workspace of make demo-paper (reconstruction.json): the displays it built and awaits")
     parser.add_argument("--output", type=Path, default=ROOT / "demo" / "RESULTS.md")
     args = parser.parse_args(argv)
     status = read(args.status, {}) or {}
@@ -158,12 +193,8 @@ def main(argv=None) -> int:
              f"{len(published)} of {len(manifest.get('artifacts', []))} artifacts published "
              f"({sum(a.get('bytes', 0) for a in published) / 2**30:.2f} GiB, "
              f"{sum(a.get('files', 0) for a in published):,} files).", "",
-             "## Rebuilt from the release with `make demo-paper`", "",
-             f"- Displays: {status.get('complete', 0)} of {status.get('displays', 0)} complete in content and comparison "
-             "coverage; the others name the artifact or printed-value contract they lack.",
-             f"- Printed values: {status.get('values_exact', 0)} equal, {status.get('values_differ', 0)} different, "
-             f"{status.get('values_missing', 0)} missing. Differences are expected: these are reduced-scale CPU runs, "
-             "not the runs the paper reports.", ""] + [
+             "## Rebuilt from the release with `make demo-paper`", ""] + display_rows(args.workspace, status) + [
+             ""] + [
              f"- Generator error: `{name}`: {str(error)[:400]}"
              for name, error in sorted({**(status.get("generator_errors") or {}),
                                         **(status.get("module_errors") or {})}.items())] + [

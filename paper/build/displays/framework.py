@@ -176,12 +176,14 @@ class DisplayContext:
 
     def __init__(self, *, root: Path = ROOT, runs: dict[str, RunView] | None = None,
                  records: dict[str, RecordSetView] | None = None,
-                 campaigns: dict[str, Path] | None = None, synthetic: bool = False):
+                 campaigns: dict[str, Path] | None = None, synthetic: bool = False, demonstration: bool = False):
         self.root = Path(root)
         self._runs = dict(runs or {})
         self._records = dict(records or {})
         self._campaigns = {k: Path(v) for k, v in (campaigns or {}).items()}
         self.synthetic = synthetic
+        # the CPU demonstration (scripts/reconstruct_paper.py --demo): its campaigns ran on fixture parents
+        self.demonstration = demonstration
 
     # -- experiment artifacts ------------------------------------------------
     def run(self, dataset: str) -> RunView | None:

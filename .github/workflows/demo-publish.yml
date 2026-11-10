@@ -8,7 +8,8 @@ name: Demo publication
 # demo/published/ and demo/RESULTS.md. Request: demo/publish-request.json {"graph_run_id": run holding
 # demo-collected, "graph_runs": [every run that executed the main graph], "runs_run_id": ..., "overrides": {...},
 # "extra": [{"run": ..., "artifact": "demo-collected-s29", "work": "/home/runner/demo/work-s29"}]}; an extra
-# graph's artifacts are added to the main map (demo/merge_maps.py).
+# graph's artifacts are added to the main map (demo/merge_maps.py). "report_only": true rebuilds from the published
+# release and records the results without packing or publishing again; "notes" state the cause of an absence.
 on:
   push:
     branches: [expanded-demo-2026-11-09]
@@ -49,6 +50,11 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - id: request
+        name: Publication or results only (report_only rebuilds and records from the published release)
+        run: |
+          python -c "import json; print('report_only=' + json.dumps(bool(json.load(open('demo/publish-request.json')).get('report_only'))))" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
       - name: The runs and the collected outputs (demo/publish-request.json)
         run: |
           read -r runs graph < <(python -c "import json; r=json.load(open('demo/publish-request.json')); print(' '.join([str(r['runs_run_id'])] + ['%s=%s' % kv for kv in sorted((r.get('overrides') or {}).items())]).replace(' ', ','), r['graph_run_id'])")
@@ -78,11 +84,13 @@ jobs:
           echo "REPORT_GRAPHS=$graphs" >> "$GITHUB_ENV"
           echo "REPORT_RUNS=$reports" >> "$GITHUB_ENV"
       - name: Pack the demonstration, one artifact at a time
+        if: ${{ !fromJSON(steps.request.outputs.report_only) }}
         run: |
           python -B demo/pack_each.py --map "$WORK/paper-artifacts.map.json" --output-dir "$DEMO/staged" \
             --failures "$DEMO/pack-failures.json"
           du -sh "$DEMO/staged"; ls "$DEMO/staged" | head -80
       - name: Publish the release demo-artifacts
+        if: ${{ !fromJSON(steps.request.outputs.report_only) }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         # the tag names the commit whose tooling produced and publishes the demonstration
@@ -97,7 +105,7 @@ jobs:
           python -c "import json; json.dump(json.load(open('demo/publish-request.json')).get('notes') or {}, open('$DEMO/notes.json', 'w'))"
           python -B demo/report.py --status "$DEMO/paper.status.json" $REPORT_GRAPHS --runs "$DEMO/runs" \
             --graphs "$DEMO/graphs" $REPORT_RUNS --pack-failures "$DEMO/pack-failures.json" --notes "$DEMO/notes.json" \
-            --output demo/RESULTS.md
+            --workspace "$DEMO/paper" --output demo/RESULTS.md
           mkdir -p demo/published/graphs && cp "$DEMO"/graphs/*_demo.json demo/published/graphs/
           python -B scripts/statement_check.py --write
           python -B scripts/artifact_catalog.py

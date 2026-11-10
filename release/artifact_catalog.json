@@ -298,9 +298,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 37503,
+          "bytes": 37624,
           "path": "scripts/reconstruct.py",
-          "sha256": "ae2b48f12bd6f6bd4f729c5cecb8aa2f5bb6be53b72d80a65176f90abd81ba32"
+          "sha256": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470"
         }
       ],
       "entrypoints": [
@@ -321,9 +321,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 37503,
+          "bytes": 37624,
           "path": "scripts/reconstruct.py",
-          "sha256": "ae2b48f12bd6f6bd4f729c5cecb8aa2f5bb6be53b72d80a65176f90abd81ba32"
+          "sha256": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470"
         }
       ],
       "entrypoints": [
@@ -2771,9 +2771,9 @@
               "sha256": "fe8a7d26ff183c40dfcf08f6fb0c1f1580fb93e147642d72f05ebfb5f1e77736"
             },
             {
-              "bytes": 37396,
+              "bytes": 37576,
               "path": "paper/build/displays/framework.py",
-              "sha256": "79d8c9c676433b307600ed2598cae2195c807f99e45f4ef49fcea791b4cc2609"
+              "sha256": "470930016d1540d68035535a913a1654b689f47734ceffb227023e4e4b456cc9"
             },
             {
               "bytes": 121431,
@@ -2786,9 +2786,9 @@
               "sha256": "39dea8b4bb0f29b233a08547c4dc4b9e92086b338df9fcb7e785794715ce8829"
             },
             {
-              "bytes": 121526,
+              "bytes": 121863,
               "path": "paper/build/displays/records_campaigns.py",
-              "sha256": "56635812cb183fea2f3a907151ebf24d3ff040039059cc38232963b01a091e12"
+              "sha256": "3b91eae9f032643d79ca8ccd71ca0f95fd302cd157139354bc2f28149f936a92"
             },
             {
               "bytes": 6396,
@@ -2851,9 +2851,9 @@
               "sha256": "91f51168e4557974dc7fcc6ec0e88669230ad403e259bb9c3f20acc9531fa91c"
             },
             {
-              "bytes": 37503,
+              "bytes": 37624,
               "path": "scripts/reconstruct.py",
-              "sha256": "ae2b48f12bd6f6bd4f729c5cecb8aa2f5bb6be53b72d80a65176f90abd81ba32"
+              "sha256": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470"
             },
             {
               "bytes": 12213,

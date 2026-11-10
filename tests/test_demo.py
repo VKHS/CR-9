@@ -498,6 +498,24 @@ class Publication(unittest.TestCase):
         # a note states the cause of an absence; an artifact another graph produced stays out of the list
         self.assertEqual(noted, ["- `records:b`: the cause"])
 
+    def test_the_report_counts_the_displays_built_from_the_release_and_lists_those_waiting(self):
+        report = module("report")
+        with tempfile.TemporaryDirectory() as temporary:
+            workspace = Path(temporary)
+            (workspace / "reconstruction.json").write_text(json.dumps({
+                "displays": [{"id": "main:Table 1", "generator": "built"}, {"id": "main:Figure 2", "generator": "built"},
+                             {"id": "main:Figure 3", "generator": "awaiting_inputs", "awaiting": ["campaign:confirmation"]}],
+                "outputs": [{"id": "display:main:Table 1", "display_ids": ["main:Table 1"], "input_kind": "repository_sources"},
+                            {"id": "display:main:Figure 2", "display_ids": ["main:Figure 2"], "input_kind": "synthetic_examples"}],
+                "supplementary_build": {"status": "PASS", "outputs": [{}, {}]}}), encoding="utf-8")
+            rows = report.display_rows(workspace, {"values_exact": 3, "values_differ": 2, "values_missing": 1})
+            fallback = report.display_rows(None, {"complete": 1, "displays": 3})
+        self.assertTrue(rows[0].startswith("- Display generators: 2 of 3 built, 1 of them from the release and 1 from"))
+        self.assertIn("2 output(s), status PASS", rows[1])
+        self.assertIn("3 equal, 2 different, 1 missing", rows[2])
+        self.assertEqual(rows[-1], "- `main:Figure 3`: campaign:confirmation")
+        self.assertTrue(fallback[0].startswith("- Displays: 1 of 3 complete"))
+
 
 if __name__ == "__main__":
     unittest.main()

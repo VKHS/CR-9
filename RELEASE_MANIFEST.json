@@ -73,10 +73,10 @@
       "sha256": "335d2c6bec61fd48df19b1a77c4e80eb622a5c014a77c445bfe2bc0028f21a38"
     },
     {
-      "bytes": 6306,
+      "bytes": 6949,
       "executable": false,
       "path": ".github/workflows/demo-publish.yml",
-      "sha256": "5bf69ee440105c457f1b0aec517efbc806b029a79dbeb77343e89062db0acec7"
+      "sha256": "cc66798794c75c76e91469f8c1e042813d6385241be77013ba6229cffb19eeea"
     },
     {
       "bytes": 7357,
@@ -913,10 +913,10 @@
       "sha256": "8c1dfa8adeec4e6a194d3afd50bbb7ba607ed49f885c96c8add6ba802271669a"
     },
     {
-      "bytes": 2033,
+      "bytes": 2055,
       "executable": false,
       "path": "demo/publish-request.json",
-      "sha256": "187952050a5af7db40da86ce4a4e9c0ab3b6354228766412e68180e1596db66e"
+      "sha256": "55024cf5025d0ca1b480c39358966232d6c8f785ef2ec387683c830b2f0f1dcb"
     },
     {
       "bytes": 962,
@@ -955,10 +955,10 @@
       "sha256": "fdfccced5c9e827eb60c46367267f92d928024408bce39a0162cc336dd332568"
     },
     {
-      "bytes": 10586,
+      "bytes": 12788,
       "executable": false,
       "path": "demo/report.py",
-      "sha256": "4403049fbe8a54f955d84ce4f691e0b0616bbb1c560f299dddaabbb0cad9b5ef"
+      "sha256": "ea4a9116cdfe1f76fed976f5f3c923d7594ee3b5ffb16b333c1085ce380aaa00"
     },
     {
       "bytes": 10778,
@@ -6277,10 +6277,10 @@
       "sha256": "fe8a7d26ff183c40dfcf08f6fb0c1f1580fb93e147642d72f05ebfb5f1e77736"
     },
     {
-      "bytes": 37396,
+      "bytes": 37576,
       "executable": false,
       "path": "paper/build/displays/framework.py",
-      "sha256": "79d8c9c676433b307600ed2598cae2195c807f99e45f4ef49fcea791b4cc2609"
+      "sha256": "470930016d1540d68035535a913a1654b689f47734ceffb227023e4e4b456cc9"
     },
     {
       "bytes": 121431,
@@ -6295,10 +6295,10 @@
       "sha256": "39dea8b4bb0f29b233a08547c4dc4b9e92086b338df9fcb7e785794715ce8829"
     },
     {
-      "bytes": 121526,
+      "bytes": 121863,
       "executable": false,
       "path": "paper/build/displays/records_campaigns.py",
-      "sha256": "56635812cb183fea2f3a907151ebf24d3ff040039059cc38232963b01a091e12"
+      "sha256": "3b91eae9f032643d79ca8ccd71ca0f95fd302cd157139354bc2f28149f936a92"
     },
     {
       "bytes": 6396,
@@ -6862,7 +6862,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "fd23f3e8247924590dc6cd9fef6438ad99450dd61e017d6df5fcc168190aa4f0"
+      "sha256": "887a05d3c71d3cc3b8bae385a7dd3799af6a85916b82fb3607d919ee96360ad3"
     },
     {
       "bytes": 35593,
@@ -7405,10 +7405,10 @@
       "sha256": "e382688191772c068211254dfbf882e02a63c51ce5d3ce8df3d147f7ef44dd18"
     },
     {
-      "bytes": 37503,
+      "bytes": 37624,
       "executable": false,
       "path": "scripts/reconstruct.py",
-      "sha256": "ae2b48f12bd6f6bd4f729c5cecb8aa2f5bb6be53b72d80a65176f90abd81ba32"
+      "sha256": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470"
     },
     {
       "bytes": 12213,
@@ -7723,10 +7723,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 30034,
+      "bytes": 31542,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "8c754edeb5bfb503bc373657f31c30e943a3b976db854a77034ac55cc6610710"
+      "sha256": "1b366305f8c6d3db66cb7ca44f6a2e161da9936aeb52c2dcaf83397dfbe3b027"
     },
     {
       "bytes": 23965,
@@ -7771,10 +7771,10 @@
       "sha256": "0cd579b7dd3c260fe2a94aae6f5f6daa5577642be5dcf2ab261fbc6c722ae965"
     },
     {
-      "bytes": 60624,
+      "bytes": 61455,
       "executable": false,
       "path": "tests/test_displays_records_campaigns.py",
-      "sha256": "24606cde0b3e1a02738e74d1470219ccced39217e81e8d55e5143f6332a0b12c"
+      "sha256": "9ee98cdbe7ba05984f05b14f2b6e097426c0aca252209f34a6495ed4790ad1ba"
     },
     {
       "bytes": 68697,
@@ -8266,5 +8266,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "4577a4238c805d9d1b5ad1ef028997debd1802ac4e5b1b10fe4c31ca128e3315"
+  "tree_sha256": "83529e18f5c3b5ddacfd5ef69173d646e569c39a2db4da022a1beff0dad385fc"
 }
