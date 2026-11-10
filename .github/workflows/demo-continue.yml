@@ -51,6 +51,8 @@ jobs:
       work: ${{ steps.request.outputs.work }}
       excludes: ${{ steps.request.outputs.excludes }}
       patterns: ${{ steps.request.outputs.patterns }}
+      level_patterns: ${{ steps.request.outputs.level_patterns }}
+      parallel: ${{ steps.request.outputs.parallel }}
       previous_exports: ${{ steps.request.outputs.previous_exports }}
       plan_sources: ${{ steps.request.outputs.plan_sources }}
       matrix: ${{ steps.matrix.outputs.matrix }}
@@ -73,6 +75,9 @@ jobs:
           print("work=" + (r.get("work") or "/home/runner/demo/work"))
           print("excludes=" + json.dumps(r.get("export_excludes") or {}))
           print("patterns=" + json.dumps(r.get("export_exclude_patterns") or {}))
+          # members left out of every level's restore, e.g. the exploration trajectories the measurements do not read
+          print("level_patterns=" + " ".join("--exclude-pattern '%s'" % g for g in r.get("level_exclude_patterns") or []))
+          print("parallel=%d" % int(r.get("restore_parallel") or 4))
           print("previous_exports=" + " ".join("--run %s --prefix %s" % (run, prefix)
                                                for run, prefix in r.get("previous_exports") or []))
           # where the runner plans of measurement tasks are (default: every earlier archive)
@@ -259,7 +264,8 @@ jobs:
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 1 --exclude-from "$RUNNER_TEMP/excludes.txt" \
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 1 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
@@ -358,7 +364,8 @@ jobs:
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 2 --exclude-from "$RUNNER_TEMP/excludes.txt" \
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 2 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
@@ -457,7 +464,8 @@ jobs:
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 3 --exclude-from "$RUNNER_TEMP/excludes.txt" \
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 3 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
@@ -556,7 +564,8 @@ jobs:
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 4 --exclude-from "$RUNNER_TEMP/excludes.txt" \
+            eval python -B demo/restore.py --work "\"$WORK\"" --level 4 --exclude-from "\"$RUNNER_TEMP/excludes.txt\"" \
+              --parallel "${{ needs.setup.outputs.parallel }}" ${{ needs.setup.outputs.level_patterns }} \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
