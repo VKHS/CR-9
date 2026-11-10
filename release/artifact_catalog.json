@@ -460,9 +460,9 @@
           "sha256": "079da187004f7cefc9557546045565810f2e41d3e9bc88d6f04fc56dc3c8ed15"
         },
         {
-          "bytes": 25992,
+          "bytes": 26527,
           "path": "scripts/statement_check.py",
-          "sha256": "e607c6c1f99a8b0a0f79ca23c7d05ad5454233dd355bd0a18ab1f28b6f2d2343"
+          "sha256": "8769d423dacc4da233fb353dbef1951b27cb8d3be3aca935d78fe528863be371"
         }
       ],
       "entrypoints": [

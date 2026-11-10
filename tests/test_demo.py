@@ -456,9 +456,19 @@ class Channels(unittest.TestCase):
                 self.published(pa.DEMO_RELATIONSHIP, False)])
             (root / "release" / "demo_artifacts.json").write_text(json.dumps(manifest), encoding="utf-8")
             demo = statement_check.demonstration(evaluation, root)
+            # the derived views: the one command runs and builds the displays its artifacts support
+            views = root / "demo" / "published" / "paper" / "source_data"
+            (views / "reports").mkdir(parents=True)
+            (views / "INDEX.json").write_text(json.dumps({"reconstruction": {"displays": 90}}), encoding="utf-8")
+            (views / "reports" / "reconstruction.json").write_text(
+                json.dumps({"display_generators": {"built": 56, "registered": 90}}), encoding="utf-8")
+            derived = {row["id"]: row for row in statement_check.demonstration(evaluation, root)["rows"]}
         rows = {row["id"]: row for row in demo["rows"]}
         self.assertTrue(rows["checkpoints"]["demonstrated"])
         self.assertFalse(rows["one_command"]["demonstrated"])
+        self.assertEqual((derived["one_command"]["demonstrated"], derived["one_command"]["evidence"]),
+                         ("partly", "56 of 90 displays built"))
+        self.assertIs(derived["generators"]["demonstrated"], True)
         self.assertEqual(statement_check.evaluate(ROOT)["counts"], before)
         self.assertIn("CPU demonstration (separate from the statement)",
                       statement_check.render(evaluation, None, demo))

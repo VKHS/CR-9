@@ -43,15 +43,15 @@ CPU demonstration of the released code at reduced scale (demo/README.md). Every 
 |---|---|---|---|
 | complete experiment code | yes | the lifecycle and every runner executed from this checkout (the E12 adapters excepted) | 7 artifact(s) |
 | configurations | yes | the effective configuration sealed in every demonstration run | 7 artifact(s) |
-| source data | yes | the source data written by the demonstration reconstruction | 90 displays rebuilt |
+| source data | yes | the source data written by the demonstration reconstruction | 56 of 90 displays built |
 | split and seed manifests | yes | the executed split and seed manifests of the demonstration runs | 7 artifact(s) |
 | environment specification | yes | the observed CPU environment of the demonstration runs | 8 artifact(s) |
 | checkpoints | yes | the plant and controller checkpoints of the demonstration runs | 7 artifact(s) |
 | predictions | yes | the member and deployed predictions of the demonstration runs | 8 artifact(s) |
 | propensity-logged trajectories | yes | the propensity-logged exploration trajectories of the demonstration runs | 7 artifact(s) |
 | statistical outputs | yes | the selection, confirmation and admission statistics, record sets and campaigns | 30 artifact(s) |
-| figure/table generators | yes | every table and figure generator run on the demonstration artifacts | 90 displays rebuilt |
-| one-command reconstruction of every reported table and figure | yes | make demo-paper | 90 displays rebuilt |
+| figure/table generators | yes | every table and figure generator run on the demonstration artifacts | 56 of 90 displays built |
+| one-command reconstruction of every reported table and figure | partly | make demo-paper | 56 of 90 displays built |
 | follows established reproducibility guidance | yes | the same checklist mapping | demo/published/paper/source_data |
 
 ## The availability text printed in the manuscript

@@ -296,15 +296,21 @@ def demonstration(evaluation: dict, root: Path = ROOT) -> dict | None:
     if not manifest or manifest.get("channel") != "demonstration":
         return None
     published = [a for a in manifest.get("artifacts", []) if a.get("status") == "published"]
-    source = _json(root / "demo" / "published" / "paper" / "source_data" / "INDEX.json") or {}
-    rebuilt = (source.get("reconstruction") or {}).get("displays")
+    views = root / "demo" / "published" / "paper" / "source_data"
+    source = _json(views / "INDEX.json") or {}
+    # the display generators that built a display from the demonstration (its reconstruction report)
+    generators = (_json(views / "reports" / "reconstruction.json") or {}).get("display_generators") or {}
+    built, registered = generators.get("built"), generators.get("registered")
+    counted = type(built) is int and type(registered) is int
     rows = []
     for item in evaluation["items"]:
         kinds = DEMO_KINDS[item["id"]]
         if kinds is None:
             shown = bool(published) and (item["id"] == "guidance" or bool(source))
-            evidence = (f"{rebuilt} displays rebuilt" if item["id"] in ("one_command", "generators", "source_data")
-                        and rebuilt else ("demo/published/paper/source_data" if source else ""))
+            evidence = (f"{built} of {registered} displays built" if item["id"] in ("one_command", "generators", "source_data")
+                        and counted else ("demo/published/paper/source_data" if source else ""))
+            if item["id"] == "one_command" and shown and counted and built < registered:
+                shown = "partly"     # the one command runs; the artifacts it lacks are listed in demo/RESULTS.md
         else:
             ids = [a["id"] for a in published if a.get("kind") in kinds]
             shown, evidence = bool(ids), f"{len(ids)} artifact(s)" if ids else ""
@@ -362,8 +368,8 @@ def render(evaluation: dict, printed: dict | None = None, demo: dict | None = No
                   "change any status above.", "",
                   "| Statement item | Demonstrated | What the demonstration supplies | Evidence |", "|---|---|---|---|"]
         for row in demo["rows"]:
-            lines.append(f"| {row['phrase']} | {'yes' if row['demonstrated'] else 'no'} | {row['what']} | "
-                         f"{row['evidence'] or '—'} |")
+            shown = {True: "yes", "partly": "partly"}.get(row["demonstrated"], "no")
+            lines.append(f"| {row['phrase']} | {shown} | {row['what']} | {row['evidence'] or '—'} |")
         lines.append("")
     if printed is not None:
         from scripts import printed_statement_check
