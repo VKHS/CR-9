@@ -197,14 +197,27 @@ def _record_inputs(index: Path | None, specs_path: Path) -> tuple[list, dict]:
                      "sets": entries, "verification": "manifest hashes and summary-to-raw-value traceability"}
 
 
+def _benchmark_dataset(path: Path) -> str:
+    """The benchmark dataset of one discovered run, or of a split campaign's first split (sealed final summary)."""
+    child = path if build_paper.is_run(path) else next(p for p in sorted(path.glob("split_*")) if build_paper.is_run(p))
+    return read_json(child / "final/results_summary.json")["benchmark_dataset"]
+
+
 def display_context(root: Path, found: list, collected: list, record_entries: list, records_index,
                     campaigns: dict, synthetic: bool):
-    """Inputs of the display generators: verified runs, verified record sets and campaign exports."""
+    """Inputs of the display generators: verified runs, verified record sets and campaign exports.
+
+    ``collected`` is in the paper's dataset order (build_paper.collect), ``found`` in discovery order; each run
+    is paired with its own dataset, whatever its directory is called."""
     from paper.build.displays.framework import DisplayContext, RecordSetView, RunView
     runs = {}
-    for (_, path), record in zip(found, collected):
-        splits = [RunView(record["dataset"], p) for p in sorted(path.glob("split_*")) if build_paper.is_run(p)]
-        runs[record["dataset"]] = RunView(record["dataset"], path, splits=splits if not build_paper.is_run(path) else ())
+    datasets = {record["dataset"] for record in collected}
+    for _, path in found:
+        dataset = _benchmark_dataset(path)
+        if dataset not in datasets or dataset in runs:
+            raise ReconstructionError(f"Run {path} does not pair with exactly one collected dataset record")
+        splits = [RunView(dataset, p) for p in sorted(path.glob("split_*")) if build_paper.is_run(p)]
+        runs[dataset] = RunView(dataset, path, splits=splits if not build_paper.is_run(path) else ())
     records = {}
     if record_entries:
         base = Path(records_index).resolve().parent
@@ -369,12 +382,16 @@ def verify_workspace(directory: Path) -> dict:
 
 def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=None,
                 confirmation_campaign=None, budget_campaign=None, campaigns=None,
-                label="reconstruction", root=ROOT, demonstration=False) -> dict:
+                label="reconstruction", root=ROOT, demonstration=False, scope_note: str | None = None) -> dict:
     """Build in a new staging directory, then atomically publish a managed workspace.
 
     ``demonstration`` (scripts/reconstruct_paper.py --demo) builds the supplementary displays of the CPU
     demonstration from its fixture-derived record sets and campaign, labelled as such; a supplementary input that
-    still cannot be built is then reported among the generator errors instead of stopping the reconstruction."""
+    still cannot be built is then reported among the generator errors instead of stopping the reconstruction.
+    ``scope_note`` opens the report (the demonstration's scope); it is written before the file manifest, so the
+    workspace verifies as built."""
+    if scope_note is not None and (not isinstance(scope_note, str) or not scope_note.strip()):
+        raise ReconstructionError("A scope note must be nonempty text")
     root, output_dir = Path(root).resolve(), Path(output_dir).absolute()
     if not isinstance(label, str) or not label.strip() or "\n" in label or "|" in label:
         raise ReconstructionError("Build label must be nonempty text on one line, without a table separator")
@@ -503,7 +520,10 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
                                          "display_content_incomplete": [d["id"] for d in displays if not d["content_complete"]],
                                          "comparison_with_printed_values": comparison}}
         write_json(stage / "reconstruction.json", result)
-        (stage / "RECONSTRUCTION_REPORT.md").write_text(render_report(result), encoding="utf-8")
+        report = render_report(result)
+        if scope_note is not None:
+            report = f"> **Demonstration.** {scope_note.strip()}\n\n" + report
+        (stage / "RECONSTRUCTION_REPORT.md").write_text(report, encoding="utf-8")
         write_file_manifest(stage)
         verify_workspace(stage)
         backup = Path(temporary) / "previous"

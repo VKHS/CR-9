@@ -58,6 +58,7 @@ jobs:
       plan_sources: ${{ steps.request.outputs.plan_sources }}
       matrix: ${{ steps.matrix.outputs.matrix }}
       collect_only: ${{ steps.matrix.outputs.collect_only }}
+      markers_from: ${{ steps.request.outputs.markers_from }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -86,6 +87,8 @@ jobs:
           # where the runner plans of measurement tasks are (default: every earlier archive)
           print("plan_sources=" + " ".join("--run %s --prefix %s" % (run, prefix)
                                            for run, prefix in r.get("plan_sources") or previous))
+          # collect_only: the task markers of an earlier collect ([run, artifact]), which the results page reads
+          print("markers_from=" + " ".join(str(x) for x in r.get("markers_from") or []))
           EOF
           cat "$GITHUB_OUTPUT"
           grep '^work=' "$GITHUB_OUTPUT" | sed 's/^work=/WORK=/' >> "$GITHUB_ENV"
@@ -727,6 +730,11 @@ jobs:
           if [ "${{ needs.setup.outputs.collect_only }}" != 1 ]; then
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }} --run "$GITHUB_RUN_ID" --prefix demo-work-L
+          elif [ -n "${{ needs.setup.outputs.markers_from }}" ]; then
+            read -r run artifact <<< "${{ needs.setup.outputs.markers_from }}"
+            bash demo/artifact.sh "$artifact" "$RUNNER_TEMP/markers" "$run"
+            tar -xzf "$RUNNER_TEMP/markers/collected.tar.gz" -C / "${WORK#/}/state"
+            echo "task markers of run $run ($artifact): $(find "$WORK/state" -type f | wc -l) file(s)"
           fi
           python -B demo/restore.py --work "$WORK" --all ${{ needs.setup.outputs.previous_exports }} --run "$GITHUB_RUN_ID" --prefix demo-export-
       - name: Collect the publication map

@@ -222,14 +222,20 @@ class SupplementBuildTests(unittest.TestCase):
             build_supplement(self.records / "generated", records_index=self.index)
 
     def test_the_demonstration_reconstruction_reports_a_supplementary_input_it_cannot_build(self):
-        from scripts.reconstruct import reconstruct
+        from scripts.reconstruct import reconstruct, verify_workspace
         values = [row for row in self.factorial_values() if not (row[0]["dataset"] == "ogbn-arxiv" and row[0]["cell"] == "111")]
         self.record("factorials", values, synthetic=True)
         self.record("ensemble_grid", self.ensemble_values(), synthetic=True)
         with contextlib.redirect_stdout(io.StringIO()):
             paper = reconstruct(self.base / "paper_workspace", records_index=self.index, label="paper")
             demonstration = reconstruct(self.base / "demonstration_workspace", records_index=self.index,
-                                        label="demonstration", demonstration=True)
+                                        label="demonstration", demonstration=True, scope_note="CPU demonstration.")
+            # the scope opens the report inside the verified workspace, which a second build replaces
+            report = (self.base / "demonstration_workspace/RECONSTRUCTION_REPORT.md").read_text()
+            self.assertTrue(report.startswith("> **Demonstration.** CPU demonstration."))
+            verify_workspace(self.base / "demonstration_workspace")
+            reconstruct(self.base / "demonstration_workspace", records_index=self.index, label="demonstration",
+                        demonstration=True, scope_note="CPU demonstration.")
         # the paper's reconstruction does not build supplementary displays from synthetic sets
         self.assertIsNone(paper["supplementary_build"])
         errors = demonstration["display_generators"]["errors"]

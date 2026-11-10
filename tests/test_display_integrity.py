@@ -151,6 +151,16 @@ class JointFactorialIntegrity(unittest.TestCase):
             row["source_file"] = "cells.csv"
         self.assertIsNone(joint_factorial_contrasts(self.records, "ogbn-arxiv", self.cells))
 
+    def test_summary_values_printed_to_ten_significant_digits_replay(self):
+        # scripts/export_records.fmt prints every summary value with ten significant digits, which can move it by
+        # up to half a unit in the tenth digit: 5e-10 of the value
+        printed = {cell: {key: float(format(value, ".10g")) for key, value in stats.items()}
+                   for cell, stats in self.cells.items()}
+        self.assertEqual(joint_factorial_contrasts(self.records, "ogbn-arxiv", printed)["replicates"], 128)
+        rounded = {cell: {key: value * (1 + 4.5e-10) if key in ("ld_integrated_loss", "interval_low", "interval_high")
+                          else value for key, value in stats.items()} for cell, stats in self.cells.items()}
+        self.assertEqual(joint_factorial_contrasts(self.records, "ogbn-arxiv", rounded)["replicates"], 128)
+
     def test_summary_change_is_not_hidden_by_a_valid_raw_bundle(self):
         self.cells["000"]["ld_integrated_loss"] += .001
         with self.assertRaisesRegex(fw.DisplayValidationError, "differs from its summary"):

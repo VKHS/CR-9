@@ -435,7 +435,10 @@ class Channels(unittest.TestCase):
     def test_reconstruction_refuses_to_mix_the_manifests(self):
         with tempfile.TemporaryDirectory() as temporary:
             out = Path(temporary)
-            self.assertEqual(reconstruct_paper.main(["--demo", "--offline", "--manifest", str(pa.MANIFEST),
+            # the paper's manifest under another name (the default path itself selects the demonstration's)
+            paper = out / "paper_artifacts.json"
+            paper.write_bytes(pa.MANIFEST.read_bytes())
+            self.assertEqual(reconstruct_paper.main(["--demo", "--offline", "--manifest", str(paper),
                                                      "--artifacts", str(out / "a"), "--output-dir", str(out / "p")]), 2)
             demo = out / "demo_artifacts.json"
             demo.write_text(json.dumps(pa.blank_manifest(demonstration=True)), encoding="utf-8")

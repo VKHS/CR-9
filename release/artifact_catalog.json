@@ -244,9 +244,9 @@
           "sha256": "0809fcc5dd50dc933c60ed9ca55c7b0bc9f1e0b483b5d27a8ee5aef297887d75"
         },
         {
-          "bytes": 12254,
+          "bytes": 12213,
           "path": "scripts/reconstruct_paper.py",
-          "sha256": "81718be97568e004f67d40f05249836c8b4fa25c015b146839bfbdff9fe2088c"
+          "sha256": "ca817e976ca4a27d113dd95ca1c3982d143ad0e4af3a43c399bfc7ef2a9af20d"
         }
       ],
       "entrypoints": [
@@ -298,9 +298,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 36267,
+          "bytes": 37503,
           "path": "scripts/reconstruct.py",
-          "sha256": "fce8a626d9cf17af85f668a7d234b5f18bd4cc64a62bb286a774ca677f1e7adb"
+          "sha256": "ae2b48f12bd6f6bd4f729c5cecb8aa2f5bb6be53b72d80a65176f90abd81ba32"
         }
       ],
       "entrypoints": [
@@ -321,9 +321,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 36267,
+          "bytes": 37503,
           "path": "scripts/reconstruct.py",
-          "sha256": "fce8a626d9cf17af85f668a7d234b5f18bd4cc64a62bb286a774ca677f1e7adb"
+          "sha256": "ae2b48f12bd6f6bd4f729c5cecb8aa2f5bb6be53b72d80a65176f90abd81ba32"
         }
       ],
       "entrypoints": [
@@ -2766,9 +2766,9 @@
               "sha256": "debd3a5ebe9bba09a8b63f066eca945e168e28019c598b32bfeeaa6d0aec113f"
             },
             {
-              "bytes": 7969,
+              "bytes": 8407,
               "path": "paper/build/displays/factorial_data.py",
-              "sha256": "ea5fdce3fa107df3421a10d303e02c604e74b0f4cfb9868ad1b999c09e0d080b"
+              "sha256": "fe8a7d26ff183c40dfcf08f6fb0c1f1580fb93e147642d72f05ebfb5f1e77736"
             },
             {
               "bytes": 37396,
@@ -2851,14 +2851,14 @@
               "sha256": "91f51168e4557974dc7fcc6ec0e88669230ad403e259bb9c3f20acc9531fa91c"
             },
             {
-              "bytes": 36267,
+              "bytes": 37503,
               "path": "scripts/reconstruct.py",
-              "sha256": "fce8a626d9cf17af85f668a7d234b5f18bd4cc64a62bb286a774ca677f1e7adb"
+              "sha256": "ae2b48f12bd6f6bd4f729c5cecb8aa2f5bb6be53b72d80a65176f90abd81ba32"
             },
             {
-              "bytes": 12254,
+              "bytes": 12213,
               "path": "scripts/reconstruct_paper.py",
-              "sha256": "81718be97568e004f67d40f05249836c8b4fa25c015b146839bfbdff9fe2088c"
+              "sha256": "ca817e976ca4a27d113dd95ca1c3982d143ad0e4af3a43c399bfc7ef2a9af20d"
             }
           ],
           "patterns": [

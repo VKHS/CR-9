@@ -143,7 +143,8 @@ def main(argv=None) -> int:
         result = reconstruct(args.output_dir, runs_root=found["runs_root"], records_index=found["records_index"],
                              confirmation_campaign=campaigns.pop("confirmation", None),
                              budget_campaign=campaigns.pop("budget", None), campaigns=campaigns,
-                             label=label, demonstration=args.demo)
+                             label=label, demonstration=args.demo,
+                             scope_note=manifest.get("scope", artifacts.DEMO_SCOPE) if args.demo else None)
     except (artifacts.ArtifactError, ReconstructionError, OSError, ValueError, KeyError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
@@ -151,12 +152,9 @@ def main(argv=None) -> int:
     status["artifacts_awaiting_publication"] = materialization["not_published"]
     status["artifact_materialization"] = materialization
     if args.demo:
+        # the report opens with this scope (reconstruct(scope_note=...)), inside the verified workspace
         status["channel"] = artifacts.DEMO_CHANNEL
         status["scope"] = manifest.get("scope", artifacts.DEMO_SCOPE)
-        report = args.output_dir / "RECONSTRUCTION_REPORT.md"
-        if report.is_file():
-            report.write_text(f"> **Demonstration.** {status['scope']}\n\n" + report.read_text(encoding="utf-8"),
-                              encoding="utf-8")
     status_path = args.output_dir.parent / f"{args.output_dir.name}.status.json"
     status_path.write_text(json.dumps(status, indent=1) + "\n", encoding="utf-8")
     print(f"Displays complete: {status['complete']} of {status['displays']}")
