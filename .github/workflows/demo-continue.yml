@@ -49,6 +49,8 @@ jobs:
       source: ${{ steps.request.outputs.source }}
       skip: ${{ steps.request.outputs.skip }}
       work: ${{ steps.request.outputs.work }}
+      excludes: ${{ steps.request.outputs.excludes }}
+      previous_exports: ${{ steps.request.outputs.previous_exports }}
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -67,6 +69,9 @@ jobs:
           print("source=" + (r.get("source_sha") or "${{ github.sha }}"))
           print("skip=" + " ".join("--skip-node %s" % node for node in r.get("skip_nodes") or []))
           print("work=" + (r.get("work") or "/home/runner/demo/work"))
+          print("excludes=" + json.dumps(r.get("export_excludes") or {}))
+          print("previous_exports=" + " ".join("--run %s --prefix %s" % (run, prefix)
+                                               for run, prefix in r.get("previous_exports") or []))
           EOF
           cat "$GITHUB_OUTPUT"
           grep '^work=' "$GITHUB_OUTPUT" | sed 's/^work=/WORK=/' >> "$GITHUB_ENV"
@@ -83,7 +88,9 @@ jobs:
                                                        *"${{ steps.request.outputs.skip }}".split()]))
           plan = json.load(open(os.environ["WORK"] + "/plan.json"))
           out = dict(matrix)        # per level, the shares that hold an unfinished task
-          out["exports"] = [e["id"] for e in plan["exports"]]
+          request = json.load(open("demo/continue-request.json"))
+          only = request.get("export_only")
+          out["exports"] = [e["id"] for e in plan["exports"] if not only or e["id"] in only]
           print("matrix=" + json.dumps(out))
           EOF
           cat "$GITHUB_OUTPUT"
@@ -211,12 +218,15 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          python -B demo/task_inputs.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 1 = 0 ]; then
             # the first level's unfinished tasks: their finished siblings are known from the markers alone
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 1 \
+            python -B demo/restore.py --work "$WORK" --level 1 --exclude-from "$RUNNER_TEMP/excludes.txt" \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
@@ -292,12 +302,15 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          python -B demo/task_inputs.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 2 = 0 ]; then
             # the first level's unfinished tasks: their finished siblings are known from the markers alone
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 2 \
+            python -B demo/restore.py --work "$WORK" --level 2 --exclude-from "$RUNNER_TEMP/excludes.txt" \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
@@ -373,12 +386,15 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          python -B demo/task_inputs.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 3 = 0 ]; then
             # the first level's unfinished tasks: their finished siblings are known from the markers alone
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 3 \
+            python -B demo/restore.py --work "$WORK" --level 3 --exclude-from "$RUNNER_TEMP/excludes.txt" \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
@@ -454,12 +470,15 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          # the variant lifecycle runs that this share's measurement tasks do not read stay out (demo/task_inputs.py)
+          python -B demo/task_inputs.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" \
+            --salt "${{ github.run_id }}" ${{ needs.setup.outputs.skip }} > "$RUNNER_TEMP/excludes.txt"
           if [ 4 = 0 ]; then
             # the first level's unfinished tasks: their finished siblings are known from the markers alone
             python -B demo/restore.py --work "$WORK" --node __markers_only__ \
               ${{ needs.setup.outputs.previous }}
           else
-            python -B demo/restore.py --work "$WORK" --level 4 \
+            python -B demo/restore.py --work "$WORK" --level 4 --exclude-from "$RUNNER_TEMP/excludes.txt" \
               ${{ needs.setup.outputs.previous }} \
               --run "$GITHUB_RUN_ID" --prefix demo-work-L
           fi
@@ -534,7 +553,9 @@ jobs:
         run: |
           bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
-          python -B demo/restore.py --work "$WORK" --export "${{ steps.work.outputs.export }}" \
+          python3 -c "import json,os,sys; e=json.loads(sys.argv[1]).get(sys.argv[2]) or []; print('\n'.join(os.path.join(os.environ['WORK'], p).lstrip('/') for p in e))" \
+            '${{ needs.setup.outputs.excludes }}' "${{ steps.work.outputs.export }}" > "$RUNNER_TEMP/excludes.txt"
+          python -B demo/restore.py --work "$WORK" --export "${{ steps.work.outputs.export }}" --exclude-from "$RUNNER_TEMP/excludes.txt" \
             ${{ needs.setup.outputs.previous }} \
             --run "$GITHUB_RUN_ID" --prefix demo-work-L
       - name: Export
@@ -584,7 +605,7 @@ jobs:
           python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
           python -B demo/restore.py --work "$WORK" --node __markers_only__ \
             ${{ needs.setup.outputs.previous }} --run "$GITHUB_RUN_ID" --prefix demo-work-L
-          python -B demo/restore.py --work "$WORK" --all --run "$GITHUB_RUN_ID" --prefix demo-export-
+          python -B demo/restore.py --work "$WORK" --all ${{ needs.setup.outputs.previous_exports }} --run "$GITHUB_RUN_ID" --prefix demo-export-
       - name: Collect the publication map
         run: |
           python -B scripts/paper_outputs.py collect --work "$WORK" || true

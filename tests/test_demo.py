@@ -246,6 +246,29 @@ class TimingWithoutScheduler(unittest.TestCase):
         self.assertFalse(any("--allow-partial" in step for step in gpu_steps))
 
 
+class NarrowRestores(unittest.TestCase):
+    def test_a_measurement_share_restores_only_the_lifecycle_runs_its_arms_read(self):
+        task_inputs = module("task_inputs")
+        with tempfile.TemporaryDirectory() as temporary:
+            out = Path(temporary) / "work" / "experiments" / "module_ablations"
+            out.mkdir(parents=True)
+            runs = {m: [str(out / "runs" / m / v) for v in ("v1", "v2")] for m in ("a", "b")}
+            jobs = [{"job": i, "kind": "lifecycle", "run": run} for i, run in enumerate(runs["a"] + runs["b"])]
+            jobs += [{"job": 4 + i, "kind": "measure", "arms": [{"source": "parent", "run": "/runs/" + m}] +
+                      [{"source": "lifecycle", "run": run} for run in runs[m]]} for i, m in enumerate(("a", "b"))]
+            (out / "plan.json").write_text(json.dumps({"jobs": jobs}), encoding="utf-8")
+            measure = [{"commands": [], "job_in": {"plan": str(out / "plan.json"), "index": 4 + i, "kind": "measure"}}
+                       for i in range(2)]
+            plan = {"nodes": [{"id": "lifecycles", "tasks": [{}] * 4, "dependencies": []},
+                              {"id": "measure", "tasks": measure,
+                               "dependencies": [{"node": "lifecycles", "type": "afterok"}]}]}
+            first = task_inputs.unread_runs(plan, level=1, shard=1, shards=2, salt=None)
+            second = task_inputs.unread_runs(plan, level=1, shard=2, shards=2, salt=None)
+            self.assertEqual(first, sorted(r.lstrip("/") for r in runs["b"]))
+            self.assertEqual(second, sorted(r.lstrip("/") for r in runs["a"]))
+            self.assertEqual(task_inputs.unread_runs(plan, level=0, shard=1, shards=2, salt=None), [])
+
+
 class PartialCoverage(unittest.TestCase):
     def test_only_a_fixture_plan_admits_a_set_that_declares_partial_coverage(self):
         from unittest import mock

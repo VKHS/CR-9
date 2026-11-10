@@ -84,15 +84,19 @@ def artifacts(run: str, prefix: str) -> list[tuple[int, str]]:
     return sorted(found, key=lambda row: row[1])
 
 
+EXCLUDED: list[str] = []      # path prefixes (relative to /) left out of every extraction (--exclude)
+
+
 def extract(archive_zip: Path, prefixes: list[str] | None) -> str:
     """Stream every tar.gz inside one artifact zip through unzip and GNU tar (both in C)."""
     members = subprocess.check_output(["unzip", "-Z1", str(archive_zip)], text=True).split()
     report = []
+    exclude = ["--anchored", *(f"--exclude={p.rstrip('/')}" for p in EXCLUDED)] if EXCLUDED else []
     for member in (m for m in members if m.endswith(".tar.gz")):
         names = [p.rstrip("/") for p in prefixes] if prefixes is not None else []
         unzip = subprocess.Popen(["unzip", "-p", str(archive_zip), member], stdout=subprocess.PIPE)
         # A directory name extracts everything below it; a name absent from this archive is not an error here.
-        tar = subprocess.run(["tar", "-xzf", "-", "-C", "/", "--no-same-owner", *names], stdin=unzip.stdout,
+        tar = subprocess.run(["tar", "-xzf", "-", "-C", "/", "--no-same-owner", *exclude, *names], stdin=unzip.stdout,
                              capture_output=True, text=True)
         unzip.stdout.close()
         unzip.wait()
@@ -129,7 +133,15 @@ def main(argv=None) -> int:
     parser.add_argument("--export", default=None)
     parser.add_argument("--plan-only", action="store_true")
     parser.add_argument("--parallel", type=int, default=4, help="archives of one level processed at once")
+    parser.add_argument("--exclude", action="append", default=[], metavar="PATH",
+                        help="leave this path (and everything below it) out of the extraction (repeatable)")
+    parser.add_argument("--exclude-from", type=Path, default=None, help="a file of such paths, one per line")
     args = parser.parse_args(argv)
+    EXCLUDED[:] = [p.lstrip("/") for p in args.exclude]
+    if args.exclude_from is not None and args.exclude_from.is_file():
+        EXCLUDED.extend(line.strip().lstrip("/") for line in args.exclude_from.read_text().splitlines() if line.strip())
+    if EXCLUDED:
+        print(f"excluded from the extraction: {len(EXCLUDED)} path(s)")
     if len(args.run) != len(args.prefix) and not args.plan_only:
         parser.error("give one --prefix per --run")
     import importlib.util

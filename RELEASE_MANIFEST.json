@@ -55,10 +55,10 @@
       "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
     },
     {
-      "bytes": 31997,
+      "bytes": 34356,
       "executable": false,
       "path": ".github/workflows/demo-continue.yml",
-      "sha256": "26c96faca37b8fbdc59a2869ebb14dcabf0f2a486665b8a89d1805ccd5e3bcfd"
+      "sha256": "37502dc36504efd6ceb074a0e73d528051bb18f85460b5107505baa4934114d6"
     },
     {
       "bytes": 24834,
@@ -913,10 +913,10 @@
       "sha256": "9655c9523f3dfe580f53085e64606c9eab17e14aa11a20111b70313b51349647"
     },
     {
-      "bytes": 8009,
+      "bytes": 8861,
       "executable": false,
       "path": "demo/restore.py",
-      "sha256": "6a6c1c9d4ea788e40a4ce3cadd9b4a94affccbbee213539d4238d6f2ed0aec96"
+      "sha256": "ef9eaff7de81d84d6da9558cb875bfdad9448c69cbd6822f379b2628e046d4d4"
     },
     {
       "bytes": 2258,
@@ -935,6 +935,12 @@
       "executable": false,
       "path": "demo/sweep-request.json",
       "sha256": "056af152c10f38470d3c0bda34d52f8ed60542fcd3fb07a1a0c74e6838836afc"
+    },
+    {
+      "bytes": 3472,
+      "executable": false,
+      "path": "demo/task_inputs.py",
+      "sha256": "8358307fb0ac75c5f4a10f58f18b48e080e6913f37d429ce9ef4cb4886ec0cef"
     },
     {
       "bytes": 1174,
@@ -7663,10 +7669,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 20390,
+      "bytes": 22107,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "eb8067f2acb8695fa8a6ea9c2484deb2da433a18afe6e8a1dc94406d09ef2154"
+      "sha256": "148a03b53c50df9543a25e10c439730da896ea88f76f092224db77bf20efdcd4"
     },
     {
       "bytes": 23965,
@@ -8206,5 +8212,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "95d3233df240eefb733c3f707590d39c8799546db27b6dbebcc7fc6139687e18"
+  "tree_sha256": "a0dc6e8a10d916352811cd29057552458fab044b32690bbc19d2d6e7fcbba1d5"
 }
