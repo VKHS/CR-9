@@ -1,10 +1,14 @@
 name: Demo publication
 
 # Publishes the CPU demonstration (demo/README.md): the sealed runs of the "Demo runs" workflow and the
-# record sets, campaigns and environment that a "Demo production graph" run collected (demo-collected) are
-# packed (paper_artifacts.py pack --demo), published to the release demo-artifacts (publish --demo),
-# rebuilt into every table and figure from the release (make demo-paper) and recorded in the branch:
-# release/demo_artifacts.json, the views under demo/published/ and demo/RESULTS.md.
+# record sets, campaigns and environment that the production graph collected (demo-collected) are
+# packed (paper_artifacts.py pack --demo, one artifact at a time: demo/pack_each.py), published to the
+# release demo-artifacts (publish --demo), rebuilt into every table and figure from the release
+# (make demo-paper) and recorded in the branch: release/demo_artifacts.json, the views under
+# demo/published/ and demo/RESULTS.md. Request: demo/publish-request.json {"graph_run_id": run holding
+# demo-collected, "graph_runs": [every run that executed the main graph], "runs_run_id": ..., "overrides": {...},
+# "extra": [{"run": ..., "artifact": "demo-collected-s29", "work": "/home/runner/demo/work-s29"}]}; an extra
+# graph's artifacts are added to the main map (demo/merge_maps.py).
 on:
   push:
     branches: [expanded-demo-2026-11-09]
@@ -51,10 +55,32 @@ jobs:
           bash demo/fetch_inputs.sh ${runs//,/ } > /dev/null
           bash demo/artifact.sh demo-collected "$RUNNER_TEMP/collected" "$graph"
           tar -xzf "$RUNNER_TEMP/collected/collected.tar.gz" -C /
+          python - <<'EOF' > "$RUNNER_TEMP/extra.txt"
+          import json
+          r = json.load(open("demo/publish-request.json"))
+          for item in r.get("extra") or []:
+              print(item["run"], item["artifact"], item["work"])
+          EOF
+          graphs="--graph $WORK"; reports=""
+          for run in $(python -c "import json; r=json.load(open('demo/publish-request.json')); print(' '.join(str(x) for x in r.get('graph_runs') or [r['graph_run_id']]))"); do
+            reports="$reports --graph-run 0=$run"
+          done
+          index=0
+          while read -r run artifact work; do
+            [ -n "${run:-}" ] || continue
+            index=$((index + 1))
+            bash demo/artifact.sh "$artifact" "$RUNNER_TEMP/extra-$index" "$run"
+            tar -xzf "$RUNNER_TEMP/extra-$index/collected.tar.gz" -C /
+            python -B demo/merge_maps.py "$WORK/paper-artifacts.map.json" "$work/paper-artifacts.map.json"
+            graphs="$graphs --graph $work"; reports="$reports --graph-run $index=$run"
+          done < "$RUNNER_TEMP/extra.txt"
           echo "GRAPH_RUN=$graph" >> "$GITHUB_ENV"
-      - name: Pack the demonstration
+          echo "REPORT_GRAPHS=$graphs" >> "$GITHUB_ENV"
+          echo "REPORT_RUNS=$reports" >> "$GITHUB_ENV"
+      - name: Pack the demonstration, one artifact at a time
         run: |
-          python -B scripts/paper_artifacts.py pack --demo --map "$WORK/paper-artifacts.map.json" --output-dir "$DEMO/staged"
+          python -B demo/pack_each.py --map "$WORK/paper-artifacts.map.json" --output-dir "$DEMO/staged" \
+            --failures "$DEMO/pack-failures.json"
           du -sh "$DEMO/staged"; ls "$DEMO/staged" | head -80
       - name: Publish the release demo-artifacts
         env:
@@ -62,10 +88,13 @@ jobs:
         run: python -B scripts/paper_artifacts.py publish --demo --staged "$DEMO/staged"
       - name: Rebuild every table and figure from the release, install the views, write the results
         run: |
-          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper"
-          python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper"
-          python -B demo/report.py --status "$DEMO/paper.status.json" --graph "$WORK" --runs "$DEMO/runs" \
-            --graphs "$DEMO/graphs" --graph-run "$GRAPH_RUN" --output demo/RESULTS.md
+          # the manifest is committed whatever the rebuild reports; RESULTS.md records its status and errors
+          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper" \
+            || echo "make demo-paper exited $?"
+          python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper" \
+            || echo "derive --demo exited $?"
+          python -B demo/report.py --status "$DEMO/paper.status.json" $REPORT_GRAPHS --runs "$DEMO/runs" \
+            --graphs "$DEMO/graphs" $REPORT_RUNS --pack-failures "$DEMO/pack-failures.json" --output demo/RESULTS.md
           mkdir -p demo/published/graphs && cp "$DEMO"/graphs/*_demo.json demo/published/graphs/
           python -B scripts/statement_check.py --write
           python -B scripts/artifact_catalog.py

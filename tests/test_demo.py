@@ -147,5 +147,37 @@ class Channels(unittest.TestCase):
                       statement_check.render(evaluation, None, demo))
 
 
+
+class Publication(unittest.TestCase):
+    def test_a_second_graph_fills_only_what_the_main_map_awaits(self):
+        merge_maps = module("merge_maps")
+        main = {"_awaiting": {"records:horizon_beam_sweep": "beam width 4 is not the registered 16",
+                              "records:baselines": "E12"}, "_relationships": {"run:ogbn-arxiv": "post_result_revision"},
+                "run:ogbn-arxiv": "/runs/arxiv", "records:horizon_beam_sweep": "", "records:baselines": ""}
+        extra = {"_awaiting": {"records:baselines": "outside --only"}, "run:ogbn-arxiv": "/other/arxiv",
+                 "records:horizon_beam_sweep": "/w2/records/horizon_beam_sweep", "records:baselines": ""}
+        self.assertEqual(merge_maps.merge(main, extra), ["records:horizon_beam_sweep"])
+        self.assertEqual(main["run:ogbn-arxiv"], "/runs/arxiv")
+        self.assertEqual(main["records:horizon_beam_sweep"], "/w2/records/horizon_beam_sweep")
+        self.assertEqual(main["_awaiting"], {"records:baselines": "E12"})
+        self.assertEqual(main["_relationships"]["records:horizon_beam_sweep"], "post_result_revision")
+
+    def test_the_report_lists_what_no_graph_produced(self):
+        report = module("report")
+        with tempfile.TemporaryDirectory() as temporary:
+            first, second = Path(temporary) / "w", Path(temporary) / "w2"
+            artifacts = {"records:a": {"status": "planned"}, "records:b": {"status": "awaiting", "reason": "planner"},
+                         "records:c": {"status": "planned"}, "records:d": {"status": "planned"}}
+            for work, mapping in ((first, {"records:a": "/w/a", "records:b": "", "records:c": "", "records:d": "/w/d",
+                                           "_awaiting": {"records:b": "no run", "records:c": "beam"}}),
+                                  (second, {"records:c": "/w2/c", "_awaiting": {}})):
+                work.mkdir()
+                (work / "plan.json").write_text(json.dumps({"artifacts": artifacts, "nodes": []}), encoding="utf-8")
+                (work / "paper-artifacts.map.json").write_text(json.dumps(mapping), encoding="utf-8")
+            rows = report.artifact_rows([first, second], {"records:d": "Artifact contains a symlink"})
+        self.assertEqual(rows, ["- `records:b`: no run",
+                                "- `records:d`: produced, refused by the packer: Artifact contains a symlink"])
+
+
 if __name__ == "__main__":
     unittest.main()

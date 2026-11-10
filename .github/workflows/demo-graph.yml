@@ -95,7 +95,7 @@ jobs:
   level0:
     name: Level 0 shard ${{ matrix.shard }}
     needs: [plan]
-    if: ${{ always() && needs.plan.result == 'success' }}
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -161,7 +161,7 @@ jobs:
   level1:
     name: Level 1 shard ${{ matrix.shard }}
     needs: [plan, level0]
-    if: ${{ always() && needs.plan.result == 'success' }}
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -227,7 +227,7 @@ jobs:
   level2:
     name: Level 2 shard ${{ matrix.shard }}
     needs: [plan, level1]
-    if: ${{ always() && needs.plan.result == 'success' }}
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -293,7 +293,7 @@ jobs:
   level3:
     name: Level 3 shard ${{ matrix.shard }}
     needs: [plan, level2]
-    if: ${{ always() && needs.plan.result == 'success' }}
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -359,7 +359,7 @@ jobs:
   level4:
     name: Level 4 shard ${{ matrix.shard }}
     needs: [plan, level3]
-    if: ${{ always() && needs.plan.result == 'success' }}
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -425,7 +425,7 @@ jobs:
   collect:
     name: Collect
     needs: [plan, level0, level1, level2, level3, level4]
-    if: ${{ always() && needs.plan.result == 'success' }}
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
@@ -459,7 +459,7 @@ jobs:
       - name: Save the collected outputs, the plan and its task markers
         run: |
           cd / && tar -czf "$RUNNER_TEMP/collected.tar.gz" "${WORK#/}/paper-artifacts.map.json" "${WORK#/}/plan.json" \
-            "${WORK#/}/state" $(for d in records campaigns environment collect; do [ -e "$WORK/$d" ] && echo "${WORK#/}/$d"; done)
+            "${WORK#/}/state" $(for d in records campaigns environment collect.json; do [ -e "$WORK/$d" ] && echo "${WORK#/}/$d"; done)
           ls -la "$RUNNER_TEMP/collected.tar.gz"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

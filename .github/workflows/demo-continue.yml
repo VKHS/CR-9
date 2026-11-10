@@ -6,6 +6,8 @@ name: Demo production graph continuation
 # kept as the artifact demo-collected, which demo-publish.yml publishes. Request: demo/continue-request.json
 # {"graph_run_id": ..., "runs_run_id": ..., "overrides": {...}, "previous": [[run_id, artifact_prefix], ...]}.
 # "previous" lists, oldest first, the work archives of earlier runs; by default the first level of the graph run.
+# "source_sha" pins the checkout of the jobs to the commit the graph was planned at: execute and collect refuse
+# producer code that changed after planning (scripts/paper_outputs.py verify_plan_source).
 on:
   push:
     branches: [expanded-demo-2026-11-09]
@@ -40,6 +42,7 @@ jobs:
       graph: ${{ steps.request.outputs.graph }}
       runs: ${{ steps.request.outputs.runs }}
       previous: ${{ steps.request.outputs.previous }}
+      source: ${{ steps.request.outputs.source }}
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -55,6 +58,7 @@ jobs:
           print("graph=" + graph)
           print("runs=" + " ".join([str(r["runs_run_id"])] + ["%s=%s" % kv for kv in sorted((r.get("overrides") or {}).items())]))
           print("previous=" + " ".join("--run %s --prefix %s" % (run, prefix) for run, prefix in previous))
+          print("source=" + (r.get("source_sha") or "${{ github.sha }}"))
           EOF
           cat "$GITHUB_OUTPUT"
       - id: matrix
@@ -94,6 +98,7 @@ jobs:
         if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -168,6 +173,7 @@ jobs:
         if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -242,6 +248,7 @@ jobs:
         if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -316,6 +323,7 @@ jobs:
         if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -390,6 +398,7 @@ jobs:
         if: steps.work.outputs.here == '1'
         with:
           persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -464,6 +473,7 @@ jobs:
         if: steps.work.outputs.export != ''
         with:
           persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.export != ''
         with:
@@ -511,6 +521,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
