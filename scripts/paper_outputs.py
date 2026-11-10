@@ -669,7 +669,8 @@ def build_sweep(p, export, sweep, datasets, title, *, resource=GPU, device="cuda
     if sweep == "horizon_beam_sweep":
         swept = p.opts.get("horizon_sweep") or {}
         argv += [*(["--profile", swept["profile"]] if swept.get("profile") else []),
-                 *(["--ensemble", str(swept["ensemble"])] if swept.get("ensemble") is not None else [])]
+                 *(["--ensemble", str(swept["ensemble"])] if swept.get("ensemble") is not None else []),
+                 *(["--beam", str(swept["beam"])] if swept.get("beam") is not None else [])]
     plan = p.runner_plan(argv, out)
     variants = [v["id"] for v in plan.get("variants") or []]
     after = []
@@ -1252,6 +1253,9 @@ def command_plan(args, executor=_subprocess_executor) -> int:
         raise PlanError("write the work directory outside the repository checkout")
     if (work / "plan.json").exists():
         raise PlanError(f"{work}/plan.json exists; use a new --work directory")
+    if getattr(args, "horizon_sweep_beam", None) is not None and not args.allow_fixture:
+        raise PlanError("--horizon-sweep-beam sweeps a configuration the parent never planned: a demonstration, "
+                        "planned with --allow-fixture")
     found, suite = discover_runs(args.runs, args.run)
     runtime = runtime_fingerprint()
     runs = verify_runs(found, runtime=runtime, allow_fixture=args.allow_fixture)
@@ -1295,8 +1299,9 @@ def command_plan(args, executor=_subprocess_executor) -> int:
         if unknown:
             raise PlanError(f"--s14-exclude: unknown datasets {unknown}")
         options["s14_exclude"] = sorted(set(args.s14_exclude))
-    if args.horizon_sweep_profile or args.horizon_sweep_ensemble is not None:
-        options["horizon_sweep"] = {"profile": args.horizon_sweep_profile, "ensemble": args.horizon_sweep_ensemble}
+    if args.horizon_sweep_profile or args.horizon_sweep_ensemble is not None or args.horizon_sweep_beam is not None:
+        options["horizon_sweep"] = {"profile": args.horizon_sweep_profile, "ensemble": args.horizon_sweep_ensemble,
+                                    **({"beam": args.horizon_sweep_beam} if args.horizon_sweep_beam is not None else {})}
     work.mkdir(parents=True, exist_ok=True)
     plan = build_plan(work, runs, options, required=required_artifact_ids(), suite=suite, executor=executor,
                       repository=dict(repository_identity(), runtime_sha256=runtime))
@@ -2403,6 +2408,9 @@ def parser() -> argparse.ArgumentParser:
                    help="profile of the swept MPC-RH configuration of Table S29 (declared; default: the deployed rule)")
     p.add_argument("--horizon-sweep-ensemble", type=int, default=None,
                    help="ensemble size of the swept MPC-RH configuration (declared; default: the deployed rule)")
+    p.add_argument("--horizon-sweep-beam", type=int, default=None,
+                   help="beam width the Table S29 horizon sweep holds when the parent was planned with another "
+                        "(declared; requires --allow-fixture; every point is then a variant lifecycle)")
     p = sub.add_parser("submit", help="write the batch scripts and submit the job graph with afterok dependencies")
     p.add_argument("--work", type=Path, required=True)
     p.add_argument("--dry-run", action="store_true", help="print the sbatch commands; submit nothing")

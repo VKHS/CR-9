@@ -75,6 +75,34 @@ class PlannerDevice(unittest.TestCase):
             with self.assertRaises(po.PlanError):
                 po.command_plan(args, executor=lambda argv: (0, ""))
 
+    def test_held_horizon_sweep_beam_requires_a_fixture_plan(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args = po.parser().parse_args(["plan", "--runs", str(ROOT / "examples" / "runs"), "--work",
+                                           str(Path(temporary) / "work"), "--horizon-sweep-beam", "16"])
+            with self.assertRaises(po.PlanError) as caught:
+                po.command_plan(args, executor=lambda argv: (0, ""))
+            self.assertIn("--horizon-sweep-beam", str(caught.exception))
+
+    def test_held_horizon_sweep_beam_reaches_the_sweep_planner(self):
+        class Recorder:
+            opts = {"horizon_sweep": {"profile": "full", "ensemble": 1, "beam": 16}}
+            argv = None
+
+            def experiment_dir(self, name):
+                return Path("/w") / name
+
+            def parents(self, datasets):
+                return ["--parent", "/runs/pascalvoc_sp"]
+
+            def runner_plan(self, argv, out):
+                Recorder.argv = argv
+                return {"variants": []}
+
+        po.build_sweep(Recorder(), False, "horizon_beam_sweep", ("PascalVOC-SP",), "S29")
+        argv = [str(a) for a in Recorder.argv]
+        self.assertEqual(argv[argv.index("--beam") + 1], "16")
+        self.assertEqual(argv[argv.index("--profile") + 1], "full")
+
 
 class Executor(unittest.TestCase):
     def test_levels_follow_the_dependencies(self):
