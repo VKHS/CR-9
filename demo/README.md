@@ -132,7 +132,11 @@ author supplies), the S14 campaign and the confirmation record sets that read it
 above) and a GPU environment (`environment:gpu` holds the capture of the CPU runner). The
 action-gap audit (`records:action_gap_audit`) scores the decisions of a closed-loop deployed rule;
 every demonstration run deployed an open-loop rule, so the audit has no decision to score and the
-exporter writes no set.
+exporter writes no set. Fifteen of the sixteen measurement jobs of the S17 module ablations
+(`records:module_ablations`) completed; the remaining job reads the sealed variant lifecycle runs of
+its parent, each opened and verified through its confirm stage with its prediction arrays, and
+restoring them filled a hosted runner's disk twice. The module-ablation exporter writes only the
+complete set.
 
 Several sets are present in a declared partial form. The E3-E6 campaign (`campaign:budget`,
 `records:budget_matched`) is the partial campaign export: its studies ran on fixture parents
