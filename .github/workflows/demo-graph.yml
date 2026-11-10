@@ -22,7 +22,8 @@ permissions:
   actions: read
 
 concurrency:
-  group: demo-graph-${{ github.ref }}
+  # each request plans its own work directory: graphs of different requests run side by side
+  group: demo-graph-${{ github.run_id }}
   cancel-in-progress: false
 
 env:

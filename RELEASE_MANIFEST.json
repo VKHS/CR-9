@@ -61,10 +61,10 @@
       "sha256": "955bbcfa5b7c76bb73827f6581d17caa03aa99eaf19061533fe6a75ea04ae33e"
     },
     {
-      "bytes": 24198,
+      "bytes": 24294,
       "executable": false,
       "path": ".github/workflows/demo-graph.yml",
-      "sha256": "f73bf60ef0f60901a5db982186ce880ecd4b5ceb738b73d13262be9cf8559898"
+      "sha256": "326bac44184bc8eab795e63b07b76153662c11b7a63824565c3ac224a5afc91f"
     },
     {
       "bytes": 10494,
@@ -877,10 +877,10 @@
       "sha256": "29843284eed8d3410dedc86e7716c02e7dfb3372b0802d64630d45fde5546c84"
     },
     {
-      "bytes": 228,
+      "bytes": 233,
       "executable": false,
       "path": "demo/graph-request.json",
-      "sha256": "721e560c5897b2f1b7bd16a4eab576576b7e761eceddef4ab5272a56d18dca24"
+      "sha256": "ade4093bbe95001f426d9c3af961bffced8be9dfe738f1dcbf552ba2afad4858"
     },
     {
       "bytes": 292,
@@ -7297,10 +7297,10 @@
       "sha256": "de781ad0525335f16111042cfb8b0311c9a6eeef3a8dc900a4ef9dca3f5f992e"
     },
     {
-      "bytes": 143361,
+      "bytes": 143983,
       "executable": false,
       "path": "scripts/paper_outputs.py",
-      "sha256": "49777097bfc4498ee4f3bf9bcb5e38631bdb144e1a3652d39785306910b5efab"
+      "sha256": "c6588e41f8d6406d1fe9fbe957d4a85936b407d6c07fa4af6477ae175099fb65"
     },
     {
       "bytes": 21648,
@@ -7663,10 +7663,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 17693,
+      "bytes": 19664,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "9eb616bb161af98df7bb49de92e4d175a69e09adcbe45082578a8d55490ee68a"
+      "sha256": "c37b9d5d249b06e73b32da9c4821c82c880cc1e9c7cc923d274f58446f77a6d8"
     },
     {
       "bytes": 23965,
@@ -8206,5 +8206,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "bcd6bf4865b4194f0d3ad6ed97c98502aff0620521305659bc8b4af02e2f2fb7"
+  "tree_sha256": "a3dc2544a989f576a20d67bce5faf1081b1fafa503c0212ab0bd831ccfe8f154"
 }

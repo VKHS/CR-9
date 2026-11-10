@@ -742,16 +742,22 @@ def build_module_ablations(p, export, gates: dict, controls: list[str]):
 def build_runtime_scaling(p, export):
     out = p.experiment_dir("runtime_scaling")
     accounting = p.work / "accounting" / "runtime_scaling"
-    _, _, node = _record_experiment(
-        p, name="runtime_scaling", script="scripts/run_timing_records.py", verb=["scaling"],
-        datasets=EXPERIMENT_DATASETS["runtime_scaling"], artifacts=["records:runtime_scaling"], export=export,
-        title="E17 runtime and peak memory of the deployed rule against graph size (Figure S2)",
-        export_steps=[
+    if p.opts.get("device") == "cpu":
+        # Timings on CPU, without scheduler allocations: a partial measurement (cm_experiments/timing_records
+        # records why), written only with --allow-partial and never into records/.
+        steps = [{"argv": py("scripts/run_timing_records.py", "scaling", "export", "--output", out, "--root", p.records,
+                             "--allow-partial")}]
+    else:
+        steps = [
             # the terminal sacct records of the timing allocations, exported after every timing job completed
             {"argv": ["bash", "hpc/capture_arrhenius_accounting.sh", "{jobs:runtime_scaling.run}", accounting],
              "skip_if": str(accounting / "sacct_original.psv")},
             {"argv": py("scripts/run_timing_records.py", "scaling", "export", "--output", out, "--accounting",
-                        accounting / "sacct_original.psv", "--root", p.records)}])
+                        accounting / "sacct_original.psv", "--root", p.records)}]
+    _, _, node = _record_experiment(
+        p, name="runtime_scaling", script="scripts/run_timing_records.py", verb=["scaling"],
+        datasets=EXPERIMENT_DATASETS["runtime_scaling"], artifacts=["records:runtime_scaling"], export=export,
+        title="E17 runtime and peak memory of the deployed rule against graph size (Figure S2)", export_steps=steps)
     for task in node["tasks"]:
         task["requeue"] = False        # one allocation per timing job: a requeue would give it two sacct records
     node["requeue"] = False
@@ -772,7 +778,9 @@ def build_timing_anchors(p, export, scaling: dict):
         p.add_export("export.timing_anchors", artifacts=["records:timing_anchors"], after=[node["id"]],
                      outputs={"records:timing_anchors": p.record_set("timing_anchors")},
                      steps=[{"argv": py("scripts/run_timing_records.py", "anchors", "export", "--output", anchors,
-                                        "--root", p.records)}])
+                                        "--root", p.records,
+                                        # throughput timed on CPU is a partial measurement
+                                        *(["--allow-partial"] if p.opts.get("device") == "cpu" else []))}])
 
 
 def build_s14_campaign(p, export):

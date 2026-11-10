@@ -199,6 +199,53 @@ class BudgetStudiesWithoutScheduler(unittest.TestCase):
             self.assertEqual(again.returncode, 2)                                       # never overwrites a study
 
 
+class TimingWithoutScheduler(unittest.TestCase):
+    """E17 on a CPU plan: no scheduler accounting to capture, and a partial measurement to declare."""
+
+    class Planner:
+        def __init__(self, device):
+            self.opts = {"device": device} if device else {}
+            self.work, self.records = Path("/w"), Path("/w/records")
+            self.exports, self.nodes = [], []
+
+        def experiment_dir(self, *parts):
+            return self.work.joinpath("experiments", *parts)
+
+        def parents(self, datasets):
+            return ["--parent", "/runs/x"]
+
+        def fixture(self, key):
+            return []
+
+        def runner_plan(self, argv, out):
+            return {"jobs": [{}, {}]}
+
+        def record_set(self, name):
+            return str(self.records / name)
+
+        def add_node(self, node_id, **kwargs):
+            node = {"id": node_id, "tasks": kwargs.get("tasks") or [], **kwargs}
+            self.nodes.append(node)
+            return node
+
+        def add_export(self, export_id, **kwargs):
+            self.exports.append({"id": export_id, **kwargs})
+
+    def argv_of(self, planner):
+        return [[str(a) for a in step["argv"]] for export in planner.exports for step in export["steps"]]
+
+    def test_cpu_plans_export_partial_timings_without_accounting(self):
+        cpu, gpu = self.Planner("cpu"), self.Planner(None)
+        for planner in (cpu, gpu):
+            scaling = po.build_runtime_scaling(planner, True)
+            po.build_timing_anchors(planner, True, scaling)
+        cpu_steps, gpu_steps = self.argv_of(cpu), self.argv_of(gpu)
+        self.assertFalse(any("hpc/capture_arrhenius_accounting.sh" in step for step in cpu_steps))
+        self.assertTrue(all("--allow-partial" in step and "--accounting" not in step for step in cpu_steps))
+        self.assertTrue(any("hpc/capture_arrhenius_accounting.sh" in step for step in gpu_steps))
+        self.assertFalse(any("--allow-partial" in step for step in gpu_steps))
+
+
 class Channels(unittest.TestCase):
     def published(self, relationship: str, scientific: bool) -> dict:
         part = {"asset": "x.complete-0.tar.gz", "bytes": 10, "sha256": "0" * 64,
