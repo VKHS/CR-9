@@ -49,6 +49,29 @@ def shares(tasks: list, shards: int, salt: str | None) -> dict:
     return {task: index % shards + 1 for index, task in enumerate(order)}
 
 
+def left_out(work: Path, nodes: dict, skip) -> set:
+    """The nodes left to another job (--skip-node) and every node that waits on one of them that has not finished:
+    none of them can run in this call, so no share counts or runs their tasks."""
+    def finished(node_id: str) -> bool:
+        for k in range(max(1, len(nodes[node_id]["tasks"]))):
+            try:
+                status = po.read_json(po.task_marker(work, node_id, k)).get("status")
+            except (OSError, ValueError):
+                return False
+            if status not in ("COMPLETE", "SKIPPED"):
+                return False
+        return True
+    out, changed = set(n for n in skip if n in nodes), True
+    while changed:
+        changed = False
+        for node_id, node in nodes.items():
+            if node_id not in out and any(d["node"] in out and not finished(d["node"])
+                                          for d in node.get("dependencies") or []):
+                out.add(node_id)
+                changed = True
+    return out
+
+
 def levels(plan: dict) -> dict[str, int]:
     nodes = {n["id"]: n for n in plan["nodes"]}
     level: dict[str, int] = {}
@@ -170,7 +193,8 @@ def main(argv=None) -> int:
     plan = po.load_plan(work)
     nodes = {n["id"]: n for n in plan["nodes"]}
     level = levels(plan)
-    ordered = [n for n in sorted(nodes, key=lambda n: (level[n], list(nodes).index(n))) if n not in args.skip_node]
+    left = left_out(work, nodes, args.skip_node)
+    ordered = [n for n in sorted(nodes, key=lambda n: (level[n], list(nodes).index(n))) if n not in left]
     if args.matrix is not None:
         matrix = {}
         for current in sorted({level[n] for n in ordered}):

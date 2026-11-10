@@ -146,6 +146,16 @@ class Executor(unittest.TestCase):
             with contextlib.redirect_stdout(printed):
                 execute.main(["--work", str(work), "--matrix", "16"])
             self.assertEqual(json.loads(printed.getvalue()), {"l0": [1, 2, 3, 4, 5], "l1": [1]})
+            # a node waiting on a skipped node that has not finished cannot run in this call
+            printed = io.StringIO()
+            with contextlib.redirect_stdout(printed):
+                execute.main(["--work", str(work), "--matrix", "16", "--skip-node", "other"])
+            self.assertEqual(json.loads(printed.getvalue()), {"l0": [1, 2, 3]})
+            for k in range(2):
+                marker = work / "state" / "other" / f"task-{k}.json"
+                marker.parent.mkdir(parents=True, exist_ok=True)
+                marker.write_text(json.dumps({"status": "COMPLETE"}), encoding="utf-8")
+            self.assertEqual(execute.left_out(work, {n["id"]: n for n in plan["nodes"]}, ["other"]), {"other"})
 
 
 class BudgetStudiesWithoutScheduler(unittest.TestCase):

@@ -27,11 +27,12 @@ def executor():
     return module
 
 
-def unread_runs(plan: dict, *, level: int, shard: int, shards: int, salt: str | None, skip=()) -> list[str]:
+def unread_runs(plan: dict, *, level: int, shard: int, shards: int, salt: str | None, skip=(), work=None) -> list[str]:
     execute = executor()
     nodes = {n["id"]: n for n in plan["nodes"]}
     depth = execute.levels(plan)
-    ordered = [n for n in sorted(nodes, key=lambda n: (depth[n], list(nodes).index(n))) if n not in skip]
+    left = execute.left_out(Path(work), nodes, skip) if work is not None else set(skip)
+    ordered = [n for n in sorted(nodes, key=lambda n: (depth[n], list(nodes).index(n))) if n not in left]
     tasks = [(n, k) for n in ordered if depth[n] == level for k in range(max(1, len(nodes[n]["tasks"])))]
     share = execute.shares(tasks, shards, salt)
     runners: dict[str, dict] = {}
@@ -61,7 +62,8 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     shard, shards = (int(x) for x in args.shard.split("/"))
     plan = json.loads((args.work / "plan.json").read_text(encoding="utf-8"))
-    for line in unread_runs(plan, level=args.level, shard=shard, shards=shards, salt=args.salt, skip=args.skip_node):
+    for line in unread_runs(plan, level=args.level, shard=shard, shards=shards, salt=args.salt, skip=args.skip_node,
+                            work=args.work):
         print(line)
     return 0
 
