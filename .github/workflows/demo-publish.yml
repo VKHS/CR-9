@@ -93,8 +93,10 @@ jobs:
             || echo "make demo-paper exited $?"
           python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper" \
             || echo "derive --demo exited $?"
+          python -c "import json; json.dump(json.load(open('demo/publish-request.json')).get('notes') or {}, open('$DEMO/notes.json', 'w'))"
           python -B demo/report.py --status "$DEMO/paper.status.json" $REPORT_GRAPHS --runs "$DEMO/runs" \
-            --graphs "$DEMO/graphs" $REPORT_RUNS --pack-failures "$DEMO/pack-failures.json" --output demo/RESULTS.md
+            --graphs "$DEMO/graphs" $REPORT_RUNS --pack-failures "$DEMO/pack-failures.json" --notes "$DEMO/notes.json" \
+            --output demo/RESULTS.md
           mkdir -p demo/published/graphs && cp "$DEMO"/graphs/*_demo.json demo/published/graphs/
           python -B scripts/statement_check.py --write
           python -B scripts/artifact_catalog.py
