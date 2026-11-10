@@ -84,17 +84,38 @@ def artifacts(run: str, prefix: str) -> list[tuple[int, str]]:
     return sorted(found, key=lambda row: row[1])
 
 
-def extract(source, prefixes: list[str] | None) -> tuple[int, int]:
-    kept = skipped = 0
-    with tarfile.open(fileobj=source, mode="r|gz") as stream:
-        for member in stream:
-            name = member.name.lstrip("./")
-            if prefixes is None or any(name == p.rstrip("/") or name.startswith(p) for p in prefixes):
-                stream.extract(member, path="/", filter="tar")
-                kept += 1
-            else:
-                skipped += 1
-    return kept, skipped
+def extract(archive_zip: Path, prefixes: list[str] | None) -> str:
+    """Stream every tar.gz inside one artifact zip through unzip and GNU tar (both in C)."""
+    members = subprocess.check_output(["unzip", "-Z1", str(archive_zip)], text=True).split()
+    report = []
+    for member in (m for m in members if m.endswith(".tar.gz")):
+        names = [p.rstrip("/") for p in prefixes] if prefixes is not None else []
+        unzip = subprocess.Popen(["unzip", "-p", str(archive_zip), member], stdout=subprocess.PIPE)
+        # A directory name extracts everything below it; a name absent from this archive is not an error here.
+        tar = subprocess.run(["tar", "-xzf", "-", "-C", "/", "--no-same-owner", *names], stdin=unzip.stdout,
+                             capture_output=True, text=True)
+        unzip.stdout.close()
+        unzip.wait()
+        if tar.returncode not in (0, 2) or (tar.returncode == 2 and "Not found in archive" not in tar.stderr):
+            raise RuntimeError(f"{archive_zip.name}/{member}: tar failed: {tar.stderr[-800:]}")
+        report.append(member)
+    return ", ".join(report)
+
+
+def level_of(name: str) -> str:
+    """demo-work-L3-12 -> L3; the archives of one level never write the same task's files."""
+    parts = name.split("-")
+    return parts[2] if len(parts) > 2 else name
+
+
+def fetch_and_extract(artifact_id: int, name: str, prefixes) -> str:
+    with tempfile.TemporaryDirectory(prefix="restore-", dir=os.environ.get("RUNNER_TEMP")) as temporary:
+        archive = Path(temporary) / "artifact.zip"
+        subprocess.run(["curl", "-fsSL", "--retry", "8", "--retry-delay", "15", "--retry-all-errors", "-H",
+                        f"Authorization: Bearer {os.environ['GH_TOKEN']}", "-o", str(archive),
+                        f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/"
+                        f"{artifact_id}/zip"], check=True)
+        return f"{name}: {extract(archive, prefixes)}"
 
 
 def main(argv=None) -> int:
@@ -107,6 +128,7 @@ def main(argv=None) -> int:
     parser.add_argument("--node", action="append", default=[])
     parser.add_argument("--export", default=None)
     parser.add_argument("--plan-only", action="store_true")
+    parser.add_argument("--parallel", type=int, default=4, help="archives of one level processed at once")
     args = parser.parse_args(argv)
     if len(args.run) != len(args.prefix) and not args.plan_only:
         parser.error("give one --prefix per --run")
@@ -123,20 +145,16 @@ def main(argv=None) -> int:
         if args.plan_only:
             print("\n".join(prefixes))
             return 0
+    import concurrent.futures as futures
     for run, prefix in zip(args.run, args.prefix):
-        for artifact_id, name in artifacts(run, prefix):
-            with tempfile.TemporaryDirectory(prefix="restore-", dir=os.environ.get("RUNNER_TEMP")) as temporary:
-                archive = Path(temporary) / "artifact.zip"
-                subprocess.run(["curl", "-fsSL", "--retry", "8", "--retry-delay", "15", "--retry-all-errors", "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}", "-o",
-                                str(archive), f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}"
-                                f"/actions/artifacts/{artifact_id}/zip"], check=True)
-                with zipfile.ZipFile(archive) as bundle:
-                    for member in bundle.namelist():
-                        if not member.endswith(".tar.gz"):
-                            continue
-                        with bundle.open(member) as source:
-                            kept, skipped = extract(source, prefixes)
-                        print(f"{name}/{member}: extracted {kept}, skipped {skipped}", flush=True)
+        found = artifacts(run, prefix)
+        groups: dict[str, list] = {}
+        for artifact_id, name in found:
+            groups.setdefault(level_of(name), []).append((artifact_id, name))
+        for group in sorted(groups):            # levels in order; the shards of one level in parallel
+            with futures.ThreadPoolExecutor(max_workers=args.parallel) as pool:
+                for line in pool.map(lambda row: fetch_and_extract(row[0], row[1], prefixes), groups[group]):
+                    print(line, flush=True)
     return 0
 
 
