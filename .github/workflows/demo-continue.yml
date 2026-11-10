@@ -742,7 +742,7 @@ jobs:
       - name: Save the collected outputs, the plan and its task markers
         run: |
           cd / && tar -czf "$RUNNER_TEMP/collected.tar.gz" "${WORK#/}/paper-artifacts.map.json" "${WORK#/}/plan.json" \
-            "${WORK#/}/collect.json" "${WORK#/}/state" $(for d in records campaigns environment; do [ -e "$WORK/$d" ] && echo "${WORK#/}/$d"; done)
+            "${WORK#/}/collect.json" $(for d in state records campaigns environment; do [ -e "$WORK/$d" ] && echo "${WORK#/}/$d"; done)
           ls -la "$RUNNER_TEMP/collected.tar.gz"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
