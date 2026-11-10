@@ -6,8 +6,46 @@ Release: [demo-artifacts](https://github.com/VKHS/CR-9/releases/tag/demo-artifac
 
 ## Rebuilt from the release with `make demo-paper`
 
-- Displays: 0 of 0 complete in content and comparison coverage; the others name the artifact or printed-value contract they lack.
-- Printed values: 0 equal, 0 different, 0 missing. Differences are expected: these are reduced-scale CPU runs, not the runs the paper reports.
+- Display generators: 56 of 90 built, 35 of them from the release and 21 from the repository's own sources (protocol and analytical displays); 34 wait for an input (below). Every display built from the release is labelled as the demonstration (synthetic software example).
+- Supplementary builds from the release's record sets and campaign: 10 output(s), status PASS.
+- Printed values: 1263 equal, 1202 different, 248 missing. Differences are expected: these are reduced-scale CPU runs, not the runs the paper reports.
+
+Displays waiting for an input, with what they lack:
+
+- `main:Figure 2`: campaign:confirmation
+- `main:Figure 3`: campaign:confirmation
+- `main:Figure 4`: records:baselines
+- `main:Figure 5`: records:baselines
+- `supplementary:Figure S2`: runtime_scaling: peak_memory_gib {'dataset': 'ogbn-arxiv', 'instance': 'full'} is not in the record set
+- `supplementary:Figure S4`: records:baselines
+- `supplementary:Figure S6`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Figure S7`: records:action_gap_audit
+- `supplementary:Figure S8`: PascalVOC-SP: a zero-width admission or test interval leaves the two-way shares undefined
+- `supplementary:Figure S9`: campaign:confirmation; records:confirmation_sensitivity
+- `supplementary:Figure S10`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Figure S12`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Figure S16`: reliability_diagnostics: no coverage rows
+- `supplementary:Figure S17`: records:action_gap_audit
+- `supplementary:Figure S18`: records:confirmation_sensitivity
+- `supplementary:Figure S20`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Table S6c`: sensor_parameters: sketch_dim {'dataset': 'ogbn-arxiv'} is not in the record set
+- `supplementary:Table S14`: campaign:confirmation
+- `supplementary:Table S14b`: records:confirmation_contrasts
+- `supplementary:Table S15`: records:baselines
+- `supplementary:Table S15b`: records:baselines
+- `supplementary:Table S17`: records:module_ablations
+- `supplementary:Table S21`: records:action_gap_audit
+- `supplementary:Table S23`: records:baselines
+- `supplementary:Table S23b`: records:baselines
+- `supplementary:Table S28`: ogbn-arxiv: no qualified support cell
+- `supplementary:Table S33`: records:action_gap_audit
+- `supplementary:Table S34`: records:action_gap_audit
+- `supplementary:Table S37`: input_gate: fallback_probability {'dataset': 'PascalVOC-SP'} is not in the record set
+- `supplementary:Table S41`: studies/ogbn-arxiv/seed-0/split-0: no captured Slurm job ID
+- `supplementary:Table S42`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Table S43`: records:baselines; records:confirmation_sensitivity
+- `supplementary:Table S44`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Table S47`: records:action_gap_audit
 
 
 ## The seven lifecycle runs
@@ -35,66 +73,66 @@ Every run executed the eight stages of the lifecycle from this checkout on a hos
 
 ## The production graph
 
-The repository's own production graph (scripts/paper_outputs.py, planned with `--allow-fixture --device cpu`) executed every node it could plan on CPU (demo/execute.py; workflow runs [42674584772](https://github.com/VKHS/CR-9/actions/runs/42674584772), [42738711578](https://github.com/VKHS/CR-9/actions/runs/42738711578), [42746503398](https://github.com/VKHS/CR-9/actions/runs/42746503398), [42746423814](https://github.com/VKHS/CR-9/actions/runs/42746423814), [42753821512](https://github.com/VKHS/CR-9/actions/runs/42753821512), [42800949895](https://github.com/VKHS/CR-9/actions/runs/42800949895), [42817409486](https://github.com/VKHS/CR-9/actions/runs/42817409486), [42820132747](https://github.com/VKHS/CR-9/actions/runs/42820132747), [42843295081](https://github.com/VKHS/CR-9/actions/runs/42843295081)). Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "horizon_sweep_configuration": {"ensemble": 1, "profile": "full"}, "negative_controls_dataset": "PascalVOC-SP", "provisional": [], "s14_excluded": ["Roman-empire"]}.
+The repository's own production graph (scripts/paper_outputs.py, planned with `--allow-fixture --device cpu`) executed every node it could plan on CPU (demo/execute.py; workflow runs [42674584772](https://github.com/VKHS/CR-9/actions/runs/42674584772), [42738711578](https://github.com/VKHS/CR-9/actions/runs/42738711578), [42746503398](https://github.com/VKHS/CR-9/actions/runs/42746503398), [42746423814](https://github.com/VKHS/CR-9/actions/runs/42746423814), [42753821512](https://github.com/VKHS/CR-9/actions/runs/42753821512), [42800949895](https://github.com/VKHS/CR-9/actions/runs/42800949895), [42817409486](https://github.com/VKHS/CR-9/actions/runs/42817409486), [42820132747](https://github.com/VKHS/CR-9/actions/runs/42820132747), [42843295081](https://github.com/VKHS/CR-9/actions/runs/42843295081), [42860910909](https://github.com/VKHS/CR-9/actions/runs/42860910909)). Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "horizon_sweep_configuration": {"ensemble": 1, "profile": "full"}, "negative_controls_dataset": "PascalVOC-SP", "provisional": [], "s14_excluded": ["Roman-empire"]}.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
-| band_audit.run | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.arxiv | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.coco_sp | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.pascalvoc_sp | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.peptides_func | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.proteins | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_00 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_01 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_02 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_03 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_04 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_05 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_06 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_07 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_08 | 0 | 0/1 | incomplete (NOT RUN) |
-| budget.parent.roman_empire_split_09 | 0 | 0/1 | incomplete (NOT RUN) |
-| buffer_sensitivity.run | 0 | 0/2 | incomplete (NOT RUN) |
-| cross_backbone.run | 0 | 0/12 | incomplete (NOT RUN) |
-| depth_diagnostics.run | 0 | 0/16 | incomplete (NOT RUN) |
-| ensemble_grid.run | 0 | 0/15 | incomplete (NOT RUN) |
-| environment.capture | 0 | 0/1 | incomplete (NOT RUN) |
-| factorials.lifecycles | 0 | 0/12 | incomplete (NOT RUN) |
-| input_gate.run | 0 | 0/15 | incomplete (NOT RUN) |
-| inserted_site.run | 0 | 0/3 | incomplete (NOT RUN) |
-| mechanism_contrasts.run | 0 | 0/16 | incomplete (NOT RUN) |
-| oracle_dispersion.run | 0 | 0/352 | incomplete (NOT RUN) |
-| runtime_scaling.run | 0 | 0/29 | incomplete (NOT RUN) |
-| s14_campaign.run | 0 | 0/6 | incomplete (NOT RUN) |
-| sensitivity_grids.variants | 0 | 0/160 | incomplete (NOT RUN) |
-| tube_audit.run | 0 | 0/14 | incomplete (NOT RUN) |
-| budget.studies.arxiv | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.coco_sp | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.pascalvoc_sp | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.peptides_func | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.proteins | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_00 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_01 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_02 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_03 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_04 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_05 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_06 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_07 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_08 | 1 | 0/12 | incomplete (NOT RUN) |
-| budget.studies.roman_empire_split_09 | 1 | 0/12 | incomplete (NOT RUN) |
-| decision_audit.plan | 1 | 0/1 | incomplete (NOT RUN) |
-| factorials.cells | 1 | 0/2 | incomplete (NOT RUN) |
-| negative_controls.run | 1 | 0/1 | incomplete (NOT RUN) |
-| s14_campaign.assemble | 1 | 0/1 | incomplete (NOT RUN) |
-| timing_anchors.run | 1 | 0/6 | incomplete (NOT RUN) |
+| band_audit.run | 0 | 1/1 | complete |
+| budget.parent.arxiv | 0 | 1/1 | complete |
+| budget.parent.coco_sp | 0 | 1/1 | complete |
+| budget.parent.pascalvoc_sp | 0 | 1/1 | complete |
+| budget.parent.peptides_func | 0 | 1/1 | complete |
+| budget.parent.proteins | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_00 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_01 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_02 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_03 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_04 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_05 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_06 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_07 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_08 | 0 | 1/1 | complete |
+| budget.parent.roman_empire_split_09 | 0 | 1/1 | complete |
+| buffer_sensitivity.run | 0 | 2/2 | complete |
+| cross_backbone.run | 0 | 12/12 | complete |
+| depth_diagnostics.run | 0 | 16/16 | complete |
+| ensemble_grid.run | 0 | 15/15 | complete |
+| environment.capture | 0 | 1/1 | complete |
+| factorials.lifecycles | 0 | 12/12 | complete |
+| input_gate.run | 0 | 15/15 | complete |
+| inserted_site.run | 0 | 3/3 | complete |
+| mechanism_contrasts.run | 0 | 16/16 | complete |
+| oracle_dispersion.run | 0 | 352/352 | complete |
+| runtime_scaling.run | 0 | 29/29 | complete |
+| s14_campaign.run | 0 | 6/6 | complete |
+| sensitivity_grids.variants | 0 | 160/160 | complete |
+| tube_audit.run | 0 | 14/14 | complete |
+| budget.studies.arxiv | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.coco_sp | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.pascalvoc_sp | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.peptides_func | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.proteins | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_00 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_01 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_02 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_03 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_04 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_05 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_06 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_07 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_08 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.roman_empire_split_09 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| decision_audit.plan | 1 | 1/1 | complete |
+| factorials.cells | 1 | 2/2 | complete |
+| negative_controls.run | 1 | 1/1 | complete |
+| s14_campaign.assemble | 1 | 0/1 | incomplete (FAILED) |
+| timing_anchors.run | 1 | 6/6 | complete |
 | confirmation.plan | 2 | 0/1 | incomplete (NOT RUN) |
-| decision_audit.run | 2 | 0/16 | incomplete (NOT RUN) |
-| module_ablations.plan | 2 | 0/1 | incomplete (NOT RUN) |
+| decision_audit.run | 2 | 16/16 | complete |
+| module_ablations.plan | 2 | 1/1 | complete |
 | confirmation.run | 3 | 0/6 | incomplete (NOT RUN) |
-| module_ablations.lifecycles | 3 | 0/192 | incomplete (NOT RUN) |
-| module_ablations.measure | 4 | 0/16 | incomplete (NOT RUN) |
+| module_ablations.lifecycles | 3 | 192/192 | complete |
+| module_ablations.measure | 4 | 15/16 | incomplete (NOT RUN) |
 
 A second graph, planned for `horizon_beam_sweep` alone in its own work directory (demo-sweep.yml; workflow run [42742259867](https://github.com/VKHS/CR-9/actions/runs/42742259867)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "horizon_sweep_configuration": {"beam": 16, "ensemble": 1, "profile": "full"}, "negative_controls_dataset": "PascalVOC-SP", "provisional": []}.
 
@@ -162,6 +200,6 @@ Each artifact the demonstration does not hold, with its reason:
 - `records:baselines`: The fourteen external comparisons of E12 run the pinned upstream studies and adapters that the author supplies; the demonstration does not run them.
 - `records:confirmation_contrasts`: Reads campaign:confirmation, which the demonstration does not assemble.
 - `records:confirmation_sensitivity`: Reads campaign:confirmation, which the demonstration does not assemble.
-- `records:module_ablations`: nodes not complete: module_ablations.measure
+- `records:module_ablations`: Fifteen of the sixteen measurement jobs of the S17 module ablations completed. The remaining job reads the sealed variant lifecycle runs of its parent, each opened and verified through its confirm stage with its prediction arrays; restoring them filled a hosted runner's disk twice (No space left on device). The exporter writes only the complete set.
 
 Generated by `demo/report.py` in the publishing workflow.
