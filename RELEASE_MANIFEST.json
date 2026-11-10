@@ -8005,10 +8005,10 @@
       "sha256": "4be0e4a444bbf4052f7892bea58d1f9378ff121d5501d080e12aef3d07267c6b"
     },
     {
-      "bytes": 8765,
+      "bytes": 8915,
       "executable": false,
       "path": "tests/test_printed_statement_check.py",
-      "sha256": "7cdff5d98f27201c4c3212432c5ce8d11f3cb8fee891720c74f9a5e780c6d7a7"
+      "sha256": "7b522d0621a07b5efc56b62a6c0d9eaa0cf4ae6a675cd2186d135ec2e882f25d"
     },
     {
       "bytes": 13670,
@@ -8266,5 +8266,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "9822f68d3ae1eccc60ce6c95f53e277ec31b45f6ffd6c96505b55bed1176e0cf"
+  "tree_sha256": "7d6c59fca3451567cafcd414d966aa59778fb2389c20f31b198843fe4dd6fe80"
 }
