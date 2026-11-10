@@ -489,8 +489,11 @@ class Publication(unittest.TestCase):
                 (work / "plan.json").write_text(json.dumps({"artifacts": artifacts, "nodes": []}), encoding="utf-8")
                 (work / "paper-artifacts.map.json").write_text(json.dumps(mapping), encoding="utf-8")
             rows = report.artifact_rows([first, second], {"records:d": "Artifact contains a symlink"})
+            noted = report.artifact_rows([first, second], {}, {"records:b": "the cause", "records:c": "unused"})
         self.assertEqual(rows, ["- `records:b`: no run",
                                 "- `records:d`: produced, refused by the packer: Artifact contains a symlink"])
+        # a note states the cause of an absence; an artifact another graph produced stays out of the list
+        self.assertEqual(noted, ["- `records:b`: the cause"])
 
 
 if __name__ == "__main__":
