@@ -1,0 +1,1 @@
+{"graph_run_id": "42674584772", "runs_run_id": "42649674781", "overrides": {"proteins": "42651551849", "products": "42656980716"}, "source_sha": "0aaa1838e459b002ef7ff4d701f2d8557752b936", "node": "ensemble_grid.run", "task": 12, "previous": [["42674584772", "demo-work-L-16"]], "shares": 6}

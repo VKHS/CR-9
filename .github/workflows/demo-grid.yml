@@ -1,0 +1,194 @@
+name: Demo ensemble-grid job
+
+# One E14 ensemble-grid task of the demonstration's production graph whose additional checkpoints need more
+# than the six hours of one runner (demo/grid_seeds.py). Its unfinished seeds train on several runners at
+# once, into the job's own checkpoint directory; one final job then executes the graph task itself
+# (scripts/paper_outputs.py execute), which finds the seeds complete and computes the member predictions and
+# grid statistics. The outputs are kept as the artifacts demo-grid-seeds-<share> and demo-work-T<task>, which a
+# continuation names among its earlier archives (demo/continue-request.json "previous").
+# Request: demo/grid-request.json {"graph_run_id": run holding demo-work-base, "runs_run_id": ..., "overrides":
+# {...}, "source_sha": commit the graph was planned at, "node": ..., "task": ..., "previous": [[run, prefix],
+# ...] (archives holding the task's partial outputs), "shares": at most this many runners}.
+on:
+  push:
+    branches: [expanded-demo-2026-11-09]
+    paths: [demo/grid-request.json]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: demo-grid-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  DEMO: /home/runner/demo
+  WORK: /home/runner/demo/work
+  GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      graph: ${{ steps.request.outputs.graph }}
+      runs: ${{ steps.request.outputs.runs }}
+      previous: ${{ steps.request.outputs.previous }}
+      source: ${{ steps.request.outputs.source }}
+      node: ${{ steps.request.outputs.node }}
+      task: ${{ steps.request.outputs.task }}
+      shares: ${{ steps.shares.outputs.shares }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - id: request
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json
+          r = json.load(open("demo/grid-request.json"))
+          print("graph=%s" % r["graph_run_id"])
+          print("runs=" + " ".join([str(r["runs_run_id"])] + ["%s=%s" % kv for kv in sorted((r.get("overrides") or {}).items())]))
+          print("previous=" + " ".join("--run %s --prefix %s" % (run, prefix) for run, prefix in r["previous"]))
+          print("source=%s" % r["source_sha"])
+          print("node=%s" % r["node"])
+          print("task=%d" % int(r["task"]))
+          print("max_shares=%d" % int(r.get("shares") or 6))
+          EOF
+          cat "$GITHUB_OUTPUT"
+      - id: shares
+        name: The task's unfinished seeds
+        run: |
+          python -B demo/restore.py --work "$WORK" --run "${{ steps.request.outputs.graph }}" --prefix demo-work-base --all
+          python -B demo/restore.py --work "$WORK" --node "${{ steps.request.outputs.node }}" ${{ steps.request.outputs.previous }}
+          output=$(python -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); n=next(x for x in p['nodes'] if x['id']==sys.argv[1]); print(n['outputs'][0])" "${{ steps.request.outputs.node }}")
+          seeds=$(python -B demo/grid_seeds.py --output "$output" --job "${{ steps.request.outputs.task }}" --list)
+          echo "unfinished seeds: $seeds"
+          python -c "import json,sys; n=min(int(sys.argv[2]), len(json.loads(sys.argv[1]))); print('shares=' + json.dumps(list(range(1, n + 1))))" "$seeds" "${{ steps.request.outputs.max_shares }}" >> "$GITHUB_OUTPUT"
+          echo "OUTPUT_DIR=$output" >> "$GITHUB_ENV"
+          cat "$GITHUB_OUTPUT"
+
+  seeds:
+    name: Seeds ${{ matrix.share }}
+    needs: [setup]
+    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        share: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - id: work
+        name: Work for this runner
+        run: |
+          python3 -c "import json,sys; s=json.loads(sys.argv[1]); print('here=' + ('1' if int(sys.argv[2]) in s else '0')); print('count=%d' % len(s))" '${{ needs.setup.outputs.shares }}' "${{ matrix.share }}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.work.outputs.here == '1'
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: steps.work.outputs.here == '1'
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        if: steps.work.outputs.here == '1'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Inputs, the plan and the task's partial outputs
+        if: steps.work.outputs.here == '1'
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          python -B demo/restore.py --work "$WORK" --node "${{ needs.setup.outputs.node }}" ${{ needs.setup.outputs.previous }}
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Train this runner's share of the seeds
+        if: steps.work.outputs.here == '1'
+        run: |
+          output=$(python -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); n=next(x for x in p['nodes'] if x['id']==sys.argv[1]); print(n['outputs'][0])" "${{ needs.setup.outputs.node }}")
+          CM_THREADS=4 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 python -B demo/grid_seeds.py --output "$output" \
+            --job "${{ needs.setup.outputs.task }}" --shard "${{ matrix.share }}/${{ steps.work.outputs.count }}" --device cpu --threads 4
+      - name: Save this runner's checkpoints
+        if: always() && steps.work.outputs.here == '1'
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/seeds-${{ matrix.share }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.work.outputs.here == '1'
+        with:
+          name: demo-grid-seeds-${{ matrix.share }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30
+
+  task:
+    name: Task
+    needs: [setup, seeds]
+    if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the recorded CPU environment
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Inputs, the plan, the partial outputs and every trained seed
+        run: |
+          bash demo/fetch_inputs.sh ${{ needs.setup.outputs.runs }} > /dev/null
+          python -B demo/restore.py --work "$WORK" --run "${{ needs.setup.outputs.graph }}" --prefix demo-work-base --all
+          python -B demo/restore.py --work "$WORK" --node "${{ needs.setup.outputs.node }}" ${{ needs.setup.outputs.previous }} \
+            --run "$GITHUB_RUN_ID" --prefix demo-grid-seeds-
+          output=$(python -c "import json,os,sys; p=json.load(open(os.environ['WORK']+'/plan.json')); n=next(x for x in p['nodes'] if x['id']==sys.argv[1]); print(n['outputs'][0])" "${{ needs.setup.outputs.node }}")
+          echo "unfinished seeds: $(python -B demo/grid_seeds.py --output "$output" --job "${{ needs.setup.outputs.task }}" --list)"
+          bash demo/work_delta.sh mark "$RUNNER_TEMP/mark"
+      - name: Execute the graph task
+        run: |
+          for attempt in 1 2 3 4; do
+            code=0
+            CM_THREADS=4 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 python -B scripts/paper_outputs.py execute --work "$WORK" \
+              --node "${{ needs.setup.outputs.node }}" --task "${{ needs.setup.outputs.task }}" || code=$?
+            echo "attempt $attempt: exit $code"
+            [ "$code" = 75 ] || break          # 75: checkpointed at a safe boundary; run again to resume
+          done
+          cat "$WORK/state/${{ needs.setup.outputs.node }}/task-${{ needs.setup.outputs.task }}.json"
+          python -c "import json,os,sys; m=json.load(open(sys.argv[1])); sys.exit(0 if m.get('status') == 'COMPLETE' else 1)" \
+            "$WORK/state/${{ needs.setup.outputs.node }}/task-${{ needs.setup.outputs.task }}.json"
+      - name: Save the task's outputs
+        if: always()
+        run: bash demo/work_delta.sh save "$WORK" "$RUNNER_TEMP/mark" "$RUNNER_TEMP/delta/T${{ needs.setup.outputs.task }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: demo-work-T${{ needs.setup.outputs.task }}
+          path: ${{ runner.temp }}/delta/
+          retention-days: 30

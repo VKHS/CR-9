@@ -6,8 +6,9 @@ name: Demo production graph continuation
 # kept as the artifact demo-collected, which demo-publish.yml publishes. Request: demo/continue-request.json
 # {"graph_run_id": ..., "runs_run_id": ..., "overrides": {...}, "previous": [[run_id, artifact_prefix], ...]}.
 # "previous" lists, oldest first, the work archives of earlier runs; by default the first level of the graph run.
-# "source_sha" pins the checkout of the jobs to the commit the graph was planned at: execute and collect refuse
-# producer code that changed after planning (scripts/paper_outputs.py verify_plan_source).
+# "source_sha" pins the producer code of the jobs to the commit the graph was planned at: execute and collect
+# refuse producer code that changed after planning (scripts/paper_outputs.py verify_plan_source); demo/ comes
+# from this commit. "skip_nodes" leaves those nodes' tasks to another workflow (demo-grid.yml).
 on:
   push:
     branches: [expanded-demo-2026-11-09]
@@ -43,6 +44,7 @@ jobs:
       runs: ${{ steps.request.outputs.runs }}
       previous: ${{ steps.request.outputs.previous }}
       source: ${{ steps.request.outputs.source }}
+      skip: ${{ steps.request.outputs.skip }}
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -59,6 +61,7 @@ jobs:
           print("runs=" + " ".join([str(r["runs_run_id"])] + ["%s=%s" % kv for kv in sorted((r.get("overrides") or {}).items())]))
           print("previous=" + " ".join("--run %s --prefix %s" % (run, prefix) for run, prefix in previous))
           print("source=" + (r.get("source_sha") or "${{ github.sha }}"))
+          print("skip=" + " ".join("--skip-node %s" % node for node in r.get("skip_nodes") or []))
           EOF
           cat "$GITHUB_OUTPUT"
       - id: matrix
@@ -70,7 +73,8 @@ jobs:
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
           import json, os, subprocess
           matrix = json.loads(subprocess.check_output(["python3", "-B", "demo/execute.py", "--work", os.environ["WORK"],
-                                                       "--trust-markers", "--matrix", "16"]))
+                                                       "--trust-markers", "--matrix", "16",
+                                                       *"${{ steps.request.outputs.skip }}".split()]))
           plan = json.load(open(os.environ["WORK"] + "/plan.json"))
           out = {key: len(value) for key, value in matrix.items()}
           out["exports"] = [e["id"] for e in plan["exports"]]
@@ -99,6 +103,9 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -130,7 +137,7 @@ jobs:
         run: |
           python -B demo/execute.py --work "$WORK" --level 0 --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
-            $( [ 0 = 0 ] && echo --trust-markers )
+            $( [ 0 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -174,6 +181,9 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -205,7 +215,7 @@ jobs:
         run: |
           python -B demo/execute.py --work "$WORK" --level 1 --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
-            $( [ 1 = 0 ] && echo --trust-markers )
+            $( [ 1 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -249,6 +259,9 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -280,7 +293,7 @@ jobs:
         run: |
           python -B demo/execute.py --work "$WORK" --level 2 --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
-            $( [ 2 = 0 ] && echo --trust-markers )
+            $( [ 2 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -324,6 +337,9 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -355,7 +371,7 @@ jobs:
         run: |
           python -B demo/execute.py --work "$WORK" --level 3 --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
-            $( [ 3 = 0 ] && echo --trust-markers )
+            $( [ 3 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -399,6 +415,9 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.here == '1'
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.here == '1'
         with:
@@ -430,7 +449,7 @@ jobs:
         run: |
           python -B demo/execute.py --work "$WORK" --level 4 --shard "${{ matrix.shard }}/16" \
             --parallel 2 --threads 4 --budget-minutes 260 --summary "$RUNNER_TEMP/summary.json" \
-            $( [ 4 = 0 ] && echo --trust-markers )
+            $( [ 4 = 0 ] && echo --trust-markers ) ${{ needs.setup.outputs.skip }}
       - name: Task logs of failures
         if: always() && steps.work.outputs.here == '1'
         run: |
@@ -474,6 +493,9 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        if: steps.work.outputs.export != ''
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.work.outputs.export != ''
         with:
@@ -522,6 +544,8 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
+      - name: Demonstration tooling of this commit
+        run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"

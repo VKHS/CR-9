@@ -115,6 +115,27 @@ class Executor(unittest.TestCase):
         self.assertEqual(execute.levels(plan), {"a": 0, "b": 1, "c": 2, "d": 0})
 
 
+    def test_a_skipped_node_is_left_out_of_the_matrix_and_the_shares(self):
+        import contextlib
+        import io
+        execute = module("execute")
+        plan = {"schema": po.SCHEMA, "nodes": [
+            {"id": "grid", "tasks": [{}, {}, {}], "dependencies": [], "outputs": []},
+            {"id": "other", "tasks": [{}, {}], "dependencies": [], "outputs": []},
+            {"id": "later", "tasks": [{}], "dependencies": [{"node": "other", "type": "afterok"}], "outputs": []}]}
+        with tempfile.TemporaryDirectory() as temporary:
+            work = Path(temporary)
+            (work / "plan.json").write_text(json.dumps(plan), encoding="utf-8")
+            printed = io.StringIO()
+            with contextlib.redirect_stdout(printed):
+                execute.main(["--work", str(work), "--matrix", "16", "--skip-node", "grid"])
+            self.assertEqual(json.loads(printed.getvalue()), {"l0": [1, 2], "l1": [1]})
+            printed = io.StringIO()
+            with contextlib.redirect_stdout(printed):
+                execute.main(["--work", str(work), "--matrix", "16"])
+            self.assertEqual(json.loads(printed.getvalue()), {"l0": [1, 2, 3, 4, 5], "l1": [1]})
+
+
 class Channels(unittest.TestCase):
     def published(self, relationship: str, scientific: bool) -> dict:
         part = {"asset": "x.complete-0.tar.gz", "bytes": 10, "sha256": "0" * 64,

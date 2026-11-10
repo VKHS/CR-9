@@ -134,6 +134,8 @@ def main(argv=None) -> int:
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--level", type=int, default=None, help="only this dependency level")
     parser.add_argument("--node", action="append", default=None, help="only these nodes (repeatable)")
+    parser.add_argument("--skip-node", action="append", default=[], metavar="NODE",
+                        help="leave this node's tasks to another job (repeatable); --matrix does not count them")
     parser.add_argument("--shard", default="1/1", help="i/n: the i-th of n interleaved shares of the selected tasks")
     parser.add_argument("--parallel", type=int, default=1, help="tasks run at once (threads are shared)")
     parser.add_argument("--threads", type=int, default=os.cpu_count() or 1)
@@ -154,7 +156,7 @@ def main(argv=None) -> int:
     if args.matrix is not None:
         counts: dict[int, int] = {}
         for node_id, node in nodes.items():
-            if not node.get("blocked"):
+            if not node.get("blocked") and node_id not in args.skip_node:
                 pending = sum(task_state(work, node, k) not in ("COMPLETE", "SKIPPED")
                               for k in range(max(1, len(node["tasks"]))))
                 if pending:
@@ -172,7 +174,8 @@ def main(argv=None) -> int:
         return 0
     shard, shards = (int(x) for x in args.shard.split("/"))
     selected = [n for n in sorted(nodes, key=lambda n: (level[n], list(nodes).index(n)))
-                if (args.level is None or level[n] == args.level) and (not args.node or n in args.node)]
+                if (args.level is None or level[n] == args.level) and (not args.node or n in args.node)
+                and n not in args.skip_node]
     deadline = None if args.budget_minutes is None else time.time() + 60 * args.budget_minutes
     threads = max(1, args.threads // max(1, args.parallel))
     results, skipped = [], []
