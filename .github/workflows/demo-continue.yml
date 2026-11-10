@@ -8,7 +8,9 @@ name: Demo production graph continuation
 # "previous" lists, oldest first, the work archives of earlier runs; by default the first level of the graph run.
 # "source_sha" pins the producer code of the jobs to the commit the graph was planned at: execute and collect
 # refuse producer code that changed after planning (scripts/paper_outputs.py verify_plan_source); demo/ comes
-# from this commit. "skip_nodes" leaves those nodes' tasks to another workflow (demo-grid.yml).
+# from this commit. "skip_nodes" leaves those nodes' tasks to another workflow (demo-grid.yml). "work" is the
+# graph's work directory (default /home/runner/demo/work; a graph planned by a demo-graph.yml request with
+# its own "work" is continued in that directory).
 on:
   push:
     branches: [expanded-demo-2026-11-09]
@@ -20,7 +22,8 @@ permissions:
   actions: read
 
 concurrency:
-  group: demo-continue-${{ github.ref }}
+  # each request continues its own graph: continuations of different graphs run side by side
+  group: demo-continue-${{ github.run_id }}
   cancel-in-progress: false
 
 env:
@@ -45,6 +48,7 @@ jobs:
       previous: ${{ steps.request.outputs.previous }}
       source: ${{ steps.request.outputs.source }}
       skip: ${{ steps.request.outputs.skip }}
+      work: ${{ steps.request.outputs.work }}
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -62,8 +66,10 @@ jobs:
           print("previous=" + " ".join("--run %s --prefix %s" % (run, prefix) for run, prefix in previous))
           print("source=" + (r.get("source_sha") or "${{ github.sha }}"))
           print("skip=" + " ".join("--skip-node %s" % node for node in r.get("skip_nodes") or []))
+          print("work=" + (r.get("work") or "/home/runner/demo/work"))
           EOF
           cat "$GITHUB_OUTPUT"
+          grep '^work=' "$GITHUB_OUTPUT" | sed 's/^work=/WORK=/' >> "$GITHUB_ENV"
       - id: matrix
         name: Pending tasks per level and exports of the plan
         run: |
@@ -86,6 +92,8 @@ jobs:
     name: Level 0 shard ${{ matrix.shard }}
     needs: [setup]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -164,6 +172,8 @@ jobs:
     name: Level 1 shard ${{ matrix.shard }}
     needs: [setup, level0]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -242,6 +252,8 @@ jobs:
     name: Level 2 shard ${{ matrix.shard }}
     needs: [setup, level1]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -320,6 +332,8 @@ jobs:
     name: Level 3 shard ${{ matrix.shard }}
     needs: [setup, level2]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -398,6 +412,8 @@ jobs:
     name: Level 4 shard ${{ matrix.shard }}
     needs: [setup, level3]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
     timeout-minutes: 345
     strategy:
@@ -476,6 +492,8 @@ jobs:
     name: Export ${{ matrix.slot }}
     needs: [setup, level0, level1, level2, level3, level4]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
@@ -537,6 +555,8 @@ jobs:
     name: Collect
     needs: [setup, export]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
+    env:
+      WORK: ${{ needs.setup.outputs.work }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
