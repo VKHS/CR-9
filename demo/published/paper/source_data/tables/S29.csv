@@ -1,0 +1,9 @@
+configuration,selection effect (nats),expected serial cost,realized fraction
+horizon H = 8 (beam 16),47.54227,0.4,
+horizon H = 16 (beam 16),46.69987,0.4,
+horizon H = 32 (beam 16),47.61839,0.4,
+horizon H = 64 (beam 16),47.61839,0.4,
+beam 4 (H = 16),47.54227,0.4,
+beam 8 (H = 16),46.69987,0.4,
+beam 16 (H = 16),46.69987,0.4,
+beam 32 (H = 16),47.54227,0.4,

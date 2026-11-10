@@ -1,0 +1,4 @@
+Dataset,native-site fraction,"arm 1: native, open loop","arm 2: inserted, open loop (= qC; identity)","arm 1': native, feedback [range]","arm 3: inserted, feedback",paired SE (unit of Table S42),retained share of arm 1'
+Pascal,0.047,+0.0000,0 (identity),"+46.5187 [+44.3273, +48.7101]",+46.5187,0.00000,1.00
+COCO,0.047,+0.0000,0 (identity),"+40.7437 [+38.6252, +42.8623]",+40.7437,0.00000,1.00
+Peptides,0.125,+0.0000,0 (identity),"+0.3134 [+0.2756, +0.3512]",+0.3134,0.00000,1.00

@@ -1,0 +1,192 @@
+{
+ "benchmark_dataset": "ogbn-proteins",
+ "data_kind": "synthetic",
+ "dataset": "ogbn-proteins",
+ "environment": {
+  "cuda_runtime": null,
+  "cudnn_deterministic": false,
+  "deterministic_algorithms_enabled": false,
+  "device": "cpu",
+  "gpu": null,
+  "machine": "x86_64",
+  "numpy": "2.3.5",
+  "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+  "precision": "fp32",
+  "python": "3.12.16",
+  "python_implementation": "CPython",
+  "tf32_matmul": false,
+  "torch": "2.10.0+cpu"
+ },
+ "identities": {
+  "config_sha256": "f0ea5fa15d145aee37970be43acfd632b4fc37ad870192b5f7711a936aa561bd",
+  "prepared_fingerprint": "4d5c02dd036c1948c8d0589039ae4ce5a02a049af09e15d02900d447d5c2c4cc",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+  "unit_sha256": "c1c713dd212cc5d79c97b39edd5d05346412da8de626891af0cbcefb917f0149"
+ },
+ "index_arrays_copied": [
+  "proteins_splits.npz",
+  "proteins_official_splits.npz",
+  "proteins_clusters.npz"
+ ],
+ "is_benchmark_data": false,
+ "packages": {
+  "CairoSVG": "2.9.1",
+  "Jinja2": "3.1.6",
+  "MarkupSafe": "3.0.3",
+  "attrs": "26.1.0",
+  "cairocffi": "1.7.1",
+  "certifi": "2026.10.19",
+  "cffi": "2.1.1",
+  "charset-normalizer": "3.5.2",
+  "cloudpickle": "3.1.2",
+  "contourpy": "1.3.3",
+  "cssselect2": "0.10.1",
+  "cycler": "0.12.1",
+  "defusedxml": "0.7.1",
+  "filelock": "4.2.4",
+  "fonttools": "4.61.1",
+  "fsspec": "2026.9.0",
+  "idna": "3.19",
+  "joblib": "1.5.3",
+  "jsonschema": "4.26.0",
+  "jsonschema-specifications": "2025.9.1",
+  "kiwisolver": "1.4.9",
+  "littleutils": "0.2.4",
+  "matplotlib": "3.10.8",
+  "mpmath": "1.3.0",
+  "narwhals": "2.28.0",
+  "networkx": "3.7",
+  "numpy": "2.3.5",
+  "ogb": "1.3.6",
+  "outdated": "0.2.2",
+  "packaging": "26.3",
+  "pandas": "2.2.3",
+  "pillow": "12.3.0",
+  "pip": "25.0.1",
+  "pycparser": "3.11",
+  "pymetis": "2025.2.2",
+  "pyparsing": "3.3.2",
+  "python-dateutil": "2.9.0.post0",
+  "pytz": "2026.6",
+  "referencing": "0.37.0",
+  "requests": "2.34.2",
+  "rpds-py": "2026.9.1",
+  "scikit-learn": "1.8.0",
+  "scipy": "1.17.0",
+  "setuptools": "84.1.0",
+  "six": "1.17.0",
+  "sympy": "1.14.0",
+  "threadpoolctl": "3.6.0",
+  "tinycss2": "1.5.1",
+  "torch": "2.10.0+cpu",
+  "tqdm": "4.70.1",
+  "typing_extensions": "4.16.0",
+  "tzdata": "2026.5",
+  "urllib3": "2.8.0",
+  "webencodings": "0.6.1"
+ },
+ "policy_lock": {
+  "comparator_hash": "c2567e6071ebe146a3eb1bf44243a41596abc67cf3ee5d6537eb75d3aa629520",
+  "deployed_hash": "c2567e6071ebe146a3eb1bf44243a41596abc67cf3ee5d6537eb75d3aa629520",
+  "model_hashes": {
+   "fit/full/controller.pt": "d4701f4b3ecf81de67247f0df80a08bc36004456ba64e46793b33331d043bfce",
+   "fit/lean/controller.pt": "9e57caa99c43a10379d80fe7e902cc7c12c533240c029552c03118468607a55b",
+   "train/plant_seed1_best.pt": "5ab1fca9873e1240996dd55eabe59dea0634ed0d0a4b3754a7e8d371504d8718",
+   "train/plant_seed2_best.pt": "9f0be9510c987c018b6cb39449ce97648dcc9bb9f19450b42e42f23d77e1b857",
+   "train/q0_seed1_best.pt": "6a95b7bfb3907e8cb0fac86d291117b1f7aab2867127d1799f98d00d0f5b445b",
+   "train/q0_seed2_best.pt": "e0dcc671c57795c475c47ef950f30d909cb57971f50bf8e0e9d22d0fb8b845e3"
+  }
+ },
+ "profile": "smoke",
+ "run_name": "proteins",
+ "schema": "cross-morse-run-manifest-1",
+ "scientific_run": false,
+ "seeds": {
+  "bootstrap_seeds": {
+   "admission": 314165,
+   "final": 314166,
+   "selection": 314163
+  },
+  "ensemble_seeds": {
+   "qC": [
+    1,
+    2
+   ],
+   "qD": [
+    1,
+    2
+   ]
+  },
+  "partition_seed": 314159,
+  "split_index": null,
+  "training_seeds": [
+   1,
+   2
+  ]
+ },
+ "source_data": {
+  "num_features": 8,
+  "num_graphs": 1,
+  "num_nodes": 4266,
+  "num_outputs": 112,
+  "source": "trusted_raw_npz",
+  "source_array_hashes": {
+   "edge_attr": "1346689b0aafed85524fa68eaddb65cec81e3cc4fec1a0513bc2338cfbc3a952",
+   "edge_index": "c6efd39d4810fc1d90184f7a5bfca5ad4f408bae527cf06d2d62b4abc908cca3",
+   "edge_weight": "66b2d73c49a377ed12f5b2dd6c4f1448bccc5ddd1593ce6b9e0bf150810fa274",
+   "x": "b55206051540df4f044c9b8ec6e3f050ad32c86eb1428adf07c39a4fcd4ea54c",
+   "y": "59540f4b3f05cb896b1878783ffb3f8f0a3c8a2c826ab1b6281792daf597d686"
+  }
+ },
+ "splits": {
+  "arrays": {
+   "clusters.npz": {
+    "bytes": 34404,
+    "sha256": "516a2cb78f9443a66b347a84f1725688926d2921289affaecd842a10ad816ae9"
+   },
+   "official_splits.npz": {
+    "bytes": 34874,
+    "sha256": "4f2b1c92929c3e1d8ea8ec57c4dbac75939f302d699127006fafe00198213731"
+   },
+   "splits.npz": {
+    "bytes": 43172,
+    "sha256": "c1c713dd212cc5d79c97b39edd5d05346412da8de626891af0cbcefb917f0149"
+   }
+  },
+  "comparison_reserved_at": "prepare",
+  "graph_role_hashes": null,
+  "independent_graphs": false,
+  "official_split_axis": "node",
+  "official_split_hashes": {
+   "test": "207ba9549ba0e7ebcb7412cd2d155ca21bdefeb073a20dc6ef5917692e41396c",
+   "train": "6d99e873e08bde3ffd4998202c861cfd0a015774f386b5364ea754a336da112e",
+   "valid": "fad8c56e5689f3789ae5a1b3333586eef339c5265213c9feaeaac8c02fd6ba86"
+  },
+  "role_hashes": {
+   "admit": "fad8c56e5689f3789ae5a1b3333586eef339c5265213c9feaeaac8c02fd6ba86",
+   "compare": "0979f4af793bb7d13a94857463797537950364d696ec0d691d5eb560b4eb076a",
+   "confirm": "439dd70cd08b7ba2142ca5d7fc4113f20281a321730817e761213c824cd1a35c",
+   "explore": "28acffa0d64763fa9539eedc182d9248a776c0a449fbd523be2329fb56ad9acc",
+   "fit": "bdd1b2c596c066230cfebac645b565b378072a031e54df86b86271ef4ede44dd",
+   "fit_train": "d00ce1fe47cd994e32c0d89625124a5436e2e0b9a3ee614e4f47355299008e1d",
+   "fit_val": "f1fd913611ebe2ea9a8a94ec45c10fcaa2fbd4247619d0a713ba1e0120910ab6",
+   "select": "140b239622fa6b92fdc7da22738a875eda7d27a9edcaca3c9c0ca9c360b025ef",
+   "test": "207ba9549ba0e7ebcb7412cd2d155ca21bdefeb073a20dc6ef5917692e41396c"
+  },
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": {
+   "admit": 1422,
+   "compare": 72,
+   "confirm": 71,
+   "explore": 285,
+   "fit": 853,
+   "fit_train": 768,
+   "fit_val": 85,
+   "select": 142,
+   "test": 1421
+  },
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "statistical_unit": "degree-stratified core",
+  "unit": "node"
+ }
+}

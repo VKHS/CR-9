@@ -1,0 +1,7 @@
+parameter,grid,observed effect on route/support,required report
+minimum propensity,"0.025, 0.05, 0.075, 0.10",stricter values simplify 20–36% of selected routes,"qualified fraction, coverage, harm, fallback, compute"
+minimum ESS,"32, 64, 96, 128",route changes at 32,"effect, route, interval width, fallback"
+maximum normalized weight,"0.10, 0.15, 0.20, 0.25","implied by the ESS threshold: ESS ≥ 64 gives ωmax ≤ 0.125, so the grid points 0.15–0.25 cannot change any route when ESS ≥ 64 is enforced on the same cells; the grid point 0.25 therefore cannot admit additional radius/MPC routes under that ESS threshold, and the grid is informative only together with the ESS grid (at ESS ≥ 32, ωmax ≤ 0.177)","support, FSR, HMR, route per joint cell"
+selection margin εR,"CE: 0.0025, 0.003, 0.005; mean BCE: 0.001, 0.0015, 0.0025",eligible family unchanged under stricter margin,eligible family and selected route
+equivalence margin εeq,"0.001, 0.002, 0.004",selected route unchanged over the grid,route/resources and practical effect
+clip B,"0.05, 0.10, 0.20",Pascal most sensitive,"clipped fractions, tails, Ua, decision"

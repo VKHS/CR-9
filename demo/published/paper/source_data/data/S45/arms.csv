@@ -1,0 +1,4 @@
+dataset,native_site_fraction,"native, open loop effect_nats","native, open loop se_nats","inserted, open loop (q_C identity) effect_nats","inserted, open loop (q_C identity) se_nats","native, feedback effect_nats","native, feedback se_nats","inserted, feedback (deployed) effect_nats","inserted, feedback (deployed) se_nats",arm1prime_low,arm1prime_high,retained_share
+PascalVOC-SP,0.046875,0.0,0.0,0.0,0.0,46.51867087,1.118082721,46.51867087,1.118082721,44.32726900510345,48.71007273489655,1.0
+COCO-SP,0.046875,0.0,0.0,0.0,0.0,40.74374148,1.080902978,40.74374148,1.080902978,38.625210572337906,42.86227238766209,1.0
+Peptides-func,0.125,0.0,0.0,0.0,0.0,0.3134288167,0.01928650129,0.3134288167,0.01928650129,0.2756279687838147,0.3512296646161853,1.0

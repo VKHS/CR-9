@@ -1,0 +1,15 @@
+dataset,panel,observed_effect,observed_low,observed_high,comparator_returned
+ogbn-arxiv,a,0.0,0.0,0.0,True
+ogbn-arxiv,b,0.0,0.0,0.0,True
+ogbn-proteins,a,0.0,0.0,0.0,True
+ogbn-proteins,b,0.0,0.0,0.0,True
+ogbn-products,a,0.0,0.0,0.0,True
+ogbn-products,b,0.0,0.0,0.0,True
+Roman-empire,a,0.0,0.0,0.0,True
+Roman-empire,b,0.0,0.0,0.0,True
+PascalVOC-SP,a,0.0,0.0,0.0,True
+PascalVOC-SP,b,0.0,0.0,0.0,True
+COCO-SP,a,0.0,0.0,0.0,True
+COCO-SP,b,0.0,0.0,0.0,True
+Peptides-func,a,0.0,0.0,0.0,True
+Peptides-func,b,0.0,0.0,0.0,True

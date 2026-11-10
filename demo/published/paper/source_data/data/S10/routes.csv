@@ -1,0 +1,10 @@
+route,complexity,is_open_loop
+nominal,0,True
+best_depth,1,True
+learned_stop,2,True
+phase,3,True
+fixed_sequence,4,True
+mpc_ol,5,True
+one_step,6,False
+radius,7,False
+mpc_rh,8,False

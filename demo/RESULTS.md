@@ -107,21 +107,21 @@ The repository's own production graph (scripts/paper_outputs.py, planned with `-
 | s14_campaign.run | 0 | 6/6 | complete |
 | sensitivity_grids.variants | 0 | 160/160 | complete |
 | tube_audit.run | 0 | 14/14 | complete |
-| budget.studies.arxiv | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.coco_sp | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.pascalvoc_sp | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.peptides_func | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.proteins | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_00 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_01 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_02 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_03 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_04 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_05 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_06 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_07 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_08 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
-| budget.studies.roman_empire_split_09 | 1 | 0/12 | incomplete (FAILED, NOT RUN) |
+| budget.studies.arxiv | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.coco_sp | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.pascalvoc_sp | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.peptides_func | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.proteins | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_00 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_01 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_02 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_03 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_04 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_05 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_06 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_07 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_08 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
+| budget.studies.roman_empire_split_09 | 1 | 0/12 | incomplete (FAILED, NOT RUN); complete in the graph of `campaign:budget`, `records:budget_matched` (below) |
 | decision_audit.plan | 1 | 1/1 | complete |
 | factorials.cells | 1 | 2/2 | complete |
 | negative_controls.run | 1 | 1/1 | complete |
@@ -134,20 +134,20 @@ The repository's own production graph (scripts/paper_outputs.py, planned with `-
 | module_ablations.lifecycles | 3 | 192/192 | complete |
 | module_ablations.measure | 4 | 15/16 | incomplete (NOT RUN) |
 
-A second graph, planned for `horizon_beam_sweep` alone in its own work directory (demo-sweep.yml; workflow run [42742259867](https://github.com/VKHS/CR-9/actions/runs/42742259867)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "horizon_sweep_configuration": {"beam": 16, "ensemble": 1, "profile": "full"}, "negative_controls_dataset": "PascalVOC-SP", "provisional": []}.
+A further graph, planned for `horizon_beam_sweep` alone in its own work directory (workflow run [42742259867](https://github.com/VKHS/CR-9/actions/runs/42742259867)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices differ from the main graph's in: {"horizon_sweep_configuration": {"beam": 16, "ensemble": 1, "profile": "full"}}.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
 | horizon_beam_sweep.variants | 0 | 7/7 | complete |
 
-A second graph, planned for `records:runtime_scaling`, `records:timing_anchors` alone in its own work directory (demo-sweep.yml; workflow run [42758399098](https://github.com/VKHS/CR-9/actions/runs/42758399098)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "negative_controls_dataset": "PascalVOC-SP", "provisional": []}.
+A further graph, planned for `records:runtime_scaling`, `records:timing_anchors` alone in its own work directory (workflow run [42758399098](https://github.com/VKHS/CR-9/actions/runs/42758399098)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
 | runtime_scaling.run | 0 | 29/29 | complete |
 | timing_anchors.run | 1 | 6/6 | complete |
 
-A second graph, planned for `records:decision_traces`, `records:reliability_diagnostics`, `records:mechanism_contrasts` alone in its own work directory (demo-sweep.yml; workflow run [42790196009](https://github.com/VKHS/CR-9/actions/runs/42790196009)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "negative_controls_dataset": "PascalVOC-SP", "provisional": []}.
+A further graph, planned for `records:decision_traces`, `records:reliability_diagnostics`, `records:mechanism_contrasts` alone in its own work directory (workflow run [42790196009](https://github.com/VKHS/CR-9/actions/runs/42790196009)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
@@ -156,7 +156,7 @@ A second graph, planned for `records:decision_traces`, `records:reliability_diag
 | decision_audit.plan | 1 | 1/1 | complete |
 | decision_audit.run | 2 | 16/16 | complete |
 
-A second graph, planned for `campaign:budget`, `records:budget_matched` alone in its own work directory (demo-sweep.yml; workflow run [42811732665](https://github.com/VKHS/CR-9/actions/runs/42811732665)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "negative_controls_dataset": "PascalVOC-SP", "provisional": []}.
+A further graph, planned for `campaign:budget`, `records:budget_matched` alone in its own work directory (workflow run [42811732665](https://github.com/VKHS/CR-9/actions/runs/42811732665)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|

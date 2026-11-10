@@ -1,0 +1,8 @@
+Dataset,q_C identity,q_C E,provisional rule,confirmation output,G_admit,admission criterion,D-bar,U_desc,U_a,J,input-fallback fraction,official gain [95% interval],loss effect [95% interval],scope,deployed rule,deployed E
+arxiv,nominal,1,same nominal,no feedback candidate in Q_s; q_C retained,0,not evaluated (Q_s empty),,,,,,,0,comparator regime (exactly zero effect by construction),qC returned,1
+proteins,learned stop,2,same learned stop,no feedback candidate in Q_s; q_C retained,0,not evaluated (Q_s empty),,,,,,,0,comparator regime (exactly zero effect by construction),qC returned,2
+products,learned stop,2,same learned stop,no feedback candidate in Q_s; q_C retained,0,not evaluated (Q_s empty),,,,,,,0,comparator regime (exactly zero effect by construction),qC returned,2
+Roman,nominal,2,same nominal,no feedback candidate in Q_s; q_C retained,0,not evaluated (Q_s empty),,,,,,,0,comparator regime (exactly zero effect by construction),qC returned,2
+Pascal,nominal,1,same nominal,no feedback candidate in Q_s; q_C retained,0,not evaluated (Q_s empty),,,,,,,0,comparator regime (exactly zero effect by construction),qC returned,1
+COCO,nominal,2,same nominal,no feedback candidate in Q_s; q_C retained,0,not evaluated (Q_s empty),,,,,,,0,comparator regime (exactly zero effect by construction),qC returned,2
+Peptides,nominal,2,same nominal,no feedback candidate in Q_s; q_C retained,0,not evaluated (Q_s empty),,,,,,,0,comparator regime (exactly zero effect by construction),qC returned,2

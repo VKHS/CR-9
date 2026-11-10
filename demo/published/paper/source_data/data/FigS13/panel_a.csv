@@ -1,0 +1,10 @@
+setting,description,backbone,backbone_text,adapter,adapter_text
+Compiled or certified backbone,"quantized and synthesized to an accelerator, or validated under a release process. Retraining forces re-synthesis and re-validation; a runtime wrapper on the aggregation call does not.",frozen backbone,"θ, update, head,
+precision unchanged",adapter,"reads H_ℓ
+wraps A_ℓ"
+Shared pretrained backbone,one checkpoint served to downstream users who hold neither the training data nor the right to retrain it.,frozen backbone,"θ, update, head,
+precision unchanged",adapter,"reads H_ℓ
+wraps A_ℓ"
+"One backbone, heterogeneous inputs","graphs of different size, degree and homophily reach one model; the useful amount of transport varies per input, so one schedule cannot track it.",frozen backbone,"θ, update, head,
+precision unchanged",adapter,"reads H_ℓ
+wraps A_ℓ"

@@ -1,0 +1,7 @@
+class,definition
+exact,identity with no approximation
+bound,deterministic inequality
+conditional,holds on a registered coverage or invariance event
+finite-sample,holds with probability >= 1-delta for independent graphs
+empirical,a measurement with its declared statistical unit
+protocol,evaluation requirements and reporting definitions

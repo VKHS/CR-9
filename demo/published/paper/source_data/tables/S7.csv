@@ -1,0 +1,8 @@
+Dataset,trajectories,minimum count,minimum propensity,ESS (per-cell minimum),max. normalized weight (per cell),qualified fraction,failure/remediation
+ogbn-arxiv,24,3,0.050,3,0.33,0.00,collect/prune on failure
+ogbn-proteins,24,3,0.050,3,0.33,0.00,collect/prune on failure
+ogbn-products,24,3,0.050,3,0.33,0.00,collect/prune on failure
+Roman-empire,24,3,0.050,3,0.33,0.00,collect/prune on failure
+PascalVOC-SP,24,1,0.050,1,1.00,0.00,collect/prune on failure
+COCO-SP,24,1,0.050,1,1.00,0.00,collect/prune on failure
+Peptides-func,24,1,0.050,1,1.00,0.00,downgrade on failure

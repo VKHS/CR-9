@@ -1,0 +1,8 @@
+dataset,effect,low,high,unit,interval_kind
+ogbn-arxiv,0.0,,,pp,comparator identity; no statistical interval
+ogbn-proteins,0.0,,,pp,comparator identity; no statistical interval
+ogbn-products,0.0,,,pp,comparator identity; no statistical interval
+Roman-empire,0.0,,,pp,comparator identity; no statistical interval
+PascalVOC-SP,0.0,,,pp,comparator identity; no statistical interval
+COCO-SP,0.0,,,pp,comparator identity; no statistical interval
+Peptides-func,0.0,,,AP,comparator identity; no statistical interval

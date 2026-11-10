@@ -1,0 +1,9 @@
+sweep,horizon,beam_width,selection_effect_nats,expected_serial_cost,oracle_headroom_bound_nats,realized_fraction,source_file,locator
+horizon,8,16,47.54227341,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H8_B16.json,json:/values/selection_effect_nats
+horizon,16,16,46.69986821,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H16_B16.json,json:/values/selection_effect_nats
+horizon,32,16,47.61838572,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H32_B16.json,json:/values/selection_effect_nats
+horizon,64,16,47.61838572,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H64_B16.json,json:/values/selection_effect_nats
+beam,16,4,47.54227341,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H16_B4.json,json:/values/selection_effect_nats
+beam,16,8,46.69986821,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H16_B8.json,json:/values/selection_effect_nats
+beam,16,16,46.69986821,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H16_B16.json,json:/values/selection_effect_nats
+beam,16,32,47.54227341,0.4072584599,0.0,,raw/computed/horizon_beam_sweep/PascalVOC-SP_H16_B32.json,json:/values/selection_effect_nats

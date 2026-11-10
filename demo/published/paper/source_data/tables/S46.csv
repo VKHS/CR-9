@@ -1,0 +1,7 @@
+Dataset,ceiling,feedback effect,E3 predictor,E4 distilled,E5 no-observation replanning,E6 qB: effect; overhead [range],present overhead
+arxiv,1.15,0.0,0.0 [—],0.0 [—],0.0 [—],0.0; 0% [—],0%
+proteins,1.17,0.0,0.0 [—],0.0 [—],0.0 [—],0.0; 0% [—],0%
+Roman,1.30,0.0,4.2 [—],0.0 [—],0.0 [—],0.0; 0% [—],0%
+Pascal,1.29,0.0,4.7 [—],0.0 [—],0.0 [—],0.0; 0% [—],0%
+COCO,1.33,0.0,53.1 [—],0.0 [—],0.0 [—],0.0; 0% [—],0%
+Peptides,1.18,0.0,0.0 [—],0.0 [—],0.0 [—],0.0; 0% [—],0%

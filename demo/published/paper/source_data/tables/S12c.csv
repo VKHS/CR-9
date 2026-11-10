@@ -1,0 +1,8 @@
+Dataset,U_min,eps_eq = 0.002 on U_s: near-best -> choice,eps_eq = 0.002 on Delta_s,eps_eq = 0.001 on Delta_s,executed selection (complete ledger),separated-protocol selection
+arxiv,,— → qC,— → qC,— → qC,qC,qC
+proteins,,— → qC,— → qC,— → qC,qC,qC
+products,,— → qC,— → qC,— → qC,qC,qC
+Roman,,— → qC,— → qC,— → qC,qC,qC
+Pascal,,— → qC,— → qC,— → qC,qC,qC
+COCO,,— → qC,— → qC,— → qC,qC,qC
+Peptides,,— → qC,— → qC,— → qC,qC,qC

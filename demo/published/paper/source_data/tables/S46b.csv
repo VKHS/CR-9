@@ -1,0 +1,25 @@
+Dataset,arm,effect vs qC [grid range],effect vs qM [95% interval],Holm P,work / ceiling
+arxiv,E3 predictor,0.0 [—],"-1071.1 [-1193.9, -928.3]",0.0004,0.87
+arxiv,E4 distilled,0.0 [—],"-1071.1 [-1193.9, -928.3]",0.0004,0.87
+arxiv,E5 no-observation replanning,0.0 [—],"-1071.1 [-1193.9, -928.3]",0.0004,0.87
+arxiv,E6 budget-aware q_B,0.0; overhead 0%,"-1071.1 [-1193.9, -928.3]",0.0004,0.87
+proteins,E3 predictor,0.0 [—],"-58.9 [-65.8, -51.5]",0.0004,0.85
+proteins,E4 distilled,0.0 [—],"-58.9 [-65.8, -51.5]",0.0004,0.85
+proteins,E5 no-observation replanning,0.0 [—],"-58.9 [-65.8, -51.5]",0.0004,0.85
+proteins,E6 budget-aware q_B,0.0; overhead 0%,"-58.9 [-65.8, -51.5]",0.0004,0.85
+Roman,E3 predictor,4.2 [—],"-225.3 [-248.1, -200.1]",0.0078,0.70
+Roman,E4 distilled,0.0 [—],"-229.5 [-251.3, -205.4]",0.0078,0.77
+Roman,E5 no-observation replanning,0.0 [—],"-229.5 [-251.3, -205.4]",0.0078,0.77
+Roman,E6 budget-aware q_B,0.0; overhead 0%,"-229.5 [-251.3, -205.4]",0.0078,0.77
+Pascal,E3 predictor,4.7 [—],"-45490.4 [-47614.9, -43274.2]",0.0004,0.76
+Pascal,E4 distilled,0.0 [—],"-45495.1 [-47623.9, -43276.3]",0.0004,0.78
+Pascal,E5 no-observation replanning,0.0 [—],"-45495.1 [-47623.9, -43276.3]",0.0004,0.78
+Pascal,E6 budget-aware q_B,0.0; overhead 0%,"-45495.1 [-47623.9, -43276.3]",0.0004,0.78
+COCO,E3 predictor,53.1 [—],"-40850.8 [-42833.1, -38721.6]",0.0004,0.66
+COCO,E4 distilled,0.0 [—],"-40903.9 [-42901.0, -38765.9]",0.0004,0.75
+COCO,E5 no-observation replanning,0.0 [—],"-40903.9 [-42901.0, -38765.9]",0.0004,0.75
+COCO,E6 budget-aware q_B,0.0; overhead 0%,"-40903.9 [-42901.0, -38765.9]",0.0004,0.75
+Peptides,E3 predictor,0.0 [—],"-291.7 [-328.3, -252.4]",0.0004,0.85
+Peptides,E4 distilled,0.0 [—],"-291.7 [-328.3, -252.4]",0.0004,0.85
+Peptides,E5 no-observation replanning,0.0 [—],"-291.7 [-328.3, -252.4]",0.0004,0.85
+Peptides,E6 budget-aware q_B,0.0; overhead 0%,"-291.7 [-328.3, -252.4]",0.0004,0.85

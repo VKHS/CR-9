@@ -1,0 +1,8 @@
+dataset,U_Delta_oracle_nats,headroom_bound_mnats,deployed_effect_nats,unrealized_lower_bound_mnats,per_run_U_Delta_oracle
+ogbn-arxiv,0.0,0.0,0.0,0.0,arxiv:0.0
+ogbn-proteins,0.0,0.0,0.0,0.0,proteins:0.0
+ogbn-products,0.0,0.0,0.0,0.0,products:0.0
+Roman-empire,0.0,0.0,0.0,0.0,split_00:0.0 split_01:0.0 split_02:0.0 split_03:0.0 split_04:0.0 split_05:0.0 split_06:0.0 split_07:0.0 split_08:0.0 split_09:0.0
+PascalVOC-SP,0.0,0.0,0.0,0.0,pascalvoc_sp:0.0
+COCO-SP,0.0,0.0,0.0,0.0,coco_sp:0.0
+Peptides-func,0.0,0.0,0.0,0.0,peptides_func:0.0

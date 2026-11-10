@@ -1,0 +1,8 @@
+dataset,qC_route,qC_E,qC_horizon,qC_phase_boundaries,provisional_route,provisional_E,deployed_route,deployed_E,qC_returned,G_admit,independent_graphs,D_bar,U_desc,U_a,J,epsilon_a,input_fallback_fraction,metric,official_gain_pp,official_gain_low_pp,official_gain_high_pp,loss_effect_nats,loss_low_nats,loss_high_nats,loss,registered_reading,reading_splits
+ogbn-arxiv,nominal,1,,,nominal,1,nominal,1,True,0,False,,,,32,0.003,,accuracy,0.0,0.0,0.0,0.0,0.0,0.0,CE,qC,1/1
+ogbn-proteins,learned_stop,2,,,learned_stop,2,learned_stop,2,True,0,False,,,,32,0.0015,,rocauc,0.0,0.0,0.0,0.0,0.0,0.0,BCE,qC,1/1
+ogbn-products,learned_stop,2,,,learned_stop,2,learned_stop,2,True,0,False,,,,59,0.003,,accuracy,0.0,0.0,0.0,0.0,0.0,0.0,CE,qC,1/1
+Roman-empire,nominal,2,,,nominal,2,nominal,2,True,0,False,,,,10,0.003,,accuracy,0.0,0.0,0.0,0.0,0.0,0.0,CE,qC,10/10
+PascalVOC-SP,nominal,1,,,nominal,1,nominal,1,True,0,False,,,,60,0.003,,macro_f1,0.0,0.0,0.0,0.0,0.0,0.0,CE,qC,1/1
+COCO-SP,nominal,2,,,nominal,2,nominal,2,True,0,False,,,,60,0.003,,macro_f1,0.0,0.0,0.0,0.0,0.0,0.0,CE,qC,1/1
+Peptides-func,nominal,2,,,nominal,2,nominal,2,True,0,False,,,,150,0.0015,,ap,0.0,0.0,0.0,0.0,0.0,0.0,BCE,qC,1/1

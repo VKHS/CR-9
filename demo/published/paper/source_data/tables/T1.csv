@@ -1,0 +1,8 @@
+Dataset,strongest open-loop comparator q_C,deployed policy,official-metric change; paired loss versus q_C (95% test-stage intervals),"registered reading, representative rows",separated-protocol admission; test effect
+arxiv,"nominal, E = 1",q_C returned,0 (comparator identity),q_C,q_C; 0
+proteins,"learned stop, E = 2",q_C returned,0 (comparator identity),q_C,q_C; 0
+products,"learned stop, E = 2",q_C returned,0 (comparator identity),q_C,q_C; 0
+Roman,"nominal, E = 2",q_C returned,0 (comparator identity),q_C,q_C; 0
+Pascal,"nominal, E = 1",q_C returned,0 (comparator identity),q_C,q_C; 0
+COCO,"nominal, E = 2",q_C returned,0 (comparator identity),q_C,q_C; 0
+Peptides,"nominal, E = 2",q_C returned,0 (comparator identity),q_C,q_C; 0

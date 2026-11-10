@@ -1,0 +1,6 @@
+group,path,computed,reported,status,note
+main_table_1_policy_and_deployment_ledger,ogbn-arxiv/admission_D_bar,0.0,-0.0046,differs,
+main_table_1_policy_and_deployment_ledger,ogbn-arxiv/admission_U_desc,0.0,-0.0008,differs,
+main_table_1_policy_and_deployment_ledger,ogbn-proteins/admission_D_bar,0.0,-0.0039,differs,
+main_table_1_policy_and_deployment_ledger,ogbn-proteins/admission_U_desc,0.0,-0.0007,differs,
+display:supplementary:Table S27,,,,missing,No dedicated independently reviewed printed-value contract is registered for this display

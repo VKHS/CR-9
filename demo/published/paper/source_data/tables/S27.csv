@@ -1,0 +1,11 @@
+Dataset,buffer (hops),D_bar,half-width,U_desc,decision at eps_a
+arxiv,2,0.0000,0.0000,+0.0000,interval includes zero
+arxiv,4,0.0000,0.0000,+0.0000,interval includes zero
+arxiv,8,0.0000,0.0000,+0.0000,interval includes zero
+arxiv,16,0.0000,,,one resampling unit: no interval
+arxiv,32,0.0000,,,one resampling unit: no interval
+proteins,2,0.0000,0.0000,+0.0000,interval includes zero
+proteins,4,0.0000,,,one resampling unit: no interval
+proteins,8,0.0000,,,one resampling unit: no interval
+proteins,16,0.0000,,,one resampling unit: no interval
+proteins,32,0.0000,,,one resampling unit: no interval

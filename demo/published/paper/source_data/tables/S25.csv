@@ -1,0 +1,4 @@
+regime,model A,model B,route stability,paired effect vs qC
+arxiv / homophily,residual MLP4-512; post-training adapter,frozen GCNII; same adapter interface,nominal in 5/5 versus 5/5 outer folds,0.00000 versus 0.00000 CE
+Roman / heterophily,heterophily encoder4-384; post-training adapter,frozen GCNII; same adapter interface,nominal in 44/50 versus 50/50 outer folds,0.00000 versus 0.00000 CE
+Pascal / independent long range,GraphGPS-style 6x128; post-training adapter,frozen GINE/GRAMA-style; same adapter interface,nominal in 5/5 versus 5/5 outer folds,0.00000 versus 0.00000 CE

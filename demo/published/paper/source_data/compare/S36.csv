@@ -1,0 +1,4 @@
+group,path,computed,reported,status,note
+supplementary_table_S36_experiment_definitions,E14/extended_grid,"[1, 2, 4, 8, 12, 16, 20]","[1, 2, 4, 8, 12, 16, 20]",exact,
+supplementary_table_S36_experiment_definitions,E14/distinct_checkpoints_beyond_registry,"[16, 20]","[16, 20]",exact,
+supplementary_table_S36_experiment_definitions,E16/plant_seeds,12,12,exact,

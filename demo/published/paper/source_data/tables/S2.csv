@@ -1,0 +1,8 @@
+Stage,frozen allocation,outer folds,inner folds,plant seeds,controller seeds,labels,operation,frozen after stage
+D_fit,60% of official training; internal checkpoint subset (10% of D_fit),,,12,,training labels,fit plant/head; audit entry contract and bands,"model, preprocessing, nominal action, band definitions"
+D_explore,20% of official training,,5 trajectory folds,,12 (trajectory t on checkpoint t mod 12),offline action outcomes,"fit observer, action and sequence models","action registry, strata, model schemas"
+D_select,10% of official training,5,4,"ensembles E ∈ {1, 2, 4, 8, 12}",,nested training labels,"reconstruct q_C; compare every (π, E, b)","candidate family, margins, selector"
+D_confirm,5%; untouched by fitting,,,,,selected contrast only,apply fixed mechanism map,"teacher q_M, mechanism label and downgrade"
+D_compare,5%; reserved at preparation,,,frozen parent ensemble,12 (E3–E6 controller optimization),comparison evaluator only,E3–E6 against frozen q_M and q_C,independent comparison record; no automatic deployment switch
+D_admit,official validation; disjoint from checkpointing,,,,,locked admission labels,compare one executable rule with one q_C,G_admit
+D_test,official test,,,,,evaluator only,"report q_0, q_N^ctrl, q_C, q_D",no further decision

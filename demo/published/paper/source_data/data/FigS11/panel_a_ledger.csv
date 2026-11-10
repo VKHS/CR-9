@@ -1,0 +1,5 @@
+step,operation,accumulated_work,budget,restart_reserve,prediction_cost
+0,enter terminal site,6.0,10.0,4.0,0.5
+1,pay sensing (reserve C_pred),8.0,10.0,4.0,0.5
+2,action unaffordable: abort,8.0,10.0,4.0,0.5
+3,comparator restart,12.0,10.0,4.0,0.5

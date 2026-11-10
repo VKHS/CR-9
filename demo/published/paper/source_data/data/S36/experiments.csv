@@ -1,0 +1,21 @@
+experiment,reporting_displays,repository_implementation
+E1,supplementary:Table S5c,`cross_morse/core.py`; runtime parity and plant tests
+E2,supplementary:Table S30 supplementary:Table S33 supplementary:Table S47,Reference information bounds and registered S30/S33/S47 targets
+E3,supplementary:Table S46 supplementary:Table S46b main:Figure 6 supplementary:Figure S3 supplementary:Table S42 supplementary:Table S47,`cm_experiments/`; `budget_matched` records
+E4,supplementary:Table S46 supplementary:Table S46b supplementary:Table S33,`cm_experiments/`; `budget_matched` records
+E5,supplementary:Table S46 supplementary:Table S46b supplementary:Table S33,`cm_experiments/`; `budget_matched` records
+E6,supplementary:Table S34 supplementary:Table S46 supplementary:Table S46b supplementary:Figure S11,`cm_experiments/budget.py`; reference/runtime episode parity
+E7,supplementary:Table S17,Sensor implementation and analytical perturbation checks
+E8,supplementary:Table S17,`MeasurementBank`; observer and factorial reference checks
+E9,,Proposition 8 reference checks
+E10,main:Table 1 supplementary:Table S14b supplementary:Figure S18,"Role, provenance, confirmation, admission and policy-lock checks"
+E11,supplementary:Table S27,Dependent-core and Roman campaign summaries
+E12,supplementary:Table S15b,Pinned upstream harness; `baselines` records
+E13,supplementary:Table S45 supplementary:Figure S18,Plant identity checks; `inserted_site` record contract
+E14,supplementary:Table S26b,`ensemble_grid` contract; analytical loss-law calculations
+E15,supplementary:Table S12c,`nested_selection`; reference terminal-rule parity; scientific audit
+E16,supplementary:Figure S20,`cm_theory/inference.py`; Note S24 arithmetic
+E17,supplementary:Table S15b supplementary:Table S23 supplementary:Table S44 supplementary:Table S6c main:Table 2,"`cm_campaigns/timing.py`, scheduler capture; timing/baseline records"
+E18,supplementary:Figure S18 supplementary:Table S8,Dense/sparse operator parity; global numerical remainder bound
+E19,supplementary:Table S7,Logged-propensity support audit and selection masks
+E20,supplementary:Table S23,"Profile-specific sensors, controller and cost records"

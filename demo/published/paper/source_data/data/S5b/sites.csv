@@ -1,0 +1,8 @@
+dataset,backbone,controlled_sites,native_sites,inserted_sites,substeps_per_native_site,boundary_sites
+ogbn-arxiv,shared_transport,256,256,0,1,0
+ogbn-proteins,edge_weighted_transport,128,128,0,1,0
+ogbn-products,shared_transport,64,64,0,1,0
+Roman-empire,heterophily,256,256,0,1,0
+PascalVOC-SP,gps,128,6,122,21,2
+COCO-SP,gps,128,6,122,21,2
+Peptides-func,linear_gine,64,8,56,8,0

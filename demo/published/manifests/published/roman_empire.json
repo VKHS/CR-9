@@ -1,0 +1,753 @@
+{
+ "benchmark_dataset": "Roman-empire",
+ "campaign": {
+  "per_split": [
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "cb42bfe531ee4fc0df2490079d81e9adb161983d7860545b8db68a718611a154"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "2cece3f260bf0d061ce1aad8e5480f073cdc476ab6343cc36536ac641bccd226"
+     }
+    },
+    "identities": {
+     "config_sha256": "9b767054fe888963a10e705031fc39367f2759cc0ba5bea4a7ed6e3efc24e170",
+     "prepared_fingerprint": "a89308e3f5a9bbda4b21ba07d73d20fe6fef0c61ffff61f1e58b08ce52cb9a9e",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "2cece3f260bf0d061ce1aad8e5480f073cdc476ab6343cc36536ac641bccd226"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_00_splits.npz",
+     "roman_empire_split_00_official_splits.npz",
+     "roman_empire_split_00_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "86242fa93b8e5770d5cdb2934a4bdae1c821f7fbc6e5d32d495cbc506f1b007e",
+     "compare": "22dceeecefc22560e0af477d9650693b72bff830c3241d5c3e9aeaf78d248f74",
+     "confirm": "a747887b33268c4822d0a548bb4d6f58885a592e049e4fd73feffd774f085fb8",
+     "explore": "2cddaec59561e8afe9e84123efcbc8112dd12756869e1b0d1d86d27d1feb2eba",
+     "fit": "ff6885ea3ed022d863fe343b6cb1c9d75e6bcf4244a2acdde7e071ff4fa3e10b",
+     "fit_train": "9757b07f7af171e3050a10438422bd64b90bdfb0a4675d17f44e938f01354ae1",
+     "fit_val": "c994eb4ba13db47e87abe297a2463f8f5ed456643f4ce437ddbfdf5fcfed7bc7",
+     "select": "81cb3af991e030e5a4768bc5ec73285989e3e2ace09e89fe68aed106a21e64a5",
+     "test": "d9b1a973965bb3ec473644f341e5e484b36d83a5d38c5d57946123a895df959a"
+    },
+    "run_name": "split_00",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 0,
+    "unit_sha256": "2cece3f260bf0d061ce1aad8e5480f073cdc476ab6343cc36536ac641bccd226"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "82615b4bd8bf5346504591b475da40f6a6c5fbac71b85493a3d2eaa175adc291"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "ae3a75576be20ab3ed98bb09da16246664a1f40cb5bc94fb9c2a184e72a85da4"
+     }
+    },
+    "identities": {
+     "config_sha256": "e3f8fb0a1d5c5fc164da9b46fc8969a1bb91861cad134be90f90132f16a8ace3",
+     "prepared_fingerprint": "7695a354c50a727892dbdcf8328d95b5860d84aa2776442bb8c437139756ccba",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "ae3a75576be20ab3ed98bb09da16246664a1f40cb5bc94fb9c2a184e72a85da4"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_01_splits.npz",
+     "roman_empire_split_01_official_splits.npz",
+     "roman_empire_split_01_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "e4f3a6f30b4bfb5c36b48d4eabe72034c7f45a7c07eb307d9fa0bc3f81db4c01",
+     "compare": "d907d0c13e53a71b80e1860faa6369ac7daaf986cafeb9749ea098df209b4c96",
+     "confirm": "5c8067a3e99e261e63fbbec9700a439c50f557fbae896f993fc8b62a149f12ef",
+     "explore": "d0e49c23d5f330b64ee55a66bbdfe47a91278c70b4959781e41186f796f2c45b",
+     "fit": "eb5226f400175e84cf6017f16fec51af71a5487a370dfb00854caf54c203b8b5",
+     "fit_train": "8b5129b1155f264ecbb8c095301e39819169f31ba7dd0b056f23bef0ca82fa57",
+     "fit_val": "cfeb8953909c3a7b0475e0e9f047793356c7f01315aa27aa2484474266f199d4",
+     "select": "cf66b45467e4bf709d29eca74f903a84d91a2e5604eb41a1fbbff3756e6ed440",
+     "test": "ce3c32ba5b4ac7f4e246ff020f5c1f13d822d6b1b7b17a8affdd8d8991faf67c"
+    },
+    "run_name": "split_01",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 1,
+    "unit_sha256": "ae3a75576be20ab3ed98bb09da16246664a1f40cb5bc94fb9c2a184e72a85da4"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "09a070bd0e9b867f87b5a5542f833537d05864a309e73267114c467d31743ddf"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "e66d87044d9c2ae52b1033106b3aa00912199e6dfde72daa0ceffe78bae19114"
+     }
+    },
+    "identities": {
+     "config_sha256": "15b930d48aeddb05531faaf559c51410ed98e4cf38e10a08a5bd6adde18d2594",
+     "prepared_fingerprint": "f731c715af4e8712b1b3cab214997b7a1fbfb19bcf3d7c764473421d1c5aceb6",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "e66d87044d9c2ae52b1033106b3aa00912199e6dfde72daa0ceffe78bae19114"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_02_splits.npz",
+     "roman_empire_split_02_official_splits.npz",
+     "roman_empire_split_02_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "23e63557be16c88721e3d9ba596445b32156ef1323a19beacf62a34f0a9534ec",
+     "compare": "ce1f1c529e82c32fcef16e2fdb9c898d354662b3350388e1566693eaf169df63",
+     "confirm": "61c4efaa2e3b8650ce14a8cdd89e0a907ea884b4debad5de1d3b006fd97a7a41",
+     "explore": "3f25fafacfd9cd8c7157fc269171f5f4359d8b291dbd8fc02e9120d322c852d8",
+     "fit": "8948af68041e3cd2ee587395463a4b0590daf05062a4d02d38da46f20d5aba4d",
+     "fit_train": "b7ed0714e6e2fb13533fb0570976364069866f9fda397cb07b4b1b8375d8fd7d",
+     "fit_val": "66946d9dd21d52b589633e074dd77f6dc37182296c50d0d9cda556d87909fe60",
+     "select": "d4ca618b10acb638d649758b9de013d7d83e98814960cd4f0b56923460eb90f9",
+     "test": "d01d249f9581b139871683b786b8b1a51b0b0e330feb385de42d7f7ac04380ff"
+    },
+    "run_name": "split_02",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 2,
+    "unit_sha256": "e66d87044d9c2ae52b1033106b3aa00912199e6dfde72daa0ceffe78bae19114"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "2fc8180063466922b2d7c1ccba65bfb07c4da55785ef552ca95bbef46c1be614"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "448ed8115a98649be8a43bfc0d1cb1cf82118759baf150f61cd0ced889cbba4d"
+     }
+    },
+    "identities": {
+     "config_sha256": "63a0ef3802b568d3afe4fb67d77317ec6445625f240234c89f7fd7ac64c9f353",
+     "prepared_fingerprint": "9d0ae58d732b23268f2600af76a898385f510d5a89cfe678e889affaece51d36",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "448ed8115a98649be8a43bfc0d1cb1cf82118759baf150f61cd0ced889cbba4d"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_03_splits.npz",
+     "roman_empire_split_03_official_splits.npz",
+     "roman_empire_split_03_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "f4ec8404e0d82c9518ff8a5bae00747299c0d63d334492875385e0feb4db8ef6",
+     "compare": "02d57a5bc40d3491862a3fd763e12bcae2e93d60be1eecdce07f02c75267fa6a",
+     "confirm": "1f81b9a43c34cc27f304ef1e64361e52fc54d49802446efc57c87be0340d4f97",
+     "explore": "ff062890d7ee5ccb06337f28450d035031ed9cedf286128f59e3bcbd9b6e9c97",
+     "fit": "74a56ae9afc36f08c0dc32cf43cea4b3323ad855e611f5f5e32721671ab6f0b9",
+     "fit_train": "8648c22f976b3fc3fad572ba5267f5322fa0f1602b59510c386e4b65c57a36a6",
+     "fit_val": "32c804f3d88da9a5f04ac4e7cebb0282764671351f2f29e03f506097176a77b4",
+     "select": "c03d0574843dcf4237ace706cf4652a8fc6bb9445c0cfe477a0122f2e6e4711b",
+     "test": "0fe6357bdf3303e39fb234f7bd4cf338f245c93dff34c111a52ade52db81a016"
+    },
+    "run_name": "split_03",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 3,
+    "unit_sha256": "448ed8115a98649be8a43bfc0d1cb1cf82118759baf150f61cd0ced889cbba4d"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "6705a6f8631a5ea8bb49d932abc6f489da304cf7aeb2e0adc206c930694e7474"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "fb4d944332480410dae957886954216f187ce0728d8e58cf7274d37189577196"
+     }
+    },
+    "identities": {
+     "config_sha256": "084dde6e8424759db25342f9fed7a6d125c0882a4cba95a0a7fef69d006c15ad",
+     "prepared_fingerprint": "d49c561b1e33d6831b83f61d430e2ee729335bc6c087727c97cece55175167af",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "fb4d944332480410dae957886954216f187ce0728d8e58cf7274d37189577196"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_04_splits.npz",
+     "roman_empire_split_04_official_splits.npz",
+     "roman_empire_split_04_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "c209b95f43ea58aae1ebf98644c307b3a67cabc9e848f427f8575737456e53c4",
+     "compare": "480c51967517856a57f217852b6bafa5b1b22d2c482d1703964d5b5714fbb325",
+     "confirm": "80272ca1292b501a6e5f2a39de495dd6909aa3d326b52627df3a157c9399abeb",
+     "explore": "1b207849f1653233af43644eda19579491860b32cbd38b7fa7a692e34eea7ac5",
+     "fit": "8a4612162e8facb92a65be18dc35986622179d8ab197c42ec138af2dc2665d5b",
+     "fit_train": "e96ed24c71bda83343681177331dd3c56edb2d5d8f5691d3b36a67023967acb6",
+     "fit_val": "708ea1fdfaa8f5e8e813a12b123344b9a67ced5fffc6a7ca7f7680923500dc8d",
+     "select": "0d42f10096adc55e155b004245849720b822a52e1454b682a9e35143d5c012cc",
+     "test": "59d8aaab30e690b7b15b0fcb6d079a88457bbe27b625fc50a6d789c934881b1d"
+    },
+    "run_name": "split_04",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 4,
+    "unit_sha256": "fb4d944332480410dae957886954216f187ce0728d8e58cf7274d37189577196"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "b86365c6fd27c7b5072e16388d72cc68426cf0c7fac75209c99f3cad460675aa"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "a6b79ab5bc1fec1aafa1e1d6d65f1a4da6542d9c7135894dbd010569b1754831"
+     }
+    },
+    "identities": {
+     "config_sha256": "55018cf164e62ea6c5dbe92e6d6a9f84e9ed9d1ca94a0d4ac58d26345f093756",
+     "prepared_fingerprint": "1e3ec7991b13b1d438dabf2d4b209c02f6ba2ee53de50e4698fa21e0f7bb5f7f",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "a6b79ab5bc1fec1aafa1e1d6d65f1a4da6542d9c7135894dbd010569b1754831"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_05_splits.npz",
+     "roman_empire_split_05_official_splits.npz",
+     "roman_empire_split_05_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "328dcd0af948ab80acf6fd7f032210003fc2f72020b9abff74eb537e0ec3f4c8",
+     "compare": "235735d66d3eafd8803f9209c9e4b9ee8eeea85e8027b8e15e452a1ed4a589a4",
+     "confirm": "b9343a2ef4fef9ccc622fb1d70aa97a1d5be3062fa409a10f7e707baedf27f51",
+     "explore": "9a27fa1124a7f02ced820051541e5af823bd59109cde3840498df05ebfada6e4",
+     "fit": "19baad5ca2ecb9b3867b1a89cbee273cb482c1413d8ed43fcaced276b8f97ada",
+     "fit_train": "5b81a4d6aa21daf0bc8646f92b59ecd4509c0eb7254d864e112d2cddee9c707f",
+     "fit_val": "aa8251520c026fa19d3e19340d7bd63f34934c826fa0edf608530669affb3718",
+     "select": "e47f914532c1bc3292f703d362fad10714fbdfcaba9061b0578423ea0f4be9d4",
+     "test": "84457d21c707ddf2144ccd8a89dfe62e514d71eea7d8955fd15e354def59ef6e"
+    },
+    "run_name": "split_05",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 5,
+    "unit_sha256": "a6b79ab5bc1fec1aafa1e1d6d65f1a4da6542d9c7135894dbd010569b1754831"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "c1f64959be9501ca97ed2fcd557a19da033c5a19794ef5c95a39288ac885fd88"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "df38a5a3ebffd62e58ff09b019dfbcc31fc90fe4d6b379ea103d2b4dca847857"
+     }
+    },
+    "identities": {
+     "config_sha256": "cbdd58b7246ea25c6bfde305b4ddf97bfe3d8a8eba81fac1cb44b0d0e54af2a4",
+     "prepared_fingerprint": "f51c10be43217b7d51ee6f5dc37aa5f8bda4cda899ace71daf883b50aba4b60a",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "df38a5a3ebffd62e58ff09b019dfbcc31fc90fe4d6b379ea103d2b4dca847857"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_06_splits.npz",
+     "roman_empire_split_06_official_splits.npz",
+     "roman_empire_split_06_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "e8d392f965d1e6926b381a14b82f4d85b8351c4922dfba09f111ba4fd558b982",
+     "compare": "7e010d54b023b7773355c68c8f78ccd26e21859b5186ab6171528b981a9b1dae",
+     "confirm": "467af7f97ab3910d314c22dba28d01aae3689883b834ec9b71f245dcdccd1c96",
+     "explore": "bc77ed081768a7a8f7eb02da1de1f2712f2c0f9d3b4465e7ffca9c767aa66457",
+     "fit": "ae0dc3013feea1a9741dd82cb8a89af516b96c3d1300bb047b00a96735d2f8b5",
+     "fit_train": "82b10cdc8eeda7f2d0b96c851980f9797c5cc95a648083eebf2bef31d941f3b5",
+     "fit_val": "ae5584933b9e499b40c0f31a84afb81e0b4bc740b0dae0301c77f5483bf28571",
+     "select": "a1c064448a3166bacfad0f87b795073dbbe56a230416471c6597657ca5575aa7",
+     "test": "ed20bf77cc9e4958a49741f96e91157be8b3c27865c0237c3514247a04d4b20c"
+    },
+    "run_name": "split_06",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 6,
+    "unit_sha256": "df38a5a3ebffd62e58ff09b019dfbcc31fc90fe4d6b379ea103d2b4dca847857"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "f79bef032eb14867b4f66c090f4e8c93b10116e86ef00f3a2b5277475171b50d"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "654bd90db7db18d5694830f1f9a97c7cbf7e10b9b12ce36842a378fcb5f2dd56"
+     }
+    },
+    "identities": {
+     "config_sha256": "f12963e78fc2a2793cf7a020b832ccd3b2d22c9dbd149e451198711ae5011b71",
+     "prepared_fingerprint": "c7cbd26c070b94f75180c5779073aaf1a697007b45a3b3177fed9e4e612ef44f",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "654bd90db7db18d5694830f1f9a97c7cbf7e10b9b12ce36842a378fcb5f2dd56"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_07_splits.npz",
+     "roman_empire_split_07_official_splits.npz",
+     "roman_empire_split_07_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "4cea97485bf1955e8bf34f34cf0c2b4e9300314898d1bebcd40bb9772f29a51d",
+     "compare": "56d1b979c32612b821c379778b4fa55df749d2df84f8fd69f575262dbba4d90c",
+     "confirm": "670ecd7455508bd0ca359517e6cc86f2d681a210bfb80131d61864022ee72070",
+     "explore": "d8be239203070d7988a3b2773d3b7d1f9bba014c4e985f6f8c87fe6468acb9fb",
+     "fit": "a7e8b8d9c56b1656f6cc171c6185f4d5be31f80535a2a73a979bed0dd7288405",
+     "fit_train": "e4d278381bab358189b98c1286f76d6b4514939bb2777b513cabf1df38e2d58b",
+     "fit_val": "721b174160cd4d3fe3700fea05178a18ec5835a08627f653de9b70ce9617de6c",
+     "select": "9648101b9b9326a236d1246019e70a0f21c879f177539da16b336b15505b1c31",
+     "test": "91def39de8002f6f7f65c9f674579eb87934479d4c8b4b4ed443017ef8df7a66"
+    },
+    "run_name": "split_07",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 7,
+    "unit_sha256": "654bd90db7db18d5694830f1f9a97c7cbf7e10b9b12ce36842a378fcb5f2dd56"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "b60cff1127538b02e806efc71e339fe077694f18ab1aee46a612c2818b871059"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "4c75e90135c6f050941c22b2d733865e91937c92b52f77890336c9b96a955b0b"
+     }
+    },
+    "identities": {
+     "config_sha256": "6248c758d4ed820669c4f1f4ac202f7632376cf4a595ae61051948b242ed234e",
+     "prepared_fingerprint": "a37319c60beeff993d1622c8c5383807c7734751915b8eab475c3ab2be1a383e",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "4c75e90135c6f050941c22b2d733865e91937c92b52f77890336c9b96a955b0b"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_08_splits.npz",
+     "roman_empire_split_08_official_splits.npz",
+     "roman_empire_split_08_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "efadc13849762e36d3aa3a3e4604031a26d8e6c3595d3e7240415cc1de856975",
+     "compare": "3dfc7f7bd574e9464fe6ef353c5d1dde804b06a8e21a5a70a03cb5c680f47a32",
+     "confirm": "7ae036944c295f49734d7f0f2499b3ab0506c4fed8a5b34bd7cedfd83be17547",
+     "explore": "6679f0ad0b690b7e82ecfefa2c1cc56f458bfadb6af4e0f2a5bab866a5f282b2",
+     "fit": "8c442f73d60cff3885b6a5335230a649ddeda74075b259dc8ff81f8503851efd",
+     "fit_train": "c5d9ec27d534110789d7a436af45669e3d7fb1d376aff5e92fb15c1536f121b4",
+     "fit_val": "31950f3138d3a6ac73e5b482699e87f5ae05fd9adeab0fa3c60220f35e9c5ca0",
+     "select": "5fcb944b7885583e9cfb31b3877702133f0d244ef7fa695628619d54e1cc7a6e",
+     "test": "6def3fb79757fec2563cadc39ca5d3b394f5fa8dce6f5eaaa36420cdf1b145fb"
+    },
+    "run_name": "split_08",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 8,
+    "unit_sha256": "4c75e90135c6f050941c22b2d733865e91937c92b52f77890336c9b96a955b0b"
+   },
+   {
+    "arrays": {
+     "clusters.npz": {
+      "bytes": 181572,
+      "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+     },
+     "official_splits.npz": {
+      "bytes": 182042,
+      "sha256": "4028d1d6b6aa3013d48789c42c197bab6c444aa19c43efadac15a8715ac50045"
+     },
+     "splits.npz": {
+      "bytes": 237900,
+      "sha256": "7d349a3077fca838e7bf1fc846a8cb1c70b4768da91170cc2554a95d9d13f7a6"
+     }
+    },
+    "identities": {
+     "config_sha256": "f41146de176fd89d5b95f7ca18a9b0404fc54002ee073eb8c7ba5273fdbcb5c2",
+     "prepared_fingerprint": "774071df2489c46da47e58596ad043c8c96ceadc6fd6e40e7c977312c501f285",
+     "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+     "unit_sha256": "7d349a3077fca838e7bf1fc846a8cb1c70b4768da91170cc2554a95d9d13f7a6"
+    },
+    "index_arrays_copied": [
+     "roman_empire_split_09_splits.npz",
+     "roman_empire_split_09_official_splits.npz",
+     "roman_empire_split_09_clusters.npz"
+    ],
+    "role_hashes": {
+     "admit": "c04cb15baf0627a1994e49d875525bf92a15df7103597dc18ef6fab512815d55",
+     "compare": "edcdb77712e9488e84fbab4f8262935f809dec14040ab4db0fb66b505257cd8c",
+     "confirm": "e82ca64f97ba0b49e41c79e8ee19abf5e8c3caf5a6fd8e20248080ea5c43c7f0",
+     "explore": "725f6c5f8eb18eb55de0e1b63f3953c11c177ba7410514498c955a84828ae171",
+     "fit": "f1b31c4877f666290fa8b69ae50c3f3bed3e346c2c5c0b9d754ca25eef25ca7c",
+     "fit_train": "cbf29d5381eb4d35070197f304715bbedc99eadc67e2439999c91f10a96cebef",
+     "fit_val": "744a90ffb56a06e8cb6e2fb0b98e053874dfc0dffdbca9ad88736950c76b5dea",
+     "select": "0a35b15558cbfb2c37fda2a10d91f747a85b1a43ac3d11c31aba1567725d737b",
+     "test": "3f7062f7a8ba9e8195199e4aac0aec86d581d2d703ca1ea960a11aaf6ca89e5e"
+    },
+    "run_name": "split_09",
+    "sizes": {
+     "admit": 5665,
+     "compare": 567,
+     "confirm": 567,
+     "explore": 2266,
+     "fit": 6798,
+     "fit_train": 6119,
+     "fit_val": 679,
+     "select": 1133,
+     "test": 5666
+    },
+    "split_index": 9,
+    "unit_sha256": "7d349a3077fca838e7bf1fc846a8cb1c70b4768da91170cc2554a95d9d13f7a6"
+   }
+  ],
+  "splits": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ]
+ },
+ "data_kind": "Roman-empire",
+ "dataset": "Roman-empire",
+ "environment": {
+  "cuda_runtime": null,
+  "cudnn_deterministic": false,
+  "deterministic_algorithms_enabled": false,
+  "device": "cpu",
+  "gpu": null,
+  "machine": "x86_64",
+  "numpy": "2.3.5",
+  "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+  "precision": "fp32",
+  "python": "3.12.16",
+  "python_implementation": "CPython",
+  "tf32_matmul": false,
+  "torch": "2.10.0+cpu"
+ },
+ "identities": {
+  "config_sha256": "9b767054fe888963a10e705031fc39367f2759cc0ba5bea4a7ed6e3efc24e170",
+  "prepared_fingerprint": "a89308e3f5a9bbda4b21ba07d73d20fe6fef0c61ffff61f1e58b08ce52cb9a9e",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+  "unit_sha256": "2cece3f260bf0d061ce1aad8e5480f073cdc476ab6343cc36536ac641bccd226"
+ },
+ "index_arrays_copied": [
+  "roman_empire_split_00_splits.npz",
+  "roman_empire_split_00_official_splits.npz",
+  "roman_empire_split_00_clusters.npz",
+  "roman_empire_split_01_splits.npz",
+  "roman_empire_split_01_official_splits.npz",
+  "roman_empire_split_01_clusters.npz",
+  "roman_empire_split_02_splits.npz",
+  "roman_empire_split_02_official_splits.npz",
+  "roman_empire_split_02_clusters.npz",
+  "roman_empire_split_03_splits.npz",
+  "roman_empire_split_03_official_splits.npz",
+  "roman_empire_split_03_clusters.npz",
+  "roman_empire_split_04_splits.npz",
+  "roman_empire_split_04_official_splits.npz",
+  "roman_empire_split_04_clusters.npz",
+  "roman_empire_split_05_splits.npz",
+  "roman_empire_split_05_official_splits.npz",
+  "roman_empire_split_05_clusters.npz",
+  "roman_empire_split_06_splits.npz",
+  "roman_empire_split_06_official_splits.npz",
+  "roman_empire_split_06_clusters.npz",
+  "roman_empire_split_07_splits.npz",
+  "roman_empire_split_07_official_splits.npz",
+  "roman_empire_split_07_clusters.npz",
+  "roman_empire_split_08_splits.npz",
+  "roman_empire_split_08_official_splits.npz",
+  "roman_empire_split_08_clusters.npz",
+  "roman_empire_split_09_splits.npz",
+  "roman_empire_split_09_official_splits.npz",
+  "roman_empire_split_09_clusters.npz"
+ ],
+ "is_benchmark_data": true,
+ "packages": {
+  "CairoSVG": "2.9.1",
+  "Jinja2": "3.1.6",
+  "MarkupSafe": "3.0.3",
+  "attrs": "26.1.0",
+  "cairocffi": "1.7.1",
+  "certifi": "2026.10.19",
+  "cffi": "2.1.1",
+  "charset-normalizer": "3.5.2",
+  "cloudpickle": "3.1.2",
+  "contourpy": "1.3.3",
+  "cssselect2": "0.10.1",
+  "cycler": "0.12.1",
+  "defusedxml": "0.7.1",
+  "filelock": "4.2.4",
+  "fonttools": "4.61.1",
+  "fsspec": "2026.9.0",
+  "idna": "3.19",
+  "joblib": "1.5.3",
+  "jsonschema": "4.26.0",
+  "jsonschema-specifications": "2025.9.1",
+  "kiwisolver": "1.4.9",
+  "littleutils": "0.2.4",
+  "matplotlib": "3.10.8",
+  "mpmath": "1.3.0",
+  "narwhals": "2.28.0",
+  "networkx": "3.7",
+  "numpy": "2.3.5",
+  "ogb": "1.3.6",
+  "outdated": "0.2.2",
+  "packaging": "26.3",
+  "pandas": "2.2.3",
+  "pillow": "12.3.0",
+  "pip": "25.0.1",
+  "pycparser": "3.11",
+  "pymetis": "2025.2.2",
+  "pyparsing": "3.3.2",
+  "python-dateutil": "2.9.0.post0",
+  "pytz": "2026.6",
+  "referencing": "0.37.0",
+  "requests": "2.34.2",
+  "rpds-py": "2026.9.1",
+  "scikit-learn": "1.8.0",
+  "scipy": "1.17.0",
+  "setuptools": "84.1.0",
+  "six": "1.17.0",
+  "sympy": "1.14.0",
+  "threadpoolctl": "3.6.0",
+  "tinycss2": "1.5.1",
+  "torch": "2.10.0+cpu",
+  "tqdm": "4.70.1",
+  "typing_extensions": "4.16.0",
+  "tzdata": "2026.5",
+  "urllib3": "2.8.0",
+  "webencodings": "0.6.1"
+ },
+ "policy_lock": {
+  "comparator_hash": "76e67171038c25a713e8935f77da45cf435ed39d0b9e5bba86fc1fbb85be8089",
+  "deployed_hash": "76e67171038c25a713e8935f77da45cf435ed39d0b9e5bba86fc1fbb85be8089",
+  "model_hashes": {
+   "fit/full/controller.pt": "e84d033bfd7ac6c9aac2f336613b767bc6b3b44a8c34669c282a533ba372599c",
+   "fit/lean/controller.pt": "3990d0a8cb5c655e964de924c2ba1da7aa611996372733af11a78dabb3e6febb",
+   "train/plant_seed1_best.pt": "0d7ab9d0b88557924790b7b0438a3a7b5b5daf3c7e668dd20abf4094caf5e342",
+   "train/plant_seed2_best.pt": "77ae92d40a77ca2a02d1424e545417630f94fd0255d60275e2a3b87100146903",
+   "train/q0_seed1_best.pt": "6a45aa86f8838a7ea6324674b1417fe5a6a6b877edfc828f155abc131a859663",
+   "train/q0_seed2_best.pt": "2da553b558dec8744d9fe6d35aaf2c7a3d94325b5fa2cdd08a963e2c2f6df842"
+  }
+ },
+ "profile": "pilot",
+ "run_name": "roman_empire",
+ "schema": "cross-morse-run-manifest-1",
+ "scientific_run": false,
+ "seeds": {
+  "bootstrap_seeds": {
+   "admission": 314165,
+   "final": 314166,
+   "selection": 314163
+  },
+  "ensemble_seeds": {
+   "qC": [
+    1,
+    2
+   ],
+   "qD": [
+    1,
+    2
+   ]
+  },
+  "partition_seed": 314159,
+  "split_index": 0,
+  "training_seeds": [
+   1,
+   2
+  ]
+ },
+ "source_data": {
+  "num_features": 300,
+  "num_graphs": 1,
+  "num_nodes": 22662,
+  "num_outputs": 18,
+  "source": "official_heterophilous_graphs_npz",
+  "source_array_hashes": {
+   "edge_index": "5e61986c54282830a01039b71144c07ce47058aab2236f52e498018dfa9890f8",
+   "x": "8bf88a5fb856036c25a9117593d51bb4595de3f3c82aef7877027c89cb3c3364",
+   "y": "97cd1de0d15aff2150adc32329afd59563c08009e9952928f25c981dc2d1dd7b"
+  }
+ },
+ "splits": {
+  "arrays": {
+   "clusters.npz": {
+    "bytes": 181572,
+    "sha256": "914fd7d1c3251ce56db3e84e9c2e64648b051eb2e632e999246c2ea8b12aebd7"
+   },
+   "official_splits.npz": {
+    "bytes": 182042,
+    "sha256": "cb42bfe531ee4fc0df2490079d81e9adb161983d7860545b8db68a718611a154"
+   },
+   "splits.npz": {
+    "bytes": 237900,
+    "sha256": "2cece3f260bf0d061ce1aad8e5480f073cdc476ab6343cc36536ac641bccd226"
+   }
+  },
+  "comparison_reserved_at": "prepare",
+  "graph_role_hashes": null,
+  "independent_graphs": false,
+  "official_split_axis": "node",
+  "official_split_hashes": {
+   "test": "d9b1a973965bb3ec473644f341e5e484b36d83a5d38c5d57946123a895df959a",
+   "train": "45e6a4160751058026cb028443b7079997c2a01fc47724dfddc021ab75ecad92",
+   "valid": "86242fa93b8e5770d5cdb2934a4bdae1c821f7fbc6e5d32d495cbc506f1b007e"
+  },
+  "role_hashes": {
+   "admit": "86242fa93b8e5770d5cdb2934a4bdae1c821f7fbc6e5d32d495cbc506f1b007e",
+   "compare": "22dceeecefc22560e0af477d9650693b72bff830c3241d5c3e9aeaf78d248f74",
+   "confirm": "a747887b33268c4822d0a548bb4d6f58885a592e049e4fd73feffd774f085fb8",
+   "explore": "2cddaec59561e8afe9e84123efcbc8112dd12756869e1b0d1d86d27d1feb2eba",
+   "fit": "ff6885ea3ed022d863fe343b6cb1c9d75e6bcf4244a2acdde7e071ff4fa3e10b",
+   "fit_train": "9757b07f7af171e3050a10438422bd64b90bdfb0a4675d17f44e938f01354ae1",
+   "fit_val": "c994eb4ba13db47e87abe297a2463f8f5ed456643f4ce437ddbfdf5fcfed7bc7",
+   "select": "81cb3af991e030e5a4768bc5ec73285989e3e2ace09e89fe68aed106a21e64a5",
+   "test": "d9b1a973965bb3ec473644f341e5e484b36d83a5d38c5d57946123a895df959a"
+  },
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": {
+   "admit": 5665,
+   "compare": 567,
+   "confirm": 567,
+   "explore": 2266,
+   "fit": 6798,
+   "fit_train": 6119,
+   "fit_val": 679,
+   "select": 1133,
+   "test": 5666
+  },
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "statistical_unit": "METIS core",
+  "unit": "node"
+ }
+}

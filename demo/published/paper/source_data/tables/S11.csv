@@ -1,0 +1,5 @@
+provisional route,held-out contrast,practical margin,pass output,fail/equality output
+state-conditioned route,conditional state destruction,0.002 nats,state-conditioned route,strongest open-loop predecessor (q_C)
+radius,radius minus deterministic one-step,0.0015 nats,radius,"one-step if one-step ∈ Q_s, otherwise q_C"
+MPC-RH,MPC-RH minus MPC-OL,0.002 nats,MPC-RH,"MPC-OL if MPC-OL ∈ Q_s, otherwise q_C"
+Full profile,Full retained effect minus Lean,0.02 fraction,Full,"Lean if Lean ∈ Q_s, otherwise q_C"

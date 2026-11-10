@@ -1,0 +1,8 @@
+dataset,mechanism,fallback_fraction,expected_serial_cost,marker_area
+ogbn-arxiv,comparator/nominal,1.0,1.0,8.0
+ogbn-proteins,comparator/learned stop,1.0,1.1671080487513767,9.336864390011014
+ogbn-products,comparator/learned stop,1.0,1.9901596977294511,15.921277581835609
+Roman-empire,comparator/nominal,1.0,1.1175428176120379,8.940342540896303
+PascalVOC-SP,comparator/nominal,1.0,1.0,8.0
+COCO-SP,comparator/nominal,1.0,2.0,16.0
+Peptides-func,comparator/nominal,1.0,2.0,16.0

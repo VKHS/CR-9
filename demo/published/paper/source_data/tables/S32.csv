@@ -1,0 +1,10 @@
+Policy,information available at decision time,completion and budget rule
+fixed depth / phase / fixed sequence,registered schedule; initial input where specified,explicit ending state or remaining nominal sites; tuned on development data
+larger q_C ensemble,as q_C,"ensemble size raised to the ceiling on the registered grid E ∈ {1, 2, 4, 8, 12}; fractional sizes are not executable"
+initial-input schedule predictor,initial graph and features; capacity matched to the critic,"predicts the complete supported sequence once, trained on development-oracle sequences"
+initial-input distillation,initial graph and features; development feedback trajectories as targets,no feedback at evaluation; student prediction and full execution charged
+MPC-OL,initial estimated state,"lookahead H at site 0, then the declared tail"
+no-observation replanning,"initial input, executed actions and model-predicted states",re-solves the objective at every site with the same model calls as MPC-RH; never assimilates measurements
+one-step / radius / MPC-RH,current label-free measurements and history,registered profiles; cost of sensing and search charged
+budget-aware q_B,cheap measurements every site; Lean or Full profile on trigger,certificate of main Proposition 9 with τ = 0.002; reserved comparator restart; late abort to q_C
+oracle replay,stored feedback sequence or label-informed search,exact execution check; never a deployable competitor

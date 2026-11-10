@@ -1,0 +1,8 @@
+dataset,effect_nats,low,high,loss,interval_kind
+ogbn-arxiv,0.0,,,CE,comparator identity; no statistical interval
+ogbn-proteins,0.0,,,BCE,comparator identity; no statistical interval
+ogbn-products,0.0,,,CE,comparator identity; no statistical interval
+Roman-empire,0.0,,,CE,comparator identity; no statistical interval
+PascalVOC-SP,0.0,,,CE,comparator identity; no statistical interval
+COCO-SP,0.0,,,CE,comparator identity; no statistical interval
+Peptides-func,0.0,,,BCE,comparator identity; no statistical interval

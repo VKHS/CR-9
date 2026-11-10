@@ -1,0 +1,8 @@
+Dataset,|Q|,|Qs|,rmax,eps_eq + 2 rmax,slack with 12 finalists,resamples,interpretation
+arxiv,4,0,0.0526,0.1071,0.4421,500,comparator/simple route
+proteins,1,0,0.0000,0.0020,0.0129,500,comparator/simple route
+products,0,0,0.0000,0.0020,0.4777,500,comparator/simple route
+Roman,0–23,0,0.0774,0.1569,0.1999,500,comparator/simple route
+Pascal,1,0,0.1454,0.2928,0.7029,500,comparator/simple route
+COCO,12,0,0.2014,0.4047,0.4047,500,comparator/simple route
+Peptides,0,0,0.0000,0.0020,0.0743,500,comparator/simple route

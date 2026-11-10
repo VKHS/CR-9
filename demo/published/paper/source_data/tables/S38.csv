@@ -1,0 +1,13 @@
+field,values,role
+dataset,one of the seven benchmarks,key
+backbone,"frozen plant or substituted backbone (Table S5, S25)",key
+checkpoint / ensemble,checkpoint identifiers and the ensemble they form (E); repeated evaluations are separate records,key
+policy,"q_C (with its family and the selected rule), q̂_s, q_M, q̃_M, q_D, a comparator of Table S15 or an experimental arm (E2–E20)",key
+execution profile,"Lean, Full, inserted-site parameters, truncation order T and resolvent frequency actually executed",key
+data stage,"D_fit, D_explore, D_select, D_confirm, D_compare, D_admit (validation), D_test; graph or cluster identities attached",not a record column
+statistical unit,"complete graph, buffered cluster (buffer in hops), official split, optimization seed",not a record column
+evaluation protocol,"loss (clipped or unclipped, B), official metric, pairing, resampling hierarchy (E16)",value
+unrounded score and paired effect,native units; paired to the comparator record,value
+uncertainty,interval with its resampling procedure and level,value
+actual cost,"serial work, wall time (protocol of E17), fitting cost with its accounting unit",value
+observation identifier,path to the log or trace that produced the record,provenance

@@ -1,0 +1,84 @@
+group,path,computed,reported,status,note
+main_table_1_policy_and_deployment_ledger,ogbn-arxiv/loss_effect_nats,0.0,-0.0045,differs,
+main_table_1_policy_and_deployment_ledger,ogbn-arxiv/loss_effect_interval_nats,,"[-0.0075, -0.0015]",missing,
+main_table_1_policy_and_deployment_ledger,ogbn-proteins/loss_effect_nats,0.0,-0.0038,differs,
+main_table_1_policy_and_deployment_ledger,ogbn-proteins/loss_effect_interval_nats,,"[-0.0068, -0.0008]",missing,
+main_table_1_policy_and_deployment_ledger,ogbn-products/loss_effect_nats,0.0,0.0,exact,
+main_table_1_policy_and_deployment_ledger,ogbn-products/loss_effect_interval_nats,,,exact,
+main_table_1_policy_and_deployment_ledger,Roman-empire/loss_effect_nats,0.0,-0.00572,differs,
+main_table_1_policy_and_deployment_ledger,Roman-empire/loss_effect_interval_nats,,"[-0.0089, -0.0026]",missing,
+main_table_1_policy_and_deployment_ledger,PascalVOC-SP/loss_effect_nats,0.0,-0.00842,differs,
+main_table_1_policy_and_deployment_ledger,PascalVOC-SP/loss_effect_interval_nats,,"[-0.0128, -0.0041]",missing,
+main_table_1_policy_and_deployment_ledger,COCO-SP/loss_effect_nats,0.0,-0.00905,differs,
+main_table_1_policy_and_deployment_ledger,COCO-SP/loss_effect_interval_nats,,"[-0.0127, -0.0054]",missing,
+main_table_1_policy_and_deployment_ledger,Peptides-func/loss_effect_nats,0.0,-0.00303,differs,
+main_table_1_policy_and_deployment_ledger,Peptides-func/loss_effect_interval_nats,,"[-0.0047, -0.0013]",missing,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/label,a,a,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/title,Deployment settings in which the backbone stays frozen,Deployment settings in which the backbone stays frozen,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/0/name,Compiled or certified backbone,Compiled or certified backbone,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/0/description,"quantized and synthesized to an
+accelerator, or validated under a
+release process. Retraining forces
+re-synthesis and re-validation; a
+runtime wrapper on the aggregation call
+does not.","quantized and synthesized to an accelerator, or validated under a release process. Retraining forces re-synthesis and re-validation; a runtime wrapper on the aggregation call does not.",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/0/backbone_box,"[""frozen backbone"", ""\u03b8, update, head,\nprecision unchanged""]","[""frozen backbone"", ""\u03b8, update, head, precision unchanged""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/0/adapter_box,"[""adapter"", ""reads H_\u2113\nwraps A_\u2113""]","[""adapter"", ""reads H_\u2113 wraps A_\u2113""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/1/name,Shared pretrained backbone,Shared pretrained backbone,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/1/description,"one checkpoint served to downstream
+users who hold neither the training data
+nor the right to retrain it.",one checkpoint served to downstream users who hold neither the training data nor the right to retrain it.,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/1/backbone_box,"[""frozen backbone"", ""\u03b8, update, head,\nprecision unchanged""]","[""frozen backbone"", ""\u03b8, update, head, precision unchanged""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/1/adapter_box,"[""adapter"", ""reads H_\u2113\nwraps A_\u2113""]","[""adapter"", ""reads H_\u2113 wraps A_\u2113""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/2/name,"One backbone, heterogeneous inputs","One backbone, heterogeneous inputs",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/2/description,"graphs of different size, degree and
+homophily reach one model; the useful
+amount of transport varies per input, so
+one schedule cannot track it.","graphs of different size, degree and homophily reach one model; the useful amount of transport varies per input, so one schedule cannot track it.",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/2/backbone_box,"[""frozen backbone"", ""\u03b8, update, head,\nprecision unchanged""]","[""frozen backbone"", ""\u03b8, update, head, precision unchanged""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_a/settings/2/adapter_box,"[""adapter"", ""reads H_\u2113\nwraps A_\u2113""]","[""adapter"", ""reads H_\u2113 wraps A_\u2113""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/label,b,b,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/0/title,"schedule adequate (arxiv, proteins, products, Roman, Pascal, COCO, Peptides)",schedule adequate (products),differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/0/y_label,risk (illustrative),risk (illustrative),exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/0/x_tick_labels,"[""0"", ""L""]","[""0"", ""L""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/0/annotations,"[""one open-loop\ndepth serves\nevery input""]","[""one open-loop depth serves every input""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/0/common_risk_minimizer,True,True,exact,"Read from the stylized curves; a structural property of the illustration, not a measurement."
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/x_label,propagation depth ℓ,propagation depth ℓ,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/1/title,feedback valuable (no datasets),feedback valuable (six datasets),differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/1/y_label,risk (illustrative),risk (illustrative),exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/1/x_tick_labels,"[""0"", ""L""]","[""0"", ""L""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/1/annotations,"[""state feedback\npicks the next\ntransport per input"", ""best fixed\nschedule misses\ninput-dependent\nminima""]","[""state feedback picks the next transport per input"", ""best fixed schedule misses input-dependent minima""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_b/families/1/common_risk_minimizer,False,False,exact,"Read from the stylized curves; a structural property of the illustration, not a measurement."
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/label,c,c,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/title,Measured: deployed rule versus q_C (Table 2),Measured: deployed rule versus q_C (Table 2),exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/legend,"[""open-loop schedule retained"", ""uncertainty-radius feedback"", ""receding-horizon replanning""]","[""open-loop schedule retained"", ""uncertainty-radius feedback"", ""receding-horizon replanning""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/x_label,"paired CE or BCE effect vs q_C on D_test (nats, 95%)","paired CE or BCE effect vs q_C on D_test (nats, 95%)",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/zero_line_nats,0.0,"{""$value"": 0.0, ""$decimals"": 6}",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/0/label,"[""arxiv"", ""returns q_C""]","[""arxiv"", ""radius, E=4""]",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/0/category,open-loop schedule retained,uncertainty-radius feedback,differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/0/effect_nats,0.0,"{""$value"": -0.0045, ""$decimals"": 5}",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/0/interval_nats,,"[{""$value"": -0.0075, ""$decimals"": 4}, {""$value"": -0.0015, ""$decimals"": 4}]",missing,A returned comparator is the exact comparator identity; no statistical interval is drawn.
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/1/label,"[""proteins"", ""returns q_C""]","[""proteins"", ""radius, E=4""]",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/1/category,open-loop schedule retained,uncertainty-radius feedback,differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/1/effect_nats,0.0,"{""$value"": -0.0038, ""$decimals"": 5}",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/1/interval_nats,,"[{""$value"": -0.0068, ""$decimals"": 4}, {""$value"": -0.0008, ""$decimals"": 4}]",missing,A returned comparator is the exact comparator identity; no statistical interval is drawn.
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/2/label,"[""products"", ""returns q_C""]","[""products"", ""returns q_C""]",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/2/category,open-loop schedule retained,open-loop schedule retained,exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/2/effect_nats,0.0,"{""$value"": 0.0, ""$decimals"": 5}",exact,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/2/interval_nats,,,exact,A returned comparator is the exact comparator identity; no statistical interval is drawn.
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/3/label,"[""Roman"", ""returns q_C""]","[""Roman"", ""MPC-RH, E=4""]",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/3/category,open-loop schedule retained,receding-horizon replanning,differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/3/effect_nats,0.0,"{""$value"": -0.00572, ""$decimals"": 5}",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/3/interval_nats,,"[{""$value"": -0.0089, ""$decimals"": 4}, {""$value"": -0.0026, ""$decimals"": 4}]",missing,A returned comparator is the exact comparator identity; no statistical interval is drawn.
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/4/label,"[""Pascal"", ""returns q_C""]","[""Pascal"", ""MPC-RH, E=8""]",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/4/category,open-loop schedule retained,receding-horizon replanning,differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/4/effect_nats,0.0,"{""$value"": -0.00842, ""$decimals"": 5}",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/4/interval_nats,,"[{""$value"": -0.0128, ""$decimals"": 4}, {""$value"": -0.0041, ""$decimals"": 4}]",missing,A returned comparator is the exact comparator identity; no statistical interval is drawn.
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/5/label,"[""COCO"", ""returns q_C""]","[""COCO"", ""MPC-RH, E=8""]",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/5/category,open-loop schedule retained,receding-horizon replanning,differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/5/effect_nats,0.0,"{""$value"": -0.00905, ""$decimals"": 5}",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/5/interval_nats,,"[{""$value"": -0.0127, ""$decimals"": 4}, {""$value"": -0.0054, ""$decimals"": 4}]",missing,A returned comparator is the exact comparator identity; no statistical interval is drawn.
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/6/label,"[""Peptides"", ""returns q_C""]","[""Peptides"", ""radius, E=4""]",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/6/category,open-loop schedule retained,uncertainty-radius feedback,differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/6/effect_nats,0.0,"{""$value"": -0.00303, ""$decimals"": 5}",differs,
+supplementary_figure_S13_motivating_settings_and_schedule_adequacy,panel_c/rows/6/interval_nats,,"[{""$value"": -0.0047, ""$decimals"": 4}, {""$value"": -0.0013, ""$decimals"": 4}]",missing,A returned comparator is the exact comparator identity; no statistical interval is drawn.

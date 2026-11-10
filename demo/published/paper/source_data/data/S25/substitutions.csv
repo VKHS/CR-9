@@ -1,0 +1,7 @@
+regime,dataset,role,model,route,effect_nats,route_stable_folds,outer_folds
+arxiv / homophily,ogbn-arxiv,A,residual MLP4-512,nominal,0.0,5.0,5.0
+arxiv / homophily,ogbn-arxiv,B,frozen GCNII,nominal,0.0,5.0,5.0
+Roman / heterophily,Roman-empire,A,heterophily encoder4-384,nominal,0.0,44.0,50.0
+Roman / heterophily,Roman-empire,B,frozen GCNII,nominal,0.0,50.0,50.0
+Pascal / independent long range,PascalVOC-SP,A,GraphGPS-style 6x128,nominal,0.0,5.0,5.0
+Pascal / independent long range,PascalVOC-SP,B,frozen GINE/GRAMA-style,nominal,0.0,5.0,5.0

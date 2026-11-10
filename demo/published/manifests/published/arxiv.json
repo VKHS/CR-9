@@ -1,0 +1,188 @@
+{
+ "benchmark_dataset": "ogbn-arxiv",
+ "data_kind": "synthetic",
+ "dataset": "ogbn-arxiv",
+ "environment": {
+  "cuda_runtime": null,
+  "cudnn_deterministic": false,
+  "deterministic_algorithms_enabled": false,
+  "device": "cpu",
+  "gpu": null,
+  "machine": "x86_64",
+  "numpy": "2.3.5",
+  "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+  "precision": "fp32",
+  "python": "3.12.16",
+  "python_implementation": "CPython",
+  "tf32_matmul": false,
+  "torch": "2.10.0+cpu"
+ },
+ "identities": {
+  "config_sha256": "98f38f755a43073d744083e0a8b64ff548b94da4775499a386188cc24dd00ff4",
+  "prepared_fingerprint": "934ad96fbb1b83e8f480b42ce959ca3add9bd05b621374e7d17d0d3a90344b59",
+  "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
+  "unit_sha256": "dae8b534a37f5f1904758b13d50ec78c0c61e70aa56ee04e796455b71c10dc3c"
+ },
+ "index_arrays_copied": [
+  "arxiv_splits.npz",
+  "arxiv_official_splits.npz",
+  "arxiv_clusters.npz"
+ ],
+ "is_benchmark_data": false,
+ "packages": {
+  "CairoSVG": "2.9.1",
+  "Jinja2": "3.1.6",
+  "MarkupSafe": "3.0.3",
+  "attrs": "26.1.0",
+  "cairocffi": "1.7.1",
+  "certifi": "2026.10.19",
+  "cffi": "2.1.1",
+  "charset-normalizer": "3.5.2",
+  "cloudpickle": "3.1.2",
+  "contourpy": "1.3.3",
+  "cssselect2": "0.10.1",
+  "cycler": "0.12.1",
+  "defusedxml": "0.7.1",
+  "filelock": "4.2.4",
+  "fonttools": "4.61.1",
+  "fsspec": "2026.9.0",
+  "idna": "3.19",
+  "joblib": "1.5.3",
+  "jsonschema": "4.26.0",
+  "jsonschema-specifications": "2025.9.1",
+  "kiwisolver": "1.4.9",
+  "littleutils": "0.2.4",
+  "matplotlib": "3.10.8",
+  "mpmath": "1.3.0",
+  "narwhals": "2.28.0",
+  "networkx": "3.7",
+  "numpy": "2.3.5",
+  "ogb": "1.3.6",
+  "outdated": "0.2.2",
+  "packaging": "26.3",
+  "pandas": "2.2.3",
+  "pillow": "12.3.0",
+  "pip": "25.0.1",
+  "pycparser": "3.11",
+  "pymetis": "2025.2.2",
+  "pyparsing": "3.3.2",
+  "python-dateutil": "2.9.0.post0",
+  "pytz": "2026.6",
+  "referencing": "0.37.0",
+  "requests": "2.34.2",
+  "rpds-py": "2026.9.1",
+  "scikit-learn": "1.8.0",
+  "scipy": "1.17.0",
+  "setuptools": "84.1.0",
+  "six": "1.17.0",
+  "sympy": "1.14.0",
+  "threadpoolctl": "3.6.0",
+  "tinycss2": "1.5.1",
+  "torch": "2.10.0+cpu",
+  "tqdm": "4.70.1",
+  "typing_extensions": "4.16.0",
+  "tzdata": "2026.5",
+  "urllib3": "2.8.0",
+  "webencodings": "0.6.1"
+ },
+ "policy_lock": {
+  "comparator_hash": "89f74d5a54ab76f81a69f2a0bd408e00b03960bf18db44445440e98544573ecc",
+  "deployed_hash": "89f74d5a54ab76f81a69f2a0bd408e00b03960bf18db44445440e98544573ecc",
+  "model_hashes": {
+   "fit/full/controller.pt": "ba11f3b11cbe98f09ceb137d0852a408eafc8cda479096f4c17475493fdb570a",
+   "fit/lean/controller.pt": "018de769ad6b354d3c2484d0cf3bbd0572e061250554d8acd846f17330c36f9b",
+   "train/plant_seed1_best.pt": "785ed6f17e72d19924d18a1a8706b907cfdfde8dbff6c0e6b578cabede2291ae",
+   "train/plant_seed2_best.pt": "49738b131d7b4f42595d41580de9afcc47e4327e89de49d6617a6103797c8e9c",
+   "train/q0_seed1_best.pt": "4e649761555d509de325f4b43ea30a5fc157adef7004ba83a0532fa0b5967a16",
+   "train/q0_seed2_best.pt": "3e4c242b87a9327639dc80fd10423c19c397c8e62cddb63cd9ab1b7f90817785"
+  }
+ },
+ "profile": "smoke",
+ "run_name": "arxiv",
+ "schema": "cross-morse-run-manifest-1",
+ "scientific_run": false,
+ "seeds": {
+  "bootstrap_seeds": {
+   "admission": 314165,
+   "final": 314166,
+   "selection": 314163
+  },
+  "ensemble_seeds": {
+   "qC": [
+    1
+   ],
+   "qD": [
+    1
+   ]
+  },
+  "partition_seed": 314159,
+  "split_index": null,
+  "training_seeds": [
+   1,
+   2
+  ]
+ },
+ "source_data": {
+  "num_features": 128,
+  "num_graphs": 1,
+  "num_nodes": 21168,
+  "num_outputs": 40,
+  "source": "trusted_raw_npz",
+  "source_array_hashes": {
+   "edge_index": "0a55806b1acf60436e0f2d5b10514959bead7ef85750bdf24d88f10c54f56e65",
+   "x": "fd02c317f0c37cdeb01166f60c1a4fdf18cd0743aea16c26c512d40d213db06f",
+   "y": "c1bbe10748c90044c12f23603e9f392f0e2e31cb61f184de6841f4ecfb515e73"
+  }
+ },
+ "splits": {
+  "arrays": {
+   "clusters.npz": {
+    "bytes": 169620,
+    "sha256": "555c9c84eb22676df11d3430f40b4207c7a747f3cfb7481ecdb8c047c00321c8"
+   },
+   "official_splits.npz": {
+    "bytes": 170090,
+    "sha256": "1df81b004a6ecc204ad3ccc715c2ae3edeb7e3d500d5425d24356650490cb820"
+   },
+   "splits.npz": {
+    "bytes": 206604,
+    "sha256": "dae8b534a37f5f1904758b13d50ec78c0c61e70aa56ee04e796455b71c10dc3c"
+   }
+  },
+  "comparison_reserved_at": "prepare",
+  "graph_role_hashes": null,
+  "independent_graphs": false,
+  "official_split_axis": "node",
+  "official_split_hashes": {
+   "test": "b5676fc223eb3721a7662820e2952e4aadf5e9c87f3e58e410a67ad31fb93137",
+   "train": "7ce86a5e97ff6692e0207e5354ff565529b59ad7a67c50c2a2878ad13638bec2",
+   "valid": "f6793deac904c4a05f6a794c0e266d6a17f52ffc1655be23ad0de13f6c9c954b"
+  },
+  "role_hashes": {
+   "admit": "f6793deac904c4a05f6a794c0e266d6a17f52ffc1655be23ad0de13f6c9c954b",
+   "compare": "4cde888d26c665b7b2e93c215f5223456d5c13691d57096ef04497b104c115a0",
+   "confirm": "440799ebba5eadc4614d61fa0fd6352b3e78b75172b67dccfca9bff3627e0036",
+   "explore": "f6faf5de9a860ad6ec7e741e3142140fb292463e92dc796e571dacb29a9d00df",
+   "fit": "bbe602e458a2599f9d3bdd625c2be9ee013e2a8085f8785f0265334ad7647152",
+   "fit_train": "e1a2f63ea2407d98895b67d0b748deb28bc3c2e0083a016796fecce7a41f787f",
+   "fit_val": "d8ee27999f7daf87c9b0df417df8dfce6a809e149ff3c53a2e7420909dc5ee95",
+   "select": "4c3bdbdd9b79731a99ab3aaf6f726285139455c50a34c722c58d08710cd9ad7a",
+   "test": "b5676fc223eb3721a7662820e2952e4aadf5e9c87f3e58e410a67ad31fb93137"
+  },
+  "rule": "seeded permutation of official train; floor cuts at 60%,80%,90%,95%; fit/explore/select/confirm/compare; validation=admit; test=test",
+  "sizes": {
+   "admit": 5031,
+   "compare": 365,
+   "confirm": 365,
+   "explore": 1460,
+   "fit": 4380,
+   "fit_train": 3942,
+   "fit_val": 438,
+   "select": 730,
+   "test": 8837
+  },
+  "split_protocol": "fit60-explore20-select10-confirm5-compare5-v1",
+  "statistical_unit": "METIS core",
+  "unit": "node"
+ }
+}

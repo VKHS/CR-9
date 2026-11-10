@@ -1,0 +1,11 @@
+group,path,computed,reported,status,note
+supplementary_table_S39_data_role_contract,PascalVOC-SP/D_confirm,425,425,exact,
+supplementary_table_S39_data_role_contract,PascalVOC-SP/D_compare,425,425,exact,
+supplementary_table_S39_data_role_contract,PascalVOC-SP/D_admit,1428,1428,exact,
+supplementary_table_S39_data_role_contract,COCO-SP/D_confirm,5664,5664,exact,
+supplementary_table_S39_data_role_contract,COCO-SP/D_compare,5665,5665,exact,
+supplementary_table_S39_data_role_contract,COCO-SP/D_admit,5000,5000,exact,
+supplementary_table_S39_data_role_contract,Peptides-func/D_confirm,544,544,exact,
+supplementary_table_S39_data_role_contract,Peptides-func/D_compare,544,544,exact,
+supplementary_table_S39_data_role_contract,Peptides-func/D_admit,2331,2331,exact,
+supplementary_table_S39_data_role_contract,allocation_percent,"[60.0, 20.0, 10.0, 5.0, 5.0]","[60, 20, 10, 5, 5]",exact,

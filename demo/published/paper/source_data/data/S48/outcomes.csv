@@ -1,0 +1,17 @@
+dataset,split,evaluated_rule,paired_loss,metric_change_pp,C_qC,C_qD,fallback_probability,expected_work,G_admit,admission_units,J
+ogbn-arxiv,,qC returned,0.0,0.0,1.0,1.0,,1.0,0,32,
+ogbn-proteins,,qC returned,0.0,0.0,1.1671080487513767,1.1671080487513767,,1.1671080487513767,0,32,
+ogbn-products,,qC returned,0.0,0.0,1.9901596977294511,1.9901596977294511,,1.9901596977294511,0,59,
+Roman-empire,0,qC returned,0.0,0.0,2.0,2.0,,2.0,0,32,
+Roman-empire,1,qC returned,0.0,0.0,0.21384378429253056,0.21384378429253056,,0.21384378429253056,0,32,
+Roman-empire,2,qC returned,0.0,0.0,1.7409852177681073,1.7409852177681073,,1.7409852177681073,0,32,
+Roman-empire,3,qC returned,0.0,0.0,1.6833672753259308,1.6833672753259308,,1.6833672753259308,0,32,
+Roman-empire,4,qC returned,0.0,0.0,1.1359968221252548,1.1359968221252548,,1.1359968221252548,0,32,
+Roman-empire,5,qC returned,0.0,0.0,2.0,2.0,,2.0,0,32,
+Roman-empire,6,qC returned,0.0,0.0,0.10692189214626528,0.10692189214626528,,0.10692189214626528,0,32,
+Roman-empire,7,qC returned,0.0,0.0,1.0,1.0,,1.0,0,32,
+Roman-empire,8,qC returned,0.0,0.0,1.0,1.0,,1.0,0,32,
+Roman-empire,9,qC returned,0.0,0.0,0.29431318446228927,0.29431318446228927,,0.29431318446228927,0,32,
+PascalVOC-SP,,qC returned,0.0,0.0,1.0,1.0,,1.0,0,60,60
+COCO-SP,,qC returned,0.0,0.0,2.0,2.0,,2.0,0,60,60
+Peptides-func,,qC returned,0.0,0.0,2.0,2.0,,2.0,0,150,150

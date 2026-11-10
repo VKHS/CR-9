@@ -1,0 +1,4 @@
+step,operation,accumulated_work,budget,restart_reserve,prediction_cost
+0,enter terminal site,6.0,10.0,4.0,0.5
+1,sensing check 6 + 2 + 4 > 10: abort before paying,6.0,10.0,4.0,0.5
+2,comparator restart within W_C,10.0,10.0,4.0,0.5

@@ -1,0 +1,11 @@
+group,path,computed,reported,status,note
+supplementary_table_S3_target_regime_contract,nominal_graph_value/epsilon_plant_nats,0.004,"{""$value"": 0.004, ""$decimals"": 3}",exact,
+supplementary_table_S3_target_regime_contract,depth_qualification/PDD_pp,1.0,"{""$value"": 1.0, ""$decimals"": 1}",exact,
+supplementary_table_S3_target_regime_contract,depth_qualification/DIL_gap_nats,0.02,"{""$value"": 0.02, ""$decimals"": 3}",exact,
+supplementary_table_S3_target_regime_contract,registry_support/phi_registry_min,0.8,"{""$value"": 0.8, ""$decimals"": 2}",exact,
+supplementary_table_S3_target_regime_contract,registry_support/selected_strata,1.0,"{""$value"": 1.0, ""$decimals"": 2}",exact,prospective A0-support gate under Table S35 convention C28
+supplementary_table_S3_target_regime_contract,residual_headroom/epsilon_headroom_nats,0.003,"{""$value"": 0.003, ""$decimals"": 3}",exact,
+supplementary_table_S3_target_regime_contract,nominal_graph_value/failure_action,retain strongest open loop,stop or improve plant,differs,
+supplementary_table_S3_target_regime_contract,depth_qualification/failure_action,retain strongest open loop,do not credit controller with plant rescue,differs,
+supplementary_table_S3_target_regime_contract,registry_support/failure_action,retain strongest open loop,prune bank or collect exploration,differs,
+supplementary_table_S3_target_regime_contract,residual_headroom/failure_action,retain strongest open loop,retain strongest open loop,exact,

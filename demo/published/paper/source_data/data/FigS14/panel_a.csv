@@ -1,0 +1,11 @@
+dataset,depth,validation_loss_change,source_alignment_change
+ogbn-arxiv,2,0.0,
+ogbn-arxiv,4,0.125274658203125,
+ogbn-arxiv,8,0.4727632999420166,
+ogbn-arxiv,16,0.15573787689208984,
+ogbn-arxiv,32,-0.8264813423156738,
+ogbn-arxiv,2,,0.0
+ogbn-arxiv,4,,-0.0123541678
+ogbn-arxiv,8,,-0.0537234433
+ogbn-arxiv,16,,-0.08625386034
+ogbn-arxiv,32,,-0.09398592015

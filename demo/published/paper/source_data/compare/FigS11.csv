@@ -1,0 +1,9 @@
+group,path,computed,reported,status,note
+supplementary_figure_S11_terminal_budget,scenario/W,10.0,10,exact,
+supplementary_figure_S11_terminal_budget,scenario/W_C,4.0,4,exact,
+supplementary_figure_S11_terminal_budget,scenario/C_pred,0.5,0.5,exact,
+supplementary_figure_S11_terminal_budget,scenario/w,6.0,6,exact,
+supplementary_figure_S11_terminal_budget,scenario/sensing,2.0,2,exact,
+supplementary_figure_S11_terminal_budget,scenario/action,2.0,2,exact,
+supplementary_figure_S11_terminal_budget,panels/a/accumulated_work,"[6.0, 8.0, 8.0, 12.0]","[6, 8, 8, 12]",exact,
+supplementary_figure_S11_terminal_budget,panels/b/accumulated_work,"[6.0, 6.0, 10.0]","[6, 6, 10]",exact,

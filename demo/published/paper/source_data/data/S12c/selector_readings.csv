@@ -1,0 +1,17 @@
+dataset,split,U_min,registered_reading,point_reading,alternative_reading,executed_selection,separated_protocol_selection
+ogbn-arxiv,,,qC,qC,qC,qC,qC
+ogbn-proteins,,,qC,qC,qC,qC,qC
+ogbn-products,,,qC,qC,qC,qC,qC
+Roman-empire,0,,qC,qC,qC,qC,qC
+Roman-empire,1,,qC,qC,qC,qC,qC
+Roman-empire,2,,qC,qC,qC,qC,qC
+Roman-empire,3,,qC,qC,qC,qC,qC
+Roman-empire,4,,qC,qC,qC,qC,qC
+Roman-empire,5,,qC,qC,qC,qC,qC
+Roman-empire,6,,qC,qC,qC,qC,qC
+Roman-empire,7,,qC,qC,qC,qC,qC
+Roman-empire,8,,qC,qC,qC,qC,qC
+Roman-empire,9,,qC,qC,qC,qC,qC
+PascalVOC-SP,,,qC,qC,qC,qC,qC
+COCO-SP,,,qC,qC,qC,qC,qC
+Peptides-func,,,qC,qC,qC,qC,qC

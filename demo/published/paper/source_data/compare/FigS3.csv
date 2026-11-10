@@ -1,0 +1,8 @@
+group,path,computed,reported,status,note
+supplementary_table_S46_budget_matched_frontier,ogbn-arxiv/ceiling,1.15,1.15,exact,
+supplementary_table_S46_budget_matched_frontier,ogbn-proteins/ceiling,1.17,1.17,exact,
+supplementary_table_S46_budget_matched_frontier,Roman-empire/ceiling,1.3,1.3,exact,
+supplementary_table_S46_budget_matched_frontier,PascalVOC-SP/ceiling,1.29,1.29,exact,
+supplementary_table_S46_budget_matched_frontier,COCO-SP/ceiling,1.33,1.33,exact,
+supplementary_table_S46_budget_matched_frontier,Peptides-func/ceiling,1.18,1.18,exact,
+display:supplementary:Figure S3,,,,missing,No dedicated independently reviewed printed-value contract is registered for this display

@@ -1,0 +1,13 @@
+field,record_columns,results_csv_columns,evidence_fields,role
+dataset,dataset,,dataset,key
+backbone,model,,entry,key
+checkpoint,seed ensemble,ensemble,seeds,key
+policy,method arm,model,selection confirmation admission,key
+profile,configuration,,candidates,key
+stage,,,data,not a record column
+unit,,,data,not a record column
+protocol,unit,metric_name loss_name,task admission,value
+score,quantity value,metric metric_percent loss_nats,final,value
+uncertainty,quantity value,,final admission,value
+cost,quantity value unit,,cost stages,value
+identifier,source_file locator,,run_root identities,provenance
