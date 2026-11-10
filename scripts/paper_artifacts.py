@@ -1482,6 +1482,8 @@ def main(argv=None) -> int:
     p.add_argument("--demo", action="store_true", help=f"publish to {DEMO_TAG} and release/demo_artifacts.json")
     p.add_argument("--api-url", default="https://api.github.com")
     p.add_argument("--download-base", default=None)
+    p.add_argument("--target", default="main",
+                   help="the commit or branch the release tag is created on, when the release does not exist yet")
     p = sub.add_parser("fetch")
     p.add_argument("--dest", type=Path, required=True)
     p.add_argument("--tier", choices=["analysis", "complete"], default="analysis")
@@ -1555,7 +1557,8 @@ def main(argv=None) -> int:
             token = github_token()
             require(token, "Set GITHUB_TOKEN (contents: write on the repository) or log in with `gh auth login`")
             manifest = publish(args.staged, args.manifest, client=GitHub(args.repository, token, args.api_url),
-                               tag=args.tag, download_base=args.download_base, demonstration=args.demo)
+                               tag=args.tag, target=args.target, download_base=args.download_base,
+                               demonstration=args.demo)
             print("\n".join(status_lines(manifest)))
             print(f"Commit {args.manifest} so that `make paper` can retrieve the published artifacts.")
             return 0

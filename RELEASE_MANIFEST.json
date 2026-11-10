@@ -73,10 +73,10 @@
       "sha256": "335d2c6bec61fd48df19b1a77c4e80eb622a5c014a77c445bfe2bc0028f21a38"
     },
     {
-      "bytes": 6187,
+      "bytes": 6306,
       "executable": false,
       "path": ".github/workflows/demo-publish.yml",
-      "sha256": "5b3480130486de25a454fd70ac5945ae959c7b5d4272d49494c5d957894ab7bc"
+      "sha256": "5bf69ee440105c457f1b0aec517efbc806b029a79dbeb77343e89062db0acec7"
     },
     {
       "bytes": 7357,
@@ -6820,7 +6820,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "92ffdcfa695873d825b0182e71baa462069ab95ddf0e190ad6c846d9651982fe"
+      "sha256": "e173b683b5c82ef42fb1d110db6182d064d630d0d8ea7d1b117ab2bd82f662eb"
     },
     {
       "bytes": 35593,
@@ -7303,10 +7303,10 @@
       "sha256": "bc123217f31f5eb694442749292f7f2c6a2f850edffae952f53d4b5561fbb87d"
     },
     {
-      "bytes": 94771,
+      "bytes": 94984,
       "executable": false,
       "path": "scripts/paper_artifacts.py",
-      "sha256": "de781ad0525335f16111042cfb8b0311c9a6eeef3a8dc900a4ef9dca3f5f992e"
+      "sha256": "089d58959760f538eab0b16a4f02ab3c0162a16344dbfdb7574e01652ab27537"
     },
     {
       "bytes": 145970,
@@ -8218,5 +8218,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "5a70385bd28684cce558261d52454128a11f47d84acde38710a19565a8ada7eb"
+  "tree_sha256": "b0a06be9cb95118c9ee08bd5c65722eaee3bc9a7407771d0e37af220362a5ab2"
 }

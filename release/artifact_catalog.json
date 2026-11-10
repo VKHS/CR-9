@@ -274,9 +274,9 @@
           "sha256": "125fae95eaa28c1aa897237f3c9075021623ca18b32d16b3a5febd9f7862edd0"
         },
         {
-          "bytes": 94771,
+          "bytes": 94984,
           "path": "scripts/paper_artifacts.py",
-          "sha256": "de781ad0525335f16111042cfb8b0311c9a6eeef3a8dc900a4ef9dca3f5f992e"
+          "sha256": "089d58959760f538eab0b16a4f02ab3c0162a16344dbfdb7574e01652ab27537"
         }
       ],
       "entrypoints": [

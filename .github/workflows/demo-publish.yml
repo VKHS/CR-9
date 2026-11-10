@@ -85,7 +85,8 @@ jobs:
       - name: Publish the release demo-artifacts
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python -B scripts/paper_artifacts.py publish --demo --staged "$DEMO/staged"
+        # the tag names the commit whose tooling produced and publishes the demonstration
+        run: python -B scripts/paper_artifacts.py publish --demo --staged "$DEMO/staged" --target "${{ github.sha }}"
       - name: Rebuild every table and figure from the release, install the views, write the results
         run: |
           # the manifest is committed whatever the rebuild reports; RESULTS.md records its status and errors
