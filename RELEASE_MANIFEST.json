@@ -853,10 +853,10 @@
       "sha256": "44789a3dcc09fd3141840986cfdf3cd6122be9cca779fdf55547173deb712365"
     },
     {
-      "bytes": 228,
+      "bytes": 426,
       "executable": false,
       "path": "demo/continue-request.json",
-      "sha256": "d7878fb9eaf633b2c689dcf16b7313e206e4d88aa31d318ef0e5d77acb4d2a5b"
+      "sha256": "a79256fd19e738bef598ed6d39a10c210b1ff9148c2c672d9bc7de7d31eeaed2"
     },
     {
       "bytes": 9640,
@@ -8200,5 +8200,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "f1f4d61118cb9b546946f8fd1c7143d90b3abb1d3c0bb24a756cd33594b3c3d3"
+  "tree_sha256": "25248830d093a7c819b7138520913f1fc671673a940ea53f56d0cc69850f1aa1"
 }
