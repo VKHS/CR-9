@@ -356,9 +356,10 @@ def render(evaluation: dict, printed: dict | None = None, demo: dict | None = No
         lines += ["## CPU demonstration (separate from the statement)", "",
                   f"{demo['scope']} It is published as the release [`demo-artifacts`]({demo['release']}) "
                   f"({demo['published']} of {demo['artifacts']} artifacts) and listed in "
-                  "[release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` rebuilds every "
-                  "table and figure from it ([demo/README.md](demo/README.md)). It shows each item working end to end; "
-                  "it does not change any status above.", "",
+                  "[release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table "
+                  "and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) "
+                  "lists the displays its artifacts support). It shows each item working end to end; it does not "
+                  "change any status above.", "",
                   "| Statement item | Demonstrated | What the demonstration supplies | Evidence |", "|---|---|---|---|"]
         for row in demo["rows"]:
             lines.append(f"| {row['phrase']} | {'yes' if row['demonstrated'] else 'no'} | {row['what']} | "

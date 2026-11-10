@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-11-10 — The CPU demonstration published; reconstruction corrections
+
+- The release `demo-artifacts` holds 31 of the 37 artifacts (the seven lifecycle runs, 22 record sets, the
+  E3-E6 campaign and the runner's environment capture; 38.55 GiB). `make demo-paper` builds 56 of the 90
+  displays from it, 35 from the release and 21 from the repository's own sources; 1,263 printed values are
+  equal, 1,202 differ and 248 are missing. [demo/RESULTS.md](demo/RESULTS.md) lists each display that waits
+  for an input and each artifact the demonstration does not hold, with its reason: the external comparisons
+  of E12, the S14 campaign and the two record sets that read it, the action-gap audit (every demonstration
+  run deployed an open-loop rule) and the module ablations (one of their sixteen measurement jobs reads more
+  sealed variant runs than a hosted runner's disk holds).
+- `scripts/reconstruct.py` paired the discovered runs with the dataset records by position, while
+  `build_paper.collect` returns the records in the paper's dataset order: runs discovered in another order
+  reached the display generators under other datasets. Each run is now paired with its sealed benchmark
+  dataset (regression test with the example runs in reverse order).
+- `paper/build/displays/factorial_data.py` compared raw factorial values with summary values at a relative
+  1e-10, tighter than the summary's ten printed significant digits (up to 5e-10); a comparison with a summary
+  value now allows 1e-9, and values replayed from the raw arrays keep 1e-10.
+- The demonstration's reconstruction (`reconstruct_paper.py --demo`) builds the supplementary displays of
+  the factorials, the ensemble grid and the E3-E6 campaign from its fixture-derived inputs, labelled as the
+  demonstration, and its display context replays the campaign without the scheduler and fixture
+  qualifications (all 24 contrasts still required); a supplementary input it cannot build is reported among
+  the generator errors. The paper's build and context are unchanged. The scope note opens the report before
+  the file manifest is written, so the workspace verifies and a second run replaces it.
+- `scripts/paper_artifacts.py publish --target` names the commit a new release tag is created on.
+  `demo/report.py` lists the displays built and waiting (`--workspace`), states the cause of an absence that
+  the publication request notes (`--notes`) and marks a main-graph node that a further graph completed.
+  `demo-continue.yml` collects a map from earlier exports alone (`collect_only`, with the task markers of an
+  earlier collect, `markers_from`); `demo-publish.yml` can rebuild and record without publishing again
+  (`report_only`).
+
 ## 2026-11-09 — CPU demonstration of the complete pipeline
 
 - A separately published demonstration ([demo/README.md](demo/README.md)) runs the whole pipeline with the

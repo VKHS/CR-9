@@ -1287,8 +1287,11 @@ def derive_baseline_studies(records: Path, checkout: Path, *, provenance: dict |
     return studies
 
 
-def _verify_reconstruction_inputs(result: dict, fetched: Path, verified: dict) -> None:
-    """Bind the complete measured input set, not only the inputs a stale report happened to name."""
+def _verify_reconstruction_inputs(result: dict, fetched: Path, verified: dict, *, demonstration: bool = False) -> None:
+    """Bind the complete measured input set, not only the inputs a stale report happened to name.
+
+    The CPU demonstration's supplementary build (reconstruct --demo) records its budget campaign as a
+    demonstration input: the campaign ran on fixture parents and is replayed without the strict qualification."""
     inputs = result.get("inputs")
     require(isinstance(inputs, list) and all(isinstance(item, dict) for item in inputs),
             "Reconstruction inputs must be a list of input descriptors")
@@ -1330,7 +1333,8 @@ def _verify_reconstruction_inputs(result: dict, fetched: Path, verified: dict) -
     # Campaign input inventories are carried by the supplementary builder, even
     # when individual numbered display generators also consume the same campaign.
     from cm_campaigns.common import directory_inventory
-    kinds = {"confirmation": "original_confirmation_campaign", "budget": "strict_budget_campaign"}
+    kinds = {"confirmation": "original_confirmation_campaign",
+             "budget": "demonstration_budget_campaign" if demonstration else "strict_budget_campaign"}
     observed = {}
     for item in (result.get("supplementary_build") or {}).get("inputs", []):
         if item.get("input_kind") not in kinds.values():
@@ -1372,7 +1376,7 @@ def derive(fetched: Path, *, workspace: Path | None = None, checkout: Path = ROO
         result = verify_workspace(workspace)
         require(result.get("software_sources") == source_inventory(checkout),
                 "Reconstruction tools or registered inputs changed; rebuild the workspace before deriving")
-        _verify_reconstruction_inputs(result, fetched, verified)
+        _verify_reconstruction_inputs(result, fetched, verified, demonstration=manifest.get("channel") == DEMO_CHANNEL)
     written, names = {}, []
     install_root.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".cm-published-views-", dir=install_root.parent) as temporary:

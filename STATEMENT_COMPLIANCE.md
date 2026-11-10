@@ -37,7 +37,7 @@ The first command is described in [docs/PRODUCTION.md](docs/PRODUCTION.md); its 
 
 ## CPU demonstration (separate from the statement)
 
-CPU demonstration of the released code at reduced scale (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on public benchmark data on hosted CPU runners. The values are not the paper's measurements and are not expected to equal the printed values. It is published as the release [`demo-artifacts`](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts) (31 of 37 artifacts) and listed in [release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` rebuilds every table and figure from it ([demo/README.md](demo/README.md)). It shows each item working end to end; it does not change any status above.
+CPU demonstration of the released code at reduced scale (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on public benchmark data on hosted CPU runners. The values are not the paper's measurements and are not expected to equal the printed values. It is published as the release [`demo-artifacts`](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts) (31 of 37 artifacts) and listed in [release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) lists the displays its artifacts support). It shows each item working end to end; it does not change any status above.
 
 | Statement item | Demonstrated | What the demonstration supplies | Evidence |
 |---|---|---|---|

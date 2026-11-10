@@ -1,10 +1,10 @@
 # CPU demonstration
 
-This directory produces and documents a complete, separately published demonstration of
-the CROSS-MORSE pipeline: the seven lifecycle runs, the measurement-record sets and
-campaigns that the production graph derives from them, their checkpoints, predictions,
+This directory produces and documents a separately published demonstration of the
+CROSS-MORSE pipeline: the seven lifecycle runs, the measurement-record sets and campaigns
+that the production graph derives from them, their checkpoints, predictions,
 propensity-logged trajectories, split and seed manifests, observed environment and
-statistical outputs, and every table and figure of the paper rebuilt from them with one
+statistical outputs, and the paper's tables and figures rebuilt from them with one
 command.
 
 **It is not the paper's evidence.** Every artifact was produced by this repository's own
@@ -19,14 +19,28 @@ section reports what the demonstration shows for each item).
 ## Rebuild every table and figure from the demonstration
 
 ```bash
-make demo-paper        # download and verify the release demo-artifacts, rebuild all 90 displays
+make demo-paper        # download and verify the release demo-artifacts, run all 90 display generators on it
 make demo-status       # what the release holds
 ```
 
 `make demo-paper` runs `scripts/reconstruct_paper.py --demo`: the same verification, display
 generators and printed-value comparison as `make paper`, on the demonstration's manifest. The
 workspace (`../cm-demo-paper`) is labelled as the demonstration and its report opens with the
-scope above. [RESULTS.md](RESULTS.md) records what the published demonstration contains.
+scope above. Its record sets and campaign derive from fixture runs, so every display built from
+them carries the label of a synthetic software example; the supplementary displays of the
+factorials, the ensemble grid and the E3-E6 campaign are built from them in this labelled form
+(`--demo` only; the paper's build refuses such inputs). [RESULTS.md](RESULTS.md) records what the
+published demonstration contains.
+
+## What the release holds
+
+The release `demo-artifacts` holds 31 of the 37 artifacts the paper's manifest names (38.55 GiB,
+28,913 files): the seven lifecycle runs, 22 record sets, the E3-E6 campaign and the environment
+capture of the CPU runner. On it, `make demo-paper` builds 56 of the 90 displays, 35 from the
+release and 21 from the repository's own sources; 1,263 printed values are equal, 1,202 differ and
+248 are missing. The other 34 displays wait for an input the demonstration does not hold or a cell
+its runs do not reach (for instance, the reduced ogbn-arxiv run deploys no feedback rule with a
+positive gain over q_C); [RESULTS.md](RESULTS.md) lists each with what it lacks.
 
 ## Scale
 

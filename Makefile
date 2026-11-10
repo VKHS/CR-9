@@ -185,7 +185,7 @@ help:
 	  '  make availability-fulfilled  the registered statement and every printed claim fulfilled' \
 	  '' \
 	  'CPU demonstration (demo/README.md; reduced scale, not the paper'"'"'s measurements):' \
-	  '  make demo-paper           download the demonstration release and rebuild every table and figure from it' \
+	  '  make demo-paper           download the demonstration release and rebuild the tables and figures it supports' \
 	  '  make demo-status          what the demonstration release holds' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \

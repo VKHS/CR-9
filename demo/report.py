@@ -104,26 +104,50 @@ def run_rows(runs: Path, graphs: Path) -> list[str]:
     return lines
 
 
-def graph_rows(work: Path) -> list[str]:
-    """Every planned node with the states its task markers record (scripts/paper_outputs.py execute)."""
+def node_states(work: Path) -> dict[str, tuple[int, int, list[str]]]:
+    """{node: (tasks complete, tasks, the other states)} from the task markers (scripts/paper_outputs.py execute)."""
+    plan = read(work / "plan.json", {}) or {}
+    states = {}
+    for node in plan.get("nodes", []):
+        count = max(1, len(node["tasks"]))
+        marks = [(read(work / "state" / node["id"] / f"task-{k}.json", {}) or {}).get("status") or "NOT RUN"
+                 for k in range(count)]
+        states[node["id"]] = (sum(m in ("COMPLETE", "SKIPPED") for m in marks), count,
+                              sorted({m for m in marks if m not in ("COMPLETE", "SKIPPED")}))
+    return states
+
+
+def graph_rows(work: Path, elsewhere: dict | None = None) -> list[str]:
+    """Every planned node with the states its task markers record; ``elsewhere`` names, for a node that a further
+    graph executed completely, that graph."""
     from demo.execute import levels
     plan = read(work / "plan.json")
     level = levels(plan)
+    states = node_states(work)
     lines = ["| Node | Level | Tasks complete | State |", "|---|---|---|---|"]
     for node in sorted(plan["nodes"], key=lambda n: (level[n["id"]], n["id"])):
-        count = max(1, len(node["tasks"]))
-        states = [(read(work / "state" / node["id"] / f"task-{k}.json", {}) or {}).get("status") or "NOT RUN"
-                  for k in range(count)]
-        done = sum(s in ("COMPLETE", "SKIPPED") for s in states)
+        done, count, other = states[node["id"]]
         if node.get("blocked"):
             state = "blocked at planning: " + str(node["blocked"])[:160].replace("|", "/")
         elif done == count:
             state = "complete"
         else:
-            other = sorted({s for s in states if s not in ("COMPLETE", "SKIPPED")})
             state = "incomplete (" + ", ".join(other) + ")"
+            if (elsewhere or {}).get(node["id"]):
+                state += f"; complete in the graph of {elsewhere[node['id']]} (below)"
         lines.append(f"| {node['id']} | {level[node['id']]} | {done}/{count} | {state} |")
     return lines
+
+
+def complete_elsewhere(works: list[Path]) -> dict[str, str]:
+    """{node: the further graph (its artifacts) that executed every task of it}."""
+    found = {}
+    for work in works[1:]:
+        only = ((read(work / "plan.json", {}) or {}).get("options") or {}).get("only") or []
+        for node, (done, count, _) in node_states(work).items():
+            if done == count:
+                found.setdefault(node, ", ".join(f"`{o}`" for o in only) or "a further graph")
+    return found
 
 
 def artifact_rows(works: list[Path], failures: dict, notes: dict | None = None) -> list[str]:
@@ -145,20 +169,25 @@ def artifact_rows(works: list[Path], failures: dict, notes: dict | None = None) 
     return lines
 
 
-def graph_section(work: Path, runs: list[str], first: bool) -> list[str]:
+def graph_section(work: Path, runs: list[str], first: bool, *, main_choices: dict | None = None,
+                  elsewhere: dict | None = None) -> list[str]:
     plan = read(work / "plan.json", {}) or {}
     links = ", ".join(f"[{run}](https://github.com/VKHS/CR-9/actions/runs/{run})" for run in runs)
     only = (plan.get("options") or {}).get("only") or []
+    choices = plan.get("declared_choices", {}) or {}
     if first:
         text = ("The repository's own production graph (scripts/paper_outputs.py, planned with `--allow-fixture "
                 "--device cpu`) executed every node it could plan on CPU (demo/execute.py"
-                + (f"; workflow runs {links}" if links else "") + ").")
+                + (f"; workflow runs {links}" if links else "") + "). Its declared choices are recorded in the plan: "
+                + json.dumps(choices, sort_keys=True)[:1200] + ".")
     else:
-        text = (f"A second graph, planned for {', '.join(f'`{o}`' for o in only) or 'one record set'} alone in its own "
-                "work directory (demo-sweep.yml" + (f"; workflow run {links}" if links else "") + "), produced the "
-                "artifacts that demo/merge_maps.py added to the main graph's map.")
-    return [text + " Its declared choices are recorded in the plan: "
-            + json.dumps(plan.get("declared_choices", {}), sort_keys=True)[:1200] + ".", ""] + graph_rows(work)
+        changed = {k: v for k, v in choices.items() if (main_choices or {}).get(k) != v}
+        text = (f"A further graph, planned for {', '.join(f'`{o}`' for o in only) or 'one record set'} alone in its "
+                "own work directory" + (f" (workflow run {links})" if links else "") + ", produced the artifacts that "
+                "demo/merge_maps.py added to the main graph's map. "
+                + ("Its declared choices differ from the main graph's in: " + json.dumps(changed, sort_keys=True)[:600]
+                   + "." if changed else "Its declared choices are the main graph's."))
+    return [text, ""] + graph_rows(work, elsewhere if first else None)
 
 
 def main(argv=None) -> int:
@@ -203,8 +232,11 @@ def main(argv=None) -> int:
              "", "Every run executed the eight stages of the lifecycle from this checkout on a hosted 4-CPU runner "
              "(demo-runs.yml). Configurations: demo/configure.py (the pilot settings, fp32 plant).", "",
              "## The production graph", ""]
+    main_choices = (read(args.graph[0] / "plan.json", {}) or {}).get("declared_choices") or {}
+    elsewhere = complete_elsewhere(args.graph)
     for index, work in enumerate(args.graph):
-        lines += graph_section(work, graph_runs.get(index, []), index == 0) + [""]
+        lines += graph_section(work, graph_runs.get(index, []), index == 0, main_choices=main_choices,
+                               elsewhere=elsewhere) + [""]
     rows = artifact_rows(args.graph, failures, (read(args.notes, {}) or {}) if args.notes else {})
     lines += ["## Not in the demonstration", "", "Each artifact the demonstration does not hold, with its reason:", ""]
     lines += rows or [f"- `{entry['id']}`" for entry in awaiting]

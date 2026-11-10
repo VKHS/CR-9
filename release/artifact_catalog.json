@@ -239,9 +239,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 46287,
+          "bytes": 46291,
           "path": "Makefile",
-          "sha256": "0809fcc5dd50dc933c60ed9ca55c7b0bc9f1e0b483b5d27a8ee5aef297887d75"
+          "sha256": "079da187004f7cefc9557546045565810f2e41d3e9bc88d6f04fc56dc3c8ed15"
         },
         {
           "bytes": 12213,
@@ -274,9 +274,9 @@
           "sha256": "125fae95eaa28c1aa897237f3c9075021623ca18b32d16b3a5febd9f7862edd0"
         },
         {
-          "bytes": 94984,
+          "bytes": 95352,
           "path": "scripts/paper_artifacts.py",
-          "sha256": "089d58959760f538eab0b16a4f02ab3c0162a16344dbfdb7574e01652ab27537"
+          "sha256": "628201cea6c77ecc581ff2ee953bc1777fa871b2e053e75d427b7800ae96e697"
         }
       ],
       "entrypoints": [
@@ -455,14 +455,14 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 46287,
+          "bytes": 46291,
           "path": "Makefile",
-          "sha256": "0809fcc5dd50dc933c60ed9ca55c7b0bc9f1e0b483b5d27a8ee5aef297887d75"
+          "sha256": "079da187004f7cefc9557546045565810f2e41d3e9bc88d6f04fc56dc3c8ed15"
         },
         {
-          "bytes": 25890,
+          "bytes": 25992,
           "path": "scripts/statement_check.py",
-          "sha256": "43b8dc6039fcfedf5da7f0d77fe4780614cf28b9863918fede072c000e21001a"
+          "sha256": "e607c6c1f99a8b0a0f79ca23c7d05ad5454233dd355bd0a18ab1f28b6f2d2343"
         }
       ],
       "entrypoints": [
@@ -603,9 +603,9 @@
       ],
       "entrypoint_identities": [
         {
-          "bytes": 46287,
+          "bytes": 46291,
           "path": "Makefile",
-          "sha256": "0809fcc5dd50dc933c60ed9ca55c7b0bc9f1e0b483b5d27a8ee5aef297887d75"
+          "sha256": "079da187004f7cefc9557546045565810f2e41d3e9bc88d6f04fc56dc3c8ed15"
         }
       ],
       "entrypoints": [

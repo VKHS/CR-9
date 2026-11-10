@@ -498,6 +498,39 @@ class Publication(unittest.TestCase):
         # a note states the cause of an absence; an artifact another graph produced stays out of the list
         self.assertEqual(noted, ["- `records:b`: the cause"])
 
+    def test_the_demonstration_views_bind_its_budget_campaign_input(self):
+        from cm_campaigns.common import directory_inventory
+        with tempfile.TemporaryDirectory() as temporary:
+            fetched = Path(temporary).resolve()
+            campaign = fetched / "campaigns" / "budget"
+            campaign.mkdir(parents=True)
+            (campaign / "study.json").write_text("{}")
+            verified = {"artifacts": [{"id": "campaign:budget", "kind": "campaign", "path": str(campaign)}]}
+            result = {"inputs": [], "supplementary_build": {"demonstration": True, "inputs": [
+                {"input_kind": "demonstration_budget_campaign", "source": str(campaign),
+                 "files": directory_inventory(campaign)}]}}
+            pa._verify_reconstruction_inputs(result, fetched, verified, demonstration=True)
+            # the paper's views accept only the strictly replayed campaign
+            with self.assertRaisesRegex(pa.ArtifactError, "differ from the fetched campaigns"):
+                pa._verify_reconstruction_inputs(result, fetched, verified)
+
+    def test_the_main_graph_table_names_the_further_graph_that_completed_a_node(self):
+        report = module("report")
+        with tempfile.TemporaryDirectory() as temporary:
+            main, further = Path(temporary) / "w", Path(temporary) / "w2"
+            node = {"id": "budget.studies.arxiv", "tasks": [{}], "dependencies": []}
+            for work, status, options in ((main, "FAILED", {}), (further, "COMPLETE", {"only": ["campaign:budget"]})):
+                (work / "state" / node["id"]).mkdir(parents=True)
+                (work / "state" / node["id"] / "task-0.json").write_text(json.dumps({"status": status}))
+                (work / "plan.json").write_text(json.dumps({"nodes": [node], "options": options, "artifacts": {},
+                                                            "declared_choices": {"a": 1, "b": options.get("only")}}))
+            elsewhere = report.complete_elsewhere([main, further])
+            rows = report.graph_section(main, ["1"], True, main_choices={}, elsewhere=elsewhere)
+            text = report.graph_section(further, ["2"], False, main_choices={"a": 1, "b": None})[0]
+        self.assertEqual(rows[-1], "| budget.studies.arxiv | 0 | 0/1 | incomplete (FAILED); complete in the graph of "
+                                   "`campaign:budget` (below) |")
+        self.assertIn('differ from the main graph\'s in: {"b": ["campaign:budget"]}', text)
+
     def test_the_report_counts_the_displays_built_from_the_release_and_lists_those_waiting(self):
         report = module("report")
         with tempfile.TemporaryDirectory() as temporary:
