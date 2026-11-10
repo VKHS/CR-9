@@ -115,8 +115,16 @@ jobs:
         run: |
           git config user.name "Abdolvahab Khalili Sadaghiani"
           git config user.email "32028020+VKHS@users.noreply.github.com"
-          git add -A release/demo_artifacts.json demo/ STATEMENT_COMPLIANCE.md release/artifact_catalog.json RELEASE_MANIFEST.json SHA256SUMS.txt
+          # the generated inventories are written again after the rebase onto the branch as it is now, so that
+          # commits pushed while this run worked never conflict with them
+          git checkout -- release/artifact_catalog.json RELEASE_MANIFEST.json SHA256SUMS.txt
+          git add -A release/demo_artifacts.json demo/ STATEMENT_COMPLIANCE.md
           git commit -q -m "Record the published CPU demonstration (publication run ${{ github.run_id }}, graph run ${GRAPH_RUN})"
           git pull -q --rebase origin "${GITHUB_REF_NAME}"
+          python -B scripts/statement_check.py --write
+          python -B scripts/artifact_catalog.py
+          make manifest PYTHON=python
+          git add -A STATEMENT_COMPLIANCE.md release/artifact_catalog.json RELEASE_MANIFEST.json SHA256SUMS.txt
+          git commit -q --amend --no-edit
           git push -q origin "HEAD:${GITHUB_REF_NAME}"
           git log --oneline -1

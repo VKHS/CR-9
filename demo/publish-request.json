@@ -48,5 +48,5 @@
   "records:module_ablations": "Fifteen of the sixteen measurement jobs of the S17 module ablations completed. The remaining job reads the sealed variant lifecycle runs of its parent, each opened and verified through its confirm stage with its prediction arrays; restoring them filled a hosted runner's disk twice (No space left on device). The exporter writes only the complete set."
  },
  "report_only": true,
- "attempt": 2
+ "attempt": 3
 }
