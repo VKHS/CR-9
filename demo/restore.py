@@ -66,6 +66,8 @@ def selection(plan: dict, work: Path, *, level: int | None, nodes: list[str], ex
         for output in by_id[node_id].get("outputs") or []:
             prefixes.add(str(Path(output)).lstrip("/") + "/")
             prefixes.add(str(Path(output)).lstrip("/"))
+            # the job evidence an E3-E6 study keeps beside itself (<study>.job-<id>, scripts/run_budget_study.py)
+            prefixes.add(str(Path(output)).lstrip("/") + ".job-*")
     return needed, sorted(prefixes)
 
 
@@ -99,7 +101,8 @@ def extract(archive_zip: Path, prefixes: list[str] | None) -> str:
         names = [p.rstrip("/") for p in prefixes] if prefixes is not None else []
         unzip = subprocess.Popen(["unzip", "-p", str(archive_zip), member], stdout=subprocess.PIPE)
         # A directory name extracts everything below it; a name absent from this archive is not an error here.
-        tar = subprocess.run(["tar", "-xzf", "-", "-C", "/", "--no-same-owner", *exclude, *names], stdin=unzip.stdout,
+        tar = subprocess.run(["tar", "-xzf", "-", "-C", "/", "--no-same-owner", *exclude,
+                              *(["--anchored", "--wildcards"] if names else []), *names], stdin=unzip.stdout,
                              capture_output=True, text=True)
         unzip.stdout.close()
         unzip.wait()

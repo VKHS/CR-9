@@ -269,6 +269,58 @@ class NarrowRestores(unittest.TestCase):
             self.assertEqual(task_inputs.unread_runs(plan, level=0, shard=1, shards=2, salt=None), [])
 
 
+class Restore(unittest.TestCase):
+    def test_a_study_is_restored_with_its_job_evidence_and_exclusions_hold(self):
+        import shutil
+        import subprocess
+        import zipfile
+        if not (shutil.which("unzip") and shutil.which("tar")):
+            self.skipTest("unzip and GNU tar are required")
+        restore = module("restore")
+        sys.modules.setdefault("demo_levels", module("execute"))      # what restore.main registers
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            work = root / "w"
+            files = {"budget/studies/a/seed-0/ARTIFACT_MANIFEST.json": "1",
+                     "budget/studies/a/seed-0.job-local-1/process_exit_code.txt": "0",
+                     "budget/studies/a/seed-1/ARTIFACT_MANIFEST.json": "2",
+                     "budget/studies/a/seed-0/train/plant.pt": "3", "state/n/task-0.json": "{}"}
+            for name, text in files.items():
+                (work / name).parent.mkdir(parents=True, exist_ok=True)
+                (work / name).write_text(text)
+            archive = root / "delta.tar.gz"
+            subprocess.run(["tar", "-czf", str(archive), "-C", "/", *[str(work / n).lstrip("/") for n in files]],
+                           check=True)
+            shutil.rmtree(work)
+            bundle = root / "artifact.zip"
+            with zipfile.ZipFile(bundle, "w") as handle:
+                handle.write(archive, "delta.tar.gz")
+            plan = {"nodes": [{"id": "studies", "tasks": [{}], "dependencies": [],
+                               "outputs": [str(work / "budget/studies/a/seed-0")]}]}
+            needed, prefixes = restore.selection(plan, work, level=None, nodes=["studies"], export=None)
+            restore.PATTERNS[:] = ["*.pt"]
+            try:
+                restore.extract(bundle, prefixes)
+            finally:
+                restore.PATTERNS[:] = []
+            got = sorted(str(p.relative_to(work)) for p in work.rglob("*") if p.is_file())
+        self.assertEqual(got, ["budget/studies/a/seed-0.job-local-1/process_exit_code.txt",
+                               "budget/studies/a/seed-0/ARTIFACT_MANIFEST.json", "state/n/task-0.json"])
+
+
+class PartialExports(unittest.TestCase):
+    def test_a_fixture_plan_lets_partial_exporters_write_the_measured_part(self):
+        exports = [{"steps": [{"argv": po.py("scripts/run_confirmation_analysis.py", "mechanism", "export", "--output", "o")}]},
+                   {"steps": [{"argv": po.py("scripts/run_ablation.py", "modules", "export", "--output", "o")}]},
+                   {"steps": [{"argv": po.py("scripts/run_ablation.py", "factorial-fit", "export", "--output", "o")}]},
+                   {"steps": [{"argv": po.py("scripts/export_sweep_records.py", "--results", "r")}]},
+                   {"steps": [{"argv": po.py("scripts/run_decision_audit.py", "export", "--allow-partial")},
+                              {"internal": "accepted"}]}]
+        po.declare_partial_exports(exports)
+        flags = [[s["argv"].count("--allow-partial") for s in e["steps"] if "argv" in s] for e in exports]
+        self.assertEqual(flags, [[1], [0], [1], [0], [1]])
+
+
 class PartialCoverage(unittest.TestCase):
     def test_only_a_fixture_plan_admits_a_set_that_declares_partial_coverage(self):
         from unittest import mock

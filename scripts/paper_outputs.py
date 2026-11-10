@@ -1100,6 +1100,24 @@ def _normalize_only(values) -> set[str]:
     return out
 
 
+# Record exporters that write the measured part of an incomplete set, with the cells it lacks, when given
+# --allow-partial (never into records/). A fixture plan's runs (a software check or the CPU demonstration) can
+# leave cells without a valid measurement, e.g. no state donors where every audited rule is open loop.
+PARTIAL_EXPORTERS = {"scripts/run_confirmation_analysis.py", "scripts/run_experiment.py",
+                     "scripts/run_trajectory_audit.py", "scripts/run_decision_audit.py", "scripts/run_timing_records.py"}
+
+
+def declare_partial_exports(exports: list[dict]) -> None:
+    """In a fixture plan, every export step of an exporter that can write a partial set passes --allow-partial."""
+    for export in exports:
+        for step in export["steps"]:
+            argv = [str(a) for a in step.get("argv") or []]
+            script = next((a for a in argv if a.endswith(".py")), None)
+            partial = script in PARTIAL_EXPORTERS or (script == "scripts/run_ablation.py" and "modules" not in argv)
+            if partial and "export" in argv and "--allow-partial" not in argv:
+                step["argv"] = [*step["argv"], "--allow-partial"]
+
+
 def build_plan(work, runs: dict, options: dict, *, required: list[str], executor=_subprocess_executor,
                suite=None, repository=None) -> dict:
     """The node graph and exports of every required artifact (see the module docstring)."""
@@ -1228,6 +1246,8 @@ def build_plan(work, runs: dict, options: dict, *, required: list[str], executor
                 "E12 needs the author's pinned-upstream study plans (pinned upstream and adapter checkouts): give "
                 "--baselines DIR, or a finished set with --artifact records:baselines=DIR"))
     attempt("environment", build_environment)
+    if options.get("allow_fixture"):
+        declare_partial_exports(p.exports)
     for artifact in required:
         if artifact not in p.artifacts:
             p.artifacts[artifact] = {"status": "awaiting", "reason": "not planned"}
