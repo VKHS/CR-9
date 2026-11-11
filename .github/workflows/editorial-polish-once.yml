@@ -1,0 +1,215 @@
+name: Verify editorial documentation update
+
+on:
+  push:
+    branches: [reviewer-wording-cleanup-2026-11-11]
+    paths: [.github/workflows/editorial-polish-once.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: editorial-polish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  documentation:
+    if: github.ref == 'refs/heads/reviewer-wording-cleanup-2026-11-11'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Edit reviewed prose and verify all protected content
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B - <<'PY'
+          import collections
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          expected = {
+              '.zenodo.json': '7c1106f7ee00f32364eff77febbdd3365bc57a03',
+              'docs/README.md': 'fc3ab1c00126a46fcc23a52bc6025c6a2715ff0d',
+              'docs/REVIEWER_GUIDE.md': '9070ab6ff2206f501c65be8c2617538cd74ba0d2',
+              'docs/GETTING_STARTED.md': 'c77a306dc8054aa13cccb2a03a0826365e269ac5',
+              'examples/README.md': 'a70f7f40af4cefe8a0b773df0731cdfff6ded66e',
+              'paper/README.md': 'ec5c28112cb363262fdad0a7f30f0eca865cc2cd',
+          }
+          workflow = '.github/workflows/editorial-polish-once.yml'
+          allowed = set(expected) | {'RELEASE_MANIFEST.json', 'SHA256SUMS.txt', workflow}
+          temp = Path(os.environ['RUNNER_TEMP'])
+          def git_blob(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          def replace_once(text, old, new):
+              if text.count(old) != 1:
+                  raise ValueError('Missing or ambiguous editorial anchor: ' + repr(old[:120]))
+              return text.replace(old, new, 1)
+          names = [n for n in subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0') if n]
+          protected = {}
+          for name in names:
+              if name not in allowed:
+                  path = Path(name)
+                  if path.is_symlink() or not path.is_file():
+                      raise ValueError('Protected file missing or symlink: ' + name)
+                  protected[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+          original = {}
+          for name, digest in expected.items():
+              data = Path(name).read_bytes()
+              if git_blob(data) != digest:
+                  raise ValueError(name + ': source differs from the reviewed version')
+              original[name] = data.decode('utf-8')
+          changes = dict(original)
+
+          changes['.zenodo.json'] = replace_once(changes['.zenodo.json'],
+              'The official benchmark archives and auxiliary measurements are not deposited in this release; see AVAILABILITY.md.',
+              'Archive locations, identities and reconstruction coverage are recorded in the release manifests and AVAILABILITY.md.')
+          a, b = json.loads(original['.zenodo.json']), json.loads(changes['.zenodo.json'])
+          a.pop('description'); b.pop('description')
+          assert a == b, 'Only the metadata description may change'
+
+          text = changes['docs/README.md']
+          text = replace_once(text, '## Every table and figure from the published outputs',
+                              '## Artifact reconstruction and publication')
+          text = replace_once(text,
+              '| [Availability review](AVAILABILITY_REVIEW.md) | The detailed repository review, scientific corrections, remaining paper/code differences and the artifacts needed for fulfillment |',
+              '| [Implementation and reconstruction review](AVAILABILITY_REVIEW.md) | Implementation decisions, source references, comparison findings and artifact requirements |')
+          old_planning = '''| [The final destination](FINAL_DESTINATION.md) | The repository after publication, drawn now: printed values the released code fixes by design and their agreement with the paper, pre-registered data roles, the projected release (contents, tiers, parts, Zenodo feasibility), compliance at the destination and the close-out sequence |
+          | [destination/](../destination/README.md) | Every file publication writes into the checkout, projected at the path it will occupy (release manifest, executed manifests, observed environments, E12 study view, source data), the twelve registered items evaluated on them and the convergence check `make final-destination-converge` |
+          '''
+          text = replace_once(text, old_planning, '')
+          planning = '''## Publication planning references
+
+          | Reference | Purpose |
+          |---|---|
+          | [Publication layout and storage estimates](FINAL_DESTINATION.md) | Planning calculations, intended archive organization and publication steps; measured results remain identified by their execution records. |
+          | [Publication-layout templates](../destination/README.md) | Templates for release manifests, executed manifests, environments, baseline study views and source data. These planning files remain distinct from execution artifacts; `make final-destination-converge` compares the two. |
+
+          '''
+          text = replace_once(text, '## Regenerate the results on a cluster\n',
+                              planning + '## Regenerate the results on a cluster\n')
+          changes['docs/README.md'] = text
+
+          text = changes['docs/REVIEWER_GUIDE.md']
+          text = replace_once(text,
+              'This repository is a code release. It distributes the implementation, the\nconfigurations of all seven datasets, the Slurm reproduction launcher and a\nregistry of reported results and protocol constants. The launcher produces new\nrun artifacts; original and regenerated artifacts keep their own source identities.',
+              'This repository provides the CROSS-MORSE implementation, configurations of all\nseven datasets, release manifests, artifact-reconstruction tools, the Slurm\nreproduction launcher and the registry of reported results and protocol constants.\nOriginal and regenerated artifacts retain their own source and execution identities.')
+          text = replace_once(text,
+              '| `SOFTWARE-ONLY` | Every software and example check passed; benchmark results come from a reproduction (section 2) |',
+              '| `SOFTWARE-ONLY` | Every software and example check in this invocation passed; manuscript comparisons use the relevant run records (section 3) |')
+          text = replace_once(text,
+              '| `EVIDENCE COMPLETE` / `EVIDENCE INCOMPLETE` | Evidence mode, for run archives registered in a run index; this release registers none |',
+              '| `EVIDENCE COMPLETE` / `EVIDENCE INCOMPLETE` | Artifact validation for archives selected through a run index; the invocation report identifies the records checked |')
+          changes['docs/REVIEWER_GUIDE.md'] = text
+
+          text = changes['docs/GETTING_STARTED.md']
+          text = replace_once(text, 'examples demonstrate the workflow on synthetic data.',
+                              'examples exercise the workflow using generated inputs.')
+          text = replace_once(text,
+              'Official dataset with reduced model/training settings; integration and resource measurement',
+              'Official dataset with smaller model and training budgets; integration and resource measurement')
+          text = replace_once(text,
+              'require substantial memory. It does not establish full-profile accuracy. A\ncomparator return is a valid lifecycle outcome.',
+              'require substantial memory. Its results correspond to the selected pilot\nsettings; full-profile results use their own run records. A comparator return\nis a valid lifecycle outcome.')
+          changes['docs/GETTING_STARTED.md'] = text
+
+          text = changes['examples/README.md']
+          text = replace_once(text,
+              'Two archived **synthetic** runs demonstrate the complete artifact format without',
+              'Two archived **synthetic** runs exercise the complete artifact format without')
+          text = replace_once(text,
+              'is stored in [`source_snapshots/`](source_snapshots) for replay. They demonstrate\nthe recorded lifecycle and its comparator-return decisions; they do not establish\nindependent-role execution by the current runtime or performance on official data.\nThe official evidence status is stated in [AVAILABILITY.md](../AVAILABILITY.md).',
+              'is stored in [`source_snapshots/`](source_snapshots) for replay. Their scope is\nthe recorded synthetic inputs, historical source and comparator-return decisions.\nCurrent-runtime validation and official-dataset results use their own source and\ndata identities. Artifact availability is recorded in [AVAILABILITY.md](../AVAILABILITY.md).')
+          text = replace_once(text,
+              'two archives. The outputs retain a synthetic-data label. They are examples of the\nbuild process, not reconstructed benchmark results.',
+              'two archives. The outputs retain a synthetic-data label and the identities of\nthe generated inputs in the table above. Benchmark outputs are built separately\nfrom the corresponding benchmark-run records.')
+          text = replace_once(text, 'sets demonstrate measurement-record export:',
+                              'sets exercise measurement-record export:')
+          changes['examples/README.md'] = text
+
+          text = changes['paper/README.md']
+          text = replace_once(text,
+              'obligations to inspectable evidence and records the remaining manuscript decisions.',
+              'requirements to inspectable records and the associated manuscript decisions.')
+          text = replace_once(text,
+              'for example, use the reported cost multiplier; checking those calculations does\nnot reproduce its measurement.',
+              'for example, use the reported cost multiplier. Arithmetic checks use those\nregistered inputs; measurement replay uses the originating execution records.')
+          text = replace_once(text,
+              'Missing observations remain unavailable in generated results.',
+              'Output reports identify any observation that the selected input set does not supply.')
+          text = replace_once(text,
+              'confirmation outcome separately from an evaluated arm. It does not substitute\ntranscribed values for reconstructed experiment output.',
+              'confirmation outcome separately from an evaluated arm. This reading view uses\nregistered manuscript values; reconstructed outputs are generated separately\nfrom the corresponding execution artifacts.')
+          changes['paper/README.md'] = text
+
+          for name, text in changes.items():
+              if name.endswith('.md'):
+                  old = original[name]
+                  # Commands, identifiers and numerical literals remain unchanged.
+                  spans = lambda s: collections.Counter(re.findall(r'```[\s\S]*?```|`[^`\n]+`', s))
+                  assert spans(old) == spans(text), 'Code span changed: ' + name
+                  digits = lambda s: collections.Counter(re.findall(r'\d+(?:[.,]\d+)*', s))
+                  assert digits(old) == digits(text), 'Numerical literal changed: ' + name
+                  links = lambda s: collections.Counter(re.findall(r'\]\(([^)]+)\)', s))
+                  assert links(old) == links(text), 'Link target changed: ' + name
+              Path(name).write_text(text, encoding='utf-8', newline='\n')
+          for name, digest in protected.items():
+              assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest, name
+          (temp / 'editorial-protected.json').write_text(json.dumps(protected), encoding='utf-8')
+          (temp / 'editorial-allowed.json').write_text(json.dumps(sorted(allowed)), encoding='utf-8')
+          (temp / 'editorial-workflow.yml').write_bytes(Path(workflow).read_bytes())
+          print('PASS: six reviewed prose files; commands, link destinations, numerical literals and all protected-file hashes unchanged')
+          PY
+          git diff --check
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+      - name: Install the repository review dependencies
+        run: python -m pip install -q -c environment/requirements-cpu.lock -r requirements-review.txt 'matplotlib>=3.8,<4' scipy
+      - name: Run repository verification and documentation regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          make verify PYTHON=python > "$RUNNER_TEMP/editorial-verify.log" 2>&1 || { tail -n 100 "$RUNNER_TEMP/editorial-verify.log"; exit 1; }
+          tail -n 35 "$RUNNER_TEMP/editorial-verify.log"
+          python -B -m unittest tests.test_release_tooling tests.test_uplift_tools tests.test_availability tests.test_reviewer_faq tests.test_paper_support_report tests.test_environment_spec -q
+      - name: Prepare final integrity files and commit only documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/editorial-polish-once.yml
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+          python -B scripts/create_release_manifest.py --root . --verify RELEASE_MANIFEST.json
+          python -B - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          temp = Path(os.environ['RUNNER_TEMP'])
+          protected = json.loads((temp / 'editorial-protected.json').read_text())
+          for name, digest in protected.items():
+              assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest, name
+          allowed = set(json.loads((temp / 'editorial-allowed.json').read_text()))
+          changed = set(filter(None, subprocess.check_output(['git', 'diff', '--name-only', '-z']).decode().split('\0')))
+          untracked = set(filter(None, subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard', '-z']).decode().split('\0')))
+          assert changed <= allowed and not untracked, sorted((changed - allowed) | untracked)
+          # The connector removes this temporary workflow after these final checksums are published.
+          # Restore it unchanged for this push: the job token does not edit workflow files.
+          Path('.github/workflows/editorial-polish-once.yml').write_bytes((temp / 'editorial-workflow.yml').read_bytes())
+          print('PASS: final target-tree checksums and protected evidence; temporary workflow unchanged for the push')
+          PY
+          git diff --check
+          git add .zenodo.json docs/README.md docs/REVIEWER_GUIDE.md docs/GETTING_STARTED.md examples/README.md paper/README.md RELEASE_MANIFEST.json SHA256SUMS.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Replace blanket editorial claims with precise artifact descriptions'
+          git push origin HEAD:reviewer-wording-cleanup-2026-11-11
