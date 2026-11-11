@@ -323,6 +323,8 @@ def write(ledger: dict, *, ledger_path: Path, badge_path: Path) -> None:
     badge_path.parent.mkdir(parents=True, exist_ok=True)
     ledger_path.write_text(render(ledger), encoding="utf-8")
     badge_path.write_text(json.dumps(badge(ledger), indent=1) + "\n", encoding="utf-8")
+    from scripts.render_evidence_badge import render_badge
+    badge_path.with_suffix(".svg").write_text(render_badge(badge(ledger)), encoding="utf-8")
 
 
 def check(ledger: dict, *, ledger_path: Path, badge_path: Path) -> list[str]:
@@ -330,6 +332,10 @@ def check(ledger: dict, *, ledger_path: Path, badge_path: Path) -> list[str]:
     for path, expected in ((ledger_path, render(ledger)), (badge_path, json.dumps(badge(ledger), indent=1) + "\n")):
         if not path.is_file() or path.read_text(encoding="utf-8") != expected:
             problems.append(f"{path} is stale; run `make claims`")
+    from scripts.render_evidence_badge import render_badge
+    svg = badge_path.with_suffix(".svg")
+    if not svg.is_file() or svg.read_text(encoding="utf-8") != render_badge(badge(ledger)):
+        problems.append(f"{svg} is stale; run `make claims`")
     return problems
 
 

@@ -661,6 +661,17 @@ class BudgetTables(World):
             build_one("supplementary:Table S46b", self.ctx("budget_matched", runs=False, campaign=True),
                       Path(tempfile.mkdtemp(dir=self.tmp)))
 
+    def test_the_demonstration_context_replays_its_campaign_without_the_strict_qualification(self):
+        ctx = self.ctx("budget_matched", runs=False, campaign=True)
+        ctx.demonstration = True
+        with mock.patch("cm_campaigns.arm_campaign.check_campaign", return_value=self.replay) as check:
+            build_one("supplementary:Table S46b", ctx, Path(tempfile.mkdtemp(dir=self.tmp)), registry=REGISTRY)
+        self.assertIs(check.call_args.kwargs["strict"], False)
+        with mock.patch("cm_campaigns.arm_campaign.check_campaign", return_value=self.replay) as check:
+            build_one("supplementary:Table S46b", self.ctx("budget_matched", runs=False, campaign=True),
+                      Path(tempfile.mkdtemp(dir=self.tmp)), registry=REGISTRY)
+        self.assertIs(check.call_args.kwargs["strict"], True)
+
 
 # ---------------------------------------------------------------------------
 # Figures

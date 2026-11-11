@@ -179,6 +179,30 @@ class Planning(Workspace):
             sweeps.plan_sweep("horizon_beam_sweep", [ARXIV], self.tmp / "hb", horizon=2, horizons=[1, 2],
                               beams=[2], profile="full", ensemble=2, allow_source_change=True)
 
+    def test_horizon_beam_plan_holding_another_beam(self):
+        # the parent (beam 2, horizons 1 and 2) never planned beam 3 or horizon 4: every point is a variant
+        with self.assertRaises(sweeps.SweepError) as caught:
+            sweeps.plan_sweep("horizon_beam_sweep", [ARXIV], self.tmp / "refused", horizon=4, horizons=[2, 4],
+                              beams=[1, 2, 3], profile="full", ensemble=2, allow_source_change=True)
+        self.assertIn("not in the parent's registry", str(caught.exception))
+        path = sweeps.plan_sweep("horizon_beam_sweep", [ARXIV], self.tmp / "hb", horizon=4, horizons=[2, 4],
+                                 beams=[1, 2, 3], beam=3, profile="full", ensemble=2, allow_source_change=True)
+        plan = json.loads(path.read_text())
+        settings = plan["settings"]
+        self.assertEqual((settings["registered_horizon"], settings["registered_beam_width"],
+                          settings["parent_beam_width"], settings["registered_in_parent"]), (4, 3, 2, False))
+        points = {(p["horizon"], p["beam_width"]): p for p in settings["points"]}
+        self.assertEqual(set(points), {(2, 3), (4, 3), (4, 1), (4, 2)})
+        self.assertEqual({p["source"] for p in points.values()}, {"variant"})
+        variants = {v["id"]: v for v in plan["variants"]}
+        self.assertEqual(set(variants), {"H2_B3", "H4_B3", "H4_B1", "H4_B2"})        # no replicate of the parent
+        self.assertEqual(variants["H2_B3"]["patch"], {"/controller/beam_width": 3})
+        self.assertEqual(variants["H4_B2"]["patch"], {"/controller/horizons": [1, 2, 4]})
+        self.assertEqual(variants["H4_B3"]["patch"], {"/controller/beam_width": 3, "/controller/horizons": [1, 2, 4]})
+        with self.assertRaises(sweeps.SweepError):                       # the held width must lie on the grid
+            sweeps.plan_sweep("horizon_beam_sweep", [ARXIV], self.tmp / "off", horizon=4, horizons=[2, 4],
+                              beams=[1, 2], beam=3, profile="full", ensemble=2, allow_source_change=True)
+
     def test_registered_configuration_required(self):
         with self.assertRaises(sweeps.SweepError):                       # beam 2 is not the registered 16
             sweeps.plan_sweep("horizon_beam_sweep", [ARXIV], self.tmp / "a", profile="full", ensemble=2)
