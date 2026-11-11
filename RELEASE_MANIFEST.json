@@ -73,10 +73,10 @@
       "sha256": "f12c02c5542ff3611bad3aeb45220a0f6baeb577667075701ca13c0159166c74"
     },
     {
-      "bytes": 9026,
+      "bytes": 9647,
       "executable": false,
       "path": ".github/workflows/demo-publish.yml",
-      "sha256": "77cb6756f3aaaf8a96f6629c4ff8e5c2795b6c88fb2be3636d68fb8577de35ec"
+      "sha256": "14f4de09eca3d354d36a0edd78e56da0ec63bef72160638dce890b5e4e0a5add"
     },
     {
       "bytes": 7249,
@@ -823,10 +823,10 @@
       "sha256": "95046f24226ad40ad9ef5ad69457716b9796b8e787f68beaa04272d5d6ccea5f"
     },
     {
-      "bytes": 14406,
+      "bytes": 17137,
       "executable": false,
       "path": "demo/RESULTS.md",
-      "sha256": "564ee6462aec70850ef9071962579e88f6f7920f063b1c0b28d50a6f133c567c"
+      "sha256": "591b8ecb08813637336f149f5985ebd514fb7d36173fd01e3818fed8c4629993"
     },
     {
       "bytes": 1188,
@@ -9436,5 +9436,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "e49da5d9d7ae72eac34f6379e0d345f632eeef1cec609740c4e3a7619dd451f9"
+  "tree_sha256": "03a9e99847b4db1434231f79754383d394d353d7ed76a9b470adc64af9a83d3d"
 }

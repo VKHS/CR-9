@@ -6,8 +6,46 @@ Release: [demo-artifacts](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-
 
 ## Rebuilt from the release with `make demo-paper`
 
-- Displays: 0 of 0 complete in content and comparison coverage; the others name the artifact or printed-value contract they lack.
-- Printed values: 0 equal, 0 different, 0 missing. The printed values are the measurements of the paper's full-scale GPU runs; the values here come from the CPU runs below.
+- Display generators: 56 of 90 built, 35 of them from the release and 21 from the repository's own sources (protocol and analytical displays); 34 wait for an input (below). Every display built from the release is labelled as the CPU execution on public data.
+- Supplementary builds from the release's record sets and campaign: 10 output(s), status PASS.
+- Printed values: 1263 equal, 1202 different, 248 missing. The printed values are the measurements of the paper's full-scale GPU runs; the values here come from the CPU runs below.
+
+Displays waiting for an input, with what they lack:
+
+- `main:Figure 2`: campaign:confirmation
+- `main:Figure 3`: campaign:confirmation
+- `main:Figure 4`: records:baselines
+- `main:Figure 5`: records:baselines
+- `supplementary:Figure S2`: runtime_scaling: peak_memory_gib {'dataset': 'ogbn-arxiv', 'instance': 'full'} is not in the record set
+- `supplementary:Figure S4`: records:baselines
+- `supplementary:Figure S6`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Figure S7`: records:action_gap_audit
+- `supplementary:Figure S8`: PascalVOC-SP: a zero-width admission or test interval leaves the two-way shares undefined
+- `supplementary:Figure S9`: campaign:confirmation; records:confirmation_sensitivity
+- `supplementary:Figure S10`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Figure S12`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Figure S16`: reliability_diagnostics: no coverage rows
+- `supplementary:Figure S17`: records:action_gap_audit
+- `supplementary:Figure S18`: records:confirmation_sensitivity
+- `supplementary:Figure S20`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Table S6c`: sensor_parameters: sketch_dim {'dataset': 'ogbn-arxiv'} is not in the record set
+- `supplementary:Table S14`: campaign:confirmation
+- `supplementary:Table S14b`: records:confirmation_contrasts
+- `supplementary:Table S15`: records:baselines
+- `supplementary:Table S15b`: records:baselines
+- `supplementary:Table S17`: records:module_ablations
+- `supplementary:Table S21`: records:action_gap_audit
+- `supplementary:Table S23`: records:baselines
+- `supplementary:Table S23b`: records:baselines
+- `supplementary:Table S28`: ogbn-arxiv: no qualified support cell
+- `supplementary:Table S33`: records:action_gap_audit
+- `supplementary:Table S34`: records:action_gap_audit
+- `supplementary:Table S37`: input_gate: fallback_probability {'dataset': 'PascalVOC-SP'} is not in the record set
+- `supplementary:Table S41`: studies/ogbn-arxiv/seed-0/split-0: no captured Slurm job ID
+- `supplementary:Table S42`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Table S43`: records:baselines; records:confirmation_sensitivity
+- `supplementary:Table S44`: ogbn-arxiv: the run deploys no feedback rule with a positive gain over q_C
+- `supplementary:Table S47`: records:action_gap_audit
 
 
 ## The seven lifecycle runs

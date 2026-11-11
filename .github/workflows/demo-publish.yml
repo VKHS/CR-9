@@ -70,6 +70,14 @@ jobs:
         run: |
           python -c "import json; print('report_only=' + json.dumps(bool(json.load(open('demo/publish-request.json')).get('report_only'))))" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
+      - name: Rebuild every table and figure from the release first (results only)
+        if: ${{ fromJSON(steps.request.outputs.report_only) }}
+        run: |
+          # the runner's disk holds the unpacked release or the runs and collected outputs, not both at once
+          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper"
+          python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper"
+          rm -rf "$DEMO/fetched"
+          touch "$DEMO/rebuilt"
       - name: The runs and the collected outputs (demo/publish-request.json)
         run: |
           read -r runs graph < <(python -c "import json; r=json.load(open('demo/publish-request.json')); print(' '.join([str(r['runs_run_id'])] + ['%s=%s' % kv for kv in sorted((r.get('overrides') or {}).items())]).replace(' ', ','), r['graph_run_id'])")
@@ -112,11 +120,13 @@ jobs:
         run: python -B scripts/paper_artifacts.py publish --demo --staged "$DEMO/staged" --target "${{ github.sha }}"
       - name: Rebuild every table and figure from the release, install the views, write the results
         run: |
-          # the manifest is committed whatever the rebuild reports; RESULTS.md records its status and errors
-          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper" \
-            || echo "make demo-paper exited $?"
-          python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper" \
-            || echo "derive --demo exited $?"
+          if [ ! -e "$DEMO/rebuilt" ]; then
+            # the manifest is committed whatever the rebuild reports; RESULTS.md records its status and errors
+            make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper" \
+              || echo "make demo-paper exited $?"
+            python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper" \
+              || echo "derive --demo exited $?"
+          fi
           python -c "import json; json.dump(json.load(open('demo/publish-request.json')).get('notes') or {}, open('$DEMO/notes.json', 'w'))"
           python -B demo/report.py --status "$DEMO/paper.status.json" $REPORT_GRAPHS --runs "$DEMO/runs" \
             --graphs "$DEMO/graphs" $REPORT_RUNS --pack-failures "$DEMO/pack-failures.json" --notes "$DEMO/notes.json" \
