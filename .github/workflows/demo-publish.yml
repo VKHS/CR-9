@@ -47,6 +47,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          temp="$RUNNER_TEMP"
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            temp=/mnt/demo-tmp
+          fi
+          echo "DEMO_TEMP=$temp" >> "$GITHUB_ENV"
       - id: request
         name: Publication or results only (report_only rebuilds and records from the published release)
         run: |
@@ -56,8 +68,8 @@ jobs:
         run: |
           read -r runs graph < <(python -c "import json; r=json.load(open('demo/publish-request.json')); print(' '.join([str(r['runs_run_id'])] + ['%s=%s' % kv for kv in sorted((r.get('overrides') or {}).items())]).replace(' ', ','), r['graph_run_id'])")
           bash demo/fetch_inputs.sh ${runs//,/ } > /dev/null
-          bash demo/artifact.sh demo-collected "$RUNNER_TEMP/collected" "$graph"
-          tar -xzf "$RUNNER_TEMP/collected/collected.tar.gz" -C /
+          bash demo/artifact.sh demo-collected "$DEMO_TEMP/collected" "$graph"
+          tar -xzf "$DEMO_TEMP/collected/collected.tar.gz" -C / && rm -rf "$DEMO_TEMP/collected"
           python - <<'EOF' > "$RUNNER_TEMP/extra.txt"
           import json
           r = json.load(open("demo/publish-request.json"))
@@ -72,8 +84,8 @@ jobs:
           while read -r run artifact work; do
             [ -n "${run:-}" ] || continue
             index=$((index + 1))
-            bash demo/artifact.sh "$artifact" "$RUNNER_TEMP/extra-$index" "$run"
-            tar -xzf "$RUNNER_TEMP/extra-$index/collected.tar.gz" -C /
+            bash demo/artifact.sh "$artifact" "$DEMO_TEMP/extra-$index" "$run"
+            tar -xzf "$DEMO_TEMP/extra-$index/collected.tar.gz" -C / && rm -rf "$DEMO_TEMP/extra-$index"
             python -B demo/merge_maps.py "$WORK/paper-artifacts.map.json" "$work/paper-artifacts.map.json"
             graphs="$graphs --graph $work"; reports="$reports --graph-run $index=$run"
           done < "$RUNNER_TEMP/extra.txt"
