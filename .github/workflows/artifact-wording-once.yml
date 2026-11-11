@@ -30,13 +30,15 @@ jobs:
           assert len(a['artifacts'])==len(b['artifacts'])==37
           assert sum(x['status']=='published' for x in a['artifacts'])==31
           assert sum(x['status']=='published' for x in b['artifacts'])==0
-          protected={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in subprocess.check_output(['git','ls-files','-z']).decode().split('\0') if p and p not in {'RELEASE_MANIFEST.json','SHA256SUMS.txt','.github/workflows/artifact-wording-once.yml'}}
+          protected={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in subprocess.check_output(['git','ls-files','-z']).decode().split('\0') if p and p not in {'RELEASE_MANIFEST.json','SHA256SUMS.txt','.github/workflows/artifact-wording-once.yml','release/artifact_catalog.json','docs/ARTIFACT_CATALOG.md','docs/badges/evidence.json','docs/badges/evidence.svg','paper/CLAIMS.md'}}
           from pathlib import Path
           tmp=Path(os.environ['RUNNER_TEMP'])
           (tmp/'protected.json').write_text(json.dumps(protected))
           (tmp/'helper.yml').write_bytes(Path('.github/workflows/artifact-wording-once.yml').read_bytes())
           print('Verified two unchanged scientific artifact channels and protected file hashes')
           PY
+          python -B scripts/artifact_catalog.py
+          python -B scripts/claims_ledger.py
           make verify PYTHON=python > "$RUNNER_TEMP/verify.log" 2>&1 || { tail -n 75 "$RUNNER_TEMP/verify.log"; exit 1; }
       - name: Regenerate target-tree source checksums and commit
         shell: bash
@@ -55,7 +57,7 @@ jobs:
           print('PASS: all protected files unchanged; target-tree checksums valid')
           PY
           git diff --check
-          git add RELEASE_MANIFEST.json SHA256SUMS.txt
+          git add RELEASE_MANIFEST.json SHA256SUMS.txt release/artifact_catalog.json docs/ARTIFACT_CATALOG.md paper/CLAIMS.md docs/badges/evidence.json docs/badges/evidence.svg
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'Refresh source integrity after artifact channel clarification'
