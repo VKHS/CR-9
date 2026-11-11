@@ -115,10 +115,10 @@
       "sha256": "439a1a761d26e9cb08485682a01ecce9075b56262a6f954d91a77f9631e83e2f"
     },
     {
-      "bytes": 1304,
+      "bytes": 1306,
       "executable": false,
       "path": ".zenodo.json",
-      "sha256": "6b575741c8cb199ef2e219027729a9567f7469988009a8bcddf26400e93c9512"
+      "sha256": "08780e5d9cc10da8ee20d98b4422fd7b5feb8b5df1d35169507a3374ef14c440"
     },
     {
       "bytes": 8334,
@@ -2479,10 +2479,10 @@
       "sha256": "6619a2a2b8d06c5000816318e46facb3d66adde6f61b3a81842dad16c2907fc9"
     },
     {
-      "bytes": 6893,
+      "bytes": 6956,
       "executable": false,
       "path": "docs/GETTING_STARTED.md",
-      "sha256": "8ed8c67bd6dcd6fe840523e0865aea6303daadd28674dd011edc721f7ce416d4"
+      "sha256": "06b6a469c3e1324dd3ab92a15872e58a9675c6ccbb242a59daa3437e593bfb48"
     },
     {
       "bytes": 16677,
@@ -2521,10 +2521,10 @@
       "sha256": "363f64c35d395bee85b13136605f62a5c1a9ae02a253bdabd9d91543523d3c36"
     },
     {
-      "bytes": 5668,
+      "bytes": 5534,
       "executable": false,
       "path": "docs/README.md",
-      "sha256": "d9a8437cd6792862ee3ddceb47de1b344be4e29d793152ee06c51bf1677bf8e2"
+      "sha256": "60ea0f03501dc1377fb00a5a45a67f3562df26e1fb5adf9f5f4c32b4fb1629e4"
     },
     {
       "bytes": 12554,
@@ -2539,10 +2539,10 @@
       "sha256": "d3b878c2925283d5aa7703b0303d1da6810f2df9c8a8c5e31560f3b20e9372a7"
     },
     {
-      "bytes": 8447,
+      "bytes": 8520,
       "executable": false,
       "path": "docs/REVIEWER_GUIDE.md",
-      "sha256": "c00bec8c12152223dd434f7d581cc43a7bcf1ebf7a0a9dea9158c0870e0e9985"
+      "sha256": "a5eff41bd3eb89da59f8822f0aa775b3c26d343e2c8bcb69c2d588b6c55ed0e3"
     },
     {
       "bytes": 2626,
@@ -2803,10 +2803,10 @@
       "sha256": "5298e6015bce61b907710dac4476ebcc574a80798b2f434dd25ca1d1fbaf2289"
     },
     {
-      "bytes": 3607,
+      "bytes": 3679,
       "executable": false,
       "path": "examples/README.md",
-      "sha256": "4412768a520b451b52dc9a29f7421a089d53eb8c347e9f2ad1d1048d8ea8b715"
+      "sha256": "c79af3691c479112faf85eac5c7bbaad089c1ed870f039fce4279ae3294605d6"
     },
     {
       "bytes": 108872,
@@ -7507,10 +7507,10 @@
       "sha256": "2ca799e62b7b7b2500c2643b73427d61aabd15e047cd16ad18e1ad88fe4afc70"
     },
     {
-      "bytes": 5962,
+      "bytes": 6085,
       "executable": false,
       "path": "paper/README.md",
-      "sha256": "7d19c644525836108e56ea9e608659618ed1a707eeb0e371bf9da6a91c8c0fa8"
+      "sha256": "9b7b7208f247055e2fbb9695f3c080adffbf031d0e6c5b2f0eac44f5ab1c04e2"
     },
     {
       "bytes": 4803,
@@ -9586,5 +9586,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "d37eb7090b4de89c923dfff192fdc668725b771b0474229d4b2da2a5cb68bd7b"
+  "tree_sha256": "d4633608fe36a85be73c5aad44625b52ab948f3aa8b0a884c641c1fcc4690cd8"
 }
