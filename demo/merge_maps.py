@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add to the main graph's publication map the artifacts that another demonstration graph produced.
+"""Add to the main graph's publication map the artifacts that another CPU execution graph produced.
 
 A graph planned for one record set alone (``paper_outputs.py plan --only``, e.g. the Table S29 sweep of
 demo-sweep.yml) writes its own map. Every artifact that such a map names, and that the main map leaves

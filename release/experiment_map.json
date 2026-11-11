@@ -25,7 +25,7 @@
   ],
   "profiles": {
     "smoke": "synthetic task-specific software validation",
-    "pilot": "official-data integration and resource check at reduced computation",
+    "pilot": "official-data integration and resource check at smaller training budgets",
     "full": "registered dataset-specific experiment configuration"
   },
   "implemented_checks": [

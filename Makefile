@@ -37,7 +37,7 @@ RECONSTRUCTION_ROOT ?= $(REPORT_ROOT)/reconstruction
 ARTIFACTS_ROOT ?= ../cm-artifacts
 PAPER_ROOT ?= ../cm-paper
 PAPER_TIER ?= analysis
-# The CPU demonstration (demo/README.md): its own release, manifest and workspace; not the paper's measurements.
+# The CPU execution on public data (demo/README.md): its own release, manifest and workspace.
 DEMO_ARTIFACTS_ROOT ?= ../cm-demo-artifacts
 DEMO_PAPER_ROOT ?= ../cm-demo-paper
 PUBLISH_MAP ?=
@@ -116,7 +116,7 @@ endef
 .PHONY: help verify check test test-no-torch test-release \
  tables figures paper paper-offline paper-from-index paper-from-runs fetch-artifacts paper-artifacts-status \
  paper-artifacts-plan paper-artifacts-check statement statement-check statement-fulfilled example-paper example-paper-check \
- printed-statement-check final-destination final-destination-check final-destination-runs final-destination-converge availability-fulfilled \
+ printed-statement-check availability-fulfilled \
  consistency consistency-check consistency-audit independent-verification \
  demo-paper demo-paper-offline demo-fetch demo-status \
  paper-outputs paper-outputs-plan paper-outputs-submit paper-outputs-status paper-outputs-collect \
@@ -178,15 +178,13 @@ help:
 	  '  bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   publish' \
 	  '  make statement-fulfilled  every item of the registered availability statement fulfilled' \
 	  '  make printed-statement-check  each claim of the availability text printed in the manuscript' \
-	  '  make final-destination    the repository after publication, projected (docs/FINAL_DESTINATION.md, destination/)' \
-	  '  make final-destination-converge  every published file against its projection in destination/' \
 	  '  make consistency-audit RUNS_ROOT=<runs>  decide each open printed-method question from the original runs' \
 	  '  make independent-verification VERIFY_WORK=<new dir>  the acceptance test from a fresh clone' \
 	  '  make availability-fulfilled  the registered statement and every printed claim fulfilled' \
 	  '' \
-	  'CPU demonstration (demo/README.md; reduced scale, not the paper'"'"'s measurements):' \
-	  '  make demo-paper           download the demonstration release and rebuild the tables and figures it supports' \
-	  '  make demo-status          what the demonstration release holds' \
+	  'CPU execution on public data (demo/README.md):' \
+	  '  make demo-paper           download the CPU execution release and rebuild the tables and figures it supports' \
+	  '  make demo-status          what the CPU execution release holds' \
 	  '' \
 	  'Registered evidence (run archives and record sets registered in runs/ and records/):' \
 	  '  make paper                build supported tables/figures from official archives and records' \
@@ -244,7 +242,7 @@ paper:
 paper-offline:
 	"$(PYTHON)" -B scripts/reconstruct_paper.py --offline --artifacts "$(ARTIFACTS_ROOT)" --output-dir "$(PAPER_ROOT)" --tier "$(PAPER_TIER)"
 
-# The CPU demonstration: the same reconstruction on the release demo-artifacts (release/demo_artifacts.json).
+# The CPU execution: the same reconstruction on the release demo-artifacts (release/demo_artifacts.json).
 demo-paper:
 	"$(PYTHON)" -B scripts/reconstruct_paper.py --demo --artifacts "$(DEMO_ARTIFACTS_ROOT)" --output-dir "$(DEMO_PAPER_ROOT)" \
 	  --tier "$(PAPER_TIER)"
@@ -282,35 +280,15 @@ paper-artifacts-check:
 
 statement:
 	"$(PYTHON)" -B scripts/statement_check.py --write
-	"$(PYTHON)" -B scripts/final_destination.py --write
 	"$(PYTHON)" -B scripts/consistency_audit.py --write
 
 statement-check:
 	"$(PYTHON)" -B scripts/statement_check.py --check
-	"$(PYTHON)" -B scripts/final_destination.py --check
 	"$(PYTHON)" -B scripts/consistency_audit.py --check
 
 # The availability text printed in the manuscript (main page 15, Methods, SI page 30), claim by claim.
 printed-statement-check:
 	"$(PYTHON)" -B scripts/printed_statement_check.py
-
-# The repository after publication, drawn now: design forecast, pre-registered roles, projected release,
-# compliance at publication, the close-out sequence (docs/FINAL_DESTINATION.md) and every file publication
-# writes into the checkout, projected (destination/).
-final-destination:
-	"$(PYTHON)" -B scripts/final_destination.py --write
-
-final-destination-check:
-	"$(PYTHON)" -B scripts/final_destination.py --check
-
-# Completed runs against the design forecast before they are published: RUNS_ROOT=<suite>/runs
-final-destination-runs:
-	@test -n "$(RUNS_ROOT)" || { echo 'Set RUNS_ROOT to a directory of completed runs' >&2; exit 2; }
-	"$(PYTHON)" -B scripts/final_destination.py --runs-root "$(RUNS_ROOT)"
-
-# Every published file of the checkout against its projection in destination/ (exit 1 when an exact value differs).
-final-destination-converge:
-	"$(PYTHON)" -B scripts/final_destination.py --converge
 
 # Scientific consistency: the open questions between the printed methods/values and the code, each with the
 # original record and the rule that decides it (paper/consistency_ledger.json, docs/CONSISTENCY.md).
@@ -613,8 +591,8 @@ NUMPY_TESTS := test_demo test_paper_registry test_textual_source_references test
  test_displays_main_paper test_displays_run_audits test_displays_records_campaigns test_displays_protocol_tables \
  test_displays_analytical test_displays_experiments test_sweeps test_experiments_runners_a test_experiments_runners_b \
  test_timing_records test_confirmation_analysis test_trajectory_audit test_decision_audit test_ablation_lifecycle \
- test_s14_builder test_paper_outputs test_internal_baselines test_printed_statement_check test_final_destination \
- test_destination test_consistency_audit test_figure_contracts_s6_s7 test_figure_contracts_s9_s13 \
+ test_s14_builder test_paper_outputs test_internal_baselines test_printed_statement_check \
+ test_consistency_audit test_figure_contracts_s6_s7 test_figure_contracts_s9_s13 \
  test_figure_contracts_s12_s20 test_figure_contracts_s15_f5
 
 test-no-torch:

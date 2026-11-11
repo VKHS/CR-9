@@ -294,8 +294,8 @@ def cell(text) -> str:
 
 def render(ledger: dict) -> str:
     L = ["# Scientific consistency", "",
-         "[Statement compliance](../STATEMENT_COMPLIANCE.md) · [The final destination](FINAL_DESTINATION.md) · "
-         "[Availability review](AVAILABILITY_REVIEW.md) · [Figure coverage](FIGURE_REFERENCE_COVERAGE.md)", "",
+         "[Statement compliance](../STATEMENT_COMPLIANCE.md) · "
+         "[Figure coverage](FIGURE_REFERENCE_COVERAGE.md)", "",
          ledger["about"], "",
          "| Item | Question | Status | Decided by |", "|---|---|---|---|"]
     for item in ledger["items"]:

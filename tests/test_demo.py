@@ -1,4 +1,4 @@
-"""The CPU demonstration channel: its configurations, planner device, executor and separation from the
+"""The CPU execution channel: its configurations, planner device, executor and separation from the
 paper's evidence (NumPy only; no PyTorch)."""
 from __future__ import annotations
 
@@ -470,7 +470,7 @@ class Channels(unittest.TestCase):
                          ("partly", "56 of 90 displays built"))
         self.assertIs(derived["generators"]["demonstrated"], True)
         self.assertEqual(statement_check.evaluate(ROOT)["counts"], before)
-        self.assertIn("CPU demonstration (separate from the statement)",
+        self.assertIn("CPU execution on public data",
                       statement_check.render(evaluation, None, demo))
 
 
@@ -517,7 +517,7 @@ class Publication(unittest.TestCase):
             (campaign / "study.json").write_text("{}")
             verified = {"artifacts": [{"id": "campaign:budget", "kind": "campaign", "path": str(campaign)}]}
             result = {"inputs": [], "supplementary_build": {"demonstration": True, "inputs": [
-                {"input_kind": "demonstration_budget_campaign", "source": str(campaign),
+                {"input_kind": "cpu_execution_budget_campaign", "source": str(campaign),
                  "files": directory_inventory(campaign)}]}}
             pa._verify_reconstruction_inputs(result, fetched, verified, demonstration=True)
             # the paper's views accept only the strictly replayed campaign

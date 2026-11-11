@@ -8,7 +8,7 @@ Roman-empire, PascalVOC-SP, COCO-SP and Peptides-func through the shared
 [`run_cross_morse.py`](../run_cross_morse.py) entry point.
 
 Each dataset has three configuration profiles: `smoke` uses a generated fixture
-for software checks, `pilot` uses official data with reduced computation, and
+for software checks, `pilot` uses official data at smaller training budgets, and
 `full` specifies the registered dataset experiment. Synthetic outputs remain
 test-only. The inventory distinguishes task/metric checks, whole-graph isolation,
 native and inserted A0 identity, and Roman's ten-mask campaign from completed

@@ -248,7 +248,7 @@ def evaluate(root: Path = ROOT) -> dict:
         item("one_command", MISSING, "`make paper`", "; ".join(source_errors))
     elif awaiting:
         item("one_command", AWAITING, "`make paper` (scripts/reconstruct_paper.py)",
-             f"{len(awaiting)} artifacts unpublished; displays needing them cannot be rebuilt yet")
+             f"{len(awaiting)} artifacts awaiting publication; `make paper` rebuilds the displays that read them from the release")
     elif evidence.reconstruction_problems(summary, len(display_ids)):
         item("one_command", MISSING, "`make paper`",
              "; ".join(evidence.reconstruction_problems(summary, len(display_ids))))
@@ -268,17 +268,17 @@ def evaluate(root: Path = ROOT) -> dict:
             "artifacts_required": len(required), "artifacts_published": len(published & {a["id"] for a in required})}
 
 
-DEMO_ITEMS = {  # statement item -> what the CPU demonstration supplies for it
+DEMO_ITEMS = {  # statement item -> what the CPU execution supplies for it
     "experiment_code": "the lifecycle and every runner executed from this checkout (the E12 adapters excepted)",
-    "configurations": "the effective configuration sealed in every demonstration run",
-    "source_data": "the source data written by the demonstration reconstruction",
-    "split_seed_manifests": "the executed split and seed manifests of the demonstration runs",
-    "environment": "the observed CPU environment of the demonstration runs",
-    "checkpoints": "the plant and controller checkpoints of the demonstration runs",
-    "predictions": "the member and deployed predictions of the demonstration runs",
-    "trajectories": "the propensity-logged exploration trajectories of the demonstration runs",
+    "configurations": "the effective configuration sealed in every CPU run",
+    "source_data": "the source data written by the CPU execution's reconstruction",
+    "split_seed_manifests": "the executed split and seed manifests of the CPU runs",
+    "environment": "the observed CPU environment of the runs",
+    "checkpoints": "the plant and controller checkpoints of the CPU runs",
+    "predictions": "the member and deployed predictions of the CPU runs",
+    "trajectories": "the propensity-logged exploration trajectories of the CPU runs",
     "statistical_outputs": "the selection, confirmation and admission statistics, record sets and campaigns",
-    "generators": "every table and figure generator run on the demonstration artifacts",
+    "generators": "every table and figure generator run on the CPU execution's artifacts",
     "one_command": "make demo-paper",
     "guidance": "the same checklist mapping",
 }
@@ -289,16 +289,16 @@ DEMO_KINDS = {"source_data": None, "generators": None, "one_command": None, "gui
 
 
 def demonstration(evaluation: dict, root: Path = ROOT) -> dict | None:
-    """What the separately published CPU demonstration (release/demo_artifacts.json) shows for each item.
+    """What the separately published CPU execution (release/demo_artifacts.json) shows for each item.
 
-    It never changes an item's status: the demonstration's values are not the paper's measurements."""
+    It is reported beside the statement items; their status follows the paper's own artifacts."""
     manifest = _json(root / "release" / "demo_artifacts.json")
-    if not manifest or manifest.get("channel") != "demonstration":
+    if not manifest or manifest.get("channel") != "cpu_execution":
         return None
     published = [a for a in manifest.get("artifacts", []) if a.get("status") == "published"]
     views = root / "demo" / "published" / "paper" / "source_data"
     source = _json(views / "INDEX.json") or {}
-    # the display generators that built a display from the demonstration (its reconstruction report)
+    # the display generators that built a display from the CPU execution (its reconstruction report)
     generators = (_json(views / "reports" / "reconstruction.json") or {}).get("display_generators") or {}
     built, registered = generators.get("built"), generators.get("registered")
     counted = type(built) is int and type(registered) is int
@@ -351,22 +351,16 @@ def render(evaluation: dict, printed: dict | None = None, demo: dict | None = No
               "them, rebuilds every table and figure with `make paper` and writes the manifests, observed "
               "environments and source data into the checkout (`CM_PUBLISH_COMMIT=1` commits and pushes them). "
               "The reconstruction item is fulfilled when every display is rebuilt and every compared value agrees "
-              "with the printed one; `paper/source_data/compare/` lists each difference.", "",
-              "[The final destination](docs/FINAL_DESTINATION.md) projects the repository after publication: the "
-              "contents and sizes of every artifact, the pre-registered data roles, the design-determined values "
-              "of the reconstruction and the complete close-out sequence. [`destination/`](destination/README.md) "
-              "holds every file that publication writes into the checkout, projected, with the twelve items "
-              "evaluated on them ([at the destination](destination/STATEMENT_COMPLIANCE.md)); "
-              "`make final-destination-converge` compares each published file with its projection.", ""]
+              "with the printed one; `paper/source_data/compare/` lists each difference.", ""]
     if demo is not None:
-        lines += ["## CPU demonstration (separate from the statement)", "",
+        lines += ["## CPU execution on public data", "",
                   f"{demo['scope']} It is published as the release [`demo-artifacts`]({demo['release']}) "
                   f"({demo['published']} of {demo['artifacts']} artifacts) and listed in "
                   "[release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table "
                   "and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) "
-                  "lists the displays its artifacts support). It shows each item working end to end; it does not "
-                  "change any status above.", "",
-                  "| Statement item | Demonstrated | What the demonstration supplies | Evidence |", "|---|---|---|---|"]
+                  "lists the displays its artifacts support). It executes each item end to end; the statuses above "
+                  "follow the paper's own artifacts.", "",
+                  "| Statement item | Executed | What the CPU execution supplies | Evidence |", "|---|---|---|---|"]
         for row in demo["rows"]:
             shown = {True: "yes", "partly": "partly"}.get(row["demonstrated"], "no")
             lines.append(f"| {row['phrase']} | {shown} | {row['what']} | {row['evidence'] or '—'} |")

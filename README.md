@@ -6,7 +6,7 @@ Abdolvahab Khalili Sadaghiani · Linköping University
 
 [![Software checks](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml)
 [![Availability statement](docs/badges/evidence.svg)](STATEMENT_COMPLIANCE.md)
-[Statement compliance](STATEMENT_COMPLIANCE.md) · [Final destination](docs/FINAL_DESTINATION.md) · [destination/](destination/README.md) · [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
+[One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [CPU execution](demo/README.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Statement compliance](STATEMENT_COMPLIANCE.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
 
 CROSS-MORSE attaches an external controller to a frozen graph predictor. At
 inference, intermediate representations guide whether and how propagation
@@ -16,70 +16,48 @@ selection, confirmation, and admission protocol.
 
 ![Frozen predictor and external feedback controller](docs/assets/architecture.svg)
 
-## Published resources and manuscript reconstruction
-
-The existing [GitHub Release](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts),
-currently titled **Paper artifacts** but tagged `demo-artifacts`,
-contains **40 assets totaling approximately 10.85 GB** (verified on 11 November 2026).
-The [execution-package manifest](release/demo_artifacts.json) records **31 of its
-37 artifact groups as published**. These are real released archives, whose
-specific dataset selections, execution settings, and reconstruction coverage are
-recorded in the [package guide](demo/README.md) and [report](demo/RESULTS.md).
-
-The separate [full-manuscript manifest](release/paper_artifacts.json)
-tracks the required original-paper artifacts for `make paper`; its publication
-status is **distinct from the existing 10.85 GB execution package**. The
-unpublished state of that manuscript-specific channel does not mean this
-repository has no published experimental resources. Full-paper reconstruction
-requires its own source-identified archives and numerical comparisons. See
-the [reviewer entry point](docs/REVIEW_ENTRY.md) for both workflows.
-
-## Every table and figure in one command
-
-The repository combines experiment code, configurations, environment specifications
-and generators with a verified publication workflow for the measured outputs.
-The artifact inventory covers the paper's source data, executed split and seed
-manifests, checkpoints, predictions, propensity-logged trajectories and statistical
-outputs. The publication workflow uses the `paper-artifacts` release in
-[GitHub Releases](https://github.com/VKHS/CROSS-MORSE/releases), with published assets
-listed by SHA-256 in [`release/paper_artifacts.json`](release/paper_artifacts.json).
+## Reproduce the paper
 
 ```bash
 git clone https://github.com/VKHS/CROSS-MORSE.git && cd CROSS-MORSE
-make paper                     # download and verify the published outputs, rebuild all 90 displays, compare
-make paper PAPER_TIER=complete # also the lifecycle checkpoints and full prediction arrays
-make statement-check           # each item of the availability statement and where it is fulfilled
-make printed-statement-check   # each claim of the availability text printed in the manuscript
-make final-destination         # the repository after publication: design forecast, roles, release, close-out
+bash run_cross_morse.sh reproduce                     # the seven lifecycle runs on a Slurm GPU cluster
+bash hpc/produce_paper_outputs_arrhenius.sh <suite>   # the measured outputs of the experiments, one job graph
+make paper                                            # verify the measured outputs, rebuild all 90 displays, compare with the paper
 ```
 
-`make paper` verifies the published artifacts and each run's sealed eight-stage
-chain, writes the supported tables (CSV, Markdown, LaTeX) and figures (PNG, SVG)
-with their source data, and places computed values beside independently registered
-paper values (`displays/compare/`). It succeeds only when every required display,
-value and comparison is complete and agrees at the printed precision.
-[Statement compliance](STATEMENT_COMPLIANCE.md) states, item by
-item, what is fulfilled and what awaits publication;
-[Producing the measured outputs](docs/PRODUCTION.md) produces all of them on the
-cluster with one command, and [Publishing the measured outputs](docs/PUBLICATION.md)
-describes how they enter the release.
+The launcher runs the registered eight-stage lifecycle on all seven datasets, including
+Roman-empire's ten official splits, and the production graph derives the measured outputs of
+the experiments from those runs ([Producing the measured outputs](docs/PRODUCTION.md)).
+`make paper` verifies the measured outputs and each run's sealed eight-stage chain, writes the
+tables (CSV, Markdown, LaTeX) and figures (PNG, SVG) with their source data, and places the
+computed values beside the independently registered paper values (`displays/compare/`).
+Publication uploads the measured outputs to the release `paper-artifacts`
+([Publishing the measured outputs](docs/PUBLICATION.md)), and
+[statement compliance](STATEMENT_COMPLIANCE.md) lists each item of the availability statement
+with where it is provided.
 
-The final publication check is `make statement-fulfilled`. It verifies the complete
-artifact tier, including checkpoint and prediction bytes, executes reconstruction,
-and checks the committed source-data and manifest views against those artifacts.
-`make availability-fulfilled` adds every claim of the longer availability text that the
-manuscript prints (main text page 15, Methods, Supplementary Information page 30), which
-[Statement compliance](STATEMENT_COMPLIANCE.md) evaluates claim by claim. The
-[final destination](docs/FINAL_DESTINATION.md) draws the repository as it will stand after
-publication from what the repository already fixes: the printed values that the released code
-determines by design and their agreement with the paper, the pre-registered data roles, the
-projected contents and size of every run archive, and the close-out sequence.
-[`destination/`](destination/README.md) holds every file that publication writes into the
-checkout, projected at the path it will occupy, with the twelve registered items evaluated on
-them ([12 of 12 at the destination](destination/STATEMENT_COMPLIANCE.md)); after publication,
-`make final-destination-converge` checks every realized file against its projection.
-The [paper-reference guide](docs/PAPER_REFERENCE_VALUES.md) explains how printed
-comparison targets are tied to the author's manuscript files.
+```bash
+make paper PAPER_TIER=complete # also the lifecycle checkpoints and full prediction arrays
+make statement-check           # each item of the availability statement
+make printed-statement-check   # each claim of the availability text printed in the manuscript
+make statement-fulfilled       # the complete artifact tier, the reconstruction and the committed views
+```
+
+## Complete execution on CPU
+
+The release [`demo-artifacts`](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts)
+(40 files, 10.85 GB) holds a complete execution of the pipeline on public data on CPU: the
+seven lifecycle runs (Roman-empire on its complete official graph with its ten official
+splits; the other six datasets on deterministic subsets of their official data) with their
+checkpoints, predictions and propensity-logged trajectories, 22 measurement-record sets, the
+E3–E6 campaign and the environment capture of the runner. It runs on any machine:
+
+```bash
+make demo-paper    # download and verify the release, rebuild the tables and figures from it
+```
+
+[demo/README.md](demo/README.md) describes how the execution was produced, and
+[demo/RESULTS.md](demo/RESULTS.md) what it contains.
 
 Existing experiment folders can be checked before publication:
 
@@ -90,8 +68,7 @@ make paper-preflight PUBLISH_MAP=/abs/paper-artifacts.map.json PAPER_PREFLIGHT_R
 This verifies the local inputs and reconstructs the available displays without
 uploading files or changing the release inventory. The [publication guide](docs/PUBLICATION.md)
 explains the input map and the distinction between local readiness and public
-availability. The [availability review](docs/AVAILABILITY_REVIEW.md) records the
-implemented improvements and the evidence still needed for the full statement.
+availability.
 
 ## Regenerate the results on a Slurm cluster
 
@@ -116,7 +93,7 @@ bash run_cross_morse.sh status        # progress
 | Identity | `check` and `reproduce` verify the runtime fingerprint recorded in `release/release_scope.json`; every run seals it with its source snapshot, configuration, data-role membership, checkpoints and decision records |
 | Resilience | Jobs that reach their time limit checkpoint at a safe boundary and requeue themselves; a GPU or driver failure requeues the job on another node; `reproduce resume` continues a suite |
 | Report | `REPRODUCTION_REPORT.md` places each dataset's deployed policy and paired effect beside main Table 1, summarises the comparison of every readable quantity (exact, inside the printed 95% interval, or outside), embeds the rebuilt Tables 1–2 and records the GPU-hours used; a results ZIP holds every run's decision records |
-| First run | `bash run_cross_morse.sh reproduce smoke` exercises the complete orchestration on synthetic data in minutes; `pilot` uses the official data with reduced compute |
+| First run | `bash run_cross_morse.sh reproduce smoke` exercises the complete orchestration on synthetic data in minutes; `pilot` runs the official data at smaller training budgets |
 
 The [HPC guide](docs/HPC.md) documents every setting, job, record and exit
 code, and the compute the paper reports per dataset; the
@@ -205,7 +182,7 @@ The repository includes two complete, sealed synthetic examples: **arxiv** for
 transductive node classification and **Peptides** for independent-graph multilabel
 prediction. They contain checkpoints, predictions, trajectories, and decision
 records. `make reproduce` numerically replays those records; `make example-paper`
-rebuilds their tables and figures. The examples are software demonstrations.
+rebuilds their tables and figures.
 
 To execute a new small lifecycle with the current source:
 
@@ -217,7 +194,7 @@ make replay RUN_ROOT=../cm-work/peptides-smoke REPORT_ROOT=../cm-reports
 ## Run an experiment
 
 All seven dataset adapters and all 21 profiles are included. `smoke` uses
-synthetic data, `pilot` uses official data with reduced computation, and `full`
+synthetic data, `pilot` uses official data at smaller training budgets, and `full`
 uses the registered full execution budget and explicit model widths. The seven
 full-profile parameter totals agree with Supplementary Table S5 at its printed
 precision; the [parameter inventory](docs/DATASETS.md#model-parameter-inventory)

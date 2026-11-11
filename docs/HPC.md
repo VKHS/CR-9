@@ -89,7 +89,7 @@ suite records itself as a variant.
 ```bash
 bash run_cross_morse.sh reproduce            # full profile, all seven datasets
 bash run_cross_morse.sh reproduce smoke      # synthetic data: the whole orchestration in minutes
-bash run_cross_morse.sh reproduce pilot      # official data, reduced compute
+bash run_cross_morse.sh reproduce pilot      # official data, smaller training budgets
 bash run_cross_morse_peptides_func.sh reproduce full           # one dataset
 CM_REPRODUCE_DATASETS="ogbn-arxiv,COCO-SP" bash run_cross_morse.sh reproduce
 ```

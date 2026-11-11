@@ -1,7 +1,10 @@
 # Run archive index
 
-This release distributes no run archives: `run_cross_morse.sh reproduce`
-regenerates the runs ([HPC guide](../docs/HPC.md)), and `index.json` is empty.
+Run archives are distributed as release assets
+([release/paper_artifacts.json](../release/paper_artifacts.json); the CPU execution in
+[release/demo_artifacts.json](../release/demo_artifacts.json)), and
+`run_cross_morse.sh reproduce` regenerates the runs ([HPC guide](../docs/HPC.md)).
+`index.json` registers archives in the checkout and is empty here.
 The index accepts verified archives, one subdirectory per dataset (`arxiv/`,
 `proteins/`, `products/`, `roman_empire/` with `split_00` … `split_09`,
 `pascalvoc_sp/`, `coco_sp/`, `peptides_func/`), for example the sealed archives

@@ -1,6 +1,6 @@
-name: Demo ensemble-grid job
+name: CPU ensemble-grid job
 
-# One E14 ensemble-grid task of the demonstration's production graph whose additional checkpoints need more
+# One E14 ensemble-grid task of the CPU execution's production graph whose additional checkpoints need more
 # than the six hours of one runner (demo/grid_seeds.py). Its unfinished seeds train on several runners at
 # once, into the job's own checkpoint directory; one final job then executes the graph task itself
 # (scripts/paper_outputs.py execute), which finds the seeds complete and computes the member predictions and
@@ -10,9 +10,6 @@ name: Demo ensemble-grid job
 # {...}, "source_sha": commit the graph was planned at, "node": ..., "task": ..., "previous": [[run, prefix],
 # ...] (archives holding the task's partial outputs), "shares": at most this many runners}.
 on:
-  push:
-    branches: [expanded-demo-2026-11-09]
-    paths: [demo/grid-request.json]
   workflow_dispatch:
 
 permissions:
@@ -105,7 +102,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         if: steps.work.outputs.here == '1'
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -152,7 +149,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:

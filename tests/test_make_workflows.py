@@ -103,7 +103,6 @@ class MakeWorkflowTests(unittest.TestCase):
         self.capture.unlink()
         calls = self.invoke("statement-check")
         self.assertEqual(calls, [["-B", "scripts/statement_check.py", "--check"],
-                                 ["-B", "scripts/final_destination.py", "--check"],
                                  ["-B", "scripts/consistency_audit.py", "--check"]])
         self.assertFalse(any("reported_results" in arg for call in calls for arg in call))
 
@@ -150,15 +149,8 @@ class MakeWorkflowTests(unittest.TestCase):
         calls = self.invoke("records-tables", RECORDS_ROOT=explicit, ARTIFACTS_ROOT=artifacts, PAPER_OFFICIAL_ROOT=out)
         self.assertEqual(calls[0][3:5], ["--root", str(explicit)])
 
-    def test_final_destination_targets(self):
-        self.assertEqual(self.invoke("final-destination"), [["-B", "scripts/final_destination.py", "--write"]])
-        self.capture.unlink()
+    def test_consistency_and_printed_statement_targets(self):
         runs = self.root / "completed suite" / "runs"
-        self.assertEqual(self.invoke("final-destination-runs", RUNS_ROOT=runs),
-                         [["-B", "scripts/final_destination.py", "--runs-root", str(runs)]])
-        self.capture.unlink()
-        self.assertEqual(self.invoke("final-destination-converge"), [["-B", "scripts/final_destination.py", "--converge"]])
-        self.capture.unlink()
         self.assertEqual(self.invoke("consistency-audit", RUNS_ROOT=runs),
                          [["-B", "scripts/consistency_audit.py", "--runs-root", str(runs)]])
         self.capture.unlink()
@@ -275,7 +267,6 @@ class IndependentVerificationTests(unittest.TestCase):
             self.assertEqual(steps[1], f"git -C {work}/checkout checkout --quiet 0123abc")
             self.assertIn(f"paper PYTHON=python3 PAPER_TIER=complete ARTIFACTS_ROOT={work}/artifacts PAPER_ROOT={work}/paper", steps[2])
             self.assertIn("statement-fulfilled", steps[3])
-            self.assertIn("final-destination-converge", steps[4])
             self.assertTrue(all(str(work) in step for step in steps[:4]))
             self.assertFalse(work.exists())
 

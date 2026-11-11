@@ -40,11 +40,11 @@
   }
  ],
  "notes": {
-  "records:action_gap_audit": "The audit scores the decisions of a closed-loop deployed rule. Every demonstration run deployed an open-loop rule, so the audit has no decision to score and the exporter writes no set.",
-  "records:baselines": "The fourteen external comparisons of E12 run the pinned upstream studies and adapters that the author supplies; the demonstration does not run them.",
+  "records:action_gap_audit": "The audit scores the decisions of a closed-loop deployed rule. Every CPU run deployed an open-loop rule, so the audit has no decision to score and the exporter writes no set.",
+  "records:baselines": "The fourteen external comparisons of E12 run the pinned upstream studies and adapters that the author supplies, outside the CPU execution.",
   "campaign:confirmation": "The S14 family is planned without Roman-empire (declared choice, demo/README.md): assemble_s14 refuses a partial family, and check_campaign admits only a non-synthetic campaign of all seven datasets.",
-  "records:confirmation_contrasts": "Reads campaign:confirmation, which the demonstration does not assemble.",
-  "records:confirmation_sensitivity": "Reads campaign:confirmation, which the demonstration does not assemble.",
+  "records:confirmation_contrasts": "Reads campaign:confirmation (above).",
+  "records:confirmation_sensitivity": "Reads campaign:confirmation (above).",
   "records:module_ablations": "Fifteen of the sixteen measurement jobs of the S17 module ablations completed. The remaining job reads the sealed variant lifecycle runs of its parent, each opened and verified through its confirm stage with its prediction arrays; restoring them filled a hosted runner's disk twice (No space left on device). The exporter writes only the complete set."
  },
  "report_only": true,

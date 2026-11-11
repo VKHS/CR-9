@@ -19,12 +19,11 @@ Steps:
 4. Every computed value that the paper prints is compared with the printed value at
    the printed precision.
 
-``make demo-paper`` runs the same steps on the CPU demonstration (``--demo``): its own
+``make demo-paper`` runs the same steps on the CPU execution (``--demo``): its own
 manifest ``release/demo_artifacts.json`` and release ``demo-artifacts``, a workspace
-labelled as the demonstration and a report that opens with its scope. Its values are not
-the paper's measurements; their comparison with the printed values is reported, and the
-exit status counts only verification and generation (0: every published demonstration
-artifact verified and every generator ran).
+labelled as the CPU execution and a report that opens with its scope. The comparison of
+its values with the printed values is reported, and the exit status counts verification
+and generation (0: every published CPU execution artifact verified and every generator ran).
 
 Exit status 0 means every display was generated in full from the published outputs
 and every required value has a comparable printed reference and agrees; 1 means
@@ -36,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -118,20 +118,22 @@ def main(argv=None) -> int:
     parser.add_argument("--manifest", type=Path, default=artifacts.MANIFEST)
     parser.add_argument("--offline", action="store_true", help="use already downloaded artifacts only")
     parser.add_argument("--demo", action="store_true",
-                        help="the CPU demonstration (release/demo_artifacts.json); not the paper's measurements")
+                        help="the CPU execution on public data (release/demo_artifacts.json)")
     args = parser.parse_args(argv)
     if args.demo and args.manifest == artifacts.MANIFEST:
         args.manifest = artifacts.DEMO_MANIFEST
-    label = (f"demo-artifacts: CPU demonstration at reduced scale, not the paper's measurements "
-             f"(requested {args.tier} tier)" if args.demo else f"paper-artifacts (requested {args.tier} tier)")
+    label = (f"demo-artifacts: CPU execution on public data (requested {args.tier} tier)" if args.demo
+             else f"paper-artifacts (requested {args.tier} tier)")
     try:
         manifest = artifacts.load_manifest(args.manifest)
         if (manifest.get("channel") == artifacts.DEMO_CHANNEL) != bool(args.demo):
-            raise artifacts.ArtifactError("The demonstration manifest is reconstructed with --demo (make demo-paper), "
+            raise artifacts.ArtifactError("The CPU execution manifest is reconstructed with --demo (make demo-paper), "
                                           "the paper's manifest without it (make paper)")
         published = [a for a in manifest["artifacts"] if a.get("status") == artifacts.PUBLISHED]
         if published and not args.offline:
-            report = artifacts.fetch(args.artifacts, manifest_path=args.manifest, tier=args.tier)
+            # a token (GitHub Actions, or an author before the repository is public) reads private release assets
+            report = artifacts.fetch(args.artifacts, manifest_path=args.manifest, tier=args.tier,
+                                     token=os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN"))
             for row in report["published"]:
                 print(f"verified {row['id']} ({row['tier']})")
         # Offline reuse must satisfy the same current release inventory and
@@ -175,7 +177,6 @@ def main(argv=None) -> int:
     if status["generator_errors"] or status["module_errors"]:
         return 2
     if args.demo:
-        print("Demonstration: values from reduced-scale CPU runs; differences from the printed values are expected.")
         return 1 if materialization["missing_local"] or materialization["incomplete_tiers"] else 0
     if materialization["missing_local"] or materialization["incomplete_tiers"]:
         print("Fetch the requested artifact tier before treating this offline reconstruction as complete.",

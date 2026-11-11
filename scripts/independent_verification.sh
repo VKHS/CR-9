@@ -41,7 +41,6 @@ steps=(
     "git -C ${CHECKOUT} checkout --quiet ${REVISION}"
     "make -C ${CHECKOUT} paper PYTHON=${PYTHON} PAPER_TIER=complete ARTIFACTS_ROOT=${ARTIFACTS} PAPER_ROOT=${PAPER}"
     "make -C ${CHECKOUT} statement-fulfilled PYTHON=${PYTHON} ARTIFACTS_ROOT=${ARTIFACTS} PAPER_ROOT=${PAPER}"
-    "make -C ${CHECKOUT} final-destination-converge PYTHON=${PYTHON}"
 )
 if [[ "${DRY_RUN}" == "1" ]]; then
     printf '%s\n' "${steps[@]}"

@@ -1,8 +1,8 @@
 name: Published package integrity and rendering
 
 # make demo-paper on a fresh clone: download and verify the release demo-artifacts, rebuild every table
-# and figure from it and compare with the installed views (demo/published/). The demonstration is
-# reduced-scale CPU evidence, not the paper's measurements (demo/README.md).
+# and figure from it and compare with the installed views (demo/published/); demo/README.md describes the
+# CPU execution on public data.
 on:
   push:
     paths: [release/demo_artifacts.json, .github/workflows/demo-verify.yml]
@@ -19,6 +19,8 @@ concurrency:
 
 env:
   PYTHONDONTWRITEBYTECODE: "1"
+  # a private repository serves its release assets to an authenticated request only
+  GH_TOKEN: ${{ github.event.repository.private && github.token || '' }}
 
 defaults:
   run:
@@ -50,7 +52,7 @@ jobs:
           python - <<'EOF'
           import json, os
           status = json.load(open(os.environ["RUNNER_TEMP"] + "/demo-paper.status.json"))
-          assert status.get("channel") == "demonstration", status.get("channel")
+          assert status.get("channel") == "cpu_execution", status.get("channel")
           print({k: status[k] for k in ("displays", "complete", "values_exact", "values_differ", "values_missing")})
           EOF
       - name: Derive the views again from the release (the differences, if any, are listed)

@@ -36,7 +36,7 @@ from statistics import NormalDist
 import numpy as np
 
 from .framework import (DATASETS, SHORT, DisplayInputError, DisplayValidationError,
-                        display, integer, not_applicable, num, pyplot)
+                        display, integer, not_applicable, num, pyplot, scope_banner)
 
 T1_GROUP = "main_table_1_policy_and_deployment_ledger"
 T2_GROUP = "main_table_2_gain_and_cost_ledger"
@@ -907,8 +907,7 @@ def figure_2(ctx, out):
     ax.set_xlabel("rank of the raw one-sided P value (Table S14)")
     ax.set_ylabel("P value")
     _panel(ax, "d", "Holm family of the nine mechanism contrasts")
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout()
     out.figure(fig)
     for dataset in DATASETS:
@@ -1081,8 +1080,7 @@ def figure_3(ctx, out):
     ax.set_ylabel("fraction of decisions")
     ax.legend(ncol=2, frameon=False, fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.16))
     _panel(ax, "d", "Decision origins are mutually exclusive")
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout()
     out.figure(fig)
     for dataset in DATASETS:
@@ -1311,8 +1309,7 @@ def figure_4(ctx, out):
     ax.set_ylabel("overhead over $q_C$ (%)")
     ax.legend(frameon=False, fontsize=7, loc="upper left")
     _panel(ax, "f", "Wall-time overhead per dataset")
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout()
     out.figure(fig)
     for dataset in DATASETS:
@@ -1666,8 +1663,7 @@ def figure_5(ctx, out):
     ax.text(0.98, 0.97, F5_ROLES["operating_points"].replace(" (Supplementary", "\n(Supplementary"),
             transform=ax.transAxes, ha="right", va="top", fontsize=7, color=MUTED)
     _panel(ax, "d", f"Amortization horizon $M^\\star$ ($\\theta$ = {theta:g})")
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout()
     out.figure(fig)
     for dataset in DATASETS:
@@ -1934,8 +1930,7 @@ def figure_6(ctx, out):
     ax.set_ylabel("overhead over $q_C$ (%)")
     ax.legend(handles=handles, ncol=3, frameon=False, fontsize=7, loc="upper left")
     _panel(ax, "d", "Expected cost, modelled tail and the assurance configuration")
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout()
     out.figure(fig)
     for dataset in DATASETS:

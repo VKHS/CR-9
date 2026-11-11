@@ -1,6 +1,6 @@
-name: Demo publication
+name: CPU execution publication
 
-# Publishes the CPU demonstration (demo/README.md): the sealed runs of the "Demo runs" workflow and the
+# Publishes the CPU execution (demo/README.md): the sealed runs of the "CPU lifecycle runs" workflow and the
 # record sets, campaigns and environment that the production graph collected (demo-collected) are
 # packed (paper_artifacts.py pack --demo, one artifact at a time: demo/pack_each.py), published to the
 # release demo-artifacts (publish --demo), rebuilt into every table and figure from the release
@@ -11,9 +11,6 @@ name: Demo publication
 # graph's artifacts are added to the main map (demo/merge_maps.py). "report_only": true rebuilds from the published
 # release and records the results without packing or publishing again; "notes" state the cause of an absence.
 on:
-  push:
-    branches: [expanded-demo-2026-11-09]
-    paths: [demo/publish-request.json]
   workflow_dispatch:
 
 permissions:
@@ -83,7 +80,7 @@ jobs:
           echo "GRAPH_RUN=$graph" >> "$GITHUB_ENV"
           echo "REPORT_GRAPHS=$graphs" >> "$GITHUB_ENV"
           echo "REPORT_RUNS=$reports" >> "$GITHUB_ENV"
-      - name: Pack the demonstration, one artifact at a time
+      - name: Pack the CPU execution, one artifact at a time
         if: ${{ !fromJSON(steps.request.outputs.report_only) }}
         run: |
           python -B demo/pack_each.py --map "$WORK/paper-artifacts.map.json" --output-dir "$DEMO/staged" \
@@ -93,7 +90,7 @@ jobs:
         if: ${{ !fromJSON(steps.request.outputs.report_only) }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        # the tag names the commit whose tooling produced and publishes the demonstration
+        # the tag names the commit whose tooling produced and publishes the CPU execution
         run: python -B scripts/paper_artifacts.py publish --demo --staged "$DEMO/staged" --target "${{ github.sha }}"
       - name: Rebuild every table and figure from the release, install the views, write the results
         run: |
@@ -106,7 +103,11 @@ jobs:
           python -B demo/report.py --status "$DEMO/paper.status.json" $REPORT_GRAPHS --runs "$DEMO/runs" \
             --graphs "$DEMO/graphs" $REPORT_RUNS --pack-failures "$DEMO/pack-failures.json" --notes "$DEMO/notes.json" \
             --workspace "$DEMO/paper" --output demo/RESULTS.md
-          mkdir -p demo/published/graphs && cp "$DEMO"/graphs/*_demo.json demo/published/graphs/
+          mkdir -p demo/published/graphs
+          python -B -c 'import json, sys; sys.path.insert(0, "demo"); from data import SCOPE; from pathlib import Path
+          for path in sorted(Path(sys.argv[1]).glob("*_demo.json")):
+              record = dict(json.loads(path.read_text(encoding="utf-8")), scope=SCOPE)
+              (Path("demo/published/graphs") / path.name).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")' "$DEMO/graphs"
           python -B scripts/statement_check.py --write
           python -B scripts/artifact_catalog.py
           make manifest PYTHON=python
@@ -119,7 +120,7 @@ jobs:
           # commits pushed while this run worked never conflict with them
           git checkout -- release/artifact_catalog.json RELEASE_MANIFEST.json SHA256SUMS.txt
           git add -A release/demo_artifacts.json demo/ STATEMENT_COMPLIANCE.md
-          git commit -q -m "Record the published CPU demonstration (publication run ${{ github.run_id }}, graph run ${GRAPH_RUN})"
+          git commit -q -m "Record the published CPU execution (publication run ${{ github.run_id }}, graph run ${GRAPH_RUN})"
           git pull -q --rebase origin "${GITHUB_REF_NAME}"
           python -B scripts/statement_check.py --write
           python -B scripts/artifact_catalog.py

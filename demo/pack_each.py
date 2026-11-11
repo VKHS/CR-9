@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack every artifact of a demonstration map on its own, so that one refusal does not stop the others.
+"""Pack every artifact of a CPU execution map on its own, so that one refusal does not stop the others.
 
 Each mapped artifact is packed by ``scripts/paper_artifacts.py pack --demo`` from a map that names it alone;
 the staged entries (``<stem>.entry.json``) accumulate in one directory, which ``publish --demo`` reads. The

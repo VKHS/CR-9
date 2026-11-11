@@ -34,11 +34,11 @@
         "review_status": "reviewed"
       },
       "supplementary_table_S14b_separated_data_sensitivity": {
-        "note": "Three rescaled multigraph contrasts checked at J_new=425/5664/544, old intervals and graph variance shares .030/.015/.071. Fixed-effect rescaling under the variance model is analytical sensitivity, not a new observed replication. Peptides Holm .070 remains above .05. 2026-11-07 AI-assisted source-text check by ChatGPT: visually checked SI page 11 and restored the exact Peptides interpretation, including the Holm P above 0.05 qualification and Note S26 reference. The prior repository explanation is retained as labeled metadata; no numerical values changed.",
+        "note": "Three rescaled multigraph contrasts checked at J_new=425/5664/544, old intervals and graph variance shares .030/.015/.071. Fixed-effect rescaling under the variance model is analytical sensitivity. Peptides Holm .070 remains above .05. AI-assisted source-text check of SI page 11 (ChatGPT): the Peptides interpretation follows the printed text, including the Holm P above 0.05 qualification and the Note S26 reference; the repository's explanation is kept as labeled metadata.",
         "review_status": "reviewed"
       },
       "supplementary_table_S14b_unchanged_contrasts": {
-        "note": "Six unchanged single-graph contrasts checked. Their role in the analytical family is distinct from reconstructing the original joint nine-test confirmation campaign; products is not tested against its equivalence margin. 2026-11-07 AI-assisted source-text check by ChatGPT: visually checked SI page 10; all six printed interpretation cells say unchanged. Added Holm-family and products-margin explanations are retained as labeled repository metadata; no numerical values changed.",
+        "note": "Six unchanged single-graph contrasts checked. Their role in the analytical family is distinct from reconstructing the original joint nine-test confirmation campaign; products is not tested against its equivalence margin. AI-assisted source-text check of SI page 10 (ChatGPT): all six printed interpretation cells say unchanged; the Holm-family and products-margin explanations are kept as labeled repository metadata.",
         "review_status": "reviewed"
       },
       "supplementary_table_S15_method_comparison": {
@@ -58,7 +58,7 @@
         "review_status": "reviewed"
       },
       "supplementary_table_S20_selection_theorem_instantiation": {
-        "note": "All candidate counts, eligible-family counts, radii, near-best slack, screened-finalist slack and 10,000 resamples checked. Products eligible set is empty. Peptides source wording is boundary graph-level selection. Conditional slack does not establish measured optimality. 2026-11-07 AI-assisted source-text check by ChatGPT: visually checked SI page 15; the Peptides interpretation reads boundary graph-level selection. The prior fragile characterization is retained only as labeled repository metadata; no numerical values changed.",
+        "note": "All candidate counts, eligible-family counts, radii, near-best slack, screened-finalist slack and 10,000 resamples checked. Products eligible set is empty. Peptides source wording is boundary graph-level selection. Conditional slack does not establish measured optimality. AI-assisted source-text check of SI page 15 (ChatGPT): the Peptides interpretation reads boundary graph-level selection; the repository's own characterization is kept as labeled metadata.",
         "review_status": "reviewed"
       },
       "supplementary_table_S21_action_gap_audit": {
@@ -98,7 +98,7 @@
         "review_status": "reviewed"
       },
       "supplementary_table_S42_power_of_budget_matched_test": {
-        "note": "All six SE, MDE, margin and power rows checked. MDE and margins are in millinats; SE in nats. The values follow the stated variance/power model, with conservative and optimistic paired-seed readings. Multigraph D_compare counts follow S39 and are not admission counts. 2026-11-07 AI-assisted source-text check by ChatGPT: visually checked SI page 25; the Pascal, COCO and Peptides unit cells read comparison graphs (fixed ensemble). The added D_compare counts and analytical-power qualification remain as labeled repository metadata; no numerical values changed.",
+        "note": "All six SE, MDE, margin and power rows checked. MDE and margins are in millinats; SE in nats. The values follow the stated variance/power model, with conservative and optimistic paired-seed readings. Multigraph D_compare counts follow S39 and are not admission counts. AI-assisted source-text check of SI page 25 (ChatGPT): the Pascal, COCO and Peptides unit cells read comparison graphs (fixed ensemble); the D_compare counts and the analytical-power qualification are kept as labeled repository metadata.",
         "review_status": "reviewed"
       },
       "supplementary_table_S44_per_input_cost_model": {
@@ -149,7 +149,7 @@
     },
     "reviewed_by": "ChatGPT: AI-assisted contextual review requested by author on 2026-11-06; main and supplementary review agents",
     "schema": "cross-morse-manuscript-review-1",
-    "scope": "Contextual source review of registry interpretation and page provenance by the named reviewer; not verification of measurements or an attestation of personal review by an author. 2026-11-08 AI-assisted source review added explicitly declared analytical input coordinates for Tables S28/S28b and Figure S17g from supplementary pages 18-19 and 36. These coordinates are distinct from observed support minima and unrounded measured effects. Independent comparison targets remain in printed_display_values.json. Existing registered numerical values are unchanged; this is not an author certification or verification of experiment measurements. 2026-11-08 source-bound completion reviewed supplementary Figures S1, S5, S8, S10 and S19 and Table S29 (pages 19, 31-33, 37, with supporting main Table 1 page 10). Figure S19 literal statement classifications, conditions and model scope are registered as protocol inputs; measured outcomes remain comparison targets only."
+    "scope": "Contextual source review of registry interpretation and page provenance by the named reviewer. It covers the explicitly declared analytical input coordinates of Tables S28/S28b and Figure S17g (supplementary pages 18-19 and 36), which are distinct from observed support minima and unrounded measured effects, and supplementary Figures S1, S5, S8, S10 and S19 and Table S29 (pages 19, 31-33, 37, with supporting main Table 1 page 10). Figure S19 literal statement classifications, conditions and model scope are registered as protocol inputs; measured outcomes are comparison targets. Independent comparison targets are in printed_display_values.json."
   },
   "extractor": "poppler",
   "page_map_sha256": "fb94f7da0f6f12fa8259998aa0d13b4d70545e3561bb77cebfbeb2bec1373c1b",

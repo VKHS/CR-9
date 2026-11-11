@@ -182,7 +182,7 @@ class DisplayContext:
         self._records = dict(records or {})
         self._campaigns = {k: Path(v) for k, v in (campaigns or {}).items()}
         self.synthetic = synthetic
-        # the CPU demonstration (scripts/reconstruct_paper.py --demo): its campaigns ran on fixture parents
+        # the CPU execution (scripts/reconstruct_paper.py --demo): its campaigns ran on fixture parents
         self.demonstration = demonstration
 
     # -- experiment artifacts ------------------------------------------------
@@ -324,16 +324,29 @@ class Comparison:
     missing: bool = False
 
 
+CPU_EXECUTION_LABEL = "CPU execution on public data"
+
+
+def scope_banner(fig, ctx) -> None:
+    """Label a figure built from the CPU execution or from synthetic software examples."""
+    if getattr(ctx, "demonstration", False):
+        fig.text(0.5, 1.0, CPU_EXECUTION_LABEL, ha="center", va="bottom", color="#444444")
+    elif ctx.synthetic:
+        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom",
+                 color="#b00020")
+
+
 class DisplayWriter:
     """Collects the files and declared comparisons of one display."""
 
     def __init__(self, display_id: str, stem: str, out_dir: Path, *, title: str, synthetic: bool,
-                 scope: str = "measurement"):
+                 scope: str = "measurement", demonstration: bool = False):
         self.display_id = display_id
         self.stem = stem
         self.out_dir = Path(out_dir)
         self.title = title
         self.synthetic = synthetic
+        self.demonstration = demonstration
         self.scope = scope
         self.files: list[str] = []
         self.comparisons: list[Comparison] = []
@@ -370,6 +383,8 @@ class DisplayWriter:
             scope = "computed from the stated formulas and registered inputs"
         elif self.scope == "illustration":
             scope = "illustration generated from the repository's code and configuration"
+        elif self.demonstration:
+            scope = f"computed from the {CPU_EXECUTION_LABEL}"
         elif self.synthetic:
             scope = "synthetic software example; not the paper's benchmark observations"
         else:
@@ -758,7 +773,8 @@ def build_displays(ctx: DisplayContext, out_dir: Path, *, registry: dict | None 
             results.append({**entry, "status": "awaiting_inputs", "missing": missing})
             continue
         writer = DisplayWriter(display_id, generator.stem, out_dir, title=generator.title,
-                               synthetic=ctx.synthetic, scope=generator.scope)
+                               synthetic=ctx.synthetic, scope=generator.scope,
+                               demonstration=bool(getattr(ctx, "demonstration", False)))
         try:
             generator.function(ctx, writer)
         except DisplayInputError as exc:

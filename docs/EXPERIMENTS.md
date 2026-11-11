@@ -272,19 +272,18 @@ configuration, nominal reference and lifecycle seals. `CONTROLLERS.json` identif
 shared parent plant/data archive required to execute them. The package does not substitute a lifecycle
 summary for trained controller bytes.
 
-The factorial's existing timing definition requires care: a read-only observer stop ends the online wall
+The factorial's timing definition requires care: a read-only observer stop ends the online wall
 timer, then an untimed replay produces the stopped output. Such cells' `wall_seconds` and `relative_time`
 therefore measure partial execution latency and omit completion of the final returned predictions. Their
 `deployed_work` likewise excludes stopping-rule evaluations and the stopping-site measurement. These
-definitions are retained and now explicit in result/provenance `measurement_scope`; comparison as complete
-inference latency requires a separately specified measurement that includes the full returned output.
+definitions are explicit in result/provenance `measurement_scope`; complete inference latency is a separately
+specified measurement that includes the full returned output.
 
 E11 buffer sensitivity uses `walk-dependence-connected-components-v2`: every above-threshold graph link
-belongs to a single resampling component. This corrects the earlier independent-root assignment, which
-could leave linked cores in separate bootstrap blocks. The rule remains descriptive and does not prove
-stochastic independence. It may collapse to one component, in which case no interval or positive admission
-decision is reported. Versioned plans/results prevent an earlier grouping from silently resuming under the
-corrected method; neither the threshold nor the grouping is tuned to reproduce a printed target.
+belongs to a single resampling component, so linked cores share one bootstrap block. The rule is
+descriptive. It may collapse to one component, in which case no interval or positive admission decision is
+reported. Versioned plans/results keep each grouping with the method it was computed by; neither the
+threshold nor the grouping is tuned to a printed target.
 
 After actual runs are exported:
 

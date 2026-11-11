@@ -68,7 +68,7 @@ Every dataset has three configuration profiles:
 | Profile | Intended use |
 |---|---|
 | `smoke` | Generated fixture; small CPU software run; downloads disabled |
-| `pilot` | Official dataset with reduced model/training settings; integration and resource measurement |
+| `pilot` | Official dataset with smaller model/training settings; integration and resource measurement |
 | `full` | Configured full workload and twelve optimization seeds |
 
 A pilot retains the complete official graph or graph corpus, so it can still

@@ -5,8 +5,8 @@
   "release_url": "https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts",
   "part_bytes": 1992294400,
   "statement": "release/availability_statement.json",
-  "channel": "demonstration",
-  "scope": "CPU demonstration of the released code at reduced scale (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on public benchmark data on hosted CPU runners. The values are not the paper's measurements and are not expected to equal the printed values.",
+  "channel": "cpu_execution",
+  "scope": "CPU execution of the released code on public benchmark data (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on hosted CPU runners: Roman-empire on its complete official graph with its ten official splits, the other six datasets on deterministic subsets of their official data, at the pilot settings. The paper's printed values are the measurements of its full-scale GPU runs.",
   "status": "awaiting_measured_outputs",
   "artifacts": [
     {
@@ -74,7 +74,7 @@
         "supplementary:Table S7"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "campaign": false,
         "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
@@ -190,7 +190,7 @@
         "supplementary:Table S7"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "campaign": false,
         "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
@@ -291,7 +291,7 @@
         "supplementary:Table S7"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "campaign": false,
         "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
@@ -409,7 +409,7 @@
         "supplementary:Table S7"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "campaign": true,
         "splits": {
@@ -598,7 +598,7 @@
         "supplementary:Table S7"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "campaign": false,
         "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
@@ -718,7 +718,7 @@
         "supplementary:Table S7"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "campaign": false,
         "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
@@ -838,7 +838,7 @@
         "supplementary:Table S7"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "campaign": false,
         "source_sha256": "9f7393f7f337d3bd8747e85e2aaf3481db33895e02f1f3f5a7881e6e8a3e6c5c",
@@ -909,7 +909,7 @@
         "supplementary:Table S47"
       ],
       "status": "awaiting_measured_outputs",
-      "awaiting": "not produced by the CPU demonstration (demo/README.md names the reason)"
+      "awaiting": "outside the CPU execution (demo/README.md gives the reason)"
     },
     {
       "id": "records:band_bound_tightness",
@@ -925,7 +925,7 @@
         "supplementary:Table S43"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "96cc070c371aa2bb50c48a0a1fd146069459156b1891790b376d9314ee8a8475",
         "rows": 21
@@ -981,7 +981,7 @@
         "supplementary:Table S43"
       ],
       "status": "awaiting_measured_outputs",
-      "awaiting": "not produced by the CPU demonstration (demo/README.md names the reason)"
+      "awaiting": "outside the CPU execution (demo/README.md gives the reason)"
     },
     {
       "id": "records:budget_matched",
@@ -1006,7 +1006,7 @@
         "supplementary:Table S47"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "5e9e66627398dd86fa4eaa59b22e6f8675e61f87cad61cc5687e851974f10b04",
         "rows": 168
@@ -1055,7 +1055,7 @@
         "supplementary:Table S27"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "e0445f6c75468e0bc8477219eb61046c604a60f3e7098aaed82d82fa153ef14b",
         "rows": 38
@@ -1104,7 +1104,7 @@
         "supplementary:Table S14b"
       ],
       "status": "awaiting_measured_outputs",
-      "awaiting": "not produced by the CPU demonstration (demo/README.md names the reason)"
+      "awaiting": "outside the CPU execution (demo/README.md gives the reason)"
     },
     {
       "id": "records:confirmation_sensitivity",
@@ -1121,7 +1121,7 @@
         "supplementary:Table S43"
       ],
       "status": "awaiting_measured_outputs",
-      "awaiting": "not produced by the CPU demonstration (demo/README.md names the reason)"
+      "awaiting": "outside the CPU execution (demo/README.md gives the reason)"
     },
     {
       "id": "records:cross_backbone",
@@ -1136,7 +1136,7 @@
         "supplementary:Table S25"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "bfe68343d0a7649424510d6d4df6cf492192a1bfdb203951bcac5453023ae246",
         "rows": 18
@@ -1185,7 +1185,7 @@
         "main:Figure 3"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "3e7ea32b969e415a0abb0957573ac160244317c65161bac0cc7cb86255fb7ae3",
         "rows": 42
@@ -1234,7 +1234,7 @@
         "supplementary:Figure S14"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "9047eb23d6048a6359388afd435aa0907098edbb1718548fef435d8f96ef895c",
         "rows": 63
@@ -1289,7 +1289,7 @@
         "supplementary:Table S43"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "568d946ae44f98e3b48d0ea357b150c2160596beddd910bbef67846fca364e05",
         "rows": 42
@@ -1338,7 +1338,7 @@
         "supplementary:Table S26"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "db09e5c0b214e2a5d1264121b1d7c05cf5e48df9f2ab86c1fa8c5282897a86dd",
         "rows": 42
@@ -1391,7 +1391,7 @@
         "supplementary:Table S43"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "c0b2235890e9aa9c1071243d781de24c1369261c02d5a990907659816434bce0",
         "rows": 96
@@ -1441,7 +1441,7 @@
         "supplementary:Table S29"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "07d572594e5ee7cb2cb9dfcc06b95b3b3de5c23b2202fefb925ffe3047e4d286",
         "rows": 21
@@ -1512,7 +1512,7 @@
         "supplementary:Table S48"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "701aabba2b1b6413e075a8450f73f837a2b40fe5808330f61ffd62f43f91ad27",
         "rows": 12
@@ -1563,7 +1563,7 @@
         "supplementary:Table S45"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "6498f7f3863ebf3d3ce07c6743fc6503477801f7b19554a91c155aa38a208cf1",
         "rows": 24
@@ -1612,7 +1612,7 @@
         "main:Figure 3"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "0c1239548b7d60d9fb74b5cfb6d5b5e1b3b4d1e4ff6fe0dfa6a6a9e732bb95ba",
         "rows": 9
@@ -1661,7 +1661,7 @@
         "supplementary:Table S17"
       ],
       "status": "awaiting_measured_outputs",
-      "awaiting": "not produced by the CPU demonstration (demo/README.md names the reason)"
+      "awaiting": "outside the CPU execution (demo/README.md gives the reason)"
     },
     {
       "id": "records:negative_controls",
@@ -1677,7 +1677,7 @@
         "supplementary:Table S19"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "5e91ac0646f73b994b0c1afc919da54d7c12e3fc47de74ffffb2a83068868243",
         "rows": 12
@@ -1728,7 +1728,7 @@
         "supplementary:Table S43"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "4b5c9384c57e8a39cc2039d6c34a9894589574ff20fe5c9ddcb5498aac23ca53",
         "rows": 6
@@ -1778,7 +1778,7 @@
         "supplementary:Table S43"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "838db5415875a297772c1d76d377f49f93abdac69e25d7ace76b3619a2e49a45",
         "rows": 35
@@ -1827,7 +1827,7 @@
         "supplementary:Figure S16"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "01da1b551af37584a0c6f1179f4abf3ee24523ecfe311e5af757d0bae0ce8833",
         "rows": 10
@@ -1876,7 +1876,7 @@
         "supplementary:Figure S2"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "86fc4d2a2813eabaede22fc7fdd903fbadc669cc9543f385454823639dc2cd81",
         "rows": 58
@@ -1925,7 +1925,7 @@
         "supplementary:Table S18"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "30188565565ba07b9fc0976b95c430572f3d0da27a2304fed1b0eaea0ca35c48",
         "rows": 777
@@ -1974,7 +1974,7 @@
         "supplementary:Table S6c"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "e7ffcb5a1c6c65d2c9200d3995a5d76140cec98786189dc161e94066a369093e",
         "rows": 24
@@ -2024,7 +2024,7 @@
         "supplementary:Table S23b"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "6a46013013b042d21ce40afbfa6038ea4454a669780cc20e8757824b8813093a",
         "rows": 15
@@ -2075,7 +2075,7 @@
         "supplementary:Table S22"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "manifest_sha256": "6e5c8024721e89fc5a6e057de40762e92dee9b478e7d776a380495f130f05e52",
         "rows": 45
@@ -2129,7 +2129,7 @@
         "supplementary:Table S46b"
       ],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "verification_status": "PASS",
         "coverage": {
@@ -2201,7 +2201,7 @@
         "supplementary:Table S14"
       ],
       "status": "awaiting_measured_outputs",
-      "awaiting": "not produced by the CPU demonstration (demo/README.md names the reason)"
+      "awaiting": "outside the CPU execution (demo/README.md gives the reason)"
     },
     {
       "id": "environment:gpu",
@@ -2213,7 +2213,7 @@
       ],
       "displays": [],
       "status": "published",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "identity": {
         "verification_scope": "software fixture"
       },

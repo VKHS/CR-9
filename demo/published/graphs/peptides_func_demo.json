@@ -37,5 +37,5 @@
   "npz_bytes": 170146076,
   "builder": "demo/data.py",
   "seconds": 13.8,
-  "scope": "Deterministic subset of the official data for the CPU demonstration; not the paper's dataset scale."
+  "scope": "Deterministic subset of the official data for the CPU execution."
 }

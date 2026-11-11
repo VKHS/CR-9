@@ -147,12 +147,7 @@ bash hpc/publish_paper_artifacts_arrhenius.sh publish
   its file inventory and a recomputed comparison status). Every view is linked to the
   current release manifest and artifact identities; source data also identifies its
   builders and registered comparison inputs. `make statement` refreshes
-  `STATEMENT_COMPLIANCE.md` and [the final destination](FINAL_DESTINATION.md), whose
-  projected values are replaced by the published ones, and
-  `make final-destination-converge` compares every committed view with its projection in
-  [`destination/`](../destination/README.md): identities, seeds, role sizes and the
-  pre-registered role hashes must be identical; sizes and counts must fall within their
-  stated tolerance.
+  `STATEMENT_COMPLIANCE.md`.
 - Commit those files (or set `CM_PUBLISH_COMMIT=1` to commit and push them from a clean
   checkout). Verification or generator errors stop publication before derived views
   are committed. Numerical differences or incomplete display coverage remain explicit

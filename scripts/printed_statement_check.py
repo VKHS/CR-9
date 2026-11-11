@@ -477,7 +477,7 @@ def check_records_index_dois(ctx, spec):
                   "distributed as `records:*` assets of the release `paper-artifacts` (`release/paper_artifacts.json`"
                   + (f", {len(via_release)} published" if via_release else "") + "). Either add record-set deposit "
                   "registration to the record contract or state the release as the location of the measurement "
-                  "records in the printed paragraph (docs/FINAL_DESTINATION.md)")
+                  "records in the printed paragraph")
 
 
 def check_make_paper(ctx, spec):
@@ -638,8 +638,7 @@ def render_section(evaluation: dict, registry: dict) -> list[str]:
         lines.append("")
     if counts[MISSING]:
         lines += ["Claims marked missing describe a location that the repository's publication route does not "
-                  "produce. [The final destination](docs/FINAL_DESTINATION.md) sets out the two ways to close "
-                  "them.", ""]
+                  "produce: the printed paragraph names the location, or the route adds it.", ""]
     return lines
 
 

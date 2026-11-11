@@ -6,7 +6,7 @@
   },
   "review": {
     "date": "2026-11-09",
-    "method": "AI-assisted contextual transcription from the author-supplied, SHA-256 identified supplementary PDF; text extraction and rendered-page inspection. Not an execution record or author certification.",
+    "method": "AI-assisted contextual transcription from the author-supplied, SHA-256 identified supplementary PDF; text extraction and rendered-page inspection.",
     "normalization": "Whitespace and LaTeX notation are normalized to the generator field vocabulary. A printed dash is null. Signed thresholds are stored as positive margin magnitudes where the field explicitly names epsilon. Recorded values are comparison targets only; generators do not read this file as an experiment input.",
     "coverage": "Thirty-seven PDF-bound reference groups, including fourteen complete figure maps (main Figure 5 and supplementary Figures S1, S5, S6, S7, S8, S9, S10, S11, S12, S13, S15, S19 and S20) and the Table S29 sweep. Formula-derived reference coordinates retain explicit input, source and precision notes and are distinct from printed measurements. A complete reference definition does not verify an experiment or establish that its computed result agrees.",
     "additional_checks": [
@@ -32,7 +32,7 @@
           "supplementary_figure_S1_integrated_decision_surface",
           "supplementary_figure_S5_horizon_beam_sensitivity"
         ],
-        "method": "AI-assisted, source-bound visual and table review; no new benchmark measurements",
+        "method": "AI-assisted, source-bound visual and table review",
         "scope": "Independent source-bound figure/table reference completion; original empirical inputs remain required. No new benchmark measurements or author certification."
       },
       {

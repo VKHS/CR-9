@@ -40,7 +40,7 @@ from scripts._paper_common import BCE_DATASETS, ROUTE_NAMES
 from scripts.record_mapping import BUDGET_ARMS, INSERTED_SITE_ARMS
 
 from .framework import (DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputError, DisplayValidationError,
-                        display, integer, interval, not_applicable, num, pyplot)
+                        display, integer, interval, not_applicable, num, pyplot, scope_banner)
 
 Z95 = 1.959963984540054
 # ROUTE_METHOD (method names of Table S15) and S15_ROUTES (the internal routes it tabulates; the comparator's and
@@ -1199,9 +1199,9 @@ def arm_id(text: str) -> str:
 
 
 def strict_budget_replay(ctx) -> dict:
-    """Strict replay of the E3-E6 campaign export (paper.build.supplement._budget_data), once per context. The CPU
-    demonstration's campaign ran on fixture parents without scheduler accounting; its context replays it without
-    those qualifications (still all 24 contrasts), and every display it feeds is labelled as the demonstration."""
+    """Strict replay of the E3-E6 campaign export (paper.build.supplement._budget_data), once per context. The
+    CPU execution's campaign ran on fixture parents without scheduler accounting; its context replays it without
+    those qualifications (still all 24 contrasts), and every display it feeds is labelled as the CPU execution."""
     cache = _cache(ctx)
     if "budget" not in cache:
         from paper.build.supplement import _budget_data
@@ -1462,8 +1462,7 @@ def figure_s1(ctx, out):
     axes[2].set_xlabel("input comparator-fallback fraction\n(marker area: expected serial cost)")
     for ax, title in zip(axes, ("a  Endpoint effect", "b  Primary loss effect", "c  Selected mechanism and resource scale")):
         ax.set_title(title, fontsize=9)
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout()
     out.figure(fig)
     out.data("panel_a_endpoint_effect", ["dataset", "effect", "low", "high", "unit", "interval_kind"], panel_a)
@@ -1728,8 +1727,7 @@ def figure_s4(ctx, out):
                plt.Line2D([], [], marker="o", color="0.55", lw=2, alpha=0.7,
                           label="other internal routes (declared range)")]
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=7, frameon=False)
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     out.figure(fig)
     out.data("observed_costs", ["dataset", "method", "role", "observed_cost_low", "observed_cost_high",

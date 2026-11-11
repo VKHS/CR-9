@@ -169,19 +169,19 @@ class SupplementBuildTests(unittest.TestCase):
         for output in report["outputs"]:
             self.assertTrue(output["synthetic"] and output["demonstration"])
             self.assertEqual(output["input_kind"], "synthetic_examples")
-            self.assertTrue(output["note"].startswith("CPU DEMONSTRATION"))
-        self.assertIn("CPU DEMONSTRATION", (out / "tables/S16.md").read_text())
-        self.assertIn("CPU DEMONSTRATION", (out / "figures/ensemble_fit.svg").read_text())
+            self.assertTrue(output["note"].startswith("CPU execution on public data"))
+        self.assertIn("CPU execution on public data", (out / "tables/S16.md").read_text())
+        self.assertIn("CPU execution on public data", (out / "figures/ensemble_fit.svg").read_text())
         self.assertEqual(sorted((row["record_set"], row["input_kind"], row["synthetic"]) for row in report["inputs"]
                                 if "record_set" in row),
-                         [("ensemble_grid", "demonstration_record_set", True), ("factorials", "demonstration_record_set", True)])
+                         [("ensemble_grid", "cpu_execution_record_set", True), ("factorials", "cpu_execution_record_set", True)])
         # an example set stays refused in the demonstration, and the paper's build carries no banner afterwards
         self.record("ensemble_grid", self.ensemble_values(), synthetic=True, example="toy CPU worked example")
         report = build_supplement(self.base / "example", records_index=self.index, demonstration=True)
         self.assertIn("ensemble_grid", [row["input"] for row in report["errors"]])
         self.record("factorials", self.factorial_values())
         report = build_supplement(self.base / "after", records_index=self.index)
-        self.assertNotIn("CPU DEMONSTRATION", (self.base / "after/tables/S16.md").read_text())
+        self.assertNotIn("CPU execution on public data", (self.base / "after/tables/S16.md").read_text())
 
     def test_ensemble_law_is_fit_to_original_points_with_exact_csv_plot_sources(self):
         self.record("ensemble_grid", self.ensemble_values())
@@ -229,13 +229,13 @@ class SupplementBuildTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             paper = reconstruct(self.base / "paper_workspace", records_index=self.index, label="paper")
             demonstration = reconstruct(self.base / "demonstration_workspace", records_index=self.index,
-                                        label="demonstration", demonstration=True, scope_note="CPU demonstration.")
+                                        label="demonstration", demonstration=True, scope_note="CPU execution.")
             # the scope opens the report inside the verified workspace, which a second build replaces
             report = (self.base / "demonstration_workspace/RECONSTRUCTION_REPORT.md").read_text()
-            self.assertTrue(report.startswith("> **Demonstration.** CPU demonstration."))
+            self.assertTrue(report.startswith("> **CPU execution.** CPU execution."))
             verify_workspace(self.base / "demonstration_workspace")
             reconstruct(self.base / "demonstration_workspace", records_index=self.index, label="demonstration",
-                        demonstration=True, scope_note="CPU demonstration.")
+                        demonstration=True, scope_note="CPU execution.")
         # the paper's reconstruction does not build supplementary displays from synthetic sets
         self.assertIsNone(paper["supplementary_build"])
         errors = demonstration["display_generators"]["errors"]
@@ -329,14 +329,14 @@ class SupplementBuildTests(unittest.TestCase):
         rejected = build_supplement(self.base / "bad_campaign", budget_campaign=campaign)
         self.assertEqual(rejected["status"], "FAIL")
         self.assertEqual(rejected["outputs"], [])
-        # the CPU demonstration's campaign is replayed without the strict qualification, and labelled
+        # the CPU execution's campaign is replayed without the strict qualification, and labelled
         with patch("cm_campaigns.arm_campaign.check_campaign", return_value=self.budget_fixture()) as check:
             report = build_supplement(self.base / "budget_demonstration", budget_campaign=campaign, demonstration=True)
         check.assert_called_once_with(campaign, study, strict=False)
         self.assertEqual(report["status"], "PASS", report["errors"])
         self.assertTrue(all(item["synthetic"] and item["input_kind"] == "synthetic_examples"
                             and item["source_input_kind"] == "strict_budget_campaign" for item in report["outputs"]))
-        self.assertEqual([row["input_kind"] for row in report["inputs"]], ["demonstration_budget_campaign"])
+        self.assertEqual([row["input_kind"] for row in report["inputs"]], ["cpu_execution_budget_campaign"])
         with patch("cm_campaigns.arm_campaign.check_campaign", side_effect=ModuleNotFoundError("No module named 'torch'")):
             report = build_supplement(self.base / "budget_without_runtime", budget_campaign=campaign, demonstration=True)
         self.assertEqual(report["status"], "FAIL")
