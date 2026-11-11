@@ -2,10 +2,10 @@
 
 [Documentation](README.md) · [Reproduce the paper](HPC.md) · [Reviewer FAQ](REVIEWER_FAQ.md) · [Availability](../AVAILABILITY.md) · [Complete paper support](../paper/PAPER_SUPPORT.md) · [Claims ledger](../paper/CLAIMS.md) · [Reproducibility checklist](../REPRODUCIBILITY.md)
 
-This repository is a code release. It distributes the implementation, the
-configurations of all seven datasets, the Slurm reproduction launcher and a
-registry of reported results and protocol constants. The launcher produces new
-run artifacts; original and regenerated artifacts keep their own source identities.
+This repository provides the CROSS-MORSE implementation, configurations of all
+seven datasets, release manifests, artifact-reconstruction tools, the Slurm
+reproduction launcher and the registry of reported results and protocol constants.
+Original and regenerated artifacts retain their own source and execution identities.
 The [artifact catalog](ARTIFACT_CATALOG.md) maps the availability statement to
 actual files and producing commands. This guide shows how to check each part and maps
 each review concern to its code, its commands and the records a reproduction
@@ -30,9 +30,9 @@ entry point in the CPU container.
 
 | Verdict | Meaning |
 |---|---|
-| `SOFTWARE-ONLY` | Every software and example check passed; benchmark results come from a reproduction (section 2) |
+| `SOFTWARE-ONLY` | Every software and example check in this invocation passed; benchmark regeneration and its run records are described in section 2 |
 | `SOFTWARE FAILURE` | At least one software check failed |
-| `EVIDENCE COMPLETE` / `EVIDENCE INCOMPLETE` | Evidence mode, for run archives registered in a run index; this release registers none |
+| `EVIDENCE COMPLETE` / `EVIDENCE INCOMPLETE` | Artifact validation for archives selected through a run index; the invocation report identifies the records checked |
 
 The individual checks are also available separately: `make verify`,
 `make test`, `make theory`, `make si-check`, `make registry-check`,
