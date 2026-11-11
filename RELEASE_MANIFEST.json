@@ -49,10 +49,10 @@
       "sha256": "919225cea060fcf836817d2eb09cfbab0447ad759b1a38f35aebed128b899f39"
     },
     {
-      "bytes": 2506,
+      "bytes": 4968,
       "executable": false,
       "path": ".github/workflows/container.yml",
-      "sha256": "28a2c09bc4f9df4b3f6a3ef6a3cdd8ecf4eea211312c15e2ef07b097b514570d"
+      "sha256": "b957af81ef29219cc7cee6ab1470db489f554178103c0c6042eb02afcdfd6230"
     },
     {
       "bytes": 44570,
@@ -103,10 +103,10 @@
       "sha256": "e13e9ccb7c0710e1577a6176001398c6ee0fc60640658b346f8c367e584b0b82"
     },
     {
-      "bytes": 9699,
+      "bytes": 10342,
       "executable": false,
       "path": ".github/workflows/quality.yml",
-      "sha256": "cc49ecf09bc03be936a9f23d85e0c964012e96e79492f551016e04b63cac7d8d"
+      "sha256": "13765424ac51457b5217db49b82320052a504924edc18b8302573097eda273ec"
     },
     {
       "bytes": 1066,
@@ -9604,5 +9604,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "36ddcdb03687d3d57e65918831ce70724a717d03dad021b146047e074450c358"
+  "tree_sha256": "7a7ab382b501f307362388d552212814ff37b38339ec4333e6d422ed8d708bf8"
 }
