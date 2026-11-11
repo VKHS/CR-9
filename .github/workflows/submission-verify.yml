@@ -1,0 +1,68 @@
+name: Submission package verification
+
+# Manual only: complete-tier verification may require substantial disk space.
+# This workflow publishes no release and uploads no Actions artifacts.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Inventory only, or strict complete-tier manuscript reconstruction
+        required: true
+        default: inventory
+        type: choice
+        options: [inventory, verify]
+      runner:
+        description: Runner label with sufficient disk and memory for the selected mode
+        required: true
+        default: ubuntu-latest
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: submission-verification-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 350
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+      SUBMISSION_MODE: ${{ inputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install inventory dependencies
+        if: inputs.mode == 'inventory'
+        run: python -m pip install -q -c environment/requirements-cpu.lock -r requirements-review.txt 'matplotlib>=3.8,<4' scipy
+      - name: Install recorded reconstruction environment
+        if: inputs.mode == 'verify'
+        run: |
+          python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
+          python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Check artifact connections or reconstruct the complete manuscript
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$SUBMISSION_MODE" in inventory|verify) ;; *) exit 2;; esac
+          python -B scripts/submission_package.py "$SUBMISSION_MODE" --work "$RUNNER_TEMP/submission-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+      - name: Retain the verification summary in the job log
+        if: always()
+        shell: bash
+        run: |
+          report="$RUNNER_TEMP/submission-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/REPORT.md"
+          if [ -f "$report" ]; then
+            cat "$report"
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+          fi

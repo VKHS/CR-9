@@ -1,0 +1,184 @@
+name: Validate submission-tool integration
+
+on:
+  push:
+    branches: [submission-package-2026-11-11]
+    paths: [.github/workflows/submission-install-once.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: submission-install-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  integrate:
+    if: github.ref == 'refs/heads/submission-package-2026-11-11'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Connect existing entry points without changing experiment records
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B - <<'PY'
+          import ast, hashlib, json, os, subprocess
+          from pathlib import Path
+          temp = Path(os.environ['RUNNER_TEMP'])
+          allowed = {'scripts/paper_artifacts.py', 'Makefile', 'README.md',
+                     'release/artifact_catalog.json', 'docs/ARTIFACT_CATALOG.md',
+                     'RELEASE_MANIFEST.json', 'SHA256SUMS.txt', '.github/workflows/submission-install-once.yml'}
+          names = filter(None, subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0'))
+          protected = {name: hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in names if name not in allowed}
+          (temp / 'submission-protected.json').write_text(json.dumps(protected))
+          (temp / 'submission-allowed.json').write_text(json.dumps(sorted(allowed)))
+          workflow = Path('.github/workflows/submission-install-once.yml')
+          (temp / 'submission-installer.yml').write_bytes(workflow.read_bytes())
+          def once(text, old, new):
+              if text.count(old) != 1:
+                  raise ValueError('Missing or ambiguous integration anchor: ' + old[:120])
+              return text.replace(old, new, 1)
+          path = Path('scripts/paper_artifacts.py')
+          original = path.read_text()
+          start = original.index('def download(url: str, target: Path, *, token: str | None = None) -> None:\n')
+          end = original.index('\n\ndef publish(', start)
+          replacement = '''def download(url: str, target: Path, *, token: str | None = None) -> None:
+              """Retrieve release bytes securely; archive verification remains with the caller."""
+              from scripts.release_transport import download as transfer
+              try:
+                  transfer(url, target, token=github_token() if token is None else token)
+              except ValueError as exc:
+                  raise ArtifactError(str(exc)) from exc
+          '''
+          updated = original[:start] + replacement.rstrip() + original[end:]
+          nodes = lambda text: {getattr(n, 'name', str(i)): ast.dump(n) for i, n in enumerate(ast.parse(text).body)
+                                if not isinstance(n, ast.FunctionDef) or n.name != 'download'}
+          assert nodes(original) == nodes(updated), 'An unrelated artifact function changed'
+          path.write_text(updated, encoding='utf-8')
+          path = Path('Makefile'); text = path.read_text()
+          text = once(text, 'NUMPY_TESTS := test_demo ', 'NUMPY_TESTS := test_release_transport test_submission_package test_demo ')
+          assert 'submission-inventory:' not in text
+          text += '''
+          # Submission-level verification: existing artifacts only; no training or history edits.
+          SUBMISSION_ROOT ?= $(abspath ../cm-submission)
+          .PHONY: submission-inventory submission-verify submission-finalize
+          submission-inventory:
+          \t"$(PYTHON)" -B scripts/submission_package.py inventory --work "$(SUBMISSION_ROOT)"
+          
+          submission-verify:
+          \t"$(PYTHON)" -B scripts/submission_package.py verify --work "$(SUBMISSION_ROOT)"
+          
+          submission-finalize:
+          \t@test -n "$(PUBLISH_MAP)" || { echo 'Set PUBLISH_MAP to the existing experiment input map' >&2; exit 2; }
+          \t$(call check-boolean,PUBLISH)
+          \t"$(PYTHON)" -B scripts/submission_package.py finalize --map "$(PUBLISH_MAP)" --work "$(SUBMISSION_ROOT)" $(if $(filter 1,$(PUBLISH)),--publish,)
+          '''
+          path.write_text(text, encoding='utf-8')
+          path = Path('README.md'); text = path.read_text()
+          text = once(text, '## For reviewers\n',
+              '## For reviewers\n\nThe [submission-package guide](docs/SUBMISSION_PACKAGE.md) connects existing\n'
+              'experiment outputs to the availability statement without changing the measurements.\n'
+              '`make submission-inventory` reports artifact connections; `make submission-verify`\n'
+              'requests complete-tier reconstruction and committed-view verification.\n')
+          path.write_text(text, encoding='utf-8')
+          for name, digest in protected.items():
+              assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest, name
+          print('PASS: protected-file hashes and all unrelated artifact function ASTs are unchanged')
+          PY
+          git diff --check
+          make -n submission-inventory submission-verify
+          make -n submission-finalize PUBLISH_MAP=/absolute/inputs.json PUBLISH=0
+      - name: Install recorded review dependencies
+        run: python -m pip install -q -c environment/requirements-cpu.lock -r requirements-review.txt 'matplotlib>=3.8,<4' scipy
+      - name: Refresh generated software inventories
+        run: |
+          python -B scripts/artifact_catalog.py
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+      - name: New transport and preservation tests
+        run: python -B -m unittest tests.test_release_transport tests.test_submission_package -v
+      - name: Existing source and reconstruction checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          make verify PYTHON=python > "$RUNNER_TEMP/submission-verify-source.log" 2>&1 || { tail -n 120 "$RUNNER_TEMP/submission-verify-source.log"; exit 1; }
+          tail -n 25 "$RUNNER_TEMP/submission-verify-source.log"
+          make test-no-torch PYTHON=python > "$RUNNER_TEMP/submission-tests.log" 2>&1 || { tail -n 160 "$RUNNER_TEMP/submission-tests.log"; exit 1; }
+          tail -n 12 "$RUNNER_TEMP/submission-tests.log"
+      - name: Verify a small existing release download with repository authentication
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from scripts import paper_artifacts as pa
+          manifest = json.loads(Path('release/demo_artifacts.json').read_text())
+          parts = [p for a in manifest['artifacts'] if a.get('kind') == 'environment' and a.get('status') == 'published'
+                   for p in a['tiers']['complete']['parts'] if p['bytes'] < 2 * 1024 * 1024]
+          if not parts:
+              raise ValueError('No bounded existing release asset was available for a live transport test')
+          part = min(parts, key=lambda p: p['bytes'])
+          target = Path(os.environ['RUNNER_TEMP']) / 'submission-transport-check.bin'
+          pa.download(part['url'], target)
+          assert target.stat().st_size == part['bytes']
+          assert hashlib.sha256(target.read_bytes()).hexdigest() == part['sha256']
+          print('PASS: authenticated retrieval of existing release bytes; size and SHA-256 agree')
+          PY
+      - name: Run the read-only statement inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=0
+          python -B scripts/submission_package.py inventory --work "$RUNNER_TEMP/submission-inventory" || code=$?
+          test "$code" -le 1
+          python -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['RUNNER_TEMP'])/'submission-inventory/report.json').read_text())
+          assert 'inventory' in d, d
+          i=d['inventory']
+          print({k:i[k] for k in ('registered_displays','required_artifacts','connected_artifacts')})
+          print('Entries with alternative descriptors:', sum(bool(a['other_descriptor_locations']) for a in i['artifacts']))
+          assert not d['full_reconstruction_verified']
+          PY
+      - name: Verify final source inventory and preserve the original files
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/submission-install-once.yml
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+          python -B scripts/create_release_manifest.py --root . --verify RELEASE_MANIFEST.json
+          python -B - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          temp=Path(os.environ['RUNNER_TEMP'])
+          protected=json.loads((temp/'submission-protected.json').read_text())
+          for name,digest in protected.items():
+              assert Path(name).is_file() and hashlib.sha256(Path(name).read_bytes()).hexdigest()==digest, name
+          allowed=set(json.loads((temp/'submission-allowed.json').read_text()))
+          changed=set(filter(None,subprocess.check_output(['git','diff','--name-only','-z']).decode().split('\0')))
+          extra=set(filter(None,subprocess.check_output(['git','ls-files','--others','--exclude-standard','-z']).decode().split('\0')))
+          assert changed <= allowed and not extra, sorted((changed-allowed)|extra)
+          # Restore unchanged for this push; connector removes the helper from the final tree.
+          Path('.github/workflows/submission-install-once.yml').write_bytes((temp/'submission-installer.yml').read_bytes())
+          print('PASS: original scientific files unchanged; final source checksums verified')
+          PY
+          git diff --check
+          git add scripts/paper_artifacts.py Makefile README.md release/artifact_catalog.json docs/ARTIFACT_CATALOG.md RELEASE_MANIFEST.json SHA256SUMS.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Connect submission commands and authenticated artifact transport after preservation checks'
+          git push origin HEAD:submission-package-2026-11-11
