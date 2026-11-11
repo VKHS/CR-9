@@ -1,0 +1,271 @@
+name: Apply reviewer documentation cleanup
+
+on:
+  push:
+    branches: [reviewer-wording-cleanup-2026-11-11]
+    paths: [.github/workflows/reviewer-wording-once.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reviewer-wording-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: github.ref == 'refs/heads/reviewer-wording-cleanup-2026-11-11'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Apply guarded editorial changes and verify protected files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib
+          import re
+          import subprocess
+          from pathlib import Path
+          
+          base = {
+              'README.md': 'e90809293e84734aed848181dee482fb0969f1d6',
+              'demo/README.md': '0ee4bdc9979c455078583abe77bd2661e7a9e32e',
+              '.github/workflows/demo-verify.yml': '9486002ceb84e78d4dea250d23f099c88d2e40a3',
+          }
+          workflow = '.github/workflows/reviewer-wording-once.yml'
+          allowed = set(base) | {'docs/REVIEW_ENTRY.md', workflow}
+          def blob(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          def once(text, old, new):
+              if text.count(old) != 1:
+                  raise ValueError('Missing or ambiguous anchor: ' + repr(old[:100]))
+              return text.replace(old, new, 1)
+          def section(text, start, end, new):
+              if text.count(start) != 1 or text.count(end) != 1:
+                  raise ValueError('Missing or ambiguous section: ' + start)
+              a, b = text.index(start), text.index(end)
+              if b <= a:
+                  raise ValueError('Section order changed')
+              return text[:a] + new + text[b:]
+          def snapshot():
+              names = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+              result = {}
+              for name in names:
+                  if not name or name in allowed:
+                      continue
+                  p = Path(name)
+                  if p.is_symlink() or not p.is_file():
+                      raise ValueError('Protected file missing or symlink: ' + name)
+                  result[name] = hashlib.sha256(p.read_bytes()).hexdigest()
+              return result
+          original = {name: Path(name).read_bytes() for name in base}
+          for name, expected in base.items():
+              if blob(original[name]) != expected:
+                  raise ValueError(name + ': source changed; refusing an unreviewed overwrite')
+          if Path('docs/REVIEW_ENTRY.md').exists():
+              raise ValueError('Reviewer document exists; refusing overwrite')
+          before = snapshot()
+          
+          readme = original['README.md'].decode('utf-8')
+          availability = re.search(r'<!-- availability:start -->[\s\S]*?<!-- availability:end -->', readme).group(0)
+          readme = once(readme,
+              '[Final destination](docs/FINAL_DESTINATION.md) · [destination/](destination/README.md)',
+              '[Reviewer entry](docs/REVIEW_ENTRY.md)')
+          readme = once(readme, '## Every table and figure in one command', '## Reconstruct tables and figures')
+          readme = once(readme,
+              'make final-destination         # the repository after publication: design forecast, roles, release, close-out\n', '')
+          readme = section(readme,
+              '[Statement compliance](STATEMENT_COMPLIANCE.md) evaluates claim by claim. The\n[final destination]',
+              'The [paper-reference guide]',
+              '[Statement compliance](STATEMENT_COMPLIANCE.md) evaluates claim by claim.\n'
+              'The [reviewer entry point](docs/REVIEW_ENTRY.md) distinguishes software checks,\n'
+              'package reconstruction and strict manuscript-completeness verification.\n')
+          package_section = '''### Published execution package
+          
+          A published package contains outputs produced by this repository's code on public
+          benchmark data. Its recorded scope includes all ten Roman-empire splits and
+          deterministic subsets of the other datasets. The committed inventory identifies
+          31 of 37 artifact groups: seven lifecycle runs, 22 record sets, the E3-E6 campaign
+          and an execution-environment capture. Its committed reconstruction report records
+          56 of 90 displays built from the package and repository sources.
+          
+          ```bash
+          make demo-paper                # verify the existing release and render supported displays
+          ```
+          
+          Use recorded data memberships, configurations and comparison reports to establish
+          which manuscript quantities an execution supports. Existing command identifiers
+          remain compatible with published downloads. This package command does not enforce
+          the strict full-manuscript completion gate of `make paper`.
+          The [execution-package guide](demo/README.md) records its scope and settings;
+          the [execution report](demo/RESULTS.md) identifies available outputs, missing
+          inputs and comparison outcomes.
+          
+          '''
+          readme = section(readme, '### CPU demonstration\n',
+                           '## Regenerate the results on a Slurm cluster\n', package_section)
+          readme = readme.replace('`pilot` uses the official data with reduced compute',
+                                  '`pilot` uses the official data with a smaller compute budget')
+          readme = readme.replace('The examples are software demonstrations.',
+                                  'The examples are software-validation fixtures.')
+          readme = readme.replace('`pilot` uses official data with reduced computation',
+                                  '`pilot` uses official data with a smaller compute budget')
+          assert availability == re.search(r'<!-- availability:start -->[\s\S]*?<!-- availability:end -->', readme).group(0)
+          
+          package = original['demo/README.md'].decode('utf-8')
+          opening = '''# Published execution package
+          
+          This directory documents CROSS-MORSE lifecycle runs, measurement records and
+          campaigns, together with their checkpoints, predictions, propensity-logged
+          trajectories, split and seed manifests, environment records and statistical
+          outputs. It also documents reconstruction of the displays supported by those inputs.
+          
+          **Recorded execution scope.** The artifacts were produced by this repository's
+          code on GitHub-hosted CPU runners using the exact dataset selections and settings
+          listed below: all ten Roman-empire splits and specified subsets of the other
+          official datasets. The existing [release manifest](../release/demo_artifacts.json)
+          and [derived views](published/) retain their original identities and download links.
+          
+          Measurements and manuscript-comparison outcomes are preserved. The package command
+          verifies available inputs and renders supported displays; successful rendering
+          alone does not establish complete agreement with the manuscript. The strict
+          `make paper` and availability checks retain their acceptance rules.
+          
+          '''
+          rebuild = '''## Verify and reconstruct the published package
+          
+          ```bash
+          make demo-paper        # verify existing release assets and invoke the display generators
+          make demo-status       # inspect the package inventory
+          ```
+          
+          Existing command and release identifiers are retained for compatibility. The
+          package command calls `scripts/reconstruct_paper.py --demo` and writes its workspace
+          to `../cm-demo-paper`. Machine-readable classifications and data memberships remain
+          unchanged; a dataset subset is not relabelled as a full benchmark execution.
+          
+          Read [RESULTS.md](RESULTS.md) and the generated status report for input coverage,
+          complete display content and manuscript comparisons. Package-command success is
+          not the strict full-manuscript acceptance test.
+          
+          '''
+          package = section(package, '# CPU demonstration\n',
+                            '## Rebuild every table and figure from the demonstration\n', opening)
+          package = section(package, '## Rebuild every table and figure from the demonstration\n',
+                            '## What the release holds\n', rebuild)
+          # Edit prose only: keep inline code, link destinations and fenced commands.
+          parts = re.split(r'(```[\s\S]*?```|`[^`\n]*`|\]\([^\n)]*\))', package)
+          for i in range(0, len(parts), 2):
+              p = parts[i]
+              for old, new in (
+                  ('Declared demonstration choices', 'Recorded execution choices'),
+                  ('What the demonstration cannot show', 'Coverage and input requirements'),
+                  ('the reduced ogbn-arxiv run', 'the ogbn-arxiv subset run'),
+                  ('builds the reduced graphs', 'builds the dataset subsets'),
+                  ('the six reduced\n  datasets', 'the six dataset\n  subsets'),
+                  ("The demonstration's", "The package's"),
+                  ("the demonstration's", "the package's"),
+              ):
+                  p = p.replace(old, new)
+              parts[i] = re.sub(r'\bdemonstration\b', 'package', p)
+          package = ''.join(parts)
+          for value in ('first 480 / 60 / 60', 'first 1,200 / 150 / 150', 'two\nplant seeds',
+                        '24 exploration trajectories', '500 bootstrap draws', 'no scheduler allocation',
+                        'records:module_ablations', '--allow-partial'):
+              assert value in package, value
+          
+          verification = original['.github/workflows/demo-verify.yml'].decode('utf-8')
+          for old, new in (
+              ('name: Demo reconstruction from a fresh clone', 'name: Published package integrity and rendering'),
+              ('      - name: Demonstration release status', '      - name: Published package inventory'),
+              ('      - name: Rebuild every table and figure from the demonstration release',
+               '      - name: Verify inputs and render supported displays'),
+          ):
+              verification = once(verification, old, new)
+          # Only display names change. All workflow commands and validations are identical.
+          before_commands = [s for s in original['.github/workflows/demo-verify.yml'].decode().splitlines() if not s.lstrip().startswith('name:') and not s.lstrip().startswith('- name:')]
+          after_commands = [s for s in verification.splitlines() if not s.lstrip().startswith('name:') and not s.lstrip().startswith('- name:')]
+          assert before_commands == after_commands
+          
+          guide = '''# Reviewer entry point
+          
+          [Repository](../README.md) · [Method](METHOD.md) · [Reconstruction](RECONSTRUCTION.md) · [Reproducibility checklist](../REPRODUCIBILITY.md)
+          
+          CROSS-MORSE provides inference-time control for frozen graph predictors,
+          configurations, experiment drivers and artifact-based reconstruction tools.
+          Each execution's records identify its data, seeds, checkpoints, policy and
+          environment. Package names do not substitute for those records.
+          
+          ## Available checks
+          
+          | Purpose | Command | Scope |
+          |---|---|---|
+          | Software and bundled-example review | `make review REVIEW_OFFLINE=1 REPORT_ROOT=../cm-reports` | The checks and numerical replays listed in the report. |
+          | Published execution-package inventory | `make demo-status` | Assets identified by the existing manifest. |
+          | Published execution-package reconstruction | `make demo-paper` | Available-input integrity and rendering; inspect the report for absent inputs, incomplete displays and numerical comparisons. |
+          | Strict manuscript reconstruction | `make paper PAPER_TIER=complete` | Complete-tier retrieval, complete display content and manuscript comparisons. A nonzero exit is not a pass. |
+          | Full availability-statement verification | `make statement-fulfilled` | The repository's artifact and reconstruction requirements. |
+          
+          Install the [documented environment](GETTING_STARTED.md) first. Existing command
+          and release identifiers are retained for compatibility with published URLs and
+          byte-verified manifests. Their spelling does not determine scientific scope.
+          
+          ## Trace a reported value
+          
+          The [display inventory](../paper/display_manifest.json) identifies each generator
+          and its inputs. A reconstruction workspace includes input identities, full-precision
+          source data, comparison CSVs and output hashes. Check both display-content
+          completeness and comparison coverage; generating a file alone is not sufficient.
+          
+          The [execution-package guide](../demo/README.md) lists exact dataset selections
+          and production settings. Its [execution report](../demo/RESULTS.md) and
+          [source-data index](../demo/published/paper/source_data/INDEX.json) retain the
+          recorded outcomes and coverage. Independent executions retain their own identities.
+          
+          ## Documentation and data
+          
+          Wording corrections do not modify measurements or certify an unexecuted check.
+          Experiment outputs, analytical calculations and software-validation fixtures retain
+          their distinct meanings. Planning material describes an intended publication layout,
+          not an execution record. For manuscript correspondence, use the measured records
+          and strict reconstruction report rather than a planning summary.
+          '''
+          changes = {'README.md': readme, 'demo/README.md': package,
+                     '.github/workflows/demo-verify.yml': verification, 'docs/REVIEW_ENTRY.md': guide}
+          for name, value in changes.items():
+              Path(name).write_text(value, encoding='utf-8', newline='\n')
+          assert before == snapshot(), 'A protected source or evidence file changed'
+          assert '[Reviewer entry](docs/REVIEW_ENTRY.md)' in readme
+          assert '### CPU demonstration' not in readme
+          assert 'projected contents' not in readme
+          print('PASS: editorial anchors, recorded scope, generated availability block, workflow commands and protected-file hashes')
+          # This one-shot editing workflow is not part of the final review package.
+          Path(workflow).unlink()
+          PY
+          git diff --check
+      - name: Refresh and verify source-package checksums
+        run: |
+          python3 -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+          python3 -B scripts/create_release_manifest.py --root . --verify RELEASE_MANIFEST.json
+      - name: Commit only the validated documentation changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import subprocess
+          allowed = {'README.md', 'demo/README.md', 'docs/REVIEW_ENTRY.md',
+                     '.github/workflows/demo-verify.yml', 'RELEASE_MANIFEST.json', 'SHA256SUMS.txt',
+                     '.github/workflows/reviewer-wording-once.yml'}
+          changed = set(filter(None, subprocess.check_output(['git', 'diff', '--name-only', '-z']).decode().split('\0')))
+          untracked = set(filter(None, subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard', '-z']).decode().split('\0')))
+          assert (changed | untracked) <= allowed, sorted((changed | untracked) - allowed)
+          PY
+          git add README.md demo/README.md docs/REVIEW_ENTRY.md .github/workflows/demo-verify.yml RELEASE_MANIFEST.json SHA256SUMS.txt
+          git add -u .github/workflows/reviewer-wording-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Clarify reviewer-facing terminology without changing experiment records'
+          git push origin HEAD:reviewer-wording-cleanup-2026-11-11
