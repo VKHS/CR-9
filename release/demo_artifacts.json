@@ -1,8 +1,8 @@
 {
   "schema": "cross-morse-paper-artifacts-1",
-  "repository": "VKHS/CR-9",
+  "repository": "VKHS/CROSS-MORSE",
   "release_tag": "demo-artifacts",
-  "release_url": "https://github.com/VKHS/CR-9/releases/tag/demo-artifacts",
+  "release_url": "https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts",
   "part_bytes": 1992294400,
   "statement": "release/availability_statement.json",
   "channel": "demonstration",
@@ -106,7 +106,7 @@
               "asset": "run-arxiv.complete-8d65a1d5c2c06e82a5415ccf8f19c027a2666de7bab257fc0901a4368ef2e508.tar.gz",
               "bytes": 311283988,
               "sha256": "8d65a1d5c2c06e82a5415ccf8f19c027a2666de7bab257fc0901a4368ef2e508",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-arxiv.complete-8d65a1d5c2c06e82a5415ccf8f19c027a2666de7bab257fc0901a4368ef2e508.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-arxiv.complete-8d65a1d5c2c06e82a5415ccf8f19c027a2666de7bab257fc0901a4368ef2e508.tar.gz"
             }
           ]
         },
@@ -119,7 +119,7 @@
               "asset": "run-arxiv.analysis-4544ed25be358d7fd4f8b5fcbd0e8e20d8eda708dd2630f5a9d824e179d60c4d.tar.gz",
               "bytes": 11466054,
               "sha256": "4544ed25be358d7fd4f8b5fcbd0e8e20d8eda708dd2630f5a9d824e179d60c4d",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-arxiv.analysis-4544ed25be358d7fd4f8b5fcbd0e8e20d8eda708dd2630f5a9d824e179d60c4d.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-arxiv.analysis-4544ed25be358d7fd4f8b5fcbd0e8e20d8eda708dd2630f5a9d824e179d60c4d.tar.gz"
             }
           ]
         }
@@ -222,7 +222,7 @@
               "asset": "run-proteins.complete-aa77a164724eb97d5fa3ee3b756c46edc28f543f6acbc0a573da704072bb14fc.tar.gz",
               "bytes": 188312803,
               "sha256": "aa77a164724eb97d5fa3ee3b756c46edc28f543f6acbc0a573da704072bb14fc",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-proteins.complete-aa77a164724eb97d5fa3ee3b756c46edc28f543f6acbc0a573da704072bb14fc.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-proteins.complete-aa77a164724eb97d5fa3ee3b756c46edc28f543f6acbc0a573da704072bb14fc.tar.gz"
             }
           ]
         },
@@ -235,7 +235,7 @@
               "asset": "run-proteins.analysis-2501cfd65da5f5797df1cd0f97e6612c15ee7675af2b55c11ab7dfdf71cd2eb9.tar.gz",
               "bytes": 11329196,
               "sha256": "2501cfd65da5f5797df1cd0f97e6612c15ee7675af2b55c11ab7dfdf71cd2eb9",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-proteins.analysis-2501cfd65da5f5797df1cd0f97e6612c15ee7675af2b55c11ab7dfdf71cd2eb9.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-proteins.analysis-2501cfd65da5f5797df1cd0f97e6612c15ee7675af2b55c11ab7dfdf71cd2eb9.tar.gz"
             }
           ]
         }
@@ -323,7 +323,7 @@
               "asset": "run-products.complete-742a5331bf664f9c25d25a1b38bd99ee183957e4c2c7c5da2e22f2e227ab1ceb.tar.gz",
               "bytes": 325679864,
               "sha256": "742a5331bf664f9c25d25a1b38bd99ee183957e4c2c7c5da2e22f2e227ab1ceb",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-products.complete-742a5331bf664f9c25d25a1b38bd99ee183957e4c2c7c5da2e22f2e227ab1ceb.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-products.complete-742a5331bf664f9c25d25a1b38bd99ee183957e4c2c7c5da2e22f2e227ab1ceb.tar.gz"
             }
           ]
         },
@@ -336,7 +336,7 @@
               "asset": "run-products.analysis-11474de87b7c94e46014eb2d4e8c2cf2e5966e2ba943de02d0c7848f8198c3ea.tar.gz",
               "bytes": 8918859,
               "sha256": "11474de87b7c94e46014eb2d4e8c2cf2e5966e2ba943de02d0c7848f8198c3ea",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-products.analysis-11474de87b7c94e46014eb2d4e8c2cf2e5966e2ba943de02d0c7848f8198c3ea.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-products.analysis-11474de87b7c94e46014eb2d4e8c2cf2e5966e2ba943de02d0c7848f8198c3ea.tar.gz"
             }
           ]
         }
@@ -508,7 +508,7 @@
               "asset": "run-roman_empire.complete-536369c49ce3c8fc54ed82e505d0429f2e8f6a8d41e04fee6341cd96de997923.tar.gz",
               "bytes": 1594751705,
               "sha256": "536369c49ce3c8fc54ed82e505d0429f2e8f6a8d41e04fee6341cd96de997923",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-roman_empire.complete-536369c49ce3c8fc54ed82e505d0429f2e8f6a8d41e04fee6341cd96de997923.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-roman_empire.complete-536369c49ce3c8fc54ed82e505d0429f2e8f6a8d41e04fee6341cd96de997923.tar.gz"
             }
           ]
         },
@@ -521,7 +521,7 @@
               "asset": "run-roman_empire.analysis-2ce3f4371a261188d2695c67171e4ec4f0d66fc92f9a2db04ee3fedd88ca3595.tar.gz",
               "bytes": 206823882,
               "sha256": "2ce3f4371a261188d2695c67171e4ec4f0d66fc92f9a2db04ee3fedd88ca3595",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-roman_empire.analysis-2ce3f4371a261188d2695c67171e4ec4f0d66fc92f9a2db04ee3fedd88ca3595.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-roman_empire.analysis-2ce3f4371a261188d2695c67171e4ec4f0d66fc92f9a2db04ee3fedd88ca3595.tar.gz"
             }
           ]
         }
@@ -630,7 +630,7 @@
               "asset": "run-pascalvoc_sp.complete-3fa71dce2b7f34124083ff2f1b1f19ff2554d92a849d93f5243b29fb892df54e.tar.gz",
               "bytes": 444055235,
               "sha256": "3fa71dce2b7f34124083ff2f1b1f19ff2554d92a849d93f5243b29fb892df54e",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-pascalvoc_sp.complete-3fa71dce2b7f34124083ff2f1b1f19ff2554d92a849d93f5243b29fb892df54e.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-pascalvoc_sp.complete-3fa71dce2b7f34124083ff2f1b1f19ff2554d92a849d93f5243b29fb892df54e.tar.gz"
             }
           ]
         },
@@ -643,7 +643,7 @@
               "asset": "run-pascalvoc_sp.analysis-984ce6e61562d3bbacafc22fa52bf70cd57a2913be0cc04952977de8a4e83d4b.tar.gz",
               "bytes": 102631291,
               "sha256": "984ce6e61562d3bbacafc22fa52bf70cd57a2913be0cc04952977de8a4e83d4b",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-pascalvoc_sp.analysis-984ce6e61562d3bbacafc22fa52bf70cd57a2913be0cc04952977de8a4e83d4b.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-pascalvoc_sp.analysis-984ce6e61562d3bbacafc22fa52bf70cd57a2913be0cc04952977de8a4e83d4b.tar.gz"
             }
           ]
         }
@@ -750,7 +750,7 @@
               "asset": "run-coco_sp.complete-0a49ea579aa74f02b67363640a957028978c2e4d4ea4a72d6835b649f374bf4f.tar.gz",
               "bytes": 1469949972,
               "sha256": "0a49ea579aa74f02b67363640a957028978c2e4d4ea4a72d6835b649f374bf4f",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-coco_sp.complete-0a49ea579aa74f02b67363640a957028978c2e4d4ea4a72d6835b649f374bf4f.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-coco_sp.complete-0a49ea579aa74f02b67363640a957028978c2e4d4ea4a72d6835b649f374bf4f.tar.gz"
             }
           ]
         },
@@ -763,7 +763,7 @@
               "asset": "run-coco_sp.analysis-b34d90de0a7c8d50d9adb42cf49e3255510af96208506b23d00fcb47966eb5f5.tar.gz",
               "bytes": 327119735,
               "sha256": "b34d90de0a7c8d50d9adb42cf49e3255510af96208506b23d00fcb47966eb5f5",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-coco_sp.analysis-b34d90de0a7c8d50d9adb42cf49e3255510af96208506b23d00fcb47966eb5f5.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-coco_sp.analysis-b34d90de0a7c8d50d9adb42cf49e3255510af96208506b23d00fcb47966eb5f5.tar.gz"
             }
           ]
         }
@@ -870,7 +870,7 @@
               "asset": "run-peptides_func.complete-c0f35c56258ec5e4e4f29d1fe6e65c0181082a010cbb22eb7c180383c21b88f8.tar.gz",
               "bytes": 31755904,
               "sha256": "c0f35c56258ec5e4e4f29d1fe6e65c0181082a010cbb22eb7c180383c21b88f8",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-peptides_func.complete-c0f35c56258ec5e4e4f29d1fe6e65c0181082a010cbb22eb7c180383c21b88f8.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-peptides_func.complete-c0f35c56258ec5e4e4f29d1fe6e65c0181082a010cbb22eb7c180383c21b88f8.tar.gz"
             }
           ]
         },
@@ -883,7 +883,7 @@
               "asset": "run-peptides_func.analysis-9dc62dd3636790603b4016c2f2c7dfd94c84ecc1e978338fd0aba1b48ee9d641.tar.gz",
               "bytes": 2740317,
               "sha256": "9dc62dd3636790603b4016c2f2c7dfd94c84ecc1e978338fd0aba1b48ee9d641",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/run-peptides_func.analysis-9dc62dd3636790603b4016c2f2c7dfd94c84ecc1e978338fd0aba1b48ee9d641.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/run-peptides_func.analysis-9dc62dd3636790603b4016c2f2c7dfd94c84ecc1e978338fd0aba1b48ee9d641.tar.gz"
             }
           ]
         }
@@ -953,7 +953,7 @@
               "asset": "records-band-bound-tightness.complete-65765827a743842a0e8ee471432cfef2ece256f5898d0900e6499fee25178c10.tar.gz",
               "bytes": 185279,
               "sha256": "65765827a743842a0e8ee471432cfef2ece256f5898d0900e6499fee25178c10",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-band-bound-tightness.complete-65765827a743842a0e8ee471432cfef2ece256f5898d0900e6499fee25178c10.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-band-bound-tightness.complete-65765827a743842a0e8ee471432cfef2ece256f5898d0900e6499fee25178c10.tar.gz"
             }
           ]
         }
@@ -1034,7 +1034,7 @@
               "asset": "records-budget-matched.complete-7f7ead205327912a04ff56e0109167bfe03258feeda54b848e6598f9da16047a.tar.gz",
               "bytes": 34604,
               "sha256": "7f7ead205327912a04ff56e0109167bfe03258feeda54b848e6598f9da16047a",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-budget-matched.complete-7f7ead205327912a04ff56e0109167bfe03258feeda54b848e6598f9da16047a.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-budget-matched.complete-7f7ead205327912a04ff56e0109167bfe03258feeda54b848e6598f9da16047a.tar.gz"
             }
           ]
         }
@@ -1083,7 +1083,7 @@
               "asset": "records-buffer-sensitivity.complete-7916ced84f7e6ceccd857a33ab8790a878838ca888acd569693eb6b332595583.tar.gz",
               "bytes": 90644,
               "sha256": "7916ced84f7e6ceccd857a33ab8790a878838ca888acd569693eb6b332595583",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-buffer-sensitivity.complete-7916ced84f7e6ceccd857a33ab8790a878838ca888acd569693eb6b332595583.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-buffer-sensitivity.complete-7916ced84f7e6ceccd857a33ab8790a878838ca888acd569693eb6b332595583.tar.gz"
             }
           ]
         }
@@ -1164,7 +1164,7 @@
               "asset": "records-cross-backbone.complete-56f10d9d7700a3c81dc28f54116edc77c0fd53b5832fee746b1f3b364663fee3.tar.gz",
               "bytes": 106596,
               "sha256": "56f10d9d7700a3c81dc28f54116edc77c0fd53b5832fee746b1f3b364663fee3",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-cross-backbone.complete-56f10d9d7700a3c81dc28f54116edc77c0fd53b5832fee746b1f3b364663fee3.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-cross-backbone.complete-56f10d9d7700a3c81dc28f54116edc77c0fd53b5832fee746b1f3b364663fee3.tar.gz"
             }
           ]
         }
@@ -1213,7 +1213,7 @@
               "asset": "records-decision-traces.complete-8d32127521d92f2a88855760b579fceec147739e28195d27d2fa62a94908caf9.tar.gz",
               "bytes": 176343,
               "sha256": "8d32127521d92f2a88855760b579fceec147739e28195d27d2fa62a94908caf9",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-decision-traces.complete-8d32127521d92f2a88855760b579fceec147739e28195d27d2fa62a94908caf9.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-decision-traces.complete-8d32127521d92f2a88855760b579fceec147739e28195d27d2fa62a94908caf9.tar.gz"
             }
           ]
         }
@@ -1262,7 +1262,7 @@
               "asset": "records-depth-diagnostics.complete-af63c3ed93081f1de26308b692353b183719b35179347483465e38e3c95b6ea6.tar.gz",
               "bytes": 1134956,
               "sha256": "af63c3ed93081f1de26308b692353b183719b35179347483465e38e3c95b6ea6",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-depth-diagnostics.complete-af63c3ed93081f1de26308b692353b183719b35179347483465e38e3c95b6ea6.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-depth-diagnostics.complete-af63c3ed93081f1de26308b692353b183719b35179347483465e38e3c95b6ea6.tar.gz"
             }
           ]
         }
@@ -1317,7 +1317,7 @@
               "asset": "records-ensemble-grid.complete-dafafdff7cd322e718e72b899a1222ac8848028dcfb7ed73dfba6477fbd2cbba.tar.gz",
               "bytes": 224140,
               "sha256": "dafafdff7cd322e718e72b899a1222ac8848028dcfb7ed73dfba6477fbd2cbba",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-ensemble-grid.complete-dafafdff7cd322e718e72b899a1222ac8848028dcfb7ed73dfba6477fbd2cbba.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-ensemble-grid.complete-dafafdff7cd322e718e72b899a1222ac8848028dcfb7ed73dfba6477fbd2cbba.tar.gz"
             }
           ]
         }
@@ -1366,7 +1366,7 @@
               "asset": "records-ensemble-grid-scores.complete-021dbb846209767351497b413711209e4a119d8c43b74666c7d8317362b5f3de.tar.gz",
               "bytes": 214496,
               "sha256": "021dbb846209767351497b413711209e4a119d8c43b74666c7d8317362b5f3de",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-ensemble-grid-scores.complete-021dbb846209767351497b413711209e4a119d8c43b74666c7d8317362b5f3de.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-ensemble-grid-scores.complete-021dbb846209767351497b413711209e4a119d8c43b74666c7d8317362b5f3de.tar.gz"
             }
           ]
         }
@@ -1419,7 +1419,7 @@
               "asset": "records-factorials.complete-c412011d997b5eb97bf031dc877505098a9ec56f9394972bbc12018f05a16b0c.tar.gz",
               "bytes": 43242354,
               "sha256": "c412011d997b5eb97bf031dc877505098a9ec56f9394972bbc12018f05a16b0c",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-factorials.complete-c412011d997b5eb97bf031dc877505098a9ec56f9394972bbc12018f05a16b0c.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-factorials.complete-c412011d997b5eb97bf031dc877505098a9ec56f9394972bbc12018f05a16b0c.tar.gz"
             }
           ]
         }
@@ -1469,7 +1469,7 @@
               "asset": "records-horizon-beam-sweep.complete-5acc5c233539d74106e3628e371edf6862f55b5164ce5e6f50cff050a20feaaf.tar.gz",
               "bytes": 5867,
               "sha256": "5acc5c233539d74106e3628e371edf6862f55b5164ce5e6f50cff050a20feaaf",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-horizon-beam-sweep.complete-5acc5c233539d74106e3628e371edf6862f55b5164ce5e6f50cff050a20feaaf.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-horizon-beam-sweep.complete-5acc5c233539d74106e3628e371edf6862f55b5164ce5e6f50cff050a20feaaf.tar.gz"
             }
           ]
         }
@@ -1540,7 +1540,7 @@
               "asset": "records-input-gate.complete-e1e969fbc15fec2645d666e95af3fd843f74a080a87803c389689e5f799ee902.tar.gz",
               "bytes": 266562,
               "sha256": "e1e969fbc15fec2645d666e95af3fd843f74a080a87803c389689e5f799ee902",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-input-gate.complete-e1e969fbc15fec2645d666e95af3fd843f74a080a87803c389689e5f799ee902.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-input-gate.complete-e1e969fbc15fec2645d666e95af3fd843f74a080a87803c389689e5f799ee902.tar.gz"
             }
           ]
         }
@@ -1591,7 +1591,7 @@
               "asset": "records-inserted-site.complete-036afc21164801ee065e99d4ddec968a335201bfed310360d6ef2648e95f9211.tar.gz",
               "bytes": 62667,
               "sha256": "036afc21164801ee065e99d4ddec968a335201bfed310360d6ef2648e95f9211",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-inserted-site.complete-036afc21164801ee065e99d4ddec968a335201bfed310360d6ef2648e95f9211.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-inserted-site.complete-036afc21164801ee065e99d4ddec968a335201bfed310360d6ef2648e95f9211.tar.gz"
             }
           ]
         }
@@ -1640,7 +1640,7 @@
               "asset": "records-mechanism-contrasts.complete-30c364e30ecb863e6c69bbbea1bf8176fbfc9ba1c4ac842d8f29556d3886544a.tar.gz",
               "bytes": 86248,
               "sha256": "30c364e30ecb863e6c69bbbea1bf8176fbfc9ba1c4ac842d8f29556d3886544a",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-mechanism-contrasts.complete-30c364e30ecb863e6c69bbbea1bf8176fbfc9ba1c4ac842d8f29556d3886544a.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-mechanism-contrasts.complete-30c364e30ecb863e6c69bbbea1bf8176fbfc9ba1c4ac842d8f29556d3886544a.tar.gz"
             }
           ]
         }
@@ -1705,7 +1705,7 @@
               "asset": "records-negative-controls.complete-9dc5f1c1278f106a957283d9ee6eabefbc234edf644265b961bdfd2be75cc78e.tar.gz",
               "bytes": 48549,
               "sha256": "9dc5f1c1278f106a957283d9ee6eabefbc234edf644265b961bdfd2be75cc78e",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-negative-controls.complete-9dc5f1c1278f106a957283d9ee6eabefbc234edf644265b961bdfd2be75cc78e.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-negative-controls.complete-9dc5f1c1278f106a957283d9ee6eabefbc234edf644265b961bdfd2be75cc78e.tar.gz"
             }
           ]
         }
@@ -1756,7 +1756,7 @@
               "asset": "records-nominal-time.complete-c23a8f28a8edf4f7a33ea7c083e4cbb836a5b16223c2899782131d14c69ede44.tar.gz",
               "bytes": 21467,
               "sha256": "c23a8f28a8edf4f7a33ea7c083e4cbb836a5b16223c2899782131d14c69ede44",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-nominal-time.complete-c23a8f28a8edf4f7a33ea7c083e4cbb836a5b16223c2899782131d14c69ede44.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-nominal-time.complete-c23a8f28a8edf4f7a33ea7c083e4cbb836a5b16223c2899782131d14c69ede44.tar.gz"
             }
           ]
         }
@@ -1806,7 +1806,7 @@
               "asset": "records-oracle-dispersion.complete-4538fb7f82fd76e8d9367039723613a26f9094e8f2f64c9e73fea6350796313f.tar.gz",
               "bytes": 1660331,
               "sha256": "4538fb7f82fd76e8d9367039723613a26f9094e8f2f64c9e73fea6350796313f",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-oracle-dispersion.complete-4538fb7f82fd76e8d9367039723613a26f9094e8f2f64c9e73fea6350796313f.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-oracle-dispersion.complete-4538fb7f82fd76e8d9367039723613a26f9094e8f2f64c9e73fea6350796313f.tar.gz"
             }
           ]
         }
@@ -1855,7 +1855,7 @@
               "asset": "records-reliability-diagnostics.complete-26b3a0486b983815a4f93c1112c9a67c2fa85ab2f9b9c12c2ebeb04670a80880.tar.gz",
               "bytes": 180460,
               "sha256": "26b3a0486b983815a4f93c1112c9a67c2fa85ab2f9b9c12c2ebeb04670a80880",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-reliability-diagnostics.complete-26b3a0486b983815a4f93c1112c9a67c2fa85ab2f9b9c12c2ebeb04670a80880.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-reliability-diagnostics.complete-26b3a0486b983815a4f93c1112c9a67c2fa85ab2f9b9c12c2ebeb04670a80880.tar.gz"
             }
           ]
         }
@@ -1904,7 +1904,7 @@
               "asset": "records-runtime-scaling.complete-8ac23e17712d3bacb26531c39ffe25d0ab9ff55abebe503f8145881f2984ad3e.tar.gz",
               "bytes": 138207,
               "sha256": "8ac23e17712d3bacb26531c39ffe25d0ab9ff55abebe503f8145881f2984ad3e",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-runtime-scaling.complete-8ac23e17712d3bacb26531c39ffe25d0ab9ff55abebe503f8145881f2984ad3e.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-runtime-scaling.complete-8ac23e17712d3bacb26531c39ffe25d0ab9ff55abebe503f8145881f2984ad3e.tar.gz"
             }
           ]
         }
@@ -1953,7 +1953,7 @@
               "asset": "records-sensitivity-grids.complete-7c576b7054d93255c698275189edbbc9944ab86e7d836e13a47c96b2eff1fbdd.tar.gz",
               "bytes": 91117,
               "sha256": "7c576b7054d93255c698275189edbbc9944ab86e7d836e13a47c96b2eff1fbdd",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-sensitivity-grids.complete-7c576b7054d93255c698275189edbbc9944ab86e7d836e13a47c96b2eff1fbdd.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-sensitivity-grids.complete-7c576b7054d93255c698275189edbbc9944ab86e7d836e13a47c96b2eff1fbdd.tar.gz"
             }
           ]
         }
@@ -2002,7 +2002,7 @@
               "asset": "records-sensor-parameters.complete-a12940a8edb0c25f76ea60814465c295712b3a82d06290b50cd38181af38b6ad.tar.gz",
               "bytes": 22433,
               "sha256": "a12940a8edb0c25f76ea60814465c295712b3a82d06290b50cd38181af38b6ad",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-sensor-parameters.complete-a12940a8edb0c25f76ea60814465c295712b3a82d06290b50cd38181af38b6ad.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-sensor-parameters.complete-a12940a8edb0c25f76ea60814465c295712b3a82d06290b50cd38181af38b6ad.tar.gz"
             }
           ]
         }
@@ -2052,7 +2052,7 @@
               "asset": "records-timing-anchors.complete-1c990537facb4230da8df9b9500da39def9589406d150741dfabafb45922b28d.tar.gz",
               "bytes": 133385,
               "sha256": "1c990537facb4230da8df9b9500da39def9589406d150741dfabafb45922b28d",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-timing-anchors.complete-1c990537facb4230da8df9b9500da39def9589406d150741dfabafb45922b28d.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-timing-anchors.complete-1c990537facb4230da8df9b9500da39def9589406d150741dfabafb45922b28d.tar.gz"
             }
           ]
         }
@@ -2103,7 +2103,7 @@
               "asset": "records-tube-audit.complete-203c3a2e0605ed7bd064afd824ecd9621a8d2738e71a774357da9fcc514a0b8d.tar.gz",
               "bytes": 175558,
               "sha256": "203c3a2e0605ed7bd064afd824ecd9621a8d2738e71a774357da9fcc514a0b8d",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/records-tube-audit.complete-203c3a2e0605ed7bd064afd824ecd9621a8d2738e71a774357da9fcc514a0b8d.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/records-tube-audit.complete-203c3a2e0605ed7bd064afd824ecd9621a8d2738e71a774357da9fcc514a0b8d.tar.gz"
             }
           ]
         }
@@ -2164,19 +2164,19 @@
               "asset": "campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part000",
               "bytes": 1992294400,
               "sha256": "9ef61cb392c6bc963826675c7c6e9447d42ad9e6c958ef36e0764a786744b501",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part000"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part000"
             },
             {
               "asset": "campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part001",
               "bytes": 1992294400,
               "sha256": "8b91c773c34d5e99830924efecdec6c73d5ff64849d4bb73e605973791b6a5af",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part001"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part001"
             },
             {
               "asset": "campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part002",
               "bytes": 1779872359,
               "sha256": "66566ab4591a070a76a2bc56af0860b2fe183c81feae0c097a0038afa4a89798",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part002"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/campaign-budget.complete-69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4.tar.gz.part002"
             }
           ]
         }
@@ -2240,7 +2240,7 @@
               "asset": "environment-gpu.complete-ead87b6d6201de706483798eb5d54b1a8cca61a5fba917ba13eb8c0961a13669.tar.gz",
               "bytes": 1850,
               "sha256": "ead87b6d6201de706483798eb5d54b1a8cca61a5fba917ba13eb8c0961a13669",
-              "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/environment-gpu.complete-ead87b6d6201de706483798eb5d54b1a8cca61a5fba917ba13eb8c0961a13669.tar.gz"
+              "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/environment-gpu.complete-ead87b6d6201de706483798eb5d54b1a8cca61a5fba917ba13eb8c0961a13669.tar.gz"
             }
           ]
         }

@@ -19,7 +19,7 @@
     "support": "scripts/reproduction.py",
     "guide": "docs/HPC.md"
   },
-  "repository_url": "https://github.com/VKHS/CR-9",
+  "repository_url": "https://github.com/VKHS/CROSS-MORSE",
   "code_archive_doi": null,
   "scientific_scope": [
     "ogbn-arxiv",

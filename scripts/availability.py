@@ -139,7 +139,7 @@ def render_repository_release(st: dict) -> str:
     release = st["release"]
     statement, manifest, compliance = release["statement"], release["manifest"], release["compliance"]
     counts = compliance["counts"]
-    url = st["scope"].get("repository_url") or "https://github.com/VKHS/CR-9"
+    url = st["scope"].get("repository_url") or "https://github.com/VKHS/CROSS-MORSE"
     lines = ["# Data and code availability", "", "## Availability statement", "",
              "The paper's registered data-availability statement:", "", f"> {statement['registered_text']}", "",
              "The table below identifies the available resources and the measured outputs that await publication. "
@@ -220,7 +220,7 @@ CONTENTS = (
 
 def render_code_release(st: dict) -> str:
     scope = st["scope"]
-    url = scope.get("repository_url") or "https://github.com/VKHS/CR-9"
+    url = scope.get("repository_url") or "https://github.com/VKHS/CROSS-MORSE"
     code_doi = scope.get("code_archive_doi")
     paragraph = (
         "The CROSS-MORSE reference implementation, the seven dataset adapters with their configurations, the Slurm "
@@ -279,7 +279,7 @@ def render(st: dict) -> str:
     if code_release(st):
         return render_code_release(st)
     scope = st["scope"]
-    url = scope.get("repository_url") or "https://github.com/VKHS/CR-9"
+    url = scope.get("repository_url") or "https://github.com/VKHS/CROSS-MORSE"
     code_doi = scope.get("code_archive_doi")
     n = len(st["official"])
     paragraph = (

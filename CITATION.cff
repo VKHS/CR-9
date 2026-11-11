@@ -3,8 +3,8 @@ message: "If you use this software, cite the CROSS-MORSE manuscript and this rep
 title: "CROSS-MORSE: Cross-Spectral Control of Message Passing in Frozen Graph Neural Networks (reference implementation)"
 type: software
 license: BSD-3-Clause
-repository-code: "https://github.com/VKHS/CR-9"
-url: "https://github.com/VKHS/CR-9"
+repository-code: "https://github.com/VKHS/CROSS-MORSE"
+url: "https://github.com/VKHS/CROSS-MORSE"
 authors:
   - family-names: "Khalili Sadaghiani"
     given-names: "Abdolvahab"

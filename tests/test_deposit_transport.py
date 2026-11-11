@@ -273,8 +273,8 @@ class DepositTransportTests(unittest.TestCase):
             changed["related_identifiers"][0][key] = value
             with self.subTest(field=key), self.assertRaises(deposit.DepositError):
                 deposit._metadata_matches(changed, expected)
-        expected_url = {"related_identifiers": [{"identifier": "https://github.com/VKHS/CR-9", "relation": "isSupplementTo"}]}
-        changed_url = {"related_identifiers": [{"identifier": "http://github.com/VKHS/CR-9", "relation": "isSupplementTo"}]}
+        expected_url = {"related_identifiers": [{"identifier": "https://github.com/VKHS/CROSS-MORSE", "relation": "isSupplementTo"}]}
+        changed_url = {"related_identifiers": [{"identifier": "http://github.com/VKHS/CROSS-MORSE", "relation": "isSupplementTo"}]}
         with self.assertRaises(deposit.DepositError):
             deposit._metadata_matches(changed_url, expected_url)
         metadata = deposit.build_metadata("code", archive=self.file, info={}, commit="b" * 40,

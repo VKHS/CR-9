@@ -17,10 +17,10 @@ jobs:
       - name: Export tracked source
         run: |
           mkdir -p "$RUNNER_TEMP/demo-source"
-          git archive --format=tar.gz --prefix=CR-9/ HEAD > "$RUNNER_TEMP/demo-source/CR-9-source.tar.gz"
+          git archive --format=tar.gz --prefix=CROSS-MORSE/ HEAD > "$RUNNER_TEMP/demo-source/CROSS-MORSE-source.tar.gz"
           git rev-parse HEAD > "$RUNNER_TEMP/demo-source/COMMIT.txt"
           cd "$RUNNER_TEMP/demo-source"
-          sha256sum CR-9-source.tar.gz COMMIT.txt > SHA256SUMS.txt
+          sha256sum CROSS-MORSE-source.tar.gz COMMIT.txt > SHA256SUMS.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: expanded-demo-source

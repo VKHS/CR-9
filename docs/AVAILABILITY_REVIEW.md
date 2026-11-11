@@ -4,7 +4,7 @@
 
 ## Scope and conclusion
 
-This review examines the author-supplied **CR-9 work report and remaining steps**,
+This review examines the author-supplied **CROSS-MORSE work report and remaining steps**,
 the main paper and supplementary file identified in
 [`paper/sources.json`](../paper/sources.json), and the successive repository
 upgrades beginning at `f34aa5a8f1d9c3d379fc0e6a288aa4373c1b980b`. The current
@@ -117,7 +117,7 @@ The remaining group, `o_dec` and `phi_OL`, is symbolically defined without exact
 numerical settings. Inferring `phi_OL=0.20` from rounded S33 outputs would not be a
 unique transcription; `o_dec` cannot be isolated from the printed total-work
 fractions. Their original scenario configurations or an explicit author setting
-are needed. The report also refers to a separate **CR-9: decisions left for the
+are needed. The report also refers to a separate **CROSS-MORSE: decisions left for the
 author** document. That document was not located among the accessible files;
 the review does not claim to have settled its broader definition choices and
 internal manuscript inconsistencies.

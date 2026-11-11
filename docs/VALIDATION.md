@@ -177,10 +177,10 @@ The final code revision `6fb49c5` subsequently passed both hosted workflows:
 
 | Hosted check | Final result |
 |---|---|
-| [Fresh-clone numeric suite](https://github.com/VKHS/CR-9/actions/runs/42428992534) | 1,413 tests: 1,362 passed, 51 skipped |
-| [Fresh-clone full CPU suite](https://github.com/VKHS/CR-9/actions/runs/42428992534) | 1,706 tests: 1,704 passed, 2 skipped; 834.235 seconds |
+| [Fresh-clone numeric suite](https://github.com/VKHS/CROSS-MORSE/actions/runs/42428992534) | 1,413 tests: 1,362 passed, 51 skipped |
+| [Fresh-clone full CPU suite](https://github.com/VKHS/CROSS-MORSE/actions/runs/42428992534) | 1,706 tests: 1,704 passed, 2 skipped; 834.235 seconds |
 | Fresh synthetic execution in the same workflow | Training, checkpoint replay, archive ingestion, 11 tables, six figures and two record exports passed |
-| [CPU container](https://github.com/VKHS/CR-9/actions/runs/42428992481) | 1,706 tests: 1,704 passed, 2 skipped; 567.506 seconds; verification ran without networking |
+| [CPU container](https://github.com/VKHS/CROSS-MORSE/actions/runs/42428992481) | 1,706 tests: 1,704 passed, 2 skipped; 567.506 seconds; verification ran without networking |
 | Container reviewer | 16 PASS checks, one printed-decision consistency WARN, no failed checks; `SOFTWARE-ONLY` |
 
 The later publication-map and validation-documentation follow-up preserves the

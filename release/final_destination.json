@@ -1868,7 +1868,7 @@
    },
    {
     "id": "M21",
-    "text": "are available at https://github.com/VKHS/CR-9",
+    "text": "are available at https://github.com/VKHS/CROSS-MORSE",
     "now": "fulfilled",
     "projected": "fulfilled",
     "note": "fulfilled now"
@@ -1952,7 +1952,7 @@
    },
    {
     "id": "S01",
-    "text": "The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CR-9.",
+    "text": "The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CROSS-MORSE.",
     "now": "fulfilled",
     "projected": "fulfilled",
     "note": "fulfilled now"

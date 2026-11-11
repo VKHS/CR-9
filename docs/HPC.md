@@ -18,7 +18,7 @@ Its per-display report identifies columns and partial panels; completing the
 dataset lifecycles does not by itself reconstruct every printed display.
 
 ```bash
-git clone https://github.com/VKHS/CR-9.git && cd CR-9
+git clone https://github.com/VKHS/CROSS-MORSE.git && cd CROSS-MORSE
 $EDITOR run_cross_morse.sh            # SITE SETTINGS: account, partition, GPU request, storage, modules
 bash run_cross_morse.sh check         # settings, runtime identity and job plan; creates and submits nothing
 bash run_cross_morse.sh reproduce     # setup, seven lifecycles, report

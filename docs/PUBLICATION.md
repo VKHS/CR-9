@@ -5,7 +5,7 @@
 The paper's data-availability statement places the checkpoints, predictions,
 propensity-logged trajectories, statistical outputs, split and seed manifests and
 observed environment of the reported experiments in this repository. The publication workflow attaches verified artifacts to the **`paper-artifacts`** release in
-[VKHS/CR-9 Releases](https://github.com/VKHS/CR-9/releases), listed
+[VKHS/CROSS-MORSE Releases](https://github.com/VKHS/CROSS-MORSE/releases), listed
 with their SHA-256 identities in [`release/paper_artifacts.json`](../release/paper_artifacts.json).
 GitHub accepts release assets up to 2 GiB each and limits neither the total size of a
 release nor its download bandwidth; larger archives are split into numbered parts.
@@ -99,7 +99,7 @@ has completed the seven lifecycle runs:
 bash hpc/produce_paper_outputs_arrhenius.sh "$CM_BASE/outputs/CROSS_MORSE_REPRODUCTION_0001" \
   --baselines /abs/pinned-baseline-study-plans
 python3 -B scripts/paper_outputs.py status --work $CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001
-export GITHUB_TOKEN=...                                           # fine-grained token, contents: write on VKHS/CR-9
+export GITHUB_TOKEN=...                                           # fine-grained token, contents: write on VKHS/CROSS-MORSE
 bash hpc/publish_paper_artifacts_arrhenius.sh all $CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001/paper-artifacts.map.json
 make statement-fulfilled                                          # verify the full availability claim
 make availability-fulfilled                                       # also every claim of the printed manuscript text

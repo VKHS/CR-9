@@ -7,7 +7,7 @@
 # Preflight and pack the official run archives on the cluster, one dataset per array task.
 #
 #   sbatch --account=<allocation> --partition=<partition> [--gpus=1 if the partition requires it] \
-#     --export=ALL,CM_SOURCE_ROOT=/abs/CR-9,CM_EVIDENCE_PLAN=/abs/plan.json \
+#     --export=ALL,CM_SOURCE_ROOT=/abs/CROSS-MORSE,CM_EVIDENCE_PLAN=/abs/plan.json \
 #     hpc/pack_evidence_arrhenius.sh
 #
 # Packing is CPU and storage work; no GPU is used. Pass --account and --partition explicitly, as for

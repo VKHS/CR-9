@@ -10,7 +10,7 @@
 # --dry-run prints the commands without cloning or downloading.
 set -euo pipefail
 
-REPOSITORY="https://github.com/VKHS/CR-9.git"
+REPOSITORY="https://github.com/VKHS/CROSS-MORSE.git"
 REVISION=""
 WORK=""
 DRY_RUN=0

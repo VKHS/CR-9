@@ -404,7 +404,7 @@ class PartialCoverage(unittest.TestCase):
 class Channels(unittest.TestCase):
     def published(self, relationship: str, scientific: bool) -> dict:
         part = {"asset": "x.complete-0.tar.gz", "bytes": 10, "sha256": "0" * 64,
-                "url": "https://github.com/VKHS/CR-9/releases/download/demo-artifacts/x.complete-0.tar.gz"}
+                "url": "https://github.com/VKHS/CROSS-MORSE/releases/download/demo-artifacts/x.complete-0.tar.gz"}
         return {"id": "run:ogbn-arxiv", "kind": "run", "status": pa.PUBLISHED, "relationship": relationship,
                 "identity": {"x": 1}, "inventory_sha256": "1" * 64, "files": 1, "bytes": 10,
                 "contents": pa.content_counts([]), "scientific_only_verification": scientific,

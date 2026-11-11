@@ -172,7 +172,7 @@ def artifact_rows(works: list[Path], failures: dict, notes: dict | None = None) 
 def graph_section(work: Path, runs: list[str], first: bool, *, main_choices: dict | None = None,
                   elsewhere: dict | None = None) -> list[str]:
     plan = read(work / "plan.json", {}) or {}
-    links = ", ".join(f"[{run}](https://github.com/VKHS/CR-9/actions/runs/{run})" for run in runs)
+    links = ", ".join(f"[{run}](https://github.com/VKHS/CROSS-MORSE/actions/runs/{run})" for run in runs)
     only = (plan.get("options") or {}).get("only") or []
     choices = plan.get("declared_choices", {}) or {}
     if first:

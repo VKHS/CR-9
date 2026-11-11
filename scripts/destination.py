@@ -226,7 +226,7 @@ def tier(stem: str, name: str, packed: int, parts: int) -> dict:
             "sha256": pending("SHA-256 of the archive"),
             "parts": {"count": int(parts), "each_at_most_bytes": 1900 * 1024 * 1024,
                       "asset": pending(f"{stem}.{name}-<SHA-256>.tar.gz" + (".partNNN" if parts > 1 else "")),
-                      "url": pending("https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>")}}
+                      "url": pending("https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>")}}
 
 
 def record_identity(ctx: Context, name: str) -> dict:

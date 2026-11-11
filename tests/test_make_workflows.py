@@ -271,7 +271,7 @@ class IndependentVerificationTests(unittest.TestCase):
             result = self.run_script("--work", str(work), "--revision", "0123abc", "--dry-run")
             self.assertEqual(result.returncode, 0, result.stderr)
             steps = result.stdout.splitlines()
-            self.assertEqual(steps[0], f"git clone --quiet https://github.com/VKHS/CR-9.git {work}/checkout")
+            self.assertEqual(steps[0], f"git clone --quiet https://github.com/VKHS/CROSS-MORSE.git {work}/checkout")
             self.assertEqual(steps[1], f"git -C {work}/checkout checkout --quiet 0123abc")
             self.assertIn(f"paper PYTHON=python3 PAPER_TIER=complete ARTIFACTS_ROOT={work}/artifacts PAPER_ROOT={work}/paper", steps[2])
             self.assertIn("statement-fulfilled", steps[3])

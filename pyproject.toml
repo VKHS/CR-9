@@ -36,9 +36,9 @@ review = ["numpy>=1.26,<3"]
 plots = ["matplotlib>=3.8,<4"]
 
 [project.urls]
-Repository = "https://github.com/VKHS/CR-9"
-Documentation = "https://github.com/VKHS/CR-9/tree/main/docs"
-"Manuscript registry" = "https://github.com/VKHS/CR-9/tree/main/paper"
+Repository = "https://github.com/VKHS/CROSS-MORSE"
+Documentation = "https://github.com/VKHS/CROSS-MORSE/tree/main/docs"
+"Manuscript registry" = "https://github.com/VKHS/CROSS-MORSE/tree/main/paper"
 
 [tool.setuptools]
 packages = ["cross_morse"]

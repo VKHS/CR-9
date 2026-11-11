@@ -1,6 +1,6 @@
 # Paper references and result reconstruction
 
-The canonical repository is [VKHS/CR-9](https://github.com/VKHS/CR-9).
+The canonical repository is [VKHS/CROSS-MORSE](https://github.com/VKHS/CROSS-MORSE).
 Paper PDFs are not distributed here. [sources.json](sources.json) identifies the
 reference documents by SHA-256, size and page count, and maps tables to pages.
 [reported_results.json](reported_results.json) contains numerical comparison

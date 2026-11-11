@@ -64,9 +64,9 @@
   "rule": "Every value in this file is a projection of the file that publication writes at `replaces`. Real loaders refuse it. `make final-destination-converge` compares the realized file with it: exact values must be identical, registered values follow the registered site profile, sizes must fall within a factor of 2 and counts within 25%, minimums must be reached, and pending values are supplied by the realized output."
  },
  "schema": "cross-morse-paper-artifacts-1",
- "repository": "VKHS/CR-9",
+ "repository": "VKHS/CROSS-MORSE",
  "release_tag": "paper-artifacts",
- "release_url": "https://github.com/VKHS/CR-9/releases/tag/paper-artifacts",
+ "release_url": "https://github.com/VKHS/CROSS-MORSE/releases/tag/paper-artifacts",
  "part_bytes": 1992294400,
  "statement": "release/availability_statement.json",
  "status": "published",
@@ -168,7 +168,7 @@
       "count": 1,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-arxiv.analysis-<SHA-256>.tar.gz",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     },
     "complete": {
@@ -179,7 +179,7 @@
       "count": 13,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-arxiv.complete-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     }
    }
@@ -279,7 +279,7 @@
       "count": 2,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-proteins.analysis-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     },
     "complete": {
@@ -290,7 +290,7 @@
       "count": 26,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-proteins.complete-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     }
    }
@@ -375,7 +375,7 @@
       "count": 2,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-products.analysis-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     },
     "complete": {
@@ -386,7 +386,7 @@
       "count": 177,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-products.complete-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     }
    }
@@ -555,7 +555,7 @@
       "count": 5,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-roman_empire.analysis-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     },
     "complete": {
@@ -566,7 +566,7 @@
       "count": 18,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-roman_empire.complete-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     }
    }
@@ -672,7 +672,7 @@
       "count": 1,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-pascalvoc_sp.analysis-<SHA-256>.tar.gz",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     },
     "complete": {
@@ -683,7 +683,7 @@
       "count": 16,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-pascalvoc_sp.complete-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     }
    }
@@ -787,7 +787,7 @@
       "count": 6,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-coco_sp.analysis-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     },
     "complete": {
@@ -798,7 +798,7 @@
       "count": 717,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-coco_sp.complete-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     }
    }
@@ -902,7 +902,7 @@
       "count": 1,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-peptides_func.analysis-<SHA-256>.tar.gz",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     },
     "complete": {
@@ -913,7 +913,7 @@
       "count": 2,
       "each_at_most_bytes": 1992294400,
       "asset": "pending: run-peptides_func.complete-<SHA-256>.tar.gz.partNNN",
-      "url": "pending: https://github.com/VKHS/CR-9/releases/download/paper-artifacts/<asset>"
+      "url": "pending: https://github.com/VKHS/CROSS-MORSE/releases/download/paper-artifacts/<asset>"
      }
     }
    }

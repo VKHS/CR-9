@@ -46,7 +46,7 @@ if str(ROOT) not in sys.path:
 
 SCHEMA = "cross-morse-paper-artifacts-1"
 MANIFEST = ROOT / "release" / "paper_artifacts.json"
-REPOSITORY = "VKHS/CR-9"
+REPOSITORY = "VKHS/CROSS-MORSE"
 TAG = "paper-artifacts"
 PART_BYTES = 1900 * 1024 * 1024          # GitHub limit: 2 GiB per release asset
 INVENTORY_NAME = "ARTIFACT_INVENTORY.json"

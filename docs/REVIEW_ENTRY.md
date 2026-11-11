@@ -9,7 +9,7 @@ environment. Package names do not substitute for those records.
 
 ## Published release and manuscript artifact status
 
-The existing [GitHub Release](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts) is titled **Paper artifacts**, with the actual tag `demo-artifacts`. It contains **40 uploaded assets totaling approximately 10.85 GB** (checked 11 November 2026); the [execution-package manifest](../release/demo_artifacts.json) records **31 of 37 artifact groups as published**. They are real released resources, with their execution scale and data selections documented in the [package guide](../demo/README.md). The separate [full-manuscript manifest](../release/paper_artifacts.json) lists 37 original-paper artifact groups not yet registered as published in that channel. They are separate publication scopes; the second status does not mean the first release is empty.
+The existing [GitHub Release](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) is titled **Paper artifacts**, with the actual tag `demo-artifacts`. It contains **40 uploaded assets totaling approximately 10.85 GB** (checked 11 November 2026); the [execution-package manifest](../release/demo_artifacts.json) records **31 of 37 artifact groups as published**. They are real released resources, with their execution scale and data selections documented in the [package guide](../demo/README.md). The separate [full-manuscript manifest](../release/paper_artifacts.json) lists 37 original-paper artifact groups not yet registered as published in that channel. They are separate publication scopes; the second status does not mean the first release is empty.
 
 ## Available checks
 

@@ -16,8 +16,8 @@ Log in to an Arrhenius login node, change to the project disk and clone:
 
 ```bash
 cd /nobackup/proj/disk/<storage project>
-git clone https://github.com/VKHS/CR-9.git
-cd CR-9
+git clone https://github.com/VKHS/CROSS-MORSE.git
+cd CROSS-MORSE
 cp configs/arrhenius-site.env.example configs/arrhenius.env.example   # git-ignored
 $EDITOR configs/arrhenius.env.example
 ```

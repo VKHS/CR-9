@@ -116,7 +116,7 @@ or uploading. Pass the allocation and environment paths explicitly:
 
 ```bash
 sbatch --account=<allocation> --partition=<partition> \
-  --export=ALL,CM_SOURCE_ROOT=/abs/CR-9,CM_ENV_FILE=/abs/arrhenius.env,CM_EVIDENCE_PLAN=/abs/cm-evidence/plan.json \
+  --export=ALL,CM_SOURCE_ROOT=/abs/CROSS-MORSE,CM_ENV_FILE=/abs/arrhenius.env,CM_EVIDENCE_PLAN=/abs/cm-evidence/plan.json \
   hpc/pack_evidence_arrhenius.sh
 ```
 

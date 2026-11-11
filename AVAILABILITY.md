@@ -4,7 +4,7 @@
 
 The paper's registered data-availability statement:
 
-> The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
+> The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CROSS-MORSE. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
 The table below identifies the available resources and the measured outputs that await publication. [Statement compliance](STATEMENT_COMPLIANCE.md) records the checks for each item (`make statement-check`).
 
@@ -25,7 +25,7 @@ The table below identifies the available resources and the measured outputs that
 
 ## Measured outputs
 
-The publication workflow distributes checkpoints, predictions, propensity-logged trajectories and statistical outputs through the `paper-artifacts` release in [GitHub Releases](https://github.com/VKHS/CR-9/releases); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with the SHA-256 of each published part, archive and file. The status of each artifact appears below.
+The publication workflow distributes checkpoints, predictions, propensity-logged trajectories and statistical outputs through the `paper-artifacts` release in [GitHub Releases](https://github.com/VKHS/CROSS-MORSE/releases); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with the SHA-256 of each published part, archive and file. The status of each artifact appears below.
 
 | Artifact | Status | Files | Size | Checkpoints | Predictions | Trajectories | Statistical outputs |
 |---|---|---|---|---|---|---|---|

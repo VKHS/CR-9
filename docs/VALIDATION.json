@@ -59,8 +59,8 @@
   },
   "hosted_ci": {
     "status": "REVISION_SCOPED",
-    "quality_workflow": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
-    "container_workflow": "https://github.com/VKHS/CR-9/actions/workflows/container.yml",
+    "quality_workflow": "https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml",
+    "container_workflow": "https://github.com/VKHS/CROSS-MORSE/actions/workflows/container.yml",
     "required_checks": [
       "Source and example verification (no downloads or training)",
       "Full test suite and one synthetic end-to-end run (CPU PyTorch)",
@@ -269,12 +269,12 @@
         "failures": 0,
         "errors": 0,
         "seconds": 393.161,
-        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42417871555"
+        "workflow_run": "https://github.com/VKHS/CROSS-MORSE/actions/runs/42417871555"
       },
       "hosted_container": {
         "command": "make verify test in the CPU container (.github/workflows/container.yml)",
         "status": "PASS",
-        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42417871551"
+        "workflow_run": "https://github.com/VKHS/CROSS-MORSE/actions/runs/42417871551"
       },
       "reconstruction_without_published_outputs": {
         "command": "make paper-offline (nothing published)",
@@ -559,7 +559,7 @@
       "tested_commit": "6fb49c55730c29088ad11ce5395660965703e9c8",
       "tested_tree": "91824c242713562930c351fa525abacae59a6220",
       "fresh_clone": {
-        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42428992534",
+        "workflow_run": "https://github.com/VKHS/CROSS-MORSE/actions/runs/42428992534",
         "status": "PASS",
         "numeric_suite": {
           "tests_run": 1413,
@@ -584,7 +584,7 @@
         ]
       },
       "cpu_container": {
-        "workflow_run": "https://github.com/VKHS/CR-9/actions/runs/42428992481",
+        "workflow_run": "https://github.com/VKHS/CROSS-MORSE/actions/runs/42428992481",
         "status": "PASS",
         "network_during_verification": "disabled",
         "tests_run": 1706,
@@ -609,7 +609,7 @@
         "o_dec",
         "phi_OL"
       ],
-      "author_decisions_document": "CR-9: decisions left for the author was referenced in the work report but not located among accessible files.",
+      "author_decisions_document": "CROSS-MORSE: decisions left for the author was referenced in the work report but not located among accessible files.",
       "review": "docs/AVAILABILITY_REVIEW.md"
     },
     "hpc_access": {
@@ -1065,8 +1065,8 @@
     },
     "hosted_ci": {
       "status": "REVISION_SCOPED",
-      "quality_workflow": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
-      "container_workflow": "https://github.com/VKHS/CR-9/actions/workflows/container.yml",
+      "quality_workflow": "https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml",
+      "container_workflow": "https://github.com/VKHS/CROSS-MORSE/actions/workflows/container.yml",
       "required_checks": [
         "Source and example verification (no downloads or training)",
         "Full test suite and one synthetic end-to-end run (CPU PyTorch)",
@@ -1219,7 +1219,7 @@
       },
       "live_zenodo_operations": "not performed",
       "local_container_execution": "not performed; inspect the hosted container workflow for the published commit",
-      "hosted_ci": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml"
+      "hosted_ci": "https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml"
     }
   ]
 }

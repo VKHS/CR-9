@@ -24,7 +24,7 @@
   ],
   "related_identifiers": [
     {
-      "identifier": "https://github.com/VKHS/CR-9",
+      "identifier": "https://github.com/VKHS/CROSS-MORSE",
       "relation": "isSupplementTo",
       "resource_type": "software",
       "scheme": "url"

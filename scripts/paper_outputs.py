@@ -2225,7 +2225,7 @@ def write_budget_manifest(step: dict, repository: dict) -> None:
                      "accounting": [] if unscheduled(evidence) else [str(evidence / "sacct.tsv")],
                      "job_log": [str(log) for log in logs]})
     value.update(seed_ids=[int(s) for s in step["seeds"]], studies=rows,
-                 source={"repository": "https://github.com/VKHS/CR-9", "git_commit": commit,
+                 source={"repository": "https://github.com/VKHS/CROSS-MORSE", "git_commit": commit,
                          "tree_sha256": inventory(ROOT)["tree_sha256"]})
     value.pop("instructions", None)
     write_json(manifest, value)

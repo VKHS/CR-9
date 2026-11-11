@@ -566,6 +566,6 @@
 
 - Seven dataset adapters, 21 execution profiles and two complete synthetic
   examples, with environment specifications, tests and result builders.
-- Practical guides and canonical links use `https://github.com/VKHS/CR-9`.
+- Practical guides and canonical links use `https://github.com/VKHS/CROSS-MORSE`.
 - Official benchmark archives and auxiliary measurement sets are not deposited
   in this snapshot; current coverage is recorded in [AVAILABILITY.md](AVAILABILITY.md).

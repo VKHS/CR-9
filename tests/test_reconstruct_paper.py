@@ -54,7 +54,7 @@ class OneCommandReconstruction(unittest.TestCase):
             copy = self.tmp / "measured" / example
             shutil.copytree(ROOT / "examples/runs" / example, copy)
             pa.pack_one(artifact_id, copy, staged, relationship="exact_result_producing_run", scientific_only=False)
-        client = pa.GitHub("VKHS/CR-9", "test-token", self.server.base)
+        client = pa.GitHub("VKHS/CROSS-MORSE", "test-token", self.server.base)
         return pa.publish(staged, self.manifest, client=client, download_base=f"{self.server.base}/download")
 
     def test_awaiting_outputs_are_reported_and_nothing_is_fabricated(self):
@@ -139,7 +139,7 @@ class OneCommandReconstruction(unittest.TestCase):
         (source / "observed_environment.json").write_text('{"software_fixture": true}\n')
         staged = self.tmp / "staged"
         pa.pack_one("environment:gpu", source, staged, relationship="post_result_revision", scientific_only=False)
-        client = pa.GitHub("VKHS/CR-9", "test-token", self.server.base)
+        client = pa.GitHub("VKHS/CROSS-MORSE", "test-token", self.server.base)
         manifest = pa.publish(staged, self.manifest, client=client,
                               download_base=f"{self.server.base}/download")
         manifest["artifacts"] = [row for row in manifest["artifacts"] if row["id"] == "environment:gpu"]

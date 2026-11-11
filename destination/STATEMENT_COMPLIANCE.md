@@ -2,7 +2,7 @@
 
 [Now](../STATEMENT_COMPLIANCE.md) · [The final destination](../docs/FINAL_DESTINATION.md) · [destination/](README.md)
 
-> The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
+> The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CROSS-MORSE. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
 This page is the projection of `STATEMENT_COMPLIANCE.md` once the measured outputs are published: each item is evaluated on the files of `destination/` with the checks of `scripts/statement_check.py`. Projected states are in $\color{red}{\textsf{red}}$. `make statement-fulfilled` decides the real state after publication.
 

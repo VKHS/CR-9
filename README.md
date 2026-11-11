@@ -4,7 +4,7 @@
 
 Abdolvahab Khalili Sadaghiani · Linköping University
 
-[![Software checks](https://github.com/VKHS/CR-9/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CR-9/actions/workflows/quality.yml)
+[![Software checks](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml)
 [![Availability statement](docs/badges/evidence.svg)](STATEMENT_COMPLIANCE.md)
 [Statement compliance](STATEMENT_COMPLIANCE.md) · [Final destination](docs/FINAL_DESTINATION.md) · [destination/](destination/README.md) · [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
 
@@ -18,7 +18,7 @@ selection, confirmation, and admission protocol.
 
 ## Published resources and manuscript reconstruction
 
-The existing [GitHub Release](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts),
+The existing [GitHub Release](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts),
 currently titled **Paper artifacts** but tagged `demo-artifacts`,
 contains **40 assets totaling approximately 10.85 GB** (verified on 11 November 2026).
 The [execution-package manifest](release/demo_artifacts.json) records **31 of its
@@ -41,11 +41,11 @@ and generators with a verified publication workflow for the measured outputs.
 The artifact inventory covers the paper's source data, executed split and seed
 manifests, checkpoints, predictions, propensity-logged trajectories and statistical
 outputs. The publication workflow uses the `paper-artifacts` release in
-[GitHub Releases](https://github.com/VKHS/CR-9/releases), with published assets
+[GitHub Releases](https://github.com/VKHS/CROSS-MORSE/releases), with published assets
 listed by SHA-256 in [`release/paper_artifacts.json`](release/paper_artifacts.json).
 
 ```bash
-git clone https://github.com/VKHS/CR-9.git && cd CR-9
+git clone https://github.com/VKHS/CROSS-MORSE.git && cd CROSS-MORSE
 make paper                     # download and verify the published outputs, rebuild all 90 displays, compare
 make paper PAPER_TIER=complete # also the lifecycle checkpoints and full prediction arrays
 make statement-check           # each item of the availability statement and where it is fulfilled
@@ -103,7 +103,7 @@ The [artifact catalog](docs/ARTIFACT_CATALOG.md) identifies the code, data sourc
 split and seed specifications, execution artifacts and their producing commands.
 
 ```bash
-git clone https://github.com/VKHS/CR-9.git && cd CR-9
+git clone https://github.com/VKHS/CROSS-MORSE.git && cd CROSS-MORSE
 $EDITOR run_cross_morse.sh            # SITE SETTINGS: account, partition, GPU request, storage, modules
 bash run_cross_morse.sh check         # settings, runtime identity and job plan; creates and submits nothing
 bash run_cross_morse.sh reproduce     # setup, seven lifecycles, report
@@ -192,8 +192,8 @@ Use Python 3.12 on Linux. The recorded CPU environment installs PyTorch and the
 dependencies needed for verification and a small synthetic run.
 
 ```bash
-git clone --depth 1 https://github.com/VKHS/CR-9.git
-cd CR-9
+git clone --depth 1 https://github.com/VKHS/CROSS-MORSE.git
+cd CROSS-MORSE
 make env-cpu PYTHON=python3.12 VENV_DIR=../cm-cpu
 source ../cm-cpu/bin/activate
 make verify
@@ -252,7 +252,7 @@ assumptions, and the exact implemented variants are explained in the
 ## Release scope
 
 <!-- availability:start -->
-**Reproduction resources:** Experiment code, configurations, artifact verification and reconstruction commands are included. [Statement compliance](STATEMENT_COMPLIANCE.md) identifies the published files and the measured outputs awaiting publication. `make paper` verifies the [release artifacts](https://github.com/VKHS/CR-9/releases), rebuilds their displays and compares them with the paper; see [availability](AVAILABILITY.md).
+**Reproduction resources:** Experiment code, configurations, artifact verification and reconstruction commands are included. [Statement compliance](STATEMENT_COMPLIANCE.md) identifies the published files and the measured outputs awaiting publication. `make paper` verifies the [release artifacts](https://github.com/VKHS/CROSS-MORSE/releases), rebuilds their displays and compares them with the paper; see [availability](AVAILABILITY.md).
 <!-- availability:end -->
 
 `make verify` checks the software package and bundled examples. A regenerated

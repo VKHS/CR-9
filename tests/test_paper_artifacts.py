@@ -65,9 +65,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         server, path = self.server, urllib.parse.urlparse(self.path)
-        if path.path == "/repos/VKHS/CR-9/releases/tags/paper-artifacts":
+        if path.path == "/repos/VKHS/CROSS-MORSE/releases/tags/paper-artifacts":
             return self._send(200, server.release) if server.release else self._send(404, {"message": "Not Found"})
-        if path.path == "/repos/VKHS/CR-9/releases/1/assets":
+        if path.path == "/repos/VKHS/CROSS-MORSE/releases/1/assets":
             page = int(urllib.parse.parse_qs(path.query).get("page", ["1"])[0])
             names = sorted(server.assets)[(page - 1) * 100: page * 100]
             return self._send(200, [self._asset(n) for n in names])
@@ -80,14 +80,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         server, path = self.server, urllib.parse.urlparse(self.path)
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length)
-        if path.path == "/repos/VKHS/CR-9/releases":
+        if path.path == "/repos/VKHS/CROSS-MORSE/releases":
             request = json.loads(body)
             assert request["tag_name"] == "paper-artifacts" and not request["draft"]
             server.release = {"id": 1, "tag_name": "paper-artifacts",
-                              "html_url": f"{server.base}/VKHS/CR-9/releases/tag/paper-artifacts",
-                              "upload_url": f"{server.base}/uploads/repos/VKHS/CR-9/releases/1/assets{{?name,label}}"}
+                              "html_url": f"{server.base}/VKHS/CROSS-MORSE/releases/tag/paper-artifacts",
+                              "upload_url": f"{server.base}/uploads/repos/VKHS/CROSS-MORSE/releases/1/assets{{?name,label}}"}
             return self._send(201, server.release)
-        if path.path == "/uploads/repos/VKHS/CR-9/releases/1/assets":
+        if path.path == "/uploads/repos/VKHS/CROSS-MORSE/releases/1/assets":
             assert self.headers["Authorization"] == "Bearer test-token"
             name = urllib.parse.parse_qs(path.query)["name"][0]
             server.next_id += 1
@@ -156,7 +156,7 @@ class PaperArtifactTransport(unittest.TestCase):
         return staged, run_entry
 
     def client(self):
-        return pa.GitHub("VKHS/CR-9", "test-token", self.server.base)
+        return pa.GitHub("VKHS/CROSS-MORSE", "test-token", self.server.base)
 
     def test_awaiting_manifest_lists_every_required_artifact(self):
         manifest = pa.load_manifest(self.manifest)

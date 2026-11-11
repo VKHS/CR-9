@@ -24,7 +24,7 @@ class AuxiliaryArchiveContractTests(unittest.TestCase):
         return {"schema": "cross-morse-evidence-archive-1", "origin": "original_experiment",
                 "kind": "record_set", "record_id": name, "datasets": datasets,
                 "source": {"tree_sha256": "a" * 64, "git_commit": "b" * 40,
-                           "repository": "https://github.com/VKHS/CR-9"},
+                           "repository": "https://github.com/VKHS/CROSS-MORSE"},
                 "roles": {key: ["study.json"] for key in SET_ROLES}, "study": "study.json",
                 "files": [{"path": "study.json", "sha256": "c" * 64, "bytes": 1}]}
 
