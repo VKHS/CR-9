@@ -299,7 +299,10 @@ def render_report(result: dict) -> str:
              "The source registries supply comparison targets and display identities. They are not substituted "
              "for missing experimental observations. Original experiment identity and agreement with the paper "
              "require the separate result bindings and scientific evidence audit.", ""]
-    if result["synthetic_examples"]:
+    if result.get("cpu_execution"):
+        lines += ["**Every output of this build is computed from the CPU execution of the released code on public "
+                  "data (release `demo-artifacts`).**", ""]
+    elif result["synthetic_examples"]:
         lines += ["**Synthetic software examples are included in this build. Their values demonstrate the "
                   "workflow and are not the paper's benchmark observations.**", ""]
     lines += ["## Generated outputs", "", "| Output | Coverage | Displays | Files |",
@@ -386,9 +389,9 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
     """Build in a new staging directory, then atomically publish a managed workspace.
 
     ``demonstration`` (scripts/reconstruct_paper.py --demo) builds the supplementary displays of the CPU
-    demonstration from its fixture-derived record sets and campaign, labelled as such; a supplementary input that
-    still cannot be built is then reported among the generator errors instead of stopping the reconstruction.
-    ``scope_note`` opens the report (the demonstration's scope); it is written before the file manifest, so the
+    execution from its record sets and campaign, labelled as such; a supplementary input that cannot be built
+    is then reported among the generator errors instead of stopping the reconstruction.
+    ``scope_note`` opens the report (the CPU execution's scope); it is written before the file manifest, so the
     workspace verifies as built."""
     if scope_note is not None and (not isinstance(scope_note, str) or not scope_note.strip()):
         raise ReconstructionError("A scope note must be nonempty text")
@@ -503,7 +506,8 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
                   "build_status": "SUPPORTED_OUTPUTS_BUILT" if experimental else "INPUTS_REQUIRED",
                   "all_displays_numerically_reconstructed": all(row["full_numerical_display"] for row in displays),
                   "historical_experiment_identity_verified": False,
-                  "synthetic_examples": synthetic, "inputs": inputs, "unavailable_inputs": unavailable,
+                  "synthetic_examples": synthetic, **({"cpu_execution": True} if demonstration else {}),
+                  "inputs": inputs, "unavailable_inputs": unavailable,
                   "documents": manifest["documents"], "software_sources": source_inventory(root),
                   "environment": {"python": platform.python_version(), "platform": platform.system(),
                                   **{name: importlib.metadata.version(name) for name in ("numpy", "matplotlib")}},
@@ -523,7 +527,7 @@ def reconstruct(output_dir: Path, *, runs_root=None, index=None, records_index=N
         write_json(stage / "reconstruction.json", result)
         report = render_report(result)
         if scope_note is not None:
-            report = f"> **Demonstration.** {scope_note.strip()}\n\n" + report
+            report = f"> **CPU execution.** {scope_note.strip()}\n\n" + report
         (stage / "RECONSTRUCTION_REPORT.md").write_text(report, encoding="utf-8")
         write_file_manifest(stage)
         verify_workspace(stage)

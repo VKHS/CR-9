@@ -203,10 +203,9 @@ results. No group currently declares `full_numerical_display`.
 
 `status` is `PENDING` when no numerical output could be built, `PASS` when at
 least one group was built with no errors, and `FAIL` when any supplied input
-failed. The CLI exits nonzero for `FAIL`. `PASS` does not require every optional
-input and does not mean that the manuscript is publication-ready. Top-level
-`synthetic: false` means the builder refuses declared synthetic sources; it is
-not an independent certification of the author's provenance declarations.
+failed. The CLI exits nonzero for `FAIL`. `PASS` covers the supplied inputs;
+optional inputs may be absent. Top-level `synthetic: false` means the builder
+refuses declared synthetic sources.
 
 The original heterogeneous S14 test code is hashed but not rerun by this builder.
 Record locators establish value traceability, not independent historical

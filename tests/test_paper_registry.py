@@ -43,7 +43,7 @@ class RegistryFilesTests(unittest.TestCase):
             self.assertTrue(path.is_file(), path)
             value = json.loads(path.read_text(encoding="utf-8"))
             provenance = value["_provenance"]
-            self.assertEqual(provenance["repository"], "https://github.com/VKHS/CR-9")
+            self.assertEqual(provenance["repository"], "https://github.com/VKHS/CROSS-MORSE")
             self.assertIn("transcription_rule", provenance)
             self.assertIn("Scientific Reports", provenance["venue"])
 

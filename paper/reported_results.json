@@ -9,7 +9,7 @@
     "venue": "Scientific Reports manuscript",
     "main_text_pages": 16,
     "supplementary_pages": 38,
-    "repository": "https://github.com/VKHS/CR-9",
+    "repository": "https://github.com/VKHS/CROSS-MORSE",
     "transcription_date": "2026-11-01",
     "transcription_rule": "Values are transcribed at the precision printed in the supplied PDFs. They are reported measurements, reported derived quantities, or analytical sensitivities as classified in paper/sources.json.",
     "scope": "Curated numerical tables and quantitative claims from the supplied manuscript and supplementary information.",

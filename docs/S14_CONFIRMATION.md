@@ -188,8 +188,8 @@ This does not make an open-loop comparator state-dependent.
 For a selected feedback policy, a failed state test returns `qC`. A failed
 radius/RH test can return its exact registered predecessor only when that
 predecessor belongs to `Q_s` or is `qC`; otherwise it returns `qC`. Route identities
-are verified. The gate covers this S14 map. It does not claim to replay additional
-Full/Lean contrasts or replace the complete nested-selection audit.
+are verified. The gate covers this S14 map; the Full/Lean contrasts and the
+nested-selection audit are separate checks.
 
 The supplied paper reports Peptides Holm P = 0.070. That radius contrast fails
 confirmation; an admission calculation cannot repair it. Its evaluated-arm

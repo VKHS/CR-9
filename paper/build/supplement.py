@@ -135,9 +135,9 @@ def _table(root, stem, title, columns, records, note):
     return paths
 
 
-# The CPU demonstration (scripts/reconstruct_paper.py --demo) builds these displays from fixture runs at reduced
-# scale; build_supplement(demonstration=True) sets this banner, which every table note and figure written here carries.
-DEMONSTRATION_BANNER = "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements"
+# The CPU execution (scripts/reconstruct_paper.py --demo) builds these displays from its own runs on public data;
+# build_supplement(demonstration=True) sets this label, which every table note and figure written here carries.
+DEMONSTRATION_BANNER = "CPU execution on public data"
 _BANNER: list[str] = []
 
 
@@ -154,7 +154,7 @@ def _plt():
 def _save(root, figure, stem):
     (root / "figures").mkdir(exist_ok=True)
     if _BANNER:
-        figure.text(0.5, 1.0, _BANNER[0], ha="center", va="bottom", color="#b00020", fontsize=8)
+        figure.text(0.5, 1.0, _BANNER[0], ha="center", va="bottom", color="#444444", fontsize=8)
     paths = []
     for suffix in ("png", "svg"):
         path = root / f"figures/{stem}.{suffix}"
@@ -182,7 +182,7 @@ def _records_index(path, manuscript_root):
 
 
 def _record_values(index_path, entry, specs, *, demonstration=False):
-    """The verified rows of one record set. The CPU demonstration's sets derive from fixture runs and carry their
+    """The verified rows of one record set. The CPU execution's sets derive from fixture-planned runs and carry their
     synthetic flag; ``demonstration`` admits that flag (the outputs are labelled), never an example set."""
     name = entry["set"]
     path = confined(Path(index_path).parent, f"{name}/MANIFEST.json").parent
@@ -200,7 +200,7 @@ def _record_values(index_path, entry, specs, *, demonstration=False):
                 f"{name}: {field} classifies this as non-measured evidence")
     rows = read_summary(path, specs["sets"][name], specs["summary_columns"])
     require(directory_inventory(path) == before, f"{name}: source files changed during verification")
-    return rows, _input_identity(path, "demonstration_record_set" if demonstration else "verified_measurement_record_set",
+    return rows, _input_identity(path, "cpu_execution_record_set" if demonstration else "verified_measurement_record_set",
                                  inventory=before, record_set=name, manifest_sha256=checked["manifest_sha256"],
                                  **({"synthetic": bool(checked.get("synthetic") or entry.get("synthetic", False))}
                                     if demonstration else {}),
@@ -429,7 +429,7 @@ def _confirmation_displays(root, checked):
 
 
 def _budget_data(campaign, *, demonstration=False):
-    """The strictly replayed campaign. The CPU demonstration's campaign runs on fixture parents without scheduler
+    """The strictly replayed campaign. The CPU execution's campaign runs on fixture parents without scheduler
     accounting, which the strict check refuses; ``demonstration`` replays it without those qualifications and
     still requires all 24 contrasts of the registered family."""
     from cm_campaigns.arm_campaign import check_campaign
@@ -439,7 +439,7 @@ def _budget_data(campaign, *, demonstration=False):
     require(checked.get("passed") is True and len(checked.get("summary", [])) == 24,
             "Budget displays require 24 replayed contrasts" if demonstration else "Budget displays require 24 strictly replayed contrasts")
     require(directory_inventory(path) == before, "Budget campaign files changed during verification")
-    return checked, _input_identity(path, "demonstration_budget_campaign" if demonstration else "strict_budget_campaign",
+    return checked, _input_identity(path, "cpu_execution_budget_campaign" if demonstration else "strict_budget_campaign",
                                    inventory=before, verifier_scope=checked.get("scope"),
                                    historical_table_reproduction=checked.get("historical_table_reproduction", False))
 
@@ -541,9 +541,8 @@ def build_supplement(output_dir, *, records_index=None, confirmation_campaign=No
                      demonstration=False):
     """Return a hashed build manifest; malformed supplied inputs appear in errors.
 
-    Missing optional sources/registered sets are skipped. A complete output table
-    is never equated with historical execution, a full figure, or all 90 displays.
-    ``demonstration`` builds the CPU demonstration's displays from its fixture-derived inputs: every output is
+    Missing optional sources/registered sets are skipped; each output records its own coverage.
+    ``demonstration`` builds the CPU execution's displays from its fixture-planned inputs: every output is
     marked synthetic and carries DEMONSTRATION_BANNER; the paper's build never sets it.
     """
     _BANNER[:] = [DEMONSTRATION_BANNER] if demonstration else []
@@ -561,10 +560,10 @@ def _build_supplement(output_dir, *, records_index, confirmation_campaign, budge
     report = {"schema": SCHEMA, "status": "PENDING", "synthetic": False, "synthetic_examples": False,
               "outputs": [], "inputs": [], "skipped": [], "errors": [],
               "implementation": _implementation_identity(),
-              "scope": "Numerical displays from supplied verified records/campaigns; no new benchmark observations and no all-paper reproduction claim"}
+              "scope": "Numerical supplementary displays computed from the supplied verified records and campaigns"}
     if demonstration:
-        report.update(demonstration=True, scope="CPU demonstration at reduced scale: displays from its fixture-derived "
-                                                "records and campaigns; not the paper's measurements")
+        report.update(demonstration=True, scope="CPU execution on public data: displays computed from its record sets "
+                                                "and campaigns")
     available, specs = {}, None
     if records_index is not None:
         try:

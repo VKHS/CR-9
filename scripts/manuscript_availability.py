@@ -22,7 +22,7 @@ TARGET = ROOT / "paper" / "AVAILABILITY_STATEMENT.txt"
 def render_code_release(st: dict) -> str:
     """Describe shipped code and generated products without asserting historical artifacts."""
     scope = st["scope"]
-    url = scope.get("repository_url") or "https://github.com/VKHS/CR-9"
+    url = scope.get("repository_url") or "https://github.com/VKHS/CROSS-MORSE"
     code_doi = registered_doi(scope.get("code_archive_doi"))
     text = ("Data and code availability. The CROSS-MORSE implementation, seven dataset adapters and their configurations, "
             "split and seed design manifests, environment specifications, statistical analysis code, supported table "
@@ -56,7 +56,7 @@ def render(st: dict) -> str:
     if st["scope"].get("result_distribution") == "regenerate" and not st["official"]:
         return render_code_release(st)
     scope, official = st["scope"], st["official"]
-    url = scope.get("repository_url") or "https://github.com/VKHS/CR-9"
+    url = scope.get("repository_url") or "https://github.com/VKHS/CROSS-MORSE"
     code_doi = registered_doi(scope.get("code_archive_doi"))
     records = st.get("records") or {"verified": [], "defined": []}
     registered = sorted(set(records["verified"]) & set(records["defined"]))

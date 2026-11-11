@@ -1,6 +1,6 @@
-name: Demo production graph continuation
+name: CPU production graph continuation
 
-# Continues a "Demo production graph" run whose first level completed: executes the later dependency
+# Continues a "CPU production graph" run whose first level completed: executes the later dependency
 # levels and the exports without moving the whole work directory between jobs. Each job restores only the
 # outputs that its own tasks depend on (demo/restore.py), one archive at a time. The collected outputs are
 # kept as the artifact demo-collected, which demo-publish.yml publishes. Request: demo/continue-request.json
@@ -12,9 +12,6 @@ name: Demo production graph continuation
 # graph's work directory (default /home/runner/demo/work; a graph planned by a demo-graph.yml request with
 # its own "work" is continued in that directory).
 on:
-  push:
-    branches: [expanded-demo-2026-11-09]
-    paths: [demo/continue-request.json]
   workflow_dispatch:
 
 permissions:
@@ -140,7 +137,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         if: steps.work.outputs.here == '1'
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -233,7 +230,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         if: steps.work.outputs.here == '1'
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -333,7 +330,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         if: steps.work.outputs.here == '1'
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -433,7 +430,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         if: steps.work.outputs.here == '1'
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -533,7 +530,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         if: steps.work.outputs.here == '1'
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -633,7 +630,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         if: steps.work.outputs.export != ''
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -703,7 +700,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.setup.outputs.source }}
-      - name: Demonstration tooling of this commit
+      - name: Execution tooling of this commit
         run: git fetch -q --depth 1 origin "${{ github.sha }}" && git checkout -q FETCH_HEAD -- demo
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:

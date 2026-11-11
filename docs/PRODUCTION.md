@@ -15,7 +15,7 @@ bash hpc/produce_paper_outputs_arrhenius.sh "$CM_BASE/outputs/CROSS_MORSE_REPROD
   --baselines /abs/pinned-baseline-study-plans
 python3 -B scripts/paper_outputs.py status --work "$CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001"
 # After the collect job finishes, on a login node with network access:
-export GITHUB_TOKEN=...      # fine-grained, contents: write on VKHS/CR-9
+export GITHUB_TOKEN=...      # fine-grained, contents: write on VKHS/CROSS-MORSE
 bash hpc/publish_paper_artifacts_arrhenius.sh all \
   "$CM_BASE/paper-outputs/CROSS_MORSE_REPRODUCTION_0001/paper-artifacts.map.json"
 ```

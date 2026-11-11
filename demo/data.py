@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Reduced official-split graphs for the CPU demonstration.
+"""Official-split subset graphs for the CPU execution.
 
 Except Roman-empire, the official graphs exceed what a hosted runner (4 CPUs, 16 GB) completes
 in a few hours for the 24-trajectory exploration and the repeated selection and admission
-statistics of every lifecycle. The demonstration runs those datasets on a deterministic
+statistics of every lifecycle. The CPU execution runs those datasets on a deterministic
 subset of the official data:
 
 * node-level graphs: the nodes of ``keep`` parts of a ``parts``-way METIS partition of the
@@ -18,7 +18,7 @@ subset of the official data:
 
 The official data are loaded with the runtime's own adapters (cross_morse.datasets,
 download authorized), so features, labels and the official splits are exactly those of
-a full run. The result is the trusted raw graph NPZ that a demonstration configuration
+a full run. The result is the trusted raw graph NPZ that a CPU execution configuration
 names in ``data.graph_npz``; the run records its SHA-256 (``source: trusted_raw_npz``).
 ``<output>.json`` records the selection rule, the sizes and the official source files.
 
@@ -52,6 +52,9 @@ RULES = {
     "Peptides-func": {"kind": "first_graphs", "keep": {"train": 1200, "valid": 150, "test": 150}},
 }
 
+
+# The label of every subset-graph descriptor (also applied when the descriptors are installed as views).
+SCOPE = "Deterministic subset of the official data for the CPU execution."
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -113,7 +116,7 @@ def node_subset(raw, rule: dict) -> tuple[dict, dict]:
         arrays["edge_weight"] = np.asarray(raw.edge_weight, dtype=np.float32)[inside]
     for role in ("train", "valid", "test"):
         if not len(arrays[f"{role}_idx"]):
-            raise ValueError(f"the reduced graph has no official {role} node; choose another selection rule")
+            raise ValueError(f"the subset graph has no official {role} node; choose another selection rule")
     sizes = {"nodes": int(len(kept)), "directed_edges": int(inside.sum()), "full_nodes": n,
              "full_directed_edges": int(edges.shape[1]),
              "official_roles": {role: int(len(arrays[f"{role}_idx"])) for role in ("train", "valid", "test")},
@@ -165,7 +168,7 @@ def build(dataset: str, data_root: Path, output: Path) -> dict:
     record = {"schema": SCHEMA, "dataset": dataset, "rule": rule, "sizes": sizes, "official_source": source,
               "npz": output.name, "npz_sha256": sha256_file(output), "npz_bytes": output.stat().st_size,
               "builder": "demo/data.py", "seconds": round(time.time() - started, 1),
-              "scope": "Deterministic subset of the official data for the CPU demonstration; not the paper's dataset scale."}
+              "scope": SCOPE}
     output.with_suffix(".json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     return record
 

@@ -10,7 +10,7 @@
     15
    ],
    "heading": "Data and code availability",
-   "text": "Code. The complete implementation of CROSS-MORSE (frozen plants, transport adapter, action registry, sensing, observer, consequence models, the nine policy families, selection, confirmation and admission statistics, and the sealed eight-stage lifecycle), the dataset adapters, one entry point and three configurations per dataset, the Slurm launchers with the Arrhenius site profile, the environment specifications, the test suite, the scripts that build the run-derived tables and figures from completed run directories (make tables, make figures), the code of the experiments outside the eight-stage run (the budget-matched arms E3–E6, the pinned-upstream driver of the retrained external baselines, the E17 timing protocol and the scheduler-accounting capture) and the exporter that turns their outputs into traceable measurement records are available at https://github.com/VKHS/CR-9. The runtime source identity printed by make fingerprint is sealed into every run record. Data. All seven datasets are official public releases obtained from their providers through the repository’s adapters [18–20]; the split rule, seeds, fold structure and margins of every configuration are registered in the repository, and the role membership of D_fit, D_explore, D_select, D_confirm, D_compare, D_admit and D_test of every completed run is extracted into its manifest. Run archives and measurement records. The run archive of each dataset (prepared data and split indices, frozen checkpoints, propensity-logged exploration trajectories, candidate and final predictions, selection, confirmation and admission records, stage manifests and environment records) and the measurement records of the experiments outside the eight-stage run (per-seed scores and timing traces of the retrained baselines with their scheduler accounting, the E3–E6 campaign with its paired observations, and the factorial, negative-control, ensemble-grid, attribution and cross-backbone records) are deposited at the Zenodo DOIs listed in the repository’s runs/index.json and records/index.json; make paper rebuilds every run-derived table and figure of this article from the ingested archives, and make records-tables prints the record-derived supplementary tables, with every value traced to the raw file it is read from [24]."
+   "text": "Code. The complete implementation of CROSS-MORSE (frozen plants, transport adapter, action registry, sensing, observer, consequence models, the nine policy families, selection, confirmation and admission statistics, and the sealed eight-stage lifecycle), the dataset adapters, one entry point and three configurations per dataset, the Slurm launchers with the Arrhenius site profile, the environment specifications, the test suite, the scripts that build the run-derived tables and figures from completed run directories (make tables, make figures), the code of the experiments outside the eight-stage run (the budget-matched arms E3–E6, the pinned-upstream driver of the retrained external baselines, the E17 timing protocol and the scheduler-accounting capture) and the exporter that turns their outputs into traceable measurement records are available at https://github.com/VKHS/CROSS-MORSE. The runtime source identity printed by make fingerprint is sealed into every run record. Data. All seven datasets are official public releases obtained from their providers through the repository’s adapters [18–20]; the split rule, seeds, fold structure and margins of every configuration are registered in the repository, and the role membership of D_fit, D_explore, D_select, D_confirm, D_compare, D_admit and D_test of every completed run is extracted into its manifest. Run archives and measurement records. The run archive of each dataset (prepared data and split indices, frozen checkpoints, propensity-logged exploration trajectories, candidate and final predictions, selection, confirmation and admission records, stage manifests and environment records) and the measurement records of the experiments outside the eight-stage run (per-seed scores and timing traces of the retrained baselines with their scheduler accounting, the E3–E6 campaign with its paired observations, and the factorial, negative-control, ensemble-grid, attribution and cross-backbone records) are deposited at the Zenodo DOIs listed in the repository’s runs/index.json and records/index.json; make paper rebuilds every run-derived table and figure of this article from the ingested archives, and make records-tables prints the record-derived supplementary tables, with every value traced to the raw file it is read from [24]."
   },
   "methods": {
    "document": "main",
@@ -29,7 +29,7 @@
     30
    ],
    "heading": "Data and code availability",
-   "text": "Data and code availability. The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CR-9. Official datasets are obtained from their providers through the adapters. The run archive of every dataset and the measurement records of the experiments outside the eight-stage run are deposited at the DOIs listed in the repository’s runs/index.json and records/index.json; make paper rebuilds every run-derived table and figure of this Supplementary Information from the ingested archives and make records-tables prints the record-derived tables, each value traced to the raw file it is read from. The synthetic example runs of the repository exercise the execution paths and are kept out of the benchmark tables."
+   "text": "Data and code availability. The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CROSS-MORSE. Official datasets are obtained from their providers through the adapters. The run archive of every dataset and the measurement records of the experiments outside the eight-stage run are deposited at the DOIs listed in the repository’s runs/index.json and records/index.json; make paper rebuilds every run-derived table and figure of this Supplementary Information from the ingested archives and make records-tables prints the record-derived tables, each value traced to the raw file it is read from. The synthetic example runs of the repository exercise the execution paths and are kept out of the benchmark tables."
   }
  },
  "claims": [
@@ -341,10 +341,10 @@
   {
    "id": "M21",
    "paragraph": "main",
-   "text": "are available at https://github.com/VKHS/CR-9",
+   "text": "are available at https://github.com/VKHS/CROSS-MORSE",
    "check": {
     "type": "repository_url",
-    "url": "https://github.com/VKHS/CR-9",
+    "url": "https://github.com/VKHS/CROSS-MORSE",
     "files": [
      "CITATION.cff",
      "pyproject.toml",
@@ -488,7 +488,7 @@
   {
    "id": "S01",
    "paragraph": "supplementary",
-   "text": "The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CR-9.",
+   "text": "The reference implementation, dataset adapters, entry points, configurations, Slurm launchers, environment specification, tests, run-archive and record contracts and the table and figure builders are available at https://github.com/VKHS/CROSS-MORSE.",
    "check": {
     "type": "all_of",
     "claims": [

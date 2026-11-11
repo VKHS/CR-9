@@ -1,6 +1,6 @@
 # Measured-study manuscript review
 
-Reviewed on 6 November 2026 against the author's supplied 16-page main paper
+Reviewed against the author's supplied 16-page main paper
 and 38-page supplementary information. The author confirms that the experiments
 were implemented and measured. The empirical numerical entries are therefore
 handled as **reported measurements**, with their original units, signs and
@@ -107,7 +107,7 @@ registration tools remain available for archives using that distribution route.
 
 The additional protocol references in
 [printed_display_values.json](printed_display_values.json) were transcribed from
-these same PDF bytes on 7 November 2026. They supply previously absent comparison
+these same PDF bytes. They supply comparison
 targets without changing the original measured numerical registry; see the
 [reference guide](../docs/PAPER_REFERENCE_VALUES.md).
 

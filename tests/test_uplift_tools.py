@@ -247,7 +247,7 @@ class ReviewAndStatementTests(unittest.TestCase):
             self.assertIn("SOFTWARE-ONLY", review.render(steps, root, offline=True, index=PROJECT / "runs" / "index.json", records=PROJECT / "records"))
 
     def test_manuscript_paragraph_names_only_registered_deposits(self):
-        scope = {"repository_url": "https://github.com/VKHS/CR-9", "code_archive_doi": None}
+        scope = {"repository_url": "https://github.com/VKHS/CROSS-MORSE", "code_archive_doi": None}
         empty = {"scope": scope, "official": {}, "records": {"verified": [], "defined": ["baselines"]}}
         text = manuscript_availability.render(empty)
         self.assertNotIn("deposited at", text)

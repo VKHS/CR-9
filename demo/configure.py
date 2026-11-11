@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Write the CPU demonstration configurations from the supplied pilot configurations.
+"""Write the CPU execution configurations from the supplied pilot configurations.
 
-The demonstration executes the complete eight-stage lifecycle of every dataset on a
-CPU at reduced scale. Each demonstration configuration is the dataset's pilot
-configuration (configs/<stem>_pilot.json) with the overrides of VARIANTS applied and
-nothing else changed. CPU execution requires the fp32 plant (cross_morse/common.py,
+The CPU execution runs the complete eight-stage lifecycle of every dataset on a hosted
+CPU runner. Each configuration is the dataset's pilot configuration
+(configs/<stem>_pilot.json) with the overrides of VARIANTS applied and nothing else
+changed. CPU execution requires the fp32 plant (cross_morse/common.py,
 precision_context). The configurations keep profile "pilot" and scientific_run false,
-so no demonstration run can be mistaken for a full scientific run. A dataset that runs
-on a reduced official-split graph (demo/data.py, ``--graph-npz``) is declared as the
+which keeps the CPU runs in their own channel. A dataset that runs on an official-split
+subset graph (demo/data.py, ``--graph-npz``) is declared as the
 runtime requires for anything but the complete benchmark: dataset "synthetic" with
 benchmark_dataset routing and profile "smoke".
 
@@ -76,7 +76,7 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--variant", choices=sorted(VARIANTS), default="demo")
     parser.add_argument("--dataset", action="append", choices=sorted(STEMS), default=None)
-    parser.add_argument("--graph-npz", default=None, help="reduced official-split graph (demo/data.py)")
+    parser.add_argument("--graph-npz", default=None, help="official-split subset graph (demo/data.py)")
     parser.add_argument("--split-index", type=int, default=None)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)

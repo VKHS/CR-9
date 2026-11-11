@@ -3,10 +3,12 @@
 [Documentation](README.md) · [Getting started](GETTING_STARTED.md) · [Availability](../AVAILABILITY.md)
 
 A complete run is the unit of experimental evidence. The same integrity contract
-applies to the two bundled synthetic demonstrations and to official-data runs,
+applies to the two bundled synthetic examples and to official-data runs,
 including every run of a reproduction suite (`run_cross_morse.sh reproduce`,
-[HPC guide](HPC.md)). This release distributes no run archives; the tools below
-pack, verify, ingest and rebuild tables from runs that a reproduction generates.
+[HPC guide](HPC.md)). Run archives are distributed as release assets
+([release/paper_artifacts.json](../release/paper_artifacts.json),
+[release/demo_artifacts.json](../release/demo_artifacts.json)); the tools below pack,
+verify, ingest and rebuild tables from runs, including those a reproduction generates.
 Keep every sealed file in a retained run; removing a checkpoint or inventory
 breaks that run even when a summary table still exists.
 

@@ -1,14 +1,14 @@
-# CPU demonstration: results
+# CPU execution: results
 
-> **Demonstration.** CPU demonstration of the released code at reduced scale (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on public benchmark data on hosted CPU runners. The values are not the paper's measurements and are not expected to equal the printed values.
+> **CPU execution.** CPU execution of the released code on public benchmark data (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on hosted CPU runners: Roman-empire on its complete official graph with its ten official splits, the other six datasets on deterministic subsets of their official data, at the pilot settings. The paper's printed values are the measurements of its full-scale GPU runs.
 
-Release: [demo-artifacts](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts) — 31 of 37 artifacts published (38.55 GiB, 28,913 files).
+Release: [demo-artifacts](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) — 31 of 37 artifacts published (38.55 GiB, 28,913 files).
 
 ## Rebuilt from the release with `make demo-paper`
 
-- Display generators: 56 of 90 built, 35 of them from the release and 21 from the repository's own sources (protocol and analytical displays); 34 wait for an input (below). Every display built from the release is labelled as the demonstration (synthetic software example).
+- Display generators: 56 of 90 built, 35 of them from the release and 21 from the repository's own sources (protocol and analytical displays); 34 wait for an input (below). Every display built from the release is labelled as the CPU execution on public data.
 - Supplementary builds from the release's record sets and campaign: 10 output(s), status PASS.
-- Printed values: 1263 equal, 1202 different, 248 missing. Differences are expected: these are reduced-scale CPU runs, not the runs the paper reports.
+- Printed values: 1263 equal, 1202 different, 248 missing. The printed values are the measurements of the paper's full-scale GPU runs; the values here come from the CPU runs below.
 
 Displays waiting for an input, with what they lack:
 
@@ -73,7 +73,7 @@ Every run executed the eight stages of the lifecycle from this checkout on a hos
 
 ## The production graph
 
-The repository's own production graph (scripts/paper_outputs.py, planned with `--allow-fixture --device cpu`) executed every node it could plan on CPU (demo/execute.py; workflow runs [42674584772](https://github.com/VKHS/CR-9/actions/runs/42674584772), [42738711578](https://github.com/VKHS/CR-9/actions/runs/42738711578), [42746503398](https://github.com/VKHS/CR-9/actions/runs/42746503398), [42746423814](https://github.com/VKHS/CR-9/actions/runs/42746423814), [42753821512](https://github.com/VKHS/CR-9/actions/runs/42753821512), [42800949895](https://github.com/VKHS/CR-9/actions/runs/42800949895), [42817409486](https://github.com/VKHS/CR-9/actions/runs/42817409486), [42820132747](https://github.com/VKHS/CR-9/actions/runs/42820132747), [42843295081](https://github.com/VKHS/CR-9/actions/runs/42843295081), [42860910909](https://github.com/VKHS/CR-9/actions/runs/42860910909)). Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "horizon_sweep_configuration": {"ensemble": 1, "profile": "full"}, "negative_controls_dataset": "PascalVOC-SP", "provisional": [], "s14_excluded": ["Roman-empire"]}.
+The repository's own production graph (scripts/paper_outputs.py, planned with `--allow-fixture --device cpu`) executed every node it could plan on CPU (demo/execute.py; workflow runs [42674584772](https://github.com/VKHS/CROSS-MORSE/actions/runs/42674584772), [42738711578](https://github.com/VKHS/CROSS-MORSE/actions/runs/42738711578), [42746503398](https://github.com/VKHS/CROSS-MORSE/actions/runs/42746503398), [42746423814](https://github.com/VKHS/CROSS-MORSE/actions/runs/42746423814), [42753821512](https://github.com/VKHS/CROSS-MORSE/actions/runs/42753821512), [42800949895](https://github.com/VKHS/CROSS-MORSE/actions/runs/42800949895), [42817409486](https://github.com/VKHS/CROSS-MORSE/actions/runs/42817409486), [42820132747](https://github.com/VKHS/CROSS-MORSE/actions/runs/42820132747), [42843295081](https://github.com/VKHS/CROSS-MORSE/actions/runs/42843295081), [42860910909](https://github.com/VKHS/CROSS-MORSE/actions/runs/42860910909)). Its declared choices are recorded in the plan: {"arm_seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "band_audit": {"baseline": "shared", "dataset": "ogbn-arxiv"}, "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the sealed runs carry admission and test decisions, which the E3-E6 protocol (cm_experiments/runner.py) and the complete campaign export refuse", "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)", "horizon_sweep_configuration": {"ensemble": 1, "profile": "full"}, "negative_controls_dataset": "PascalVOC-SP", "provisional": [], "s14_excluded": ["Roman-empire"]}.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
@@ -134,20 +134,20 @@ The repository's own production graph (scripts/paper_outputs.py, planned with `-
 | module_ablations.lifecycles | 3 | 192/192 | complete |
 | module_ablations.measure | 4 | 15/16 | incomplete (NOT RUN) |
 
-A further graph, planned for `horizon_beam_sweep` alone in its own work directory (workflow run [42742259867](https://github.com/VKHS/CR-9/actions/runs/42742259867)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices differ from the main graph's in: {"horizon_sweep_configuration": {"beam": 16, "ensemble": 1, "profile": "full"}}.
+A further graph, planned for `horizon_beam_sweep` alone in its own work directory (workflow run [42742259867](https://github.com/VKHS/CROSS-MORSE/actions/runs/42742259867)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices differ from the main graph's in: {"horizon_sweep_configuration": {"beam": 16, "ensemble": 1, "profile": "full"}}.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
 | horizon_beam_sweep.variants | 0 | 7/7 | complete |
 
-A further graph, planned for `records:runtime_scaling`, `records:timing_anchors` alone in its own work directory (workflow run [42758399098](https://github.com/VKHS/CR-9/actions/runs/42758399098)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
+A further graph, planned for `records:runtime_scaling`, `records:timing_anchors` alone in its own work directory (workflow run [42758399098](https://github.com/VKHS/CROSS-MORSE/actions/runs/42758399098)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
 | runtime_scaling.run | 0 | 29/29 | complete |
 | timing_anchors.run | 1 | 6/6 | complete |
 
-A further graph, planned for `records:decision_traces`, `records:reliability_diagnostics`, `records:mechanism_contrasts` alone in its own work directory (workflow run [42790196009](https://github.com/VKHS/CR-9/actions/runs/42790196009)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
+A further graph, planned for `records:decision_traces`, `records:reliability_diagnostics`, `records:mechanism_contrasts` alone in its own work directory (workflow run [42790196009](https://github.com/VKHS/CROSS-MORSE/actions/runs/42790196009)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
@@ -156,7 +156,7 @@ A further graph, planned for `records:decision_traces`, `records:reliability_dia
 | decision_audit.plan | 1 | 1/1 | complete |
 | decision_audit.run | 2 | 16/16 | complete |
 
-A further graph, planned for `campaign:budget`, `records:budget_matched` alone in its own work directory (workflow run [42811732665](https://github.com/VKHS/CR-9/actions/runs/42811732665)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
+A further graph, planned for `campaign:budget`, `records:budget_matched` alone in its own work directory (workflow run [42811732665](https://github.com/VKHS/CROSS-MORSE/actions/runs/42811732665)), produced the artifacts that demo/merge_maps.py added to the main graph's map. Its declared choices are the main graph's.
 
 | Node | Level | Tasks complete | State |
 |---|---|---|---|
@@ -191,15 +191,15 @@ A further graph, planned for `campaign:budget`, `records:budget_matched` alone i
 | budget.studies.roman_empire_split_08 | 1 | 12/12 | complete |
 | budget.studies.roman_empire_split_09 | 1 | 12/12 | complete |
 
-## Not in the demonstration
+## Artifacts outside the CPU execution
 
-Each artifact the demonstration does not hold, with its reason:
+Each artifact outside the CPU execution, with its reason:
 
 - `campaign:confirmation`: The S14 family is planned without Roman-empire (declared choice, demo/README.md): assemble_s14 refuses a partial family, and check_campaign admits only a non-synthetic campaign of all seven datasets.
-- `records:action_gap_audit`: The audit scores the decisions of a closed-loop deployed rule. Every demonstration run deployed an open-loop rule, so the audit has no decision to score and the exporter writes no set.
-- `records:baselines`: The fourteen external comparisons of E12 run the pinned upstream studies and adapters that the author supplies; the demonstration does not run them.
-- `records:confirmation_contrasts`: Reads campaign:confirmation, which the demonstration does not assemble.
-- `records:confirmation_sensitivity`: Reads campaign:confirmation, which the demonstration does not assemble.
+- `records:action_gap_audit`: The audit scores the decisions of a closed-loop deployed rule. Every CPU run deployed an open-loop rule, so the audit has no decision to score and the exporter writes no set.
+- `records:baselines`: The fourteen external comparisons of E12 run the pinned upstream studies and adapters that the author supplies, outside the CPU execution.
+- `records:confirmation_contrasts`: Reads campaign:confirmation (above).
+- `records:confirmation_sensitivity`: Reads campaign:confirmation (above).
 - `records:module_ablations`: Fifteen of the sixteen measurement jobs of the S17 module ablations completed. The remaining job reads the sealed variant lifecycle runs of its parent, each opened and verified through its confirm stage with its prediction arrays; restoring them filled a hosted runner's disk twice (No space left on device). The exporter writes only the complete set.
 
 Generated by `demo/report.py` in the publishing workflow.

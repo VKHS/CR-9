@@ -1101,7 +1101,7 @@ def _normalize_only(values) -> set[str]:
 
 
 # Record exporters that write the measured part of an incomplete set, with the cells it lacks, when given
-# --allow-partial (never into records/). A fixture plan's runs (a software check or the CPU demonstration) can
+# --allow-partial (never into records/). A fixture plan's runs (a software check or the CPU execution) can
 # leave cells without a valid measurement, e.g. no state donors where every audited rule is open loop.
 PARTIAL_EXPORTERS = {"scripts/run_confirmation_analysis.py", "scripts/run_experiment.py",
                      "scripts/run_trajectory_audit.py", "scripts/run_decision_audit.py", "scripts/run_timing_records.py"}
@@ -1296,8 +1296,8 @@ def command_plan(args, executor=_subprocess_executor) -> int:
     if (work / "plan.json").exists():
         raise PlanError(f"{work}/plan.json exists; use a new --work directory")
     if getattr(args, "horizon_sweep_beam", None) is not None and not args.allow_fixture:
-        raise PlanError("--horizon-sweep-beam sweeps a configuration the parent never planned: a demonstration, "
-                        "planned with --allow-fixture")
+        raise PlanError("--horizon-sweep-beam sweeps a configuration the parent never planned: a fixture plan "
+                        "(--allow-fixture)")
     found, suite = discover_runs(args.runs, args.run)
     runtime = runtime_fingerprint()
     runs = verify_runs(found, runtime=runtime, allow_fixture=args.allow_fixture)
@@ -1332,11 +1332,11 @@ def command_plan(args, executor=_subprocess_executor) -> int:
             raise PlanError(f"unknown dataset {dataset!r}; canonical names: {list(DATASETS)}")
     if args.device != "cuda":
         if not args.allow_fixture:
-            raise PlanError("--device cpu executes the runners on a CPU: a demonstration, planned with --allow-fixture")
+            raise PlanError("--device cpu executes the runners on a CPU: a fixture plan (--allow-fixture)")
         options["device"] = args.device
     if args.s14_exclude:
         if not args.allow_fixture:
-            raise PlanError("--s14-exclude leaves the joint S14 family partial: a demonstration, planned with --allow-fixture")
+            raise PlanError("--s14-exclude leaves the joint S14 family partial: a fixture plan (--allow-fixture)")
         unknown = sorted(set(args.s14_exclude) - set(DATASETS))
         if unknown:
             raise PlanError(f"--s14-exclude: unknown datasets {unknown}")
@@ -2225,7 +2225,7 @@ def write_budget_manifest(step: dict, repository: dict) -> None:
                      "accounting": [] if unscheduled(evidence) else [str(evidence / "sacct.tsv")],
                      "job_log": [str(log) for log in logs]})
     value.update(seed_ids=[int(s) for s in step["seeds"]], studies=rows,
-                 source={"repository": "https://github.com/VKHS/CR-9", "git_commit": commit,
+                 source={"repository": "https://github.com/VKHS/CROSS-MORSE", "git_commit": commit,
                          "tree_sha256": inventory(ROOT)["tree_sha256"]})
     value.pop("instructions", None)
     write_json(manifest, value)
@@ -2256,7 +2256,7 @@ def verify_record_set(path: Path, *, allow_fixture: bool) -> dict:
     if entry.get("synthetic") and not allow_fixture:
         raise PlanError(f"{path.name}: a synthetic record set is not a paper artifact")
     provenance = read_json(path / "provenance.json")
-    # A fixture plan (a software check or the CPU demonstration) may hold a set whose own provenance declares
+    # A fixture plan (a software check or the CPU execution) may hold a set whose own provenance declares
     # partial coverage, e.g. timings without a peak-memory reading on CPU; a paper artifact never does.
     if provenance.get("coverage_complete") is False and not allow_fixture:
         raise PlanError(f"{path.name}: partial coverage (provenance coverage_complete = false)")
@@ -2460,7 +2460,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--allow-subset", action="store_true",
                    help="plan experiments on the runs present when some datasets are missing (outputs are partial)")
     p.add_argument("--device", choices=("cuda", "cpu"), default="cuda",
-                   help="device of every runner command; cpu is a CPU demonstration (requires --allow-fixture)")
+                   help="device of every runner command; cpu is the CPU execution (requires --allow-fixture)")
     p.add_argument("--s14-exclude", action="append", default=[], metavar="DATASET",
                    help="leave a dataset out of the joint S14 family (requires --allow-fixture; the family is partial)")
     p.add_argument("--horizon-sweep-profile", default=None,

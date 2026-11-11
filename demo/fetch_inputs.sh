@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Place the demonstration runs and reduced graphs of "Demo runs" workflow runs at the fixed paths that
+# Place the sealed CPU runs and subset graphs of "CPU lifecycle runs" workflow runs at the fixed paths that
 # their sealed configurations name ($DEMO/runs/<stem>, Roman-empire as $DEMO/runs/roman_empire/split_NN;
 # $DEMO/graphs/<stem>_demo.npz).
 #   bash demo/fetch_inputs.sh RUN_ID [STEM=RUN_ID ...]     a later run of one dataset overrides RUN_ID

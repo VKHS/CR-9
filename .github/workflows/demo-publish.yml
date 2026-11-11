@@ -1,6 +1,6 @@
-name: Demo publication
+name: CPU execution publication
 
-# Publishes the CPU demonstration (demo/README.md): the sealed runs of the "Demo runs" workflow and the
+# Publishes the CPU execution (demo/README.md): the sealed runs of the "CPU lifecycle runs" workflow and the
 # record sets, campaigns and environment that the production graph collected (demo-collected) are
 # packed (paper_artifacts.py pack --demo, one artifact at a time: demo/pack_each.py), published to the
 # release demo-artifacts (publish --demo), rebuilt into every table and figure from the release
@@ -11,9 +11,6 @@ name: Demo publication
 # graph's artifacts are added to the main map (demo/merge_maps.py). "report_only": true rebuilds from the published
 # release and records the results without packing or publishing again; "notes" state the cause of an absence.
 on:
-  push:
-    branches: [expanded-demo-2026-11-09]
-    paths: [demo/publish-request.json]
   workflow_dispatch:
 
 permissions:
@@ -26,6 +23,7 @@ concurrency:
 
 env:
   PYTHONDONTWRITEBYTECODE: "1"
+  CM_KEEP_ARCHIVES: "0"
   PYTHONUNBUFFERED: "1"
   DEMO: /home/runner/demo
   WORK: /home/runner/demo/work
@@ -47,20 +45,45 @@ jobs:
           python-version: "3.12"
       - name: Install the recorded CPU environment
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /usr/share/swift \
+            /usr/local/share/boost /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules \
+            /opt/microsoft /opt/google /opt/az /usr/lib/jvm /opt/hostedtoolcache/CodeQL /opt/hostedtoolcache/go \
+            /opt/hostedtoolcache/node /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/Ruby || true
+          sudo docker system prune --all --force > /dev/null 2>&1 || true
+          echo "::notice::free disk: $(df -h --output=target,avail / /mnt 2>/dev/null | tail -n +2 | tr -s ' ' | tr '\n' ';')"
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        run: |
+          df -h / /mnt 2>/dev/null | sed 's/^/  /' || true
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          temp="$RUNNER_TEMP"
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            # a bind mount keeps every path of the plan and the archives as it is
+            sudo mkdir -p /mnt/demo /mnt/demo-tmp && sudo chown -R "$(id -u):$(id -g)" /mnt/demo /mnt/demo-tmp
+            mkdir -p "$DEMO" && sudo mount --bind /mnt/demo "$DEMO"
+            temp=/mnt/demo-tmp
+          fi
+          echo "DEMO_TEMP=$temp" >> "$GITHUB_ENV"
       - id: request
         name: Publication or results only (report_only rebuilds and records from the published release)
         run: |
           python -c "import json; print('report_only=' + json.dumps(bool(json.load(open('demo/publish-request.json')).get('report_only'))))" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
+      - name: Rebuild every table and figure from the release first (results only)
+        if: ${{ fromJSON(steps.request.outputs.report_only) }}
+        run: |
+          # the runner's disk holds the unpacked release or the runs and collected outputs, not both at once
+          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper"
+          python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper"
+          rm -rf "$DEMO/fetched"
+          touch "$DEMO/rebuilt"
       - name: The runs and the collected outputs (demo/publish-request.json)
         run: |
           read -r runs graph < <(python -c "import json; r=json.load(open('demo/publish-request.json')); print(' '.join([str(r['runs_run_id'])] + ['%s=%s' % kv for kv in sorted((r.get('overrides') or {}).items())]).replace(' ', ','), r['graph_run_id'])")
           bash demo/fetch_inputs.sh ${runs//,/ } > /dev/null
-          bash demo/artifact.sh demo-collected "$RUNNER_TEMP/collected" "$graph"
-          tar -xzf "$RUNNER_TEMP/collected/collected.tar.gz" -C /
+          bash demo/artifact.sh demo-collected "$DEMO_TEMP/collected" "$graph"
+          tar -xzf "$DEMO_TEMP/collected/collected.tar.gz" -C / && rm -rf "$DEMO_TEMP/collected"
           python - <<'EOF' > "$RUNNER_TEMP/extra.txt"
           import json
           r = json.load(open("demo/publish-request.json"))
@@ -75,15 +98,15 @@ jobs:
           while read -r run artifact work; do
             [ -n "${run:-}" ] || continue
             index=$((index + 1))
-            bash demo/artifact.sh "$artifact" "$RUNNER_TEMP/extra-$index" "$run"
-            tar -xzf "$RUNNER_TEMP/extra-$index/collected.tar.gz" -C /
+            bash demo/artifact.sh "$artifact" "$DEMO_TEMP/extra-$index" "$run"
+            tar -xzf "$DEMO_TEMP/extra-$index/collected.tar.gz" -C / && rm -rf "$DEMO_TEMP/extra-$index"
             python -B demo/merge_maps.py "$WORK/paper-artifacts.map.json" "$work/paper-artifacts.map.json"
             graphs="$graphs --graph $work"; reports="$reports --graph-run $index=$run"
           done < "$RUNNER_TEMP/extra.txt"
           echo "GRAPH_RUN=$graph" >> "$GITHUB_ENV"
           echo "REPORT_GRAPHS=$graphs" >> "$GITHUB_ENV"
           echo "REPORT_RUNS=$reports" >> "$GITHUB_ENV"
-      - name: Pack the demonstration, one artifact at a time
+      - name: Pack the CPU execution, one artifact at a time
         if: ${{ !fromJSON(steps.request.outputs.report_only) }}
         run: |
           python -B demo/pack_each.py --map "$WORK/paper-artifacts.map.json" --output-dir "$DEMO/staged" \
@@ -93,20 +116,26 @@ jobs:
         if: ${{ !fromJSON(steps.request.outputs.report_only) }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        # the tag names the commit whose tooling produced and publishes the demonstration
+        # the tag names the commit whose tooling produced and publishes the CPU execution
         run: python -B scripts/paper_artifacts.py publish --demo --staged "$DEMO/staged" --target "${{ github.sha }}"
       - name: Rebuild every table and figure from the release, install the views, write the results
         run: |
-          # the manifest is committed whatever the rebuild reports; RESULTS.md records its status and errors
-          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper" \
-            || echo "make demo-paper exited $?"
-          python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper" \
-            || echo "derive --demo exited $?"
+          if [ ! -e "$DEMO/rebuilt" ]; then
+            # the manifest is committed whatever the rebuild reports; RESULTS.md records its status and errors
+            make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO/fetched" DEMO_PAPER_ROOT="$DEMO/paper" \
+              || echo "make demo-paper exited $?"
+            python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO/fetched" --workspace "$DEMO/paper" \
+              || echo "derive --demo exited $?"
+          fi
           python -c "import json; json.dump(json.load(open('demo/publish-request.json')).get('notes') or {}, open('$DEMO/notes.json', 'w'))"
           python -B demo/report.py --status "$DEMO/paper.status.json" $REPORT_GRAPHS --runs "$DEMO/runs" \
             --graphs "$DEMO/graphs" $REPORT_RUNS --pack-failures "$DEMO/pack-failures.json" --notes "$DEMO/notes.json" \
             --workspace "$DEMO/paper" --output demo/RESULTS.md
-          mkdir -p demo/published/graphs && cp "$DEMO"/graphs/*_demo.json demo/published/graphs/
+          mkdir -p demo/published/graphs
+          python -B -c 'import json, sys; sys.path.insert(0, "demo"); from data import SCOPE; from pathlib import Path
+          for path in sorted(Path(sys.argv[1]).glob("*_demo.json")):
+              record = dict(json.loads(path.read_text(encoding="utf-8")), scope=SCOPE)
+              (Path("demo/published/graphs") / path.name).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")' "$DEMO/graphs"
           python -B scripts/statement_check.py --write
           python -B scripts/artifact_catalog.py
           make manifest PYTHON=python
@@ -119,7 +148,7 @@ jobs:
           # commits pushed while this run worked never conflict with them
           git checkout -- release/artifact_catalog.json RELEASE_MANIFEST.json SHA256SUMS.txt
           git add -A release/demo_artifacts.json demo/ STATEMENT_COMPLIANCE.md
-          git commit -q -m "Record the published CPU demonstration (publication run ${{ github.run_id }}, graph run ${GRAPH_RUN})"
+          git commit -q -m "Record the published CPU execution (publication run ${{ github.run_id }}, graph run ${GRAPH_RUN})"
           git pull -q --rebase origin "${GITHUB_REF_NAME}"
           python -B scripts/statement_check.py --write
           python -B scripts/artifact_catalog.py

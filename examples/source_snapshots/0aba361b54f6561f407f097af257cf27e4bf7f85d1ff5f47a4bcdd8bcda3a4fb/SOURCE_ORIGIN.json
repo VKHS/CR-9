@@ -1,6 +1,6 @@
 {
   "origin_commit": "ba44e9a5d13cce6749514e46937dcc4cbfef5f53",
-  "origin_repository": "https://github.com/VKHS/CR-9",
+  "origin_repository": "https://github.com/VKHS/CROSS-MORSE",
   "purpose": "Exact runtime preserved before prospective selected-strata entry enforcement. It supports verification and replay of artifacts declaring this identity; its presence does not establish that any benchmark artifact has been published.",
   "runtime_files": {
     "cross_morse/__init__.py": "878a21835a174d310b9ccbc8af8f70d654f155822d14a932cb44d64a3b2039b6",

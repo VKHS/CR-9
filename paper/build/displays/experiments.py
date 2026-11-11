@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import math
 
-from .framework import DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputError, display, integer, num, pyplot
+from .framework import (DATASETS, GRAPH_LEVEL, NODE_LEVEL, SHORT, DisplayInputError, display, integer, num, pyplot,
+                        scope_banner)
 
 S5C_TITLE = "Nominal-identity test E1 and site accounting"
 ADMITTED = tuple(d for d in DATASETS if d != "ogbn-products")
@@ -308,8 +309,7 @@ def figure_s5(ctx, out):
     for ax in (ax_a, ax_b):
         ax.grid(alpha=0.25)
         ax.margins(x=0.12, y=0.14)
-    if ctx.synthetic:
-        fig.text(0.5, 1.0, "SYNTHETIC SOFTWARE EXAMPLE — not benchmark results", ha="center", va="bottom", color="#b00020")
+    scope_banner(fig, ctx)
     fig.tight_layout()
     out.data("panel_a", SWEEP_COLUMNS, sweep_rows(points, "horizon"))
     out.data("panel_b", SWEEP_COLUMNS, sweep_rows(points, "beam") + sweep_rows(points, "horizon"))

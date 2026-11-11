@@ -1,6 +1,6 @@
 # Scientific consistency
 
-[Statement compliance](../STATEMENT_COMPLIANCE.md) · [The final destination](FINAL_DESTINATION.md) · [Availability review](AVAILABILITY_REVIEW.md) · [Figure coverage](FIGURE_REFERENCE_COVERAGE.md)
+[Statement compliance](../STATEMENT_COMPLIANCE.md) · [Figure coverage](FIGURE_REFERENCE_COVERAGE.md)
 
 Questions on which the printed methods or printed values and the released code (or two printed statements) do not yet agree, each with the original record that decides it and the rule that decides it. Reference values, measurements and their provenance are never changed to force agreement. scripts/consistency_audit.py evaluates the machine-checkable rules on completed runs (make consistency-audit RUNS_ROOT=<runs>) and renders docs/CONSISTENCY.md.
 

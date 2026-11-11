@@ -358,7 +358,7 @@ def compare(run: RunReader, reported: dict, registered: dict | None = None) -> d
     if single_roman:
         for row in rows:
             row["status"] = "diagnostic only"
-            row["note"] = (row.get("note", "") + " A single official split is not the paper's ten-split aggregate.").strip()
+            row["note"] = (row.get("note", "") + " The paper reports the ten-split aggregate; this row is one official split.").strip()
     statuses = ("exact", "interval", "outside", "match", "differs", "missing", "informational",
                 "not produced by this source", "not reported", "diagnostic only")
     return {"dataset": dataset, "run": str(run.root), "rows": rows,

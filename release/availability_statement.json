@@ -1,8 +1,8 @@
 {
   "schema": "cross-morse-availability-statement-1",
-  "registered_text": "The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CR-9. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.",
+  "registered_text": "The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CROSS-MORSE. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.",
   "registered_in": "Data availability section of the CROSS-MORSE manuscript",
-  "repository": "https://github.com/VKHS/CR-9",
+  "repository": "https://github.com/VKHS/CROSS-MORSE",
   "check": "scripts/statement_check.py (make statement-check)",
   "items": [
     {"id": "experiment_code", "phrase": "complete experiment code",

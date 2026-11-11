@@ -4,7 +4,7 @@
 
 ## Existing released outputs versus full-manuscript artifacts
 
-The existing [10.85 GB release](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts) has 40 uploaded assets and 31 of 37 groups published in its execution-package manifest. That is distinct from the full-manuscript `paper-artifacts` channel required by the reconstruction command below. The published execution-package verification does not by itself certify every numerical result printed in the manuscript.
+The existing [10.85 GB release](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) has 40 uploaded assets and 31 of 37 groups published in its execution-package manifest. That is distinct from the full-manuscript `paper-artifacts` channel required by the reconstruction command below. The published execution-package verification does not by itself certify every numerical result printed in the manuscript.
 
 ## One command
 

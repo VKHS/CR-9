@@ -26,8 +26,8 @@ The full profiles configure master/split seed `314159` and training seeds
 `[1, 2, ..., 12]`. These are the executable configuration choices, extracted per
 profile into [`manifests/registered/`](../manifests/registered/) by `make manifests`.
 The seeds a completed run actually used are read from its sealed records into
-`manifests/<label>/`; no claim is made that the configured list by itself
-identifies the seeds of any manuscript run.
+`manifests/<label>/`; the sealed records, not the configured list, identify
+the seeds of a run.
 The seed ensemble is a fixed prefix of separately trained members; a bootstrap
 over graph/core units does not estimate uncertainty over retraining seeds.
 

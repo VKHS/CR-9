@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Restore the parts of a production work directory that one job needs, from workflow artifacts.
 
-Each executing shard of the demonstration graph saves everything it wrote under the work directory as
+Each executing shard of the CPU execution graph saves everything it wrote under the work directory as
 one archive (demo/work_delta.sh save), so a shard's archive holds several experiments. A later job needs
 only the outputs of the nodes its own tasks depend on; the complete set is too large for one runner's disk.
 This tool downloads the archives one at a time (GitHub REST API, GH_TOKEN), extracts only the members under

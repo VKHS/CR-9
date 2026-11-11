@@ -1,20 +1,17 @@
-name: Demo production graph
+name: CPU production graph
 
-# Every record set, campaign and the observed environment of the CPU demonstration (demo/README.md),
-# produced from the sealed demonstration runs of a "Demo runs" workflow run by the repository's own
+# Every record set, campaign and the observed environment of the CPU execution (demo/README.md),
+# produced from the sealed CPU runs of a "CPU lifecycle runs" workflow run by the repository's own
 # production graph (scripts/paper_outputs.py, planned with --allow-fixture --device cpu) and executed level
 # by level on hosted CPU runners (demo/execute.py); the collected outputs are kept as the artifact
 # demo-collected, which demo-publish.yml publishes. A request may plan a graph of its own in another work
 # directory: demo/graph-request.json {"runs_run_id": ..., "overrides": {...}, "work": ..., "plan_options": [...]}
 # (for example the E3-E6 campaign alone, --only campaign:budget records:budget_matched).
 on:
-  push:
-    branches: [expanded-demo-2026-11-09]
-    paths: [demo/graph-request.json]
   workflow_dispatch:
     inputs:
       runs_run_id:
-        description: run id of the "Demo runs" workflow whose sealed runs this graph uses
+        description: run id of the "CPU lifecycle runs" workflow whose sealed runs this graph uses
         required: true
 
 permissions:
@@ -68,7 +65,7 @@ jobs:
           fi
           cat "$GITHUB_OUTPUT"
           grep '^work=' "$GITHUB_OUTPUT" | sed 's/^work=/WORK=/' >> "$GITHUB_ENV"
-      - name: Sealed demonstration runs and reduced graphs
+      - name: Sealed CPU runs and subset graphs
         run: bash demo/fetch_inputs.sh ${{ steps.request.outputs.runs }}
       - name: Plan the production graph on CPU, or resume an earlier graph run's plan and outputs
         run: |
@@ -80,8 +77,8 @@ jobs:
             python -B scripts/paper_outputs.py plan --runs "$DEMO/runs" --work "$WORK" --allow-fixture --device cpu \
               --data-root "$DEMO/data" ${{ steps.request.outputs.options }}
           else
-            # Declared demonstration choices: the ten Roman-empire split runs select different routes, and the
-            # S14 family cannot join benchmark and fixture parents, so S14 covers the six reduced datasets; the
+            # Declared execution choices: the ten Roman-empire split runs select different routes, and the
+            # S14 family cannot join benchmark and fixture parents, so S14 covers the six subset datasets; the
             # PascalVOC-SP run deploys no MPC-RH rule, so the Table S29 sweep names its swept configuration.
             python -B scripts/paper_outputs.py plan --runs "$DEMO/runs" --work "$WORK" --allow-fixture --device cpu \
               --data-root "$DEMO/data" --s14-exclude Roman-empire --horizon-sweep-profile full --horizon-sweep-ensemble 1

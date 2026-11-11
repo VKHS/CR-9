@@ -1,6 +1,6 @@
 # Paper references and result reconstruction
 
-The canonical repository is [VKHS/CR-9](https://github.com/VKHS/CR-9).
+The canonical repository is [VKHS/CROSS-MORSE](https://github.com/VKHS/CROSS-MORSE).
 Paper PDFs are not distributed here. [sources.json](sources.json) identifies the
 reference documents by SHA-256, size and page count, and maps tables to pages.
 [reported_results.json](reported_results.json) contains numerical comparison
@@ -39,8 +39,8 @@ make registry-check
 
 This checks metadata, executable protocol constants, reference formulas and
 arithmetic within transcribed tables. S6c residuals and admissible sketch ratios,
-for example, use the reported cost multiplier; checking those calculations does
-not reproduce its measurement.
+for example, are recomputed from the reported cost multiplier, which the measured
+runs supply.
 
 ```bash
 make si-check     # derived supplementary entries recomputed from their printed inputs

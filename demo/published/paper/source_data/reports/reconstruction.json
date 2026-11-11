@@ -1,6 +1,7 @@
 {
   "all_displays_numerically_reconstructed": false,
   "build_status": "SUPPORTED_OUTPUTS_BUILT",
+  "cpu_execution": true,
   "display_generators": {
     "awaiting_inputs": 34,
     "built": 56,
@@ -8,11 +9,11 @@
     "comparison_sources": [
       {
         "path": "paper/reported_results.json",
-        "sha256": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b"
+        "sha256": "30a09de2b62c69f55b224002083913bc21734510af19c6cd8dbfc7ca72ea6855"
       },
       {
         "path": "paper/printed_display_values.json",
-        "sha256": "fa9ac88affa6d31f123cab364a4ecd7389b72d8ab90dde61959f2a82dba7e08c"
+        "sha256": "858da950c0e698eedfa5a275406bbfa13093d756341dd710ac86032b44d7e8fb"
       }
     ],
     "comparison_with_printed_values": {
@@ -4592,7 +4593,7 @@
       "verification": "manifest hashes and summary-to-raw-value traceability"
     }
   ],
-  "label": "demo-artifacts: CPU demonstration at reduced scale, not the paper's measurements (requested analysis tier)",
+  "label": "demo-artifacts: CPU execution on public data (requested analysis tier)",
   "outputs": [
     {
       "coverage": "columns",
@@ -4609,9 +4610,9 @@
         "main:Table 1"
       ],
       "file_sha256": {
-        "runs/tables/T1.csv": "b7da5099a4317a535b6ff8fbf1adace67757be4032014ea8ec5a7318f682b40f",
-        "runs/tables/T1.md": "1fe0c437a377cc74d5fa37ce93bf35963a13e53efe61542240ee99bb8e079418",
-        "runs/tables/T1.tex": "adf815e058113d371c969d9ad4082833609a0f172993b4b40ebe56e289c65776"
+        "runs/tables/T1.csv": "7c69169894e093f24cc5d4e1b54f5fca709309ad4b78b6dcf16d946fc147af51",
+        "runs/tables/T1.md": "837f2b5cef51a01498fdc97583a53fb0c7b6788b60fde952ca214b1b33d5f7c1",
+        "runs/tables/T1.tex": "74a715b938068142cb1e7cd679413d86a50b5f9ebbbc4f32207a62d593de9711"
       },
       "files": [
         "runs/tables/T1.tex",
@@ -4637,9 +4638,9 @@
         "main:Table 2"
       ],
       "file_sha256": {
-        "runs/tables/T2.csv": "301fde6a12255282344bd4c7a4f8dc4ed9b5b7648b371b314831dab850349c75",
-        "runs/tables/T2.md": "96d465cbc1c982aded3ec9866187c5a6dd59ef97e5bd9ea3f8dc085b7292255a",
-        "runs/tables/T2.tex": "b66b365cbe28ddf3c99b64fab3f541c1ce23ceb407ecdc0f37a632f88ccaba04"
+        "runs/tables/T2.csv": "115d2cc2c4b83af7655e7b2ff38890154c1d0c1842f71747401b6b67e2f639f7",
+        "runs/tables/T2.md": "e74f623300dd8ebcfcf7e9a03f1ce744fcde59923591808a532758f4da639446",
+        "runs/tables/T2.tex": "c86944ff5064ad106d6b1678e54411fa29a8342f38605950f2ef429ebdce14a8"
       },
       "files": [
         "runs/tables/T2.tex",
@@ -4665,9 +4666,9 @@
         "supplementary:Table S4"
       ],
       "file_sha256": {
-        "runs/tables/S4.csv": "f8973312437eb31d7dc279041395e497624ddbd30765fef4b79b7674eebfb86a",
-        "runs/tables/S4.md": "6c3f4f2fc21fc56386c065443a9520a5ea745a46b79b4d89f2a6c4d6574081dd",
-        "runs/tables/S4.tex": "9401816903c8c87d11347806c62ebd6f1716e6aecab3cc13864080600725f43e"
+        "runs/tables/S4.csv": "342edec8aaea37fa01485a461c7f78670f777fe7efa2219065b7250b4e87f7e2",
+        "runs/tables/S4.md": "2e301b0460ac12eac5e816cce53012ccabb1e5ab6e4615e80498c497f301a8f0",
+        "runs/tables/S4.tex": "9b9c8de2f2358a94d517def3eca7af3325be66c917ba8061e040811f03969c93"
       },
       "files": [
         "runs/tables/S4.tex",
@@ -4693,9 +4694,9 @@
         "supplementary:Table S12"
       ],
       "file_sha256": {
-        "runs/tables/S12.csv": "12097618ec470604b7de5143909f079eaf8b44967f34b95b988950dff64d59aa",
-        "runs/tables/S12.md": "dc1ff884ef82ef3c984dd539dfd1929f62520f32595d7eb03276e94c217a3aeb",
-        "runs/tables/S12.tex": "9cd14442c6545b6464d7346652638221dea4dbb8d56a55416ecd7ad6ffbee1c1"
+        "runs/tables/S12.csv": "b94aa05e98ba0622d4f7b0e8e93e79aecaeec849605c64d660d313794005ef5d",
+        "runs/tables/S12.md": "76ac2af2cae2375cf3c2d2d0fa110baec0bdf6b43182f45039e8214f9c9c0224",
+        "runs/tables/S12.tex": "f943ac85aa6330d886043b14e9ede27ea276c258be9c073e6481aaf7e6e6e0ab"
       },
       "files": [
         "runs/tables/S12.tex",
@@ -4721,9 +4722,9 @@
         "supplementary:Table S12c"
       ],
       "file_sha256": {
-        "runs/tables/S12c.csv": "a11792f0aa86891fe02dd54345c773e3ade2eb8fcb798d60700de7c422be77df",
-        "runs/tables/S12c.md": "4dd9cfb25bbfd1cab2e3bb7b0832f3504451d0c7a4d1c95ff60f1a3b065919ca",
-        "runs/tables/S12c.tex": "3c26cc212c66b65024fc334f1c4fd57d4f6800c287b758dfc0c797107fb016d0"
+        "runs/tables/S12c.csv": "542b7cb3dbc4e06dbfc73792216fd40f3f04b64c3195379c06f09ed4871e1658",
+        "runs/tables/S12c.md": "9968f09322d7fb004c2ea2e00db1a90d1c54739827487d1a89a524a3ab8a19b7",
+        "runs/tables/S12c.tex": "32ae17bd2d4090bf5f543ce749a2fa841cef650b99cf446b6010f5599960fc9c"
       },
       "files": [
         "runs/tables/S12c.tex",
@@ -4749,9 +4750,9 @@
         "supplementary:Table S13"
       ],
       "file_sha256": {
-        "runs/tables/S13.csv": "6bcb84e36190208178b8c2dda16be93c28a8f3bbc4fbcbb1f018b8a5b251ca2e",
-        "runs/tables/S13.md": "6332edc901cc7b4671693afe9edb9dd4a8a1f231bde744822e8f39dd58ffd1ea",
-        "runs/tables/S13.tex": "d5c14b5d05cfa3e6cc140abc5c88c8068500e42a621a14e4979f7a30b78f3eb1"
+        "runs/tables/S13.csv": "b2066c8ed55c417647b34c7d3fb77019550a02f618a99a643a7182c6819c57d7",
+        "runs/tables/S13.md": "7869579ecb391ed08a59c14bf1c650de7d6a533053421206cbd9d578091b7831",
+        "runs/tables/S13.tex": "762135e799097b17548f887b72a339e9085a9c5721ced11e96279c42501183cf"
       },
       "files": [
         "runs/tables/S13.tex",
@@ -4777,9 +4778,9 @@
         "supplementary:Table S14"
       ],
       "file_sha256": {
-        "runs/tables/S14.csv": "41cc7e2aaf1e9ff4cd6ddf63faa11e3862964ff23c799fe3fc2e00a7a00636e3",
-        "runs/tables/S14.md": "4bdda042653b5f165f7f3579f1d9235f17a2bb0b123f153cef617ad663f8e39d",
-        "runs/tables/S14.tex": "07c874fadd5c162cdbcc0799207117d3078b1cb996ff0045c7462b551e96637a"
+        "runs/tables/S14.csv": "8d2647995e9dd2c6787b7020ce1c59906caccc6330181ac95b9198dcc5d09142",
+        "runs/tables/S14.md": "6f5014f8b06d7ea42b4fc58d334d3b42f11f840547f67576d1b6310dc73b85ba",
+        "runs/tables/S14.tex": "dd687d9342f14dff2ce053aa439b342893dc4878f64f72c1b433c812a007060a"
       },
       "files": [
         "runs/tables/S14.tex",
@@ -4805,9 +4806,9 @@
         "supplementary:Table S15"
       ],
       "file_sha256": {
-        "runs/tables/S15.csv": "7dc949a1993a5ffc5ba127635edeb6143812773ac6b3543f0dd09a500cf219c5",
-        "runs/tables/S15.md": "992e9fc22dc5b5cd6e414d11da14b5e4dd9bc1c387ad943bdc33e08554779c54",
-        "runs/tables/S15.tex": "414fecc2429a77d2f5d1e39bda534314526ed52da7a23d1ac4d72147699412b5"
+        "runs/tables/S15.csv": "83cac21d24538e2800bf5cc754110a5adb609eb7a6c89238846b149644d35f71",
+        "runs/tables/S15.md": "c737fc26a2bf79d9f895b761d95cb7c74b1f5c9ac697161f85157924d917ed00",
+        "runs/tables/S15.tex": "2d5f1d1dbdbcc092a8e674162db4616a1b8d8d1449e1c45e8a56c3582f525752"
       },
       "files": [
         "runs/tables/S15.tex",
@@ -4833,9 +4834,9 @@
         "supplementary:Table S23"
       ],
       "file_sha256": {
-        "runs/tables/S23.csv": "e0bce4ca635aa9288e0645af57ba34fcdee34d469f06e5bf0a605dcafe679dbc",
-        "runs/tables/S23.md": "51f3fbff0a5592d6e9d4feb7b7c1e4cc8e66766302ff33247bb72c217412087c",
-        "runs/tables/S23.tex": "7f6fd9ccdb33f0dba6ee2b5386495850e33d2365e4c08f680208988256d03826"
+        "runs/tables/S23.csv": "dc7766c62132fdda131a8291b0d691ff1f5b768221e7f9368d415a76ba20332e",
+        "runs/tables/S23.md": "777b0da944ce6f8d22296dc0bfc60c5333ba205d6f8ff28aca603def70d410e8",
+        "runs/tables/S23.tex": "b92a0821f1c88b77ddf54a74ca9a4df5143a17a4c0ecc3da2a6900ab6a62ebc7"
       },
       "files": [
         "runs/tables/S23.tex",
@@ -4861,9 +4862,9 @@
         "supplementary:Table S41"
       ],
       "file_sha256": {
-        "runs/tables/S41.csv": "60bf876dd6d6701b8c5bb4301285873acc9887573140f2893f94d199199dd6c8",
-        "runs/tables/S41.md": "b0372eb6bdc1cdbd3fc91ddc8753dbda907af612d7347e3bf9eb212448342008",
-        "runs/tables/S41.tex": "70c36373dcb188a7e76763bf95f8547bcb4621f8748fb37cbd023310cc919dc0"
+        "runs/tables/S41.csv": "2cbfd94f7b81852b224a94655e7226f716eee5fe0a1d569cfbade2e89b6ac045",
+        "runs/tables/S41.md": "be8d2c682147d30c1955b1e255a3e995d7dc4405d269d94986ff8a596cbc3200",
+        "runs/tables/S41.tex": "a6c04c8d19271727da72d8659893000b80229e7737150455bddce313ed9c4578"
       },
       "files": [
         "runs/tables/S41.tex",
@@ -4887,9 +4888,9 @@
       ],
       "display_ids": [],
       "file_sha256": {
-        "runs/tables/M1.csv": "15496ec0bb912237400739524256d404039ae19b3348c493ebcfc2196540c6cf",
-        "runs/tables/M1.md": "36fb066a426c3265632a418640fe5bb40e7492d63604f442b2c3d6abbb4788bb",
-        "runs/tables/M1.tex": "3967deda08e7012cfe6ac49e7923bb06182f7047c685bfc5dd10b8eab56a0d33"
+        "runs/tables/M1.csv": "4a3964093c8ab253f9900a748408b5983787548f6932efb4457f88c1992446d1",
+        "runs/tables/M1.md": "5433fbbf101e26a582d48872008acb31c26be3bbb0bb7b4ecd8d9df52a16f09a",
+        "runs/tables/M1.tex": "df0e83ef22f4adbcd2bc2524a8a1c164da8ed62b0d8bcde03b1793fb709b2dfe"
       },
       "files": [
         "runs/tables/M1.tex",
@@ -5498,8 +5499,8 @@
       ],
       "file_sha256": {
         "supplement/tables/S16.csv": "b7dcad849992f23a246bcb350647d54036c5ec695966c019e23984e59d6ab567",
-        "supplement/tables/S16.md": "fa5280f5adfb3f26acb6dec2209c6af9fd5bb80e95c5954166c8a6009f9dcff0",
-        "supplement/tables/S16.tex": "3448140a7225bee021a84731a4d74dc594c49b516ab62c8005a913537b4a1a5c"
+        "supplement/tables/S16.md": "fca174491db2bb6dbbd3e3e7820e6a7c049eee2a4003835c31f06bd0e6c1f0ed",
+        "supplement/tables/S16.tex": "3bddbbcf5ee8ad8ab8fd6774bc159fa9e21536a5d1a671a4c82938f0c4053cd5"
       },
       "files": [
         "supplement/tables/S16.csv",
@@ -5509,12 +5510,12 @@
       "id": "factorial_arxiv_table",
       "input_kind": "synthetic_examples",
       "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
+      "note": "CPU execution on public data. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
       "row_count": 8,
       "sha256": {
         "tables/S16.csv": "b7dcad849992f23a246bcb350647d54036c5ec695966c019e23984e59d6ab567",
-        "tables/S16.md": "fa5280f5adfb3f26acb6dec2209c6af9fd5bb80e95c5954166c8a6009f9dcff0",
-        "tables/S16.tex": "3448140a7225bee021a84731a4d74dc594c49b516ab62c8005a913537b4a1a5c"
+        "tables/S16.md": "fca174491db2bb6dbbd3e3e7820e6a7c049eee2a4003835c31f06bd0e6c1f0ed",
+        "tables/S16.tex": "3bddbbcf5ee8ad8ab8fd6774bc159fa9e21536a5d1a671a4c82938f0c4053cd5"
       },
       "source_input_kind": "verified_measurement_record_set",
       "synthetic": true
@@ -5527,8 +5528,8 @@
       ],
       "file_sha256": {
         "supplement/data/factorial_arxiv.csv": "b7c45da646766365631cfda185f94f3d5a6048decd89bc99aea86b87d3086511",
-        "supplement/figures/factorial_arxiv.png": "39718e23691a664b1b9dd815dbd1440ccd673b864bb2d7177caa4feac82d06df",
-        "supplement/figures/factorial_arxiv.svg": "81833ee6b006d8523bde385e7c7d0071bf8357acc5242d445d19d5518126ff06"
+        "supplement/figures/factorial_arxiv.png": "246c03f87cd12f89bcce966b72d1fd2c358412a0b29946b0b46c9558ef20a2a4",
+        "supplement/figures/factorial_arxiv.svg": "3506c0cd3da326554b9ed5d38f90df8b55b5a279df5e6e9bdab7d5ff6f95d7ec"
       },
       "files": [
         "supplement/data/factorial_arxiv.csv",
@@ -5538,11 +5539,11 @@
       "id": "factorial_arxiv_plot",
       "input_kind": "synthetic_examples",
       "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
+      "note": "CPU execution on public data. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
       "sha256": {
         "data/factorial_arxiv.csv": "b7c45da646766365631cfda185f94f3d5a6048decd89bc99aea86b87d3086511",
-        "figures/factorial_arxiv.png": "39718e23691a664b1b9dd815dbd1440ccd673b864bb2d7177caa4feac82d06df",
-        "figures/factorial_arxiv.svg": "81833ee6b006d8523bde385e7c7d0071bf8357acc5242d445d19d5518126ff06"
+        "figures/factorial_arxiv.png": "246c03f87cd12f89bcce966b72d1fd2c358412a0b29946b0b46c9558ef20a2a4",
+        "figures/factorial_arxiv.svg": "3506c0cd3da326554b9ed5d38f90df8b55b5a279df5e6e9bdab7d5ff6f95d7ec"
       },
       "source_input_kind": "verified_measurement_record_set",
       "synthetic": true
@@ -5556,8 +5557,8 @@
       ],
       "file_sha256": {
         "supplement/tables/S16b.csv": "d824ee31373995ed1c5463ad54cabe27ddf8fa3be47f4817ef0fa8f1b82245d6",
-        "supplement/tables/S16b.md": "340f431c1c0c369929b6fd3eb75d166a3b4d117aa6341e519e73046a5aabd898",
-        "supplement/tables/S16b.tex": "1fe8d695130e6723894143fbb971292aa4445ceef9c213044d8feb76ca74d38f"
+        "supplement/tables/S16b.md": "5c14098adb3ea0909a4fccb1109dc9880c4185d7b331617d478d85c5eb5abf71",
+        "supplement/tables/S16b.tex": "45f4b4e2cf212b06ace1a1e6c439cd5d455071196c953258fcce25e0d564e2b6"
       },
       "files": [
         "supplement/tables/S16b.csv",
@@ -5567,12 +5568,12 @@
       "id": "factorial_pascal_table",
       "input_kind": "synthetic_examples",
       "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
+      "note": "CPU execution on public data. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
       "row_count": 8,
       "sha256": {
         "tables/S16b.csv": "d824ee31373995ed1c5463ad54cabe27ddf8fa3be47f4817ef0fa8f1b82245d6",
-        "tables/S16b.md": "340f431c1c0c369929b6fd3eb75d166a3b4d117aa6341e519e73046a5aabd898",
-        "tables/S16b.tex": "1fe8d695130e6723894143fbb971292aa4445ceef9c213044d8feb76ca74d38f"
+        "tables/S16b.md": "5c14098adb3ea0909a4fccb1109dc9880c4185d7b331617d478d85c5eb5abf71",
+        "tables/S16b.tex": "45f4b4e2cf212b06ace1a1e6c439cd5d455071196c953258fcce25e0d564e2b6"
       },
       "source_input_kind": "verified_measurement_record_set",
       "synthetic": true
@@ -5585,8 +5586,8 @@
       ],
       "file_sha256": {
         "supplement/data/factorial_pascal.csv": "264e469a6719792346357123c3c36be3bb29af24ca8889ac5480b30c63ae17f7",
-        "supplement/figures/factorial_pascal.png": "7ca15a775f2bc3fd3b9feb36c00cc05e0134d4e5fc82b732abac0b8b2e981946",
-        "supplement/figures/factorial_pascal.svg": "1dfe80394dfaeb48d80e889c36d56b50693cf7d004a928c5dcc7ec084983064f"
+        "supplement/figures/factorial_pascal.png": "c904a51ab9c2d9aca7b07e65f3a27f258a9efdb1ffd7d1c456b7158fafd43f03",
+        "supplement/figures/factorial_pascal.svg": "f7aa2abbbbbb8a0d59d50bc79b07a22a315577ae8f2af9b1c89f99525885d9e2"
       },
       "files": [
         "supplement/data/factorial_pascal.csv",
@@ -5596,11 +5597,11 @@
       "id": "factorial_pascal_plot",
       "input_kind": "synthetic_examples",
       "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
+      "note": "CPU execution on public data. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
       "sha256": {
         "data/factorial_pascal.csv": "264e469a6719792346357123c3c36be3bb29af24ca8889ac5480b30c63ae17f7",
-        "figures/factorial_pascal.png": "7ca15a775f2bc3fd3b9feb36c00cc05e0134d4e5fc82b732abac0b8b2e981946",
-        "figures/factorial_pascal.svg": "1dfe80394dfaeb48d80e889c36d56b50693cf7d004a928c5dcc7ec084983064f"
+        "figures/factorial_pascal.png": "c904a51ab9c2d9aca7b07e65f3a27f258a9efdb1ffd7d1c456b7158fafd43f03",
+        "figures/factorial_pascal.svg": "f7aa2abbbbbb8a0d59d50bc79b07a22a315577ae8f2af9b1c89f99525885d9e2"
       },
       "source_input_kind": "verified_measurement_record_set",
       "synthetic": true
@@ -5614,8 +5615,8 @@
       ],
       "file_sha256": {
         "supplement/tables/factorial_point_contrasts.csv": "cbbe3de26a932886ac37988d4f4c63e2bb666a5ebc2bf20d8b776a9857d01c9a",
-        "supplement/tables/factorial_point_contrasts.md": "91dad7c03e8ca135643869a8945ebe242fefcd1cab72931ff061d97fd3770365",
-        "supplement/tables/factorial_point_contrasts.tex": "2115d43d47c19ff24785f3c51d65c8c7e88367688ed175a98bb340fc1793d701"
+        "supplement/tables/factorial_point_contrasts.md": "f3756a64631a81c564105b33921292f492ce7992d486873d1a5bd064bd4afc70",
+        "supplement/tables/factorial_point_contrasts.tex": "6eeb0b784b2d2b67e8a988c2fee1aff871eaf05eee13c5d50228ae2b0589e330"
       },
       "files": [
         "supplement/tables/factorial_point_contrasts.csv",
@@ -5625,11 +5626,11 @@
       "id": "factorial_point_contrasts",
       "input_kind": "synthetic_examples",
       "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Point contrasts only; no fabricated interaction confidence intervals.",
+      "note": "CPU execution on public data. Point contrasts only; no fabricated interaction confidence intervals.",
       "sha256": {
         "tables/factorial_point_contrasts.csv": "cbbe3de26a932886ac37988d4f4c63e2bb666a5ebc2bf20d8b776a9857d01c9a",
-        "tables/factorial_point_contrasts.md": "91dad7c03e8ca135643869a8945ebe242fefcd1cab72931ff061d97fd3770365",
-        "tables/factorial_point_contrasts.tex": "2115d43d47c19ff24785f3c51d65c8c7e88367688ed175a98bb340fc1793d701"
+        "tables/factorial_point_contrasts.md": "f3756a64631a81c564105b33921292f492ce7992d486873d1a5bd064bd4afc70",
+        "tables/factorial_point_contrasts.tex": "6eeb0b784b2d2b67e8a988c2fee1aff871eaf05eee13c5d50228ae2b0589e330"
       },
       "source_input_kind": "derived_from_verified_measurement_records",
       "synthetic": true
@@ -5642,8 +5643,8 @@
       ],
       "file_sha256": {
         "supplement/tables/S26b_fit.csv": "bd60baa760cb1ac4ac0ab2110252871518bb48037bdcb9414a032343d77ae8ff",
-        "supplement/tables/S26b_fit.md": "3fabd64676073fe8bfaa8b11507f23b69eb1b4f05fb703675ec16ddfa44737a1",
-        "supplement/tables/S26b_fit.tex": "4562b4d769bcbc5353e143fc7565f5463cea6b6fcd62115f0052e22a45324a2c"
+        "supplement/tables/S26b_fit.md": "6ea5b6bc2ee2da8fe65a6f46d396349614b934b6134932ba2ae079c948cdc30e",
+        "supplement/tables/S26b_fit.tex": "b67a35aec0032ba91aa81a53ae9f32032faf47fe6199d0705aba44c1fb39331e"
       },
       "files": [
         "supplement/tables/S26b_fit.csv",
@@ -5653,11 +5654,11 @@
       "id": "ensemble_law_fit",
       "input_kind": "synthetic_examples",
       "input_sha256": "e45e5abecdc83afb87d8e2598bb7af32bfb9b2a9e4cb2a20df9939a7deb4a991",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. OLS of the verified comparator losses on 1/E over the exact E={1,2,4,8,12,16,20} grid. The model's coefficient/asymptote diagnostics are reported even when unfavorable. The original record schema does not supply the printed D_inf band, plant-loss ratio kappa, break-even cost inputs, feedback-by-E response or extra-checkpoint accounting; none is inferred from the manuscript.",
+      "note": "CPU execution on public data. OLS of the verified comparator losses on 1/E over the exact E={1,2,4,8,12,16,20} grid. The model's coefficient/asymptote diagnostics are reported even when unfavorable. The original record schema does not supply the printed D_inf band, plant-loss ratio kappa, break-even cost inputs, feedback-by-E response or extra-checkpoint accounting; none is inferred from the manuscript.",
       "sha256": {
         "tables/S26b_fit.csv": "bd60baa760cb1ac4ac0ab2110252871518bb48037bdcb9414a032343d77ae8ff",
-        "tables/S26b_fit.md": "3fabd64676073fe8bfaa8b11507f23b69eb1b4f05fb703675ec16ddfa44737a1",
-        "tables/S26b_fit.tex": "4562b4d769bcbc5353e143fc7565f5463cea6b6fcd62115f0052e22a45324a2c"
+        "tables/S26b_fit.md": "6ea5b6bc2ee2da8fe65a6f46d396349614b934b6134932ba2ae079c948cdc30e",
+        "tables/S26b_fit.tex": "b67a35aec0032ba91aa81a53ae9f32032faf47fe6199d0705aba44c1fb39331e"
       },
       "source_input_kind": "derived_from_verified_measurement_records",
       "synthetic": true
@@ -5670,10 +5671,10 @@
       ],
       "file_sha256": {
         "supplement/data/ensemble_grid.csv": "d1149f05869d710d90c534bb779791b2b1fc2ddc7ec13c91a152e661abda11fe",
-        "supplement/figures/ensemble_fit.png": "4614e4ec6ebba6b59036a0eccdafe6b472fb0e270fa0cfca502bfac118216a81",
-        "supplement/figures/ensemble_fit.svg": "4931c308ce7438ff74c65f7c9b13c2a2813224fd7d23a5add1657e10e6381b6b",
-        "supplement/figures/ensemble_residuals.png": "8ce839f759c1ec2bfae751d92c041cef33baa53d5419c72d0abd85ad971ba4e5",
-        "supplement/figures/ensemble_residuals.svg": "efd471f410fd74d0bb802d538dfdec8be4a11c261419983d3e32c9c8f13ebc53"
+        "supplement/figures/ensemble_fit.png": "27d43479b2269f71c93d82fa6c09c2c9cb4353fcbc32eae0d9a7e98feecdbf6f",
+        "supplement/figures/ensemble_fit.svg": "22a726d4f9499a6267af2463ff0993056012e791e083e30f07e645e97e94bcdc",
+        "supplement/figures/ensemble_residuals.png": "4d6487fd33e891d320ccd900f34ee1b4280b73a9c8f5bc0ec65ae0c2e58b4904",
+        "supplement/figures/ensemble_residuals.svg": "3ed95e0d94284f959095bd267de3ab08ca20e6059d90de27834b4d964190b1e7"
       },
       "files": [
         "supplement/data/ensemble_grid.csv",
@@ -5685,13 +5686,13 @@
       "id": "ensemble_grid_diagnostics",
       "input_kind": "synthetic_examples",
       "input_sha256": "e45e5abecdc83afb87d8e2598bb7af32bfb9b2a9e4cb2a20df9939a7deb4a991",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Measured comparator points and fit diagnostics. These do not reconstruct Figure 4b's feedback effect/work response or the S3 ensemble sensitivity band.",
+      "note": "CPU execution on public data. Measured comparator points and fit diagnostics. These do not reconstruct Figure 4b's feedback effect/work response or the S3 ensemble sensitivity band.",
       "sha256": {
         "data/ensemble_grid.csv": "d1149f05869d710d90c534bb779791b2b1fc2ddc7ec13c91a152e661abda11fe",
-        "figures/ensemble_fit.png": "4614e4ec6ebba6b59036a0eccdafe6b472fb0e270fa0cfca502bfac118216a81",
-        "figures/ensemble_fit.svg": "4931c308ce7438ff74c65f7c9b13c2a2813224fd7d23a5add1657e10e6381b6b",
-        "figures/ensemble_residuals.png": "8ce839f759c1ec2bfae751d92c041cef33baa53d5419c72d0abd85ad971ba4e5",
-        "figures/ensemble_residuals.svg": "efd471f410fd74d0bb802d538dfdec8be4a11c261419983d3e32c9c8f13ebc53"
+        "figures/ensemble_fit.png": "27d43479b2269f71c93d82fa6c09c2c9cb4353fcbc32eae0d9a7e98feecdbf6f",
+        "figures/ensemble_fit.svg": "22a726d4f9499a6267af2463ff0993056012e791e083e30f07e645e97e94bcdc",
+        "figures/ensemble_residuals.png": "4d6487fd33e891d320ccd900f34ee1b4280b73a9c8f5bc0ec65ae0c2e58b4904",
+        "figures/ensemble_residuals.svg": "3ed95e0d94284f959095bd267de3ab08ca20e6059d90de27834b4d964190b1e7"
       },
       "source_input_kind": "derived_from_verified_measurement_records",
       "synthetic": true
@@ -5705,8 +5706,8 @@
       "file_sha256": {
         "supplement/data/budget_audit_summary.json": "e06cc0a3460555c750bdb62ae175b40e9bceaec1e856617d3a4ab2adfa3d79f0",
         "supplement/tables/S46b_comparison.csv": "42954652084927b1bd4784d29662a630ec09d87864e851621e0d59287868e87f",
-        "supplement/tables/S46b_comparison.md": "c9153d753d1894118105ec2e427ed4aa1f7a6db558ca229d2b8d85c0a820db8c",
-        "supplement/tables/S46b_comparison.tex": "2ea4acab3aae7d643a6d4708d2d1db058995deb12f2c565eb9ac5cbd16572f9d"
+        "supplement/tables/S46b_comparison.md": "1bd56909ffdef6ad250d6a5ba8875f75f7cff453ff4f13aa9c503fb190eb90e1",
+        "supplement/tables/S46b_comparison.tex": "0e82e8c6c49a0e58dbd0f726b9e2a986379c0df5240ac4747ea6e5f534e996af"
       },
       "files": [
         "supplement/tables/S46b_comparison.csv",
@@ -5718,12 +5719,12 @@
       "id": "budget_comparison_table",
       "input_kind": "synthetic_examples",
       "input_sha256": "693656652746e7a9757b20bf64d873232bb8f9671b264d00001a37a0e875337e",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
+      "note": "CPU execution on public data. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
       "sha256": {
         "data/budget_audit_summary.json": "e06cc0a3460555c750bdb62ae175b40e9bceaec1e856617d3a4ab2adfa3d79f0",
         "tables/S46b_comparison.csv": "42954652084927b1bd4784d29662a630ec09d87864e851621e0d59287868e87f",
-        "tables/S46b_comparison.md": "c9153d753d1894118105ec2e427ed4aa1f7a6db558ca229d2b8d85c0a820db8c",
-        "tables/S46b_comparison.tex": "2ea4acab3aae7d643a6d4708d2d1db058995deb12f2c565eb9ac5cbd16572f9d"
+        "tables/S46b_comparison.md": "1bd56909ffdef6ad250d6a5ba8875f75f7cff453ff4f13aa9c503fb190eb90e1",
+        "tables/S46b_comparison.tex": "0e82e8c6c49a0e58dbd0f726b9e2a986379c0df5240ac4747ea6e5f534e996af"
       },
       "source_input_kind": "strict_budget_campaign",
       "synthetic": true
@@ -5736,8 +5737,8 @@
       ],
       "file_sha256": {
         "supplement/data/budget_comparison.csv": "42954652084927b1bd4784d29662a630ec09d87864e851621e0d59287868e87f",
-        "supplement/figures/budget_comparison.png": "14c525d9dc6e6badfca9709b80f1c3155c6e22730130e9df7f4cef542b290954",
-        "supplement/figures/budget_comparison.svg": "a11069e759b7bd0c03097f368fda49ba28d0ca713e7cb5f79e4f2f6304d53598"
+        "supplement/figures/budget_comparison.png": "24a7e0c0db0d53442e7fb3e349edbcc1a98e206f7306686de667248677442ae6",
+        "supplement/figures/budget_comparison.svg": "0ac8bab90185df19e83e5b81f1712190b397156e57e5fe14c970279032647174"
       },
       "files": [
         "supplement/data/budget_comparison.csv",
@@ -5748,11 +5749,11 @@
       "id": "budget_comparison_forest_work",
       "input_kind": "synthetic_examples",
       "input_sha256": "693656652746e7a9757b20bf64d873232bb8f9671b264d00001a37a0e875337e",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
+      "note": "CPU execution on public data. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
       "sha256": {
         "data/budget_comparison.csv": "42954652084927b1bd4784d29662a630ec09d87864e851621e0d59287868e87f",
-        "figures/budget_comparison.png": "14c525d9dc6e6badfca9709b80f1c3155c6e22730130e9df7f4cef542b290954",
-        "figures/budget_comparison.svg": "a11069e759b7bd0c03097f368fda49ba28d0ca713e7cb5f79e4f2f6304d53598"
+        "figures/budget_comparison.png": "24a7e0c0db0d53442e7fb3e349edbcc1a98e206f7306686de667248677442ae6",
+        "figures/budget_comparison.svg": "0ac8bab90185df19e83e5b81f1712190b397156e57e5fe14c970279032647174"
       },
       "source_input_kind": "strict_budget_campaign",
       "synthetic": true
@@ -5766,8 +5767,8 @@
       ],
       "file_sha256": {
         "supplement/data/budget_frontier.csv": "839241de57d355d34ebc0bf456b52802d0b9c4ea34d488ddfdffd9bc0aae9082",
-        "supplement/figures/budget_frontier.png": "35c2b6729a809f5fad73c9902b9da8b4f51a9613bedfa3b1592adcf01f46cc6b",
-        "supplement/figures/budget_frontier.svg": "d00db5282fb4e9f12f7683be03db764e014597ed20c3192d292158e6a5770537"
+        "supplement/figures/budget_frontier.png": "30d19b4fa7f322fc643a222ffb719bb45c0a019007bd4edfdaf24727b02e5c49",
+        "supplement/figures/budget_frontier.svg": "7b7440cc86da06caea31edb56b70f1a47768ea835917e7e0baa661cfdd8beb00"
       },
       "files": [
         "supplement/data/budget_frontier.csv",
@@ -5778,11 +5779,11 @@
       "id": "budget_comparison_frontier",
       "input_kind": "synthetic_examples",
       "input_sha256": "693656652746e7a9757b20bf64d873232bb8f9671b264d00001a37a0e875337e",
-      "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Related Figure 6a/S3 executed-work point frontiers on D_compare. Does not supply the printed D_test intervals, configuration ranges, ensemble band, power or tail panels.",
+      "note": "CPU execution on public data. Related Figure 6a/S3 executed-work point frontiers on D_compare. Does not supply the printed D_test intervals, configuration ranges, ensemble band, power or tail panels.",
       "sha256": {
         "data/budget_frontier.csv": "839241de57d355d34ebc0bf456b52802d0b9c4ea34d488ddfdffd9bc0aae9082",
-        "figures/budget_frontier.png": "35c2b6729a809f5fad73c9902b9da8b4f51a9613bedfa3b1592adcf01f46cc6b",
-        "figures/budget_frontier.svg": "d00db5282fb4e9f12f7683be03db764e014597ed20c3192d292158e6a5770537"
+        "figures/budget_frontier.png": "30d19b4fa7f322fc643a222ffb719bb45c0a019007bd4edfdaf24727b02e5c49",
+        "figures/budget_frontier.svg": "7b7440cc86da06caea31edb56b70f1a47768ea835917e7e0baa661cfdd8beb00"
       },
       "source_input_kind": "strict_budget_campaign",
       "synthetic": true
@@ -5855,8 +5856,8 @@
         "displays/data/Fig6/panel_b.csv": "252a6c37b16b906f4e8a64eaa0e623c803c2ede2a30d10415eba78ab297031db",
         "displays/data/Fig6/panel_c.csv": "27e3550b0b120faec96dd038d5e212c8151a1a1c5fff0b33b71df7d92e6ea186",
         "displays/data/Fig6/panel_d.csv": "0e2198162b8bc1a8c9cfca092531db0adaa8a0d0c58134da58159da9cbe61154",
-        "displays/figures/Fig6.png": "8dace33893d8e35c9ab463873d1997d14f7d253b38b5b8b34254a819d3809140",
-        "displays/figures/Fig6.svg": "87fbf1396bb7e16a9cf1b382776cf85e1f9db08582afc5c96dc16dc9dab3e036"
+        "displays/figures/Fig6.png": "2382669ce06fad70c6027d57a90c3bb0f83fe462afcf2ac4db29c968e31656c5",
+        "displays/figures/Fig6.svg": "5cb9066dc7c9c4acd4c21874e6af30d7844f317c7076e7a9983e17d758eb1e50"
       },
       "files": [
         "displays/data/Fig6/panel_b.csv",
@@ -5916,11 +5917,11 @@
         "displays/compare/T1.csv": "e5d74bd5575e9bfb5808f86f2690d90948ef7b0607148a28ac5ff6f25321fb16",
         "displays/data/T1/ledger.csv": "a8209942aff3a9c6e0270e26a63bea8393c74bf85029a17ff0ec858e7469bddd",
         "displays/tables/T1.csv": "aba9fbb3465687f5bab09edc46e00b8d608ee8db7e5e6c87321f1c1027db2e1c",
-        "displays/tables/T1.md": "ff58422cbc330b2684fbb40838603bb131b7b3f6c2ad2b972f02409cc2cbd06c",
-        "displays/tables/T1.tex": "b3aa3fe83ca4623933ceaf6858d9e53a17f3f29f618673fe78787333c901399c",
+        "displays/tables/T1.md": "a2c641b334da93250785537d13d7dfa829d228f513fb08d132edcbad17be4449",
+        "displays/tables/T1.tex": "f6aa3b17bbec17a70ce3e1709f368c5dbcd6e9ac7ca36ea2b8430c98e126a95a",
         "displays/tables/T1_ledger.csv": "ba345bbaa1c4ec32de1a1be9b19998d0b11adc48ecf02157c30cea0d9ca4b8ed",
-        "displays/tables/T1_ledger.md": "bf745b67eb444de6c21d981c42963dd52202cc8c6ce53e01db3f4786360588a6",
-        "displays/tables/T1_ledger.tex": "6bcabe32b8bb7b35e6f66569780facd6a388a3a3d17efc4ef075482d4d940665"
+        "displays/tables/T1_ledger.md": "17ae2041713bef0bd4c0d8d49bc2cffa408007b3dd117f494201fb507e3d1cc2",
+        "displays/tables/T1_ledger.tex": "8142fad53c530f3da8f8546c952db667b7988aaa84c072c41091c1ec0d77adc8"
       },
       "files": [
         "displays/tables/T1.csv",
@@ -5964,8 +5965,8 @@
         "displays/compare/T2.csv": "3e87186567b68202fadbb90f07f2bac26fc1f4fbe0bb684341e07572e711fea1",
         "displays/data/T2/ledger.csv": "de5f4fcf555e72cf5424f5416ae2c37dcf25bcb0b51cf504b3ae98766926e97c",
         "displays/tables/T2.csv": "d08fe733d8c777bb73a8ce7b13465045bc9cc2110a7b28c9b3a3e2765a4044dd",
-        "displays/tables/T2.md": "420de097d8cc9c44c471a4f821477377ea6e11b62eca6c03aaded8a1492bb8e0",
-        "displays/tables/T2.tex": "16ab967ef316bdd4cf75112d18b8663bca2a7e306477d825f99f66b5151de59e"
+        "displays/tables/T2.md": "64ea0086c898a2ab429ccd5e68513f7b6ee5f12826eb0cb3c141bb4a07e058f8",
+        "displays/tables/T2.tex": "9499e468c1c1f29fcf6da85bbf4911208550ed204fd3a5fbfd46b750080a38c9"
       },
       "files": [
         "displays/tables/T2.csv",
@@ -6035,8 +6036,8 @@
         "displays/data/FigS1/panel_b_loss_effect.csv": "79cfbed85d390245e37d20b8b3ee77f5696ac64ce18b04339284f940d341d4c5",
         "displays/data/FigS1/panel_c_mechanism.csv": "aeb5fbda648aef1407cb13ae27692e51f8ec51ffe9eaa3c310964f2f952d9868",
         "displays/data/FigS1/panel_c_roles.csv": "7c703fec205a0d444e0ff8735b3dd2de82aa564a48ab29176fe54a676aeeea97",
-        "displays/figures/FigS1.png": "532fd28a8805d1f2d0b043d82c190e91d193c97c2eeba7cb57b4211943add93e",
-        "displays/figures/FigS1.svg": "912343d5337551e1c1bdc4568dc771df80e1db932a0068a142a40cf0cac228ad"
+        "displays/figures/FigS1.png": "6bd4cd84196d6aac47977ec672ba6dd58ea21891aa3255e35650de179efd7b12",
+        "displays/figures/FigS1.svg": "0a3bbfa52f69ee492bf12858e09908c2f4b9d2d3fec934bc0dc281f41b125519"
       },
       "files": [
         "displays/figures/FigS1.png",
@@ -6142,8 +6143,8 @@
         "displays/compare/FigS5.csv": "5bb6b98a6e39cc01cbdb9ea7ca0ab6949802a03aca49131bbbb4ae06868c5e88",
         "displays/data/FigS5/panel_a.csv": "dc6d093f5695c4571f1e0fd9b1db9569050fbd31e923bc7f864a5175a2202f94",
         "displays/data/FigS5/panel_b.csv": "21b1f6df5f5abec256012ba928a82e082c71ad5e32720a49b8ea3e73d7aac7f1",
-        "displays/figures/FigS5.png": "9f55171ecbb3122da215da6dc30c5c7ee0de132a17e411978c63bad1e36a81d2",
-        "displays/figures/FigS5.svg": "16409627e01cfe1d3f1b4a9a6b1ff0671b506b14754350bc6e678e4ab2bf3784"
+        "displays/figures/FigS5.png": "07f3bb98140184c2c67ec79c42d9865cadcaeed753535e758ca1909eebd5cb2d",
+        "displays/figures/FigS5.svg": "495ff7a8e6a231da5bd2720113e2c69c19463d8f46c9574ce0c5fce0cf88114e"
       },
       "files": [
         "displays/data/FigS5/panel_a.csv",
@@ -6344,11 +6345,11 @@
         }
       ],
       "file_sha256": {
-        "displays/compare/FigS15.csv": "abe42c49d14ab36f4797063f2a4edd1514006e9b406f8dfb6993e54ea9552871",
-        "displays/data/FigS15/panel_a_anchor_response.csv": "43203d657f826c4ce7349777147b49c6c0c5ffb8f410afa47424c17790c93ec3",
-        "displays/data/FigS15/panel_a_response.csv": "8123d1abeab9d5a47f666fa367acea6d675d027c879996de7f2f7c721c31cd9f",
-        "displays/data/FigS15/panel_b_band_sensitivity.csv": "7dacd2f6db4722c1355e96406317cd7b7d7067a70ba027e9a47bcf6226eaa0e1",
-        "displays/data/FigS15/panel_c_executed_range.csv": "8d859b2ac7efd75557db1dedb628941379dc2f5c49e9da16c7b4ab77b4a15f35",
+        "displays/compare/FigS15.csv": "658e0cf8d81c88048071555e7da335436de6e4fa67e5b6c63f7d65c03c568745",
+        "displays/data/FigS15/panel_a_anchor_response.csv": "26974e5b259273e4106f7b629c471bc093a17918565875ea9aa028ec2f52ed15",
+        "displays/data/FigS15/panel_a_response.csv": "9084b521beb5e92870ac5230ab0a26c53ae35a8a44938aaf7730438bf6a7c9aa",
+        "displays/data/FigS15/panel_b_band_sensitivity.csv": "d29a60bc544c015aee83f310fce81d9eddb51ffa78b16c51dcb6df84990af977",
+        "displays/data/FigS15/panel_c_executed_range.csv": "ee11dc86f9c2b155042b1b9fdcf42fc41b1b9b461e7c83ca0eae93f15a148a42",
         "displays/data/FigS15/panel_d_headroom.csv": "03a8e72e081cca7bb28afc28a9891c96708da89859258b7d897ddfbce0bd060e",
         "displays/figures/FigS15.png": "455f985082992c2fdb01f7a258f0187c358f063258ca43dae8a41c68c28e9d9f",
         "displays/figures/FigS15.svg": "935101ffa3a07154a4e114c2797cdc51f116bbf32df947235c7e5759bd989a51"
@@ -6588,8 +6589,8 @@
         "displays/compare/S4.csv": "fb83892427f12d558343fcf58bcf7f78896202d01fb1617aa8a61a6d97051ffa",
         "displays/data/S4/entry_gates.csv": "c52af7af6b55e3a57c2e3a943f3f8efeb397347766857b32663abff9821abe65",
         "displays/tables/S4.csv": "086f83973a64347642e90fa5a9dc28d29a1416c9f995a5b87b9f3f95408ac250",
-        "displays/tables/S4.md": "ef650600fe644470110a6461109f97db0d1d98057668c375bf1fdfcc9677dc1f",
-        "displays/tables/S4.tex": "abe532fa24a93665332a9d59fef1b678377855f0156036b5ea690e6fd5ef7ac5"
+        "displays/tables/S4.md": "0e10abc2b153ae6ff42f5a8f8926660639d90853bb5ee9b3664a951b654b79ca",
+        "displays/tables/S4.tex": "72677f2b5f7896998b10ddc58cd478a9b0f41035c5e36ff05edf8ac6df744097"
       },
       "files": [
         "displays/tables/S4.csv",
@@ -6631,8 +6632,8 @@
         "displays/data/S5/inventory.csv": "ea4c7a738dd9b76d9750913b279e6d99e7b00318eb9ee7af5218af77a30577cf",
         "displays/data/S5/training_time.csv": "b496b8d8870d715400af6040fa7ca5f62029e34b3f8388a270e59139f2900b77",
         "displays/tables/S5.csv": "a765715a230a2b737cbea7314721416c8a2c42f032f8df44c4d7f8675126322b",
-        "displays/tables/S5.md": "6ce067e399381079334497f80f6d682c0cb6e677a8dda80dd45ee1d36b24f228",
-        "displays/tables/S5.tex": "e115cd8d3d5dd4323d97e0cdfc454545246c5aee0ffc93d1fd8702a61b64e240"
+        "displays/tables/S5.md": "a8e1412d318f5f08f21c041e498d3b64ec4256ffa8d5268935584671ac820293",
+        "displays/tables/S5.tex": "56d64ee8bf3787c489857d63e176d4409f3c91610a234b0ad7fa7850e8e4c7e2"
       },
       "files": [
         "displays/tables/S5.csv",
@@ -6716,8 +6717,8 @@
         "displays/compare/S5c.csv": "b1e501c76ab4e95cf3450a8db07a047c678546b227820172788e7e29e072c9e0",
         "displays/data/S5c/identity_records.csv": "d3c944986789a722787ec544163744ef3f8993423915bbcddeefc0c97f7d8e60",
         "displays/tables/S5c.csv": "de2bfd20c112afbcfd748edf586ffc368bef0403db3455699f358f714cc65219",
-        "displays/tables/S5c.md": "5f2b1ffc79ab2c0699d8261b4b1ab8557967174ff488c6fab74bb1bde0b1084e",
-        "displays/tables/S5c.tex": "0c9eba1ed40ff2dcc8ebab28a4373d03adb17529adb8a96fa3a43a2afc16286c"
+        "displays/tables/S5c.md": "225fb11320b37ba7f2e076dc27a7312ed4642994dafe8eaf59fdbd5f0a55696d",
+        "displays/tables/S5c.tex": "ea7b857c3f9e9c4fba1a3195c559972d8146b09d04ce57f4924cfd1e86bc64b5"
       },
       "files": [
         "displays/tables/S5c.csv",
@@ -6760,8 +6761,8 @@
         "displays/data/S5d/plants.csv": "5a021cf0b86a8f8a7a7a044e75ceb2ca9436aefed2e9debd2caa78f2eb7e96c2",
         "displays/data/S5d/sensor.csv": "01f41e7e0ee6333bea4a2feb81b848ddc6aa0c183175ae6148fc3280f86421e8",
         "displays/tables/S5d.csv": "febc4c6989b434b90735308e1825eb94501f752d442ccea54f98b6758c87332e",
-        "displays/tables/S5d.md": "3704d90f2f778430d7fa850c8481164c18b042364504c45480f88e260a6f5458",
-        "displays/tables/S5d.tex": "b440e9030d55855924bd443f0cf05376df835cd2b4a2357877dbe157d44aa3f2"
+        "displays/tables/S5d.md": "fe117b4921a4e76bc33e61a428c9eab74a3abbe30534694cc9472a161caa8783",
+        "displays/tables/S5d.tex": "54c8cc21213786c805e2932392f96a840f4b395242b3e639d1107a6cc3eb56f9"
       },
       "files": [
         "displays/tables/S5d.csv",
@@ -6802,7 +6803,7 @@
       "evidence_scope": [],
       "file_sha256": {
         "displays/compare/S6.csv": "25b4cb7c0bb6e9ef4d8c9bb8a6a97672021c0e3a45f2c058c31d63066a4b7e9b",
-        "displays/data/S6/action_registry.csv": "653c649600f892ea7fea959a0b84f470572592d010f74ee9ac8a2ce86c05460a",
+        "displays/data/S6/action_registry.csv": "e094fee2ab1d4e4b5876f6ff587dc5d3682d17b0c9cf603a58538a1332a29902",
         "displays/tables/S6.csv": "8739b1a070381d2122656ff571c59392d523f200c62e88055eb11bb4da5d9d02",
         "displays/tables/S6.md": "2a263560d174153a098f17a4efdfcd835784b88a197815d205aa548b9f438bea",
         "displays/tables/S6.tex": "f40e26feabe22a726c80674a8cfc7583795b8dab4fbea363642c80bbcdc3e4fb"
@@ -6843,8 +6844,8 @@
       ],
       "evidence_scope": [],
       "file_sha256": {
-        "displays/compare/S6b.csv": "8a4883160cfa74898873addc834c5e233fef0120ec60a9a4ffe34b0175358dfb",
-        "displays/data/S6b/executed_range.csv": "aa07b517c65c7ba4f267f7653a033b8ce3f0cb38ab67af48ea0888c422d514c8",
+        "displays/compare/S6b.csv": "9418cec5c0c55968eae49e23c9aede30e3951e79215c39879272065cef0fcc9a",
+        "displays/data/S6b/executed_range.csv": "4f0661457b7bde6be3043b3249a75941bbb87394bde71ce8eef68b3391071696",
         "displays/tables/S6b.csv": "6fa107e6efbd3597bb1e70ba725da0390ce904cc1cf352be646546af3f0169d4",
         "displays/tables/S6b.md": "00a8623e30ae20ec53abec9b544a8940d354343feaf670b49720022eadf0223e",
         "displays/tables/S6b.tex": "7141a40d7ff3e8cb63af576ac7b10183829081e9cbd6639a9c33fa213acba778"
@@ -6888,8 +6889,8 @@
         "displays/compare/S7.csv": "68488d0a11c85f8beb88b5a2ef67aeb34b046b2e5fa43fc4357c9d164c7af70a",
         "displays/data/S7/support_cells.csv": "9d31fd07522ea81c62d251e4a1e227b712e22720e55e920fe9ce119f8b70c85d",
         "displays/tables/S7.csv": "9fb2d33e7599ba4e44d9d9f8d8512ac89a745aaf1a0279917c255f4c3e7c1c29",
-        "displays/tables/S7.md": "18d681d78dac8436c4f41a7e3790031e9b3c7f844ba205b2b57d8d664b98168d",
-        "displays/tables/S7.tex": "21ee7b5050cb47c83f789fa245ed58f86fdd950f328f012d656befd0bb24b698"
+        "displays/tables/S7.md": "e417c545a9256b44d420104220ee22e2243ad33610f366ec44861aa48fcc16c0",
+        "displays/tables/S7.tex": "5c6b17d6ab5fa692e6cd9a82d136c320286865f8f3836367e1a1f061edb1f3ac"
       },
       "files": [
         "displays/tables/S7.csv",
@@ -7100,8 +7101,8 @@
         "displays/compare/S12.csv": "adc4b39523df85827f7a9535c29a5b821f0431c9a832c8f1f12f7a9592e32261",
         "displays/data/S12/representative_rows.csv": "50527b387ff0d16567797d47c25ef356383882d536f4e3f00388124eb31b6bb1",
         "displays/tables/S12.csv": "7cd64e621d76d7fc3ca422ae04b9189fe1303133cdb17ab8f4e3aeaabd4cbcbd",
-        "displays/tables/S12.md": "24a48a901d6d2bfa17ffcf64a191b4ba8e87cf46256241a2aca7972c49b3abc8",
-        "displays/tables/S12.tex": "0061f35091beac134bcfd9417e9024362544eb574e14bae082052474c5a8fc8d"
+        "displays/tables/S12.md": "230950c1f1c8c80e492dd830872c86bfb7814869c21ea423438b6fd642328fb4",
+        "displays/tables/S12.tex": "de01ffdcfe7bb8559350fec6c2105578d380ae707485536799c8f36ad160d46c"
       },
       "files": [
         "displays/tables/S12.csv",
@@ -7142,8 +7143,8 @@
         "displays/compare/S12b.csv": "d53c7fb62147c94785e737ce6ca0ab7757de0e8e9f82c49e098a6ed98abd8d53",
         "displays/data/S12b/nested_family_folds.csv": "230f9fe578df38b46a72180284701342590219e87c8a6b290e0051de1a34e400",
         "displays/tables/S12b.csv": "cd6d036045c80b9796ddfefd3de7e9e1555fce5a194875e621c375f3a588d445",
-        "displays/tables/S12b.md": "9ddd4fff0b55677af48df84100f7316b5c67c8f678367584bdfb00932328c383",
-        "displays/tables/S12b.tex": "72fc5869366ccb6f55abd36372088cd555ca5d9d1e28854a65dbed0ca7fe5d37"
+        "displays/tables/S12b.md": "09724fba3e8bf1b3add67b041902fabdde554c13a475f0a62da845a376e0182a",
+        "displays/tables/S12b.tex": "58e61977900fe167e1cb6ff1a7c15acf94dd3d31f3c3bdb32b12f22314fa2dc5"
       },
       "files": [
         "displays/tables/S12b.csv",
@@ -7193,8 +7194,8 @@
         "displays/compare/S12c.csv": "bae5b032887e75a13c763f7ae67faf87359cb575abebd6fb709703f61ef42e10",
         "displays/data/S12c/selector_readings.csv": "8d4595e250111999347daad5499993a916eabfb77f6b971d4beeb5acce303029",
         "displays/tables/S12c.csv": "6f21b7c0f3617c23275dd9a28beb2df8e15a8dfd9f627126aa5d3189979e080f",
-        "displays/tables/S12c.md": "1e23967378679ed8827d25fe0b489dc1b3d6e8530e63cee1dd618597dd2eeab8",
-        "displays/tables/S12c.tex": "77599dedd2e47850625856f0d5a95fd51491cf7c5b97c5fe64f0318b19df3782"
+        "displays/tables/S12c.md": "cb36e735d3dd58ad3f468150b00daca41048411b5ca0b30ef847aafdfb038c30",
+        "displays/tables/S12c.tex": "57a9af78dad3bf18eab5ded6ab592827984168ccaeff731aac60bfaf71f2ba70"
       },
       "files": [
         "displays/tables/S12c.csv",
@@ -7264,8 +7265,8 @@
         "displays/compare/S13.csv": "9cb716b32c8bd864445f79b0cd9d6eebe6bd2ac4890ce18a3d423e001b9a33ef",
         "displays/data/S13/admission_moments.csv": "1d9b40179ab71f6e6868450f42d28afff82c648d2d89a5b7d2e134e9e3aab984",
         "displays/tables/S13.csv": "6c5ecea6eb367e35b92fa93a3b73598769b004a0a6d164e8a6e5a5af6ba1f07f",
-        "displays/tables/S13.md": "2811e9701cd969f38a85ef65df13bd4f436bffde8822ef852629dc047e6c2e65",
-        "displays/tables/S13.tex": "de3e5df6c999a9907f7fcc0d102a834f6dce27fecdaf7653d861b27008bb2eae"
+        "displays/tables/S13.md": "11a7d35e5537ea1f7e5eaa31ee949f729e5a0c29dcce97a6709aa4b192e869c9",
+        "displays/tables/S13.tex": "a86f7c510360b0505f6917d9418c4426a47e933c6964489f432578da99fbd1d3"
       },
       "files": [
         "displays/tables/S13.csv",
@@ -7321,8 +7322,8 @@
         "displays/data/S16/cells.csv": "2e8771995d3530704d6fce24961c0e795fd0bc498ae29b97c6dfea90ab0e20e1",
         "displays/data/S16/contrasts.csv": "aa63d14fe13936c23f0f9293e5b9dec310910e791a22b08f079209f5023fbb8e",
         "displays/tables/S16.csv": "2721d1eb84cf59a0dac062a1404b7c6f111568e56bd97631344ddbd5d6e68e1d",
-        "displays/tables/S16.md": "9ae370626d63101141641f02208546ef9d7e2a678352853f557814df42f943cb",
-        "displays/tables/S16.tex": "c862c3dc06a3827ebb44e1e1a6b1c8183e0bf1836ac74431f17bdce18958fa3c"
+        "displays/tables/S16.md": "7a19ac400207518de937208380bd053fcf8ccf6430a6d36eea6b402191ca06d0",
+        "displays/tables/S16.tex": "59689f6c17a0be596122ab8d19f8e6b334805589097854219c4d3ff6cfd83f2d"
       },
       "files": [
         "displays/tables/S16.csv",
@@ -7379,8 +7380,8 @@
         "displays/data/S16b/cells.csv": "fb5ab98b7e20a12d699ef72898ed9855c2c8be9fca8785a47de80033a4be5aac",
         "displays/data/S16b/contrasts.csv": "8a0e45498f73585a3d35d96789cd0dfa8fea0b6a56768ca03119b7644b0f2dc9",
         "displays/tables/S16b.csv": "47070205a3d03aca2095a745d8c9ce2dec8420430e7ed0bb02924e76956558a7",
-        "displays/tables/S16b.md": "3336759aca49cb7a6d2929dfae88fc869eec93c3e5df66edd1ecb8aa2515f31a",
-        "displays/tables/S16b.tex": "59f99a2b79a11a5efb185a7197bba8805f52b8aa8289b521637228cba9339106"
+        "displays/tables/S16b.md": "4b7133291acfc15080972224670c7689cc3cb19c4bdd17d4cda76ddb36240e2a",
+        "displays/tables/S16b.tex": "5697e7debcdaff1def06451d9791f4d5a9d19daec297d912e09c02f32b269f7e"
       },
       "files": [
         "displays/tables/S16b.csv",
@@ -7423,8 +7424,8 @@
         "displays/data/S18/records.csv": "e130b952221ad521118ddaff5c4347e58faf47ffd9a0e897ebe802cf1007ebd2",
         "displays/data/S18/summaries.csv": "442e1205f960c92da71939d8a7f0dd2ad0c0c1fd48b7833be09c3d655317531e",
         "displays/tables/S18.csv": "90c30559006bb012fd87741ed57990f8367ef56ebe4b63f5de09a66ed14fc323",
-        "displays/tables/S18.md": "1f071e4a64c09b72c4afeed22ecf564ad6ea62016bff8d2de015c19819d35777",
-        "displays/tables/S18.tex": "4216c5c288b4a86fcd64ac07f36943d7c0cbbb70b67586e6b5cfea5555fad9ec"
+        "displays/tables/S18.md": "ac9eb9a0cc3aca9bd43fb96f3f0268a5ee746039b31469326f2759113d5b9035",
+        "displays/tables/S18.tex": "a222f805343d6c5dd1878aa336ae40cfa3bc7ed4d735877fbf48e1b608647815"
       },
       "files": [
         "displays/tables/S18.csv",
@@ -7466,8 +7467,8 @@
         "displays/compare/S19.csv": "79b5ae94c268c6532efe8a454de6c45afb6eeb051b5c04b58c1ad7f27f8352c0",
         "displays/data/S19/controls.csv": "fcadc5aecffc6b4a0949cbd24a1b43ee5efbfd9d9bfac404df28e905ae7536e6",
         "displays/tables/S19.csv": "6d3b17725d806ec899870ca74a26942026d6d0ab0bfb7795b206298362ae0bb1",
-        "displays/tables/S19.md": "8713c3c9ddcbd40ae6e468381c1a7264faf9777658e8466b66ffbd48ef720363",
-        "displays/tables/S19.tex": "3c793db42480eff10a5d8e05a9ebdc2796f88c8d51024d32994562ed82f1d26e"
+        "displays/tables/S19.md": "bd09c7fb72afda69547c73fa8ba8f01324d69f357d5ebfdd43ee8554ef6c6b1d",
+        "displays/tables/S19.tex": "bc8d7185f2a385facc5cc4ed1fe86b8e4c38e1f616dc24e677e5aeca0fee0040"
       },
       "files": [
         "displays/tables/S19.csv",
@@ -7508,8 +7509,8 @@
         "displays/compare/S20.csv": "d20fce21a35bf039b04ed03100bc35baf5307860d89d3f9c82a0e8cf1dba2657",
         "displays/data/S20/selection_radii.csv": "e5888ef37d5bc0d348e8162507f677995202f7e440e9faf1573c59aa08abbe16",
         "displays/tables/S20.csv": "ec533b57fa7cc38e6c63cc7056dc497964e21a947a3f0d5641267ce692615260",
-        "displays/tables/S20.md": "40ae9e57c3b855bb0d584af65eff7c81b5504957eeda861c0d503e4030ba50af",
-        "displays/tables/S20.tex": "cf46a26fca1e5349b3e02dbde05800ace86111cbd5b7b0b6e9971eae92aad1e5"
+        "displays/tables/S20.md": "c0d2cc346c38e528eec1dc47d3f4ac41d72a8aa7d92b8eb1bf1353c585ab666c",
+        "displays/tables/S20.tex": "f4564bda892fd958447e48be2b1cc664dfbc75fea5936421080f6e3478623f96"
       },
       "files": [
         "displays/tables/S20.csv",
@@ -7550,8 +7551,8 @@
         "displays/compare/S22.csv": "b7a536ecae024bae130d4df5bb5643b12c2d7893c8516611fe1fb3b5d1f24f3f",
         "displays/data/S22/tube.csv": "e13cbc00928051a8d9575e27e29a9097a63509ae7daad51b530a8a88bda3ee9b",
         "displays/tables/S22.csv": "e6d744784dbfc9414f1f832a4a6249b81167b66f516434cd85878405d3e121b3",
-        "displays/tables/S22.md": "8a1af6331c9faaadd087a67ec1f42106e2f45a041f9c76c966cf0341a733ed89",
-        "displays/tables/S22.tex": "66bb3220b450c3fb687bfa13f0dbe839c285c4c7ba72db1a12b403e770529292"
+        "displays/tables/S22.md": "9dfb0fd2df2d3b4eae875c23ddb9f63dc5499d9794181ba9f8fd9a4ee866b942",
+        "displays/tables/S22.tex": "4f4d2a6c6d52e5500a7309631d13e2a0597e72598eaf3bc5d34399d7da713f83"
       },
       "files": [
         "displays/tables/S22.csv",
@@ -7634,8 +7635,8 @@
         "displays/compare/S25.csv": "eadd87ad96962b2162d02b2b785708205b439accf6eba9768a874bf4dcb1923a",
         "displays/data/S25/substitutions.csv": "e07e1f0c26c29b8f4f0f14e048439e5f6c2abe3a702509b4fb478d74de484af4",
         "displays/tables/S25.csv": "5e0de8821b5ddcd02f378ac02f29b7a268c1a700f4133a120a0294fab33d94a7",
-        "displays/tables/S25.md": "735ae5f2e7f1b863ab8000144ac12b05389e3d488f33518a2feedb2ce6964a29",
-        "displays/tables/S25.tex": "def0a23d98b6a9c29d155e314e1a3903adc1d471321aa34e43b468b546238833"
+        "displays/tables/S25.md": "95f3379b9273cbe75349d26c45ad50886f8b9fd753ba8b6eed5a86e79ead854f",
+        "displays/tables/S25.tex": "773e4575975d182b4fc1a8f8ea5319c4f6473672203244c4cab99ea0b8ca8586"
       },
       "files": [
         "displays/tables/S25.csv",
@@ -7676,8 +7677,8 @@
         "displays/compare/S26.csv": "032094e20a7580d39a06684ddba20631658f6246cd2cd52d614884bf565a3c0f",
         "displays/data/S26/grid.csv": "323ba7ad87b7eeb8a1a8098408a8156ed201dcc8afc7f4be3b097ed1efeb31c5",
         "displays/tables/S26.csv": "d91210ecae3cbb44b3f8d10682a29f6e007ea9ae2c7ed00998944c6b5c0a3cac",
-        "displays/tables/S26.md": "ff0b70413cf9411dd53f251f482b7e6c7a0097225b4a5fa6f62a2f1baff199c7",
-        "displays/tables/S26.tex": "263eedccf9465b25c983e11e7cdc0686f3a1dd7699f6c2315eeb64321b645c59"
+        "displays/tables/S26.md": "ae1d444b1c7acbd6fdf79c6b4c0d4fb5a690d885cc1164e4e057dd5ab1dff724",
+        "displays/tables/S26.tex": "ab223fad423926622e0f7a91c96f01180fd12146d4897fd9823c68d7b5f7c8bb"
       },
       "files": [
         "displays/tables/S26.csv",
@@ -7718,8 +7719,8 @@
         "displays/compare/S26b.csv": "fee33630574568ca21ed227d2a182e4aeab06c573f6b7fc4c8675a9843236fb5",
         "displays/data/S26b/ensemble_law.csv": "b6babcf354583b3d1705f4233f46b2c5bb10a93cf9bd3078e9d98a497a7df291",
         "displays/tables/S26b.csv": "8e78d727b5140b41db2734ec2bca043e0aafbee1f74ab8df4db663ad722fe343",
-        "displays/tables/S26b.md": "9cbc12783377948cf4a00842c8fa160b9128418f164524e78c86879a1a6e99c8",
-        "displays/tables/S26b.tex": "5a218c07316ba47ec2af0c1360995c3fb9bc0d62dae8911a28d4b6e87dc3ff49"
+        "displays/tables/S26b.md": "4ffc974a1c435275b6c5379b3f9c962e027283b59ec898249d4d555809eedf79",
+        "displays/tables/S26b.tex": "04901c532d05c5c38f4122c0b2eb5ba486c153da21341e24a0a675a7d3ed3c3c"
       },
       "files": [
         "displays/tables/S26b.csv",
@@ -7760,8 +7761,8 @@
         "displays/compare/S27.csv": "f87e71484d7e8a86611ab8be28d30c6e557add21e63f994b2617964b7a5517dc",
         "displays/data/S27/buffer_sensitivity.csv": "b7eaa27b80a6cfe246de0ccaa2bab7666e4bf257ac1ebdca95ecde19beca13d5",
         "displays/tables/S27.csv": "6d83da9b9b7581e1b6ebd1dd0136684ef48d42c0d4219a244f50e850e2d86ca4",
-        "displays/tables/S27.md": "69179e74c521a2d8e4f895b96258cd324cd2a7b7feb25dda44ee5a93890de3fd",
-        "displays/tables/S27.tex": "bc93ae506811fd963ff5db8de7b37192d3b26866f6dde48e77dd28c8a05f4cf8"
+        "displays/tables/S27.md": "e190d69f9d07c19ea049d7f495b91a855c9030b5477c3336fe1741e78a4abf64",
+        "displays/tables/S27.tex": "ad8c57e7abc671f6fa9d9363f58f97656c80273a363df23a4a30e7ce89eefb0f"
       },
       "files": [
         "displays/tables/S27.csv",
@@ -7861,8 +7862,8 @@
         "displays/compare/S29.csv": "b1b052c8a7a10d7ab966717c938fcc52724c13747344485e814deecb536edd36",
         "displays/data/S29/sweep.csv": "6b779d4db50db210776a3cb429eade2932f72f9be0b7ae180746536ef4a43df1",
         "displays/tables/S29.csv": "59f07c484cbb3b960bc832ad760cbaf4187907cf53fed2a672d15a411a06f818",
-        "displays/tables/S29.md": "0cd1f998f2bfaef29e2ee7ebb5fa1f779064c5ee737e236cf74fdcd6b45f91fc",
-        "displays/tables/S29.tex": "d3fb3c925c8e0bd4bf666271ed5289ecfe1c5a1e1502a61ff250cd6665c9d167"
+        "displays/tables/S29.md": "b9599a1d214a667900c927eea3fa2180ebe69896ea3b9b5ac5723d1967e3abfc",
+        "displays/tables/S29.tex": "7f385714897591b1b8e28a64f0290fce6042267b7049774dd3bd87e3b6c16887"
       },
       "files": [
         "displays/tables/S29.csv",
@@ -7936,8 +7937,8 @@
         "displays/compare/S30.csv": "a735bc5c19dc34d7f838f4aa00ff140c1b54cf4a561ae020156d01bc45c6d335",
         "displays/data/S30/oracle_dispersion.csv": "d78d2903fbc5875fb910256b93d88eee8d100e8040942a97b5bc04d85d3c258b",
         "displays/tables/S30.csv": "ace182eb40131908ee042218c6e40565d97442b4ccf0ab33ec53bc029494f9d8",
-        "displays/tables/S30.md": "5cf62e6b2786bc4bf74b0c34480cae90d7416a6ff7267b01f746f088121bfa95",
-        "displays/tables/S30.tex": "064e3b54f5e445e79c5403f3b1cfbefede0915e08cec5e63ff7c6d8e3d555eea"
+        "displays/tables/S30.md": "2b662eda24ba0ca1dfe8290c85aacdd95a68e9c805263443c78975c9dc7cc924",
+        "displays/tables/S30.tex": "0a46773f96e02ee99bef3a2c72db0a3ad7b943e012b6d5a8e045e02cf42ceb70"
       },
       "files": [
         "displays/tables/S30.csv",
@@ -8317,8 +8318,8 @@
         "displays/compare/S45.csv": "d52d3ab4685df08046901f33ec4a0d0174273749e426e093e1eef3d39c2d0814",
         "displays/data/S45/arms.csv": "3f5f0f619241665bae1f8285e76a75f3bfb6588124dd10ff860aeee48fbac914",
         "displays/tables/S45.csv": "3f92691cde8d0ab80881ac2fac59c87e611024d5ac23b272ad1ccee1eb6204b9",
-        "displays/tables/S45.md": "43cf7999d6ae9b75ae1c3ebedfe2004c269b30a8be9772da19f278d461061ec5",
-        "displays/tables/S45.tex": "7a420848e3024a375e5c44fe3fddc5c07f7ee8a0cc390247d1d978b9c91d3057"
+        "displays/tables/S45.md": "f1dddc5c4284f3dbd3bc2f1ffe180c2094785192584b9ffb46bdcb6d7cb1f41c",
+        "displays/tables/S45.tex": "504ecc7633039734ad894345706468e7c7a89d696e238c8a28d43f9acdf5e8bc"
       },
       "files": [
         "displays/tables/S45.csv",
@@ -8359,8 +8360,8 @@
         "displays/compare/S46.csv": "6a83633e123ba3c65c2c7072d73490e23c1793ee5003254521febf83718e9f27",
         "displays/data/S46/frontier.csv": "457abc1dfea528c05ed65a92fd2aadefc687f67fc02f6a39ff99d4d2c7ba1c13",
         "displays/tables/S46.csv": "f6d1e17808a0cf0cbafc93b0c1164afc601c597d6150ac71076a4cb1b9d03040",
-        "displays/tables/S46.md": "a12437e2d119ed1bf13d8d48f34ce9f61d6e15a03fb2921e79338c38ed1c847c",
-        "displays/tables/S46.tex": "8a7c926da212fd8d2c94167f26810223784862f8a48c4707f1d4d986f9ca698d"
+        "displays/tables/S46.md": "60e716c40a38e62541dcfeb09674f604380aad1d087ef3368ec940a51d1751d4",
+        "displays/tables/S46.tex": "5c8a935fe33aa636714efa8a33363fc36b1d86c3fc6edbf79217d72bd39e843b"
       },
       "files": [
         "displays/tables/S46.csv",
@@ -8498,8 +8499,8 @@
         "displays/compare/S46b.csv": "62e13e3261e0c17b3707e695131c23c88502b031c90c2e4b75546bb52590d895",
         "displays/data/S46b/arms.csv": "a92adc61f405e25c80b5dc5b37baf3ac0dab31c2b102575368e84bfebd651d4e",
         "displays/tables/S46b.csv": "f342c41e362214701464bbfedce4ec51d73d3798f8d0f6b78a905533f818d6cb",
-        "displays/tables/S46b.md": "1a82fbb4d3c1781b80823d228853cd22fd778eef5a62e9bf468c2ab2b39eef50",
-        "displays/tables/S46b.tex": "253be841ec57d091cf228f3940134f1addcc486bb411c77d37d41b1a29842707"
+        "displays/tables/S46b.md": "bf19f0104a29522a4d6b5526ecc52d56af903ca90d673a4077f89a3e48fc00a0",
+        "displays/tables/S46b.tex": "22179f9510105ac55b147e2fa3ac1903acfa7595c4a38e105820af555cb16419"
       },
       "files": [
         "displays/tables/S46b.csv",
@@ -8613,8 +8614,8 @@
         "displays/compare/S48.csv": "4dd9e010439ce42b83cbbf531caf97153544486e4ebb8fe2202ce2313292690f",
         "displays/data/S48/outcomes.csv": "25da229d17a5516e004ba19fa4c1b59f2504a4628782b72332a72c80534f2e0b",
         "displays/tables/S48.csv": "43a0fb8f4c71a6adab7f4908004843a2eb8d97a80fa79691ce29c41590022e95",
-        "displays/tables/S48.md": "55add4afb352bbd713866e86bf688bb34135735db0a48cb319d75ca4782d07f2",
-        "displays/tables/S48.tex": "cbab7833feb6c2654ff0f3d877a1b95092c176d314a087f73418ff525ee19249"
+        "displays/tables/S48.md": "476e2e9e9f4ba4748b573d45a82a9caa68473d5414274e6b89ad7b9f8671e5b5",
+        "displays/tables/S48.tex": "6abb938b7bce350701951423abb323e2687fa46d84751fbddaad0bf2131184c9"
       },
       "files": [
         "displays/tables/S48.csv",
@@ -8737,22 +8738,22 @@
     "paper/build/__init__.py": "a023203fdb58baf39c137716ffb5a0f64ae96581b9e6a2faf4e6619e31682533",
     "paper/build/displays/__init__.py": "bf406b49fe2553b1dec84e4e086cb3166b7178fa981539617d189c0231e8f583",
     "paper/build/displays/analytical.py": "856e1cf3c4dc1dedaf833a15208a6847a55443ffd1ee61ca17cfb52c05683172",
-    "paper/build/displays/experiments.py": "debd3a5ebe9bba09a8b63f066eca945e168e28019c598b32bfeeaa6d0aec113f",
+    "paper/build/displays/experiments.py": "ee2498ee037d11fc2f91c918ec19927f4c679916f426683492cea946d436e1c1",
     "paper/build/displays/factorial_data.py": "fe8a7d26ff183c40dfcf08f6fb0c1f1580fb93e147642d72f05ebfb5f1e77736",
-    "paper/build/displays/framework.py": "470930016d1540d68035535a913a1654b689f47734ceffb227023e4e4b456cc9",
-    "paper/build/displays/main_paper.py": "ad4a3efbda847c2b046704f6ff0b55ca7e8647184fa204c893dc5516ea34c49c",
+    "paper/build/displays/framework.py": "aeb0376780ee7ee9fc69eff4b09b6529436b6f1f1c9311c2c4f3dac3252e0199",
+    "paper/build/displays/main_paper.py": "7b0c3f4c0cf9717ae04aefd310c65a5558d46adef003b803a98880f50c0935ce",
     "paper/build/displays/protocol_tables.py": "39dea8b4bb0f29b233a08547c4dc4b9e92086b338df9fcb7e785794715ce8829",
-    "paper/build/displays/records_campaigns.py": "3b91eae9f032643d79ca8ccd71ca0f95fd302cd157139354bc2f28149f936a92",
+    "paper/build/displays/records_campaigns.py": "a2bd720a527d6b1191a7c2caf993bf96d302c48d37a6de07f55fed0f3f2eea8e",
     "paper/build/displays/regret_data.py": "29d4081035d1ce55a562fa5ca283af9faf2890b3c374a22d77fcd2a2aa9e2081",
     "paper/build/displays/run_audits.py": "2f3d1ebc3dc9ce9a248300aca6c5d7efba2d88d67242ef4682099fb25e4d62d7",
     "paper/build/displays/testing.py": "ce5c1a3cd378b19aefa2826028ae89d158d86b930b9f46b911899f897ec9f898",
     "paper/build/evidence.py": "a6adb112fd48325fa35f01ec1100de6bd899eed1fb8afd47369b39463d706798",
     "paper/build/figures.py": "a74cc9af0e43dc92e34bc130b5d11ba7b172738c2cd8cf66d619cc8dbf0af556",
     "paper/build/selection.py": "d04a861678235474598964a7a6c206f79e74c21375a9434983ef961fd0a43969",
-    "paper/build/supplement.py": "9ffd69b3e831e682e58a50e4ac1a64a9ca4fe76f301cea3581c9258372542338",
+    "paper/build/supplement.py": "7ec843ac95ff896a6b7265776731b0150e924a555cbe944c37f62c8616ac4cf7",
     "paper/build/tables.py": "176fad302e1bc0d8ef8cfd80f6122dcf0ec966e6a9c0237163d473e7881ce669",
-    "paper/display_manifest.json": "b4caa386dc60ce89db56cd5ece4efdd4382b6c234df107e9f2a1360099007215",
-    "paper/printed_display_values.json": "fa9ac88affa6d31f123cab364a4ecd7389b72d8ab90dde61959f2a82dba7e08c",
+    "paper/display_manifest.json": "3b666c31a05100e5a70f2d3eca9046888bfc78536e7865ef641610637e45d440",
+    "paper/printed_display_values.json": "858da950c0e698eedfa5a275406bbfa13093d756341dd710ac86032b44d7e8fb",
     "paper/protocol/S1.json": "61ce58da9a8ee2892076152601c782e35c787eee252bd21275a54d7ccca480ec",
     "paper/protocol/S10.json": "50f4f2b30f02b6ec5edef30dc2b9d9ded1472717f9c680c6443ec9c18a99a94b",
     "paper/protocol/S11.json": "62610ccf3a084cc383a92bd3672abfc43673872ed38daed1ca8ee4d7644207c8",
@@ -8769,8 +8770,8 @@
     "paper/protocol/S5b.json": "849f3b2ec0fd3e5f002f284565d5cd9fe6c1376fc67052365d4df0509a4d9cc5",
     "paper/protocol/S8.json": "91143892b78f3a3e51d1f96f100ad55d9e4efe529507ca0be390c64adda88b0d",
     "paper/protocol/S9.json": "39535f66f52540ad1b83eaf19cf75762dab9bd6c0fcab64c9c55e972d84b232c",
-    "paper/registered_constants.json": "67b2100ef4f8127b19738d2326826b50dab6acc35332f26c3cd9d38aff18e4a6",
-    "paper/reported_results.json": "f4a48f61c524655541d7069f789cbb54e3e33daa12eea381222605b640f4f94b",
+    "paper/registered_constants.json": "10477fbd245dc9cade251193e03b926c990d2a0b208a904257b26066cef644b4",
+    "paper/reported_results.json": "30a09de2b62c69f55b224002083913bc21734510af19c6cd8dbfc7ca72ea6855",
     "paper/sources.json": "6cd0f44e2894ef96e0db5752dde442fbcee7af14524167de618b74ab3920dbb7",
     "records/specs.json": "e8bed3de597a2ac1f756561358f6a5284154a2a3e8f8f02a3be0bbb36dffae21",
     "run_cross_morse.py": "bcffbdc9c944c2455ce972f724abc586283797c5997a671baf67e027f7a401c9",
@@ -8790,7 +8791,7 @@
     "scripts/artifact_catalog.py": "466284c745924c94a554a061844725fc330fb39cf8982034f7fb914b24d18208",
     "scripts/artifact_inventory.py": "b2ee441371423bbd06dbd1fc5c0c06ff59a035d374d09e653153b92fab0f6244",
     "scripts/audit_s14_confirmation.py": "6a08a6c4e010c27efbc4b9af93e7479242a1cfb0cab94de1e99846bdffb01f21",
-    "scripts/availability.py": "57bb3ff51bbaf980b9ab09782eae9a1a69ad47b3b28edf7d3c0336d801a02d29",
+    "scripts/availability.py": "24f0820cfdfa6b4b6cd322dbce1d91e5309631b8a6bbb4acb26738ed45a58381",
     "scripts/build_paper.py": "1f5a00611b469637879f1bb6240fb8ce316895aa2411fdda7a5d87a6eae9feed",
     "scripts/build_release.py": "5073c7ace3d4344b7657e52712937419b826a84d9dbd0dc14c52045b67212d25",
     "scripts/build_review_bundle.py": "5d897f42e6fba64adae37078c93909f6fe9b8a09a8f2770166edecb5286cd6ea",
@@ -8803,14 +8804,13 @@
     "scripts/check_result_binding.py": "73622e8f4a27a281d8b4f1f738ba46279556151b431448fe89c4cfc35aec46c4",
     "scripts/check_reviewer_faq.py": "303b29dfe12fe38a6c913fb064be81bd3b3d5afc7c8b9abed86ad8b25b1c6694",
     "scripts/check_si_identities.py": "7085b03ec490b613a3e24615e193ef336d0ffbd86bc73930df82250ff5b8bbdd",
-    "scripts/claims_ledger.py": "72c6599b5a8466ccc15bf941674631236e7a50232354a57467820cec403d1a02",
+    "scripts/claims_ledger.py": "9696845a9714ea23a8e5c617af74ca85836b2d609abddffa70fa5a55dd45588f",
     "scripts/compare_registered_runs.py": "3cbca5d4fc388f41895256c371555b7d285183b62c9ac7a813891c6a3ca879ad",
     "scripts/compare_review_runs.py": "e233bb36a526d4f8623330be1916a3448990d3abbfc1c764e9cee0b6c1c27c21",
-    "scripts/compare_with_manuscript.py": "b086f215c789720424e66021ead84463addd4d5d95adb56c36becd8a47cbe4ca",
-    "scripts/consistency_audit.py": "d50d587ebcb3fd26c61eacf54abfbf320bab2e6bae73ef3e3e9b54bd58bf2a57",
+    "scripts/compare_with_manuscript.py": "724f30fdc95fc194f41e7652f1f1c92504b3ff1217f1e45759397db02894d466",
+    "scripts/consistency_audit.py": "af513b8133987398fcdf4f102748807cf09d9ea5bccb188d8e6bc4ef6b46c394",
     "scripts/create_release_manifest.py": "f477d46386a4b03e6ca6c42043c59f1ecc6c8bc79e2a5e7b275c0c6f1629da44",
     "scripts/deposit_zenodo.py": "53d66d7d52f50639c5e33694704b568b5f6529504ad23fba851133b91914f3be",
-    "scripts/destination.py": "9e7237e92f44e597afba3d51dfe0d37e1d51ce4bf0d48155ca73d4eeb9ea3206",
     "scripts/draw_diagrams.py": "87be7d9112b4080c5ede4a0ac7568fed38ff525c7d655eb94dcebda25f6c98c2",
     "scripts/emit_campaign_binding.py": "93a79e4bcdaab01bb7f2142636f9172df2b247157dec53627c78f8b1c9598d87",
     "scripts/evaluate_checkpoints.py": "beb77ad31625ef91cc150672cac260b8922a1e47bd28c0fdad9b0f2f48f3dd3d",
@@ -8820,25 +8820,25 @@
     "scripts/export_records.py": "0b908a345118875fa1d20f1d541a7adeac7060bae8138d3bf9c3d541a8259eed",
     "scripts/export_sweep_records.py": "7e84df48788a5092fa01a535a17fbf26622037576355e4df9ca992752fe02951",
     "scripts/fetch_deposits.py": "42961d4c632272a353e8a2637dc0cb862ec7805042197618646c3f86ad4ab535",
-    "scripts/final_destination.py": "f91dd7b011ebeae2a546420cc0d96a818bda27dab9eca2161c5550d8fc7fcbc0",
     "scripts/ingest_run.py": "95a7844cf923c4310258e21004c67a6d8ae0163377e8880b62b7614268977456",
-    "scripts/manuscript_availability.py": "332630d5ade218bf36cd78ee60eeeda7c6ef069ecf77868b892cb723cf72be79",
+    "scripts/manuscript_availability.py": "86934b9c5ff62051d3842c8d28d7942a94157054f7db895136b966cfd58cfc7e",
     "scripts/model_inventory.py": "bc123217f31f5eb694442749292f7f2c6a2f850edffae952f53d4b5561fbb87d",
-    "scripts/paper_artifacts.py": "628201cea6c77ecc581ff2ee953bc1777fa871b2e053e75d427b7800ae96e697",
-    "scripts/paper_outputs.py": "54b26e8b5a43fe644ef89ec23ff282a42f8fbd4f5c8888ae8f52eadee1e73cca",
+    "scripts/paper_artifacts.py": "8f924d2da4f35aedbfa799b3f60540325a8574824d4f35b13791314f40400652",
+    "scripts/paper_outputs.py": "c074083f3f11f7d55a0cc54970eb48cdbc85cf938fcb6344db00fbce01f89929",
     "scripts/paper_preflight.py": "2fb9c199b9401ddf03f21810dc1035a0ec14b4f682647b8db573219c3d16a70e",
     "scripts/paper_support_report.py": "651e2f221586b7a929376169e44322fc419e0b8bcfdb8cd35e7987d708796387",
     "scripts/plot_paper_summary.py": "684bac3b427859b19ba005c55c75bb0f44175b5307faa653cd677336d84d3ca8",
     "scripts/plot_registry_figures.py": "91f51168e4557974dc7fcc6ec0e88669230ad403e259bb9c3f20acc9531fa91c",
     "scripts/plot_run_figures.py": "5c20a744a0d087402cdce8a10b5b79b9544049b1ce4e9709cb55b156dfbedeff",
-    "scripts/printed_statement_check.py": "f407d6ec0cb260f33bbb9c31d49a9fcc8edc3fbb17417fd87370cee0d909ff62",
+    "scripts/printed_statement_check.py": "7e55d2290fcefc206254809c2f0cbffe3452a59bd7d01bdf30a9c4b41bfe7507",
     "scripts/readiness.py": "e382688191772c068211254dfbf882e02a63c51ce5d3ce8df3d147f7ef44dd18",
-    "scripts/reconstruct.py": "1ec4ddeb7cd774e66fa3b81eae13338980da9e700874a827c9d1696a7ef9f470",
-    "scripts/reconstruct_paper.py": "ca817e976ca4a27d113dd95ca1c3982d143ad0e4af3a43c399bfc7ef2a9af20d",
+    "scripts/reconstruct.py": "78c24aec5727e9161affe7f9c11be9548f310ac887bc9c3c63472513e800121c",
+    "scripts/reconstruct_paper.py": "84280a139b3bb7067e7d41acd9879616d5dbb3c68e8c855eba444a60fb21e2c4",
     "scripts/record_mapping.py": "76048f3af0e1150a89c709d16af293f171193be147156710e06933c6345afa78",
     "scripts/records.py": "ff08de6b8e058307c03a7ba35948b74e9c1611e37ac4654797fab3fb6cf5100b",
     "scripts/register_manuscript_sources.py": "6bdbdf998d13abaf1d58f0c9fc423d18a6b96a4a398e975b1fb3292c690b6f5c",
     "scripts/release_audit.py": "39b384ed7e6489f929340db7ba65f94e23456a3fac32d5683f46700956b3266e",
+    "scripts/render_evidence_badge.py": "d2eeca795629a8c44ac82af123a00523bdce04402384992ea710aa84f23cec0b",
     "scripts/render_paper_results.py": "c82e1c77b5e56dab327d911d000cc8fe14b321bb5a05f6c794aecc56b7cd1e53",
     "scripts/reproduce_examples.py": "918becbf406d4b97a5599b0a198be05a6aa30bdb901a1e161491b2fbe97311c4",
     "scripts/reproduce_results.py": "4521e6c5887d812aec95a42435e51de48dbf1203419eb26313e771e69f780255",
@@ -8846,7 +8846,7 @@
     "scripts/review.py": "a5e0d346bceda2ceb850ae78f9ba9ef4f77e8235d2b549ac468c54201c1634c9",
     "scripts/run_ablation.py": "6dba7b30e5acb54b6fa49eaff718864aad5890024acee51cc98953a931647639",
     "scripts/run_budget_arms.py": "04b5de04180f9b49272060d81fce26ac272832c838a981d581bf806134d6cf2b",
-    "scripts/run_budget_study.py": "9f55e82fed1b6a023b7741a0ee60804aa42b95b998306ea180ec476afbccfd4e",
+    "scripts/run_budget_study.py": "0aaabc464196d0422251d4ea8f9c91bd5d2e80ff419e9b2b58c0a150e3f8f71f",
     "scripts/run_confirmation_analysis.py": "9695db31a6a2adc64693871d20fa8ac60fe2b7dc5c5f89ccd4cd2579ea8d6af0",
     "scripts/run_decision_audit.py": "036647011837d61e5c71a8ec9832724dd33765f626e480ff664963a29a6e6c75",
     "scripts/run_experiment.py": "bc14c96a7e1e45c5ddbb93afa0d9a7748cec0ede9dc74dc50713d61d426a4066",
@@ -8859,8 +8859,8 @@
     "scripts/run_upstream_baseline.py": "4b319fdd737566021a323eb23439d6497c6b8125c1e7a60cdd2ba0b632c88f0b",
     "scripts/scientific_evidence_audit.py": "9e709cc780fcfc68f504ba64eb08cd2e0536e9c8ba896bedf38ae82e7f970e24",
     "scripts/source_fingerprint.py": "d88ad8ea4e8974d3d0192f53602357eef4ae71a85f5deca0e90ccdc31e155d40",
-    "scripts/statement_check.py": "e607c6c1f99a8b0a0f79ca23c7d05ad5454233dd355bd0a18ab1f28b6f2d2343",
-    "scripts/statement_evidence.py": "b981705317a6d67b13b51b23ca89814df83c38a003e8d28f48d0655101421b31",
+    "scripts/statement_check.py": "84b02943556ce903aa55efcd12ec564a45a812df52bf63c22a6d06490ed75154",
+    "scripts/statement_evidence.py": "89adb02d5d64c73f0377eec59b8235aba0ac63b703a0264ae9066c634f0357ab",
     "scripts/summarize_roman_splits.py": "18722c7d326e7785a2a5d7d69002876915f0be53ba5aa4f7f07714a7c798edc1",
     "scripts/validate_run_manifest.py": "104ad1db13d6311e9cb98855e1d827cd23024cd1df50fa9a9429720533d56c6b",
     "scripts/verify_review_bundle.py": "ed9ffb94e08c586cd0d98aca83d7e8426b346c9def1d7f8c163fa2b83ce4764a",
@@ -9222,9 +9222,9 @@
           "sha256": "856e1cf3c4dc1dedaf833a15208a6847a55443ffd1ee61ca17cfb52c05683172"
         },
         {
-          "bytes": 57829,
+          "bytes": 57748,
           "path": "paper/build/displays/experiments.py",
-          "sha256": "debd3a5ebe9bba09a8b63f066eca945e168e28019c598b32bfeeaa6d0aec113f"
+          "sha256": "ee2498ee037d11fc2f91c918ec19927f4c679916f426683492cea946d436e1c1"
         },
         {
           "bytes": 8407,
@@ -9232,14 +9232,14 @@
           "sha256": "fe8a7d26ff183c40dfcf08f6fb0c1f1580fb93e147642d72f05ebfb5f1e77736"
         },
         {
-          "bytes": 37576,
+          "bytes": 38316,
           "path": "paper/build/displays/framework.py",
-          "sha256": "470930016d1540d68035535a913a1654b689f47734ceffb227023e4e4b456cc9"
+          "sha256": "aeb0376780ee7ee9fc69eff4b09b6529436b6f1f1c9311c2c4f3dac3252e0199"
         },
         {
-          "bytes": 121431,
+          "bytes": 120840,
           "path": "paper/build/displays/main_paper.py",
-          "sha256": "ad4a3efbda847c2b046704f6ff0b55ca7e8647184fa204c893dc5516ea34c49c"
+          "sha256": "7b0c3f4c0cf9717ae04aefd310c65a5558d46adef003b803a98880f50c0935ce"
         },
         {
           "bytes": 103437,
@@ -9247,9 +9247,9 @@
           "sha256": "39dea8b4bb0f29b233a08547c4dc4b9e92086b338df9fcb7e785794715ce8829"
         },
         {
-          "bytes": 121863,
+          "bytes": 121631,
           "path": "paper/build/displays/records_campaigns.py",
-          "sha256": "3b91eae9f032643d79ca8ccd71ca0f95fd302cd157139354bc2f28149f936a92"
+          "sha256": "a2bd720a527d6b1191a7c2caf993bf96d302c48d37a6de07f55fed0f3f2eea8e"
         },
         {
           "bytes": 6396,
@@ -9282,9 +9282,9 @@
           "sha256": "d04a861678235474598964a7a6c206f79e74c21375a9434983ef961fd0a43969"
         },
         {
-          "bytes": 42313,
+          "bytes": 42101,
           "path": "paper/build/supplement.py",
-          "sha256": "9ffd69b3e831e682e58a50e4ac1a64a9ca4fe76f301cea3581c9258372542338"
+          "sha256": "7ec843ac95ff896a6b7265776731b0150e924a555cbe944c37f62c8616ac4cf7"
         },
         {
           "bytes": 28920,
@@ -9303,8 +9303,8 @@
         }
       ],
       "scope": "Builder/replay implementation and pinned dependency contract; archived experiment analysis code remains in each full source inventory",
-      "sha256": "2f338f75f49e72dd3aac6cfbe17b01a18ab92efe8ade67d94c161b8765b90f24",
-      "source": "/home/runner/work/CR-9/CR-9"
+      "sha256": "8cbfb8b87a8f4354faa7b9d200f8796d5363e66a256f8170688eedd5a9fd6558",
+      "source": "/home/runner/work/CROSS-MORSE/CROSS-MORSE"
     },
     "inputs": [
       {
@@ -9317,7 +9317,7 @@
         "bytes": 69346,
         "input_kind": "registered_record_contract",
         "sha256": "e8bed3de597a2ac1f756561358f6a5284154a2a3e8f8f02a3be0bbb36dffae21",
-        "source": "/home/runner/work/CR-9/CR-9/records/specs.json"
+        "source": "/home/runner/work/CROSS-MORSE/CROSS-MORSE/records/specs.json"
       },
       {
         "files": [
@@ -10347,7 +10347,7 @@
             "sha256": "edd7d1d34afd323e26cab26aeaa6854a1be8ae96e0b51974ad1a48397ebda5a8"
           }
         ],
-        "input_kind": "demonstration_record_set",
+        "input_kind": "cpu_execution_record_set",
         "manifest_sha256": "c0b2235890e9aa9c1071243d781de24c1369261c02d5a990907659816434bce0",
         "record_set": "factorials",
         "scope": "Every summary value traced to a sealed raw file; historical execution and the original inferential method are not independently attested",
@@ -10663,7 +10663,7 @@
             "sha256": "fcca2a83bb20d4e4ebcfecf87f4196ae37f61d5729e78e8638c813663b14c600"
           }
         ],
-        "input_kind": "demonstration_record_set",
+        "input_kind": "cpu_execution_record_set",
         "manifest_sha256": "568d946ae44f98e3b48d0ea357b150c2160596beddd910bbef67846fca364e05",
         "record_set": "ensemble_grid",
         "scope": "Every summary value traced to a sealed raw file; historical execution and the original inferential method are not independently attested",
@@ -113195,7 +113195,7 @@
           }
         ],
         "historical_table_reproduction": false,
-        "input_kind": "demonstration_budget_campaign",
+        "input_kind": "cpu_execution_budget_campaign",
         "sha256": "693656652746e7a9757b20bf64d873232bb8f9671b264d00001a37a0e875337e",
         "source": "/home/runner/demo/fetched/campaigns/budget",
         "verifier_scope": "new experiment: development-selected controller-seed procedure conditional on frozen parent ensembles; not historical S46 reconstruction"
@@ -113217,12 +113217,12 @@
         "id": "factorial_arxiv_table",
         "input_kind": "synthetic_examples",
         "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
+        "note": "CPU execution on public data. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
         "row_count": 8,
         "sha256": {
           "tables/S16.csv": "b7dcad849992f23a246bcb350647d54036c5ec695966c019e23984e59d6ab567",
-          "tables/S16.md": "fa5280f5adfb3f26acb6dec2209c6af9fd5bb80e95c5954166c8a6009f9dcff0",
-          "tables/S16.tex": "3448140a7225bee021a84731a4d74dc594c49b516ab62c8005a913537b4a1a5c"
+          "tables/S16.md": "fca174491db2bb6dbbd3e3e7820e6a7c049eee2a4003835c31f06bd0e6c1f0ed",
+          "tables/S16.tex": "3bddbbcf5ee8ad8ab8fd6774bc159fa9e21536a5d1a671a4c82938f0c4053cd5"
         },
         "source_input_kind": "verified_measurement_record_set",
         "synthetic": true
@@ -113241,11 +113241,11 @@
         "id": "factorial_arxiv_plot",
         "input_kind": "synthetic_examples",
         "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
+        "note": "CPU execution on public data. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
         "sha256": {
           "data/factorial_arxiv.csv": "b7c45da646766365631cfda185f94f3d5a6048decd89bc99aea86b87d3086511",
-          "figures/factorial_arxiv.png": "39718e23691a664b1b9dd815dbd1440ccd673b864bb2d7177caa4feac82d06df",
-          "figures/factorial_arxiv.svg": "81833ee6b006d8523bde385e7c7d0071bf8357acc5242d445d19d5518126ff06"
+          "figures/factorial_arxiv.png": "246c03f87cd12f89bcce966b72d1fd2c358412a0b29946b0b46c9558ef20a2a4",
+          "figures/factorial_arxiv.svg": "3506c0cd3da326554b9ed5d38f90df8b55b5a279df5e6e9bdab7d5ff6f95d7ec"
         },
         "source_input_kind": "verified_measurement_record_set",
         "synthetic": true
@@ -113265,12 +113265,12 @@
         "id": "factorial_pascal_table",
         "input_kind": "synthetic_examples",
         "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
+        "note": "CPU execution on public data. All eight cells and their six measured quantities are read from verified factorial records. Loss and original 95% interval are in nats; official metric is in percent/F1 points, activity is a fraction. Relative time retains the explicitly recorded unit/denominator without renormalization. Cell intervals are preserved; contrast intervals need the original joint resampling covariance and are not inferred from marginal intervals.",
         "row_count": 8,
         "sha256": {
           "tables/S16b.csv": "d824ee31373995ed1c5463ad54cabe27ddf8fa3be47f4817ef0fa8f1b82245d6",
-          "tables/S16b.md": "340f431c1c0c369929b6fd3eb75d166a3b4d117aa6341e519e73046a5aabd898",
-          "tables/S16b.tex": "1fe8d695130e6723894143fbb971292aa4445ceef9c213044d8feb76ca74d38f"
+          "tables/S16b.md": "5c14098adb3ea0909a4fccb1109dc9880c4185d7b331617d478d85c5eb5abf71",
+          "tables/S16b.tex": "45f4b4e2cf212b06ace1a1e6c439cd5d455071196c953258fcce25e0d564e2b6"
         },
         "source_input_kind": "verified_measurement_record_set",
         "synthetic": true
@@ -113289,11 +113289,11 @@
         "id": "factorial_pascal_plot",
         "input_kind": "synthetic_examples",
         "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
+        "note": "CPU execution on public data. Cell-mean/interval plot: main Figure 4a for arxiv; companion view of S16b for Pascal. Other panels and joint-covariance contrast intervals are not supplied.",
         "sha256": {
           "data/factorial_pascal.csv": "264e469a6719792346357123c3c36be3bb29af24ca8889ac5480b30c63ae17f7",
-          "figures/factorial_pascal.png": "7ca15a775f2bc3fd3b9feb36c00cc05e0134d4e5fc82b732abac0b8b2e981946",
-          "figures/factorial_pascal.svg": "1dfe80394dfaeb48d80e889c36d56b50693cf7d004a928c5dcc7ec084983064f"
+          "figures/factorial_pascal.png": "c904a51ab9c2d9aca7b07e65f3a27f258a9efdb1ffd7d1c456b7158fafd43f03",
+          "figures/factorial_pascal.svg": "f7aa2abbbbbb8a0d59d50bc79b07a22a315577ae8f2af9b1c89f99525885d9e2"
         },
         "source_input_kind": "verified_measurement_record_set",
         "synthetic": true
@@ -113313,11 +113313,11 @@
         "id": "factorial_point_contrasts",
         "input_kind": "synthetic_examples",
         "input_sha256": "30d5e05f00eee244daa5ba8489c46eed0d30f3fd606f527813d7da9c0f828216",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Point contrasts only; no fabricated interaction confidence intervals.",
+        "note": "CPU execution on public data. Point contrasts only; no fabricated interaction confidence intervals.",
         "sha256": {
           "tables/factorial_point_contrasts.csv": "cbbe3de26a932886ac37988d4f4c63e2bb666a5ebc2bf20d8b776a9857d01c9a",
-          "tables/factorial_point_contrasts.md": "91dad7c03e8ca135643869a8945ebe242fefcd1cab72931ff061d97fd3770365",
-          "tables/factorial_point_contrasts.tex": "2115d43d47c19ff24785f3c51d65c8c7e88367688ed175a98bb340fc1793d701"
+          "tables/factorial_point_contrasts.md": "f3756a64631a81c564105b33921292f492ce7992d486873d1a5bd064bd4afc70",
+          "tables/factorial_point_contrasts.tex": "6eeb0b784b2d2b67e8a988c2fee1aff871eaf05eee13c5d50228ae2b0589e330"
         },
         "source_input_kind": "derived_from_verified_measurement_records",
         "synthetic": true
@@ -113336,11 +113336,11 @@
         "id": "ensemble_law_fit",
         "input_kind": "synthetic_examples",
         "input_sha256": "e45e5abecdc83afb87d8e2598bb7af32bfb9b2a9e4cb2a20df9939a7deb4a991",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. OLS of the verified comparator losses on 1/E over the exact E={1,2,4,8,12,16,20} grid. The model's coefficient/asymptote diagnostics are reported even when unfavorable. The original record schema does not supply the printed D_inf band, plant-loss ratio kappa, break-even cost inputs, feedback-by-E response or extra-checkpoint accounting; none is inferred from the manuscript.",
+        "note": "CPU execution on public data. OLS of the verified comparator losses on 1/E over the exact E={1,2,4,8,12,16,20} grid. The model's coefficient/asymptote diagnostics are reported even when unfavorable. The original record schema does not supply the printed D_inf band, plant-loss ratio kappa, break-even cost inputs, feedback-by-E response or extra-checkpoint accounting; none is inferred from the manuscript.",
         "sha256": {
           "tables/S26b_fit.csv": "bd60baa760cb1ac4ac0ab2110252871518bb48037bdcb9414a032343d77ae8ff",
-          "tables/S26b_fit.md": "3fabd64676073fe8bfaa8b11507f23b69eb1b4f05fb703675ec16ddfa44737a1",
-          "tables/S26b_fit.tex": "4562b4d769bcbc5353e143fc7565f5463cea6b6fcd62115f0052e22a45324a2c"
+          "tables/S26b_fit.md": "6ea5b6bc2ee2da8fe65a6f46d396349614b934b6134932ba2ae079c948cdc30e",
+          "tables/S26b_fit.tex": "b67a35aec0032ba91aa81a53ae9f32032faf47fe6199d0705aba44c1fb39331e"
         },
         "source_input_kind": "derived_from_verified_measurement_records",
         "synthetic": true
@@ -113361,13 +113361,13 @@
         "id": "ensemble_grid_diagnostics",
         "input_kind": "synthetic_examples",
         "input_sha256": "e45e5abecdc83afb87d8e2598bb7af32bfb9b2a9e4cb2a20df9939a7deb4a991",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Measured comparator points and fit diagnostics. These do not reconstruct Figure 4b's feedback effect/work response or the S3 ensemble sensitivity band.",
+        "note": "CPU execution on public data. Measured comparator points and fit diagnostics. These do not reconstruct Figure 4b's feedback effect/work response or the S3 ensemble sensitivity band.",
         "sha256": {
           "data/ensemble_grid.csv": "d1149f05869d710d90c534bb779791b2b1fc2ddc7ec13c91a152e661abda11fe",
-          "figures/ensemble_fit.png": "4614e4ec6ebba6b59036a0eccdafe6b472fb0e270fa0cfca502bfac118216a81",
-          "figures/ensemble_fit.svg": "4931c308ce7438ff74c65f7c9b13c2a2813224fd7d23a5add1657e10e6381b6b",
-          "figures/ensemble_residuals.png": "8ce839f759c1ec2bfae751d92c041cef33baa53d5419c72d0abd85ad971ba4e5",
-          "figures/ensemble_residuals.svg": "efd471f410fd74d0bb802d538dfdec8be4a11c261419983d3e32c9c8f13ebc53"
+          "figures/ensemble_fit.png": "27d43479b2269f71c93d82fa6c09c2c9cb4353fcbc32eae0d9a7e98feecdbf6f",
+          "figures/ensemble_fit.svg": "22a726d4f9499a6267af2463ff0993056012e791e083e30f07e645e97e94bcdc",
+          "figures/ensemble_residuals.png": "4d6487fd33e891d320ccd900f34ee1b4280b73a9c8f5bc0ec65ae0c2e58b4904",
+          "figures/ensemble_residuals.svg": "3ed95e0d94284f959095bd267de3ab08ca20e6059d90de27834b4d964190b1e7"
         },
         "source_input_kind": "derived_from_verified_measurement_records",
         "synthetic": true
@@ -113388,12 +113388,12 @@
         "id": "budget_comparison_table",
         "input_kind": "synthetic_examples",
         "input_sha256": "693656652746e7a9757b20bf64d873232bb8f9671b264d00001a37a0e875337e",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
+        "note": "CPU execution on public data. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
         "sha256": {
           "data/budget_audit_summary.json": "e06cc0a3460555c750bdb62ae175b40e9bceaec1e856617d3a4ab2adfa3d79f0",
           "tables/S46b_comparison.csv": "42954652084927b1bd4784d29662a630ec09d87864e851621e0d59287868e87f",
-          "tables/S46b_comparison.md": "c9153d753d1894118105ec2e427ed4aa1f7a6db558ca229d2b8d85c0a820db8c",
-          "tables/S46b_comparison.tex": "2ea4acab3aae7d643a6d4708d2d1db058995deb12f2c565eb9ac5cbd16572f9d"
+          "tables/S46b_comparison.md": "1bd56909ffdef6ad250d6a5ba8875f75f7cff453ff4f13aa9c503fb190eb90e1",
+          "tables/S46b_comparison.tex": "0e82e8c6c49a0e58dbd0f726b9e2a986379c0df5240ac4747ea6e5f534e996af"
         },
         "source_input_kind": "strict_budget_campaign",
         "synthetic": true
@@ -113413,11 +113413,11 @@
         "id": "budget_comparison_forest_work",
         "input_kind": "synthetic_examples",
         "input_sha256": "693656652746e7a9757b20bf64d873232bb8f9671b264d00001a37a0e875337e",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
+        "note": "CPU execution on public data. Twenty-four D_compare contrasts from strict original-file replay. Positive arm-minus-qM effects favor the frozen teacher. Holm operates within each dataset's four-arm family. Work/ceiling is derived from executed work, not confused with work/qC. Controller seeds remain conditional on the frozen parent ensembles. This is a new experiment, not historical Table S46 reconstruction; retained-share grid ranges, the teacher's D_test interval and modelled tails are not supplied.",
         "sha256": {
           "data/budget_comparison.csv": "42954652084927b1bd4784d29662a630ec09d87864e851621e0d59287868e87f",
-          "figures/budget_comparison.png": "14c525d9dc6e6badfca9709b80f1c3155c6e22730130e9df7f4cef542b290954",
-          "figures/budget_comparison.svg": "a11069e759b7bd0c03097f368fda49ba28d0ca713e7cb5f79e4f2f6304d53598"
+          "figures/budget_comparison.png": "24a7e0c0db0d53442e7fb3e349edbcc1a98e206f7306686de667248677442ae6",
+          "figures/budget_comparison.svg": "0ac8bab90185df19e83e5b81f1712190b397156e57e5fe14c970279032647174"
         },
         "source_input_kind": "strict_budget_campaign",
         "synthetic": true
@@ -113438,18 +113438,18 @@
         "id": "budget_comparison_frontier",
         "input_kind": "synthetic_examples",
         "input_sha256": "693656652746e7a9757b20bf64d873232bb8f9671b264d00001a37a0e875337e",
-        "note": "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements. Related Figure 6a/S3 executed-work point frontiers on D_compare. Does not supply the printed D_test intervals, configuration ranges, ensemble band, power or tail panels.",
+        "note": "CPU execution on public data. Related Figure 6a/S3 executed-work point frontiers on D_compare. Does not supply the printed D_test intervals, configuration ranges, ensemble band, power or tail panels.",
         "sha256": {
           "data/budget_frontier.csv": "839241de57d355d34ebc0bf456b52802d0b9c4ea34d488ddfdffd9bc0aae9082",
-          "figures/budget_frontier.png": "35c2b6729a809f5fad73c9902b9da8b4f51a9613bedfa3b1592adcf01f46cc6b",
-          "figures/budget_frontier.svg": "d00db5282fb4e9f12f7683be03db764e014597ed20c3192d292158e6a5770537"
+          "figures/budget_frontier.png": "30d19b4fa7f322fc643a222ffb719bb45c0a019007bd4edfdaf24727b02e5c49",
+          "figures/budget_frontier.svg": "7b7440cc86da06caea31edb56b70f1a47768ea835917e7e0baa661cfdd8beb00"
         },
         "source_input_kind": "strict_budget_campaign",
         "synthetic": true
       }
     ],
     "schema": "cross-morse-supplement-build-1",
-    "scope": "CPU demonstration at reduced scale: displays from its fixture-derived records and campaigns; not the paper's measurements",
+    "scope": "CPU execution on public data: displays computed from its record sets and campaigns",
     "skipped": [
       {
         "input": "confirmation_campaign",

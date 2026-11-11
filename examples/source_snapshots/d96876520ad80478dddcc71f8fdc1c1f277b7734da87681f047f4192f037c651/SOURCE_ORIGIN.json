@@ -1,6 +1,6 @@
 {
   "origin_commit": "89dedcbe1432b4e9580fa4cabcd0923f9f28f6c6",
-  "origin_repository": "https://github.com/VKHS/CR-9",
+  "origin_repository": "https://github.com/VKHS/CROSS-MORSE",
   "purpose": "Exact runtime preserved before the selection's studentized maximum followed Supplementary Algorithm S4 (the feasible family Q_feas). It supports verification and replay of artifacts declaring this identity; its presence does not establish that any benchmark artifact has been published.",
   "runtime_files": {
     "run_cross_morse.py": "bcffbdc9c944c2455ce972f724abc586283797c5997a671baf67e027f7a401c9",

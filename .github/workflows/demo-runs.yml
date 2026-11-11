@@ -1,14 +1,11 @@
-name: Demo runs
+name: CPU lifecycle runs
 
-# The seven sealed lifecycle runs of the CPU demonstration (demo/README.md): every dataset's eight
+# The seven sealed lifecycle runs of the CPU execution (demo/README.md): every dataset's eight
 # stages at the pilot settings on a hosted CPU runner, Roman-empire as its ten split runs on the
-# complete official graph and the other datasets on the reduced official-split graphs of demo/data.py.
+# complete official graph and the other datasets on the deterministic official-split subsets of demo/data.py.
 # Each run is kept as a workflow artifact for the production graph (demo-graph.yml).
 on:
   workflow_dispatch:
-  push:
-    branches: [expanded-demo-2026-11-09]
-    paths: [.github/workflows/demo-runs.yml, demo/runs-request.json]
 
 permissions:
   contents: read
@@ -56,7 +53,7 @@ jobs:
           cat "$GITHUB_OUTPUT"
 
   graphs:
-    name: Reduced graph ${{ matrix.dataset }}
+    name: Subset graph ${{ matrix.dataset }}
     needs: select
     if: ${{ needs.select.outputs.graphs != '[]' }}
     runs-on: ubuntu-latest
@@ -83,7 +80,7 @@ jobs:
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
           python -m pip check
-      - name: Build the reduced official-split graph
+      - name: Build the official-split subset graph
         run: |
           stem=$(python -c "import sys;sys.path.insert(0,'demo');import configure;print(configure.STEMS['${{ matrix.dataset }}'])")
           echo "STEM=$stem" >> "$GITHUB_ENV"
@@ -120,7 +117,7 @@ jobs:
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
           python -m pip check
-      - name: Demonstration configuration
+      - name: CPU execution configuration
         run: |
           stem=$(python -c "import sys;sys.path.insert(0,'demo');import configure;print(configure.STEMS['${{ matrix.dataset }}'])")
           echo "STEM=$stem" >> "$GITHUB_ENV"

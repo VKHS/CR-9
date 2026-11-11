@@ -3,8 +3,8 @@
   "@type": "SoftwareSourceCode",
   "name": "CROSS-MORSE",
   "description": "Reference implementation of CROSS-MORSE: inference-time control of message passing in frozen graph neural networks, with seven dataset adapters, a sealed eight-stage lifecycle, numerical replay, run-archive and measurement-record contracts, and evidence-backed table and figure builders.",
-  "codeRepository": "https://github.com/VKHS/CR-9",
-  "issueTracker": "https://github.com/VKHS/CR-9/issues",
+  "codeRepository": "https://github.com/VKHS/CROSS-MORSE",
+  "issueTracker": "https://github.com/VKHS/CROSS-MORSE/issues",
   "license": "https://spdx.org/licenses/BSD-3-Clause",
   "programmingLanguage": [
     {
@@ -54,9 +54,9 @@
     "reproducibility"
   ],
   "developmentStatus": "active",
-  "readme": "https://github.com/VKHS/CR-9/blob/main/README.md",
-  "buildInstructions": "https://github.com/VKHS/CR-9/blob/main/docs/GETTING_STARTED.md",
-  "continuousIntegration": "https://github.com/VKHS/CR-9/actions/workflows/quality.yml",
+  "readme": "https://github.com/VKHS/CROSS-MORSE/blob/main/README.md",
+  "buildInstructions": "https://github.com/VKHS/CROSS-MORSE/blob/main/docs/GETTING_STARTED.md",
+  "continuousIntegration": "https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml",
   "referencePublication": {
     "@type": "ScholarlyArticle",
     "name": "CROSS-MORSE: Cross-Spectral Control of Message Passing in Frozen Graph Neural Networks",

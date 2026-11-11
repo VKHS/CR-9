@@ -10,7 +10,7 @@
 # --dry-run prints the commands without cloning or downloading.
 set -euo pipefail
 
-REPOSITORY="https://github.com/VKHS/CR-9.git"
+REPOSITORY="https://github.com/VKHS/CROSS-MORSE.git"
 REVISION=""
 WORK=""
 DRY_RUN=0
@@ -41,7 +41,6 @@ steps=(
     "git -C ${CHECKOUT} checkout --quiet ${REVISION}"
     "make -C ${CHECKOUT} paper PYTHON=${PYTHON} PAPER_TIER=complete ARTIFACTS_ROOT=${ARTIFACTS} PAPER_ROOT=${PAPER}"
     "make -C ${CHECKOUT} statement-fulfilled PYTHON=${PYTHON} ARTIFACTS_ROOT=${ARTIFACTS} PAPER_ROOT=${PAPER}"
-    "make -C ${CHECKOUT} final-destination-converge PYTHON=${PYTHON}"
 )
 if [[ "${DRY_RUN}" == "1" ]]; then
     printf '%s\n' "${steps[@]}"

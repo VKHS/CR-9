@@ -1,8 +1,8 @@
 {
   "schema": "cross-morse-paper-artifacts-1",
-  "repository": "VKHS/CR-9",
+  "repository": "VKHS/CROSS-MORSE",
   "release_tag": "paper-artifacts",
-  "release_url": "https://github.com/VKHS/CR-9/releases/tag/paper-artifacts",
+  "release_url": "https://github.com/VKHS/CROSS-MORSE/releases/tag/paper-artifacts",
   "part_bytes": 1992294400,
   "statement": "release/availability_statement.json",
   "status": "awaiting_measured_outputs",

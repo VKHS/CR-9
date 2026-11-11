@@ -46,7 +46,7 @@ if str(ROOT) not in sys.path:
 
 SCHEMA = "cross-morse-paper-artifacts-1"
 MANIFEST = ROOT / "release" / "paper_artifacts.json"
-REPOSITORY = "VKHS/CR-9"
+REPOSITORY = "VKHS/CROSS-MORSE"
 TAG = "paper-artifacts"
 PART_BYTES = 1900 * 1024 * 1024          # GitHub limit: 2 GiB per release asset
 INVENTORY_NAME = "ARTIFACT_INVENTORY.json"
@@ -55,15 +55,17 @@ RUN_ARCHIVE_MANIFEST = "ARCHIVE_MANIFEST.json"
 AWAITING = "awaiting_measured_outputs"
 PUBLISHED = "published"
 RELATIONSHIPS = ("exact_result_producing_run", "post_result_revision", "refactor_with_prediction_equivalence")
-# The CPU demonstration (demo/README.md) is a separate channel: its own manifest and release, one relationship.
+# The CPU execution (demo/README.md) is a separate channel: its own manifest and release, one relationship.
 DEMO_MANIFEST = ROOT / "release" / "demo_artifacts.json"
 DEMO_TAG = "demo-artifacts"
-DEMO_CHANNEL = "demonstration"
-DEMO_RELATIONSHIP = "reduced_scale_demonstration"
-DEMO_SCOPE = ("CPU demonstration of the released code at reduced scale (demo/README.md). Every artifact was produced by "
-              "the repository's own lifecycle and runners on public benchmark data on hosted CPU runners. The values "
-              "are not the paper's measurements and are not expected to equal the printed values.")
-DEMO_AWAITING = "not produced by the CPU demonstration (demo/README.md names the reason)"
+DEMO_CHANNEL = "cpu_execution"
+DEMO_RELATIONSHIP = "cpu_execution_on_public_data"
+DEMO_SCOPE = ("CPU execution of the released code on public benchmark data (demo/README.md). Every artifact was "
+              "produced by the repository's own lifecycle and runners on hosted CPU runners: Roman-empire on its "
+              "complete official graph with its ten official splits, the other six datasets on deterministic subsets "
+              "of their official data, at the pilot settings. The paper's printed values are the measurements of its "
+              "full-scale GPU runs.")
+DEMO_AWAITING = "outside the CPU execution (demo/README.md gives the reason)"
 HASH = re.compile(r"[0-9a-f]{64}\Z")
 DATASETS = ("ogbn-arxiv", "ogbn-proteins", "ogbn-products", "Roman-empire",
             "PascalVOC-SP", "COCO-SP", "Peptides-func")
@@ -106,9 +108,6 @@ def read_json(path: Path):
     def reject(value):
         raise ArtifactError(f"Nonfinite JSON in {path}: {value}")
     value = json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=pairs, parse_constant=reject)
-    # A projected file of destination/ (scripts/destination.py) is never a publication record.
-    require(not (isinstance(value, dict) and "projection" in value),
-            f"{path} is a projection from destination/, not a published file")
     return value
 
 
@@ -249,7 +248,7 @@ def validate_manifest(manifest: dict) -> dict:
             continue
         if manifest.get("channel") == DEMO_CHANNEL:
             require(entry.get("relationship") == DEMO_RELATIONSHIP and entry.get("scientific_only_verification") is False,
-                    f"The demonstration channel publishes demonstration artifacts only: {identifier}")
+                    f"The CPU execution channel publishes CPU execution artifacts only: {identifier}")
         else:
             require(entry.get("relationship") in RELATIONSHIPS, f"Declare the manuscript relationship: {identifier}")
         require(isinstance(entry.get("identity"), dict) and bool(entry["identity"]), f"Missing artifact identity: {identifier}")
@@ -287,9 +286,9 @@ def validate_manifest(manifest: dict) -> dict:
     require(manifest.get("channel") in (None, DEMO_CHANNEL), "Unknown artifact channel")
     if manifest.get("channel") == DEMO_CHANNEL:
         require(manifest.get("release_tag") == DEMO_TAG and bool(manifest.get("scope")),
-                "The demonstration manifest names its own release and scope")
+                "The CPU execution manifest names its own release and scope")
     else:
-        require(manifest.get("release_tag", TAG) != DEMO_TAG, "The paper's manifest cannot name the demonstration release")
+        require(manifest.get("release_tag", TAG) != DEMO_TAG, "The paper's manifest cannot name the CPU execution release")
     all_published = bool(manifest["artifacts"]) and all(e["status"] == PUBLISHED for e in manifest["artifacts"])
     require(manifest["status"] == (PUBLISHED if all_published else AWAITING), "Manifest state differs from its artifact descriptors")
     return manifest
@@ -705,9 +704,9 @@ class GitHub:
                                       ok=(200, 404))
         return value if status == 200 else None
 
-    def create_release(self, tag: str, *, target: str, body: str) -> dict:
+    def create_release(self, tag: str, *, target: str, body: str, name: str = "Paper artifacts") -> dict:
         _, value = self._request("POST", f"{self.api}/repos/{self.repository}/releases", ok=(201,), body={
-            "tag_name": tag, "target_commitish": target, "name": "Paper artifacts", "body": body,
+            "tag_name": tag, "target_commitish": target, "name": name, "body": body,
             "draft": False, "prerelease": False, "make_latest": "false"})
         return value
 
@@ -734,11 +733,32 @@ class GitHub:
         return value
 
 
+_ASSET_URLS: dict[tuple[str, str], dict[str, str]] = {}
+
+
+def _asset_api_url(url: str, token: str) -> str | None:
+    """The REST URL of a release asset given by its download URL; a private repository serves its assets there."""
+    parsed = urllib.parse.urlparse(url)
+    parts = parsed.path.strip("/").split("/")
+    if parsed.netloc != "github.com" or len(parts) != 6 or parts[2:4] != ["releases", "download"]:
+        return None
+    repository, tag = f"{parts[0]}/{parts[1]}", urllib.parse.unquote(parts[4])
+    if (repository, tag) not in _ASSET_URLS:
+        client = GitHub(repository, token)
+        release = client.release(tag)
+        _ASSET_URLS[(repository, tag)] = ({name: asset["url"] for name, asset in client.assets(release).items()}
+                                          if release else {})
+    return _ASSET_URLS[(repository, tag)].get(urllib.parse.unquote(parts[5]))
+
+
 def download(url: str, target: Path, *, token: str | None = None) -> None:
     headers = {"User-Agent": "cross-morse-paper-artifacts", "Accept": "application/octet-stream"}
     if token:
-        headers["Authorization"] = f"Bearer {token}"
+        url = _asset_api_url(url, token) or url
     request = urllib.request.Request(url, headers=headers)
+    if token:
+        # sent to the first host only: the asset redirect leads to storage that refuses a second credential
+        request.add_unredirected_header("Authorization", f"Bearer {token}")
     temporary = target.with_name(target.name + ".download")
     require(not target.is_symlink() and not temporary.is_symlink(), "Download target is linked")
     with urllib.request.urlopen(request, timeout=600) as response, temporary.open("wb") as out:
@@ -750,13 +770,13 @@ def publish(staged: Path, manifest_path: Path = MANIFEST, *, client: GitHub, tag
             target: str = "main", download_base: str | None = None, demonstration: bool = False) -> dict:
     """Publish immutable asset versions after preflight; switch the local manifest last.
 
-    ``demonstration`` publishes the CPU demonstration to its own release (DEMO_TAG) and manifest
+    ``demonstration`` publishes the CPU execution to its own release (DEMO_TAG) and manifest
     (DEMO_MANIFEST); its entries carry DEMO_RELATIONSHIP only and never enter the paper's manifest."""
     if demonstration:
         require(tag == DEMO_TAG and Path(manifest_path).resolve() != MANIFEST.resolve(),
-                "The demonstration publishes to its own release and manifest")
+                "The CPU execution publishes to its own release and manifest")
     else:
-        require(tag != DEMO_TAG, "The paper's outputs are not published to the demonstration release")
+        require(tag != DEMO_TAG, "The paper's outputs are published to their own release")
     staged = Path(staged).resolve()
     entries = [read_json(p) for p in sorted(staged.glob("*.entry.json"))]
     require(entries, f"No packed artifacts (*.entry.json) under {staged}")
@@ -775,15 +795,18 @@ def publish(staged: Path, manifest_path: Path = MANIFEST, *, client: GitHub, tag
     validate_manifest({"schema": SCHEMA, "status": PUBLISHED, **channel,
                        "artifacts": [dict(entry, status=PUBLISHED) for entry in entries]})
     old_manifest = planned_manifest(load_manifest(manifest_path))
-    body = ("CPU demonstration of the CROSS-MORSE code at reduced scale; not the paper's measurements. "
-            "release/demo_artifacts.json records each artifact's identities and asset hashes; `make demo-paper` "
-            "verifies the downloaded bytes and rebuilds every table and figure from them (demo/README.md)."
+    body = ("Complete execution of the CROSS-MORSE pipeline on public data on CPU: the seven lifecycle runs with "
+            "checkpoints, predictions and propensity-logged trajectories, the measurement-record sets, the E3-E6 "
+            "campaign and the environment capture of the runner. release/demo_artifacts.json records each "
+            "artifact's identities and asset hashes; `make demo-paper` downloads and verifies the assets and "
+            "rebuilds the tables and figures from them (demo/README.md, demo/RESULTS.md)."
             if demonstration else
             "Archived experimental outputs for the CROSS-MORSE paper and its reproductions. "
             "release/paper_artifacts.json records each artifact's source identities, declared "
             "relationship to the paper and immutable asset hashes. `make paper` verifies the "
             "downloaded bytes and reports display coverage and numerical comparisons.")
-    release = client.release(tag) or client.create_release(tag, target=target, body=body)
+    release = client.release(tag) or client.create_release(
+        tag, target=target, body=body, name="CROSS-MORSE CPU execution" if demonstration else "Paper artifacts")
     present = client.assets(release)
     for entry in entries:
         for tier in entry["tiers"].values():
@@ -957,13 +980,15 @@ def verify_fetched(directory: Path, *, manifest_path: Path = MANIFEST, require_a
 
 
 def fetch(destination: Path, *, manifest_path: Path = MANIFEST, tier: str = "analysis",
-          only: list[str] | None = None, token: str | None = None, cache: Path | None = None) -> dict:
+          only: list[str] | None = None, token: str | None = None, cache: Path | None = None,
+          keep_archives: bool = True) -> dict:
     """Download, verify and unpack every published artifact into ``destination``.
 
     Layout: ``runs/<stem>/`` (Roman-empire: the campaign with ``split_*``),
     ``records/<set>/`` with ``records/index.json``, ``campaigns/<name>/`` and
     ``environment/<name>/``; ``.artifacts/`` keeps each artifact's inventory and the
-    identity of the archive it came from. Directories already verified are reused.
+    identity of the archive it came from. Directories already verified are reused. Without
+    ``keep_archives`` each downloaded archive is deleted once its directory is materialized.
     """
     require(tier in ("analysis", "complete"), "tier is analysis or complete")
     manifest = load_manifest(manifest_path)
@@ -1053,6 +1078,11 @@ def fetch(destination: Path, *, manifest_path: Path = MANIFEST, tier: str = "ana
                 if backup.exists():
                     os.replace(backup, target)
                 raise
+        if not keep_archives:
+            # later runs verify and reuse the materialized directory through its stamp
+            for part in spec["parts"]:
+                contained(cache, part["asset"], exists=False).unlink(missing_ok=True)
+            archive.unlink(missing_ok=True)
         report["published"].append({"id": entry["id"], "path": str(target), "tier": use, "reused": False, **check})
     records = destination / "records"
     if records.is_dir() and any(p.is_dir() and not p.name.startswith(".") for p in records.iterdir()):
@@ -1290,8 +1320,8 @@ def derive_baseline_studies(records: Path, checkout: Path, *, provenance: dict |
 def _verify_reconstruction_inputs(result: dict, fetched: Path, verified: dict, *, demonstration: bool = False) -> None:
     """Bind the complete measured input set, not only the inputs a stale report happened to name.
 
-    The CPU demonstration's supplementary build (reconstruct --demo) records its budget campaign as a
-    demonstration input: the campaign ran on fixture parents and is replayed without the strict qualification."""
+    The CPU execution's supplementary build (reconstruct --demo) records its budget campaign as a
+    CPU execution input: the campaign ran on fixture parents and is replayed without the strict qualification."""
     inputs = result.get("inputs")
     require(isinstance(inputs, list) and all(isinstance(item, dict) for item in inputs),
             "Reconstruction inputs must be a list of input descriptors")
@@ -1334,7 +1364,7 @@ def _verify_reconstruction_inputs(result: dict, fetched: Path, verified: dict, *
     # when individual numbered display generators also consume the same campaign.
     from cm_campaigns.common import directory_inventory
     kinds = {"confirmation": "original_confirmation_campaign",
-             "budget": "demonstration_budget_campaign" if demonstration else "strict_budget_campaign"}
+             "budget": "cpu_execution_budget_campaign" if demonstration else "strict_budget_campaign"}
     observed = {}
     for item in (result.get("supplementary_build") or {}).get("inputs", []):
         if item.get("input_kind") not in kinds.values():
@@ -1353,7 +1383,7 @@ def derive(fetched: Path, *, workspace: Path | None = None, checkout: Path = ROO
            manifest_path: Path = MANIFEST, install_root: Path | None = None) -> dict:
     """Verify the release and workspace, stage every small view, then install them together.
 
-    ``install_root`` (default: the checkout) is where the views are installed; the CPU demonstration's
+    ``install_root`` (default: the checkout) is where the views are installed; the CPU execution's
     views go under demo/published/ so that they never replace the paper's views."""
     from scripts.reconstruct import source_inventory, verify_workspace
     from scripts.reconstruct_paper import summarize
@@ -1362,7 +1392,7 @@ def derive(fetched: Path, *, workspace: Path | None = None, checkout: Path = ROO
     install_root = checkout if install_root is None else Path(install_root).resolve()
     manifest = load_manifest(manifest_path)
     require((manifest.get("channel") == DEMO_CHANNEL) == (install_root != checkout),
-            "Demonstration views are installed under demo/published/ and the paper's views in the checkout")
+            "CPU execution views are installed under demo/published/ and the paper's views in the checkout")
     verified = verify_fetched(fetched, manifest_path=manifest_path)
     links = [artifact_identity(entry, row["tier"]) for row in verified["artifacts"]
              for entry in manifest["artifacts"] if entry["id"] == row["id"]]
@@ -1477,7 +1507,7 @@ def main(argv=None) -> int:
     p.add_argument("--require-complete", action="store_true", help="refuse a map missing any required artifact")
     p.add_argument("--part-bytes", type=int, default=PART_BYTES)
     p.add_argument("--demo", action="store_true",
-                   help="pack the CPU demonstration (a software-fixture map; relationship reduced_scale_demonstration)")
+                   help="pack the CPU execution (a software-fixture map; relationship cpu_execution_on_public_data)")
     p = sub.add_parser("publish")
     p.add_argument("--staged", type=Path, required=True)
     p.add_argument("--manifest", type=Path, default=None)
@@ -1493,17 +1523,17 @@ def main(argv=None) -> int:
     p.add_argument("--tier", choices=["analysis", "complete"], default="analysis")
     p.add_argument("--manifest", type=Path, default=None)
     p.add_argument("--only", nargs="*")
-    p.add_argument("--demo", action="store_true", help="the CPU demonstration's manifest")
+    p.add_argument("--demo", action="store_true", help="the CPU execution's manifest")
     p = sub.add_parser("status")
     p.add_argument("--manifest", type=Path, default=None)
-    p.add_argument("--demo", action="store_true", help="the CPU demonstration's manifest")
+    p.add_argument("--demo", action="store_true", help="the CPU execution's manifest")
     p = sub.add_parser("map-template")
     p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser("derive")
     p.add_argument("--fetched", type=Path, required=True, help="a directory filled by `fetch`")
     p.add_argument("--workspace", type=Path, help="the reconstruction workspace written by scripts/reconstruct_paper.py")
     p.add_argument("--manifest", type=Path, default=None)
-    p.add_argument("--demo", action="store_true", help="the CPU demonstration: views under demo/published/")
+    p.add_argument("--demo", action="store_true", help="the CPU execution: views under demo/published/")
     p = sub.add_parser("verify")
     p.add_argument("directory", type=Path)
     args = parser.parse_args(argv)
@@ -1537,7 +1567,7 @@ def main(argv=None) -> int:
             missing = sorted(required - set(mapping))
             require(not args.require_complete or not missing, "Publication map is incomplete: " + ", ".join(missing))
             if args.demo:
-                require(args.relationship in (None, DEMO_RELATIONSHIP), "The demonstration has one relationship")
+                require(args.relationship in (None, DEMO_RELATIONSHIP), "The CPU execution has one relationship")
                 relationships = {key: DEMO_RELATIONSHIP for key in mapping}
             else:
                 relationships = {key: args.relationship or document.get("_relationships", {}).get(key)

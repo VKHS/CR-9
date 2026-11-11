@@ -1,11 +1,11 @@
 {
   "schema": "cross-morse-published-run-manifests-1",
-  "artifact_manifest_sha256": "f9561f74e9c0640ef5b8081eafe9ddc0381fb284c7885e8d18f832a7af12fb12",
+  "artifact_manifest_sha256": "b51c1b78d08ebab1383e1882169f7b3a000d0af1c45acfe2b2d7ef6dec5f0ae6",
   "artifacts": [
     {
       "id": "run:ogbn-arxiv",
       "kind": "run",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "analysis",
       "archive_sha256": "4544ed25be358d7fd4f8b5fcbd0e8e20d8eda708dd2630f5a9d824e179d60c4d",
       "inventory_sha256": "eacfc51c303319d65ff0c5ba3247ba1ff5e6d09bc0fc16638c082ddd5c36b414",
@@ -22,7 +22,7 @@
     {
       "id": "run:ogbn-proteins",
       "kind": "run",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "analysis",
       "archive_sha256": "2501cfd65da5f5797df1cd0f97e6612c15ee7675af2b55c11ab7dfdf71cd2eb9",
       "inventory_sha256": "d385c691cda7885d3cf85fb868fe10fb58846f378e90c59ebbdc39a85c9179f4",
@@ -39,7 +39,7 @@
     {
       "id": "run:ogbn-products",
       "kind": "run",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "analysis",
       "archive_sha256": "11474de87b7c94e46014eb2d4e8c2cf2e5966e2ba943de02d0c7848f8198c3ea",
       "inventory_sha256": "197813feafee586fa6ef1c453d65634e896fa09114af11695fd770aea5c51055",
@@ -56,7 +56,7 @@
     {
       "id": "run:Roman-empire",
       "kind": "run",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "analysis",
       "archive_sha256": "2ce3f4371a261188d2695c67171e4ec4f0d66fc92f9a2db04ee3fedd88ca3595",
       "inventory_sha256": "20bc48099577afb28639d3124140baf08f6e0e886f8878b64969311d9763d4c9",
@@ -140,7 +140,7 @@
     {
       "id": "run:PascalVOC-SP",
       "kind": "run",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "analysis",
       "archive_sha256": "984ce6e61562d3bbacafc22fa52bf70cd57a2913be0cc04952977de8a4e83d4b",
       "inventory_sha256": "e5b9fa27e1c30a1e3af503a3471cbc3839424a3c02616fe809f44e1576b68aae",
@@ -157,7 +157,7 @@
     {
       "id": "run:COCO-SP",
       "kind": "run",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "analysis",
       "archive_sha256": "b34d90de0a7c8d50d9adb42cf49e3255510af96208506b23d00fcb47966eb5f5",
       "inventory_sha256": "d6f0a89f4685fd9f5c96970b4d43bdd94e1796cd19dd8506b074f70f659b9a9b",
@@ -174,7 +174,7 @@
     {
       "id": "run:Peptides-func",
       "kind": "run",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "analysis",
       "archive_sha256": "9dc62dd3636790603b4016c2f2c7dfd94c84ecc1e978338fd0aba1b48ee9d641",
       "inventory_sha256": "e68ca55f50b07938fa7992c02858928b36c2670c724e4afe1fa42f6324085076",
@@ -191,7 +191,7 @@
     {
       "id": "records:band_bound_tightness",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "65765827a743842a0e8ee471432cfef2ece256f5898d0900e6499fee25178c10",
       "inventory_sha256": "21fe992ee65e6316219ac3a677ef6afe35108018c821fe176d84e126d75d3b1d",
@@ -204,7 +204,7 @@
     {
       "id": "records:budget_matched",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "7f7ead205327912a04ff56e0109167bfe03258feeda54b848e6598f9da16047a",
       "inventory_sha256": "fcd6fda7e7c9da13eaa1a7fa3f8ce7779c257d0790e4b46730bc6997a998a9c5",
@@ -217,7 +217,7 @@
     {
       "id": "records:buffer_sensitivity",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "7916ced84f7e6ceccd857a33ab8790a878838ca888acd569693eb6b332595583",
       "inventory_sha256": "909dd2263335a65d63a81c1426b88fd398d462ea822fb9b0af3e55febf159c93",
@@ -230,7 +230,7 @@
     {
       "id": "records:cross_backbone",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "56f10d9d7700a3c81dc28f54116edc77c0fd53b5832fee746b1f3b364663fee3",
       "inventory_sha256": "f587ee40bd0600c026f1b6ef9876d94f7ff273f1cdde49a10975199847ee6ef6",
@@ -243,7 +243,7 @@
     {
       "id": "records:decision_traces",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "8d32127521d92f2a88855760b579fceec147739e28195d27d2fa62a94908caf9",
       "inventory_sha256": "1aed3285205ced8074d76a836dd646c5d5cc1d24853281f120cccc7f742c55c9",
@@ -256,7 +256,7 @@
     {
       "id": "records:depth_diagnostics",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "af63c3ed93081f1de26308b692353b183719b35179347483465e38e3c95b6ea6",
       "inventory_sha256": "08106422189acf2b570622b214989fec170d18a31f822ed6469d9f5960f8d9b8",
@@ -269,7 +269,7 @@
     {
       "id": "records:ensemble_grid",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "dafafdff7cd322e718e72b899a1222ac8848028dcfb7ed73dfba6477fbd2cbba",
       "inventory_sha256": "b4e391fa64ecda214971d917bb5ef7d56d73b0463df1f555f8062db091c38879",
@@ -282,7 +282,7 @@
     {
       "id": "records:ensemble_grid_scores",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "021dbb846209767351497b413711209e4a119d8c43b74666c7d8317362b5f3de",
       "inventory_sha256": "b154c44a2395fa53e496896c4717fbd8eca8ca9ea66c20801bf13b0b87795f74",
@@ -295,7 +295,7 @@
     {
       "id": "records:factorials",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "c412011d997b5eb97bf031dc877505098a9ec56f9394972bbc12018f05a16b0c",
       "inventory_sha256": "9c507b390862a3ee03f9b76bb7bfb7c630a77f997aa931b54e68f19f58b3c2bf",
@@ -308,7 +308,7 @@
     {
       "id": "records:horizon_beam_sweep",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "5acc5c233539d74106e3628e371edf6862f55b5164ce5e6f50cff050a20feaaf",
       "inventory_sha256": "4b3d360086a8bd38198e4f5ce34ee1b12dbdfb98c8b1f6abcf65402021da42ae",
@@ -321,7 +321,7 @@
     {
       "id": "records:input_gate",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "e1e969fbc15fec2645d666e95af3fd843f74a080a87803c389689e5f799ee902",
       "inventory_sha256": "5129ef2e921429a9e19bc4ad6bba43a5cafd4df40aa824752aa905e31bdf3d93",
@@ -334,7 +334,7 @@
     {
       "id": "records:inserted_site",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "036afc21164801ee065e99d4ddec968a335201bfed310360d6ef2648e95f9211",
       "inventory_sha256": "499a8568d1ab4d011f192815f7d80e3ef96d899116062a6cf1d8a1e74f939635",
@@ -347,7 +347,7 @@
     {
       "id": "records:mechanism_contrasts",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "30c364e30ecb863e6c69bbbea1bf8176fbfc9ba1c4ac842d8f29556d3886544a",
       "inventory_sha256": "296504ff4ce0966f15fbb07170766a0a923efa1326a8bd43f545d91e29f7aea4",
@@ -360,7 +360,7 @@
     {
       "id": "records:negative_controls",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "9dc5f1c1278f106a957283d9ee6eabefbc234edf644265b961bdfd2be75cc78e",
       "inventory_sha256": "36dcb929ea4c85a3e4c5d2d6ca89741c774e991095cf40495c501c61a9e341ee",
@@ -373,7 +373,7 @@
     {
       "id": "records:nominal_time",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "c23a8f28a8edf4f7a33ea7c083e4cbb836a5b16223c2899782131d14c69ede44",
       "inventory_sha256": "f9534ecfd1ad57c85b310aed435d15a5c4b1bb6ad7724cd034440073d9fcfec7",
@@ -386,7 +386,7 @@
     {
       "id": "records:oracle_dispersion",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "4538fb7f82fd76e8d9367039723613a26f9094e8f2f64c9e73fea6350796313f",
       "inventory_sha256": "e5ea52bda9b50f0f4917da677adcfb995b55c98615782a5c5379e7ca511eae5b",
@@ -399,7 +399,7 @@
     {
       "id": "records:reliability_diagnostics",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "26b3a0486b983815a4f93c1112c9a67c2fa85ab2f9b9c12c2ebeb04670a80880",
       "inventory_sha256": "7e9089cead4bdb2c93a5da1fd87f1f41f3ef50d43e42f96895af8fb7ede7d347",
@@ -412,7 +412,7 @@
     {
       "id": "records:runtime_scaling",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "8ac23e17712d3bacb26531c39ffe25d0ab9ff55abebe503f8145881f2984ad3e",
       "inventory_sha256": "954a1523b6e6be52a01a0c2eb649e8360e3008838200a88e58aa72457e9cc345",
@@ -425,7 +425,7 @@
     {
       "id": "records:sensitivity_grids",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "7c576b7054d93255c698275189edbbc9944ab86e7d836e13a47c96b2eff1fbdd",
       "inventory_sha256": "496638230e0a78cab8e62186379c40687a4d75c01d736a06a90ed69243eb1f4a",
@@ -438,7 +438,7 @@
     {
       "id": "records:sensor_parameters",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "a12940a8edb0c25f76ea60814465c295712b3a82d06290b50cd38181af38b6ad",
       "inventory_sha256": "ff79e8f7a4ed48e59d4a72e512d24d04f920bb632373fb3291d76e4c443987d6",
@@ -451,7 +451,7 @@
     {
       "id": "records:timing_anchors",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "1c990537facb4230da8df9b9500da39def9589406d150741dfabafb45922b28d",
       "inventory_sha256": "76b8ad0dc949e862ad51ac1841b4465de1e759035393b4ebc04e190ec44cd600",
@@ -464,7 +464,7 @@
     {
       "id": "records:tube_audit",
       "kind": "records",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "203c3a2e0605ed7bd064afd824ecd9621a8d2738e71a774357da9fcc514a0b8d",
       "inventory_sha256": "f7d22262419241a7af44fd495b9009115dcf1bdaa6e8f807d85b3523c3cee7a8",
@@ -477,7 +477,7 @@
     {
       "id": "campaign:budget",
       "kind": "campaign",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "69f9edee720554fb38383863a17db8aa22d4dff3476db8cddb1912833bd001c4",
       "inventory_sha256": "db5bfa27d20392df7cfe7fdf96a10afc83f4b8dfcdd81f665264acbcc792a78f",
@@ -497,7 +497,7 @@
     {
       "id": "environment:gpu",
       "kind": "environment",
-      "relationship": "reduced_scale_demonstration",
+      "relationship": "cpu_execution_on_public_data",
       "tier": "complete",
       "archive_sha256": "ead87b6d6201de706483798eb5d54b1a8cca61a5fba917ba13eb8c0961a13669",
       "inventory_sha256": "a5f0c47d7f2bd11aee073ad957809549d74cde807f38c4e1b9acc41e1710f06f",

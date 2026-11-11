@@ -6,7 +6,7 @@ authors' cluster and keeps, beside the study, a job-evidence directory ``<study>
 environment, the installed packages, the command, the standard output and error, the process exit status
 and the numerical replay of the finished study; after the allocation ends, ``hpc/finalize_arm_accounting.sh``
 adds the scheduler's accounting. This runner keeps the same directory for an execution without a scheduler
-(a workstation or the CPU demonstration): ``<study>.job-local-<time>-<pid>``, whose ``scheduler.json`` records
+(a workstation or the CPU execution): ``<study>.job-local-<time>-<pid>``, whose ``scheduler.json`` records
 that no allocation and no accounting exist. ``scripts/paper_outputs.py`` uses it for plans of the CPU device;
 an export of such studies is a partial campaign (missing accounting), never the original GPU campaign.
 
@@ -65,7 +65,7 @@ def main(argv=None) -> int:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--threads", type=int, default=os.cpu_count() or 1)
     parser.add_argument("--allow-fixture", action="store_true",
-                        help="parents planned with --allow-fixture (a software check or the CPU demonstration)")
+                        help="parents planned with --allow-fixture (a software check or the CPU execution)")
     parser.add_argument("--python", default=sys.executable)
     args = parser.parse_args(argv)
     source = Path(setting("CM_SOURCE_ROOT")).resolve()
