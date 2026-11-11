@@ -169,10 +169,10 @@
       "sha256": "697959ad39254c4d12ac08a69c81111d1a362e66ba3ac6e3195753aa88a47705"
     },
     {
-      "bytes": 19049,
+      "bytes": 20181,
       "executable": false,
       "path": "README.md",
-      "sha256": "df016724684b5ec2bba22c8de04f3d230b66ac93ad1d472e7b310ca0fd927cd0"
+      "sha256": "3ebad7ddb85bd6fb5114fbec0a98b66cc2e0f733c033b8ef5034f334a080dac4"
     },
     {
       "bytes": 10205,
@@ -2527,10 +2527,10 @@
       "sha256": "d9a8437cd6792862ee3ddceb47de1b344be4e29d793152ee06c51bf1677bf8e2"
     },
     {
-      "bytes": 12554,
+      "bytes": 13032,
       "executable": false,
       "path": "docs/RECONSTRUCTION.md",
-      "sha256": "01dc0170767b07033df9bdc1947b4f622162bfa59ba31bd9cc5c4d974a19db20"
+      "sha256": "bbb623d772e2f8f3e23361aa0484e563374e42a42cd895904c60d2cf4281a2dc"
     },
     {
       "bytes": 21155,
@@ -2545,10 +2545,10 @@
       "sha256": "c00bec8c12152223dd434f7d581cc43a7bcf1ebf7a0a9dea9158c0870e0e9985"
     },
     {
-      "bytes": 2626,
+      "bytes": 3443,
       "executable": false,
       "path": "docs/REVIEW_ENTRY.md",
-      "sha256": "15c9f613fa1a23032569d97765a939a4ce33bfeadaec4ce8e2e7a2314cf0bef7"
+      "sha256": "1d1957acd688610735ebb98b47509bcb80de82d5528fc58e6ab32e4fd9af6e85"
     },
     {
       "bytes": 9819,
@@ -8188,7 +8188,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "6c8cdf1e9988b7093db679bdae8ae55864e22e7ea5990c077ef4eecb09aacc96"
+      "sha256": "7848b8070ee1b822af096f9be552cbeba9d5f6562b4ae7c9bc8ee1dd7cad97a5"
     },
     {
       "bytes": 35593,
@@ -9604,5 +9604,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "7a7ab382b501f307362388d552212814ff37b38339ec4333e6d422ed8d708bf8"
+  "tree_sha256": "d0cd44b39256b536542d605dd23c60786aaaaf294f66b44948e0398f21d040d5"
 }
