@@ -16,6 +16,24 @@ selection, confirmation, and admission protocol.
 
 ![Frozen predictor and external feedback controller](docs/assets/architecture.svg)
 
+## Published resources and manuscript reconstruction
+
+The existing [GitHub Release](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts),
+currently titled **Paper artifacts** but tagged `demo-artifacts`,
+contains **40 assets totaling approximately 10.85 GB** (verified on 11 November 2026).
+The [execution-package manifest](release/demo_artifacts.json) records **31 of its
+37 artifact groups as published**. These are real released archives, whose
+specific dataset selections, execution settings, and reconstruction coverage are
+recorded in the [package guide](demo/README.md) and [report](demo/RESULTS.md).
+
+The separate [full-manuscript manifest](release/paper_artifacts.json)
+tracks the required original-paper artifacts for `make paper`; its publication
+status is **distinct from the existing 10.85 GB execution package**. The
+unpublished state of that manuscript-specific channel does not mean this
+repository has no published experimental resources. Full-paper reconstruction
+requires its own source-identified archives and numerical comparisons. See
+the [reviewer entry point](docs/REVIEW_ENTRY.md) for both workflows.
+
 ## Every table and figure in one command
 
 The repository combines experiment code, configurations, environment specifications
