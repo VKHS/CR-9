@@ -39,6 +39,7 @@ jobs:
           PY
           python -B scripts/artifact_catalog.py
           python -B scripts/claims_ledger.py
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
           make verify PYTHON=python > "$RUNNER_TEMP/verify.log" 2>&1 || { tail -n 75 "$RUNNER_TEMP/verify.log"; exit 1; }
       - name: Regenerate target-tree source checksums and commit
         shell: bash
