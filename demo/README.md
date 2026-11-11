@@ -1,36 +1,36 @@
-# CPU demonstration
+# Published execution package
 
-This directory produces and documents a separately published demonstration of the
-CROSS-MORSE pipeline: the seven lifecycle runs, the measurement-record sets and campaigns
-that the production graph derives from them, their checkpoints, predictions,
-propensity-logged trajectories, split and seed manifests, observed environment and
-statistical outputs, and the paper's tables and figures rebuilt from them with one
-command.
+This directory documents CROSS-MORSE lifecycle runs, measurement records and
+campaigns, together with their checkpoints, predictions, propensity-logged
+trajectories, split and seed manifests, environment records and statistical
+outputs. It also documents reconstruction of the displays supported by those inputs.
 
-**It is not the paper's evidence.** Every artifact was produced by this repository's own
-code on public benchmark data, on GitHub-hosted CPU runners, at reduced scale. The values
-are not the paper's measurements and are not expected to equal the printed values. The
-demonstration has its own release (`demo-artifacts`), its own manifest
-([release/demo_artifacts.json](../release/demo_artifacts.json)) and its own views
-([demo/published/](published/)); the paper's manifest refuses demonstration artifacts, and no
-status in [STATEMENT_COMPLIANCE.md](../STATEMENT_COMPLIANCE.md) depends on it (its separate
-section reports what the demonstration shows for each item).
+**Recorded execution scope.** The artifacts were produced by this repository's
+code on GitHub-hosted CPU runners using the exact dataset selections and settings
+listed below: all ten Roman-empire splits and specified subsets of the other
+official datasets. The existing [release manifest](../release/demo_artifacts.json)
+and [derived views](published/) retain their original identities and download links.
 
-## Rebuild every table and figure from the demonstration
+Measurements and manuscript-comparison outcomes are preserved. The package command
+verifies available inputs and renders supported displays; successful rendering
+alone does not establish complete agreement with the manuscript. The strict
+`make paper` and availability checks retain their acceptance rules.
+
+## Verify and reconstruct the published package
 
 ```bash
-make demo-paper        # download and verify the release demo-artifacts, run all 90 display generators on it
-make demo-status       # what the release holds
+make demo-paper        # verify existing release assets and invoke the display generators
+make demo-status       # inspect the package inventory
 ```
 
-`make demo-paper` runs `scripts/reconstruct_paper.py --demo`: the same verification, display
-generators and printed-value comparison as `make paper`, on the demonstration's manifest. The
-workspace (`../cm-demo-paper`) is labelled as the demonstration and its report opens with the
-scope above. Its record sets and campaign derive from fixture runs, so every display built from
-them carries the label of a synthetic software example; the supplementary displays of the
-factorials, the ensemble grid and the E3-E6 campaign are built from them in this labelled form
-(`--demo` only; the paper's build refuses such inputs). [RESULTS.md](RESULTS.md) records what the
-published demonstration contains.
+Existing command and release identifiers are retained for compatibility. The
+package command calls `scripts/reconstruct_paper.py --demo` and writes its workspace
+to `../cm-demo-paper`. Machine-readable classifications and data memberships remain
+unchanged; a dataset subset is not relabelled as a full benchmark execution.
+
+Read [RESULTS.md](RESULTS.md) and the generated status report for input coverage,
+complete display content and manuscript comparisons. Package-command success is
+not the strict full-manuscript acceptance test.
 
 ## What the release holds
 
@@ -38,8 +38,8 @@ The release `demo-artifacts` holds 31 of the 37 artifacts the paper's manifest n
 28,913 files): the seven lifecycle runs, 22 record sets, the E3-E6 campaign and the environment
 capture of the CPU runner. On it, `make demo-paper` builds 56 of the 90 displays, 35 from the
 release and 21 from the repository's own sources; 1,263 printed values are equal, 1,202 differ and
-248 are missing. The other 34 displays wait for an input the demonstration does not hold or a cell
-its runs do not reach (for instance, the reduced ogbn-arxiv run deploys no feedback rule with a
+248 are missing. The other 34 displays wait for an input the package does not hold or a cell
+its runs do not reach (for instance, the ogbn-arxiv subset run deploys no feedback rule with a
 positive gain over q_C); [RESULTS.md](RESULTS.md) lists each with what it lacks.
 
 ## Scale
@@ -65,7 +65,7 @@ execution requires.
 
 ## How it was produced
 
-1. [demo-runs.yml](../.github/workflows/demo-runs.yml) builds the reduced graphs and runs each
+1. [demo-runs.yml](../.github/workflows/demo-runs.yml) builds the dataset subsets and runs each
    dataset's eight stages (`run_cross_morse.py --device cpu`), Roman-empire as its ten split
    runs. Each sealed run is kept as a workflow artifact.
 2. [demo-graph.yml](../.github/workflows/demo-graph.yml) plans the repository's production graph
@@ -117,35 +117,35 @@ python -B demo/merge_maps.py WORK/paper-artifacts.map.json WORK_S29/paper-artifa
 
 On one machine no task needs to be split: `demo/execute.py` runs the long E14 job like any other.
 
-## Declared demonstration choices
+## Recorded execution choices
 
 The production graph records these in its plan (`declared_choices`):
 
 - **S14 family without Roman-empire** (`--s14-exclude Roman-empire`). The joint S14 family needs
   the ten Roman-empire split runs to share one route, and it cannot join benchmark and fixture
-  parents. The ten demonstration splits selected different routes, and Roman-empire is the only
-  dataset run on its complete official graph, so the family's test jobs run on the six reduced
-  datasets. The campaign is not assembled from them: `assemble_s14` refuses a partial family and
+  parents. The ten package splits selected different routes, and Roman-empire is the only
+  dataset run on its complete official graph, so the family's test jobs run on the six dataset
+  subsets. The campaign is not assembled from them: `assemble_s14` refuses a partial family and
   `check_campaign` admits only a non-synthetic campaign of all seven datasets
   (`cm_campaigns/s14_builder.py`, `cm_campaigns/confirmation.py`).
 - **Swept configuration of Table S29** (`--horizon-sweep-profile full --horizon-sweep-ensemble 1
-  --horizon-sweep-beam 16`). The demonstration's PascalVOC-SP run deploys no MPC-RH rule, so the
+  --horizon-sweep-beam 16`). The package's PascalVOC-SP run deploys no MPC-RH rule, so the
   sweep names the configuration it sweeps. That run was planned with the pilot planner (beam 4,
   horizons 1 and 4), which holds neither the registered horizon 16 nor the registered beam width
   16, so the sweep holds the registered beam width: each of its seven points is a variant
   lifecycle of the run's configuration, and no replicate of the run's own configuration is
   planned.
 
-## What the demonstration cannot show
+## Coverage and input requirements
 
-[RESULTS.md](RESULTS.md) lists every artifact the demonstration does not hold, with the production
+[RESULTS.md](RESULTS.md) lists every artifact the package does not hold, with the production
 graph's reason. By design they need the author's resources or benchmark runs: the fourteen
 external comparisons of E12 (`records:baselines`: the pinned upstream studies and adapters the
 author supplies), the S14 campaign and the confirmation record sets that read it
 (`campaign:confirmation`, `records:confirmation_contrasts`, `records:confirmation_sensitivity`;
 above) and a GPU environment (`environment:gpu` holds the capture of the CPU runner). The
 action-gap audit (`records:action_gap_audit`) scores the decisions of a closed-loop deployed rule;
-every demonstration run deployed an open-loop rule, so the audit has no decision to score and the
+every package run deployed an open-loop rule, so the audit has no decision to score and the
 exporter writes no set. Fifteen of the sixteen measurement jobs of the S17 module ablations
 (`records:module_ablations`) completed; the remaining job reads the sealed variant lifecycle runs of
 its parent, each opened and verified through its confirm stage with its prediction arrays, and
@@ -159,6 +159,6 @@ qualification blockers (software fixture, missing accounting) and the record set
 synthetic. The E17 timing records (`records:runtime_scaling`, `records:timing_anchors`) time the
 deployed rule on CPU without GPU allocations; each set records why its measurement is incomplete
 (`incomplete_measurement`). The mechanism contrasts and the decision-log sets hold the cells the
-demonstration's runs measure; a cell without a valid measurement (e.g. a state contrast without
+package's runs measure; a cell without a valid measurement (e.g. a state contrast without
 matched donors) is listed in the set instead of a value. The repository does not emulate scheduler
 records.

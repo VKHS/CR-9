@@ -97,10 +97,10 @@
       "sha256": "33db85c5d628191e31719659d2e8285958ca49b9586a37fffaf846dec7e01e83"
     },
     {
-      "bytes": 2502,
+      "bytes": 2486,
       "executable": false,
       "path": ".github/workflows/demo-verify.yml",
-      "sha256": "882433042676e1673cca269d626b7f0bdccc1c48aa61489d844ac125fdfcea40"
+      "sha256": "e13e9ccb7c0710e1577a6176001398c6ee0fc60640658b346f8c367e584b0b82"
     },
     {
       "bytes": 7708,
@@ -169,10 +169,10 @@
       "sha256": "697959ad39254c4d12ac08a69c81111d1a362e66ba3ac6e3195753aa88a47705"
     },
     {
-      "bytes": 20386,
+      "bytes": 19535,
       "executable": false,
       "path": "README.md",
-      "sha256": "e74157bb2afe73bc49531302858b817de735fded77aa6633224935c71d221aa2"
+      "sha256": "30f485afc56f015d479568147415ec5cc5aa863cc0da1664b9a52ab531dee656"
     },
     {
       "bytes": 10205,
@@ -829,10 +829,10 @@
       "sha256": "ed5e531733ec966777472470f4b0870b2367601e0d95abe45e7c030cfea1056c"
     },
     {
-      "bytes": 11909,
+      "bytes": 11630,
       "executable": false,
       "path": "demo/README.md",
-      "sha256": "602aa3832a6c9fa040024be0985ec1ce742bd9a30090bf76590875c6a09d6870"
+      "sha256": "f638c2a912c4abbf1d615c43be5a4b600d2278e0d92abeb1a4e22d461b99bf9d"
     },
     {
       "bytes": 16975,
@@ -2543,6 +2543,12 @@
       "executable": false,
       "path": "docs/REVIEWER_GUIDE.md",
       "sha256": "c00bec8c12152223dd434f7d581cc43a7bcf1ebf7a0a9dea9158c0870e0e9985"
+    },
+    {
+      "bytes": 2626,
+      "executable": false,
+      "path": "docs/REVIEW_ENTRY.md",
+      "sha256": "15c9f613fa1a23032569d97765a939a4ce33bfeadaec4ce8e2e7a2314cf0bef7"
     },
     {
       "bytes": 9819,
@@ -9580,5 +9586,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "7063722445a18234d7f94c9e5995f25ac53241441a33f5470c44d1daf25d2a72"
+  "tree_sha256": "d37eb7090b4de89c923dfff192fdc668725b771b0474229d4b2da2a5cb68bd7b"
 }
