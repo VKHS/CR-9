@@ -82,13 +82,34 @@ jobs:
       - name: Reviewer path on the bundled examples (no network, no official evidence)
         id: review
         run: make review PYTHON=python REVIEW_OFFLINE=1 REVIEW_ROOT="$RUNNER_TEMP/review"
+      - name: Retain a readable report summary independently of artifact storage
+        if: ${{ always() && !cancelled() }}
+        run: |
+          python - <<'PY'
+          import hashlib, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as out:
+              out.write('## Verification reports\n\nCorrectness checks remain mandatory. Report archival is a separate, optional operation.\n\n')
+              for relative in ('review/REVIEW_REPORT.md', 'theory/theory-full.md', 'theory/si-identities.md'):
+                  path = root / relative
+                  if path.is_file():
+                      data = path.read_bytes()
+                      out.write(f'### {relative}\n\nSHA-256: `{hashlib.sha256(data).hexdigest()}`\n\n')
+                      text = data.decode('utf-8', errors='replace')
+                      out.write(text[:12000] + ('\n\n[Summary truncated; detailed execution is retained in the job logs.]' if len(text)>12000 else '') + '\n\n')
+              out.write('This workflow validates software and its bundled test inputs, not a fresh execution of the complete manuscript experiments.\n')
+          PY
       - name: Publish the review, example and analytical reports as workflow artifacts
+        id: report_upload
+        # Only the ancillary upload is nonfatal. No verification or test step is ignored.
+        continue-on-error: true
         if: ${{ always() && (steps.review.outcome != 'skipped' || steps.theory.outcome != 'skipped' || steps.si.outcome != 'skipped') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: review-report-and-example-displays
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
           path: |
             ${{ runner.temp }}/review/REVIEW_REPORT.md
             ${{ runner.temp }}/review/review.json
@@ -100,6 +121,11 @@ jobs:
             ${{ runner.temp }}/guards
             ${{ runner.temp }}/theory
             ${{ runner.temp }}/reconstruction-examples
+      - name: Report an archival failure without misrepresenting verification
+        if: ${{ always() && steps.report_upload.outcome == 'failure' }}
+        run: |
+          echo '::warning::CI report archival failed. Inspect the upload step for the cause (including storage quota). Verification and test failures still fail this workflow. Existing releases and experimental artifacts were not removed.'
+          printf '\n**CI report archival failed.** See the upload-step error. The readable summary and job logs remain available; no existing artifact was deleted.\n' >> "$GITHUB_STEP_SUMMARY"
 
   pytorch:
     name: Full test suite and one synthetic end-to-end run (CPU PyTorch)

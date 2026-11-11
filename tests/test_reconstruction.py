@@ -57,6 +57,15 @@ class ReconstructionTests(unittest.TestCase):
         self.assertIn("scripts/reconstruct.py", self.result["software_sources"])
         self.assertEqual(rc.verify_workspace(self.output), self.result)
 
+    def test_each_run_reaches_the_generators_under_its_own_dataset_in_any_discovery_order(self):
+        found = rc.build_paper.discover(ROOT / "examples/runs")
+        collected = rc.build_paper.collect(found)
+        for order in (found, list(reversed(found))):
+            context = rc.display_context(ROOT, order, collected, [], None, {}, True)
+            self.assertEqual({dataset: context.require_run(dataset).root.name
+                              for dataset in ("ogbn-arxiv", "Peptides-func")},
+                             {"ogbn-arxiv": "arxiv", "Peptides-func": "peptides_func"})
+
     def test_examples_and_partial_panels_never_claim_complete_paper(self):
         self.assertTrue(self.result["synthetic_examples"])
         self.assertFalse(self.result["all_displays_numerically_reconstructed"])

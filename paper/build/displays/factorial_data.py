@@ -33,10 +33,16 @@ def _safe_file(root: Path, name: str) -> Path:
     return path
 
 
-def _equal(actual, expected, message):
+# A summary value is printed with ten significant digits (scripts/export_records.fmt), so it can differ from the
+# value it records by half a unit in its tenth digit (5e-10 relative). A comparison with a summary value allows that
+# rounding; values replayed from the raw arrays are compared at the tighter default.
+SUMMARY_RTOL = 1e-9
+
+
+def _equal(actual, expected, message, *, rtol=1e-10):
     try:
         a, b = np.asarray(actual, dtype=float), np.asarray(expected, dtype=float)
-        okay = a.shape == b.shape and np.isfinite(a).all() and np.isfinite(b).all() and np.allclose(a, b, rtol=1e-10, atol=1e-12)
+        okay = a.shape == b.shape and np.isfinite(a).all() and np.isfinite(b).all() and np.allclose(a, b, rtol=rtol, atol=1e-12)
     except (ValueError, TypeError):
         okay = False
     if not okay:
@@ -73,7 +79,8 @@ assumption. ``cells`` supplies the verified summary means and marginal intervals
         raise DisplayValidationError("Factorial joint record must bind the same eight ordered cells")
     for row in raw_cells:
         for key in ("ld_integrated_loss", "interval_low", "interval_high"):
-            _equal(row.get(key), cells[row["cell"]].get(key), f"Factorial {row['cell']} {key} differs from its summary")
+            _equal(row.get(key), cells[row["cell"]].get(key), f"Factorial {row['cell']} {key} differs from its summary",
+                   rtol=SUMMARY_RTOL)
     descriptor = raw.get("unit_dil") or {}
     unit_path = _safe_file(path.parent, descriptor.get("file", ""))
     unit_bytes = unit_path.read_bytes()
@@ -103,7 +110,8 @@ assumption. ``cells`` supplies the verified summary means and marginal intervals
     # buffered graph clusters retain the number of scored nodes as their weight.
     weights = counts if dataset == "ogbn-arxiv" else np.ones(n, dtype=float)
     means = np.asarray([np.average(values[cell], weights=weights) for cell in CELLS])
-    _equal(means, [cells[c]["ld_integrated_loss"] for c in CELLS], "Factorial means do not replay from paired units")
+    _equal(means, [cells[c]["ld_integrated_loss"] for c in CELLS], "Factorial means do not replay from paired units",
+           rtol=SUMMARY_RTOL)
     rng = np.random.default_rng(seed)
     for start in range(0, reps, 1024):
         indices = rng.integers(0, n, size=(min(1024, reps - start), n))
@@ -115,7 +123,7 @@ assumption. ``cells`` supplies the verified summary means and marginal intervals
     for j, cell in enumerate(CELLS):
         _equal(np.quantile(draws[:, j], [0.025, 0.975]),
                [cells[cell]["interval_low"], cells[cell]["interval_high"]],
-               f"Factorial {cell} marginal interval differs from the joint stream")
+               f"Factorial {cell} marginal interval differs from the joint stream", rtol=SUMMARY_RTOL)
     effects = all_effects(dict(zip(CELLS, means)))
     declared = raw.get("contrasts", [])
     labels = FACTORS[dataset]
