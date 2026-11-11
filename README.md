@@ -4,7 +4,7 @@
 
 Abdolvahab Khalili Sadaghiani · Linköping University
 
-[![Software checks](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml)
+[![Software checks](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/VKHS/CROSS-MORSE/actions/workflows/quality.yml)
 [![Availability statement](docs/badges/evidence.svg)](STATEMENT_COMPLIANCE.md)
 [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [CPU execution](demo/README.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Statement compliance](STATEMENT_COMPLIANCE.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
 
@@ -15,6 +15,23 @@ feedback policies are compared on the same predictor through a declared
 selection, confirmation, and admission protocol.
 
 ![Frozen predictor and external feedback controller](docs/assets/architecture.svg)
+
+## Package scope and verification
+
+This repository provides the CROSS-MORSE code and reconstruction tools. The
+published CPU execution package currently registers **31 of 37 artifact groups**;
+the separate original-paper manifest registers **0 of 37 groups as published**.
+These are different execution scopes, not competing counts of the same release.
+[Availability](AVAILABILITY.md) evaluates all twelve requirements against their
+corresponding artifacts rather than treating uploaded file size as proof of completeness.
+
+The recorded CPU reconstruction builds **56 of 90 displays**, with **1,202
+comparison values different** and **248 missing** relative to the printed
+references. Its ogbn-arxiv subset run deploys no feedback rule with a positive
+gain over q_C. These observations describe that CPU run, not a remeasurement
+of the full-scale GPU study. [The execution report](demo/RESULTS.md) provides
+the per-display details. A successful software check or CPU-package command
+is not a successful full-manuscript reconstruction.
 
 ## Reproduce the paper
 
@@ -45,14 +62,15 @@ make printed-statement-check   # each claim of the availability text printed in 
 make statement-fulfilled       # the complete artifact tier, the reconstruction and the committed views
 ```
 
-## Complete execution on CPU
+## Published CPU execution package
 
 The release [`demo-artifacts`](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts)
-(40 files, 10.85 GB) holds a complete execution of the pipeline on public data on CPU: the
+(40 files, 10.85 GB) holds the published CPU execution outputs on public data: the
 seven lifecycle runs (Roman-empire on its complete official graph with its ten official
 splits; the other six datasets on deterministic subsets of their official data) with their
 checkpoints, predictions and propensity-logged trajectories, 22 measurement-record sets, the
-E3–E6 campaign and the environment capture of the runner. It runs on any machine:
+E3–E6 campaign and the environment capture of the runner. Reconstruction uses the
+documented CPU environment:
 
 ```bash
 make demo-paper    # download and verify the release, rebuild the tables and figures from it

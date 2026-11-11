@@ -460,9 +460,9 @@
           "sha256": "b6871c8f947260919f6c24fb242d9056f419cfdb05e7b1e9610a5ee34c34f384"
         },
         {
-          "bytes": 25817,
+          "bytes": 26742,
           "path": "scripts/statement_check.py",
-          "sha256": "84b02943556ce903aa55efcd12ec564a45a812df52bf63c22a6d06490ed75154"
+          "sha256": "ce68d1f07e4e9461981a0ad3c842efd31a14d57f2e312e288b49db67f83046ec"
         }
       ],
       "entrypoints": [
@@ -2895,9 +2895,9 @@
       ],
       "contract_identities": [
         {
-          "bytes": 13039,
+          "bytes": 13546,
           "path": "docs/RECONSTRUCTION.md",
-          "sha256": "e9b7609554f39f4dcd7a0c6bca06f93a6c8b8da6030e8dc70021602c2b460f00"
+          "sha256": "5cd1033ce16033bfc59602085005c63286be4afebb37856557f5ea1da27577ca"
         },
         {
           "bytes": 13288,

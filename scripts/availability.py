@@ -80,6 +80,7 @@ def state(root: Path = ROOT) -> dict:
         release = {"statement": _json(root / "release" / "availability_statement.json"),
                    "manifest": paper_artifacts.load_manifest(root / "release" / "paper_artifacts.json"),
                    "compliance": statement_check.evaluate(root)}
+        release["execution_package"] = statement_check.demonstration(release["compliance"], root)
     return {"campaigns": campaigns, "example_records": example_records, "scope": scope, "official": official, "examples": examples, "registered_manifests": registered,
             "release": release,
             "source_sha256": runtime_source_fingerprint(root),
@@ -135,14 +136,31 @@ def _gib(value: int) -> str:
     return f"{value / 2**30:.2f} GiB" if value else "—"
 
 
+def published_package_note(package: dict | None) -> str:
+    """Describe the separately registered CPU package without changing paper eligibility."""
+    if package is None:
+        return "A separate CPU execution package is not registered in this checkout."
+    return (f"The [CPU execution release]({package['release']}) has "
+            f"**{package['published']} of {package['artifacts']} artifact groups registered as published**. "
+            "Its recorded dataset selections, execution settings and reconstruction coverage are described in "
+            "[demo/README.md](demo/README.md) and [demo/RESULTS.md](demo/RESULTS.md). "
+            "These existing outputs are distinct from the full original-paper artifacts evaluated below. "
+            "An unregistered original-paper archive does not mean no experimental resources have been published.")
+
+
 def render_repository_release(st: dict) -> str:
     release = st["release"]
     statement, manifest, compliance = release["statement"], release["manifest"], release["compliance"]
     counts = compliance["counts"]
     url = st["scope"].get("repository_url") or "https://github.com/VKHS/CROSS-MORSE"
-    lines = ["# Data and code availability", "", "## Availability statement", "",
-             "The paper's registered data-availability statement:", "", f"> {statement['registered_text']}", "",
-             "The table below identifies the available resources and the measured outputs that await publication. "
+    lines = ["# Data and code availability", "", "## Published execution package", "",
+             published_package_note(release.get("execution_package")), "",
+             "## Availability statement", "",
+             f"**Original-paper evidence: {counts['fulfilled']} of {len(compliance['items'])} requirements fulfilled by the registered artifacts and checks.** "
+             "This is not a count of all code or CPU-package resources present in the repository.", "",
+             "The paper's registered data-availability statement (evaluated below):", "", f"> {statement['registered_text']}", "",
+             "The table below assesses the original-paper channel in `release/paper_artifacts.json`; "
+             "the separately published CPU package is described above. "
              "[Statement compliance](STATEMENT_COMPLIANCE.md) records the checks for each item "
              "(`make statement-check`).", "",
              "| Statement item | Status | Where in the repository |", "|---|---|---|"]
