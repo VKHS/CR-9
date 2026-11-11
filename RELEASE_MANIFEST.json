@@ -109,16 +109,16 @@
       "sha256": "439a1a761d26e9cb08485682a01ecce9075b56262a6f954d91a77f9631e83e2f"
     },
     {
-      "bytes": 1451,
+      "bytes": 1457,
       "executable": false,
       "path": ".zenodo.json",
-      "sha256": "e4d7085f373c055a1372c83d4780ada76dc674a99fb1d5b08fef58360a1cc1b1"
+      "sha256": "0bbec811d401ba8889abd127462c9c8fe045a7c400a9ff19be92b932e8c71ae5"
     },
     {
-      "bytes": 8348,
+      "bytes": 9141,
       "executable": false,
       "path": "AVAILABILITY.md",
-      "sha256": "d7acf455466a9d27b21c8262eb93ccae91bc162d8ab286ef5f93df7fd33da1fc"
+      "sha256": "24ed56954d13e02351d419946e3e780dea505ae72bf4d2e7fc165d311d013e22"
     },
     {
       "bytes": 2333,
@@ -157,10 +157,10 @@
       "sha256": "697959ad39254c4d12ac08a69c81111d1a362e66ba3ac6e3195753aa88a47705"
     },
     {
-      "bytes": 18639,
+      "bytes": 19713,
       "executable": false,
       "path": "README.md",
-      "sha256": "9d23faf0c7928fce1ba4c5d1c79f2d16a4efedfa8432ff56c4954f6aeb54af76"
+      "sha256": "d0b27360dbff611076ed9db82035ea3020af6b226a049c99dafbf10b0842b98d"
     },
     {
       "bytes": 10205,
@@ -169,10 +169,10 @@
       "sha256": "eea93895f5451636ddad948944ab05731634332beb88d240fcd3c62750926121"
     },
     {
-      "bytes": 20360,
+      "bytes": 20964,
       "executable": false,
       "path": "STATEMENT_COMPLIANCE.md",
-      "sha256": "3014cd755fb443660ce8c728431f8bcf6728035e59c9cc230ebe46b02a37da98"
+      "sha256": "dd11392359955c8d21f68f3242686155bd8c14c95578953cd0a9585fdd7ab0b8"
     },
     {
       "bytes": 395,
@@ -2383,16 +2383,16 @@
       "sha256": "405de0251693d934bd54152796d436a73fd0b4bd9c127b2b591592e77e3a0f05"
     },
     {
-      "bytes": 4796,
+      "bytes": 4784,
       "executable": false,
       "path": "docs/README.md",
-      "sha256": "02d71550d38de50b4041f22956bf68bc9175c4a2dad6cf3673f3321365fb281c"
+      "sha256": "b7e892e1734218720f9318c6b890b7fbbd58d974f5c41a59b697c27938313c8a"
     },
     {
-      "bytes": 13039,
+      "bytes": 13546,
       "executable": false,
       "path": "docs/RECONSTRUCTION.md",
-      "sha256": "e9b7609554f39f4dcd7a0c6bca06f93a6c8b8da6030e8dc70021602c2b460f00"
+      "sha256": "5cd1033ce16033bfc59602085005c63286be4afebb37856557f5ea1da27577ca"
     },
     {
       "bytes": 19686,
@@ -2407,10 +2407,10 @@
       "sha256": "c00bec8c12152223dd434f7d581cc43a7bcf1ebf7a0a9dea9158c0870e0e9985"
     },
     {
-      "bytes": 2604,
+      "bytes": 3637,
       "executable": false,
       "path": "docs/REVIEW_ENTRY.md",
-      "sha256": "773d30d5cf364798087368dc486ae37fc195efaabda1a4687f2fb99222d6025a"
+      "sha256": "2f4b2bee78dcfa0b8f6c19a4279b59e14727be360b3b4130b1d5c2c7ac4323b4"
     },
     {
       "bytes": 9960,
@@ -8050,7 +8050,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "3cc3289a87edbc41b0b8c2a0717bfaddbf684dbda42ac2a7fe05dc8e5c587633"
+      "sha256": "d164c117cedfd63ea76682be415b5f5e312a5c9b27cfc5e06425a822335afbb0"
     },
     {
       "bytes": 35593,
@@ -8323,10 +8323,10 @@
       "sha256": "6a08a6c4e010c27efbc4b9af93e7479242a1cfb0cab94de1e99846bdffb01f21"
     },
     {
-      "bytes": 35009,
+      "bytes": 36440,
       "executable": false,
       "path": "scripts/availability.py",
-      "sha256": "24f0820cfdfa6b4b6cd322dbce1d91e5309631b8a6bbb4acb26738ed45a58381"
+      "sha256": "bd697c249aa6d7928e93a54a1718231253867308a11d4e39b85f0e3a1806cdc6"
     },
     {
       "bytes": 8830,
@@ -8737,10 +8737,10 @@
       "sha256": "d88ad8ea4e8974d3d0192f53602357eef4ae71a85f5deca0e90ccdc31e155d40"
     },
     {
-      "bytes": 25817,
+      "bytes": 26742,
       "executable": false,
       "path": "scripts/statement_check.py",
-      "sha256": "84b02943556ce903aa55efcd12ec564a45a812df52bf63c22a6d06490ed75154"
+      "sha256": "ce68d1f07e4e9461981a0ad3c842efd31a14d57f2e312e288b49db67f83046ec"
     },
     {
       "bytes": 30082,
@@ -9265,6 +9265,12 @@
       "sha256": "66bc3935b43de7909378305f94b10904aed51c0a39ce82f6b5e6125460a89292"
     },
     {
+      "bytes": 2113,
+      "executable": false,
+      "path": "tests/test_review_package_presentation.py",
+      "sha256": "15bfad98b442753447de16b9e0a68189d2d67c38d471e6a2e7e7d0cbe1588eb1"
+    },
+    {
       "bytes": 9800,
       "executable": false,
       "path": "tests/test_review_tools.py",
@@ -9436,5 +9442,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "36c98dc8467e7657346085dd92a7767fee9d4316b6839598c3162a2e4fc32ee4"
+  "tree_sha256": "8109535b9728c04942ea1b45f96734cc4c87c362e53fe13afc04c23557fd1299"
 }

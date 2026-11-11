@@ -2,7 +2,7 @@
 
 [Repository home](../README.md) · [Reported results](../paper/RESULTS.md) · [Availability](../AVAILABILITY.md) · [Statement compliance](../STATEMENT_COMPLIANCE.md)
 
-## Every table and figure from the published outputs
+## Artifact retrieval and reconstruction
 
 | Guide | Purpose |
 |---|---|

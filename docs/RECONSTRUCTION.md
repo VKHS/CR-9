@@ -6,6 +6,16 @@
 
 The existing [10.85 GB release](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) has 40 uploaded assets and 31 of 37 groups published in its execution-package manifest. That is distinct from the full-manuscript `paper-artifacts` channel required by the reconstruction command below. The published execution-package verification does not by itself certify every numerical result printed in the manuscript.
 
+## Scope of the command
+
+`make paper` reads the original-paper artifact manifest. `make demo-paper`
+reads the distinct CPU execution package. The CPU report's numerical
+differences do not disappear when a label is corrected; a complete paper
+reconstruction requires the matching source-identified experimental records.
+Missing references, missing inputs and unequal quantities remain visible
+in the generated comparison reports. No tolerance or acceptance rule is
+changed by the documentation corrections.
+
 ## One command
 
 ```bash

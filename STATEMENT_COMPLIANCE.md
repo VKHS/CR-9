@@ -4,9 +4,13 @@ The paper's registered data-availability statement:
 
 > The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CROSS-MORSE. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
-Experiment and reconstruction tooling is included. The measured artifacts identified below await publication from the completed runs.
+Experiment and reconstruction tooling is included. Full original-paper publication is not yet registered for the artifacts identified below in `release/paper_artifacts.json`. The separately published CPU execution resources are reported independently.
 
 This offline check validates the release manifest and its committed views. `make statement-fulfilled` also downloads and verifies the complete artifacts and executes the reconstruction before evaluating this statement.
+
+**Original-paper evidence: 2 of 12 requirements fulfilled.** All requirements are assessed; listing a requirement is not the same as verifying it.
+
+The separate [CPU execution release](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) has **31 of 37 artifact groups registered as published**. The original-paper status below does not mean this CPU release is empty. See [demo/RESULTS.md](demo/RESULTS.md) for its measured scope and comparison outcomes.
 
 | Statement item | Status | Where | Remaining |
 |---|---|---|---|
@@ -35,7 +39,7 @@ The first command is described in [docs/PRODUCTION.md](docs/PRODUCTION.md); its 
 
 ## CPU execution on public data
 
-CPU execution of the released code on public benchmark data (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on hosted CPU runners: Roman-empire on its complete official graph with its ten official splits, the other six datasets on deterministic subsets of their official data, at the pilot settings. The paper's printed values are the measurements of its full-scale GPU runs. It is published as the release [`demo-artifacts`](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) (31 of 37 artifacts) and listed in [release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) lists the displays its artifacts support). It executes each item end to end; the statuses above follow the paper's own artifacts.
+CPU execution of the released code on public benchmark data (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on hosted CPU runners: Roman-empire on its complete official graph with its ten official splits, the other six datasets on deterministic subsets of their official data, at the pilot settings. The paper's printed values are the measurements of its full-scale GPU runs. It is published as the release [`demo-artifacts`](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) (31 of 37 artifacts) and listed in [release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) lists the displays its artifacts support). The table below records the scope of this execution; the original-paper statuses above remain separate.
 
 | Statement item | Executed | What the CPU execution supplies | Evidence |
 |---|---|---|---|

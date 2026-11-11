@@ -326,8 +326,9 @@ def render(evaluation: dict, printed: dict | None = None, demo: dict | None = No
     if counts[MISSING]:
         scope = "The checks below identify the files or validation results that need attention."
     elif counts[AWAITING]:
-        scope = ("Experiment and reconstruction tooling is included. The measured artifacts identified below "
-                 "await publication from the completed runs.")
+        scope = ("Experiment and reconstruction tooling is included. Full original-paper publication is not yet "
+                 "registered for the artifacts identified below in `release/paper_artifacts.json`. "
+                 "The separately published CPU execution resources are reported independently.")
     else:
         scope = "The published files and reconstruction records satisfy each item checked below."
     lines = ["# Compliance with the data-availability statement", "",
@@ -337,6 +338,15 @@ def render(evaluation: dict, printed: dict | None = None, demo: dict | None = No
              "`make statement-fulfilled` also downloads and verifies the complete artifacts and executes the "
              "reconstruction before evaluating this statement.", "",
              "| Statement item | Status | Where | Remaining |", "|---|---|---|---|"]
+    overview = [f"**Original-paper evidence: {counts[FULFILLED]} of {len(evaluation['items'])} requirements fulfilled.** "
+                "All requirements are assessed; listing a requirement is not the same as verifying it.", ""]
+    if demo is not None:
+        overview += [f"The separate [CPU execution release]({demo['release']}) has "
+                     f"**{demo['published']} of {demo['artifacts']} artifact groups registered as published**. "
+                     "The original-paper status below does not mean this CPU release is empty. "
+                     "See [demo/RESULTS.md](demo/RESULTS.md) for its measured scope and comparison outcomes.", ""]
+    pos = lines.index("| Statement item | Status | Where | Remaining |")
+    lines[pos:pos] = overview
     for row in evaluation["items"]:
         lines.append(f"| {row['phrase']} | {LABEL[row['status']]} | {row['where']} | {row['remaining'] or '—'} |")
     lines += ["", "Items awaiting measured outputs have their code, structure and checks in place. On the cluster, "
@@ -358,8 +368,8 @@ def render(evaluation: dict, printed: dict | None = None, demo: dict | None = No
                   f"({demo['published']} of {demo['artifacts']} artifacts) and listed in "
                   "[release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table "
                   "and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) "
-                  "lists the displays its artifacts support). It executes each item end to end; the statuses above "
-                  "follow the paper's own artifacts.", "",
+                  "lists the displays its artifacts support). The table below records the scope of this execution; "
+                  "the original-paper statuses above remain separate.", "",
                   "| Statement item | Executed | What the CPU execution supplies | Evidence |", "|---|---|---|---|"]
         for row in demo["rows"]:
             shown = {True: "yes", "partly": "partly"}.get(row["demonstrated"], "no")

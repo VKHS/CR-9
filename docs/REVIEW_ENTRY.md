@@ -10,7 +10,7 @@ environment.
 ## Releases
 
 The release [`demo-artifacts`](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts)
-holds the complete execution of the pipeline on public data on CPU: **40 assets, 10.85 GB**,
+holds the published execution outputs on public data on CPU: **40 assets, 10.85 GB**,
 carrying 31 of the 37 artifact groups that [release/demo_artifacts.json](../release/demo_artifacts.json)
 lists. The [CPU execution guide](../demo/README.md) gives its dataset selections and
 settings, and [demo/RESULTS.md](../demo/RESULTS.md) what `make demo-paper` rebuilds from it.
@@ -19,6 +19,23 @@ settings, and [demo/RESULTS.md](../demo/RESULTS.md) what `make demo-paper` rebui
 groups of the paper's measured outputs, which `hpc/publish_paper_artifacts_arrhenius.sh`
 uploads to the release `paper-artifacts`; [STATEMENT_COMPLIANCE.md](../STATEMENT_COMPLIANCE.md)
 reports their status item by item.
+
+## Interpreting availability and comparisons
+
+The availability table assesses twelve requirements for the original-paper
+distribution. Its status is calculated from registered evidence, not the number
+of gigabytes uploaded. The CPU package has its own manifest and reconstruction
+report. In `release/release_scope.json`, `original_result_archives_included`
+and `one_command_original_tables_reproduction_claimed` describe the original-paper
+claims, not whether CPU artifacts or software are available.
+
+Keep analytical calculations, printed reference values and replayed observations
+distinct. Differences involving S46/S33 or the kappa-hat values in S26b must be
+resolved using their recorded inputs and quantity definitions; this documentation
+update does not change those numbers or relax comparison tolerances.
+`destination/` and `docs/FINAL_DESTINATION.md` are maintainer planning material,
+not evidence that twelve requirements have passed. They are not part of the
+primary reviewer navigation and remain preserved for compatibility.
 
 ## Checks
 

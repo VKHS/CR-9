@@ -1,12 +1,18 @@
 # Data and code availability
 
+## Published execution package
+
+The [CPU execution release](https://github.com/VKHS/CROSS-MORSE/releases/tag/demo-artifacts) has **31 of 37 artifact groups registered as published**. Its recorded dataset selections, execution settings and reconstruction coverage are described in [demo/README.md](demo/README.md) and [demo/RESULTS.md](demo/RESULTS.md). These existing outputs are distinct from the full original-paper artifacts evaluated below. An unregistered original-paper archive does not mean no experimental resources have been published.
+
 ## Availability statement
 
-The paper's registered data-availability statement:
+**Original-paper evidence: 2 of 12 requirements fulfilled by the registered artifacts and checks.** This is not a count of all code or CPU-package resources present in the repository.
+
+The paper's registered data-availability statement (evaluated below):
 
 > The complete experiment code, configurations, source data, split and seed manifests, environment specification, checkpoints, predictions, propensity-logged trajectories, statistical outputs and figure/table generators are available in the CROSS-MORSE GitHub repository at https://github.com/VKHS/CROSS-MORSE. The repository provides the one-command reconstruction of every reported table and figure and follows established reproducibility guidance.
 
-The table below identifies the available resources and the measured outputs that await publication. [Statement compliance](STATEMENT_COMPLIANCE.md) records the checks for each item (`make statement-check`).
+The table below assesses the original-paper channel in `release/paper_artifacts.json`; the separately published CPU package is described above. [Statement compliance](STATEMENT_COMPLIANCE.md) records the checks for each item (`make statement-check`).
 
 | Statement item | Status | Where in the repository |
 |---|---|---|
