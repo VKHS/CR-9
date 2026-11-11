@@ -666,11 +666,6 @@ def build_factorials(p, export):
 def build_sweep(p, export, sweep, datasets, title, *, resource=GPU, device="cuda"):
     out = p.experiment_dir(sweep)
     argv = py("scripts/run_sweep.py", "plan", "--sweep", sweep, *p.parents(datasets), "--output", out)
-    if sweep == "horizon_beam_sweep":
-        swept = p.opts.get("horizon_sweep") or {}
-        argv += [*(["--profile", swept["profile"]] if swept.get("profile") else []),
-                 *(["--ensemble", str(swept["ensemble"])] if swept.get("ensemble") is not None else []),
-                 *(["--beam", str(swept["beam"])] if swept.get("beam") is not None else [])]
     plan = p.runner_plan(argv, out)
     variants = [v["id"] for v in plan.get("variants") or []]
     after = []
@@ -742,22 +737,16 @@ def build_module_ablations(p, export, gates: dict, controls: list[str]):
 def build_runtime_scaling(p, export):
     out = p.experiment_dir("runtime_scaling")
     accounting = p.work / "accounting" / "runtime_scaling"
-    if p.opts.get("device") == "cpu":
-        # Timings on CPU, without scheduler allocations: a partial measurement (cm_experiments/timing_records
-        # records why), written only with --allow-partial and never into records/.
-        steps = [{"argv": py("scripts/run_timing_records.py", "scaling", "export", "--output", out, "--root", p.records,
-                             "--allow-partial")}]
-    else:
-        steps = [
+    _, _, node = _record_experiment(
+        p, name="runtime_scaling", script="scripts/run_timing_records.py", verb=["scaling"],
+        datasets=EXPERIMENT_DATASETS["runtime_scaling"], artifacts=["records:runtime_scaling"], export=export,
+        title="E17 runtime and peak memory of the deployed rule against graph size (Figure S2)",
+        export_steps=[
             # the terminal sacct records of the timing allocations, exported after every timing job completed
             {"argv": ["bash", "hpc/capture_arrhenius_accounting.sh", "{jobs:runtime_scaling.run}", accounting],
              "skip_if": str(accounting / "sacct_original.psv")},
             {"argv": py("scripts/run_timing_records.py", "scaling", "export", "--output", out, "--accounting",
-                        accounting / "sacct_original.psv", "--root", p.records)}]
-    _, _, node = _record_experiment(
-        p, name="runtime_scaling", script="scripts/run_timing_records.py", verb=["scaling"],
-        datasets=EXPERIMENT_DATASETS["runtime_scaling"], artifacts=["records:runtime_scaling"], export=export,
-        title="E17 runtime and peak memory of the deployed rule against graph size (Figure S2)", export_steps=steps)
+                        accounting / "sacct_original.psv", "--root", p.records)}])
     for task in node["tasks"]:
         task["requeue"] = False        # one allocation per timing job: a requeue would give it two sacct records
     node["requeue"] = False
@@ -778,9 +767,7 @@ def build_timing_anchors(p, export, scaling: dict):
         p.add_export("export.timing_anchors", artifacts=["records:timing_anchors"], after=[node["id"]],
                      outputs={"records:timing_anchors": p.record_set("timing_anchors")},
                      steps=[{"argv": py("scripts/run_timing_records.py", "anchors", "export", "--output", anchors,
-                                        "--root", p.records,
-                                        # throughput timed on CPU is a partial measurement
-                                        *(["--allow-partial"] if p.opts.get("device") == "cpu" else []))}])
+                                        "--root", p.records)}])
 
 
 def build_s14_campaign(p, export):
@@ -788,10 +775,8 @@ def build_s14_campaign(p, export):
     out, campaign = p.experiment_dir("s14_campaign"), p.work / "campaigns" / "confirmation"
     if not (ROOT / S14_SCRIPT).is_file():
         raise PlanError(f"{S14_SCRIPT} is not in this checkout; give --confirmation-campaign DIR or add the builder")
-    excluded = list(p.opts.get("s14_exclude") or [])
-    partial = ["--allow-partial"] if p.opts.get("allow_fixture") and (p.missing(DATASETS) or excluded) else []
-    included = [d for d in EXPERIMENT_DATASETS["s14_campaign"] if d not in excluded]
-    plan_argv = py(S14_SCRIPT, "plan", *p.parents(included), "--output", out, *partial)
+    partial = ["--allow-partial"] if p.opts.get("allow_fixture") and p.missing(DATASETS) else []
+    plan_argv = py(S14_SCRIPT, "plan", *p.parents(EXPERIMENT_DATASETS["s14_campaign"]), "--output", out, *partial)
     check_cli(plan_argv)
     plan = p.runner_plan(plan_argv, out)
     jobs = plan.get("jobs")
@@ -912,24 +897,12 @@ def build_from_runs(p, set_name):
                                     *repeat("--run", runs), "--root", p.records)}])
 
 
-def budget_study_command(p) -> list:
-    """The batch script of a GPU allocation; outside Slurm (CPU plans) scripts/run_budget_study.py, which keeps
-    the same job evidence and records that no scheduler accounting exists."""
-    if p.opts.get("device") == "cpu":
-        return py("scripts/run_budget_study.py", "--device", "cpu", "--threads", "{threads}",
-                  *(["--allow-fixture"] if p.opts.get("allow_fixture") else []))
-    return ["bash", "hpc/run_budget_arms_arrhenius.sh"]
-
-
 def build_budget(p, export):
     """E3-E6: twelve controller seeds per admitted run (each Roman split) on fresh pre-admission parents."""
     if not p.repository.get("git_commit") or p.repository.get("dirty"):
         raise PlanError("the E3-E6 campaign names the source commit that executed it; plan from a clean git "
                         "checkout (or give --budget-campaign DIR)")
     seeds = [int(s) for s in p.opts["arm_seeds"]]
-    # A fixture plan's studies cannot form the original campaign (cm_experiments/campaign.export_campaign
-    # refuses software fixtures and missing accounting): its export is the partial campaign.
-    complete = not p.opts.get("allow_fixture")
     studies, last = [], []
     for dataset in p.present(EXPERIMENT_DATASETS["budget"]):
         for member in p.members(dataset):
@@ -949,7 +922,7 @@ def build_budget(p, export):
             tasks = []
             for seed in seeds:
                 study = p.work / "budget" / "studies" / label / f"seed-{seed}"
-                tasks.append({"commands": [budget_study_command(p)], "requeue": False,
+                tasks.append({"commands": [["bash", "hpc/run_budget_arms_arrhenius.sh"]], "requeue": False,
                               "env": {"CM_SOURCE_ROOT": str(ROOT), "CM_BASE_RUN": str(parent),
                                       "CM_ARM_OUTPUT": str(study), "CM_TRUST_CHECKPOINTS": "1",
                                       "CM_ARM_SEED": str(seed)},
@@ -974,11 +947,9 @@ def build_budget(p, export):
                             {"internal": "budget_manifest", "manifest": str(manifest), "studies": studies,
                              "seeds": seeds},
                             {"argv": py("scripts/arm_campaign.py", "export", "--manifest", manifest, "--output",
-                                        campaign, *(["--complete"] if complete else [])),
-                             "skip_if": str(campaign / ("analysis.json" if complete else "partial_analysis.json"))},
+                                        campaign, "--complete"), "skip_if": str(campaign / "analysis.json")},
                             {"argv": py("scripts/export_records.py", "budget-matched", "--campaign", campaign,
-                                        "--root", p.records, *([] if complete else ["--allow-partial"]),
-                                        "--hardware", "{hardware}", "--period", "{period}")}])
+                                        "--root", p.records, "--hardware", "{hardware}", "--period", "{period}")}])
 
 
 def build_budget_provided(p, campaign: Path):
@@ -1098,24 +1069,6 @@ def _normalize_only(values) -> set[str]:
         else:
             out |= {f"records:{value}", f"campaign:{value}", f"environment:{value}"}
     return out
-
-
-# Record exporters that write the measured part of an incomplete set, with the cells it lacks, when given
-# --allow-partial (never into records/). A fixture plan's runs (a software check or the CPU demonstration) can
-# leave cells without a valid measurement, e.g. no state donors where every audited rule is open loop.
-PARTIAL_EXPORTERS = {"scripts/run_confirmation_analysis.py", "scripts/run_experiment.py",
-                     "scripts/run_trajectory_audit.py", "scripts/run_decision_audit.py", "scripts/run_timing_records.py"}
-
-
-def declare_partial_exports(exports: list[dict]) -> None:
-    """In a fixture plan, every export step of an exporter that can write a partial set passes --allow-partial."""
-    for export in exports:
-        for step in export["steps"]:
-            argv = [str(a) for a in step.get("argv") or []]
-            script = next((a for a in argv if a.endswith(".py")), None)
-            partial = script in PARTIAL_EXPORTERS or (script == "scripts/run_ablation.py" and "modules" not in argv)
-            if partial and "export" in argv and "--allow-partial" not in argv:
-                step["argv"] = [*step["argv"], "--allow-partial"]
 
 
 def build_plan(work, runs: dict, options: dict, *, required: list[str], executor=_subprocess_executor,
@@ -1246,8 +1199,6 @@ def build_plan(work, runs: dict, options: dict, *, required: list[str], executor
                 "E12 needs the author's pinned-upstream study plans (pinned upstream and adapter checkouts): give "
                 "--baselines DIR, or a finished set with --artifact records:baselines=DIR"))
     attempt("environment", build_environment)
-    if options.get("allow_fixture"):
-        declare_partial_exports(p.exports)
     for artifact in required:
         if artifact not in p.artifacts:
             p.artifacts[artifact] = {"status": "awaiting", "reason": "not planned"}
@@ -1265,8 +1216,6 @@ def build_plan(work, runs: dict, options: dict, *, required: list[str], executor
                 "band_audit": {"dataset": options["band_audit_dataset"], "baseline": options["band_audit_baseline"]},
                 "arm_seeds": list(options["arm_seeds"]), "provisional": list(options.get("provisional") or []),
                 "from_runs_roman_member": "split_00 (the first split run, as the E17 timing records time it)",
-                **({"s14_excluded": options["s14_exclude"]} if options.get("s14_exclude") else {}),
-                **({"horizon_sweep_configuration": options["horizon_sweep"]} if options.get("horizon_sweep") else {}),
                 "budget_parents": "fresh executions prepare->confirm of each sealed run's own configuration; the "
                                   "sealed runs carry admission and test decisions, which the E3-E6 protocol "
                                   "(cm_experiments/runner.py) and the complete campaign export refuse"},
@@ -1295,9 +1244,6 @@ def command_plan(args, executor=_subprocess_executor) -> int:
         raise PlanError("write the work directory outside the repository checkout")
     if (work / "plan.json").exists():
         raise PlanError(f"{work}/plan.json exists; use a new --work directory")
-    if getattr(args, "horizon_sweep_beam", None) is not None and not args.allow_fixture:
-        raise PlanError("--horizon-sweep-beam sweeps a configuration the parent never planned: a demonstration, "
-                        "planned with --allow-fixture")
     found, suite = discover_runs(args.runs, args.run)
     runtime = runtime_fingerprint()
     runs = verify_runs(found, runtime=runtime, allow_fixture=args.allow_fixture)
@@ -1330,41 +1276,12 @@ def command_plan(args, executor=_subprocess_executor) -> int:
     for dataset in (options["negative_controls_dataset"], options["band_audit_dataset"], *options["provisional"]):
         if dataset not in DATASETS:
             raise PlanError(f"unknown dataset {dataset!r}; canonical names: {list(DATASETS)}")
-    if args.device != "cuda":
-        if not args.allow_fixture:
-            raise PlanError("--device cpu executes the runners on a CPU: a demonstration, planned with --allow-fixture")
-        options["device"] = args.device
-    if args.s14_exclude:
-        if not args.allow_fixture:
-            raise PlanError("--s14-exclude leaves the joint S14 family partial: a demonstration, planned with --allow-fixture")
-        unknown = sorted(set(args.s14_exclude) - set(DATASETS))
-        if unknown:
-            raise PlanError(f"--s14-exclude: unknown datasets {unknown}")
-        options["s14_exclude"] = sorted(set(args.s14_exclude))
-    if args.horizon_sweep_profile or args.horizon_sweep_ensemble is not None or args.horizon_sweep_beam is not None:
-        options["horizon_sweep"] = {"profile": args.horizon_sweep_profile, "ensemble": args.horizon_sweep_ensemble,
-                                    **({"beam": args.horizon_sweep_beam} if args.horizon_sweep_beam is not None else {})}
     work.mkdir(parents=True, exist_ok=True)
     plan = build_plan(work, runs, options, required=required_artifact_ids(), suite=suite, executor=executor,
                       repository=dict(repository_identity(), runtime_sha256=runtime))
-    if options.get("device"):
-        plan["nodes"] = with_device(plan["nodes"], options["device"])
     write_json(work / "plan.json", plan)
     print("\n".join(plan_summary(plan)))
     return 0
-
-
-def with_device(value, device: str):
-    """Every runner argument vector with ``--device cuda`` rewritten to ``--device <device>``."""
-    if isinstance(value, dict):
-        return {key: with_device(item, device) for key, item in value.items()}
-    if isinstance(value, list):
-        items = [with_device(item, device) for item in value]
-        if all(isinstance(item, str) for item in items):
-            items = [device if index and items[index - 1] == "--device" and item == "cuda" else item
-                     for index, item in enumerate(items)]
-        return items
-    return value
 
 
 def plan_summary(plan: dict) -> list[str]:
@@ -2127,9 +2044,6 @@ def derive_provenance(spec: dict | None) -> tuple[str | None, str | None]:
         for path in sorted(campaign.glob("studies/**/environment.json")):
             environments.append(read_json(path))
         stamps = _sacct_times(sorted(campaign.glob("execution/**/accounting-*")))
-        if not stamps:
-            # studies run without a scheduler (scripts/run_budget_study.py) have no accounting: their own records
-            stamps = [read_json(path).get("created_utc") for path in sorted(campaign.glob("studies/**/experiment.json"))]
     elif kind == "baselines":
         for study in map(Path, spec["studies"]):
             for invocation in study.glob("**/invocation.json"):
@@ -2166,19 +2080,11 @@ def _baseline_evidence(invocation: Path) -> dict:
     return {}
 
 
-def unscheduled(evidence: Path) -> bool:
-    """A study executed without a scheduler allocation (scripts/run_budget_study.py): it has no accounting."""
-    try:
-        return read_json(evidence / "scheduler.json").get("scheduler") == "none"
-    except (OSError, ValueError):
-        return False
-
-
 def finalize_budget_accounting(step: dict) -> None:
     """The terminal sacct record of every E3-E6 study job (hpc/finalize_arm_accounting.sh)."""
     for study in step["studies"]:
         evidence = budget_evidence(Path(study["study"]))
-        if (evidence / "sacct.tsv").is_file() or unscheduled(evidence):
+        if (evidence / "sacct.tsv").is_file():
             continue
         job = (evidence / "job_id.txt").read_text(encoding="utf-8").strip()
         code = run_command(["bash", "hpc/finalize_arm_accounting.sh", job, str(evidence)])
@@ -2216,14 +2122,10 @@ def write_budget_manifest(step: dict, repository: dict) -> None:
     rows = []
     for study in step["studies"]:
         evidence = budget_evidence(Path(study["study"]))
-        logs = [evidence / "stdout.log", evidence / "stderr.log"]
-        if unscheduled(evidence):
-            # outside a scheduler an empty stream is not written over: there is nothing to attach
-            logs = [log for log in logs if log.is_file() and log.stat().st_size]
         rows.append({"dataset": study["dataset"], "seed": int(study["seed"]), "split": int(study["split"]),
                      "parent": study["parent"], "study": study["study"],
-                     "accounting": [] if unscheduled(evidence) else [str(evidence / "sacct.tsv")],
-                     "job_log": [str(log) for log in logs]})
+                     "accounting": [str(evidence / "sacct.tsv")],
+                     "job_log": [str(evidence / "stdout.log"), str(evidence / "stderr.log")]})
     value.update(seed_ids=[int(s) for s in step["seeds"]], studies=rows,
                  source={"repository": "https://github.com/VKHS/CR-9", "git_commit": commit,
                          "tree_sha256": inventory(ROOT)["tree_sha256"]})
@@ -2256,9 +2158,7 @@ def verify_record_set(path: Path, *, allow_fixture: bool) -> dict:
     if entry.get("synthetic") and not allow_fixture:
         raise PlanError(f"{path.name}: a synthetic record set is not a paper artifact")
     provenance = read_json(path / "provenance.json")
-    # A fixture plan (a software check or the CPU demonstration) may hold a set whose own provenance declares
-    # partial coverage, e.g. timings without a peak-memory reading on CPU; a paper artifact never does.
-    if provenance.get("coverage_complete") is False and not allow_fixture:
+    if provenance.get("coverage_complete") is False:
         raise PlanError(f"{path.name}: partial coverage (provenance coverage_complete = false)")
     if not allow_fixture:
         from scripts.paper_artifacts import _verify_source
@@ -2459,17 +2359,6 @@ def parser() -> argparse.ArgumentParser:
                         "the outputs can never be published")
     p.add_argument("--allow-subset", action="store_true",
                    help="plan experiments on the runs present when some datasets are missing (outputs are partial)")
-    p.add_argument("--device", choices=("cuda", "cpu"), default="cuda",
-                   help="device of every runner command; cpu is a CPU demonstration (requires --allow-fixture)")
-    p.add_argument("--s14-exclude", action="append", default=[], metavar="DATASET",
-                   help="leave a dataset out of the joint S14 family (requires --allow-fixture; the family is partial)")
-    p.add_argument("--horizon-sweep-profile", default=None,
-                   help="profile of the swept MPC-RH configuration of Table S29 (declared; default: the deployed rule)")
-    p.add_argument("--horizon-sweep-ensemble", type=int, default=None,
-                   help="ensemble size of the swept MPC-RH configuration (declared; default: the deployed rule)")
-    p.add_argument("--horizon-sweep-beam", type=int, default=None,
-                   help="beam width the Table S29 horizon sweep holds when the parent was planned with another "
-                        "(declared; requires --allow-fixture; every point is then a variant lifecycle)")
     p = sub.add_parser("submit", help="write the batch scripts and submit the job graph with afterok dependencies")
     p.add_argument("--work", type=Path, required=True)
     p.add_argument("--dry-run", action="store_true", help="print the sbatch commands; submit nothing")

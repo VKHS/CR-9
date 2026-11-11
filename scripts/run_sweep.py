@@ -58,9 +58,6 @@ def main(argv=None) -> int:
     p.add_argument("--horizon", type=int, default=None, help="registered horizon (default: the contract's)")
     p.add_argument("--horizons", default=None, help="horizon grid, comma separated (default: the contract's)")
     p.add_argument("--beams", default=None, help="beam-width grid, comma separated (default: the contract's)")
-    p.add_argument("--beam", type=int, default=None,
-                   help="beam width the horizon sweep holds when it is not the parent's own (every point outside the "
-                        "parent's planner registry is then a variant; no replicate)")
     p.add_argument("--profile", default=None, help="profile of the swept MPC-RH configuration (default: deployed)")
     p.add_argument("--ensemble", type=int, default=None, help="ensemble of the swept configuration (default: deployed)")
     p.add_argument("--grid", action="append", default=[], metavar="PARAMETER=V1,V2",
@@ -94,7 +91,7 @@ def main(argv=None) -> int:
                 grids[name.strip()] = _numbers(values)
             path = plan_sweep(args.sweep, args.parent, args.output, horizon=args.horizon,
                               horizons=_numbers(args.horizons, int), beams=_numbers(args.beams, int),
-                              profile=args.profile, ensemble=args.ensemble, beam=args.beam, grids=grids or None,
+                              profile=args.profile, ensemble=args.ensemble, grids=grids or None,
                               variants=not args.no_variants, replicate=not args.no_replicate,
                               allow_source_change=args.allow_source_change, ablations=args.ablations or None,
                               buffers=_numbers(args.buffers, int))

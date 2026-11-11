@@ -35,25 +35,6 @@ The first command is described in [docs/PRODUCTION.md](docs/PRODUCTION.md); its 
 
 [The final destination](docs/FINAL_DESTINATION.md) projects the repository after publication: the contents and sizes of every artifact, the pre-registered data roles, the design-determined values of the reconstruction and the complete close-out sequence. [`destination/`](destination/README.md) holds every file that publication writes into the checkout, projected, with the twelve items evaluated on them ([at the destination](destination/STATEMENT_COMPLIANCE.md)); `make final-destination-converge` compares each published file with its projection.
 
-## CPU demonstration (separate from the statement)
-
-CPU demonstration of the released code at reduced scale (demo/README.md). Every artifact was produced by the repository's own lifecycle and runners on public benchmark data on hosted CPU runners. The values are not the paper's measurements and are not expected to equal the printed values. It is published as the release [`demo-artifacts`](https://github.com/VKHS/CR-9/releases/tag/demo-artifacts) (31 of 37 artifacts) and listed in [release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) lists the displays its artifacts support). It shows each item working end to end; it does not change any status above.
-
-| Statement item | Demonstrated | What the demonstration supplies | Evidence |
-|---|---|---|---|
-| complete experiment code | yes | the lifecycle and every runner executed from this checkout (the E12 adapters excepted) | 7 artifact(s) |
-| configurations | yes | the effective configuration sealed in every demonstration run | 7 artifact(s) |
-| source data | yes | the source data written by the demonstration reconstruction | 56 of 90 displays built |
-| split and seed manifests | yes | the executed split and seed manifests of the demonstration runs | 7 artifact(s) |
-| environment specification | yes | the observed CPU environment of the demonstration runs | 8 artifact(s) |
-| checkpoints | yes | the plant and controller checkpoints of the demonstration runs | 7 artifact(s) |
-| predictions | yes | the member and deployed predictions of the demonstration runs | 8 artifact(s) |
-| propensity-logged trajectories | yes | the propensity-logged exploration trajectories of the demonstration runs | 7 artifact(s) |
-| statistical outputs | yes | the selection, confirmation and admission statistics, record sets and campaigns | 30 artifact(s) |
-| figure/table generators | yes | every table and figure generator run on the demonstration artifacts | 56 of 90 displays built |
-| one-command reconstruction of every reported table and figure | partly | make demo-paper | 56 of 90 displays built |
-| follows established reproducibility guidance | yes | the same checklist mapping | demo/published/paper/source_data |
-
 ## The availability text printed in the manuscript
 
 The identified manuscript also prints a longer availability paragraph (main text, page 15; Supplementary Information, page 30) and two repository sentences in the main Methods. [`release/printed_availability.json`](release/printed_availability.json) holds the text and divides it into 39 claims; `scripts/printed_statement_check.py` evaluates each one: 29 fulfilled, 8 awaiting measured outputs, 2 missing.

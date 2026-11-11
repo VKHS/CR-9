@@ -8,7 +8,7 @@ targets; [registered_constants.json](registered_constants.json) records the
 protocol. [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md) explains executable
 choices and the run artifacts that identify them.
 The [paper-support contract](../docs/PAPER_SUPPORT.md) maps the twenty experiment
-requirements to inspectable records and the associated manuscript decisions.
+obligations to inspectable evidence and records the remaining manuscript decisions.
 
 The registry preserves printed values. Its status fields distinguish an
 evaluated arm from the outcome allowed by the registered lifecycle. In
@@ -39,8 +39,8 @@ make registry-check
 
 This checks metadata, executable protocol constants, reference formulas and
 arithmetic within transcribed tables. S6c residuals and admissible sketch ratios,
-for example, use the reported cost multiplier. Arithmetic checks use those
-registered inputs; measurement replay uses the originating execution records.
+for example, use the reported cost multiplier; checking those calculations does
+not reproduce its measurement.
 
 ```bash
 make si-check     # derived supplementary entries recomputed from their printed inputs
@@ -88,14 +88,13 @@ make scientific-audit  # check scientific evidence, model identity and bindings
 [AVAILABILITY.md](../AVAILABILITY.md) lists current coverage and supported
 displays. [Run archives](../docs/RUN_ARCHIVES.md) explains how to ingest a run,
 register a measurement set and bind an observation to a manuscript result.
-Output reports identify any observation that the selected input set does not supply.
+Missing observations remain unavailable in generated results.
 ## Current manuscript support
 
 [RESULTS.md](RESULTS.md) is the readable seven-dataset results view. It draws
 from the reported measurements in this directory and preserves the registered
-confirmation outcome separately from an evaluated arm. This reading view uses
-registered manuscript values; reconstructed outputs are generated separately
-from the corresponding execution artifacts.
+confirmation outcome separately from an evaluated arm. It does not substitute
+transcribed values for reconstructed experiment output.
 
 [PAPER_SUPPORT.md](PAPER_SUPPORT.md) inventories all 90 numbered tables and
 figures in the current main text and supplement. The source-bound

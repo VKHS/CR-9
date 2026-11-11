@@ -114,8 +114,6 @@ def _tex(value):
 
 
 def _table(root, stem, title, columns, records, note):
-    if _BANNER:
-        note = f"{_BANNER[0]}. {note}"
     paths = [_csv(root, f"tables/{stem}.csv", columns, records)]
     escape_md = lambda value: _format(value).replace("|", r"\|").replace("\n", " ") or "—"
     lines = [f"# {title}", "", "| " + " | ".join(columns) + " |", "| " + " | ".join("---" for _ in columns) + " |"]
@@ -135,12 +133,6 @@ def _table(root, stem, title, columns, records, note):
     return paths
 
 
-# The CPU demonstration (scripts/reconstruct_paper.py --demo) builds these displays from fixture runs at reduced
-# scale; build_supplement(demonstration=True) sets this banner, which every table note and figure written here carries.
-DEMONSTRATION_BANNER = "CPU DEMONSTRATION at reduced scale (fixture runs) \u2014 not the paper's measurements"
-_BANNER: list[str] = []
-
-
 def _plt():
     import matplotlib
     matplotlib.use("Agg")
@@ -153,8 +145,6 @@ def _plt():
 
 def _save(root, figure, stem):
     (root / "figures").mkdir(exist_ok=True)
-    if _BANNER:
-        figure.text(0.5, 1.0, _BANNER[0], ha="center", va="bottom", color="#b00020", fontsize=8)
     paths = []
     for suffix in ("png", "svg"):
         path = root / f"figures/{stem}.{suffix}"
@@ -181,29 +171,25 @@ def _records_index(path, manuscript_root):
     return {row["set"]: row for row in entries}, specs
 
 
-def _record_values(index_path, entry, specs, *, demonstration=False):
-    """The verified rows of one record set. The CPU demonstration's sets derive from fixture runs and carry their
-    synthetic flag; ``demonstration`` admits that flag (the outputs are labelled), never an example set."""
+def _record_values(index_path, entry, specs):
     name = entry["set"]
     path = confined(Path(index_path).parent, f"{name}/MANIFEST.json").parent
     before = directory_inventory(path)
     require(entry.get("verified") is True, f"{name}: record set is not verified in the supplied index")
     checked = verify_set(path, specs["sets"][name], specs)
     require(checked["manifest_sha256"] == entry.get("manifest_sha256"), f"{name}: stale index manifest identity")
-    require(demonstration or (checked.get("synthetic") is False and entry.get("synthetic", False) is False),
+    require(checked.get("synthetic") is False and entry.get("synthetic", False) is False,
             f"{name}: synthetic examples cannot be scientific display inputs")
     provenance = read_json(path / "provenance.json")
     require(not provenance.get("example"), f"{name}: example records cannot establish benchmark displays")
-    for field in () if demonstration else ("evidence_kind", "data_kind", "status"):
+    for field in ("evidence_kind", "data_kind", "status"):
         value = str(provenance.get(field, "")).lower()
         require(not any(word in value for word in ("synthetic", "planning", "advisory", "sensitivity", "template", "example", "toy")),
                 f"{name}: {field} classifies this as non-measured evidence")
     rows = read_summary(path, specs["sets"][name], specs["summary_columns"])
     require(directory_inventory(path) == before, f"{name}: source files changed during verification")
-    return rows, _input_identity(path, "demonstration_record_set" if demonstration else "verified_measurement_record_set",
-                                 inventory=before, record_set=name, manifest_sha256=checked["manifest_sha256"],
-                                 **({"synthetic": bool(checked.get("synthetic") or entry.get("synthetic", False))}
-                                    if demonstration else {}),
+    return rows, _input_identity(path, "verified_measurement_record_set", inventory=before,
+                                 record_set=name, manifest_sha256=checked["manifest_sha256"],
                                  scope="Every summary value traced to a sealed raw file; historical execution and the original inferential method are not independently attested")
 
 
@@ -428,20 +414,15 @@ def _confirmation_displays(root, checked):
     return outputs
 
 
-def _budget_data(campaign, *, demonstration=False):
-    """The strictly replayed campaign. The CPU demonstration's campaign runs on fixture parents without scheduler
-    accounting, which the strict check refuses; ``demonstration`` replays it without those qualifications and
-    still requires all 24 contrasts of the registered family."""
+def _budget_data(campaign):
     from cm_campaigns.arm_campaign import check_campaign
     path = Path(campaign)
     before = directory_inventory(path)
-    checked = check_campaign(path, read_json(confined(path, "study.json")), strict=not demonstration)
-    require(checked.get("passed") is True and len(checked.get("summary", [])) == 24,
-            "Budget displays require 24 replayed contrasts" if demonstration else "Budget displays require 24 strictly replayed contrasts")
+    checked = check_campaign(path, read_json(confined(path, "study.json")), strict=True)
+    require(checked.get("passed") is True and len(checked.get("summary", [])) == 24, "Budget displays require 24 strictly replayed contrasts")
     require(directory_inventory(path) == before, "Budget campaign files changed during verification")
-    return checked, _input_identity(path, "demonstration_budget_campaign" if demonstration else "strict_budget_campaign",
-                                   inventory=before, verifier_scope=checked.get("scope"),
-                                   historical_table_reproduction=checked.get("historical_table_reproduction", False))
+    return checked, _input_identity(path, "strict_budget_campaign", inventory=before,
+                                   verifier_scope=checked.get("scope"), historical_table_reproduction=checked.get("historical_table_reproduction", False))
 
 
 def _budget_displays(root, checked):
@@ -537,34 +518,18 @@ def _budget_displays(root, checked):
     return outputs
 
 
-def build_supplement(output_dir, *, records_index=None, confirmation_campaign=None, budget_campaign=None, manuscript_root=ROOT,
-                     demonstration=False):
+def build_supplement(output_dir, *, records_index=None, confirmation_campaign=None, budget_campaign=None, manuscript_root=ROOT):
     """Return a hashed build manifest; malformed supplied inputs appear in errors.
 
     Missing optional sources/registered sets are skipped. A complete output table
     is never equated with historical execution, a full figure, or all 90 displays.
-    ``demonstration`` builds the CPU demonstration's displays from its fixture-derived inputs: every output is
-    marked synthetic and carries DEMONSTRATION_BANNER; the paper's build never sets it.
     """
-    _BANNER[:] = [DEMONSTRATION_BANNER] if demonstration else []
-    try:
-        return _build_supplement(output_dir, records_index=records_index, confirmation_campaign=confirmation_campaign,
-                                 budget_campaign=budget_campaign, manuscript_root=manuscript_root,
-                                 demonstration=demonstration)
-    finally:
-        _BANNER[:] = []
-
-
-def _build_supplement(output_dir, *, records_index, confirmation_campaign, budget_campaign, manuscript_root, demonstration):
     input_roots = [Path(records_index).parent if records_index is not None else None, confirmation_campaign, budget_campaign]
     out = _guard_output(output_dir, input_roots)
     report = {"schema": SCHEMA, "status": "PENDING", "synthetic": False, "synthetic_examples": False,
               "outputs": [], "inputs": [], "skipped": [], "errors": [],
               "implementation": _implementation_identity(),
               "scope": "Numerical displays from supplied verified records/campaigns; no new benchmark observations and no all-paper reproduction claim"}
-    if demonstration:
-        report.update(demonstration=True, scope="CPU demonstration at reduced scale: displays from its fixture-derived "
-                                                "records and campaigns; not the paper's measurements")
     available, specs = {}, None
     if records_index is not None:
         try:
@@ -589,18 +554,8 @@ def _build_supplement(output_dir, *, records_index, confirmation_campaign, budge
                 for item in outputs:
                     item["input_sha256"] = identity["sha256"]
                     item["sha256"] = {relative: sha256(out / relative) for relative in item["files"]}
-                    if demonstration:
-                        # the reconstruction's kind for fixture-derived inputs (scripts/reconstruct.py), which never
-                        # counts as a full numerical display
-                        item.update(synthetic=True, demonstration=True, source_input_kind=item["input_kind"],
-                                    input_kind="synthetic_examples", note=f"{DEMONSTRATION_BANNER}. {item['note']}")
-                if demonstration and outputs:
-                    report["synthetic"] = report["synthetic_examples"] = True
                 report["inputs"].append(identity)
                 report["outputs"].extend(outputs)
-        except ImportError as exc:
-            # the campaign replays verify the parents' checkpoints with the PyTorch runtime
-            report["errors"].append({"input": identifier, "error": f"the replay needs the recorded CPU environment ({exc})"})
         except (OSError, ValueError, KeyError, TypeError, IndexError, RuntimeError) as exc:
             report["errors"].append({"input": identifier, "error": str(exc)})
     for name, prepare, render in (("factorials", _factorial_data, _factorial_displays), ("ensemble_grid", _ensemble_data, _ensemble_displays)):
@@ -608,13 +563,12 @@ def _build_supplement(output_dir, *, records_index, confirmation_campaign, budge
             report["skipped"].append({"input": name, "reason": "No registered measurement record set supplied"})
             continue
         def load_record(name=name, prepare=prepare):
-            rows, identity = _record_values(records_index, available[name], specs, demonstration=demonstration)
+            rows, identity = _record_values(records_index, available[name], specs)
             return prepare(rows, specs), identity
         build(name, load_record, render)
     for name, source, load, render in (("confirmation_campaign", confirmation_campaign,
                                        lambda: _confirmation_data(confirmation_campaign, manuscript_root), _confirmation_displays),
-                                      ("budget_campaign", budget_campaign,
-                                       lambda: _budget_data(budget_campaign, demonstration=demonstration), _budget_displays)):
+                                      ("budget_campaign", budget_campaign, lambda: _budget_data(budget_campaign), _budget_displays)):
         if source is None:
             report["skipped"].append({"input": name, "reason": "Original campaign not supplied"})
         else:

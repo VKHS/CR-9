@@ -19,13 +19,6 @@ Steps:
 4. Every computed value that the paper prints is compared with the printed value at
    the printed precision.
 
-``make demo-paper`` runs the same steps on the CPU demonstration (``--demo``): its own
-manifest ``release/demo_artifacts.json`` and release ``demo-artifacts``, a workspace
-labelled as the demonstration and a report that opens with its scope. Its values are not
-the paper's measurements; their comparison with the printed values is reported, and the
-exit status counts only verification and generation (0: every published demonstration
-artifact verified and every generator ran).
-
 Exit status 0 means every display was generated in full from the published outputs
 and every required value has a comparable printed reference and agrees; 1 means
 outputs or comparison definitions are missing, a value differs, or content is
@@ -117,18 +110,9 @@ def main(argv=None) -> int:
     parser.add_argument("--tier", choices=["analysis", "complete"], default="analysis")
     parser.add_argument("--manifest", type=Path, default=artifacts.MANIFEST)
     parser.add_argument("--offline", action="store_true", help="use already downloaded artifacts only")
-    parser.add_argument("--demo", action="store_true",
-                        help="the CPU demonstration (release/demo_artifacts.json); not the paper's measurements")
     args = parser.parse_args(argv)
-    if args.demo and args.manifest == artifacts.MANIFEST:
-        args.manifest = artifacts.DEMO_MANIFEST
-    label = (f"demo-artifacts: CPU demonstration at reduced scale, not the paper's measurements "
-             f"(requested {args.tier} tier)" if args.demo else f"paper-artifacts (requested {args.tier} tier)")
     try:
         manifest = artifacts.load_manifest(args.manifest)
-        if (manifest.get("channel") == artifacts.DEMO_CHANNEL) != bool(args.demo):
-            raise artifacts.ArtifactError("The demonstration manifest is reconstructed with --demo (make demo-paper), "
-                                          "the paper's manifest without it (make paper)")
         published = [a for a in manifest["artifacts"] if a.get("status") == artifacts.PUBLISHED]
         if published and not args.offline:
             report = artifacts.fetch(args.artifacts, manifest_path=args.manifest, tier=args.tier)
@@ -143,18 +127,13 @@ def main(argv=None) -> int:
         result = reconstruct(args.output_dir, runs_root=found["runs_root"], records_index=found["records_index"],
                              confirmation_campaign=campaigns.pop("confirmation", None),
                              budget_campaign=campaigns.pop("budget", None), campaigns=campaigns,
-                             label=label, demonstration=args.demo,
-                             scope_note=manifest.get("scope", artifacts.DEMO_SCOPE) if args.demo else None)
+                             label=f"paper-artifacts (requested {args.tier} tier)")
     except (artifacts.ArtifactError, ReconstructionError, OSError, ValueError, KeyError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     status = summarize(result, manifest)
     status["artifacts_awaiting_publication"] = materialization["not_published"]
     status["artifact_materialization"] = materialization
-    if args.demo:
-        # the report opens with this scope (reconstruct(scope_note=...)), inside the verified workspace
-        status["channel"] = artifacts.DEMO_CHANNEL
-        status["scope"] = manifest.get("scope", artifacts.DEMO_SCOPE)
     status_path = args.output_dir.parent / f"{args.output_dir.name}.status.json"
     status_path.write_text(json.dumps(status, indent=1) + "\n", encoding="utf-8")
     print(f"Displays complete: {status['complete']} of {status['displays']}")
@@ -174,9 +153,6 @@ def main(argv=None) -> int:
     print(f"Report: {args.output_dir / 'RECONSTRUCTION_REPORT.md'}; status: {status_path}")
     if status["generator_errors"] or status["module_errors"]:
         return 2
-    if args.demo:
-        print("Demonstration: values from reduced-scale CPU runs; differences from the printed values are expected.")
-        return 1 if materialization["missing_local"] or materialization["incomplete_tiers"] else 0
     if materialization["missing_local"] or materialization["incomplete_tiers"]:
         print("Fetch the requested artifact tier before treating this offline reconstruction as complete.",
               file=sys.stderr)

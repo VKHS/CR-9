@@ -6,7 +6,7 @@ Abdolvahab Khalili Sadaghiani · Linköping University
 
 [![Software checks](https://github.com/VKHS/CR-9/actions/workflows/quality.yml/badge.svg)](https://github.com/VKHS/CR-9/actions/workflows/quality.yml)
 [![Availability statement](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json)](STATEMENT_COMPLIANCE.md)
-[Statement compliance](STATEMENT_COMPLIANCE.md) · [Reviewer entry](docs/REVIEW_ENTRY.md) · [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
+[Statement compliance](STATEMENT_COMPLIANCE.md) · [Final destination](docs/FINAL_DESTINATION.md) · [destination/](destination/README.md) · [One-command reconstruction](docs/RECONSTRUCTION.md) · [Regenerate on a cluster](docs/HPC.md) · [Reviewer guide](docs/REVIEWER_GUIDE.md) · [Reviewer FAQ](docs/REVIEWER_FAQ.md) · [Method](docs/METHOD.md) · [Analytical statements](docs/THEORY.md) · [Getting started](docs/GETTING_STARTED.md) · [Datasets](docs/DATASETS.md) · [Availability](AVAILABILITY.md) · [Paper support](paper/PAPER_SUPPORT.md) · [Reported results](paper/RESULTS.md) · [Claims ledger](paper/CLAIMS.md)
 
 CROSS-MORSE attaches an external controller to a frozen graph predictor. At
 inference, intermediate representations guide whether and how propagation
@@ -16,7 +16,7 @@ selection, confirmation, and admission protocol.
 
 ![Frozen predictor and external feedback controller](docs/assets/architecture.svg)
 
-## Reconstruct tables and figures
+## Every table and figure in one command
 
 The repository combines experiment code, configurations, environment specifications
 and generators with a verified publication workflow for the measured outputs.
@@ -32,6 +32,7 @@ make paper                     # download and verify the published outputs, rebu
 make paper PAPER_TIER=complete # also the lifecycle checkpoints and full prediction arrays
 make statement-check           # each item of the availability statement and where it is fulfilled
 make printed-statement-check   # each claim of the availability text printed in the manuscript
+make final-destination         # the repository after publication: design forecast, roles, release, close-out
 ```
 
 `make paper` verifies the published artifacts and each run's sealed eight-stage
@@ -50,9 +51,15 @@ artifact tier, including checkpoint and prediction bytes, executes reconstructio
 and checks the committed source-data and manifest views against those artifacts.
 `make availability-fulfilled` adds every claim of the longer availability text that the
 manuscript prints (main text page 15, Methods, Supplementary Information page 30), which
-[Statement compliance](STATEMENT_COMPLIANCE.md) evaluates claim by claim.
-The [reviewer entry point](docs/REVIEW_ENTRY.md) distinguishes software checks,
-package reconstruction and strict manuscript-completeness verification.
+[Statement compliance](STATEMENT_COMPLIANCE.md) evaluates claim by claim. The
+[final destination](docs/FINAL_DESTINATION.md) draws the repository as it will stand after
+publication from what the repository already fixes: the printed values that the released code
+determines by design and their agreement with the paper, the pre-registered data roles, the
+projected contents and size of every run archive, and the close-out sequence.
+[`destination/`](destination/README.md) holds every file that publication writes into the
+checkout, projected at the path it will occupy, with the twelve registered items evaluated on
+them ([12 of 12 at the destination](destination/STATEMENT_COMPLIANCE.md)); after publication,
+`make final-destination-converge` checks every realized file against its projection.
 The [paper-reference guide](docs/PAPER_REFERENCE_VALUES.md) explains how printed
 comparison targets are tied to the author's manuscript files.
 
@@ -67,27 +74,6 @@ uploading files or changing the release inventory. The [publication guide](docs/
 explains the input map and the distinction between local readiness and public
 availability. The [availability review](docs/AVAILABILITY_REVIEW.md) records the
 implemented improvements and the evidence still needed for the full statement.
-
-### Published execution package
-
-A published package contains outputs produced by this repository's code on public
-benchmark data. Its recorded scope includes all ten Roman-empire splits and
-deterministic subsets of the other datasets. The committed inventory identifies
-31 of 37 artifact groups: seven lifecycle runs, 22 record sets, the E3-E6 campaign
-and an execution-environment capture. Its committed reconstruction report records
-56 of 90 displays built from the package and repository sources.
-
-```bash
-make demo-paper                # verify the existing release and render supported displays
-```
-
-Use recorded data memberships, configurations and comparison reports to establish
-which manuscript quantities an execution supports. Existing command identifiers
-remain compatible with published downloads. This package command does not enforce
-the strict full-manuscript completion gate of `make paper`.
-The [execution-package guide](demo/README.md) records its scope and settings;
-the [execution report](demo/RESULTS.md) identifies available outputs, missing
-inputs and comparison outcomes.
 
 ## Regenerate the results on a Slurm cluster
 
@@ -112,7 +98,7 @@ bash run_cross_morse.sh status        # progress
 | Identity | `check` and `reproduce` verify the runtime fingerprint recorded in `release/release_scope.json`; every run seals it with its source snapshot, configuration, data-role membership, checkpoints and decision records |
 | Resilience | Jobs that reach their time limit checkpoint at a safe boundary and requeue themselves; a GPU or driver failure requeues the job on another node; `reproduce resume` continues a suite |
 | Report | `REPRODUCTION_REPORT.md` places each dataset's deployed policy and paired effect beside main Table 1, summarises the comparison of every readable quantity (exact, inside the printed 95% interval, or outside), embeds the rebuilt Tables 1–2 and records the GPU-hours used; a results ZIP holds every run's decision records |
-| First run | `bash run_cross_morse.sh reproduce smoke` exercises the complete orchestration on synthetic data in minutes; `pilot` uses the official data with a smaller compute budget |
+| First run | `bash run_cross_morse.sh reproduce smoke` exercises the complete orchestration on synthetic data in minutes; `pilot` uses the official data with reduced compute |
 
 The [HPC guide](docs/HPC.md) documents every setting, job, record and exit
 code, and the compute the paper reports per dataset; the
@@ -201,7 +187,7 @@ The repository includes two complete, sealed synthetic examples: **arxiv** for
 transductive node classification and **Peptides** for independent-graph multilabel
 prediction. They contain checkpoints, predictions, trajectories, and decision
 records. `make reproduce` numerically replays those records; `make example-paper`
-rebuilds their tables and figures. The examples are software-validation fixtures.
+rebuilds their tables and figures. The examples are software demonstrations.
 
 To execute a new small lifecycle with the current source:
 
@@ -213,7 +199,7 @@ make replay RUN_ROOT=../cm-work/peptides-smoke REPORT_ROOT=../cm-reports
 ## Run an experiment
 
 All seven dataset adapters and all 21 profiles are included. `smoke` uses
-synthetic data, `pilot` uses official data with a smaller compute budget, and `full`
+synthetic data, `pilot` uses official data with reduced computation, and `full`
 uses the registered full execution budget and explicit model widths. The seven
 full-profile parameter totals agree with Supplementary Table S5 at its printed
 precision; the [parameter inventory](docs/DATASETS.md#model-parameter-inventory)

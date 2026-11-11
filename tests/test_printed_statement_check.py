@@ -152,8 +152,7 @@ class Report(unittest.TestCase):
     def test_the_compliance_page_carries_both_texts_and_is_current(self):
         registered = sc.evaluate(ROOT)
         printed = psc.evaluate(ROOT, registered=registered)
-        # as scripts/statement_check.py --write renders it: with the demonstration's section once it is published
-        text = sc.render(registered, printed, sc.demonstration(registered, ROOT))
+        text = sc.render(registered, printed)
         for claim in printed["claims"]:
             self.assertIn(f"| {claim['id']} |", text)
         self.assertIn("## The availability text printed in the manuscript", text)

@@ -1199,15 +1199,12 @@ def arm_id(text: str) -> str:
 
 
 def strict_budget_replay(ctx) -> dict:
-    """Strict replay of the E3-E6 campaign export (paper.build.supplement._budget_data), once per context. The CPU
-    demonstration's campaign ran on fixture parents without scheduler accounting; its context replays it without
-    those qualifications (still all 24 contrasts), and every display it feeds is labelled as the demonstration."""
+    """Strict replay of the E3-E6 campaign export (paper.build.supplement._budget_data), once per context."""
     cache = _cache(ctx)
     if "budget" not in cache:
         from paper.build.supplement import _budget_data
         try:
-            cache["budget"], _ = _budget_data(ctx.require_campaign("budget"),
-                                              demonstration=bool(getattr(ctx, "demonstration", False)))
+            cache["budget"], _ = _budget_data(ctx.require_campaign("budget"))
         except ImportError as exc:
             raise DisplayInputError(f"the strict E3-E6 campaign replay needs the PyTorch runtime ({exc})") from exc
         except (ValueError, KeyError, OSError) as exc:

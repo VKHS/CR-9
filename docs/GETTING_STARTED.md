@@ -4,7 +4,7 @@
 
 Run commands from the checkout root. Keep environments, downloaded data, new runs
 and reports outside the checkout. The included arxiv-shaped and Peptides-shaped
-examples exercise the workflow using generated inputs.
+examples demonstrate the workflow on synthetic data.
 
 ## 1. Install the recorded CPU environment
 
@@ -68,13 +68,12 @@ Every dataset has three configuration profiles:
 | Profile | Intended use |
 |---|---|
 | `smoke` | Generated fixture; small CPU software run; downloads disabled |
-| `pilot` | Official dataset with smaller model and training budgets; integration and resource measurement |
+| `pilot` | Official dataset with reduced model/training settings; integration and resource measurement |
 | `full` | Configured full workload and twelve optimization seeds |
 
 A pilot retains the complete official graph or graph corpus, so it can still
-require substantial memory. Its results correspond to the selected pilot
-settings; full-profile results use their own run records. A comparator return
-is a valid lifecycle outcome.
+require substantial memory. It does not establish full-profile accuracy. A
+comparator return is a valid lifecycle outcome.
 
 Inspect a configuration without downloading or training:
 

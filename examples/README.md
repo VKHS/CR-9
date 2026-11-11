@@ -2,7 +2,7 @@
 
 [Repository](../README.md) · [Recomputed results](generated/metrics.md) · [Environment](../environment/README.md)
 
-Two archived **synthetic** runs exercise the complete artifact format without
+Two archived **synthetic** runs demonstrate the complete artifact format without
 requiring a benchmark download. Together they cover node prediction on a shared
 graph and multilabel prediction on independent graphs. All seven dataset adapters
 and their smoke, pilot, and full configurations remain available for fresh runs.
@@ -18,10 +18,10 @@ trajectories, predictions, statistical decisions, and parent-linked stage manife
 The examples use four generated classes or labels and three training epochs.
 
 These historical runs retain their original source identity. The exact runtime
-is stored in [`source_snapshots/`](source_snapshots) for replay. Their scope is
-the recorded synthetic inputs, historical source and comparator-return decisions.
-Current-runtime validation and official-dataset results use their own source and
-data identities. Artifact availability is recorded in [AVAILABILITY.md](../AVAILABILITY.md).
+is stored in [`source_snapshots/`](source_snapshots) for replay. They demonstrate
+the recorded lifecycle and its comparator-return decisions; they do not establish
+independent-role execution by the current runtime or performance on official data.
+The official evidence status is stated in [AVAILABILITY.md](../AVAILABILITY.md).
 
 ## Replay the saved observations
 
@@ -39,11 +39,10 @@ records, and a labeled synthetic score figure. Committed copies are under
 [`generated/`](generated); `make example-views-check` verifies their numeric contents.
 
 `make example-paper` rebuilds the supported table and figure formats from these
-two archives. The outputs retain a synthetic-data label and the identities of
-the generated inputs in the table above. Benchmark outputs are built separately
-from the corresponding benchmark-run records.
+two archives. The outputs retain a synthetic-data label. They are examples of the
+build process, not reconstructed benchmark results.
 
-The two small [`records/`](records) sets exercise measurement-record export:
+The two small [`records/`](records) sets demonstrate measurement-record export:
 `sensor_parameters` and `nominal_time`. They include their own raw observations,
 provenance, and manifests. `make example-records-check` verifies their values.
 
