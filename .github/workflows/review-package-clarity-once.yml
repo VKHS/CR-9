@@ -1,0 +1,349 @@
+name: Validate reviewer package clarification
+
+on:
+  push:
+    branches: [review-package-clarity-2026-11-12]
+    paths: [.github/workflows/review-package-clarity-once.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reviewer-package-clarity-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  clarify:
+    if: github.ref == 'refs/heads/review-package-clarity-2026-11-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Apply scoped presentation corrections and preserve evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B - <<'PY'
+          import ast, hashlib, json, os, subprocess
+          from pathlib import Path
+          helper = '.github/workflows/review-package-clarity-once.yml'
+          allowed = {'README.md', '.zenodo.json', 'docs/README.md', 'docs/REVIEW_ENTRY.md',
+                     'docs/RECONSTRUCTION.md', 'scripts/availability.py', 'scripts/statement_check.py',
+                     'tests/test_review_package_presentation.py', 'AVAILABILITY.md', 'STATEMENT_COMPLIANCE.md',
+                     'release/artifact_catalog.json', 'docs/ARTIFACT_CATALOG.md', 'RELEASE_MANIFEST.json',
+                     'SHA256SUMS.txt', 'paper/CLAIMS.md', 'docs/badges/evidence.json', 'docs/badges/evidence.svg', helper}
+          expected = {'scripts/availability.py': '42be6bddcddaa1d5a64379893c6a089f2ef4a276',
+                      'scripts/statement_check.py': 'db06fa752b8be85600fe8765d8324bc4e3b086f0',
+                      '.zenodo.json': '816812b869e847b4e19454d8c4c5fd674753cb01',
+                      'docs/REVIEW_ENTRY.md': 'c94ede408040131c11e28a4726f0f068c2a2ec80'}
+          def blob(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          def once(text, old, new):
+              if text.count(old) != 1:
+                  raise ValueError('Missing or ambiguous editorial anchor: ' + repr(old[:120]))
+              return text.replace(old, new, 1)
+          def function_ast(text, name):
+              matches = [n for n in ast.parse(text).body if isinstance(n, ast.FunctionDef) and n.name == name]
+              assert len(matches) == 1, name
+              return ast.dump(matches[0], include_attributes=False)
+          original = {p: Path(p).read_bytes() for p in subprocess.check_output(['git','ls-files','-z']).decode().split('\0') if p}
+          for path, digest in expected.items():
+              assert blob(original[path]) == digest, 'Source changed: ' + path
+          tmp = Path(os.environ['RUNNER_TEMP'])
+          protected = {p: hashlib.sha256(b).hexdigest() for p,b in original.items() if p not in allowed}
+          (tmp/'protected.json').write_text(json.dumps(protected))
+          (tmp/'allowed.json').write_text(json.dumps(sorted(allowed)))
+          (tmp/'original-paths.json').write_text(json.dumps(sorted(original)))
+          (tmp/'helper.yml').write_bytes(original[helper])
+          full = json.loads(Path('release/paper_artifacts.json').read_text())
+          cpu = json.loads(Path('release/demo_artifacts.json').read_text())
+          assert full['repository'] == cpu['repository'] == 'VKHS/CROSS-MORSE'
+          assert full['release_tag'] == 'paper-artifacts' and cpu['release_tag'] == 'demo-artifacts'
+          index = json.loads(Path('demo/published/paper/source_data/INDEX.json').read_text())
+          summary = index['reconstruction']
+          groups = sum(a.get('status') == 'published' for a in cpu['artifacts'])
+          total = len(cpu['artifacts'])
+          required = len(full['artifacts'])
+          published = sum(a.get('status') == 'published' for a in full['artifacts'])
+          print('ARTIFACT_REGISTRATION=' + json.dumps({'cpu_published':groups,'cpu_required':total,
+                 'original_paper_published':published,'original_paper_required':required,
+                 'comparison_differences':summary['values_differ'],'comparison_missing':summary['values_missing']}))
+          # Clarify presentation, never promote one execution to another or change the comparator.
+          availability = original['scripts/availability.py'].decode()
+          availability = once(availability,
+              '                   "compliance": statement_check.evaluate(root)}\n    return {"campaigns": campaigns,',
+              '                   "compliance": statement_check.evaluate(root)}\n        release["execution_package"] = statement_check.demonstration(release["compliance"], root)\n    return {"campaigns": campaigns,')
+          note_function = '''def published_package_note(package: dict | None) -> str:
+              """Describe the separately registered CPU package without changing paper eligibility."""
+              if package is None:
+                  return "A separate CPU execution package is not registered in this checkout."
+              return (f"The [CPU execution release]({package['release']}) has "
+                      f"**{package['published']} of {package['artifacts']} artifact groups registered as published**. "
+                      "Its recorded dataset selections, execution settings and reconstruction coverage are described in "
+                      "[demo/README.md](demo/README.md) and [demo/RESULTS.md](demo/RESULTS.md). "
+                      "These existing outputs are distinct from the full original-paper artifacts evaluated below. "
+                      "An unregistered original-paper archive does not mean no experimental resources have been published.")
+          
+          
+          '''
+          availability = once(availability, 'def render_repository_release(st: dict) -> str:',
+                              note_function + 'def render_repository_release(st: dict) -> str:')
+          availability = once(availability,
+              '    lines = ["# Data and code availability", "", "## Availability statement", "",\n             "The paper\'s registered data-availability statement:", "", f"> {statement[\'registered_text\']}", "",',
+              '    lines = ["# Data and code availability", "", "## Published execution package", "",\n             published_package_note(release.get("execution_package")), "",\n             "## Availability statement", "",\n             f"**Original-paper evidence: {counts[\'fulfilled\']} of {len(compliance[\'items\'])} requirements fulfilled by the registered artifacts and checks.** "\n             "This is not a count of all code or CPU-package resources present in the repository.", "",\n             "The paper\'s registered data-availability statement (evaluated below):", "", f"> {statement[\'registered_text\']}", "",')
+          availability = once(availability,
+              '"The table below identifies the available resources and the measured outputs that await publication. "',
+              '"The table below assesses the original-paper channel in `release/paper_artifacts.json`; "\n             "the separately published CPU package is described above. "')
+          Path('scripts/availability.py').write_text(availability, encoding='utf-8')
+          statement = original['scripts/statement_check.py'].decode()
+          statement = once(statement,
+              'scope = ("Experiment and reconstruction tooling is included. The measured artifacts identified below "\n                 "await publication from the completed runs.")',
+              'scope = ("Experiment and reconstruction tooling is included. Full original-paper publication is not yet "\n                 "registered for the artifacts identified below in `release/paper_artifacts.json`. "\n                 "The separately published CPU execution resources are reported independently.")')
+          anchor = '    for row in evaluation["items"]:\n        lines.append(f"| {row[\'phrase\']} | {LABEL[row[\'status\']]} | {row[\'where\']} | {row[\'remaining\'] or \'—\'} |")'
+          insertion = '''    overview = [f"**Original-paper evidence: {counts[FULFILLED]} of {len(evaluation['items'])} requirements fulfilled.** "
+                          "All requirements are assessed; listing a requirement is not the same as verifying it.", ""]
+              if demo is not None:
+                  overview += [f"The separate [CPU execution release]({demo['release']}) has "
+                               f"**{demo['published']} of {demo['artifacts']} artifact groups registered as published**. "
+                               "The original-paper status below does not mean this CPU release is empty. "
+                               "See [demo/RESULTS.md](demo/RESULTS.md) for its measured scope and comparison outcomes.", ""]
+              pos = lines.index("| Statement item | Status | Where | Remaining |")
+              lines[pos:pos] = overview
+          '''
+          statement = once(statement, anchor, insertion + anchor)
+          statement = once(statement,
+              '"lists the displays its artifacts support). It executes each item end to end; the statuses above "\n                  "follow the paper\'s own artifacts.", "",',
+              '"lists the displays its artifacts support). The table below records the scope of this execution; "\n                  "the original-paper statuses above remain separate.", "",')
+          # The evidence evaluator and command exit rules are byte-independent AST identical.
+          for name in ('evaluate', 'demonstration', 'main'):
+              assert function_ast(original['scripts/statement_check.py'].decode(), name) == function_ast(statement, name), name
+          Path('scripts/statement_check.py').write_text(statement, encoding='utf-8')
+          # Put the package distinction before the first command a reviewer may copy.
+          readme = original['README.md'].decode()
+          overview = f'''## Package scope and verification
+
+          This repository provides the CROSS-MORSE code and reconstruction tools. The
+          published CPU execution package currently registers **{groups} of {total} artifact groups**;
+          the separate original-paper manifest registers **{published} of {required} groups as published**.
+          These are different execution scopes, not competing counts of the same release.
+          [Availability](AVAILABILITY.md) evaluates all twelve requirements against their
+          corresponding artifacts rather than treating uploaded file size as proof of completeness.
+
+          The recorded CPU reconstruction builds **56 of 90 displays**, with **{summary['values_differ']:,}
+          comparison values different** and **{summary['values_missing']:,} missing** relative to the printed
+          references. Its ogbn-arxiv subset run deploys no feedback rule with a positive
+          gain over q_C. These observations describe that CPU run, not a remeasurement
+          of the full-scale GPU study. [The execution report](demo/RESULTS.md) provides
+          the per-display details. A successful software check or CPU-package command
+          is not a successful full-manuscript reconstruction.
+
+          ## Reproduce the paper'''
+          readme = once(readme, '## Reproduce the paper', overview)
+          readme = once(readme, '## Complete execution on CPU', '## Published CPU execution package')
+          readme = once(readme,
+              '(40 files, 10.85 GB) holds a complete execution of the pipeline on public data on CPU:',
+              '(40 files, 10.85 GB) holds the published CPU execution outputs on public data:')
+          readme = once(readme,
+              '22 measurement-record sets, the\nE3–E6 campaign and the environment capture of the runner. It runs on any machine:',
+              '22 measurement-record sets, the\nE3–E6 campaign and the environment capture of the runner. Reconstruction uses the\ndocumented CPU environment:')
+          # An explicit main-branch selector is a live badge, not an invented passing status.
+          readme = readme.replace('/actions/workflows/quality.yml/badge.svg)', '/actions/workflows/quality.yml/badge.svg?branch=main)')
+          Path('README.md').write_text(readme, encoding='utf-8')
+          entry = original['docs/REVIEW_ENTRY.md'].decode()
+          entry = once(entry, 'holds the complete execution of the pipeline on public data on CPU:',
+                       'holds the published execution outputs on public data on CPU:')
+          entry = once(entry, '## Checks', '''## Interpreting availability and comparisons
+
+          The availability table assesses twelve requirements for the original-paper
+          distribution. Its status is calculated from registered evidence, not the number
+          of gigabytes uploaded. The CPU package has its own manifest and reconstruction
+          report. In `release/release_scope.json`, `original_result_archives_included`
+          and `one_command_original_tables_reproduction_claimed` describe the original-paper
+          claims, not whether CPU artifacts or software are available.
+
+          Keep analytical calculations, printed reference values and replayed observations
+          distinct. Differences involving S46/S33 or the kappa-hat values in S26b must be
+          resolved using their recorded inputs and quantity definitions; this documentation
+          update does not change those numbers or relax comparison tolerances.
+          `destination/` and `docs/FINAL_DESTINATION.md` are maintainer planning material,
+          not evidence that twelve requirements have passed. They are not part of the
+          primary reviewer navigation and remain preserved for compatibility.
+
+          ## Checks''')
+          Path('docs/REVIEW_ENTRY.md').write_text(entry, encoding='utf-8')
+          doc = original['docs/RECONSTRUCTION.md'].decode()
+          doc = once(doc, '## One command', '''## Scope of the command
+
+          `make paper` reads the original-paper artifact manifest. `make demo-paper`
+          reads the distinct CPU execution package. The CPU report's numerical
+          differences do not disappear when a label is corrected; a complete paper
+          reconstruction requires the matching source-identified experimental records.
+          Missing references, missing inputs and unequal quantities remain visible
+          in the generated comparison reports. No tolerance or acceptance rule is
+          changed by the documentation corrections.
+
+          ## One command''')
+          Path('docs/RECONSTRUCTION.md').write_text(doc, encoding='utf-8')
+          docs = original['docs/README.md'].decode()
+          docs = once(docs, '## Every table and figure from the published outputs',
+                       '## Artifact retrieval and reconstruction')
+          Path('docs/README.md').write_text(docs, encoding='utf-8')
+          zenodo = json.loads(original['.zenodo.json'])
+          zenodo['description'] = ('CROSS-MORSE reference implementation for inference-time control of frozen graph neural networks. '
+              'Includes seven dataset adapters, 21 configurations, experiment and Slurm drivers, tests, environment specifications, '
+              'two complete synthetic examples, and artifact-based reconstruction tools. The CPU execution package and the '
+              'original-paper artifact distribution have separate manifests. AVAILABILITY.md records the resources, execution '
+              'scopes and verification requirements; demo/RESULTS.md records the CPU reconstruction coverage and comparisons. '
+              'Companion manuscript under review.')
+          Path('.zenodo.json').write_text(json.dumps(zenodo, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          # Correct only active presentation URLs. Frozen measurements and historical source snapshots stay byte-identical.
+          active = ['README.md','docs/README.md','docs/REVIEW_ENTRY.md','docs/RECONSTRUCTION.md','.zenodo.json']
+          for name in active:
+              p = Path(name)
+              text = p.read_text().replace('https://github.com/VKHS/CR-9','https://github.com/VKHS/CROSS-MORSE')
+              p.write_text(text, encoding='utf-8')
+              assert 'github.com/VKHS/CR-9' not in text
+          for name in ('README.md','docs/README.md'):
+              text = Path(name).read_text()
+              assert '](docs/FINAL_DESTINATION.md)' not in text
+              assert '](FINAL_DESTINATION.md)' not in text
+              assert '](destination/README.md)' not in text
+              assert '](../destination/README.md)' not in text
+          tests = '''"""Presentation must not upgrade CPU availability to original-paper completion."""
+          import copy
+          import unittest
+          from scripts import availability, statement_check
+          from pathlib import Path
+          ROOT = Path(__file__).resolve().parents[1]
+          class ReviewPackagePresentation(unittest.TestCase):
+              def test_package_note_does_not_change_registration(self):
+                  package = {'release':'https://example.invalid/release','published':31,'artifacts':37}
+                  before = copy.deepcopy(package)
+                  text = availability.published_package_note(package)
+                  self.assertIn('31 of 37', text)
+                  self.assertIn('distinct', text)
+                  self.assertEqual(package, before)
+              def test_absent_package_is_not_claimed_published(self):
+                  self.assertIn('not registered', availability.published_package_note(None))
+              def test_availability_preserves_the_evaluated_count(self):
+                  state = availability.state(ROOT)
+                  evaluation = state['release']['compliance']
+                  text = availability.render_repository_release(state)
+                  expected = str(evaluation['counts']['fulfilled']) + ' of ' + str(len(evaluation['items']))
+                  self.assertIn(expected, text)
+                  self.assertIn('original-paper channel', text)
+                  self.assertIn('Published execution package', text)
+              def test_statement_presentation_preserves_the_evaluation(self):
+                  evaluation = statement_check.evaluate(ROOT)
+                  before = copy.deepcopy(evaluation)
+                  demo = statement_check.demonstration(evaluation, ROOT)
+                  text = statement_check.render(evaluation, demo=demo)
+                  expected = str(evaluation['counts']['fulfilled']) + ' of ' + str(len(evaluation['items']))
+                  self.assertIn(expected, text)
+                  self.assertEqual(evaluation, before)
+              def test_current_clone_commands_and_scope_note(self):
+                  text = (ROOT/'README.md').read_text()
+                  self.assertIn('git clone https://github.com/VKHS/CROSS-MORSE.git', text)
+                  self.assertNotIn('github.com/VKHS/CR-9', text)
+                  self.assertLess(text.index('## Package scope'), text.index('git clone '))
+                  self.assertIn('badge.svg?branch=main', text)
+          '''
+          Path('tests/test_review_package_presentation.py').write_text(tests, encoding='utf-8')
+          for name in ('scripts/availability.py','scripts/statement_check.py','tests/test_review_package_presentation.py'):
+              ast.parse(Path(name).read_text(), filename=name)
+          assert json.loads(Path('release/release_scope.json').read_text()) == json.loads(original['release/release_scope.json'])
+          print('PASS: original-paper decision rules, flags, artifact descriptors and numerical references unchanged')
+          PY
+      - name: Install recorded numeric review dependencies
+        run: python -m pip install -q -c environment/requirements-cpu.lock -r requirements-review.txt 'matplotlib>=3.8,<4' scipy
+      - name: Regenerate presentation and run strict checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B scripts/statement_check.py --write
+          python -B scripts/availability.py
+          python -B scripts/claims_ledger.py
+          python -B scripts/artifact_catalog.py
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+          make verify PYTHON=python > "$RUNNER_TEMP/review-verify.log" 2>&1 || { tail -100 "$RUNNER_TEMP/review-verify.log"; exit 1; }
+          tail -15 "$RUNNER_TEMP/review-verify.log"
+          python -B -m unittest tests.test_review_package_presentation tests.test_statement_check tests.test_availability tests.test_release_tooling tests.test_make_workflows tests.test_reviewer_faq -q
+          git diff --check
+      - name: Rename release title without changing tag, description or assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -B - <<'PY'
+          import json, os, urllib.request
+          repo = 'VKHS/CROSS-MORSE'
+          assert os.environ['GITHUB_REPOSITORY'] == repo
+          def api(path, payload=None):
+              request = urllib.request.Request('https://api.github.com/repos/'+repo+path,
+                  data=None if payload is None else json.dumps(payload).encode(),
+                  method='GET' if payload is None else 'PATCH',
+                  headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json',
+                           'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'})
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  return json.load(response)
+          def assets(release_id):
+              rows = []
+              for page in range(1,101):
+                  chunk = api(f'/releases/{release_id}/assets?per_page=100&page={page}')
+                  rows.extend(chunk)
+                  if len(chunk) < 100:
+                      return sorted((a['id'],a['name'],a['size'],a.get('digest'),a['state']) for a in rows)
+              raise RuntimeError('Asset pagination exceeded safety limit')
+          before = api('/releases/tags/demo-artifacts')
+          new_title = 'CPU execution artifacts (subset and pilot runs)'
+          assert before['id'] == 440587295 and before['tag_name'] == 'demo-artifacts'
+          assert before['name'] in ('Paper artifacts',new_title), 'Release title changed concurrently; refusing overwrite'
+          inventory = assets(before['id'])
+          if before['name'] != new_title:
+              api('/releases/'+str(before['id']), {'name':new_title})
+          after = api('/releases/tags/demo-artifacts')
+          for key in ('id','tag_name','target_commitish','body','draft','prerelease'):
+              assert before.get(key) == after.get(key), key
+          assert after['name'] == new_title and assets(before['id']) == inventory
+          print('RELEASE_RENAME_PASS='+json.dumps({'title':new_title,'tag':after['tag_name'],
+              'assets':len(inventory),'bytes':sum(x[2] for x in inventory),'asset_identities_unchanged':True}))
+          PY
+      - name: Verify final tree and publish only the reviewed changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/review-package-clarity-once.yml
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+          python -B scripts/create_release_manifest.py --root . --verify RELEASE_MANIFEST.json
+          python -B - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          tmp = Path(os.environ['RUNNER_TEMP'])
+          protected = json.loads((tmp/'protected.json').read_text())
+          for name, digest in protected.items():
+              assert Path(name).is_file() and hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest, name
+          helper = '.github/workflows/review-package-clarity-once.yml'
+          assert all(Path(p).is_file() for p in json.loads((tmp/'original-paths.json').read_text()) if p != helper)
+          allowed = set(json.loads((tmp/'allowed.json').read_text()))
+          changed = set(filter(None,subprocess.check_output(['git','diff','--name-only','-z']).decode().split('\0')))
+          extra = set(filter(None,subprocess.check_output(['git','ls-files','--others','--exclude-standard','-z']).decode().split('\0')))
+          assert (changed | extra) <= allowed, sorted((changed | extra)-allowed)
+          # The connector removes the helper afterward. The Actions token does not edit workflow files.
+          Path(helper).write_bytes((tmp/'helper.yml').read_bytes())
+          files = sorted((changed | extra) - {helper})
+          subprocess.run(['git','add','--',*files], check=True)
+          print('PRESERVATION_PASS='+json.dumps({'protected_files':len(protected),'changed_paths':files,
+                 'preexisting_files_deleted':0,'original_paper_flags_unchanged':True}))
+          PY
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Clarify reviewer package scope and preserve evidence-based availability'
+          git push origin HEAD:review-package-clarity-2026-11-12
