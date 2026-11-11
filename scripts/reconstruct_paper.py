@@ -132,8 +132,10 @@ def main(argv=None) -> int:
         published = [a for a in manifest["artifacts"] if a.get("status") == artifacts.PUBLISHED]
         if published and not args.offline:
             # a token (GitHub Actions, or an author before the repository is public) reads private release assets
+            # CM_KEEP_ARCHIVES=0 deletes each archive once unpacked, for a disk that holds one copy only
             report = artifacts.fetch(args.artifacts, manifest_path=args.manifest, tier=args.tier,
-                                     token=os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN"))
+                                     token=os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN"),
+                                     keep_archives=os.environ.get("CM_KEEP_ARCHIVES", "1") != "0")
             for row in report["published"]:
                 print(f"verified {row['id']} ({row['tier']})")
         # Offline reuse must satisfy the same current release inventory and

@@ -19,6 +19,7 @@ concurrency:
 
 env:
   PYTHONDONTWRITEBYTECODE: "1"
+  CM_KEEP_ARCHIVES: "0"
   # a private repository serves its release assets to an authenticated request only
   GH_TOKEN: ${{ github.event.repository.private && github.token || '' }}
 
@@ -41,21 +42,35 @@ jobs:
       - name: Install the recorded CPU environment
         # the E3-E6 campaign replay verifies the parents' checkpoints with the PyTorch runtime
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /usr/share/swift \
+            /usr/local/share/boost /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules \
+            /opt/microsoft /opt/google /opt/az /usr/lib/jvm /opt/hostedtoolcache/CodeQL /opt/hostedtoolcache/go \
+            /opt/hostedtoolcache/node /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/Ruby || true
+          sudo docker system prune --all --force > /dev/null 2>&1 || true
+          echo "::notice::free disk: $(df -h --output=target,avail / /mnt 2>/dev/null | tail -n +2 | tr -s ' ' | tr '\n' ';')"
           python -m pip install -q --index-url https://download.pytorch.org/whl/cpu "$(python -B environment/check_environment.py --bootstrap)"
           python -m pip install -q -r environment/requirements-cpu.lock
+      - name: Work on the runner's larger disk
+        run: |
+          root=$(df --output=avail -B1 / | tail -1); mnt=$(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0)
+          work="$RUNNER_TEMP"
+          if [ "${mnt:-0}" -gt "$root" ]; then
+            sudo mkdir -p /mnt/demo-verify && sudo chown -R "$(id -u):$(id -g)" /mnt/demo-verify
+            work=/mnt/demo-verify
+          fi
+          echo "DEMO_WORK=$work" >> "$GITHUB_ENV"
       - name: Published package inventory
         run: make demo-status PYTHON=python || true
       - name: Verify inputs and render supported displays
         run: |
-          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$RUNNER_TEMP/demo-artifacts" DEMO_PAPER_ROOT="$RUNNER_TEMP/demo-paper"
+          make demo-paper PYTHON=python DEMO_ARTIFACTS_ROOT="$DEMO_WORK/demo-artifacts" DEMO_PAPER_ROOT="$DEMO_WORK/demo-paper"
           python - <<'EOF'
           import json, os
-          status = json.load(open(os.environ["RUNNER_TEMP"] + "/demo-paper.status.json"))
+          status = json.load(open(os.environ["DEMO_WORK"] + "/demo-paper.status.json"))
           assert status.get("channel") == "cpu_execution", status.get("channel")
           print({k: status[k] for k in ("displays", "complete", "values_exact", "values_differ", "values_missing")})
           EOF
       - name: Derive the views again from the release (the differences, if any, are listed)
         run: |
-          python -B scripts/paper_artifacts.py derive --demo --fetched "$RUNNER_TEMP/demo-artifacts" --workspace "$RUNNER_TEMP/demo-paper" > /dev/null
+          python -B scripts/paper_artifacts.py derive --demo --fetched "$DEMO_WORK/demo-artifacts" --workspace "$DEMO_WORK/demo-paper" > /dev/null
           git status --porcelain demo/published | head -50

@@ -980,13 +980,15 @@ def verify_fetched(directory: Path, *, manifest_path: Path = MANIFEST, require_a
 
 
 def fetch(destination: Path, *, manifest_path: Path = MANIFEST, tier: str = "analysis",
-          only: list[str] | None = None, token: str | None = None, cache: Path | None = None) -> dict:
+          only: list[str] | None = None, token: str | None = None, cache: Path | None = None,
+          keep_archives: bool = True) -> dict:
     """Download, verify and unpack every published artifact into ``destination``.
 
     Layout: ``runs/<stem>/`` (Roman-empire: the campaign with ``split_*``),
     ``records/<set>/`` with ``records/index.json``, ``campaigns/<name>/`` and
     ``environment/<name>/``; ``.artifacts/`` keeps each artifact's inventory and the
-    identity of the archive it came from. Directories already verified are reused.
+    identity of the archive it came from. Directories already verified are reused. Without
+    ``keep_archives`` each downloaded archive is deleted once its directory is materialized.
     """
     require(tier in ("analysis", "complete"), "tier is analysis or complete")
     manifest = load_manifest(manifest_path)
@@ -1076,6 +1078,11 @@ def fetch(destination: Path, *, manifest_path: Path = MANIFEST, tier: str = "ana
                 if backup.exists():
                     os.replace(backup, target)
                 raise
+        if not keep_archives:
+            # later runs verify and reuse the materialized directory through its stamp
+            for part in spec["parts"]:
+                contained(cache, part["asset"], exists=False).unlink(missing_ok=True)
+            archive.unlink(missing_ok=True)
         report["published"].append({"id": entry["id"], "path": str(target), "tier": use, "reused": False, **check})
     records = destination / "records"
     if records.is_dir() and any(p.is_dir() and not p.name.startswith(".") for p in records.iterdir()):
