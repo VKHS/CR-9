@@ -12,7 +12,7 @@
       "affiliation": "Linköping University"
     }
   ],
-  "description": "CROSS-MORSE reference implementation for inference-time control of frozen graph neural networks. Includes seven dataset adapters, 21 configurations, experiment and Slurm drivers, tests, environment specifications, two complete synthetic examples, and artifact-based result builders. The official benchmark archives and auxiliary measurements are not deposited in this release; see AVAILABILITY.md. Companion manuscript under review.",
+  "description": "CROSS-MORSE reference implementation for inference-time control of frozen graph neural networks. Includes seven dataset adapters, 21 configurations, experiment and Slurm drivers, tests, environment specifications, two complete synthetic examples, artifact-based result builders and the one-command reconstruction of the paper's tables and figures. The release demo-artifacts holds a complete execution of the pipeline on public data on CPU; AVAILABILITY.md lists the measured outputs of the paper's GPU runs and their publication status. Companion manuscript under review.",
   "keywords": [
     "graph neural networks",
     "adaptive message passing",

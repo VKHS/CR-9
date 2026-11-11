@@ -30,7 +30,9 @@ Roman-empire's ten official splits, and the production graph derives the measure
 the experiments from those runs ([Producing the measured outputs](docs/PRODUCTION.md)).
 `make paper` verifies the measured outputs and each run's sealed eight-stage chain, writes the
 tables (CSV, Markdown, LaTeX) and figures (PNG, SVG) with their source data, and places the
-computed values beside the independently registered paper values (`displays/compare/`).
+computed values beside the independently registered paper values (`displays/compare/`), each
+difference with both values. [Scientific consistency](docs/CONSISTENCY.md) lists the printed
+values whose computing method needs an author declaration.
 Publication uploads the measured outputs to the release `paper-artifacts`
 ([Publishing the measured outputs](docs/PUBLICATION.md)), and
 [statement compliance](STATEMENT_COMPLIANCE.md) lists each item of the availability statement
@@ -56,8 +58,12 @@ E3–E6 campaign and the environment capture of the runner. It runs on any machi
 make demo-paper    # download and verify the release, rebuild the tables and figures from it
 ```
 
-[demo/README.md](demo/README.md) describes how the execution was produced, and
-[demo/RESULTS.md](demo/RESULTS.md) what it contains.
+The CPU runs use the pilot settings and, except Roman-empire, the data subsets, so their values
+differ from the printed ones, which are the measurements of the paper's full-scale GPU runs:
+`make demo-paper` builds 56 of the 90 displays, and of the printed values 1,263 are equal,
+1,202 differ and 248 are missing. [demo/RESULTS.md](demo/RESULTS.md) lists every display with
+what it lacks (for instance, the ogbn-arxiv subset run deploys no feedback rule with a positive
+gain over q_C), and [demo/README.md](demo/README.md) describes how the execution was produced.
 
 Existing experiment folders can be checked before publication:
 

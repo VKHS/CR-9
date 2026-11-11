@@ -109,10 +109,10 @@
       "sha256": "439a1a761d26e9cb08485682a01ecce9075b56262a6f954d91a77f9631e83e2f"
     },
     {
-      "bytes": 1311,
+      "bytes": 1451,
       "executable": false,
       "path": ".zenodo.json",
-      "sha256": "1fb8b6f5cc9f1dc8746aef41b11bf5745680d9e979eac4c4a88bb1f7243d51c4"
+      "sha256": "e4d7085f373c055a1372c83d4780ada76dc674a99fb1d5b08fef58360a1cc1b1"
     },
     {
       "bytes": 8348,
@@ -157,10 +157,10 @@
       "sha256": "697959ad39254c4d12ac08a69c81111d1a362e66ba3ac6e3195753aa88a47705"
     },
     {
-      "bytes": 18049,
+      "bytes": 18639,
       "executable": false,
       "path": "README.md",
-      "sha256": "e17361ef8f65f571e50147b2499269bc6fd4395cc4158c4623e957844f5e61ef"
+      "sha256": "9d23faf0c7928fce1ba4c5d1c79f2d16a4efedfa8432ff56c4954f6aeb54af76"
     },
     {
       "bytes": 10205,
@@ -9436,5 +9436,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "bda1bab07bc4c542b24b0564cceb80a238e63f454120a1bbd6aec3e610db6976"
+  "tree_sha256": "36c98dc8467e7657346085dd92a7767fee9d4316b6839598c3162a2e4fc32ee4"
 }
