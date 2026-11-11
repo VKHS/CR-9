@@ -4,6 +4,12 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      upload_reports:
+        description: 'Upload downloadable CI reports (requires available Actions artifact storage)'
+        type: boolean
+        required: false
+        default: false
   schedule:
     # Re-run source and example checks against the default branch each week.
     - cron: "23 4 * * 1"
@@ -91,6 +97,7 @@ jobs:
           root = Path(os.environ['RUNNER_TEMP'])
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as out:
               out.write('## Verification reports\n\nCorrectness checks remain mandatory. Report archival is a separate, optional operation.\n\n')
+              out.write('Downloadable CI reports are disabled by default. To request them, use Run workflow and select upload_reports when Actions storage is available. Job summaries and execution logs do not require this option.\n\n')
               for relative in ('review/REVIEW_REPORT.md', 'theory/theory-full.md', 'theory/si-identities.md'):
                   path = root / relative
                   if path.is_file():
@@ -102,9 +109,10 @@ jobs:
           PY
       - name: Publish the review, example and analytical reports as workflow artifacts
         id: report_upload
-        # Only the ancillary upload is nonfatal. No verification or test step is ignored.
+        # Downloads are opt-in; automatic verification never needs artifact storage.
+        # Only this ancillary upload is nonfatal. All verification and test steps remain mandatory.
         continue-on-error: true
-        if: ${{ always() && (steps.review.outcome != 'skipped' || steps.theory.outcome != 'skipped' || steps.si.outcome != 'skipped') }}
+        if: ${{ always() && !cancelled() && github.event_name == 'workflow_dispatch' && inputs.upload_reports == true && (steps.review.outcome == 'success' || steps.theory.outcome == 'success' || steps.si.outcome == 'success') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: review-report-and-example-displays
@@ -122,7 +130,7 @@ jobs:
             ${{ runner.temp }}/theory
             ${{ runner.temp }}/reconstruction-examples
       - name: Report an archival failure without misrepresenting verification
-        if: ${{ always() && steps.report_upload.outcome == 'failure' }}
+        if: ${{ always() && !cancelled() && steps.report_upload.outcome == 'failure' }}
         run: |
           echo '::warning::CI report archival failed. Inspect the upload step for the cause (including storage quota). Verification and test failures still fail this workflow. Existing releases and experimental artifacts were not removed.'
           printf '\n**CI report archival failed.** See the upload-step error. The readable summary and job logs remain available; no existing artifact was deleted.\n' >> "$GITHUB_STEP_SUMMARY"

@@ -30,6 +30,12 @@ on:
       - tests/**
       - .github/workflows/container.yml
   workflow_dispatch:
+    inputs:
+      upload_reports:
+        description: 'Upload downloadable CI reports (requires available Actions artifact storage)'
+        type: boolean
+        required: false
+        default: false
   schedule:
     - cron: "41 5 * * 1"
 
@@ -62,12 +68,36 @@ jobs:
             -v "$RUNNER_TEMP/reports":/reports cross-morse:verify \
             make review PYTHON=python REVIEW_OFFLINE=1 REVIEW_ROOT=/reports/review
           test -f "$RUNNER_TEMP/reports/review/REVIEW_REPORT.md"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: ${{ always() && steps.review.outcome != 'skipped' }}
+      - name: Retain a readable report summary independently of artifact storage
+        if: ${{ always() && !cancelled() }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'reports' / 'review'
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as out:
+              out.write('## Container verification reports\n\nAll build, verification, test and review steps remain mandatory.\n\n')
+              out.write('Downloadable CI reports are disabled by default. To request them, use Run workflow and select upload_reports when Actions storage is available. Job summaries and execution logs do not require this option.\n\n')
+              for name in ('REVIEW_REPORT.md', 'review.json'):
+                  path = root / name
+                  if path.is_file():
+                      data = path.read_bytes()
+                      out.write(f'### {name}\n\nSHA-256: `{hashlib.sha256(data).hexdigest()}`\n\n')
+                      if name.endswith('.md'):
+                          text = data.decode('utf-8', errors='replace')
+                          out.write(text[:12000] + ('\n\n[Summary truncated; see the execution logs for check outcomes.]' if len(text)>12000 else '') + '\n\n')
+              out.write('These are software and bundled-input checks, not certification of full manuscript reconstruction.\n')
+          PY
+      - name: Upload the container review report when explicitly requested
+        id: report_upload
+        # Uploading a downloadable report is not a prerequisite for correctness checks.
+        continue-on-error: true
+        if: ${{ always() && !cancelled() && github.event_name == 'workflow_dispatch' && inputs.upload_reports == true && steps.review.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: container-review-report
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
           path: |
             ${{ runner.temp }}/reports/review/REVIEW_REPORT.md
             ${{ runner.temp }}/reports/review/review.json
@@ -75,3 +105,8 @@ jobs:
             ${{ runner.temp }}/reports/review/review-*/AVAILABILITY_STATEMENT.txt
             ${{ runner.temp }}/reports/review/review-*/*.json
             ${{ runner.temp }}/reports/review/review-*/paper
+      - name: Report an archival failure without misrepresenting verification
+        if: ${{ always() && !cancelled() && steps.report_upload.outcome == 'failure' }}
+        run: |
+          echo '::warning::The requested container-report upload failed. Inspect the upload error; correctness checks remain mandatory and no existing artifact was deleted.'
+          printf '\n**Requested report archival failed.** The job summary and logs remain available.\n' >> "$GITHUB_STEP_SUMMARY"
