@@ -1,0 +1,234 @@
+name: Validate repository integrity repair
+
+on:
+  push:
+    branches: [repair-ci-integrity-2026-11-11]
+    paths: [.github/workflows/repair-integrity-once.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repair-integrity-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.ref == 'refs/heads/repair-ci-integrity-2026-11-11'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Measure repository and release storage without deleting anything
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -B - <<'PY'
+          import json, os, subprocess, urllib.request
+          from pathlib import Path
+          repo = os.environ['GITHUB_REPOSITORY']
+          def api(path):
+              request = urllib.request.Request('https://api.github.com/repos/' + repo + path,
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  return json.load(response)
+          tracked = [p for p in subprocess.check_output(['git','ls-files','-z']).decode().split('\0') if p]
+          meta = api('')
+          summary = {'git_api_size_kb': meta['size'], 'visibility': meta['visibility'],
+                     'tracked_files': len(tracked), 'tracked_file_bytes': sum(Path(p).stat().st_size for p in tracked),
+                     'releases': [], 'selected_manifests': []}
+          releases = []
+          for page in range(1,101):
+              rows = api('/releases?per_page=100&page=' + str(page))
+              releases.extend(rows)
+              if len(rows)<100: break
+          for release in releases:
+              assets=[]
+              for page in range(1,1001):
+                  rows=api('/releases/' + str(release['id']) + '/assets?per_page=100&page=' + str(page))
+                  assets.extend(rows)
+                  if len(rows)<100: break
+              summary['releases'].append({'tag':release['tag_name'], 'asset_count':len(assets),
+                                          'asset_bytes':sum(a['size'] for a in assets)})
+          for path in sorted(Path('release').glob('*artifacts.json')):
+              manifest=json.loads(path.read_text())
+              entries=[a for a in manifest.get('artifacts',[]) if a.get('status')=='published']
+              parts={p['asset']:p['bytes'] for a in entries for p in a.get('tiers',{}).get('complete',{}).get('parts',[])}
+              summary['selected_manifests'].append({'path':str(path),'published_groups':len(entries),
+                   'complete_download_bytes':sum(parts.values()),'unpacked_bytes':sum(a.get('bytes',0) for a in entries),
+                   'unpacked_files':sum(a.get('files',0) for a in entries)})
+          print('STORAGE_SUMMARY=' + json.dumps(summary,sort_keys=True))
+          (Path(os.environ['RUNNER_TEMP'])/'storage-before.json').write_text(json.dumps(summary,indent=2))
+          PY
+      - name: Restore removed interfaces and regression cases; preserve every other file
+        run: |
+          python -B - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          prior='0f7b31ae6881635a7a83b0dbe526e80555d83a9b'
+          current='3f7552faad8e028ae3a0a2223802b554bd1b11cf'
+          restore=['Makefile','cm_experiments/sweeps.py','paper/build/displays/factorial_data.py',
+              'paper/build/displays/framework.py','paper/build/displays/records_campaigns.py','paper/build/supplement.py',
+              'scripts/export_records.py','scripts/paper_artifacts.py','scripts/paper_outputs.py','scripts/reconstruct.py',
+              'scripts/reconstruct_paper.py','scripts/run_sweep.py','scripts/statement_check.py',
+              'tests/test_display_integrity.py','tests/test_displays_records_campaigns.py','tests/test_printed_statement_check.py',
+              'tests/test_reconstruction.py','tests/test_supplement_build.py','tests/test_sweeps.py']
+          helper='.github/workflows/repair-integrity-once.yml'
+          allowed=set(restore)|{'README.md','scripts/claims_ledger.py','scripts/render_evidence_badge.py',
+              'tests/test_evidence_badge.py','docs/badges/evidence.svg','STATEMENT_COMPLIANCE.md',
+              'release/artifact_catalog.json','docs/ARTIFACT_CATALOG.md','RELEASE_MANIFEST.json','SHA256SUMS.txt',helper}
+          tracked=[p for p in subprocess.check_output(['git','ls-files','-z']).decode().split('\0') if p]
+          before={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in tracked if p not in allowed}
+          def old_file(ref,path): return subprocess.check_output(['git','show',ref+':'+path])
+          for path in restore:
+              if Path(path).read_bytes()!=old_file(current,path):
+                  raise ValueError('Refusing to overwrite concurrent edits: '+path)
+              Path(path).write_bytes(old_file(prior,path))
+          # Preserve the current README except for the inaccessible external endpoint image.
+          readme=Path('README.md').read_text()
+          old='https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FVKHS%2FCR-9%2Fmain%2Fdocs%2Fbadges%2Fevidence.json'
+          assert readme.count(old)==1
+          Path('README.md').write_text(readme.replace(old,'docs/badges/evidence.svg'))
+          renderer='''#!/usr/bin/env python3
+          """Render the registered badge locally, including inside private repositories."""
+          from __future__ import annotations
+          import argparse
+          import html
+          import json
+          from pathlib import Path
+          import re
+
+          ROOT=Path(__file__).resolve().parents[1]
+          COLORS={'blue':'#007ec6','brightgreen':'#4c1','green':'#97ca00','red':'#e05d44','orange':'#fe7d37','yellow':'#dfb317','lightgrey':'#9f9f9f'}
+
+          def render_badge(value: dict) -> str:
+              if value.get('schemaVersion')!=1 or not all(isinstance(value.get(k),str) and value[k] for k in ('label','message')):
+                  raise ValueError('A schemaVersion 1 badge with label and message is required')
+              label,message=value['label'],value['message']
+              if len(label)>200 or len(message)>500:
+                  raise ValueError('Badge text is too long')
+              color=value.get('color','blue')
+              color=COLORS.get(color,color)
+              if not re.fullmatch(r'#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?',color):
+                  raise ValueError('Unsupported badge color')
+              left=max(50,round(len(label)*6.7)+16)
+              right=max(50,round(len(message)*6.7)+16)
+              width=left+right
+              title=html.escape(label+': '+message,quote=True)
+              return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="20" role="img" aria-label="{title}">'
+                      f'<title>{title}</title><rect width="{left}" height="20" fill="#555"/>'
+                      f'<rect x="{left}" width="{right}" height="20" fill="{color}"/>'
+                      '<g fill="#fff" font-family="Verdana,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">'
+                      f'<text x="{left/2}" y="14">{html.escape(label)}</text>'
+                      f'<text x="{left+right/2}" y="14">{html.escape(message)}</text></g></svg>\\n')
+
+          def main(argv=None):
+              parser=argparse.ArgumentParser(description=__doc__)
+              parser.add_argument('--json',type=Path,default=ROOT/'docs/badges/evidence.json')
+              parser.add_argument('--svg',type=Path,default=ROOT/'docs/badges/evidence.svg')
+              parser.add_argument('--check',action='store_true')
+              args=parser.parse_args(argv)
+              text=render_badge(json.loads(args.json.read_text(encoding='utf-8')))
+              if args.check:
+                  if not args.svg.is_file() or args.svg.read_text(encoding='utf-8')!=text:
+                      raise SystemExit('Local badge is stale; run make claims')
+              else:
+                  args.svg.parent.mkdir(parents=True,exist_ok=True)
+                  args.svg.write_text(text,encoding='utf-8')
+              return 0
+
+          if __name__=='__main__':
+              raise SystemExit(main())
+          '''
+          Path('scripts/render_evidence_badge.py').write_text(renderer)
+          path=Path('scripts/claims_ledger.py')
+          text=path.read_text()
+          anchor='    badge_path.write_text(json.dumps(badge(ledger), indent=1) + "\\n", encoding="utf-8")'
+          assert text.count(anchor)==1
+          text=text.replace(anchor,anchor+'\n    from scripts.render_evidence_badge import render_badge\n    badge_path.with_suffix(".svg").write_text(render_badge(badge(ledger)), encoding="utf-8")')
+          anchor='    return problems\n\n\ndef main(argv=None)'
+          assert text.count(anchor)==1
+          text=text.replace(anchor,'    from scripts.render_evidence_badge import render_badge\n    svg = badge_path.with_suffix(".svg")\n    if not svg.is_file() or svg.read_text(encoding="utf-8") != render_badge(badge(ledger)):\n        problems.append(f"{svg} is stale; run `make claims`")\n    return problems\n\n\ndef main(argv=None)')
+          path.write_text(text)
+          tests='''"""Local badge generation preserves the registered message and avoids external requests."""
+          import unittest
+          import xml.etree.ElementTree as ET
+          from scripts.render_evidence_badge import render_badge
+
+          class EvidenceBadgeTests(unittest.TestCase):
+              def test_registered_message_is_preserved(self):
+                  value={'schemaVersion':1,'label':'availability statement','message':'artifact publication workflow','color':'blue'}
+                  text=render_badge(value)
+                  root=ET.fromstring(text)
+                  self.assertEqual(root.attrib['aria-label'],'availability statement: artifact publication workflow')
+                  self.assertNotIn('verified',text)
+                  self.assertNotIn('raw.githubusercontent.com',text)
+                  self.assertNotIn('shields.io',text)
+              def test_xml_text_is_escaped(self):
+                  value={'schemaVersion':1,'label':'A&B','message':'<unverified>','color':'blue'}
+                  root=ET.fromstring(render_badge(value))
+                  self.assertEqual(root.attrib['aria-label'],'A&B: <unverified>')
+              def test_invalid_color_is_rejected(self):
+                  with self.assertRaises(ValueError):
+                      render_badge({'schemaVersion':1,'label':'a','message':'b','color':'url(evil)'})
+          '''
+          Path('tests/test_evidence_badge.py').write_text(tests)
+          temp=Path(os.environ['RUNNER_TEMP'])
+          (temp/'repair-protected.json').write_text(json.dumps(before))
+          (temp/'repair-allowed.json').write_text(json.dumps(sorted(allowed)))
+          (temp/'repair-original-paths.json').write_text(json.dumps(tracked))
+          (temp/'repair-workflow.yml').write_bytes(Path(helper).read_bytes())
+          print('Restored compatibility and regression cases from '+prior+' without deleting a tracked file')
+          PY
+      - name: Install numeric verification dependencies
+        run: python -m pip install -q -c environment/requirements-cpu.lock -r requirements-review.txt 'matplotlib>=3.8,<4' scipy
+      - name: Regenerate derived inventories and validate source preservation
+        run: |
+          python -B scripts/statement_check.py --write
+          python -B scripts/artifact_catalog.py
+          python -B scripts/render_evidence_badge.py
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+          make verify PYTHON=python > "$RUNNER_TEMP/repair-verify.log" 2>&1 || { tail -100 "$RUNNER_TEMP/repair-verify.log"; exit 1; }
+          tail -15 "$RUNNER_TEMP/repair-verify.log"
+          python -B -m unittest tests.test_evidence_badge tests.test_uplift_tools tests.test_availability tests.test_release_tooling tests.test_reconstruction tests.test_display_integrity tests.test_sweeps tests.test_demo -q
+      - name: Prepare final checksums and commit the repair
+        run: |
+          set -euo pipefail
+          rm .github/workflows/repair-integrity-once.yml
+          python -B scripts/create_release_manifest.py --root . --output RELEASE_MANIFEST.json
+          python -B scripts/create_release_manifest.py --root . --verify RELEASE_MANIFEST.json
+          python -B - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          temp=Path(os.environ['RUNNER_TEMP'])
+          for path,digest in json.loads((temp/'repair-protected.json').read_text()).items():
+              assert Path(path).is_file() and hashlib.sha256(Path(path).read_bytes()).hexdigest()==digest,path
+          original=json.loads((temp/'repair-original-paths.json').read_text())
+          helper='.github/workflows/repair-integrity-once.yml'
+          assert all(Path(p).is_file() for p in original if p!=helper),'An original tracked file was removed'
+          allowed=set(json.loads((temp/'repair-allowed.json').read_text()))
+          changed=set(filter(None,subprocess.check_output(['git','diff','--name-only','-z']).decode().split('\0')))
+          extra=set(filter(None,subprocess.check_output(['git','ls-files','--others','--exclude-standard','-z']).decode().split('\0')))
+          assert (changed|extra)<=allowed,sorted((changed|extra)-allowed)
+          print('PRESERVATION_PASS: every original file remains; protected data, artifacts and code hashes are unchanged')
+          # The connector removes this temporary helper after publication. Do not edit workflows with this token.
+          Path(helper).write_bytes((temp/'repair-workflow.yml').read_bytes())
+          files=sorted((changed|extra)-{helper})
+          subprocess.run(['git','add','--',*files],check=True)
+          PY
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Restore compatible reconstruction interfaces and exact inventories; render private-safe badge'
+          git push origin HEAD:repair-ci-integrity-2026-11-11
