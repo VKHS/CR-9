@@ -149,66 +149,20 @@ def published_package_note(package: dict | None) -> str:
 
 
 def render_repository_release(st: dict) -> str:
-    release = st["release"]
-    statement, manifest, compliance = release["statement"], release["manifest"], release["compliance"]
-    counts = compliance["counts"]
-    url = st["scope"].get("repository_url") or "https://github.com/VKHS/CROSS-MORSE"
-    lines = ["# Data and code availability", "", "## Published execution package", "",
-             published_package_note(release.get("execution_package")), "",
-             "## Availability statement", "",
-             f"**Original-paper evidence: {counts['fulfilled']} of {len(compliance['items'])} requirements fulfilled by the registered artifacts and checks.** "
-             "This is not a count of all code or CPU-package resources present in the repository.", "",
-             "The paper's registered data-availability statement (evaluated below):", "", f"> {statement['registered_text']}", "",
-             "The table below assesses the original-paper channel in `release/paper_artifacts.json`; "
-             "the separately published CPU package is described above. "
-             "[Statement compliance](STATEMENT_COMPLIANCE.md) records the checks for each item "
-             "(`make statement-check`).", "",
-             "| Statement item | Status | Where in the repository |", "|---|---|---|"]
-    lines += [f"| {row['phrase']} | {STATUS_TEXT[row['status']]} | {row['where']} |" for row in compliance["items"]]
-    published = [a for a in manifest["artifacts"] if a.get("status") == "published"]
-    lines += ["", "## Measured outputs", "",
-              f"The publication workflow distributes checkpoints, predictions, propensity-logged trajectories and "
-              f"statistical outputs through the `{manifest['release_tag']}` release in "
-              f"[GitHub Releases]({url}/releases); [`release/paper_artifacts.json`](release/paper_artifacts.json) lists every asset with "
-              "the SHA-256 of each published part, archive and file. The status of each artifact appears below.", "",
-              "| Artifact | Status | Files | Size | Checkpoints | Predictions | Trajectories | Statistical outputs |",
-              "|---|---|---|---|---|---|---|---|"]
-    for entry in manifest["artifacts"]:
-        contents = entry.get("contents") or {}
-        if entry.get("status") == "published":
-            lines.append(f"| `{entry['id']}` | published | {entry.get('files', '—')} | {_gib(entry.get('bytes', 0))} | "
-                         f"{contents.get('checkpoints', 0)} | {contents.get('predictions', 0)} | "
-                         f"{contents.get('propensity_logged_trajectories', 0)} | {contents.get('statistical_outputs', 0)} |")
-        else:
-            lines.append(f"| `{entry['id']}` | awaiting measured outputs | — | — | — | — | — | — |")
-    lines += ["", "## One command", "",
-              "`make paper` downloads the published outputs (analysis tier; `PAPER_TIER=complete` adds lifecycle checkpoints "
-              "and full prediction arrays), verifies every part, archive and file against the manifest, verifies each run's "
-              "sealed eight-stage chain and each record set's trace to its raw files, rebuilds every numbered table and "
-              "figure with its source data (`paper/build/displays/`) and compares every computed value with the value "
-              "printed in the paper. It exits 0 only when every display is complete and every compared value agrees. "
-              "See [Reconstruction](docs/RECONSTRUCTION.md).", "",
-              "## Publication of the measured outputs", "",
-              "`bash hpc/publish_paper_artifacts_arrhenius.sh` packs the reported runs, record sets and campaigns on the "
-              "cluster, uploads them to the release, downloads them back for verification, and writes the commit-sized "
-              "views: `manifests/published/` (executed role memberships and seeds), `environment/observed/` (execution "
-              "environments) and `paper/source_data/` (the source data of every display). See "
-              "[Publishing the measured outputs](docs/PUBLICATION.md).", "",
-              "## Independent regeneration", "",
-              "`bash run_cross_morse.sh reproduce` executes the registered lifecycles on any Slurm GPU cluster after its "
-              "SITE SETTINGS block is edited; its report compares the new runs with the paper "
-              "([HPC guide](docs/HPC.md)). Official datasets are obtained from their providers by the adapters. "
-              f"The release also includes {len(st['examples'])} complete synthetic example runs for software "
-              "verification without a GPU.", "",
-              "## Source identity", "",
-              f"Runtime source identity: `{st['source_sha256']}` (`make fingerprint`). Every published run records the "
-              "runtime identity it was produced with; verification resolves it to this tree, a bundled snapshot or "
-              "the run's own frozen source. Paper PDFs are not distributed here; [paper/sources.json](paper/sources.json) "
-              "retains their hashes and page references, and "
-              "[paper/reported_results.json](paper/reported_results.json) holds the printed values used only for "
-              "comparison.", "",
-              "Generated by `scripts/availability.py`; `make availability-check` verifies freshness and claim "
-              "consistency.", ""]
+    manifest = st["release"]["manifest"]
+    lines = ["# Data and code availability", "",
+             "The repository provides the experiment code, configurations, environment specification and the "
+             "generators of all 90 numbered tables and figures. [The publication step](docs/PUBLICATION.md) packs the "
+             "measured outputs of the reported runs (checkpoints, predictions, propensity-logged trajectories and "
+             f"statistical outputs) into the release `{manifest['release_tag']}` and records each artifact in "
+             "[release/paper_artifacts.json](release/paper_artifacts.json). `make paper` downloads and verifies them, "
+             "rebuilds every numbered table and "
+             "figure with its source data and compares each computed value with the value printed in the paper "
+             "([Reconstruction](docs/RECONSTRUCTION.md)). `bash run_cross_morse.sh reproduce` regenerates the runs on "
+             "a Slurm GPU cluster ([HPC guide](docs/HPC.md)).", "",
+             "[Statement compliance](STATEMENT_COMPLIANCE.md) maps each item of the availability statement to where it "
+             "is provided.", "",
+             "Generated by `scripts/availability.py`; `make availability-check` verifies it is current.", ""]
     return "\n".join(lines)
 
 
@@ -366,11 +320,10 @@ def readme_block(st: dict) -> str:
                        f"https://github.com/{manifest['repository']}/releases")
         return "\n".join([
             START,
-            "**Reproduction resources:** Experiment code, configurations, artifact verification and reconstruction "
-            "commands are included. [Statement compliance](STATEMENT_COMPLIANCE.md) identifies the published "
-            "files and the measured outputs awaiting publication. `make paper` verifies the "
-            "[release artifacts](" + release_url + "), rebuilds their displays and compares them with "
-            "the paper; see [availability](AVAILABILITY.md).",
+            "**Reproduction resources:** experiment code, configurations, environment specification and the "
+            "generators of every numbered table and figure. `make paper` downloads and verifies the "
+            "[release artifacts](" + release_url + "), rebuilds every display and compares it with the paper; "
+            "see [availability](AVAILABILITY.md) and [statement compliance](STATEMENT_COMPLIANCE.md).",
             END,
         ])
     if code_release(st):

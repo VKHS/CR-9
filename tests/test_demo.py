@@ -470,8 +470,7 @@ class Channels(unittest.TestCase):
                          ("partly", "56 of 90 displays built"))
         self.assertIs(derived["generators"]["demonstrated"], True)
         self.assertEqual(statement_check.evaluate(ROOT)["counts"], before)
-        self.assertIn("CPU execution on public data",
-                      statement_check.render(evaluation, None, demo))
+        self.assertNotIn("CPU", statement_check.render(evaluation, None, demo))
 
 
 

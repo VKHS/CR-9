@@ -149,14 +149,13 @@ class Evaluation(unittest.TestCase):
 
 
 class Report(unittest.TestCase):
-    def test_the_compliance_page_carries_both_texts_and_is_current(self):
+    def test_the_compliance_page_lists_every_item_and_is_current(self):
         registered = sc.evaluate(ROOT)
         printed = psc.evaluate(ROOT, registered=registered)
-        # as scripts/statement_check.py --write renders it: with the demonstration's section once it is published
+        # as scripts/statement_check.py --write renders it
         text = sc.render(registered, printed, sc.demonstration(registered, ROOT))
-        for claim in printed["claims"]:
-            self.assertIn(f"| {claim['id']} |", text)
-        self.assertIn("## The availability text printed in the manuscript", text)
+        for row in registered["items"]:
+            self.assertIn(f"| {row['phrase']} |", text)
         self.assertEqual((ROOT / sc.REPORT).read_text(encoding="utf-8"), text,
                          "STATEMENT_COMPLIANCE.md is not current: python -B scripts/statement_check.py --write")
 

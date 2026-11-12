@@ -115,10 +115,10 @@
       "sha256": "0bbec811d401ba8889abd127462c9c8fe045a7c400a9ff19be92b932e8c71ae5"
     },
     {
-      "bytes": 9141,
+      "bytes": 1011,
       "executable": false,
       "path": "AVAILABILITY.md",
-      "sha256": "24ed56954d13e02351d419946e3e780dea505ae72bf4d2e7fc165d311d013e22"
+      "sha256": "001b2a32a7b98dfd814edce523744ac69608d9bf5aab8ef227fa3f40f26806b0"
     },
     {
       "bytes": 2333,
@@ -157,10 +157,10 @@
       "sha256": "697959ad39254c4d12ac08a69c81111d1a362e66ba3ac6e3195753aa88a47705"
     },
     {
-      "bytes": 19713,
+      "bytes": 19667,
       "executable": false,
       "path": "README.md",
-      "sha256": "d0b27360dbff611076ed9db82035ea3020af6b226a049c99dafbf10b0842b98d"
+      "sha256": "2b24846f6e71ee8da7a638f87d29d669703fd5cf41047f0d5ffd9560ed9f9102"
     },
     {
       "bytes": 10205,
@@ -169,10 +169,10 @@
       "sha256": "eea93895f5451636ddad948944ab05731634332beb88d240fcd3c62750926121"
     },
     {
-      "bytes": 20964,
+      "bytes": 2180,
       "executable": false,
       "path": "STATEMENT_COMPLIANCE.md",
-      "sha256": "dd11392359955c8d21f68f3242686155bd8c14c95578953cd0a9585fdd7ab0b8"
+      "sha256": "ebf7c7b51696f0b81b1ed870d635d7a2fac58f2afa299b41c14c931837e901a7"
     },
     {
       "bytes": 395,
@@ -8050,7 +8050,7 @@
       "bytes": 116787,
       "executable": false,
       "path": "release/artifact_catalog.json",
-      "sha256": "d164c117cedfd63ea76682be415b5f5e312a5c9b27cfc5e06425a822335afbb0"
+      "sha256": "17ca0d44ca38ce60922f8fec7f998163ebd949e7dc6d0fb59588b2fd52d5bb6b"
     },
     {
       "bytes": 35593,
@@ -8323,10 +8323,10 @@
       "sha256": "6a08a6c4e010c27efbc4b9af93e7479242a1cfb0cab94de1e99846bdffb01f21"
     },
     {
-      "bytes": 36440,
+      "bytes": 32295,
       "executable": false,
       "path": "scripts/availability.py",
-      "sha256": "bd697c249aa6d7928e93a54a1718231253867308a11d4e39b85f0e3a1806cdc6"
+      "sha256": "33b7f26ef3d901f4a0791c5ff4ce2fc0ce2db82e7c5981c73273e698aad28ec2"
     },
     {
       "bytes": 8830,
@@ -8737,10 +8737,10 @@
       "sha256": "d88ad8ea4e8974d3d0192f53602357eef4ae71a85f5deca0e90ccdc31e155d40"
     },
     {
-      "bytes": 26742,
+      "bytes": 24758,
       "executable": false,
       "path": "scripts/statement_check.py",
-      "sha256": "ce68d1f07e4e9461981a0ad3c842efd31a14d57f2e312e288b49db67f83046ec"
+      "sha256": "c41367478384ae439c753da2c3a6f05e32ecb3ee064770028da8abb733556b1f"
     },
     {
       "bytes": 30082,
@@ -8899,10 +8899,10 @@
       "sha256": "b32db82160ce6ea7ad4016e7335635144be3c88d48865024ce3a65886a75eac7"
     },
     {
-      "bytes": 34863,
+      "bytes": 34819,
       "executable": false,
       "path": "tests/test_demo.py",
-      "sha256": "c974e34f6a68497aa884000696153055666bb3e989095aed7de310fc800dc4c9"
+      "sha256": "a85f092dba9e738262dabc23f03713329fa2c1b9601a4c4a1d02b520793a5d36"
     },
     {
       "bytes": 23979,
@@ -9175,10 +9175,10 @@
       "sha256": "4be0e4a444bbf4052f7892bea58d1f9378ff121d5501d080e12aef3d07267c6b"
     },
     {
-      "bytes": 8915,
+      "bytes": 8778,
       "executable": false,
       "path": "tests/test_printed_statement_check.py",
-      "sha256": "7b522d0621a07b5efc56b62a6c0d9eaa0cf4ae6a675cd2186d135ec2e882f25d"
+      "sha256": "c235231fdf1307693bf8c37937b07606e4b7637e30c6086aaaec32cf021268db"
     },
     {
       "bytes": 13670,
@@ -9265,10 +9265,10 @@
       "sha256": "66bc3935b43de7909378305f94b10904aed51c0a39ce82f6b5e6125460a89292"
     },
     {
-      "bytes": 2113,
+      "bytes": 2249,
       "executable": false,
       "path": "tests/test_review_package_presentation.py",
-      "sha256": "15bfad98b442753447de16b9e0a68189d2d67c38d471e6a2e7e7d0cbe1588eb1"
+      "sha256": "a8892fe830c65db24449286c98ea0d3b8937c3e8b03a4def791ecc5854f8b6b8"
     },
     {
       "bytes": 9800,
@@ -9442,5 +9442,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "8109535b9728c04942ea1b45f96734cc4c87c362e53fe13afc04c23557fd1299"
+  "tree_sha256": "858650868f8770da1233e941525fdea5344eab67d8d7897ed52a892b9acd7cc6"
 }

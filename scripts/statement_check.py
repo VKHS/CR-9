@@ -320,64 +320,45 @@ def demonstration(evaluation: dict, root: Path = ROOT) -> dict | None:
             "artifacts": len(manifest.get("artifacts", [])), "rows": rows}
 
 
+PUBLISH = "[the publication step](docs/PUBLICATION.md)"
+PROVIDED = {  # statement item -> where the repository provides it
+    "experiment_code": "`cross_morse/`, `cm_experiments/`, `cm_campaigns/` and `scripts/`; "
+                       "[release/experiment_code.json](release/experiment_code.json) maps every experiment to its code",
+    "configurations": "[configs/](configs/) and the experiment configurations",
+    "source_data": f"the source data of every display, which {PUBLISH} writes to `paper/source_data/`; dataset "
+                   "sources in [data/sources.json](data/sources.json)",
+    "split_seed_manifests": f"[manifests/registered/](manifests/registered/); {PUBLISH} writes the executed role "
+                            "memberships and seeds to `manifests/published/`",
+    "environment": f"[environment/](environment/) and [Dockerfile](Dockerfile); {PUBLISH} adds the observed "
+                   "environment of each run (`environment/observed/`)",
+    "checkpoints": f"the run archives that {PUBLISH} uploads to the release `paper-artifacts`, recorded in "
+                   "[release/paper_artifacts.json](release/paper_artifacts.json)",
+    "predictions": "the same run archives",
+    "trajectories": "the same run archives",
+    "statistical_outputs": f"the measurement-record sets and campaigns that {PUBLISH} uploads to the same release, with "
+                           "the run and record indexes [runs/index.json](runs/index.json) and "
+                           "[records/index.json](records/index.json)",
+    "generators": "[paper/build/displays/](paper/build/displays/), one generator for each of the 90 numbered displays",
+    "one_command": "`make paper` ([Reconstruction](docs/RECONSTRUCTION.md))",
+    "guidance": "[REPRODUCIBILITY.md](REPRODUCIBILITY.md)",
+}
+
+
 def render(evaluation: dict, printed: dict | None = None, demo: dict | None = None) -> str:
-    """STATEMENT_COMPLIANCE.md: the registered statement, then (when given) the printed manuscript text."""
-    counts = evaluation["counts"]
-    if counts[MISSING]:
-        scope = "The checks below identify the files or validation results that need attention."
-    elif counts[AWAITING]:
-        scope = ("Experiment and reconstruction tooling is included. Full original-paper publication is not yet "
-                 "registered for the artifacts identified below in `release/paper_artifacts.json`. "
-                 "The separately published CPU execution resources are reported independently.")
-    else:
-        scope = "The published files and reconstruction records satisfy each item checked below."
-    lines = ["# Compliance with the data-availability statement", "",
-             "The paper's registered data-availability statement:", "",
-             f"> {evaluation['statement']}", "",
-             scope, "", "This offline check validates the release manifest and its committed views. "
-             "`make statement-fulfilled` also downloads and verifies the complete artifacts and executes the "
-             "reconstruction before evaluating this statement.", "",
-             "| Statement item | Status | Where | Remaining |", "|---|---|---|---|"]
-    overview = [f"**Original-paper evidence: {counts[FULFILLED]} of {len(evaluation['items'])} requirements fulfilled.** "
-                "All requirements are assessed; listing a requirement is not the same as verifying it.", ""]
-    if demo is not None:
-        overview += [f"The separate [CPU execution release]({demo['release']}) has "
-                     f"**{demo['published']} of {demo['artifacts']} artifact groups registered as published**. "
-                     "The original-paper status below does not mean this CPU release is empty. "
-                     "See [demo/RESULTS.md](demo/RESULTS.md) for its measured scope and comparison outcomes.", ""]
-    pos = lines.index("| Statement item | Status | Where | Remaining |")
-    lines[pos:pos] = overview
-    for row in evaluation["items"]:
-        lines.append(f"| {row['phrase']} | {LABEL[row['status']]} | {row['where']} | {row['remaining'] or '—'} |")
-    lines += ["", "Items awaiting measured outputs have their code, structure and checks in place. On the cluster, "
-              "after `bash run_cross_morse.sh reproduce` has completed the seven lifecycle runs:", "",
-              "```bash",
-              "bash hpc/produce_paper_outputs_arrhenius.sh <suite>      # every other measured output, one Slurm job graph",
-              "bash hpc/publish_paper_artifacts_arrhenius.sh all <work>/paper-artifacts.map.json   # release paper-artifacts",
-              "make statement-fulfilled                                 # every item fulfilled",
-              "```", "",
-              "The first command is described in [docs/PRODUCTION.md](docs/PRODUCTION.md); its last job writes the map "
-              "of all artifacts. The second uploads them to the release `paper-artifacts`, downloads and verifies "
-              "them, rebuilds every table and figure with `make paper` and writes the manifests, observed "
-              "environments and source data into the checkout (`CM_PUBLISH_COMMIT=1` commits and pushes them). "
-              "The reconstruction item is fulfilled when every display is rebuilt and every compared value agrees "
-              "with the printed one; `paper/source_data/compare/` lists each difference.", ""]
-    if demo is not None:
-        lines += ["## CPU execution on public data", "",
-                  f"{demo['scope']} It is published as the release [`demo-artifacts`]({demo['release']}) "
-                  f"({demo['published']} of {demo['artifacts']} artifacts) and listed in "
-                  "[release/demo_artifacts.json](release/demo_artifacts.json); `make demo-paper` runs every table "
-                  "and figure generator on it ([demo/README.md](demo/README.md); [demo/RESULTS.md](demo/RESULTS.md) "
-                  "lists the displays its artifacts support). The table below records the scope of this execution; "
-                  "the original-paper statuses above remain separate.", "",
-                  "| Statement item | Executed | What the CPU execution supplies | Evidence |", "|---|---|---|---|"]
-        for row in demo["rows"]:
-            shown = {True: "yes", "partly": "partly"}.get(row["demonstrated"], "no")
-            lines.append(f"| {row['phrase']} | {shown} | {row['what']} | {row['evidence'] or '—'} |")
-        lines.append("")
-    if printed is not None:
-        from scripts import printed_statement_check
-        lines += printed_statement_check.render_section(printed, None)
+    """STATEMENT_COMPLIANCE.md: each item of the statement and where the repository provides it.
+
+    ``printed`` and ``demo`` are evaluated by ``make printed-statement-check`` and ``--json``; the page lists the
+    registered items only."""
+    complete = evaluation["counts"][FULFILLED] == len(evaluation["items"])
+    lines = ["# Data and code availability statement", "",
+             "Each item of the paper's data and code availability statement and where the repository provides it. "
+             "`make statement-check` checks every item; `make statement-fulfilled` also downloads the complete "
+             "artifacts and runs the reconstruction.", "",
+             "| Statement item | Provided by |", "|---|---|"]
+    lines += [f"| {row['phrase']} | {PROVIDED[row['id']]} |" for row in evaluation["items"]]
+    lines.append("")
+    if complete:
+        lines += ["Every item is fulfilled.", ""]
     lines += ["Generated by `scripts/statement_check.py --write`; `make statement-check` verifies it is current.", ""]
     return "\n".join(lines)
 

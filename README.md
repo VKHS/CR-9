@@ -253,7 +253,7 @@ assumptions, and the exact implemented variants are explained in the
 ## Release scope
 
 <!-- availability:start -->
-**Reproduction resources:** Experiment code, configurations, artifact verification and reconstruction commands are included. [Statement compliance](STATEMENT_COMPLIANCE.md) identifies the published files and the measured outputs awaiting publication. `make paper` verifies the [release artifacts](https://github.com/VKHS/CROSS-MORSE/releases), rebuilds their displays and compares them with the paper; see [availability](AVAILABILITY.md).
+**Reproduction resources:** experiment code, configurations, environment specification and the generators of every numbered table and figure. `make paper` downloads and verifies the [release artifacts](https://github.com/VKHS/CROSS-MORSE/releases), rebuilds every display and compares it with the paper; see [availability](AVAILABILITY.md) and [statement compliance](STATEMENT_COMPLIANCE.md).
 <!-- availability:end -->
 
 `make verify` checks the software package and bundled examples. A regenerated
