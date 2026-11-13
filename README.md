@@ -18,17 +18,12 @@ selection, confirmation, and admission protocol.
 
 ## Package scope and verification
 
-This repository provides the CROSS-MORSE code and reconstruction tools. The
-published CPU execution package currently registers **31 of 37 artifact groups**;
-the separate original-paper manifest registers **0 of 37 groups as published**.
-These are different execution scopes, not competing counts of the same release.
+This repository provides the CROSS-MORSE code and reconstruction tools.
 [Availability](AVAILABILITY.md) evaluates all twelve requirements against their
 corresponding artifacts rather than treating uploaded file size as proof of completeness.
 
-The recorded CPU reconstruction builds **56 of 90 displays**, with **1,202
-comparison values different** and **248 missing** relative to the printed
-references. Its ogbn-arxiv subset run deploys no feedback rule with a positive
-gain over q_C. These observations describe that CPU run, not a remeasurement
+In the recorded CPU reconstruction, the ogbn-arxiv subset run deploys no feedback rule
+with a positive gain over q_C. This observation describes that CPU run, not a remeasurement
 of the full-scale GPU study. [The execution report](demo/RESULTS.md) provides
 the per-display details. A successful software check or CPU-package command
 is not a successful full-manuscript reconstruction.
@@ -77,9 +72,8 @@ make demo-paper    # download and verify the release, rebuild the tables and fig
 ```
 
 The CPU runs use the pilot settings and, except Roman-empire, the data subsets, so their values
-differ from the printed ones, which are the measurements of the paper's full-scale GPU runs:
-`make demo-paper` builds 56 of the 90 displays, and of the printed values 1,263 are equal,
-1,202 differ and 248 are missing. [demo/RESULTS.md](demo/RESULTS.md) lists every display with
+differ from the printed ones, which are the measurements of the paper's full-scale GPU runs.
+[demo/RESULTS.md](demo/RESULTS.md) lists every display with
 what it lacks (for instance, the ogbn-arxiv subset run deploys no feedback rule with a positive
 gain over q_C), and [demo/README.md](demo/README.md) describes how the execution was produced.
 

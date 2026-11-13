@@ -157,10 +157,10 @@
       "sha256": "697959ad39254c4d12ac08a69c81111d1a362e66ba3ac6e3195753aa88a47705"
     },
     {
-      "bytes": 19667,
+      "bytes": 19170,
       "executable": false,
       "path": "README.md",
-      "sha256": "2b24846f6e71ee8da7a638f87d29d669703fd5cf41047f0d5ffd9560ed9f9102"
+      "sha256": "2b4ee5c8a59bcda7ed4a53f7648a40ad82368034b00e27736148fc99d512f6a8"
     },
     {
       "bytes": 10205,
@@ -9442,5 +9442,5 @@
   "hash_algorithm": "sha256",
   "release_profile": "public",
   "schema_version": "2.0",
-  "tree_sha256": "858650868f8770da1233e941525fdea5344eab67d8d7897ed52a892b9acd7cc6"
+  "tree_sha256": "5d618caaa1ff429e90adee966fb9df728549799ac8b8e27d1c5efe630aaedbdb"
 }
